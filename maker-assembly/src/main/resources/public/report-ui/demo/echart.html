@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <!-- 要先引用报表平台提供的di-chart.js，为保证api以后的平滑升级，最好使用随机数来避免http缓存 -->
+    <title>echartapi</title>
+</head>
+
+    <body>
+    
+    
+    <div id="main" style="width:800px;height:300px;border:1px solid #ccc;padding:10px;" ></div>
+    <script src="../src/core/echarts/echarts-plain-original.js" ></script>
+    <script src="../src/core/echarts/dichart.js" ></script>
+    <script type="text/javascript">
+        var option = {
+            "title": "echart演示", //字符串，图表标题（可不配）
+            //"color": ["red"],
+            "categories": [
+                "2013-10-17",
+                "2013-10-18",
+                "2013-10-19",
+                "2013-10-20",
+                "2013-10-21",
+                "2013-10-22"
+            ], // 数组，如果图形为趋势图时，表示有多少种类目，默认为x轴上，如果为饼图时，则表示有多少块饼（必须配置）
+            "valueAxisOptions": [
+                {
+                    "splitNumber" : 5, // 数字，表示y轴数值划分多少段，可不配
+                    "unit" : "kg",  // 字符串，表示要显示的数值单位，可不配
+                    "position" : "left"// 字符串，表示y轴要居左还是居右，当图形只有一个轴时，可不配
+                }
+            ],
+            "seriesData": [
+                {
+                    "data": [
+                        0.67891, '-', 45, 56, 233, 343, 454, 89, 343, 123, 45, 123
+                    ], // 数组，对应每个类目的数值，当某一类目无值时，需用'-'区分，(必须配置)
+                    "name": "ios", // 字符串，表示该组的名称，(必须配置)
+                    "yAxisIndex": 1, 
+                    "format": "I,III.DD%",
+                    "type": "scatter" // 字符串，表示图形的种类，当为'pie'类型时，只显示一个饼图，(必须配置)
+                },
+                {
+                    "data": [
+                        45, 123, 1451, 526, 233, 343, 44, 829, 33, 123, 45, 13
+                    ],
+                    "name": "android",
+                    "type": "scatter"
+                },
+                {
+                    "data": [
+                        39, 69, 40, 24, 123, 244, 359, 72, 214, 428, 21, 98
+                    ],
+                    "name": "win",
+                    "lineWidth" : "3",// 字符串，表示线的粗细,(可不配)
+                    "lineType" : "solid",
+                    "type": "scatter"
+                }
+            ] //数组，表示图形的数据，必须配置
+        }
+    
+        var chart = DiChart.generateChart('main',option);
+
+    </script>
+
+
+    </body>
+</html>

@@ -1,0 +1,16 @@
+{"status":$!{status}, "data":{"dataList":[
+    {"id": 1001, "name": '角色名称1', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述1', "isChecked": true, "permissions": "0111"},
+    {"id": 1002, "name": '角色名称2', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述2', "isChecked": false, "permissions": "0101", "desc": "这个是描这个是描述这个是描述这个是描述这个是描述述"},
+    {"id": 1003, "name": '角色名称3', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述3', "isChecked": false, "permissions": "1101"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1004, "name": '角色名称4', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述4', "isChecked": true, "permissions": "1111"},
+    {"id": 1005, "name": '角色名称5', "desc": '这个是描这个是描述这个是描述这个是描述这个是描述述5', "isChecked": false, "permissions": "1000"}
+], "sortinfo":{"orderby": "$!sortInfo.orderby", "sortby":"$!sortInfo.sortby"}}}

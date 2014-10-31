@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Insight</title>
+    <link type="text/css" rel="stylesheet" href="../src/css/ecui.css?__ist__=1_0_10" />
+
+    <style type="text/css">
+        .my-select {width: 160px; height: 20px};
+    </style>
+</head>
+
+<body>
+
+
+<div style="left:400px; position:absolute; width:400px; height: 400px; background-color:red; z-index:44"
+    onmouseover="console.log((new Date()).getTime() + 'over parent')"
+    onmouseout="console.log((new Date()).getTime() + 'out parent')">
+
+    <div style="left:1px; position:absolute; width:200px; height: 200px; background-color: black; z-index: 222"
+        onmouseover="console.log((new Date()).getTime() + 'over child')"
+        onmouseout="console.log((new Date()).getTime() + 'out child')">
+    </div> 
+
+</div>
+
+
+
+
+
+<div style="width:300px;height:200px" ecui="type:locked-table;left-lock:2;">
+    <table>
+        <thead>
+            <tr>
+                <th>标题1</th>
+                <th>标题2</th>
+                <th>标题333</th>
+                <th>标题3444</th>
+                <th>标题5555</th>
+                <th>标题6666</th>
+                <th>标777777777777777777</th>
+                <th>标题88888</th>
+            </tr>
+            <tr>
+                <th>标题1</th>
+                <th>标题2</th>
+                <th>标题333</th>
+                <th colspan="2">标题3444</th>
+                <th>标题6666</th>
+                <th>标777777777777777777</th>
+                <th>标题88888</th>
+            </tr> 
+            <tr>
+                <th>标题1</th>
+                <th>标题2</th>
+                <th>标题333</th>
+                <th>标题3444</th>
+                <th>标题5555</th>
+                <th>标题6666</th>
+                <th>标777777777777777777</th>
+                <th>标题88888</th>
+            </tr>                           
+        </thead>
+        <tbody>
+            <tr>
+                <td rowspan="3">单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+            <tr>
+                <td>单元格一</td>
+                <td>单元格2</td>
+                <td>单元格3</td>
+                <td>单元格4</td>
+                <td>单元格5</td>
+                <td>单元格6</td>
+                <td>单元格7</td>
+                <td>单元格8</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+
+<div style="width:100px;height:200px" ecui="id:panel1;type:panel;">
+    <div style="height:200px;position:relative">
+        <div id="panelInner" style="height:30px;width:100%;background-color:green;position:absolute">adsfasdf</div>
+        <div>asdfasadfasdfsadfsaasdfasdfasdfsadf</div>
+        <div>e3445fasdfsadfre</div>
+        <div>fdgnhasdfsadfasdfjhyut</div>
+        <div>43asdfasdfasdf3e</div>
+        <div>453asfdasdfas23f3sd</div>
+    </div>
+</div>
+
+<div ecui="type:table;v-scroll:true;h-scroll:true;width:200px">
+  <table>
+    <!-- 表头区域 -->
+    <thead>
+      <tr>
+        <th style="width:200px;">公司名</th>
+        <th style="width:200px;">url</th>
+        <th style="width:250px;">地址</th>
+        <th style="width:100px;">创办时间</th>
+      </tr>
+    </thead>
+    <!-- 内容行区域 -->
+    <tbody>
+      <tr>
+        <td>百度</td>
+        <td>www.baidu.com</td>
+        <td>中国北京中关村</td>
+        <td>1999</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+    <div style="width:500px">
+        <div ecui="type:lite-table;id:istTable">
+        </div>
+    </div>
+
+
+    <div style="width:500px;padding:1px;margin:0px;overflow:hidden">
+        <div style="background-color:red;height:150px">
+            <div style="background-color:green;width:10px;height:40px;display:inline-block"></div>
+            <div style="background-color:blue;width:10px;height:40px;display:inline-block"></div>
+            <div style="background-color:yellow;width:10px;height:40px;display:inline-block"></div>
+        </div>
+    </div>
+
+    <div id="sel" class="ui-select my-select"></div>
+    <select ecui="type:select" name="sex">
+            <option value="male" selected="selected">男</option>
+            <option value="female">女</option>
+    </select>
+        或
+        <div ecui="type:select;name:sex;value:male">
+            <div ecui="value:male">
+                男
+            </div>
+            <div ecui="value:female">
+                女
+            </div>
+        </div>
+   
+   <input ecui="type:checkbox;subject:china" name="city" value="beijing" checked="checked" type="checkbox">
+或
+<div ecui="type:checkbox;name:city;value:beijing;checked:true;subject:china"></div>
+或
+<div ecui="type:checkbox;subject:china">
+  <input name="city" value="beijing" checked="checked" type="checkbox">
+</div>
+
+   <input type="checkbox" />
+   
+    
+    <div ecui="type:pl-dim;id:dims" class="dimension-area-table" style="width:630px;"></div>
+    asdf
+
+    <div style="width:400px">
+        <div ecui="type:tab-container;id:tab;selected:1;id:tab;current:aaa">
+            <!-- 包含容器的选项卡 -->
+            <div>
+                <label>标题221</label>
+                <!-- 这里是容器 -->
+                1111 ...
+            </div>
+            <!-- 仅有标题的选项卡，以下selected定义与控件定义是一致的，可以忽略其中之一 -->
+            <label >标1题2</label>
+            <div>
+                <label>标题z3</label>
+                <!-- 这里是容器 -->
+                3333 ...
+            </div>
+            <div>
+                <label>标题c4</label>
+                <!-- 这里是容器 -->
+                444 ...
+            </div>
+            <div>
+                <label>标题b5</label>
+                <!-- 这里是容器 -->
+                555 ...
+            </div>
+            <div>
+                <label>标题n6</label>
+                <!-- 这里是容器 -->
+                666 ...
+            </div> 
+            <div><label>标题16</label>666 ...</div> 
+            <div><label>标题26</label>666 ...</div> 
+            <div><label>标题36</label>666 ...</div> 
+            <div><label>标题46</label>666 ...</div> 
+            <div><label>标题56</label>666 ...</div> 
+            <div><label>标题66</label>666 ...</div> 
+            <div><label>标题76</label>666 ...</div> 
+            <div><label>标题86</label>666 ...</div> 
+            <div><label>标题96</label>666 ...</div> 
+            <div><label>标题06</label>666 ...</div> 
+            <div><label>标题q6</label>666 ...</div> 
+            <div><label>标题w6</label>666 ...</div> 
+            <div><label>标题s6</label>666 ...</div> 
+                   
+        </div>
+    </div>
+
+    <div ecui="type:ist-calendar;id:calendar;"></div>
+
+	<div ecui="type:condition-plus;id:test;list:[1,2,3,4]"></div>
+	
+	
+	
+    <script>
+       var _TMP_WEB_ROOT_ = '../';
+    </script>
+
+    <script type="text/javascript" src="../asset-c/xcore-debug.js"></script>
+    <script type="text/javascript" src="../asset-c/ecui-debug.js"></script>
+    
+    <script>
+
+        baidu.dom.ready(function () {
+            var i = 0; 
+            i ++;
+            var istTable = ecui.get('istTable');
+        });
+
+
+        var panel1 = ecui.get('panel1');
+        var panelTitle = document.getElementById('panelInner');
+        panel1.onscroll = function () {
+            console.log(panel1.getScrollLeft());
+            panelTitle.style.left = panel1.getScrollLeft() + 'px';
+        }   
+
+        // ecui.init();
+       /* 
+        var istTable = ecui.get('istTable');
+        istTable.setFields([
+            {title: '名称', content: 'c', width: 200}, 
+            {title: '主体绝对值', content: 'a', sortable: true, width: 100},
+            {title: '标杆一<br>贡献度', content: 'b', sortable: true, width: 50},
+            {title: '标杆二<br>贡献度', content: 'x', sortable: true, width: 50}
+        ]);
+        istTable.setData([
+            {c: '全部 代理商 北区 北方区 呼和浩特开企', a: 111111111111.12, b: '12.23%', x: '12.23%'},
+            {c: '全部 代理商 北区 北方区 呼和浩特开企', a: 111111111111.12, b: '34.33%', x: '12.23%'}
+        ]);
+
+
+        var dimTreeList = [{
+            dimId: "1",
+            dimName: "运营单位",
+            selItem: [10, 13],
+            root: {
+                text: '上海分公司，单位3',
+                value: '1',
+                children: [{
+                    text: '上海分公司',
+                    value: '10',
+                    children: [{
+                        text: '上海-单位1',
+                        value: '11'
+                    }, {
+                        text: '上海-单位2',
+                        value: '12'
+                    }, {
+                        text: '上海-单位3',
+                        value: '13'
+                    }]
+                }, {
+                    text: '广州分公司',
+                    value: '100',
+                    children: [{
+                        text: '广州-单位1',
+                        value: '101'
+                    }, {
+                        text: '广州-单位2',
+                        value: '102'
+                    }, {
+                        text: '广州-单位3',
+                        value: '103'
+                    }]
+                }, {
+                    text: '北京分公司',
+                    value: '1000',
+                    children: [{
+                        text: '北京-单位1',
+                        value: '1001'
+                    }, {
+                        text: '北京-单位2',
+                        value: '1002'
+                    }, {
+                        text: '北京-单位3',
+                        value: '1003'
+                    }]
+                }, {
+                    text: '北京分公司',
+                    value: '1000',
+                    children: [{
+                        text: '北京-单位1',
+                        value: '1001'
+                    }, {
+                        text: '北京-单位2',
+                        value: '1002'
+                    }, {
+                        text: '北京-单位3',
+                        value: '1003'
+                    }]
+                }, {
+                    text: '北京分公司',
+                    value: '1000',
+                    children: [{
+                        text: '北京-单位1',
+                        value: '1001'
+                    }, {
+                        text: '北京-单位2',
+                        value: '1002'
+                    }, {
+                        text: '北京-单位3',
+                        value: '1003'
+                    }]
+                }, {
+                    text: '北京分公司',
+                    value: '1000',
+                    children: [{
+                        text: '北京-单位1',
+                        value: '1001'
+                    }, {
+                        text: '北京-单位2',
+                        value: '1002'
+                    }, {
+                        text: '北京-单位3',
+                        value: '1003'
+                    }]
+                }, {
+                    text: '北京分公司',
+                    value: '1000',
+                    children: [{
+                        text: '北京-单位1',
+                        value: '1001'
+                    }, {
+                        text: '北京-单位2',
+                        value: '1002'
+                    }, {
+                        text: '北京-单位3',
+                        value: '1003'
+                    }]
+                }]
+            }
+        }, {
+            dimId: "2",
+            dimName: "行业",
+            selItem: [20],
+            root: {
+                text: '医疗',
+                value: '1',
+                children: [{
+                    text: '电脑硬件',
+                    value: '20'
+                }, {
+                    text: '房地产',
+                    value: '200'
+                }, {
+                    text: '医疗',
+                    value: '2000'
+                }]
+            }
+        }, {
+            dimId: "3",
+            dimName: "产品线",
+            selItem: [300],
+            root: {
+                text: '左侧',
+                value: '2',
+                children: [{
+                    text: '网页',
+                    value: '30',
+                    children: [{
+                        text: '左侧',
+                        value: '31'
+                    }, {
+                        text: '右侧',
+                        value: '32'
+                    }]
+                }, {
+                    text: '非网页',
+                    value: '300',
+                    children: [{
+                        text: '网盟query',
+                        value: '301'
+                    }, {
+                        text: '新闻',
+                        value: '302'
+                    }, {
+                        text: '知道',
+                        value: '303'
+                    }]
+                }]
+            }
+        }];
+        
+       var el = document.getElementById('sel');
+       var selCon = ecui.$fastCreate(ecui.ui.Select, el, null, {primary: 'ui-select'});
+       selCon.init();
+       selCon.add('asdf', null, {value: 123});
+*/
+    </script>
+</body>
+
+</html>

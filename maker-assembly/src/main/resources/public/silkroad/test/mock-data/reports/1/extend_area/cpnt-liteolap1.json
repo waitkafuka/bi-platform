@@ -1,0 +1,29 @@
+{
+    "status": 0,
+    "statusInfo": "",
+    "data": {
+        "xAxis": [
+
+        ],
+        "yAxis": [],
+        "sAxis": [],
+        "candInds": [
+            {
+                "id": "96",
+                "caption": "日",
+                "name": "day",
+                "type": "TIME_DIMENSION",
+                "canToInd": 0
+            }
+        ],
+        "candDims": [
+            {
+                "id": "96",
+                "caption": "日",
+                "name": "day",
+                "type": "TIME_DIMENSION",
+                "canToInd": 0
+            }
+        ]
+    }
+}

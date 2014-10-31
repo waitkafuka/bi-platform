@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>自助分析平台</title>
+    <link rel="stylesheet" href="../src/css/codemirror/codemirror.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/blackboard.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/twilight.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/rubyblue.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/xq-dark.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/ambiance.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/cobalt.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/eclipse.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/lesser-dark.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/midnight.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/monokai.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/solarized.css?__di__=1_0_0" />
+    <link rel="stylesheet" href="../src/css/codemirror/theme/cobalt.css?__di__=1_0_0" />
+</head>
+
+<body>
+
+    <script src="../src/core/codemirror/codemirror.js?__di__=1_0_0" ></script>
+    <script src="../src/core/codemirror/addon/edit/matchbrackets.js"></script>
+    <script src="../src/core/codemirror/addon/edit/continuecomment.js"></script>
+    <script src="../src/core/codemirror/addon/comment/comment.js"></script>
+    <script src="../src/core/codemirror/mode/javascript.js?__di__=1_0_0" ></script>
+    <script src="../src/core/codemirror/mode/velocity.js?__di__=1_0_0" ></script>
+    <script src="../src/core/codemirror/mode/xml.js?__di__=1_0_0" ></script>
+    <script src="../src/core/codemirror/mode/css.js?__di__=1_0_0" ></script>
+    <script src="../src/core/codemirror/mode/htmlmixed.js?__di__=1_0_0" ></script>
+	<script src="../src/core/codemirror/mode/sql.js?__di__=1_0_0" ></script>
+	
+	<script type="text/javascript">
+        var myCodeMirror = CodeMirror(document.body, {
+              value: "<html>asdf</html>",
+              // mode:  "javascript",
+              // mode:  "text/velocity",
+              // mode:  "text/html",
+              mode:  "htmlmixed",
+              theme: "cobalt",
+              // mode:  "text/x-mysql",
+                lineNumbers: true,
+                matchBrackets: true,
+                indentUnit: 4,
+                smartIndent: false
+                // extraKeys: {"Ctrl-Q": "toggleComment"}              
+        });
+
+	</script>
+	
+</body>
+</html>

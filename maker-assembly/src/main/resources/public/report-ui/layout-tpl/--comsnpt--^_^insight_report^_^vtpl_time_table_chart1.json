@@ -1,0 +1,234 @@
+{
+    "rootSnippet": "snpt-ist1",
+    "prompt": {
+        "anchor": "E"
+    },
+    "clzDefs": [
+        {
+            "clzKey": "H_CHART",
+            "dataOpt": {
+                "emptyHTML": "未查询到相关数据"
+            }
+        },
+        {
+            "clzKey": "OLAP_TABLE",
+            "dataOpt": {
+                "emptyHTML": "未查询到相关数据"
+            }
+        }
+    ],
+    "entityDefs": [
+        {
+            "id": "snpt-ist1",
+            "clzType": "SNIPPET",
+            "version": "0.5.2",
+            "reportTemplateId": "PERSISTENT^_^insight_report^_^zengzhiyewuguanli_fengongsiCSM^_^-944047045"
+        },
+        {
+            "id": "snpt-ist1.cpnt-ist1-form1",
+            "clzType": "COMPONENT",
+            "clzKey": "DI_FORM",
+            "init": { 
+                "action": { "name": "sync" }
+            },
+            "sync": { "viewDisable": "ALL" },
+            "vuiRef": {
+                "input": [
+                    "snpt-ist1.vu-ist1-form1-time92"
+                ],
+                "confirm": "snpt-ist1.vu-ist1-form1-confirm9"
+            },
+            "dataOpt": { "submitMode": "SUBMIT" }
+        },
+        {
+            "id": "snpt-ist1.vu-ist1-form1-time92",
+            "clzType": "VUI",
+            "clzKey": "X_CALENDAR",
+            "name": "Time",
+            "dataSetOpt": {
+                "forbidEmpty": true,
+                "timeTypeList": [
+                    /*{ "value": "D", "text": "日" },*/
+                    { "value": "W", "text": "周" },
+                    { "value": "M", "text": "月" },
+                    { "value": "Q", "text": "季" }
+                ],
+                "timeTypeOpt": {
+                    /*"D": {
+                        "date": ["-7D"],
+                        "disableCancelBtn": true,
+                        "range": ["2011-01-01", "-1We"],
+                        "selModeList": [
+                            { "text": "单选", "value": "SINGLE", "prompt": "单项选择" },
+                            { "text": "范围多选", "value": "RANGE", "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值" }
+                        ]
+                    },*/
+                    "W": {
+                        "date": ["-7D"],
+                        "disableCancelBtn": true,
+                        "range": ["2011-01-01", "-1We"],
+                        "selModeList": [
+                            { "text": "单选", "value": "SINGLE", "prompt": "单项选择" },
+                            { "text": "范围多选", "value": "RANGE", "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值" }
+                        ]
+                    },
+                    "M": {
+                        "date": ["-1M"],
+                        "disableCancelBtn": true,
+                        "range": ["2011-01-01", "-1M"],
+                        "selModeList": [
+                            { "text": "单选", "value": "SINGLE", "prompt": "单项选择" },
+                            { "text": "范围多选", "value": "RANGE", "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值" }
+                        ]
+                    },
+                    "Q": {
+                        "date": ["-3M"],
+                        "disableCancelBtn": true,
+                        "range": ["2011-01-01", "-3M"],
+                        "selModeList": [
+                            { "text": "单选", "value": "SINGLE", "prompt": "单项选择" },
+                            { "text": "范围多选", "value": "RANGE", "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值" }
+                        ]
+                    }
+                }
+            }
+        },
+        {
+            "id": "snpt-ist1.vu-ist1-form1-confirm9",
+            "clzType": "VUI",
+            "clzKey": "H_BUTTON",
+            "dataOpt": { 
+                "skin": "ui-g-btn",
+                "text": "查询"
+            }
+        },
+        { 
+            "id": "snpt-ist11",
+            "clzType": "SNIPPET",
+            "reportTemplateId": "PERSISTENT^_^insight_report^_^zengzhiyewuguanli_fengongsiCSM_chart^_^-944047045"
+        },
+        {
+            "id": "snpt-ist11.cpnt-ist11-chart1", 
+            "clzType": "COMPONENT",
+            "clzKey": "DI_CHART",
+            "sync": { "viewDisable": "ALL" },
+            "vuiRef": {
+                "mainChart": "snpt-ist11.vu-ist11-chart1"
+            },
+            "interactions": [
+                {
+                    "events": [
+                        { "rid": "snpt-ist12.cpnt-ist12-table1", "name": "dataloaded" },
+                        { "rid": "snpt-ist12.cpnt-ist12-table1", "name": "rowselect" },
+                    ],
+                    "action": { "name": "syncX" },
+                    "argHandlers": [
+                        ["clear"],
+                        ["getValue", "snpt-ist12.cpnt-ist12-table1", "table.rowChecked", "uniqueNames"],
+                        ["attrArr", "uniqueNames", "value.uniqueName"]
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "snpt-ist11.vu-ist11-chart1", 
+            "clzType": "VUI",
+            "clzKey": "H_CHART",
+            "dataOpt": {
+                "height": 260,
+                "legend": { "xMode": "pl" },
+                "weekViewRange": [null, "-1d"],
+                "rangeSelector": {
+                    "byAxisType": {
+                        "date": {
+                            "buttons": [
+                                { "type": "day", "count": 29, "text": "30日" },
+                                { "type": "day", "count": 89, "text": "90日" },
+                                { "type": "thisMonth", "text": "本月" },
+                                { "type": "thisQuarter", "text": "本季" },
+                                { "type": "all", "text": "全部" }
+                            ],
+                            "selected": 4
+                        },
+                        "week": {
+                            "buttons": [
+                                { "type": "week", "count": 7, "text": "8周" },
+                                { "type": "week", "count": 15, "text": "16周" },
+                                { "type": "thisYear", "text": "本年" },
+                                { "type": "all", "text": "全部" }
+                            ],
+                            "selected": 3
+                        },
+                        "month": {
+                            "buttons": [
+                                { "type": "xMonth", "count": 12, "text": "12月", "by": "max" },
+                                { "type": "xMonth", "count": 24, "text": "24月", "by": "max" },
+                                { "type": "all", "text": "全部" }
+                            ],
+                            "selected": 2
+                        },
+                        "quarter": {
+                            "buttons": [
+                                { "type": "xQuarter", "count": 4, "text": "4季", "by": "max" },
+                                { "type": "xQuarter", "count": 8, "text": "8季", "by": "max" },
+                                { "type": "all", "text": "全部" }
+                            ],
+                            "selected": 2
+                        }
+                    }
+                }
+            }
+        },
+        { 
+            "id": "snpt-ist12",
+            "clzType": "SNIPPET",
+            "reportTemplateId": "PERSISTENT^_^insight_report^_^zengzhiyewuguanli_fengongsiCSM_table^_^-944047045"
+        },
+        {
+            "id": "snpt-ist12.cpnt-ist12-table1",
+            "clzType": "COMPONENT",
+            "clzKey": "DI_TABLE",
+            "sync": { "viewDisable": "ALL" },
+            "vuiRef": {
+                "mainTable": "snpt-ist12.vu-ist12-table1",
+                "download": "snpt-ist12.vu-ist12-table1-downloadbtn1"
+            },
+            "interactions": [
+                {
+                    "events": [
+                        { "rid": "snpt-ist1.cpnt-ist1-form1", "name": "submit" },
+                        { "rid": "snpt-ist1.cpnt-ist1-form1", "name": "dataloaded" }
+                    ],
+                    "action": { "name": "sync" },
+                    "argHandlers": [
+                        ["clear"],
+                        ["getValue", "snpt-ist1.cpnt-ist1-form1"]
+                    ]
+                }
+            ]
+        },
+        { 
+            "id": "snpt-ist12.vu-ist12-table1",
+            "clzType": "VUI",
+            "clzKey": "OLAP_TABLE",
+            "name": "table",
+            "dataOpt": {
+                "rowHCellCut": 30,
+                "hCellCut": 30,
+                "cCellCut": 30,
+                "vScroll": true,
+                "rowCheckMode": "SELECT"
+            }
+        },
+        {
+            "id": "snpt-ist12.vu-ist12-table1-downloadbtn1",
+            "clzType": "VUI",
+            "clzKey": "H_BUTTON",
+            "funcAuth": "button_300002_loadbaobiao",
+            "dataOpt": {
+                "skin": "ui-download-btn",
+                "text": "下载数据"
+            }
+        }
+    ]
+}

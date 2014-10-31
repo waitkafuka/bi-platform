@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>OLAP TABLE</title>
+    <link type="text/css" rel="stylesheet" href="../src/css/ecui.css?__ist__=1_0_10" />
+
+    <style type="text/css">
+		.hidden {display:none}
+		.hide {display:none;}
+        .my-select {width: 160px; height:20px}
+		.ui-calendar-text {font-size:12px}
+		.ui-calendar{ width: auto;min-width: 150px}
+		.ui-calendar-plus-btnpre, .ui-calendar-plus-btnnext{margin-left: 10px;cursor: pointer;display:inline-block;width:20px;height:24px;line-height:24px}
+		.ui-calendar-plus-btn-disable {color:red;cursor:default}
+		.ui-calendar-plus-btnpre:hover, .ui-calendar-plus-btnnext:hover {background-color:silver}
+		.ui-calendar-plus-btn-disable:hover {background:none}
+		.ui-calendar-plus-box{display:inline-block;*display:inline;zoom:1}
+		.ml10{margin-left:10px}
+		
+		.ui-suggest {position:relative;height:20px;width:160px;border:1px solid #A9ADB6;background-color:#FFF;display:inline-block;vertical-align:middle;overflow:hidden;*display:inline;*zoom:1}
+		.ui-suggest-options {
+			border: 1px solid #A8ADB6;
+			background: white;
+			font-size: 12px;
+		}
+		.ui-suggest-item {
+			white-space: nowrap;
+			height: 20px;
+			line-height: 20px;
+			padding-left: 4px;
+			cursor: default;
+			-moz-user-select: none;
+			-webkit-user-select: none;
+		}
+		.ui-suggest-item-hover, 
+		.ui-suggest-item-focus {
+			background: #E4EAFA;
+		}
+    </style>
+</head>
+
+<body style="font-size:12px">
+
+
+    <div style="width:200px;height:100px" ecui="type:ist-calendar;id:cal;viewMode:FIX;mode:RANGE">
+    </div>
+	
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br /><br />
+
+            <span id="posTree" style='width:200px' ecui="typee:input-tree;id:posTree;hideCancel:true;asyn:true;value:123">
+                <div ecui='value:123'>总裁</div>
+            </span>
+<div id = 'test2'> hi</div>
+	<input type="text" id="aa" autocomplete="off" />
+	
+	<div ecui="type:suggest;id:st;"></div>
+    <div style="" ecui="type:calendar-plus;id:test;"></div>
+	<a id ="" onclick="setDate()">设置时间</a>
+	
+
+    <script>
+		var options = {
+		types: ['D', 'W', 'M', 'Q'],
+		// tagNames: ['','', '', ''],
+		range: {
+			day: {
+				start: '2013-01-01',
+				end: '2013-03-14'
+			},
+			week: {
+				start: '2012-03-04',
+				end: '2013-03-04'
+			},
+			month: {
+				start: '2011-02',
+				end: '2013-05'
+			},
+			quarter: {
+				start: '2011-Q1',
+				end: '2013-Q3'
+			}
+		},
+		defaults: {
+			day: '2013-01-03',
+			week: '2013-02-03',
+			month: '2012-07',
+			quarter: '2011-Q2'
+		
+		}
+
+	};
+		window.onload = function() {
+			var el = baidu.g('test2');
+
+	   
+			var cal = ecui.$fastCreate(ecui.ui.CalendarPlus, el, null, options)
+			//注册change事件
+			cal.onchange = function() {
+				var date = this.getDate();
+				console.log(date)
+			}
+			//设置控件的时间 并显示该type
+			window.setDate = function() {
+				var type = 'D';
+				cal.setDate({
+					type: type,
+					date: '2013-01-01'
+				})
+			
+			}
+			
+			window.reset = function() {
+				cal.render(options);
+			
+			}
+			var jsonToQuery = function (data) {
+				return baidu.url.jsonToQuery(data, encodeURIComponent);
+			};
+			var dao = {
+			
+				getChildrenPos: function(params, success , fail) {
+					var options = {
+						url : "position.json",
+						method : "get",
+						preventRepeat : 'preventRepeat',
+                        data: jsonToQuery(params),
+                        onsuccess: function(data) {
+						var res = data.responseText;
+						var json = baidu.json.parse(res);
+						//e-json
+						success.call(this, json.data);
+					
+					   }, 
+                       onfailure: function(data) {
+						var res = data.responseText;
+						var json = baidu.json.parse(res);
+						//e-json
+						success.call(this, json.data);
+						fail.call(this, json.data);
+					   }
+                    };
+                    baidu.ajax.request(
+                        options.url, options
+                    );
+				},
+				
+				getSuggestData: function(params, success, fail) {
+				
+					var options = {
+						url : "suggest.json",
+						method : "get",
+						preventRepeat : 'preventRepeat',
+                        data: jsonToQuery(params),
+                        onsuccess: function(data) {
+						var res = data.responseText;
+						var json = baidu.json.parse(res);
+						//e-json
+						success.call(this, json.data);
+					
+					   }, 
+                       onfailure: function(data) {
+						var res = data.responseText;
+						var json = baidu.json.parse(res);
+						//e-json
+						success.call(this, json.data);
+						fail.call(this, json.data);
+					   }
+                    };
+                    baidu.ajax.request(
+                        options.url, options
+                    );
+				
+				}
+			};
+			//suggest
+			ecui.get('st').onquery = function(value) {
+			
+				var testList = [
+					{value: 1, text: 'hhhh'},
+					{value: 2, text: 'iiiii'},
+					{value: 3, text: 'oooooo'}
+				]
+				var objValue = this.getValue();
+				console.log(value, 'hi on query');
+				//this.render(testList);
+				var me = this;
+				dao.getSuggestData(
+					{ text:value.text },
+					function(data) {
+						if (data.dataList) {
+							me.update(data.dataList);
+						}
+					})
+			}
+			
+			ecui.get('st').onchange = function(value) {
+				console.log('change event:', value);
+			
+			}
+			ecui.get('posTree').onloadtree = function(value, func) {
+
+			
+				 /**
+				 * 岗位树异步加载的load函数
+				 * @param {string} value 当前选中的节点的value
+				 * @param {Function} func 数据load以后的回调函数
+				 */
+				dao.getChildrenPos(
+					{ positionId : value },
+					function(data) {
+						if (data) {
+							func.call(value, data.dataList);
+						}
+						else {
+							func.call(null, {});
+						}
+					},
+					function(code, data) {
+
+						func.call(null, []);
+					}
+				);
+				
+			}
+
+			
+			
+		}
+
+       var _TMP_WEB_ROOT_ = '../';
+	   var __$DI__NS$__ = {
+			WEB_ROOT :'../'
+	   };
+	   function getDate() {
+			var ui = ecui.get('test');
+			var date = ui.getDate();
+			console.log(date);
+	   }
+    </script>
+	<a onclick="getDate()"> getDate</a>
+	<a onclick="reset()">reset</a>
+    <script type="text/javascript" src="../asset-c/xcore-debug.js"></script>
+    <script type="text/javascript" src="../asset-c/ecui-debug.js"></script>
+     <script src="..//src/core/ecui/src-ext/suggest.js" type="text/javascript"></script>
+	
+	
+
+    <script>
+        function random() {
+            return Math.round(Math.random() * 100000000) / 1000;
+        }
+
+		
+    </script>
+</body>
+
+</html>

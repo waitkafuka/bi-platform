@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Insight</title>
+    <link type="text/css" rel="stylesheet" href="../src/css/theme-ist.css?__ist__=1_0_10" />
+</head>
+
+<body>
+    <div id="info">INFO HERE</div>
+    <div id="chart" style="background-color:#fff;border:solid 1px #777;position:absolute;top:100px;left:130px"></div>
+    
+    <script type="text/javascript">var _TMP_WEB_ROOT_ = '..'; </script>
+    <script type="text/javascript" src="../asset/xutil.js"></script>
+    <script type="text/javascript" src="../asset/xjschart.js" ></script>
+    
+    <script>
+        var extend = xutil.object.extend;
+        
+        function g (el) {
+            return document.getElementById(el);
+        }
+        function info(info) {
+            g('info').innerHTML = info;
+        }
+        var R = Raphael;
+        var paper = R('chart', 900, 700);
+        
+        //---------------------------------------------
+        //---------------------------------------------
+        
+            var FIRST_TEXT_OFFSET_Y = 11,
+                NODE_TITLE_FONT = {font:'14px "微软雅黑", "Hoefler Text", Georgia, serif, Arial, Helvetica', 'font-weight':'bold', fill:"#000"},
+                NODE_MAIN_NUM_FONT = {font:'9px Arial, Georgia, serif, Helvetica', fill:'#000', 'font-weight':'bold'},
+                NODE_POLE_NUM_FONT = {font:'9px Arial, Georgia, serif, Helvetica', fill:'#000'},
+                TEXT_ATTR = {"text-anchor": 'start'},
+                BOTTOM_LINE_STYLE = {stroke:'#C5C5C5'},
+                BOTTOM_LINE_GLOW = {width:2, color:'#C5C5C5'},
+                BOTTOM_LINE_LENGTH = 156,
+                TITLE_STEP_Y = 21,
+                MAIN_NUM_STEP_Y = 18,
+                POLE_NUM_STEP_Y = 16,
+                BOTTOM_LINE_STEP_Y = 10,
+                POLE_NUM_WIDTH = 97,
+                CONTENT_X = 10,
+                CONTENT_Y = 10,
+                COLLAPSE_BTN_RADIO = 5,
+                COLLAPSE_BTN_X = BOTTOM_LINE_LENGTH + COLLAPSE_BTN_RADIO;
+        
+        var _eMainSet = paper.set(),
+            _eCollapseBtn = paper.set(),
+            _eContent = paper.set(),
+            _eTitle = paper.set;
+        renderNode({title: '点击消费', mainNum: '12213212121', pole1Num:'32232131312.33', pole1Percent:'43.11%', pole2Num:'9585754443.45', pole2Percent:'76.10%'})
+        layout(_eMainSet, ['t', 0, 0]);
+        var _eMainSet = paper.set();
+        renderNode({title: '有消费客户数', mainNum: '1121', pole1Num:'1312.33', pole1Percent:'43.11%', pole2Num:'4443.45', pole2Percent:'76.10%'})
+        layout(_eMainSet, ['t', 40, 250]);
+        var _eMainSet = paper.set();
+        renderNode({title: '户均消费', mainNum: '84832121', pole1Num:'231312.33', pole1Percent:'43.11%', pole2Num:'4443.45', pole2Percent:'76.10%'})
+        layout(_eMainSet, ['t', 240, 50]);
+        
+        
+        /**
+         * Node
+         */
+        function renderNode(options) {
+            var baseY;
+            options = options || {};
+            
+            _eMainSet.push(paper.text(CONTENT_X, (baseY = CONTENT_Y + FIRST_TEXT_OFFSET_Y), options.title || '').attr(extend({}, NODE_TITLE_FONT, TEXT_ATTR)));
+            _eMainSet.push(paper.text(CONTENT_X, (baseY += TITLE_STEP_Y), options.mainNum || '').attr(extend({}, NODE_MAIN_NUM_FONT, TEXT_ATTR)));
+            _eMainSet.push(paper.text(CONTENT_X, (baseY += MAIN_NUM_STEP_Y), options.pole1Num || '').attr(extend({}, NODE_POLE_NUM_FONT, TEXT_ATTR)));
+            _eMainSet.push(paper.text(CONTENT_X + POLE_NUM_WIDTH, (baseY), options.pole1Percent || '').attr(extend({}, NODE_POLE_NUM_FONT, TEXT_ATTR)));
+            _eMainSet.push(paper.text(CONTENT_X, (baseY += POLE_NUM_STEP_Y), options.pole2Num || '').attr(extend({}, NODE_POLE_NUM_FONT, TEXT_ATTR)));
+            _eMainSet.push(paper.text(CONTENT_X + POLE_NUM_WIDTH, (baseY), options.pole2Percent || '').attr(extend({}, NODE_POLE_NUM_FONT, TEXT_ATTR)));
+            _eMainSet.push(paper.path(['m', 0, (baseY += BOTTOM_LINE_STEP_Y), 'h', BOTTOM_LINE_LENGTH]).attr(BOTTOM_LINE_STYLE));
+            
+            // mainSet.push(paper.circle(COLLAPSE_BTN_X, baseY, COLLAPSE_BTN_RADIO).attr(BOTTOM_LINE_STYLE));
+            var s2 = paper.set();
+            s2.push(paper.circle(COLLAPSE_BTN_X, baseY, COLLAPSE_BTN_RADIO).attr(BOTTOM_LINE_STYLE));
+            mainSet.push(s2);
+        }
+        
+        function renderCollapseIcon(paper, mainSet, collapse) {
+        }
+        
+        function layout(mainSet, transform) {
+            mainSet.transform(transform);
+        }
+        
+        
+    </script>
+</body>
+
+</html>

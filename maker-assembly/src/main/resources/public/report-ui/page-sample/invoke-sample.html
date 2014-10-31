@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>some title</title>
+</head>
+
+<body>
+    <div class="nav"><p>当前位置：什么什么页面</p></div>
+
+    <div> ..... </div>
+    <div id="some-dom-element" ></div>
+    <div> ..... </div>
+
+    <!-- 要先引用报表引擎提供的di-stub.js，如果是动态页面的话，最好使用随机数来避免http缓存 -->
+    <script src="/_report/asset-p/di-stub.js?__version=${randomNumber}"></script>
+    
+    <script>
+
+        // 创建报表对象
+        var di = new $DataInsight$(
+            // 给报表引擎使用的DIV
+            'some-dom-element',
+            { 
+                // 报表引擎的URL（通用）
+                // 目前要求部署上报表引擎和业务系统是同域的
+                // 业务系统负责使用反向代理等手段保证同域
+                url: '/_report/reportTemplate/complex/generateReport.action',
+                // 缺省为GET方式
+                method: 'POST'
+                // 如果需要其他详细参数和API（如长宽控制等），见di-stub.js注释或文档
+            }
+        );
+        // 准备报表参数
+        var param = [];
+        // 必须（报表ID）
+        param.push('reportTemplateId=' + encodeURIComponent('your ReportTemplateId'));
+        // 必须（每个系统各自的key，每个业务系统会被分配一个_s_idCard做身份认证）
+        param.push('_s_idCard=' + encodeURIComponent('your _s_idCard'));
+        // 额外参数，看各系统业务而定，例如岗位，时间等，如果没有额外参数则可以忽略
+        param.push('posId=' + encodeURIComponent('you extra param (i.e posId)'));
+        // 额外参数 ...
+        param.push('time=' + encodeURIComponent('you extra param (i.e time)'));
+
+        // 开始加载报表
+        di.load(
+            { 
+                data: param.join('&')
+            } 
+        );
+        // 如上这样就可以完成报表加载了。
+
+        // 另外：
+
+        // 重复在一个dom元素上使用new $DataInsight$(el)，
+        // 会先自动dispose以前绑在上面的stub实例。
+ 
+        // 如果需要监听di的事件，则可：
+        di.addEventListener(   
+            'linkbridge', 
+            function (url, param) {
+                // some event handler
+                // 目前只支持'linkbridge'事件，用于点击报表中的链接，新开报表页。handler参数为：
+                //     {string} url 跳转目标url
+                //     {string} param 须带入的参数
+            }
+        );
+
+    </script>
+</body>
+
+</html>

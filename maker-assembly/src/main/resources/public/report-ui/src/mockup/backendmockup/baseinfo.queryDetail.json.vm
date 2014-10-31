@@ -1,0 +1,10 @@
+{"status":$!{status}, "data":{"dataList":[
+    {"posid": 1001, "posName": "岗位名称1", "roleName":"角色名称1", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]},
+    {"posid": 1002, "posName": "岗位名称2", "roleName":"角色名称2", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}, 
+    {"posid": 1003, "posName": "岗位名称3", "roleName":"角色名称3", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}, 
+    {"posid": 1004, "posName": "岗位名称4", "roleName":"角色名称4", "isDefault": true, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}, 
+    {"posid": 1005, "posName": "岗位名称5", "roleName":"角色名称5", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}, 
+    {"posid": 1006, "posName": "岗位名称6", "roleName":"角色名称6", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}, 
+    {"posid": 1007, "posName": "岗位名称7", "roleName":"角色名称7", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}, 
+    {"posid": 1008, "posName": "岗位名称8", "roleName":"角色名称8", "isDefault": false, "roleInfo": [{"text":"角色1", "value":1001}, {"text":"角色2", "value":1002}]}
+], "sortinfo":{"orderby": "$!sortInfo.orderby", "sortby":"$!sortInfo.sortby"}}}

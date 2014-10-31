@@ -1,0 +1,40 @@
+/**
+ * di-ui.css
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ *
+ * @file:    data insight 公用（包括console和product等公用）
+ *           data insight UI
+ * @author:  xxx(xxx@baidu.com)
+ */
+
+/**
+ * Dim Select Panel
+ */
+.di-dim-select-tree {
+    overflow: auto;
+    max-width: 600px;
+    min-width: 500px;
+    max-height: 560px;
+    min-height: 360px;
+    display: inline-block;
+    border: 1px solid #D0D0D0;
+    *display: inline;
+    *zoom: 1;
+    vertical-align: top;
+}
+.di-dim-select-cal {
+    margin: 50px 0 0 40px;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+    vertical-align: top;
+}
+.di-dim-select-panel .ui-form-body {
+    padding: 10px 25px 10px 25px;
+    width: 800px;
+}
+.di-dim-select-btn {
+    margin: 10px 0 0 0;
+    float: right;
+}
+

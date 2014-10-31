@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>自助分析平台（前端模拟配置端页面）</title>
+    <link rel="stylesheet" href="/asset/css/-di-console-debug.css?__di__=1_0_0"/>
+</head>
+<body>
+<div id="header" class="head">
+    <div class="frame-width">
+        <div class="logo-left"></div>
+        <div class="global-menu-area">
+            <div class="global-menu q-global-menu"></div>
+        </div>
+        <div class="logo-right">
+            <div class="login">
+                <span>欢迎 <b><span id="userName">A同学</span></b></span>
+                <a href="http://pulse.baidu.com/logout.action" id="Logout">[退出]</a>
+                <span>|</span>
+                <a href="mailto:pulse_OPPM@baidu.com;rigelpulse@baidu.com?subject=Questions and Suggestions for Pulse"
+                   id="WeedBack">反馈问题及建议</a>
+                <span style="display:none">|</span>
+                <a style="display:none" href="help.html" class="wired-a" target="_blank">帮助</a>
+            </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+
+<div class="content-real">
+    <div class="content-inner">
+        <div class="q-global-main main"></div>
+    </div>
+</div>
+
+<div class="foot frame-width" align="center">
+    <span>友情链接：<a href="http://asea.baidu.com/dashboard/quarter.action" target="_blank" style="color:#666666">Dashboard 实时数据</a></span>
+    <span>&nbsp;|&nbsp;</span>
+    <span>&copy;2011&nbsp;Baidu</span>
+</div>
+<!--配置端的所有js文件，不管是压缩文件还是散装文件都会自行按命名空间挂好-->
+<script src="/asset/-di-console-debug.js?__di__=1_0_0" ></script>
+
+<!--插件，与iframe的桥接组件部分-->
+<script src="/asset-p/di-stub.js?__di__=1_0_10" ></script>
+
+<!--页面的初始化入口-->
+<script type="text/javascript">
+    (function(NS) {
+        // xui 在src/core/xui,做了中转与容错等处理
+        // 也可以直接 (new di.console.frame.ui.MainPage(options)).init()
+        // 其中的options就是第二个参数
+        NS.xui.XView.start(
+                'di.console.frame.ui.MainPage',
+                {
+                    pageClass: 'di.console.frame.ui.ConsoleFrame',
+                    globalType: 'CONSOLE',
+                    webRoot: '',
+                    serverTime : (new Date).getTime(),
+                    userId : 5,
+                    bizKey: 'ditry',
+                    userName : "<非法用户>",
+                    globalMenu : {
+                        selMenu: {
+                            menuId: 100000,
+                            menuName: "报表编辑",
+                            menuPage: "di.console.frame.ui.ConsoleFrame"
+                        },
+                        menuList: [
+                            //
+                        ]
+                    }
+                }
+        );
+
+        // XVIEW.$domReady 可更具工程重写，此方法中默认执行下面函数
+        // XVIEW.$postStart 初始化完成后会执行的函数，也可以通过重写来支持工程的自定义功能
+    })(window);
+</script>
+
+</body>
+</html>

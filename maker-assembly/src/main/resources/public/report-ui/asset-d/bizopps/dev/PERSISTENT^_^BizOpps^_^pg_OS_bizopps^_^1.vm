@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+#parse("/asset-d/-com-/-cominclude-.vm")
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>商机池</title>
+	<link rel="stylesheet" href="$!{webRoot}/asset-p/css-pool/di-product.css?__v__=$!jsonUtils.version()" />
+</head>
+
+<body class="di-page-html-body"><!-- escape enter
+    --><div data-o_o-di="BODY" class="di-page-div-body">
+
+        <div data-o_o-di="snippet-biz-pool-1">
+            <div data-o_o-di="snippet-biz-pool-1.component-biz-pool-9">
+                <div data-o_o-di="snippet-biz-pool-1.vui-biz-pool-9">
+                </div>
+            </div>
+
+            <div data-o_o-di="snippet-biz-pool-2">
+                <div data-o_o-di="snippet-biz-pool-2.component-biz-pool-2">
+                    <div data-o_o-di="snippet-biz-pool-2.vui-biz-pool-2">
+                    </div>
+                </div>
+            </div>
+
+            <div data-o_o-di="snippet-biz-pool-3">
+                <div data-o_o-di="snippet-biz-pool-3.component-biz-pool-3">
+                    <div class="di-table-area">
+                        <div data-o_o-di="snippet-biz-pool-3.vu-biz-pool-breadcrumb1">
+                        </div>
+                        <div data-o_o-di="snippet-biz-pool-3.vui-biz-pool-3">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <script type="text/javascript">
+        window.__$DI__OPT$__ = {
+            depictRef: [
+            ],
+            depict: {
+                "entityDefs": [
+                ]
+            }
+        };
+    </script>
+
+    #comJS
+    #enterDI
+
+    </div><!--
+--></body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+
+#set($webRoot=$!link.getContextPath())
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>自助分析平台</title>
+	<link rel="stylesheet" href="$!{webRoot}/asset-c/css/di-console.css?__di__=1_0_0" />
+	<style type="text/css">
+			body,form,div,input{
+				margin: 0;
+				padding: 0;
+				font-family: arial, "宋体"
+			}
+			a {
+				text-decoration: none;
+				outline: none;
+				color: #0066cc;
+			}
+			a:active {
+				star:expression(this.onFocus=this.blur());
+			}
+			.content-set {
+				width: 400px;
+				margin: 50px auto;
+			}
+			.form-item {
+				height: 37px;
+				margin-bottom: 20px;
+			}
+			.left {
+				font-size: 14px;
+				float: left;
+				width: 90px;
+				font-weight: bold;
+				padding-right: 10px;
+				text-align: right;
+				height: 35px;
+				line-height: 35px;
+			}
+			.input-text {
+				float: left;
+				width: 298px;
+				height: 35px;
+				border: 1px #ddd solid;
+				line-height: 35px;
+			}
+			.form-promit {
+				padding-left: 100px;
+				font-size: 12px;
+				color: #DBDBDB;
+				margin-top: -18px;
+				margin-bottom: 20px;
+			}
+			.form-error {
+				height: 12px;
+				padding-left: 100px;
+				font-size: 12px;
+				color: red;
+				margin-bottom: 10px;
+			}
+			.form-submit {
+				padding-left: 100px;
+				height: 40px;
+			}
+
+			.submit {
+				font-size: 20px;
+				width: 255px;
+				height: 40px;
+				background: #3F89EC;
+				color: #fff;
+				border: 0;
+				font-weight: bold;
+				-moz-border-radius: 5px;
+				-ms-border-radius: 5px;
+				-o-border-radius: 5px;
+				border-radius: 5px;
+				float: left;
+				cursor: pointer;
+			}
+			.reset {
+				width: 40px;
+				float: left;
+				height: 40px;
+				line-height: 40px;
+				margin-left: 5px;
+				text-align: center;
+				cursor: pointer;
+			}
+		</style>
+</head>
+
+<body>
+	<div id="header" class="head">
+	    <div class="frame-width">
+    		<div class="logo-left"></div>
+    		<div class="global-menu-area">
+                <div class="global-menu q-global-menu"></div>
+    		</div>
+    		<div class="logo-right">
+    			<div class="login">
+    				<span>欢迎 <b><span id="userName"></span></b></span>
+    				<a href="#" id="Logout" >[退出]</a>
+    				<span>|</span>
+    				<a href="mailto:mengran@baidu.com?subject=Questions and Suggestions for Data-Insight" id="WeedBack">反馈问题及建议</a>
+    				<span style="display:none">|</span>
+    				<a style="display:none" href="help.html" class="wired-a" target="_blank">帮助</a>
+    			</div>
+    		</div>
+    		<div class="clear"></div>
+		</div>
+	</div>
+	
+	<div class="content-real">
+    	<div class="content-inner">
+    	<div align="right"><a href="showConnInfos.action?id=$id&productLine=$productLine">返回</a></div>
+    		<form method="post"  action="addconninfo.action" id="formDb">
+    			<div class="content-set">
+						<div class="form-item">
+							<label class="left">数据连接URL</label>
+							<input class="input-text" type="text" name="connInfo.jdbcUrl" value="jdbc:mysql://">
+						</div>
+						<div class="form-promit" title="例如：jdbc:mysql://cq01-testing-sfcrm42.vm.baidu.com:8801/zongheng?useUnicode=TRUE&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&noAccessToProcedureBodies=true">
+							格式：jdbc:mysql://10.10.10.10:8080/zongheng
+						</div>
+						<div class="form-item">
+							<label class="left">用户名</label>
+							<input class="input-text" type="text" name="connInfo.username">
+						</div>
+						<div class="form-item">
+							<label class="left">密码</label>
+							<input class="input-text" type="password" name="connInfo.password">
+						</div>
+						<div class="form-item">
+							<label class="left">描述</label>
+							<input class="input-text" type="text" name="connInfo.description">
+						</div>
+						<div class="form-error" id="errMsg"></div>
+						<div class="form-submit">
+							<input type="submit" class="submit" value="提交"/>
+							<a href="javascript:void(0);" id="reset" class="reset">
+								重置
+							</a>
+						</div>
+					</div>
+    			<input type="hidden" name="productLine" value="$productLine">
+				<input type="hidden" name="connInfo.datasourceId" value="$id" />
+				<input type="hidden" name="id" value="$id">
+    		</form>
+    	
+    	
+    	</div>
+	</div>
+	
+	<div class="foot frame-width" align="center">
+		<span>友情链接：Pulse</span>
+		<span>&nbsp;|&nbsp;</span>
+		<span>&copy;2013&nbsp;Baidu</span>
+	</div>
+	<script type="text/javascript" charset="utf-8">
+		(function() {
+				//表单元素名称
+				var reqParam = {
+					jdbcUrl : 'connInfo.jdbcUrl',
+					username : 'connInfo.username',
+					password : 'connInfo.password'
+				};
+				
+				//提示信息
+				var errorMsg = {
+					JDBC_WARN : '请您填写数据库连接URL',
+					USERNAME_WARN : '请您填写用户名',
+					PASSWORD_WARN : '请您填写密码'
+				};
+				
+				var constant = {
+					JDBC_URL_PREV : "jdbc:mysql://"
+				};
+
+				window.onload = function() {
+					//获取表单
+					var oForm = document.getElementById("formDb");
+					var oTxtJdbcUrl = oForm[reqParam.jdbcUrl];
+					var oTxtUser = oForm[reqParam.username];
+					var oTxtPassword = oForm[reqParam.password];
+					var oErrMsg = document.getElementById("errMsg");
+					var oReset = document.getElementById("reset");
+					
+                    //为表单添加验证
+					oForm.onsubmit = function() {
+						var url = trim(oTxtJdbcUrl.value);
+						//验证URL：URL必须是以默认前缀开头，并且后面有追加内容
+                        if (url.indexOf(constant.JDBC_URL_PREV) != 0
+                            //如果URL等于默认前缀，说明后面无追加内容
+                            || url == constant.JDBC_URL_PREV 
+						) {
+							oErrMsg.innerHTML = errorMsg.JDBC_WARN;
+							return false;
+						}
+						//验证用户名非空
+						else if (!trim(oTxtUser.value)) {
+							oErrMsg.innerHTML = errorMsg.USERNAME_WARN;
+							return false;
+						}
+						//验证密码非空
+						else if (!trim(oTxtPassword.value)) {
+							oErrMsg.innerHTML = errorMsg.PASSWORD_WARN;
+							return false;
+						}
+					}
+                    
+					oReset.onclick = function() {
+						oForm.reset();
+					}
+				}
+				
+				/**
+				 * method:去除空格
+				 *
+				 * @param {string} val 源字符串
+				 * @return {string} 去除空格后的字符串
+				 */
+                function trim(val) {
+					return val.replace(/(^\s*|\s*$)/g, '');
+				}
+
+			})();
+	</script>
+	
+</body>
+</html>

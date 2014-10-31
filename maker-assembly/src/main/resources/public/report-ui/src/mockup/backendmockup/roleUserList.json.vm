@@ -1,0 +1,7 @@
+{"status":$!{status}, "data":{"dataList":[
+    {"id": 1001, "account": "qatest01", "name": "姓名1", "sysUnitStr": "系统单元1", "sysUnit": 1001, "position": "工作职位01", "email":"qatest01.baidu.com"},
+    {"id": 1002, "account": "qatest02", "name": "姓名2", "sysUnitStr": "系统单元1,系统单元2,系统单元3,系统单元4", "sysUnit": "1001,1002,1003,1004", "position": "工作职位02", "email":"qatest02.baidu.com"},
+    {"id": 1003, "account": "qatest03", "name": "姓名3", "sysUnitStr": "系统单元3", "sysUnit": 1003, "position": "工作职位03", "email":"qatest03.baidu.com"},
+    {"id": 1004, "account": "qatest04", "name": "姓名4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "position": "工作职位04", "email":"qatest04.baidu.com"},
+    {"id": 1005, "account": "qatest05", "name": "姓名5", "sysUnitStr": "系统单元5", "sysUnit": 1005, "position": "工作职位05", "email":"qatest05.baidu.com"}
+], "sortinfo":{"orderby": "$!sortInfo.orderby", "sortby":"$!sortInfo.sortby"}}}

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>可拜访商机资源监控</title>
+    <link rel="stylesheet" href="ka-income.css">
+</head>
+
+<body>
+    <div class="nav"><p>当前位置：KA</p></div>
+
+    <div class="wrapper">
+        <div class="air">
+        <div class="area-w"></div>
+        <div class="area-v"></div>
+        <div class="tag-cont">
+                        <div class="scc">
+                    <strong>选择部门：</strong>
+                    <label onclick="opt('OS')"><input type="radio" name="c" checked="checked" id="OS" value="0">OS部门</label>
+                    <label onclick="opt('IS')"><input type="radio" name="c"  id="IS" value="1">IS部门</label>
+                </div>
+                            <div id="rep-container"></div>
+            </div>
+            <div class="area-v"></div><div class="area-w"></div>
+        </div>
+    </div>
+
+    <script src="../asset-p/di-stub.js"></script>
+    
+    <script>
+		var posId = "n6g5po2ZLMFbIWXp0BOWDw%3D%3D";
+        var tplIdMap = {
+            "IS" : "PERSISTENT^_^BizOpps^_^pg_IS_bizopps^_^1",
+            "OS" : "PERSISTENT^_^BizOpps^_^pg_OS_bizopps^_^1"
+        };
+
+        function opt(type){
+            var instance = new $DataInsight$(
+                'rep-container', 
+                { url: '/_report/reportTemplate/complex/generateReport.action' }
+            );
+            instance.load(
+                { data: 'reportTemplateId='+ tplIdMap[type] +'&_s_Pos='+ posId +'&_s_idcard=gMaH6B1AvgQgjd4In7/Xjw==' } 
+            );
+        }
+
+        opt('OS');
+
+    </script>
+</body>
+
+</html>

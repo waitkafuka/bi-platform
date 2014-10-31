@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+#parse("/asset-d/-com-/--cominclude--.vm")
+#parse("--comsnpt--^_^insight_report^_^vtpl_time_table_chart1.vm")
+
+<html>
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Monitor Tasks</title>
+
+    #comCSS
+    #reportCSS
+
+</head>
+
+<body class="di-page-html-body"><!-- escape enter
+--><div data-o_o-di="BODY" class="di-page-div-body">
+
+    <script type="text/javascript">
+        window.__$DI__NS$__ = {};
+        window.__$DI__NS$__.OPTIONS = {
+            depictRef: [
+                '--comsnpt--^_^insight_report^_^vtpl_time_table_chart1.json'
+            ],
+            depict: {
+                "entityDefs": [
+                    {
+                        "id": "snpt-ist1",
+                        "reportTemplateId": "PERSISTENT^_^insight_report^_^zengzhiyewuguanli_fengongsiCSM^_^-944047045"
+                    },
+                    { 
+                        "id": "snpt-ist11",
+                        "reportTemplateId": "PERSISTENT^_^insight_report^_^zengzhiyewuguanli_fengongsiCSM_chart^_^-944047045"
+                    },
+                    { 
+                        "id": "snpt-ist12",
+                        "reportTemplateId": "PERSISTENT^_^insight_report^_^zengzhiyewuguanli_fengongsiCSM_table^_^-944047045"
+                    }
+                ]
+            }
+        };
+    </script>
+
+    #reportDOM
+    #comJS
+    #enterDI
+
+    </div><!--
+--></body>
+</html>

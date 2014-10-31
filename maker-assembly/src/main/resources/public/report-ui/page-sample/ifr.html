@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>  
+<head>  
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />  
+<meta http-equiv="Content-Language" content="gb2312" />  
+<title>asdfsadfadfas</title>  
+<style type="text/css">  
+
+
+</style>  
+</head>  
+<body style="height:100%">
+
+asdfsaf
+asdfasdfsadf
+
+<div id="iidd"></div>
+
+<div style="position:relative;">
+    <div style="width:300px;height:100px;background-color:yellow;"></div>
+</div>
+
+<div style="width:400px;height:100px">
+    <div><span>dfasdfsadf</span></div>
+</div>
+
+<input type="button" onclick="loadIfr2()" />
+
+<div>
+    <iframe id="ifr2">
+    </iframe>
+</div>
+
+<div>
+    <iframe id="ifr" style="overflow:hidden"> 
+    </iframe>
+</div>
+
+asdfsadfsa
+sadfsdfdfasdf
+
+
+<script type="text/javascript">
+	
+    ifr().src="inner-ifr.html?rend=" + Math.random();
+
+    function ifr() {
+        return document.getElementById('ifr');
+    }
+
+    function win() {
+        return ifr().contentWindow;
+    }
+
+    function doc() {
+        return win().document;
+    }
+
+    function body() {
+        return doc().getElementById('body');
+    }
+
+    setTimeout(resize, 1000);
+
+    function resize() {
+        ifr().style.width = body().offsetWidth + 'px';
+        ifr().style.height = body().offsetHeight + 'px';
+    }
+
+    function loadIfr2() {
+        var ifr2 = document.getElementById('ifr2');
+        ifr2.src = 'inner-ifr2.html';
+    }   
+
+</script>
+
+
+
+
+
+</body>
+</html>

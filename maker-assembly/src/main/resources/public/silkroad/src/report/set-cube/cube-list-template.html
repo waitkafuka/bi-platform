@@ -1,0 +1,26 @@
+<div class="title fs-14">请选择要使用的事实表（可多选）</div>
+<ul>
+    {{each factTables as $item}}
+    <li class="data-line c-p{{if $item.selected}} selected{{/if}} j-item" data-id="{{$item.id}}">{{$item.name}}</li>
+    {{/each}}
+</ul>
+<div class="con-set-group j-root-set-group">
+    <span class="btn-has-icon btn-has-icon-info c-p j-set-group">添加分表匹配规则</span>
+    {{each prefixs as $item index}}
+    <div class="form-common-line j-item">
+        <div class="form-common-text form-common-text-big">
+            <input type="text" class="" placeholder="分表匹配规则" value="{{$item}}"/>
+            <span class="form-common-text-validation hide"></span>
+            <span class="form-common-btn-extend form-common-btn-extend-absolute j-delete" title="删除">×</span>
+        </div>
+    </div>
+    {{/each}}
+    <div class="form-common-line hide j-template">
+        <div class="form-common-text form-common-text-big">
+            <input type="text" class="" placeholder="分表匹配规则"/>
+            <span class="form-common-text-validation hide"></span>
+            <span class="form-common-btn-extend form-common-btn-extend-absolute j-delete" title="删除">×</span>
+        </div>
+    </div>
+</div>
+

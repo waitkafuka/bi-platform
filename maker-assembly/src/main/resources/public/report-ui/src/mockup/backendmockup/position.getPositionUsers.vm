@@ -1,0 +1,56 @@
+{'status':$!status, 
+    'data': {
+        'position': {
+            'id': 123,
+            'name': 'rigel',
+            'sysunit': {
+                id: 123,
+                name: 'asdf'
+            },
+            'status': 1,
+            positiontype1: { id:123, name:'主岗位' },
+            positiontype2: { id:123, name:'医疗' },
+            parentpath: [
+                [
+                    { id:123, name:'岗位1' },
+                    { id:123, name:'岗位2' },
+                    { id:123, name:'岗位3' }                    
+                ],
+                [
+                    { id:123, name:'岗位4' },
+                    { id:123, name:'岗位5' },
+                    { id:123, name:'岗位6' }                    
+                ]
+            ],
+            binding: [
+                [
+                    { id:123, name:'岗位1' },
+                    { id:123, name:'岗位2' },
+                    { id:123, name:'岗位3' }                    
+                ],
+                [
+                    { id:123, name:'岗位4' },
+                    { id:123, name:'岗位5' },
+                    { id:123, name:'岗位6' }                    
+                ]
+            ],
+            description: '这是描述文字'
+        },
+        'records':[
+            { username:'用户名称1', name:'姓名1', email:'邮箱1', unit:'系统单元1', workposition:'工作职责1' },
+            { username:'用户名称2', name:'姓名2', email:'邮箱2', unit:'系统单元2', workposition:'工作职责2' },
+            { username:'用户名称3', name:'姓名3', email:'邮箱3', unit:'系统单元3', workposition:'工作职责3' },
+            { username:'用户名称4', name:'姓名4', email:'邮箱4', unit:'系统单元4', workposition:'工作职责4' },
+            { username:'用户名称5', name:'姓名5', email:'邮箱5', unit:'系统单元5', workposition:'工作职责5' }
+        ],
+        'pager':{
+            'page':$!pager.page, 
+            'pagesize':$!pager.pagesize,
+            'total':$!pager.total
+        },
+        'sortinfo': {
+            'orderby': '$!sortInfo.orderby', 
+            'sortby':'$!sortInfo.sortby'
+        }
+    }
+}

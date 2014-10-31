@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+#set($webRoot=$!link.getContextPath())
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Monitor Tasks</title>
+	<link rel="stylesheet" href="$!{webRoot}/asset-p/css-cm/di-product.css?__v__=$!jsonUtils.version()" />
+
+    <style type="text/css">
+        .cm-block-body {
+            padding: 10px;
+            font-size: 12px;
+        }
+        .cm-line-time {
+            margin: 0 0 10px 0;
+            overflow: hidden;
+        }
+        .cm-time-form {
+            float: left;
+            vertical-align: top;
+            margin-right: 10px;
+        }
+        .cm-adv-form-text {
+            width: 60px;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .cm-adv-form-item {
+            width: 160px;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .cm-adv-form-sep {
+            margin-left: 20px;
+        }
+        .cm-adv-ctrl-btn {
+            float: left;
+            vertical-align: top;
+        }
+        .cm-table {
+            border-top: 2px solid #2070BB;
+            height: 400px;
+        }
+        .cm-block-chart {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+    </style>
+
+</head>
+
+<body class="di-page-html-body"><!-- escape enter
+    --><div data-o_o-di="BODY" class="di-page-div-body">
+
+        <div class="cm-block-body" data-o_o-di="snpt-cm1">
+
+
+            <!-- 条件 -->
+
+            <div class="cm-line-time">
+                <div class="cm-time-form" data-o_o-di="snpt-cm1.cpnt-cm1-form1">
+                    <div data-o_o-di="snpt-cm1.vu-cm1-form1-time92"></div>
+
+                    <div class="cm-adv-form-text cm-adv-form-sep">监控类型</div>
+                    <div class="cm-adv-form-item" data-o_o-di="snpt-cm1.vu-cm1-form1-jiankongleixing"></div>
+
+                    <div class="cm-adv-form-text cm-adv-form-sep">所属模块</div>
+                    <div class="cm-adv-form-item" data-o_o-di="snpt-cm1.vu-cm1-form1-suoshumokuai"></div>
+
+                    <div class="cm-adv-form-sep" data-o_o-di="snpt-cm1.vu-cm1-form1-confirm9"></div>
+                </div>
+            </div>
+
+
+            <!-- snippet cm12 -->
+
+            <div data-o_o-di="snpt-cm12">
+
+                <div class="di-table-area" data-o_o-di="snpt-cm12.cpnt-cm12-table1">
+                    <div class="cm-table" data-o_o-di="snpt-cm12.vu-cm12-table1"></div>
+                </div>
+            </div>
+
+            <!-- snippet qat11 -->
+            <!--
+            <div data-o_o-di="snpt-cm11">
+
+                <div class="cm-block-chart" data-o_o-di="snpt-cm11.cpnt-cm11-chart1">
+                    <div data-o_o-di="snpt-cm11.vu-cm11-chart1"></div>
+                </div>
+            </div>-->
+
+        </div>
+
+
+
+        <script type="text/javascript">
+            (function(NS) {
+                NS.WEB_ROOT = '$!{webRoot}';
+                NS.HTML_DATA = {
+                    globalType: 'PRODUCT',
+                    userId: '5',
+                    serverTime: '$!serverTime'
+                };
+            })(window.__$DI__NS$__ = {});
+        </script>
+
+        <script src="$!{webRoot}/asset-p/xcore.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/highcharts.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/ecui.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/xui-ui.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/di-product.js?__v__=$!jsonUtils.version()" ></script>
+
+        <script type="text/javascript">
+            (function(NS) {
+                NS.xui.XView.start(
+                    'di.product.display.ui.LayoutPage',
+                    {
+                        externalParam: $!jsonUtils.toJson($!externalParam),
+                        reportTemplateId: '$!jsonUtils.escapeInJStr($!reportTemplateId)',
+                        diAgent: '$!jsonUtils.escapeInJStr($!diAgent)',
+                        funcAuth: $!jsonUtils.toJson($!funcAuth),
+                        prodDef: {
+                            // 属性名定义，可缺省
+                            domAttrName: 'data-o_o-di',
+                            depictPath: '$!jsonUtils.escapeInJStr($!depictPath)',
+                            diVersion: '$!jsonUtils.version()'
+                        }
+                    }
+                );
+            })(window);
+        </script>
+
+
+    </div><!--
+--></body>
+</html>

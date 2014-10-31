@@ -1,0 +1,97 @@
+{"desc": "查询条件||多维表格", "diKey": "DEPICT", "clzDefs": [
+    {
+        "clzKey": "OLAP_TABLE",
+        "dataOpt": {
+            "emptyHTML": "未查询到相关数据"
+        }
+    },
+    {
+        "clzKey": "ECUI_SELECT",
+        "dataOpt": {
+            "optionSize": 10
+        }
+    }
+], "entityDefs": [
+    {
+        "id": "snpt",
+        "clzType": "SNIPPET"
+    },
+    {
+        "id": "snpt.form",
+        "compId": "comp-id-form",
+        "clzType": "COMPONENT",
+        "clzKey": "DI_FORM",
+        "reportType": "RTPL_VIRTUAL",
+        "init": {
+            "action": {
+                "name": "sync"
+            }
+        },
+        "sync": {
+            "viewDisable": "ALL"
+        },
+        "dataOpt": {
+            "submitMode": "IMMEDIATE"
+        },
+        "reportTemplateId": "RTPL_VIRT  UAL_ID",
+        "vuiRef": {
+            "input": ["snpt.8fd1163d7856c4efb53bfd3748eec167-vu-form-calendar"]
+        }
+    },
+    {
+        "clzType": "VUI",
+        "dataSetOpt": {
+            "forbidEmpty": false,
+            "disableCancelBtn": false,
+            "timeTypeList": [
+                {
+                    "value": "D",
+                    "text": "日"
+                },
+                {
+                    "value": "W",
+                    "text": "周"
+                }
+            ],
+            "timeTypeOpt": {
+                "D": {
+                    "selMode": "SINGLE",
+                    "date": ["-1D", "-1D"],
+                    "range": ["2011-01-01", "-1D"],
+                    "selModeList": [
+                        {
+                            "text": "单选",
+                            "value": "SINGLE",
+                            "prompt": "单项选择"
+                        }
+                    ]
+                },
+                "W": {
+                    "selMode": "RANGE",
+                    "date": ["-1W", "-1D"],
+                    "range": ["2011-01-01", "-1D"],
+                    "selModeList": [
+                        {
+                            "text": "单选",
+                            "value": "SINGLE",
+                            "prompt": "单项选择"
+                        },
+                        {
+                            "text": "范围多选",
+                            "value": "RANGE",
+                            "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值"
+                        }
+                    ]
+                }
+            }
+        },
+        "name": "d952295b75c8836abcb02ade972ba0db",
+        "dateKey": {
+            "D": "d952295b75c8836abcb02ade972ba0db",
+            "W": "b78b22b516c110536bf5c3cbef590443"
+        },
+        "clzKey": "X_CALENDAR",
+        "id": "snpt.8fd1163d7856c4efb53bfd3748eec167-vu-form-calendar",
+        "compId": "8fd1163d7856c4efb53bfd3748eec167"
+    }
+]}

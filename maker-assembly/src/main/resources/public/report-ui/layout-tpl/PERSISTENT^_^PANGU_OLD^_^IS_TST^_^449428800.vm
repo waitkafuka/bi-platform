@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+#set($webRoot=$!link.getContextPath())
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>新客户消费报表</title>
+	<link rel="stylesheet" href="$!{webRoot}/asset-p/css-pgr/di-product.css?__v__=$!jsonUtils.version()" />
+
+    <style type="text/css">
+        .pg-block-body {
+            padding: 10px;
+            font-size: 12px;
+        }
+        .pg-table-area {
+        }
+        .pg-block-table-meta {
+            width: 900px;
+        }
+        .pg-table {
+            width: 965px;
+            height: 400px;
+        }
+        .pg-line-table-breadcrumb {
+            padding: 10px 5px 2px 10px;
+            overflow: hidden;
+        }
+        .pg-table-breadcrumb {
+            float: left;
+            line-height: 26px;
+        }
+        .pg-table-right-btn {
+            float: right;
+            margin-top: 10px;
+        }
+        .pg-table-download-btn {
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .pg-table-prompt {
+            font-size: 12px;
+            color: #888;
+            padding: 6px 15px 10px 10px;            
+            overflow: hidden;
+            line-height: 18px;
+        }
+        .pg-table-count {
+            float: left;
+            line-height: 18px;            
+            vertical-align: middle;
+            width: 600px;
+        }
+        .pg-table-count-num {
+            font-size: 14px;
+            color: #4289D4;
+            font-weight: bold;
+            font-family: Arial;
+        }
+    </style>
+
+</head>
+
+<body class="di-page-html-body"><!-- escape enter
+    --><div data-o_o-di="BODY" class="di-page-div-body">
+
+        <div class="pg-block-body" data-o_o-di="snpt-pgr1">
+
+            <div style="display:none" data-o_o-di="snpt-pgr1.cpnt-form1">
+                <div data-o_o-di="snpt-pgr1.vu-form1-time1"></div>
+                <div data-o_o-di="snpt-pgr1.vu-form1-pos1"></div>
+            </div>
+
+            <div class="pg-table-area" data-o_o-di="snpt-pgr1.cpnt-table1">
+                <div class="pg-line-table-breadcrumb">
+                    <div class="pg-table-breadcrumb" data-o_o-di="snpt-pgr1.vu-breadcrumb1"></div>
+                    <div class="pg-table-right-btn"> 
+                        <div class="pg-table-download-btn" data-o_o-di="snpt-pgr1.vu-downloadbtn1"></div>
+                    </div>
+                </div>
+                <div class="pg-table" data-o_o-di="snpt-pgr1.vu-table1"></div>
+                <div class="pg-table-prompt">
+                    <div style="display:none" id="vvvv" class="pg-table-count" data-o_o-di="snpt-pgr1.vu-count1">
+                        符合查询条件的数据只显示<span class="pg-table-count-num">#{currRecordCount}</span>条。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            (function(NS) {
+                NS.WEB_ROOT = '$!{webRoot}';
+                NS.HTML_DATA = {
+                    globalType: 'PRODUCT',
+                    userId: '5',
+                    serverTime: '$!serverTime'
+                };
+            })(window.__$DI__NS$__ = {});
+        </script>
+
+        <script src="$!{webRoot}/asset-p/xcore.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/ecui.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/xui-ui.js?__v__=$!jsonUtils.version()" ></script>
+        <script src="$!{webRoot}/asset-p/di-product.js?__v__=$!jsonUtils.version()" ></script>
+
+        <script type="text/javascript">
+            (function(NS) {
+                NS.xui.XView.start(
+                    'di.product.display.ui.LayoutPage',
+                    {
+                        externalParam: $!jsonUtils.toJson($!externalParam),
+                        reportTemplateId: '$!jsonUtils.escapeInJStr($!reportTemplateId)',
+                        diAgent: '$!jsonUtils.escapeInJStr($!diAgent)',
+                        funcAuth: $!jsonUtils.toJson($!funcAuth),
+                        prodDef: {
+                            // 属性名定义，可缺省
+                            domAttrName: 'data-o_o-di',
+                            depictPath: '$!jsonUtils.escapeInJStr($!depictPath)',
+                            diVersion: '$!jsonUtils.version()'
+                        }
+                    }
+                );
+            })(window);
+        </script>
+
+
+    </div><!--
+--></body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Insight</title>
+    <link type="text/css" rel="stylesheet" href="../src/css/theme-ist.css?__ist__=1_0_10" />
+</head>
+
+<body>
+    
+    <input type="button" value="test" onclick="test()"/>
+
+    <script type="text/javascript" src="../asset/xutil-debug.js"></script>
+    <script type="text/javascript" src="../asset/ecui-debug.js"></script>
+    
+    <script>
+    
+    function test () {
+        var Base = function () {}
+        Base.prototype.afunc = function () {
+            for (var i = 0; i < 10000; i++ ) {
+                var j = 'fafd';   
+            }
+        }
+        Base.prototype.zattr = {a: 'this is z attr'};
+        
+        var Child1st = function () {}
+        ecui.util.inherits(Child1st, Base);
+        
+        var Child2nd = function () {}
+        ecui.util.inherits(Child2nd, Child1st);
+        
+        var Child3rd = function () {}
+        ecui.util.inherits(Child3rd, Child2nd);
+        
+        var Child4th = function () {}
+        ecui.util.inherits(Child4th, Child3rd);
+        
+        var Child5th = function () {}
+        ecui.util.inherits(Child5th, Child4th);
+        
+        var Child6th = function () {}
+        ecui.util.inherits(Child6th, Child5th);
+        
+        var Child7th = function () {}
+        ecui.util.inherits(Child7th, Child6th);
+        
+        
+        function appendFunc (clz, numEach) {
+            var i, proto, charCode = 65;
+            proto = clz.prototype;
+            for (charCode = 65; charCode < 85; charCode ++ ) {
+                for (i = 0; i < numEach; i++) {
+                    proto[String.fromCharCode(charCode) + '_attrrrrrrrrr_' + i] = new Function ();
+                }
+            }
+        }
+        
+        var numEach = 5;
+        appendFunc(Child1st, numEach);
+        appendFunc(Child2nd, numEach);
+        appendFunc(Child3rd, numEach);
+        appendFunc(Child4th, numEach);
+        appendFunc(Child5th, numEach);
+        appendFunc(Child6th, numEach);
+        appendFunc(Child7th, numEach);
+        
+         var entity = new Child7th();
+        // var entity = new Base();
+        //var entity = window.entity = new Child4th();
+        
+        // start count
+        var startTime = (new Date()).getTime();
+        for (i = 0; i < 10000; i ++ ) {
+            entity.afunc();
+        }
+        console.log('aaa');
+        console.log('Time:' + ((new Date()).getTime() - startTime));
+    }
+    </script>
+</body>
+
+</html>

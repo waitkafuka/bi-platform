@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+<!-- 
+    #set($webRoot=$!link.getContextPath())
+-->
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>新客户消费报表</title>
+    <link rel="stylesheet" href="../pre/css/-di-product.css?__di__=1_0_0" />
+
+    <style type="text/css">
+        .pg-block-body {
+            padding: 10px;
+            font-size: 12px;
+        }
+        .pg-time-form {
+            float: left;
+            vertical-align: top;
+            margin-right: 10px;
+            border: 1px solid #8CCA54;
+            border-radius: 3px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .pg-adv-form-time {
+            width: 250px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .pg-adv-form-time .ui-calendar-text {
+            font-size: 14px;
+        }
+        .pg-adv-form-text {
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .pg-adv-form-item {
+            width: 150px;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .pg-adv-form-sep {
+            margin-right: 20px;
+        }
+        .pg-table-area {
+        }
+        .pg-block-table-meta {
+            width: 900px;
+        }
+        .pg-table {
+            width: 965px;
+            height: 400px;
+        }
+        .pg-line-table-breadcrumb {
+            padding: 10px 5px 2px 10px;
+            overflow: hidden;
+        }
+        .pg-table-breadcrumb {
+            float: left;
+            line-height: 26px;
+        }
+        .pg-table-right-btn {
+            float: right;
+            margin-top: 10px;
+        }
+        .pg-table-download-btn {
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .pg-table-prompt {
+            font-size: 12px;
+            color: #888;
+            padding: 6px 15px 10px 10px;            
+            overflow: hidden;
+            line-height: 18px;
+        }
+        .pg-table-count {
+            float: left;
+            line-height: 18px;            
+            vertical-align: middle;
+            width: 600px;
+        }
+        .pg-table-count-num {
+            font-size: 14px;
+            color: #4289D4;
+            font-weight: bold;
+            font-family: Arial;
+        }
+    </style>
+
+</head>
+
+<body class="di-page-html-body"><!-- escape enter
+    --><div data-o_o-di="BODY" class="di-page-div-body">
+
+        <div class="pg-block-body" data-o_o-di="snpt-pgr1">
+
+            <div class="pg-time-form" data-o_o-di="snpt-pgr1.cpnt-form1">
+                <div class="pg-adv-form-text">时间范围</div>
+                <div class="pg-adv-form-time" data-o_o-di="snpt-pgr1.vu-form1-time1"></div>
+                <div>
+                    <div class="pg-adv-form-text">部门选择</div>
+                    <div class="pg-adv-form-item  pg-adv-form-sep" data-o_o-di="snpt-pgr1.vu-form1-pos1"></div>
+                    
+                    <div class="pg-adv-form-text">行业选择</div>
+                    <div class="pg-adv-form-item pg-adv-form-sep" data-o_o-di="snpt-pgr1.vu-form1-trade1"></div>
+                    
+                    <div class="pg-adv-form-text">产品线选择</div>
+                    <div class="pg-adv-form-item" data-o_o-di="snpt-pgr1.vu-form1-prod1"></div>
+                </div>
+            </div>
+            <div data-o_o-di="snpt-pgr1.vu-cm1-form1-confirm9"></div>
+
+            <div class="pg-table-area" data-o_o-di="snpt-pgr1.cpnt-table1">
+                <div class="pg-line-table-breadcrumb">
+                    <div class="pg-table-breadcrumb" data-o_o-di="snpt-pgr1.vu-breadcrumb1"></div>
+                    <div class="pg-table-right-btn"> 
+                        <div class="pg-table-download-btn" data-o_o-di="snpt-pgr1.vu-downloadbtn1"></div>
+                    </div>
+                </div>
+                <div class="pg-table" data-o_o-di="snpt-pgr1.vu-table1"></div>
+                <div class="pg-table-prompt">
+                    <div style="display:none" id="vvvv" class="pg-table-count" data-o_o-di="snpt-pgr1.vu-count1">
+                        符合查询条件的数据只显示<span class="pg-table-count-num">#{currRecordCount}</span>条。
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            window.__$DI__NS$__ = {}
+            window.__$DI__NS$__.OPTIONS = {
+                depictRef: [],
+                depict: {
+                    "entityDefs": []
+                }
+            };
+        </script>
+
+        <script src="../pre/-di-product.js?__di__=1_0_10" ></script>
+
+        <script type="text/javascript">
+            (function(NS) {
+                NS.xui.XView.start(
+                    'di.product.display.ui.LayoutPage',
+                    {
+                        externalParam: {
+                            xxxxexternal: '++==asfd',
+                            yyyyexternal: 12344
+                        },
+                        globalType: 'PRODUCT',
+                        // diAgent: 'STUB', // 为测试方便，注释掉
+                        reportTemplateId: 'PERSISTENT^_^pg_new^_^PG_NEW^_^-92498240',
+                        webRoot: '',
+                        bizKey: 'NewPangu',
+                        phase: 'pre',
+                        // 属性名定义，可缺省
+                        repoVersion: 'v12345678',
+                        serverTime: (new Date()).getTime(),
+                        extraOpt: (window.__$DI__NS$__ || {}).OPTIONS                        
+                    }
+                );
+            })(window);
+        </script>
+
+
+    </div><!--
+--></body>
+</html>

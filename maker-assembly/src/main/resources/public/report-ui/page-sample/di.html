@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>测试</title>
+</head>
+
+<body style="padding: 0; margin: 0">
+
+    <!-- 使用方法：***/page-sample/di.html#ka则表示调用ka的页面 -->
+
+    <iframe id="ifr" style="border-width:0;overflow:hidden;margin:0;padding:0" frameborder="no" border="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+    
+    <script src="../src/core/tangram/tangram-1.5.13.customized-prod-source.js" ></script>
+    <script type="text/javascript">
+        var ifr = document.getElementById('ifr');
+
+        ifr.contentWindow.document.head.innerHTML = '<head><meta http-equiv="Content-type" content="text/html; charset=utf-8" /><title>测试</title></head>';
+
+        var PAGE_NAME_TAG = 'diPageName';
+
+        baidu.ajax.get(
+            url,
+            function (xhr, html) {
+
+
+            }
+        );
+
+        function getPageName() {
+            
+        }
+
+    </script>
+</body>
+
+</html>

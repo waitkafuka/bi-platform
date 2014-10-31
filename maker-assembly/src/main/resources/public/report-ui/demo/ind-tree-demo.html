@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='Content-type' content='type/html; charset=utf-8' />
+    <title>ind-tree-demo</title>
+    <link rel="stylesheet" href="ecui.css" />
+</head>
+<body>
+    <div ecui="type:ind-tree; id:test;"></div>
+    <script type="text/javascript" src='ecui-2.0.1-source.js'></script>
+    <script type="text/javascript" src='ind-tree.js'></script>
+    <script type="text/javascript">
+    var tree = {
+        tree : {
+        uniqName : 1,
+        caption : '全国',
+        selected : true,
+        children : [
+            {
+                uniqName : 'all$[Time.Weekly].[All Time.Weeklys]',
+                caption : '全部',
+                selected : true
+            },
+            {
+                uniqName : 2,
+                caption : '安徽安安安安安安安安安安安安安安安安安安安安安',
+                children : [
+                    {
+                        uniqName : 3,
+                        caption : '合肥',
+                        selected : true,
+                        children : [
+                            {
+                                uniqName : 11,
+                                caption : '虹桥'
+                            }
+                        ]
+                    },
+                    {
+                        uniqName : 4,
+                        caption : '六安',
+                        selected : true,
+                        children : [
+                            {
+                                uniqName : 10,
+                                caption : '双河'
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                uniqName : 5,
+                caption : '浙江',
+                children : [
+                    {
+                        uniqName : 6,
+                        caption : '杭州'
+                    },
+                    {
+                        uniqName : 7,
+                        caption : '富阳'
+                    },
+                    {
+                        uniqName : 8,
+                        caption : '嘉兴'
+                    }
+                ]
+            },
+            {
+                uniqName : 5,
+                caption : '浙江',
+                children : [
+                    {
+                        uniqName : 6,
+                        caption : '杭州'
+                    },
+                    {
+                        uniqName : 7,
+                        caption : '富阳',
+                        selected : true,
+                        children : [
+                            {
+                                uniqName : 6,
+                                caption : '杭州'
+                            },
+                            {
+                                uniqName : 7,
+                                caption : '富阳'
+                            },
+                            {
+                                uniqName : 8,
+                                caption : '嘉兴'
+                            }
+                        ]
+                    },
+                    {
+                        uniqName : 8,
+                        caption : '嘉兴'
+                    }
+                ]
+            },
+            {
+                uniqName : 5,
+                caption : '浙江',
+                children : [
+                    {
+                        uniqName : 'all$[Time.Weekly].[All Time.Weeklys]',
+                        caption : '全部',
+                        selected : true
+                    },
+                    {
+                        uniqName : 6,
+                        caption : '杭州',
+                        selected : true,
+                        children : [
+                    {
+                        uniqName : 6,
+                        caption : '杭州'
+                    },
+                    {
+                        uniqName : 7,
+                        caption : '富阳'
+                    },
+                    {
+                        uniqName : 8,
+                        caption : '嘉兴'
+                    }
+                ]
+                    },
+                    {
+                        uniqName : 7,
+                        caption : '富阳'
+                    },
+                    {
+                        uniqName : 8,
+                        caption : '嘉兴'
+                    },
+                    {
+                        uniqName : 100,
+                        caption : 'wenzhou'
+                    }
+                ]
+            }
+        ]
+    },
+    level : [
+        {
+            'uniqName' : 'level2',
+            'caption' : '层级2222222222222222222222222'
+        },
+        {
+            'uniqName' : 'level3',
+            'caption' : '层级3',
+            'selected' : true
+        },
+        {
+            'uniqName' : 'level4',
+            'caption' : '层级4',
+            'selected' : true
+        }
+    ]
+    };
+
+    ecui.get('test').render(tree);
+    </script>
+</body>
+</html>

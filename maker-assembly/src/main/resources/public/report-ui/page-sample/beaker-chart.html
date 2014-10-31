@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>OLAP TABLE</title>
+
+    <style type="text/css">
+        .my-select {width: 160px; height: 20px};
+    </style>
+</head>
+
+<body style="font-size:12px">
+
+    <div id="container"></div>
+
+    <script src="../src/core/highcharts/jquery-1.7.1.js"></script>
+    <script src="../src/core/highcharts/highstock-1.1.5.customized.src.js"></script>
+    
+    <script>
+        function random() {
+            return Math.round(Math.random() * 100000000) / 1000;
+        }
+
+$(function () {
+    var chart = new Highcharts.Chart({
+        chart: {
+            renderTo: 'container',
+            events: {
+                load: function () {
+                    var ren = this.renderer;
+                    var colors = Highcharts.getOptions().colors;
+
+                    var BORDER_WIDTH = 4;
+                    var BORDER_WIDTH_HALF = 2;
+                    var BORDER_MARGIN = 5;
+                    var MAX_HEIGHT_PERCENT = 0.65;
+                    var WATER_RADIUS = 20;
+                    var LABEL_FONT_SIZE = '14px';
+                    var COUNT_FONT_SIZE = '30px';
+                    var COUNT_DESC_FONT_SIZE = '14px';
+                    var LEGEND_FONT_SIZE = '14px';
+                    var LEGEND_HEIGHT = 16;
+
+                    var BREAKER_COLOR_A = ['#F88E32', '#66B2E4', '#97C644'];
+                    var BREAKER_COLOR_B = ['#999999', 'red', 'green'];
+
+                    /**
+                     * 得到箭头path
+                     */
+                    function getRightArrorPath(bodyLength, bodyWidth, headLength, headWidth) {
+                        var headDiff = Math.round((headWidth - bodyWidth) / 2);
+                        var sharp = Math.round(headWidth / 2);
+                        return [
+                            'M', 0, headDiff, 
+                            'L', bodyLength, headDiff, 
+                            'L', bodyLength, 0,
+                            'L', bodyLength + headLength, sharp,
+                            'L', bodyLength, headWidth, 
+                            'L', bodyLength, headDiff + bodyWidth,
+                            'L', 0, headDiff + bodyWidth,
+                            'Z'
+                        ];
+                    }
+
+                    /** 
+                     * 画箭头
+                     */
+                    function drawArror(pos) {
+                        var g = ren.g('arror').add();
+                        ren.path(getRightArrorPath(40, 20, 30, 40))
+                            .attr({fill: '#92AE7E'})
+                            .add(g)
+                            .shadow(true);
+                        g.translate(pos.x, pos.y);
+                    }
+
+                    /**
+                     * 画烧杯
+                     * 
+                     * @param {Object} options
+                     * @param {number=} options.scale 可以指定scale，为了两个烧杯同scale
+                     * @param {Object} options.countColor 总计数字的颜色
+                     * @param {Object} options.countDesc 总计的描述
+                     * @param {Object} ret
+                     *      ret.scale 本烧杯的scale
+                     */
+                    function drawBreaker(water, mark, pos, options) {
+                        var waterWidth = pos.width - 2 * BORDER_WIDTH - 2 * BORDER_MARGIN;
+                        var yBreakerStart = ren.fontMetrics(COUNT_FONT_SIZE).b
+                            + ren.fontMetrics(COUNT_DESC_FONT_SIZE).b + 10;
+                        var baseX = BORDER_WIDTH + BORDER_MARGIN;
+                        var baseY = pos.height - BORDER_WIDTH;
+
+                        var maxHeight = Math.round((pos.height - BORDER_WIDTH - yBreakerStart) * MAX_HEIGHT_PERCENT);
+                        var edgeWidth = pos.width - 2 * BORDER_MARGIN - BORDER_WIDTH;
+                        var edgeHeight = pos.height - yBreakerStart - BORDER_WIDTH_HALF;
+                        var edgeBaseX = BORDER_MARGIN + BORDER_WIDTH_HALF;
+                        var edgeRadius =  WATER_RADIUS + BORDER_WIDTH_HALF;
+
+                        var edgeUpWidth = pos.width;
+                        var edgeUpHeight = WATER_RADIUS;
+                        var edgeUpBaseX = 0;
+                        var edgeUpRadius = WATER_RADIUS;
+
+                        var i;
+                        var item;
+                        var currX;
+                        var currY;
+                        var fh;
+
+                        // 计算高度
+                        var countValue = 0;
+                        for (i = 0; item = water[i]; i ++) {
+                            countValue += item.value;
+                        }
+                        var maxValue = mark ? Math.max(countValue, mark.value) : countValue;
+                        var scale = options.scale || (countValue != 0 ? (maxHeight / maxValue) : null);
+                        var waterV = [];
+                        for (i = 0; item = water[i]; i ++) {
+                            waterV[i] = Math.min(
+                                scale != 0 ? Math.round(item.value * scale) : 0, 
+                                maxHeight
+                            );
+                        }
+                        var countV = scale != 0 ? Math.round(countValue * scale) : 0;
+                        if (mark) {
+                            markV = Math.min(
+                                scale != 0 ? Math.round(mark.value * scale) : 0, 
+                                maxHeight
+                            );
+                        }
+
+                        // 创建g
+                        var gBreaker = ren.g('breaker').add();
+                        gBreaker.translate(pos.x, pos.y);
+
+                        // 画下部杯壁
+                        ren.rect(
+                            edgeBaseX,
+                            yBreakerStart,
+                            edgeWidth,
+                            edgeHeight,
+                            edgeRadius
+                        )
+                        .attr({ 
+                            stroke: '#729056',
+                            'stroke-width': BORDER_WIDTH,
+                            fill: 'white'
+                        })
+                        .add(gBreaker);                        
+
+                        // 画上部杯壁
+                        ren.rect(
+                            edgeUpBaseX,
+                            yBreakerStart,
+                            edgeUpWidth,
+                            edgeUpHeight,
+                            edgeUpRadius
+                        )
+                        .attr({ 
+                            stroke: '#729056',
+                            'stroke-width': BORDER_WIDTH,
+                            fill: 'white'
+                        })
+                        .add(gBreaker);                        
+                        ren.rect(
+                            BORDER_MARGIN + BORDER_WIDTH,
+                            yBreakerStart + BORDER_WIDTH,
+                            waterWidth,
+                            WATER_RADIUS
+                        )
+                        .attr({ 
+                            'stroke-width': 0,
+                            fill: 'white'
+                        })
+                        .add(gBreaker);                        
+
+                        // 画瓶里的水
+                        currX = baseX;
+                        currY = baseY;
+                        for (i = 0; item = water[i]; i ++) {
+                            if (i == 0) {
+                                ren.rect(
+                                    currX,
+                                    currY - waterV[i],
+                                    waterWidth,
+                                    waterV[i],
+                                    WATER_RADIUS
+                                )
+                                .attr({ fill: item.color })
+                                .add(gBreaker);                        
+                            }
+                            ren.rect(
+                                currX,
+                                currY - waterV[i],
+                                waterWidth,
+                                waterV[i] - (i == 0 ? WATER_RADIUS : 0)
+                            )
+                            .attr({ fill: item.color })
+                            .add(gBreaker);                        
+                            currY = currY - waterV[i];
+                        }
+
+                        // 画刻度线
+                        currX = baseX;
+                        currY = baseY;
+                        if (mark) {
+                            ren.path(ren.crispLine(
+                                [
+                                    'M', 
+                                    currX, 
+                                    currY - markV, 
+                                    'L', 
+                                    currX + waterWidth, 
+                                    currY - markV
+                                ],
+                                3
+                            ))
+                            .attr({
+                                'stroke-width': 2,
+                                stroke: mark.color
+                            })
+                            // .translate(pos.x, pos.y)
+                            .add(gBreaker);                        
+
+                            // 画mark的label
+                            var diff = countValue - mark.value;
+                            var diffColor = diff < 0 ? '#FF2300' : 'green';
+                            diff = diff > 0 ? '+' + diff : diff;
+                            ren.label(
+                                '转出目标：' + mark.value + '<br />当前情况：<span style="font-weight:bold;color:' + diffColor + '">' + diff + '</span>',
+                                currX + waterWidth + 10,
+                                currY - markV - 20
+                            )
+                            .attr({
+                                fill: 'white',
+                                stroke: mark.color,
+                                'stroke-width': 2,
+                                padding: 5,
+                                r: 5
+                            })
+                            .css({
+                                fontFamily: '微软雅黑, Arial'
+                            })
+                            .add(gBreaker)
+                            .shadow(true);                            
+                        }
+
+                        // 画水label
+                        currX = baseX;
+                        currY = baseY;
+                        fh = Math.round(ren.fontMetrics(LABEL_FONT_SIZE).b / 2);
+                        for (i = 0; item = water[i]; i ++) {
+                            ren.text(
+                                item.value,
+                                currX + Math.round(waterWidth / 2),
+                                currY - Math.round(waterV[i] / 2) + fh
+                            )
+                            .attr({
+                                align: 'center'
+                            })
+                            .css({
+                                fontSize: LABEL_FONT_SIZE
+                            })
+                            .add(gBreaker);                        
+                            currY = currY - waterV[i];
+                        }
+
+                        // 画顶层label
+                        currX = baseX + Math.round(waterWidth / 2);
+                        currY = ren.fontMetrics(COUNT_FONT_SIZE).b;
+                        ren.text(
+                            countValue,
+                            currX,
+                            currY
+                        ).attr({
+                            align: 'center'
+                        })
+                        .css({
+                            fontSize: COUNT_FONT_SIZE,
+                            fontWeight: 'bold',
+                            fontFamily: '微软雅黑, Times',
+                            color: options.countColor
+                        })
+                        .add(gBreaker);     
+                        currY += ren.fontMetrics(COUNT_DESC_FONT_SIZE).b + 3;
+                        ren.text(
+                            options.countDesc,
+                            currX,
+                            currY
+                        ).attr({
+                            align: 'center'
+                        })
+                        .css({
+                            fontSize: COUNT_DESC_FONT_SIZE,
+                            fontWeight: 'bold',
+                            fontFamily: '微软雅黑, Times',
+                            color: '#999'
+                        })
+                        .add(gBreaker);
+
+                        return { scale: scale };
+                    }
+
+                    /**
+                     * 画图例
+                     */
+                    function drawLegend(pos, dataLegend) {
+                        var g = ren.g('legend').add();
+                        var i;
+                        var item;
+                        var currX = 0;
+                        var currY = 0;
+                        var bl = Math.round((LEGEND_HEIGHT - ren.fontMetrics(LEGEND_FONT_SIZE).b) / 2);
+                        var textEl;
+
+                        for (i = 0; item = dataLegend[i]; i ++) {
+                            ren.rect(
+                                currX,
+                                currY,
+                                LEGEND_HEIGHT,
+                                LEGEND_HEIGHT
+                            )
+                            .attr({ fill: item.color })
+                            .add(g);
+                            currX += LEGEND_HEIGHT + 5;
+
+                            textEl = ren.text(
+                                item.text,
+                                currX,
+                                currY + LEGEND_HEIGHT - bl
+                            )
+                            .css({ 
+                                fontFamily: '微软雅黑, Arial', 
+                                fontSize: LEGEND_FONT_SIZE,
+                                color: '#222'
+                            })
+                            .add(g);
+
+                            currX += textEl.getBBox().width + 15;
+                        }
+
+                        g.translate(pos.x, pos.y);
+                    }
+
+                    /** 
+                     * 渲染
+                     */
+                    function render(data) {
+                        var dataBreakerA = data.breakerA;
+                        var dataBreakerB = data.breakerB;
+                        var i;
+                        var item;
+                        var dataLegend = [];
+
+                        // 设置颜色
+                        for (i = 0; item = dataBreakerA.water[i]; i ++) {
+                            item.color = item.color || BREAKER_COLOR_A[i];
+                            dataLegend.push(item);
+                        }
+                        for (i = 0; item = dataBreakerB.water[i]; i ++) {
+                            item.color = item.color || BREAKER_COLOR_B[i];
+                            dataLegend.push(item);
+                        }
+                        if (dataBreakerA.mark) {
+                            dataBreakerA.mark.color = dataBreakerA.mark.color || '#C0504D';
+                        }
+                        if (dataBreakerB.mark) {
+                            dataBreakerB.mark.color = dataBreakerB.mark.color || '#C0504D';
+                        }
+
+                        // 第一个烧杯
+                        var posA = {
+                            x: 150, 
+                            y: 50, 
+                            width: 180, 
+                            height: 280
+                        };
+                        var retA = drawBreaker(
+                            dataBreakerA.water,
+                            dataBreakerA.mark,
+                            posA,
+                            { 
+                                countColor: '#326600',
+                                countDesc: '流入商机'
+                            }
+                        );
+
+                        // 第二个烧杯
+                        var posB = { 
+                            x: posA.x + posA.width + 300,
+                            y: posA.y + posA.height - 200,
+                            width: 120,
+                            height: 180
+                        };
+                        drawBreaker(
+                            dataBreakerB.water,
+                            dataBreakerB.mark,
+                            posB,
+                            { 
+                                countColor: '#676767',
+                                countDesc: '流出商机',
+                                scale: retA.scale
+                            }
+                        );
+
+                        // 箭头
+                        drawArror({x : 50, y : posA.y + 170});
+                        drawArror({x : 500, y : posA.y + 170});
+
+                        // 图例数据
+                        drawLegend({x: 300, y: 10}, dataLegend);
+                    }
+
+
+                    /////////////////////////////////
+                    // test
+
+                    render(
+                        {
+                            breakerA: {
+                                water: [
+                                    { value: 20, text: 'asdfasdfsadf' },
+                                    { value: 30, text: 'asdfasdfsadf' },
+                                    { value: 20, text: 'asdfasdfsadf' }
+                                ],
+                                mark: { value: 25 }
+                            },
+                            breakerB: {
+                                water: [
+                                    { value: 20, text: 'zvzxcvxzcv' }
+                                ]
+                            }
+                        }
+                    );
+                    /////////////////////////////////                    
+
+
+                }
+            }
+        },
+        title: {
+            disabled: true
+        }
+            
+    });
+});
+     
+    </script>
+</body>
+
+</html>

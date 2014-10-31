@@ -1,0 +1,11 @@
+{"status":$!{status}, "data":{"dataList":[
+    {"id": 1001, "name": "功能名称1", "sysUnitStr": "系统单元1", "sysUnit": 1001, "permissions": "0111", "dPermissions": "1111"},
+    {"id": 1002, "name": "功能名称2", "sysUnitStr": "系统单元1,系统单元2,系统单元3,系统单元4", "sysUnit": "1001,1002,1003,1004", "permissions": "0101", "desc": "这个是描这个是描述这个是描述这个是描述这个是描述述", "dPermissions": "0111"},
+    {"id": 1003, "name": "功能名称3", "sysUnitStr": "系统单元3", "sysUnit": 1003, "isChecked": true, "permissions": "1101", "dPermissions": "1101"},
+    {"id": 1004, "name": "功能名称4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "permissions": "1111", "dPermissions": "1111"},
+    {"id": 1004, "name": "功能名称4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "permissions": "1111", "dPermissions": "1111"},
+    {"id": 1004, "name": "功能名称4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "permissions": "1111", "dPermissions": "1111"},
+    {"id": 1004, "name": "功能名称4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "permissions": "1111", "dPermissions": "1111"},
+    {"id": 1004, "name": "功能名称4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "permissions": "1111", "dPermissions": "1111"},
+    {"id": 1005, "name": "功能名称5", "sysUnitStr": "系统单元5", "sysUnit": 1005, "permissions": "1000", "dPermissions": "1011"}
+], "sortinfo":{"orderby": "$!sortInfo.orderby", "sortby":"$!sortInfo.sortby"}}}

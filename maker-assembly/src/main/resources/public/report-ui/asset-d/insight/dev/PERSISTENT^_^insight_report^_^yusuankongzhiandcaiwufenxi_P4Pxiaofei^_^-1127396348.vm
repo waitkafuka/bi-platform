@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+
+#parse("/asset-d/-com-/-cominclude-.vm")
+
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Monitor Tasks</title>
+
+    #comCSS
+
+    <style type="text/css">
+        .block-body {
+            padding: 10px;
+            font-size: 12px;
+        }
+        .line-time {
+            margin: 0 0 10px 0;
+            overflow: hidden;
+        }
+        .time-form {
+            float: left;
+            vertical-align: top;
+            margin-right: 10px;
+        }
+        .time-form .ui-calendar-plus {
+            margin-right: 20px;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+        }
+        .adv-form-text {
+            width: 115px;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .adv-form-item {
+            width: 160px;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .adv-form-sep {
+            margin-left: 20px;
+        }
+        .adv-ctrl-btn {
+            float: left;
+            vertical-align: top;
+        }
+        .table {
+            border-top: 2px solid #2070BB;
+            height: 400px;
+        }
+        .table-head-line {
+            overflow: hidden;
+            padding: 5px 0 5px 0;
+        }
+        .table-download-btn {
+            float: right;
+            display: inline-block;
+            *display: inline;
+            *zoom: 1;
+            vertical-align: middle;
+        }
+        .block-chart {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .chart-title {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0 10px 0;            
+        }
+        .chart-meta-label {
+            margin-right: 10px;
+            float: right;
+            vertical-align: middle;
+            line-height: 22px;
+            margin-right: 20px;
+        }
+        .chart-meta-sel {
+            float: right;
+            margin-right: 20px;
+        }
+    </style>
+
+</head>
+
+<body class="di-page-html-body"><!-- escape enter
+    --><div data-o_o-di="BODY" class="di-page-div-body">
+
+        <div class="block-body" data-o_o-di="snpt-ist1">
+
+            <!-- 条件 -->
+
+            <div class="line-time">
+                <div class="time-form" data-o_o-di="snpt-ist1.cpnt-ist1-form1">
+                    <div data-o_o-di="snpt-ist1.vu-ist1-form1-time92"></div>
+                    <div data-o_o-di="snpt-ist1.vu-ist1-form1-confirm9"></div>
+                </div>
+            </div>
+
+            <!-- snippet qat11 -->
+
+            <div data-o_o-di="snpt-ist11">
+                <div>
+                    <div class="chart-meta-sel" data-o_o-di="snpt-ist11.cpnt-ist11-chart-measuresel">
+                        <div data-o_o-di="snpt-ist11.vu-ist11-chart-measuresel"></div>
+                    </div>
+                    <span class="chart-meta-label">选择指标：</span>
+                </div>
+                <div class="block-chart" data-o_o-di="snpt-ist11.cpnt-ist11-chart1">
+                    <div class="chart-title">日报-P4P消费</div>
+                    <div data-o_o-di="snpt-ist11.vu-ist11-chart1"></div>
+                </div>
+            </div>
+
+            <!-- snippet ist12 -->
+
+            <div data-o_o-di="snpt-ist12">
+                <div class="di-table-area" data-o_o-di="snpt-ist12.cpnt-ist12-table1">
+                    <div class="table-head-line"> 
+                        <div class="table-download-btn" data-o_o-di="snpt-ist12.vu-ist12-table1-downloadbtn1"></div>
+                    </div>
+                    <div class="table" data-o_o-di="snpt-ist12.vu-ist12-table1"></div>
+                </div>
+            </div>
+
+        </div>
+
+
+    <script type="text/javascript">
+        window.__$DI__OPT$__ = {
+            depictRef: [
+            ],
+            depict: {
+                "entityDefs": [
+                ]
+            }
+        };
+    </script>
+
+    #comJS
+    #enterDI
+
+    </div><!--
+--></body>
+</html>
