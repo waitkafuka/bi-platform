@@ -67,7 +67,7 @@ public class DataDescInfo implements Serializable {
     /**
      * 事实表的ID字段
      */
-    private String idStr;
+    private String idStr ;
     
     /**
      * 
@@ -247,7 +247,7 @@ public class DataDescInfo implements Serializable {
      * @return BigDecimal
      */
     public BigDecimal getMaxDataId(String tableName) {
-        if (this.maxDataIdMap == null || this.maxDataIdMap.containsKey(tableName)) {
+        if (this.maxDataIdMap == null || !this.maxDataIdMap.containsKey(tableName)) {
             return null;
         }
         return this.maxDataIdMap.get(tableName);

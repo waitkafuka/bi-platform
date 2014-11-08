@@ -15,5 +15,15 @@
                                                 http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
 	
 	<import resource="applicationContext-properties.xml" />
-<!-- 	<import resource="applicationContext-hazelcast.xml"/>    --> 
+	
+	<bean id="taskExecutor"  
+        class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">  
+        <property name="corePoolSize" value="${executor.corePoolSize}" />  
+        <property name="maxPoolSize" value="${executor.maxPoolSize}" />  
+        <property name="queueCapacity" value="${executor.queueCapacity}" />  
+        <property name="keepAliveSeconds" value="${executor.keepAliveSeconds}" />  
+        <property name="rejectedExecutionHandler">  
+            <bean class="${executor.rejectedExecutionHandler}" />  
+        </property>  
+    </bean>  
 </beans>

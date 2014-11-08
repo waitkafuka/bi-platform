@@ -107,6 +107,7 @@ public class QueryServiceImpl implements QueryService {
     @Override
     public DataModel query(QuestionModel questionModel, QueryContext queryContext,
             QueryContextSplitStrategy preSplitStrategy) throws MiniCubeQueryException {
+        long current = System.currentTimeMillis();
         if (questionModel == null) {
             throw new IllegalArgumentException("questionModel is null");
         }
@@ -126,8 +127,9 @@ public class QueryServiceImpl implements QueryService {
         if (dataSourceInfo == null) {
             dataSourceInfo = dataSourcePoolService.getDataSourceInfo(questionModel.getDataSourceInfoKey());
         }
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to get datasource and other data");
+        current = System.currentTimeMillis();
         try {
-            System.out.println();
             queryContext =
                     buildQueryContext(questionModel, dataSourceInfo, cube, queryContext,
                             questionModel.getRequestParams());
@@ -135,7 +137,8 @@ public class QueryServiceImpl implements QueryService {
             e1.printStackTrace();
             throw new MiniCubeQueryException(e1);
         }
-
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query context.");
+        current = System.currentTimeMillis();
         // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
         int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
         logger.info("query condition descarte:" + conditionDescartes);
@@ -148,7 +151,6 @@ public class QueryServiceImpl implements QueryService {
             logger.error(sb.toString());
             throw new OverflowQueryConditionException(sb.toString());
         }
-
         // 调用拆解自动进行拆解
         QueryContextSplitResult splitResult = queryContextSplitService.split(cube, queryContext, preSplitStrategy);
 
@@ -165,7 +167,6 @@ public class QueryServiceImpl implements QueryService {
 
                 return null;
             } else {
-
                 return executeQuery(questionModel, dataSourceInfo, cube, splitResult.getSplitQueryContexts().get(0));
             }
         } else {
@@ -176,6 +177,7 @@ public class QueryServiceImpl implements QueryService {
 
     private DataModel executeQuery(QuestionModel questionModel, DataSourceInfo dataSourceInfo, Cube cube,
             QueryContext queryContext) throws MiniCubeQueryException {
+        long current = System.currentTimeMillis();
         QueryRequest queryRequest =
                 QueryRequestBuilder.buildQueryRequest(questionModel, dataSourceInfo, cube, queryContext);
         logger.info("queryContext:" + queryContext + " queryRequest:" + queryRequest);
@@ -185,7 +187,8 @@ public class QueryServiceImpl implements QueryService {
                         .isEmpty(queryContext.getQueryMeasures()))) {
             return new DataModelBuilder(null, queryContext).build();
         }
-
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query request.");
+        current = System.currentTimeMillis();
         DataModel result = null;
         try {
             TesseractResultSet resultSet = searchService.query(queryRequest);
@@ -194,6 +197,7 @@ public class QueryServiceImpl implements QueryService {
             logger.error("query occur when search queryRequest：" + queryContext, e);
             throw new MiniCubeQueryException(e);
         }
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to execute query.");
         return result;
     }
 

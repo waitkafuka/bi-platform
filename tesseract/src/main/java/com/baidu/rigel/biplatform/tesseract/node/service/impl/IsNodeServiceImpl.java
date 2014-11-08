@@ -266,7 +266,8 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
         Iterator<Node> it = result.iterator();
         while (it.hasNext()) {
             Node node = it.next();
-            if (!node.getNodeState().equals(NodeState.NODE_AVAILABLE)) {
+            if (node.getNodeState() == null
+                    || !node.getNodeState().equals(NodeState.NODE_AVAILABLE)) {
                 it.remove();
             }
         }

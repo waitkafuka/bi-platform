@@ -26,7 +26,7 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.SearcherFactory;
 import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
+import org.apache.lucene.store.FSDirectory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -115,7 +115,7 @@ public class IndexSearcherFactory {
         } else {
             File indexFile = new File(idxPath);
             if (indexFile.exists()) {
-                Directory directory = NIOFSDirectory.open(indexFile);
+                Directory directory = FSDirectory.open(indexFile);
                 searcherManager = new SearcherManager(directory,
                         this.new TesseractSearcherFactory());
             } else {

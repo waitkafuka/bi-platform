@@ -22,13 +22,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.NIOFSDirectory;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,22 +48,18 @@ public class IndexWriterFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexWriterFactory.class);
     
     /**
-     * Analyzer
-     */
-    private static final Analyzer INDEX_ANALYZER =  new StandardAnalyzer();
-    /**
      * IndexWriterConfig
      */
-    private static final IndexWriterConfig INDEX_WRITER_CONFIG = new IndexWriterConfig(
-        Version.LUCENE_4_10_1, INDEX_ANALYZER);
+//    private static final IndexWriterConfig INDEX_WRITER_CONFIG = new IndexWriterConfig(
+//            Version.LUCENE_4_10_1, new StandardAnalyzer());
     
     /**
      * 设置索引打开方式
      */
-    static {
-        INDEX_WRITER_CONFIG.setOpenMode(OpenMode.CREATE_OR_APPEND);
-    }
-    
+//    static {
+//        INDEX_WRITER_CONFIG.setOpenMode(OpenMode.CREATE_OR_APPEND);
+//    }
+//    
     /**
      * idxWriterMaps
      */
@@ -95,8 +90,11 @@ public class IndexWriterFactory {
                 "getIndexWriter", "return exist IndexWriter "));
         } else {
             File indexFile = new File(idxPath);
-            Directory directory = NIOFSDirectory.open(indexFile);
-            indexWriter = new IndexWriter(directory, INDEX_WRITER_CONFIG);
+            Directory directory = FSDirectory.open(indexFile);
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(
+                    Version.LUCENE_4_10_1, new StandardAnalyzer());
+            indexWriterConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
+            indexWriter = new IndexWriter(directory, indexWriterConfig);
             INSTANCE.idxWriterMaps.put(idxPath, indexWriter);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                 "getIndexWriter", "create new IndexWriter "));

@@ -26,7 +26,9 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.store.meta.StoreMeta;
 
@@ -616,6 +618,43 @@ public class IndexMeta extends StoreMeta implements Serializable {
             return false;
         }
         return true;
+    }
+    
+    /**
+     * 
+     * getSelectList 抽取索引元数据中的指标与维度字段，生成集合
+     * 
+     * @return Set<String> 如果指标与维度为空，则反回空集，而不是null
+     */
+    public Set<String> getSelectList() {
+        Set<String> selectList = new HashSet<String>();
+        // 处理维度
+        for (String dimKey : this.dimInfoMap.keySet()) {
+            Dimension dim = this.dimInfoMap.get(dimKey);
+            
+            // selectList.add(dim.getFacttableColumn());
+            // 处理维度不同层级
+            if (dim.getLevels() != null) {
+                for (String levelKey : dim.getLevels().keySet()) {
+                    Level dimLevel = dim.getLevels().get(levelKey);
+                    selectList.add(dimLevel.getFactTableColumn());
+                }
+            }
+        }
+        // 处理指标
+        for (String measureKey : this.measureInfoMap.keySet()) {
+            Measure measure = this.measureInfoMap.get(measureKey);
+            if (measure.getType().equals(MeasureType.COMMON)) {
+                // 普通指标，直接加入到select表列中
+                selectList.add(measure.getDefine());
+            } else if (measure.getType().equals(MeasureType.DEFINE)) {
+                // 当前不支持
+            } else if (measure.getType().equals(MeasureType.CAL)) {
+                // 当前不支持
+            }
+        }
+        
+        return selectList;
     }
     
 }

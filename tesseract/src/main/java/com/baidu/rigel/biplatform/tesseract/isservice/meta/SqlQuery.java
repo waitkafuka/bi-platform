@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * SQLQuery
@@ -38,7 +38,7 @@ public class SqlQuery {
     /**
      * idName
      */
-    private String idName;
+    private String idName ;
     /**
      * 查询的表
      */
@@ -63,6 +63,11 @@ public class SqlQuery {
     private static final String LIMITMAP_KEY_LIMITEND = "limitEnd";
     
     /**
+     * groupBy
+     */
+    private Set<String> groupBy;
+    
+    /**
      * getter method for property selectList
      * 
      * @return the selectList
@@ -71,6 +76,7 @@ public class SqlQuery {
         if (this.selectList == null) {
             this.selectList = new ArrayList<String>();
         }
+        
         return selectList;
     }
     
@@ -178,9 +184,9 @@ public class SqlQuery {
         // 处理select
         if (this.selectList != null) {
             sb.append("select");
-            if (!StringUtils.isEmpty(this.idName)) {
-                sb.append(" " + this.idName + ",");
-            }
+//            if (!StringUtils.isEmpty(this.idName)) {
+//                sb.append(" " + this.idName + ",");
+//            }
             
             for (int i = 0; i < selectList.size(); i++) {
                 String select = selectList.get(i);
@@ -259,6 +265,22 @@ public class SqlQuery {
      */
     public void setIdName(String idName) {
         this.idName = idName;
+    }
+
+    /**
+     * get groupBy
+     * @return the groupBy
+     */
+    public Set<String> getGroupBy() {
+        return groupBy;
+    }
+
+    /**
+     * set groupBy with groupBy
+     * @param groupBy the groupBy to set
+     */
+    public void setGroupBy(Set<String> groupBy) {
+        this.groupBy = groupBy;
     }
     
 }

@@ -21,11 +21,9 @@ import io.netty.channel.ChannelHandlerContext;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.document.DoubleDocValuesField;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
@@ -148,7 +146,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         
         
         IndexWriter idxWriter = IndexWriterFactory.getIndexWriter(indexMsg.getIdxPath());
-        List<String> measureInfoList = indexMsg.getMeasureInfo();
+        
         TesseractResultSet data = indexMsg.getDataBody();
         long currDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
         BigDecimal currMaxId = null;
@@ -157,23 +155,13 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
             while (data.next() && currDiskSize < indexMsg.getBlockSize()) {
                 Document doc = new Document();
                 String[] fieldNameArr = data.getFieldNameArray();
-                StringBuilder sb = new StringBuilder("Index data:");
                 for (String select : fieldNameArr) {
                     if (select.equals(indexMsg.getIdName())) {
                         currMaxId = data.getBigDecimal(select);
-                    } else if (measureInfoList.contains(select)) {
-                        doc.add(new DoubleDocValuesField(select, data.getBigDecimal(select).doubleValue()));
-                        sb.append("[fieldName:" + select + "][fieldValue:" + data.getString(select)
-                            + "]");
-                    } else {
-                        doc.add(new StringField(select, data.getString(select), Field.Store.YES));
-                        sb.append("[fieldName:" + select + "][fieldValue:" + data.getString(select)
-                            + "]");
-                        
                     }
-                    
+
+                    doc.add(new StringField(select, data.getString(select), Field.Store.NO));
                 }
-                logger.info(sb.toString());
                 
                 idxWriter.addDocument(doc);
                 

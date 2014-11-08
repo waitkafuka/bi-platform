@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
-import javax.sql.DataSource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
@@ -37,10 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.Level;
-import com.baidu.rigel.biplatform.ac.model.Measure;
-import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.dataquery.service.DataQueryService;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
@@ -200,9 +195,10 @@ public class IndexServiceImpl implements IndexService {
                     idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
                     this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
                     continue;
+                } else if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
+                    idxAction = IndexAction.INDEX_UPDATE;
                 }
                 boolean idxResult = false;
-                
                 
                 try {
                     
@@ -240,9 +236,9 @@ public class IndexServiceImpl implements IndexService {
             for (IndexMeta meta : metaList) {
                 for (IndexShard idxShard : meta.getIdxShardList()) {
                     idxServiceList.add(idxShard.getAbsoluteIdxFilePath(this.isNodeService
-                            .getCurrentNode()));
+                        .getCurrentNode()));
                     idxNoServiceList.add(idxShard.getAbsoluteFilePath(this.isNodeService
-                            .getCurrentNode()));
+                        .getCurrentNode()));
                 }
             }
             IndexUpdateInfo udpateInfo = new IndexUpdateInfo(idxServiceList, idxNoServiceList);
@@ -342,8 +338,6 @@ public class IndexServiceImpl implements IndexService {
             idxMeta = this.indexMetaService.assignIndexShard(idxMeta, this.isNodeService
                 .getCurrentNode().getClusterName());
             
-            
-            
         } else if ((idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE) || !idxMeta
             .getIdxState().equals(IndexState.INDEX_UNAVAILABLE))
             && idxAction.equals(IndexAction.INDEX_UPDATE)) {
@@ -354,46 +348,49 @@ public class IndexServiceImpl implements IndexService {
             if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                     "doIndex", "process merge"));
-                Map<String, Measure> measureAllMap = new HashMap<String, Measure>();
-                measureAllMap.putAll(idxMeta.getMeasureInfoMap());
-                measureAllMap.putAll(idxMeta.getMeasureInfoMergeMap());
-                
-                Map<String, Dimension> dimAllMap = new HashMap<String, Dimension>();
-                dimAllMap.putAll(idxMeta.getDimInfoMap());
-                dimAllMap.putAll(idxMeta.getDimInfoMergeMap());
-                
-                List<String> selectMergeList = new ArrayList<String>();
-                for (String measureKey : measureAllMap.keySet()) {
-                    Measure measure = measureAllMap.get(measureKey);
-                    if (measure.getType().equals(MeasureType.COMMON)) {
-                        // 普通指标，直接加入到select表列中
-                        selectMergeList.add(measure.getDefine());
-                    }
-                }
+                // Map<String, Measure> measureAllMap = new HashMap<String,
+                // Measure>();
+                // measureAllMap.putAll(idxMeta.getMeasureInfoMap());
+                // measureAllMap.putAll(idxMeta.getMeasureInfoMergeMap());
+                idxMeta.getMeasureInfoMap().putAll(idxMeta.getMeasureInfoMergeMap());
+                // Map<String, Dimension> dimAllMap = new HashMap<String,
+                // Dimension>();
+                // dimAllMap.putAll(idxMeta.getDimInfoMap());
+                // dimAllMap.putAll(idxMeta.getDimInfoMergeMap());
+                idxMeta.getDimInfoMap().putAll(idxMeta.getDimInfoMergeMap());
+                sqlQueryMap = transIndexMeta2SQLQuery(idxMeta);
+                //
+                // List<String> selectMergeList = new ArrayList<String>();
+                // for (String measureKey : measureAllMap.keySet()) {
+                // Measure measure = measureAllMap.get(measureKey);
+                // if (measure.getType().equals(MeasureType.COMMON)) {
+                // // 普通指标，直接加入到select表列中
+                // selectMergeList.add(measure.getDefine());
+                // }
+                // }
                 
                 // 需要合并列的更新
-                for (String tableName : sqlQueryMap.keySet()) {
-                    List<String> selectList = sqlQueryMap.get(tableName).getSelectList();
-                    if (selectList == null) {
-                        selectList = new ArrayList<String>();
-                    }
-                    selectList.clear();
-                    selectList.addAll(selectMergeList);
-                    sqlQueryMap.get(tableName).setSelectList(selectList);
-                }
-                
-                for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
-                    List<String> whereList = sqlQueryMap.get(tableName).getWhereList();
-                    if (whereList == null) {
-                        whereList = new ArrayList<String>();
-                    }
-                    BigDecimal maxId = idxMeta.getDataDescInfo().getMaxDataId(tableName);
-                    if (!maxId.equals(BigDecimal.ZERO)) {
-                        String where = "id > " + maxId.longValue();
-                        whereList.add(where);
-                    }
-                    sqlQueryMap.get(tableName).setWhereList(whereList);
-                }
+                // for (String tableName : sqlQueryMap.keySet()) {
+                // List<String> selectList =
+                // sqlQueryMap.get(tableName).getSelectList();
+                // if (selectList == null) {
+                // selectList = new ArrayList<String>();
+                // }
+                // selectList.clear();
+                // selectList.addAll(selectMergeList);
+                // sqlQueryMap.get(tableName).setSelectList(selectList);
+                // }
+                /*
+                 * for (String tableName :
+                 * idxMeta.getDataDescInfo().getTableNameList()) { List<String>
+                 * whereList = sqlQueryMap.get(tableName).getWhereList(); if
+                 * (whereList == null) { whereList = new ArrayList<String>(); }
+                 * BigDecimal maxId =
+                 * idxMeta.getDataDescInfo().getMaxDataId(tableName); if
+                 * (!maxId.equals(BigDecimal.ZERO)) { String where = "id > " +
+                 * maxId.longValue(); whereList.add(where); }
+                 * sqlQueryMap.get(tableName).setWhereList(whereList); }
+                 */
                 
             } else if (!idxMeta.getIdxState().equals(IndexState.INDEX_UNAVAILABLE)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
@@ -446,7 +443,7 @@ public class IndexServiceImpl implements IndexService {
                 total = IndexFileSystemConstants.INDEX_DATA_TOTAL_IN_LIMITEDMODEL;
             } else {
                 total = this.dataQueryService.queryForLongWithSql(getCountSQLBySQLQuery(sqlQuery),
-                    (DataSource) dataSourceWrape);
+                    dataSourceWrape);
             }
             
             boolean isLastPiece = false;
@@ -457,14 +454,22 @@ public class IndexServiceImpl implements IndexService {
             if (pcount > total) {
                 pcount = total;
             }
+            if (!StringUtils.isEmpty(sqlQuery.getIdName())
+                    && !CollectionUtils.isEmpty(sqlQuery.getSelectList())) {
+                sqlQuery.getSelectList().add(sqlQuery.getIdName());
+            }
             for (int i = 0; i * pcount < total; i++) {
                 long limitStart = i * pcount;
                 long limitEnd = pcount;
                 if ((i + 1) * pcount >= total) {
                     isLastPiece = true;
                 }
+                
                 TesseractResultSet currResult = this.dataQueryService.queryForDocListWithSQLQuery(
-                    sqlQuery, (DataSource) dataSourceWrape, limitStart, limitEnd);
+                    sqlQuery, dataSourceWrape, limitStart, limitEnd);
+                
+                
+                
                 while (currResult.size() != 0) {
                     // 向索引分片中写入数据
                     IndexShard idxShard = getFreeIndexShardForIndex(idxMeta);
@@ -702,35 +707,11 @@ public class IndexServiceImpl implements IndexService {
             throw generateIndexMetaIsNullException(idxMeta);
         }
         
-        Set<String> selectList = new HashSet<String>();
-        // 处理维度
-        for (String dimKey : idxMeta.getDimInfoMap().keySet()) {
-            Dimension dim = idxMeta.getDimInfoMap().get(dimKey);
-            
-            // selectList.add(dim.getFacttableColumn());
-            // 处理维度不同层级
-            if (dim.getLevels() != null) {
-                for (String levelKey : dim.getLevels().keySet()) {
-                    Level dimLevel = dim.getLevels().get(levelKey);
-                    selectList.add(dimLevel.getFactTableColumn());
-                }
-            }
+        Set<String> selectList = idxMeta.getSelectList();
+        if (selectList == null) {
+            selectList = new HashSet<String>();
         }
-        // 处理指标
-        for (String measureKey : idxMeta.getMeasureInfoMap().keySet()) {
-            Measure measure = idxMeta.getMeasureInfoMap().get(measureKey);
-            if (measure.getType().equals(MeasureType.COMMON)) {
-                // 普通指标，直接加入到select表列中
-                selectList.add(measure.getDefine());
-            } else if (measure.getType().equals(MeasureType.DEFINE)) {
-                LOGGER.info("do not support");
-            } else if (measure.getType().equals(MeasureType.CAL)) {
-                LOGGER.info("do not support");
-            } else {
-                throw new IllegalArgumentException();
-            }
-        }
-        
+        String idName=idxMeta.getDataDescInfo().getIdStr();
         for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
             SqlQuery sqlQuery = new SqlQuery();
             LinkedList<String> fromList = new LinkedList<String>();
@@ -738,6 +719,9 @@ public class IndexServiceImpl implements IndexService {
             sqlQuery.setFromList(fromList);
             sqlQuery.getSelectList().addAll(selectList);
             result.put(tableName, sqlQuery);
+            if(!StringUtils.isEmpty(idName)){
+                sqlQuery.setIdName(idName);
+            }
         }
         
         return result;

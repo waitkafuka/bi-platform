@@ -36,8 +36,6 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
@@ -340,9 +338,9 @@ public class IndexAndSearchClient {
         message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
         message.setIdName(idName);
         message.setLastPiece(lastPiece);
-        List<String> measureInfoList = new ArrayList<String>();
-        measureInfoList.addAll(idxShard.getIndexMeta().getMeasureInfoMap().keySet());
-        message.setMeasureInfo(measureInfoList);
+//        List<String> measureInfoList = new ArrayList<String>();
+//        measureInfoList.addAll(idxShard.getIndexMeta().getMeasureInfoMap().keySet());
+//        message.setMeasureInfo(measureInfoList);
         logger.info("ready to send index message:" + message.toString());
         AbstractMessage ret = null;
         IndexMessage result = null;

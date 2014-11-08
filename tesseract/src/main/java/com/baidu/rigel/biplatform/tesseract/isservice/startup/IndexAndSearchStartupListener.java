@@ -19,6 +19,7 @@
 package com.baidu.rigel.biplatform.tesseract.isservice.startup;
 
 import java.io.File;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -89,16 +90,7 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
         }
         // 程序初始化结束后
         // 启动索引查询服务
-        IndexAndSearchServer isServer = this.context.getBean(IndexAndSearchServer.class);
-        Node currNode = isServer.getNode();
-        if (currNode != null) {
-            // 如果本地镜像存在
-            File localImage = new File(currNode.getImageFilePath());
-            if (localImage.exists()) {
-                // 恢复本地元数据
-                loadLocalInfo(currNode);
-            }
-        }
+        IndexAndSearchServer isServer = this.context.getBean(IndexAndSearchServer.class);        
         
         isServer.start();
         int count = 0;
@@ -122,6 +114,17 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
                 isServer.getNode().setNodeState(NodeState.NODE_AVAILABLE);
                 isServer.getNode().setLastStateUpdateTime(System.currentTimeMillis());
                 this.isNodeService.saveOrUpdateNodeInfo(isServer.getNode());
+            }
+            
+            // 恢复本地镜像
+            Node currNode = isServer.getNode();
+            if (currNode != null) {
+                // 如果本地镜像存在
+                File localImage = new File(currNode.getImageFilePath());
+                if (localImage.exists()) {
+                    // 恢复本地元数据
+                    loadLocalInfo(currNode);
+                }
             }
             
             // 启动状态更新&检查线程
@@ -166,7 +169,9 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
         // 当前节点不是一个空节点
         if (currNode != null && currNode.getUsedIndexShardList() != null) {
             for (IndexShard idxShard : currNode.getUsedIndexShardList()) {
+                
                 IndexMeta idxMeta = idxShard.getIndexMeta();
+                
                 String cubeId = null;
                 IndexMeta remoteIndexMeta = null;
                 if (idxMeta != null && idxMeta.getCubeIdSet() != null
@@ -189,41 +194,104 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
                             break;
                         }
                     }
+                    remoteIdxShard = updateNodeInfoOfIndexShard(remoteIdxShard, currNode);
                     
-                    if (remoteIdxShard != null) {
-                        boolean nodeExist = false;
-                        if (!CollectionUtils.isEmpty(remoteIdxShard.getReplicaNodeList())) {
-                            for (Node reNode : remoteIdxShard.getReplicaNodeList()) {
-                                if (reNode.equals(currNode)) {
-                                    nodeExist = true;
-                                    break;
-                                    
-                                }
-                            }
-                        }
-                        if (!nodeExist
-                                && (remoteIdxShard.getNode() != null && !remoteIdxShard.getNode()
-                                        .equals(currNode))) {
-                            // node在复本中不存在，并且主NODE也不是当前节点；
-                            remoteIdxShard.getReplicaNodeList().add(currNode);
-                        } else if (!nodeExist && (remoteIdxShard.getNode() == null)) {
-                            // node在复本中不存在，并且主NODE为空
-                            remoteIdxShard.setNode(currNode);
-                        } else if (nodeExist && (remoteIdxShard.getNode() == null)) {
-                            // node在复本中存在，且主NODE为空
-                            remoteIdxShard.setNode(currNode);
-                            remoteIdxShard.getReplicaNodeList().remove(currNode);
-                            // node在复本中存在，且主NODE不为当前节点，不用处理
-                        }
-                    }
+//                    if (remoteIdxShard != null) {
+//                        boolean nodeExist = false;
+//                        if (!CollectionUtils.isEmpty(remoteIdxShard.getReplicaNodeList())) {
+//                            for (Node reNode : remoteIdxShard.getReplicaNodeList()) {
+//                                if (reNode.equals(currNode)) {
+//                                    nodeExist = true;
+//                                    break;
+//                                    
+//                                }
+//                            }
+//                        }
+//                        if (!nodeExist
+//                                && (remoteIdxShard.getNode() != null && !remoteIdxShard.getNode()
+//                                        .equals(currNode))) {
+//                            // node在复本中不存在，并且主NODE也不是当前节点；
+//                            remoteIdxShard.getReplicaNodeList().add(currNode);
+//                        } else if (!nodeExist && (remoteIdxShard.getNode() == null)) {
+//                            // node在复本中不存在，并且主NODE为空
+//                            remoteIdxShard.setNode(currNode);
+//                        } else if (nodeExist && (remoteIdxShard.getNode() == null)) {
+//                            // node在复本中存在，且主NODE为空
+//                            remoteIdxShard.setNode(currNode);
+//                            remoteIdxShard.getReplicaNodeList().remove(currNode);
+//                            // node在复本中存在，且主NODE不为当前节点，不用处理
+//                        }
+//                    }
                     idxMeta = remoteIndexMeta;
                     
+                } else {
+                    idxShard = updateNodeInfoOfIndexShard(idxShard, currNode);
                 }
                 this.idxMetaService.saveOrUpdateIndexMeta(idxMeta);
             }
         }
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "loadLocalInfo",
             "[Node:" + node + "]"));
+    }
+    
+    /**
+     * 
+     * updateNodeInfoOfIndexShard
+     * 
+     * @param remoteIdxShard
+     *            remoteIdxShard
+     * @param currNode
+     *            currNode
+     * @return IndexShard
+     */
+    private IndexShard updateNodeInfoOfIndexShard(IndexShard remoteIdxShard, Node currNode) {
+        List<Node> currAvailableNodeList = isNodeService.getAvailableNodeListByClusterName(currNode
+                .getClusterName());
+        if (remoteIdxShard != null) {
+            boolean nodeExist = false;
+            if (!CollectionUtils.isEmpty(currAvailableNodeList)) {
+                if (!CollectionUtils.isEmpty(remoteIdxShard.getReplicaNodeList())) {
+                    remoteIdxShard.getReplicaNodeList().retainAll(currAvailableNodeList);
+                }
+                if (!currAvailableNodeList.contains(remoteIdxShard.getNode())) {
+                    remoteIdxShard.setNode(null);
+                }
+            } else {
+                remoteIdxShard.getReplicaNodeList().clear();
+                remoteIdxShard.setNode(null);
+            }
+            
+            // 判断是否在复本节点中
+            if (!CollectionUtils.isEmpty(remoteIdxShard.getReplicaNodeList())) {
+                
+                for (Node reNode : remoteIdxShard.getReplicaNodeList()) {
+                    if (reNode.equals(currNode)) {
+                        nodeExist = true;
+                        break;
+                        
+                    }
+                }
+            }
+            
+            if (!nodeExist
+                    && (remoteIdxShard.getNode() != null
+                    && remoteIdxShard.getNode().getNodeState().equals(NodeState.NODE_AVAILABLE) && !remoteIdxShard
+                        .getNode().equals(currNode))) {
+                // node在复本中不存在，并且主NODE也不是当前节点；
+                remoteIdxShard.getReplicaNodeList().add(currNode);
+            } else if (!nodeExist
+                            && (remoteIdxShard.getNode() == null || !remoteIdxShard.getNode().getNodeState()
+                                .equals(NodeState.NODE_AVAILABLE))) {
+                // node在复本中不存在，并且主NODE为空
+                remoteIdxShard.setNode(currNode);
+            } else if (nodeExist && (remoteIdxShard.getNode() == null)) {
+                // node在复本中存在，且主NODE为空
+                remoteIdxShard.setNode(currNode);
+                remoteIdxShard.getReplicaNodeList().remove(currNode);
+                // node在复本中存在，且主NODE不为当前节点，不用处理
+            }
+        }
+        return remoteIdxShard;
     }
     
 }

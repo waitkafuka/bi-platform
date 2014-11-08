@@ -15,21 +15,22 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.search.agg;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
+import com.baidu.rigel.biplatform.tesseract.resultset.Aggregate;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.StatFieldObject;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.StatFieldRecord;
 
 /**
  * 
@@ -39,6 +40,8 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.StatFieldRecord;
  *
  */
 public class AggregateCompute {
+    
+    private static Logger LOGGER = LoggerFactory.getLogger(AggregateCompute.class);
     
     public static LinkedList<ResultRecord> distinct(LinkedList<ResultRecord> dataList){
         Stream<ResultRecord> stream = dataList.stream();
@@ -55,6 +58,15 @@ public class AggregateCompute {
     }
     
     /**
+     * 统计内部类耗时
+     * @author chenxiaoming01
+     *
+     */
+    static class Cost{
+        static long reduceCost = 0;
+    }
+    
+    /**
      * 聚集计算
      * 
      * @param dataList
@@ -63,81 +75,58 @@ public class AggregateCompute {
      *            原始查询请求
      * @return LinkedList<ResultRecord> 计算后的数据
      */
-    public static LinkedList<ResultRecord> aggregate(LinkedList<ResultRecord> dataList,
-        QueryRequest query) {
-        Stream<ResultRecord> stream = dataList.stream();
+    public static LinkedList<ResultRecord> aggregate(List<ResultRecord> dataList,
+        int dimSize, List<QueryMeasure> queryMeasures) {
+        Stream<ResultRecord> stream = dataList.parallelStream();
         LinkedList<ResultRecord> result = new LinkedList<ResultRecord>();
         
-        Map<Map<String, String>, StatFieldRecord> group = new HashMap<Map<String, String>, StatFieldRecord>();
-        group=stream.collect(Collectors.groupingBy(new Function<ResultRecord, Map<String, String>>() {
-            @Override
-            public Map<String, String> apply(ResultRecord t) {
-                Map<String, String> groupBy = new HashMap<String, String>();
-                for (String groupByField : query.getGroupBy().getGroups()) {
-                    try {
-                        String value = t.getField(groupByField) != null ? t.getField(groupByField)
-                            .toString() : null;
-                        groupBy.put(groupByField, value);
-                    } catch (NoSuchFieldException e) {  
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-                return groupBy;
-            }
-        }, Collectors.reducing(new StatFieldRecord(),
-            new Function<ResultRecord, StatFieldRecord>() {
-                @Override
-                public StatFieldRecord apply(ResultRecord t) {
-                    Map<String, StatFieldObject> curr = new HashMap<String, StatFieldObject>();
-                    for (QueryMeasure qm : query.getSelect().getQueryMeasures()) {
-                        StatFieldObject currMeasure = new StatFieldObject();
-                        currMeasure.setStatFieldName(qm.getProperties());
-                        currMeasure.setAggType(qm.getAggregator());
-                        AggregatorMethod am = AggregatorMethod.getAggregatorMethod(qm
-                            .getAggregator());
-                        currMeasure.setAggMethod(am);
-                        try {
-                            currMeasure.setStatFieldString((t.getField(qm.getProperties())).toString());
-                            currMeasure.setStatFieldResult((t.getField(qm.getProperties())).toString());
-                        } catch (NoSuchFieldException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                        curr.put(qm.getProperties(), currMeasure);
-                    }
-                    
-                    StatFieldRecord record = new StatFieldRecord(curr);
-                    return record;
-                }
-            }, (x, y) -> {
-                if (x == null) {
-                    return y;
-                }
-                return x.aggregate(y);
-            }))); 
-        // 取出聚集计算的结果
-        for (Map<String, String> groupKey : group.keySet()) {
-            StatFieldRecord sr = group.get(groupKey);
-            List<Object> field = new ArrayList<Object>();
-            List<String> fieldName = new ArrayList<String>();
-            
-            for (String keyName : sr.getStatFieldMap().keySet()) {
-                field.add(sr.getStatFieldMap().get(keyName).getStatFieldResult());
-                fieldName.add(sr.getStatFieldMap().get(keyName).getStatFieldName());
-            }
-            
-            for (String keyName : groupKey.keySet()) {
-                field.add(groupKey.get(keyName));
-                fieldName.add(keyName);
-            }
-            
-            ResultRecord record = new ResultRecord(field.toArray(new Serializable[0]),
-                fieldName.toArray(new String[0]));
-            result.add(record);
-        }
-        return result;
         
+        Cost.reduceCost = 0;
+        
+        long current = System.currentTimeMillis();
+        Map<String, ResultRecord> groupResult = stream.collect(Collectors.groupingBy(ResultRecord::getGroupBy,
+                Collectors.reducing(null, (x,y) ->{
+                    long reduceCurrent = System.currentTimeMillis();
+                    if(x == null){
+                        for(int i = 0; i< queryMeasures.size(); i++){
+                            QueryMeasure measure = queryMeasures.get(i);
+                            //初始化 count的初始值
+                            if(measure.getAggregator().equals(Aggregator.COUNT)){
+                                ((ResultRecord) y).setField(i+dimSize, 1);
+                            }
+                        }
+                        return y;
+                    }else if(y == null){
+                        return x;
+                    } else {
+                        if(CollectionUtils.isNotEmpty(queryMeasures)){
+                            for(int i = 0; i< queryMeasures.size(); i++){
+                                QueryMeasure measure = queryMeasures.get(i);
+                                try {
+                                  Object src1 = ((ResultRecord) x).getField(i+dimSize);
+                                  Object src2 = ((ResultRecord) y).getField(i+dimSize);
+                                  ((ResultRecord) x).setField(i+dimSize, Aggregate.aggregate(src1 == null ? null:src1.toString(),src2 == null ? null:src2.toString(),measure.getAggregator()));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }
+                    Cost.reduceCost += (System.currentTimeMillis() - reduceCurrent);
+                    return x;
+                })));
+        
+        LOGGER.info("group cost:" + (System.currentTimeMillis() - current) + "ms!,reduce cost:" + Cost.reduceCost);
+        result.addAll(groupResult.values());
+        return result;
     }
+
+    public static Queue<ResultRecord> aggregate(LinkedList<ResultRecord> resultQ, QueryRequest query) {
+        int dimSize = query.getSelect().getQueryProperties().size();
+        List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
+        return aggregate(resultQ, dimSize, queryMeasures);
+    }
+    
+    
     
 }

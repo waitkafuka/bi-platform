@@ -22,14 +22,18 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.QueryWrapperFilter;
 import org.apache.lucene.search.SearcherManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
@@ -64,6 +68,8 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
      * 返回的消息action
      */
     private static final NettyAction ACTION_FEEDBACK = NettyAction.NETTY_ACTION_SEARCH_FEEDBACK;
+    
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     
     // private static SearchServerHandler SEARCH_HANDLER;
     /**
@@ -116,12 +122,20 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
             dimFieldList.addAll(queryRequest.getSelect().getQueryProperties());
         }
         
+        
         TesseractResultSet searchResult = null;
         LinkedList<ResultRecord> resultRecordList = new LinkedList<ResultRecord>();
+        long current = System.currentTimeMillis();
         try {
             QueryWrapperFilter filter = new QueryWrapperFilter(queryAll);
+            Set<String> groupBy = new HashSet<>();
+            if (queryRequest.getGroupBy() != null) {
+                groupBy = queryRequest.getGroupBy().getGroups();
+            }
             TesseractResultRecordCollector collector = new TesseractResultRecordCollector(
-                dimFieldList.toArray(new String[0]), measureFieldList.toArray(new String[0]));
+                dimFieldList.toArray(new String[0]), measureFieldList.toArray(new String[0]), groupBy);
+            
+            
             is.search(new MatchAllDocsQuery(), filter, collector);
 //            for (int docId : collector.getResultDocIdList()) {
 //                Document doc = is.getIndexReader().document(docId);
@@ -134,6 +148,9 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
 //                resultRecordList.add(record);
 //                
 //            }
+            logger.info("cost " + (System.currentTimeMillis() - current) + " in search,result:"
+                    + collector.getResult().size());
+            current = System.currentTimeMillis();
             resultRecordList.addAll(collector.getResult());
         } finally {
             searcherManager.release(is);
@@ -142,16 +159,20 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         // process result
         // group by
         if (queryRequest.getGroupBy() != null) {
-            searchResult = new SearchResultSet(AggregateCompute.aggregate(resultRecordList,
-                queryRequest));
+            int dimSize = queryRequest.getSelect().getQueryProperties().size();
+            searchResult =
+                    new SearchResultSet(AggregateCompute.aggregate(resultRecordList, dimSize, queryRequest.getSelect()
+                            .getQueryMeasures()));
         } else {
             searchResult = new SearchResultSet(resultRecordList);
         }
         
+        logger.info("cost " + (System.currentTimeMillis() - current) 
+                + " in result group by and prepare netty message.");
+        current = System.currentTimeMillis();
         MessageHeader mh = new MessageHeader(NettyAction.NETTY_ACTION_SEARCH_FEEDBACK,
             Md5Util.encode(searchResult.toString()));
         SearchResultMessage searchResultMessage = new SearchResultMessage(mh, searchResult);
-        
         ctx.writeAndFlush(searchResultMessage);
     }
     

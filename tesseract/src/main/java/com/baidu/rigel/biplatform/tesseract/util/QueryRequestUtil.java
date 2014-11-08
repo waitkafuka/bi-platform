@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -31,9 +32,15 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
+import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
@@ -41,6 +48,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -56,6 +64,7 @@ public class QueryRequestUtil {
      */
     private static final String SQL_STRING_FORMAT = "\'%s\'";
     
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryRequestUtil.class);
     /**
      * 
      * transQueryRequestAndList2Map:analyze andList of queryRequest ,trans
@@ -90,7 +99,7 @@ public class QueryRequestUtil {
      *         Map<String,String> key is leafvalue of QueryObject and value is
      *         value of QueryObject
      */
-    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query) {
+    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query, Map<String,String> allDims) {
         if (query == null || query.getWhere() == null || query.getWhere().getAndList() == null) {
             throw new IllegalArgumentException();
         }
@@ -104,16 +113,23 @@ public class QueryRequestUtil {
             }
             for (QueryObject qo : ex.getQueryValues()) {
                 for (String leaf : qo.getLeafValues()) {
-                    Set<String> valueSet = new HashSet<String>();
-                    if (curr.get(leaf) != null) {
-                        valueSet = curr.get(leaf);
+                    Set<String> valueSet = curr.get(leaf);
+                    if (valueSet == null) {
+                        valueSet = new HashSet<String>();
                     }
-                    valueSet.add(qo.getValue());
-                    
-                    curr.put(leaf, valueSet);
+                    if(MetaNameUtil.isAllMemberName(qo.getValue()) || StringUtils.equals(MiniCubeMember.SUMMARY_NODE_NAME, qo.getValue())){
+                        allDims.put(ex.getProperties(), qo.getValue());
+                    }else if(!StringUtils.equals(leaf, qo.getValue())){
+                        valueSet.add(qo.getValue());
+                    }
+                    if(CollectionUtils.isNotEmpty(valueSet)){
+                        curr.put(leaf, valueSet);
+                    }
                 }
             }
-            resultMap.put(ex.getProperties(), curr);
+            if(query.getSelect().getQueryProperties().contains(ex.getProperties())){
+                resultMap.put(ex.getProperties(), curr);
+            }
         }
         
         return resultMap;
@@ -165,6 +181,7 @@ public class QueryRequestUtil {
         
         SqlQuery result = new SqlQuery();
         // 处理from
+        result.setGroupBy(query.getGroupBy().getGroups());
         LinkedList<String> fromList = new LinkedList<String>();
         fromList.add(query.getFrom().getFrom());
         result.setFromList(fromList);
@@ -175,10 +192,10 @@ public class QueryRequestUtil {
         
         // 处理select
         // getQueryProperties
-        Set<String> selectList = new HashSet<String>();
+        Set<String> selectList = Sets.newLinkedHashSet();
         if (query.getSelect() != null) {
             selectList.addAll(query.getSelect().getQueryProperties());
-            if (query.getSelect().getQueryMeasures() != null) {
+            if (CollectionUtils.isNotEmpty(query.getSelect().getQueryMeasures())) {
                 for (QueryMeasure qm : query.getSelect().getQueryMeasures()) {
                     selectList.add(qm.getProperties());
                 }
@@ -222,40 +239,98 @@ public class QueryRequestUtil {
         return result;
     }
     
-    /**
-     * 
-     * mapLeafValue2Value
-     * 
-     * @param srcResultSet
-     *            srcResultSet
-     * @param query
-     *            QueryRequest
-     * @return LinkedList<ResultRecord>
-     * @throws NoSuchFieldException
-     *             NoSuchFieldException
-     */
-    public static LinkedList<ResultRecord> mapLeafValue2Value(TesseractResultSet srcResultSet,
+//    /**
+//     * 
+//     * mapLeafValue2Value
+//     * 
+//     * @param srcResultSet
+//     *            srcResultSet
+//     * @param query
+//     *            QueryRequest
+//     * @return LinkedList<ResultRecord>
+//     * @throws NoSuchFieldException
+//     *             NoSuchFieldException
+//     */
+//    public static LinkedList<ResultRecord> mapLeafValue2Value(TesseractResultSet srcResultSet,
+//            QueryRequest query) throws NoSuchFieldException {
+//        TesseractResultSet dataSet = srcResultSet;
+//        LinkedList<ResultRecord> transList = new LinkedList<ResultRecord>();
+//        Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
+//            .transQueryRequest2LeafMap(query);
+//        
+//        if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
+//            ResultRecord record = null;
+//            while ((record = ((SearchResultSet) dataSet).getResultQ().poll()) != null) {
+//                // 替换维度数据的明细节点的上层结点信息
+//                if (!MapUtils.isEmpty(leafValueMap)) {
+//                    transList.addAll(mapLeafValue2ValueOfRecord(record, leafValueMap));
+//                } else {
+//                    transList.add(record);
+//                }
+//                
+//            }
+//        }
+//        
+//        return transList;
+//    }
+    
+    
+    public static TesseractResultSet processGroupBy(TesseractResultSet dataSet,
             QueryRequest query) throws NoSuchFieldException {
-        TesseractResultSet dataSet = srcResultSet;
+        
         LinkedList<ResultRecord> transList = new LinkedList<ResultRecord>();
+        Map<String,String> allDimVal = new HashMap<String, String>();
+        long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
-            .transQueryRequest2LeafMap(query);
+            .transQueryRequest2LeafMap(query, allDimVal);
         
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
             ResultRecord record = null;
             while ((record = ((SearchResultSet) dataSet).getResultQ().poll()) != null) {
                 // 替换维度数据的明细节点的上层结点信息
                 if (!MapUtils.isEmpty(leafValueMap)) {
-                    transList.addAll(mapLeafValue2ValueOfRecord(record, leafValueMap));
+                    transList.addAll(mapLeafValue2ValueOfRecord(record, leafValueMap, query.getGroupBy().getGroups()));
                 } else {
                     transList.add(record);
                 }
-                
+            }
+        }
+        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
+        current = System.currentTimeMillis();
+        int dimSize = query.getSelect().getQueryProperties().size();
+        List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
+        
+        if(CollectionUtils.isEmpty(queryMeasures)){
+            return new SearchResultSet(AggregateCompute.distinct(transList));
+        }
+        
+        queryMeasures.forEach(measure -> {
+           if(measure.getAggregator().equals(Aggregator.COUNT)){
+               measure.setAggregator(Aggregator.SUM);
+           }
+        });
+        
+        // 对非汇总节点先进行汇总计算
+        if(MapUtils.isNotEmpty(leafValueMap)){
+            transList = AggregateCompute.aggregate(transList, dimSize, queryMeasures);
+        }
+        
+        if(MapUtils.isNotEmpty(allDimVal)){
+            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);
+            for(String properties : allDimVal.keySet()){
+                List<ResultRecord> summaryCalcList = new ArrayList<ResultRecord>();
+                for(ResultRecord record : preResultList){
+                    ResultRecord vRecord = DeepcopyUtils.deepCopy(record);
+                    vRecord.setField(properties, allDimVal.get(properties));
+                    generateGroupBy(vRecord, query.getGroupBy().getGroups());
+                    summaryCalcList.add(vRecord);
+                }
+                transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
             }
         }
         
-        return transList;
-        
+        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " aggregator leaf.");
+        return new SearchResultSet(transList);
     }
     
     /**
@@ -271,32 +346,48 @@ public class QueryRequestUtil {
      *             NoSuchFieldException
      */
     public static List<ResultRecord> mapLeafValue2ValueOfRecord(ResultRecord record,
-            Map<String, Map<String, Set<String>>> leafValueMap) throws NoSuchFieldException {
+            Map<String, Map<String, Set<String>>> leafValueMap, Set<String> groups) throws NoSuchFieldException {
+        //TODO 考虑将groups改成List，后续不用遍历meta中的所有直接遍历groups就可以
         if (record == null || leafValueMap == null || leafValueMap.isEmpty()) {
             return new ArrayList<ResultRecord>();
         }
-        LinkedList<ResultRecord> result = new LinkedList<ResultRecord>();
-        result.add(record);
+        List<ResultRecord> result = new ArrayList<>();
         
+        List<ResultRecord> tmpResult = new ArrayList<ResultRecord>();
         for (String properties : leafValueMap.keySet()) {
-            List<ResultRecord> tmpResult = new ArrayList<ResultRecord>();
-            ResultRecord currRecord = null;
-            while ((currRecord = result.poll()) != null) {
-                String currValue = currRecord.getField(properties) != null ? currRecord.getField(
-                    properties).toString() : null;
-                Set<String> valueSet = leafValueMap.get(properties).get(currValue);
+            String currValue = record.getField(properties) != null ? record.getField(
+                properties).toString() : null;
+            Set<String> valueSet = leafValueMap.get(properties).get(currValue);
+            if(valueSet != null){
                 for (String value : valueSet) {
-                    ResultRecord vRecord = DeepcopyUtils.deepCopy(currRecord);
+                    ResultRecord vRecord = DeepcopyUtils.deepCopy(record);
                     vRecord.setField(properties, value);
+                    generateGroupBy(vRecord, groups);
                     tmpResult.add(vRecord);
                 }
             }
-            result.clear();
+        }
+        if(CollectionUtils.isEmpty(tmpResult)){
+            generateGroupBy(record, groups);
+            result.add(record);
+        }else{
             result.addAll(tmpResult);
         }
         
         return result;
         
+    }
+    
+    public static void generateGroupBy(ResultRecord record, Set<String> groups) throws NoSuchFieldException{
+        if(CollectionUtils.isNotEmpty(groups)){
+            String groupBy = "";
+            for(String meta : record.getMeta().getFieldNameArray()){
+                if(groups.contains(meta)){
+                    groupBy += record.getField(meta).toString();
+                }
+            }
+            record.setGroupBy(groupBy);
+        }
     }
     
 }

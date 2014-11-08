@@ -20,7 +20,6 @@ package com.baidu.rigel.biplatform.tesseract.netty.message.isservice;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
@@ -52,10 +51,10 @@ public class IndexMessage extends AbstractMessage {
      * 数据主体
      */
     private TesseractResultSet dataBody;
-    /**
-     * 维度信息
-     */
-    private List<String> measureInfo;
+//    /**
+//     * 维度信息
+//     */
+//    private List<String> measureInfo;
     /**
      * 用于服务端返回占用磁盘空间
      */
@@ -282,21 +281,21 @@ public class IndexMessage extends AbstractMessage {
         this.idName = idName;
     }
 
-    /**
-     * getter method for property measureInfo
-     * @return the measureInfo
-     */
-    public List<String> getMeasureInfo() {
-        return measureInfo;
-    }
-
-    /**
-     * setter method for property measureInfo
-     * @param measureInfo the measureInfo to set
-     */
-    public void setMeasureInfo(List<String> measureInfo) {
-        this.measureInfo = measureInfo;
-    }
+//    /**
+//     * getter method for property measureInfo
+//     * @return the measureInfo
+//     */
+//    public List<String> getMeasureInfo() {
+//        return measureInfo;
+//    }
+//
+//    /**
+//     * setter method for property measureInfo
+//     * @param measureInfo the measureInfo to set
+//     */
+//    public void setMeasureInfo(List<String> measureInfo) {
+//        this.measureInfo = measureInfo;
+//    }
     
     
     

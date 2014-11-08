@@ -20,8 +20,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
@@ -45,7 +45,7 @@ public class AbstractMetaService implements MetaSerivce {
     /**
      * LOOGER
      */
-    private static final Log LOGGER = LogFactory.getLog(AbstractMetaService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMetaService.class);
     /**
      * storeManager
      */

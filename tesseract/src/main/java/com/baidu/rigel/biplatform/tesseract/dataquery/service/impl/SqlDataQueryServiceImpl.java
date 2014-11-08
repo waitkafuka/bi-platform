@@ -25,8 +25,8 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
@@ -51,7 +51,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     /**
      * LOGGER
      */
-    private static final Log LOGGER = LogFactory.getLog(SqlDataQueryServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataQueryServiceImpl.class);
     /**
      * jdbcTemplate
      */
@@ -146,11 +146,17 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
 //                            sqlQuery.getSelectList().toArray(new String[0]));
 //                    resultList.add(record);
 //                }
+                String groupBy = "";
                 for (String select : sqlQuery.getSelectList()) {
                     fieldValues.add(rs.getObject(select));
+                    if (sqlQuery.getGroupBy() != null && sqlQuery.getGroupBy().contains(select)) {
+                        groupBy += rs.getString(select) + ",";
+                    }
                 }
+                
                 ResultRecord record = new ResultRecord(fieldValues.toArray(new Serializable[0]),
                         sqlQuery.getSelectList().toArray(new String[0]));
+                record.setGroupBy(groupBy);
                 resultList.add(record);
                 // }
             }

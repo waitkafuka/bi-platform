@@ -40,6 +40,9 @@ public class Meta implements Serializable {
      */
     private Map<String, Integer> fieldNames;
     
+    
+    private String[] fieldNameArray;
+    
     /**
      * 元数据定义
      * 
@@ -48,6 +51,7 @@ public class Meta implements Serializable {
      */
     public Meta(String[] fieldNames) {
         super();
+        this.fieldNameArray = fieldNames;
         this.fieldNames = new HashMap<String, Integer>();
         for (int i = 0; i < fieldNames.length; i++) {
             this.fieldNames.put(fieldNames[i], i);
@@ -97,6 +101,14 @@ public class Meta implements Serializable {
         } else if (!fieldNames.equals(other.fieldNames))
             return false;
         return true;
+    }
+
+    /**
+     * get fieldNameArray
+     * @return the fieldNameArray
+     */
+    public String[] getFieldNameArray() {
+        return fieldNameArray;
     }
 
     

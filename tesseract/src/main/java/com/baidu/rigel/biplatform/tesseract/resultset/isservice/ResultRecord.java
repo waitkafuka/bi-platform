@@ -47,6 +47,11 @@ public class ResultRecord implements Serializable {
     private Meta meta;
     
     /**
+     * groupBy 将groupBy的字段的值用,分隔
+     */
+    private String groupBy;
+    
+    /**
      * 构造方法
      * 
      * @param feildArray
@@ -130,6 +135,14 @@ public class ResultRecord implements Serializable {
     }
     
     /**
+     * 返回查询的元数据的数组长度
+     * @return 元数据的数据长度
+     */
+    public int getFieldArrayLen() {
+        return this.fieldArray == null ? 0 : fieldArray.length;
+    }
+    
+    /**
      * 
      * setField 覆盖已经存在的feild
      * 
@@ -149,6 +162,15 @@ public class ResultRecord implements Serializable {
         this.fieldArray[columnIndex] = newField;
         return;
         
+    }
+    
+    
+    
+    public void setField(int columnIndex, Serializable newField) {
+        if (columnIndex < 0 || columnIndex > fieldArray.length) {
+            throw new IndexOutOfBoundsException("index:" + columnIndex + " fieldArray length:" + fieldArray.length);
+        }
+        this.fieldArray[columnIndex] = newField;
     }
     
     /**
@@ -254,6 +276,22 @@ public class ResultRecord implements Serializable {
             return false;
         }
         return true;
+    }
+
+    /**
+     * get groupBy
+     * @return the groupBy
+     */
+    public String getGroupBy() {
+        return groupBy;
+    }
+
+    /**
+     * set groupBy with groupBy
+     * @param groupBy the groupBy to set
+     */
+    public void setGroupBy(String groupBy) {
+        this.groupBy = groupBy;
     }
     
 }

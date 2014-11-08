@@ -15,12 +15,32 @@
  */
 package com.baidu.rigel.biplatform.tesseract.util;
 
+/**
+ * 
+ * IndexFileSystemConstants
+ * @author lijin
+ *
+ */
 public class IndexFileSystemConstants {
     
+    /**
+     * DEFAULT_INDEX_SHARD_SIZE
+     */
     public static final long DEFAULT_INDEX_SHARD_SIZE = 64 * 1024 * 1024;
     
+    /**
+     * FETCH_SIZE_FROM_DATASOURCE
+     */
     public static final long FETCH_SIZE_FROM_DATASOURCE = 1000;
     
+    /**
+     * INDEX_DATA_TOTAL_IN_LIMITEDMODEL
+     */
     public static final long INDEX_DATA_TOTAL_IN_LIMITEDMODEL = 1000;
+    
+    /**
+     * FACTTABLE_KEY
+     */
+    public static final String FACTTABLE_KEY = "id";
     
 }

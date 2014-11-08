@@ -45,6 +45,7 @@ import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.store.service.impl.AbstractMetaService;
+import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -149,7 +150,10 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             dataDescInfo.setSplitTable(currCube.isMutilple());
             dataDescInfo.setTableName(currCube.getSource());
             dataDescInfo.setTableNameList(factTableList);
-            
+            //dataDescInfo.setIdStr(idStr);
+            if(StringUtils.isEmpty(dataDescInfo.getIdStr())){
+                dataDescInfo.setIdStr(IndexFileSystemConstants.FACTTABLE_KEY);
+            }
             IndexMeta idxMeta = new IndexMeta();
             // 设置索引元数据基本信息
             idxMeta.setIndexMetaId(String.valueOf(UUID.randomUUID()));
@@ -602,7 +606,10 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                         // 合并策略：0.维度、指标完全相同，直接复用
                         IndexMeta currIdxMeta = mostSimilarIndexMetaMap.get(mScore).get(0);
                         currIdxMeta.getCubeIdSet().addAll(idxMeta.getCubeIdSet());
-                        currIdxMeta.setIdxState(IndexState.INDEX_AVAILABLE_MERGE);
+                        if (currIdxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE)) {
+                            currIdxMeta.setIdxState(IndexState.INDEX_AVAILABLE_MERGE);
+                        }
+                        
                         idxMeta = currIdxMeta;
                     } else if (mScore.compareTo(mainScore) < 0
                         && (mScore.getDimScore() == mainScore.getDimScore())) {

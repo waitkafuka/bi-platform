@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
@@ -47,6 +48,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Where;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
 
 /**
  * sql类型维度维值获取实现
@@ -67,6 +69,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
      */
     @Resource
     private SearchService searchService;
+    
+    @Resource
+    private TaskExecutor taskExecutor;
 
     @Override
     public List<MiniCubeMember> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, Member parentMember,
@@ -112,16 +117,24 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     private List<MiniCubeMember> buildMembersFromCellSet(TesseractResultSet resultSet, MiniCubeLevel queryLevel,
             Member parentMember, DataSourceInfo dataSourceInfo, Cube cube) throws MiniCubeQueryException {
         try {
-            List<MiniCubeMember> result = new ArrayList<MiniCubeMember>();
+            List<MiniCubeMember> result = new ArrayList<MiniCubeMember>(resultSet.size());
+            // CountDownLatch latch = new CountDownLatch(resultSet.size());
             while (resultSet.next()) {
-                String value = resultSet.getString(queryLevel.getSource());
+                ResultRecord record = resultSet.getCurrentRecord();
+                // taskExecutor.execute(new Runnable() {
+                // @Override
+                // public void run() {
+                // try {
+                String value = record.getField(queryLevel.getSource()).toString();
                 if (value == null) {
+                    log.warn("can not get:" + queryLevel.getSource() + " from record:" + record);
                     continue;
+                    // return;
                 }
                 MiniCubeMember member = new MiniCubeMember(value);
                 member.setLevel(queryLevel);
                 if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
-                    member.setCaption(resultSet.getString(queryLevel.getCaptionColumn()));
+                    member.setCaption(record.getField(queryLevel.getCaptionColumn()).toString());
                 }
                 member.setParent(parentMember);
                 // 手动调用生成一下UniqueName，这时候生成代价最小
@@ -145,7 +158,15 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     member.getQueryNodes().add(member.getName());
                 }
                 result.add(member);
+                // latch.countDown();
+                // } catch (Exception e) {
+                // e.printStackTrace();
+                // throw new RuntimeException(e);
+                // }
+                // }
+                // });
             }
+//            latch.await();
             Collections.sort(result, (m1,m2) -> {
                return m1.getName().compareTo(m2.getName());
             });

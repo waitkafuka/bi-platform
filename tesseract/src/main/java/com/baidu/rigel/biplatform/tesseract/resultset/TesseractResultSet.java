@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+
 /**
  * 
  * Tesseract查询结果集
@@ -179,4 +181,12 @@ public interface TesseractResultSet extends Serializable {
      * @return int
      */
     int size();
+    
+    /**
+     * 注意，请先调用next()方法，否则直接调用本方法会返回null; 
+     * getCurrentRecord
+     * 
+     * @return ResultRecord;
+     */
+    ResultRecord getCurrentRecord();
 }

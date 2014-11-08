@@ -21,11 +21,13 @@ package com.baidu.rigel.biplatform.tesseract.isservice.search.collector;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.BinaryDocValues;
@@ -53,6 +55,8 @@ public class TesseractResultRecordCollector extends Collector {
      * measureFields
      */
     private String[] measureFields;
+    
+    private Set<String> groupByFields;
     /**
      * reader
      */
@@ -80,17 +84,19 @@ public class TesseractResultRecordCollector extends Collector {
      * @param dimFields dimFields
      * @param measureFields measureFields
      */
-    public TesseractResultRecordCollector(String[] dimFields, String[] measureFields) {
+    public TesseractResultRecordCollector(String[] dimFields, String[] measureFields, Set<String> groupByFields) {
         this.dimFields = dimFields;
         this.measureFields = measureFields;
         this.result = new ArrayList<ResultRecord>();
         
         this.currBinaryDocValuesMap = new HashMap<String, BinaryDocValues>();
         this.currDoubleValuesMap = new HashMap<String, FieldCache.Doubles>();
-        List<String> fieldNameList = new ArrayList<String>();
-        fieldNameList.addAll(Arrays.asList(measureFields));
-        fieldNameList.addAll(Arrays.asList(dimFields));
-        this.meta = new Meta(fieldNameList.toArray(new String[0]));
+        
+        this.meta = new Meta((String[]) ArrayUtils.addAll(dimFields, measureFields));
+        if (groupByFields == null) {
+            groupByFields = new HashSet<String>(1);
+        }
+        this.groupByFields = groupByFields;
     }
     
     /*
@@ -113,20 +119,26 @@ public class TesseractResultRecordCollector extends Collector {
     public void collect(int doc) throws IOException {
         List<Serializable> fieldValueList = new ArrayList<Serializable>();
         // List<String> fieldNameList=new ArrayList<String>();
+        String groupBy = "";
+        
+        for (String dim : dimFields) {
+            BinaryDocValues fieldValues = currBinaryDocValuesMap.get(dim);
+            BytesRef byteRef = fieldValues.get(doc);
+            String dimVal = byteRef.utf8ToString();
+            fieldValueList.add(dimVal);
+            if (groupByFields.contains(dim)) {
+                groupBy += dimVal + ",";
+            }
+        }
         
         for (String measure : this.measureFields) {
             FieldCache.Doubles fieldValues = currDoubleValuesMap.get(measure);
             fieldValueList.add(fieldValues.get(doc));
         }
         
-        for (String dim : dimFields) {
-            BinaryDocValues fieldValues = currBinaryDocValuesMap.get(dim);
-            BytesRef byteRef = fieldValues.get(doc);
-            fieldValueList.add(byteRef.utf8ToString());
-        }
-        
         ResultRecord record = new ResultRecord(fieldValueList.toArray(new Serializable[0]),
                 this.meta);
+        record.setGroupBy(groupBy);
         this.result.add(record);
         
     }

@@ -332,4 +332,14 @@ public class SearchResultSet implements TesseractResultSet {
         return sb.toString();
     }
 
+    /* (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet#getCurrentRecord()
+     */
+    @Override
+    public ResultRecord getCurrentRecord() {
+        return this.currRecord;
+    }
+    
+    
+    
 }
