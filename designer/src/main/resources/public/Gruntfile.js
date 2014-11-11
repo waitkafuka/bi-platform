@@ -9,7 +9,7 @@
 module.exports = function(grunt) {
     start();
     // test();
-
+    // alert(grunt);
     // TODO ----------------------------------------------------------
     // (-) change skin
 
