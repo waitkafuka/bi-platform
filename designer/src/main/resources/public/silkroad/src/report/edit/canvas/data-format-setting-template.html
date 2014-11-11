@@ -1,0 +1,26 @@
+<div class="data-format">
+    <div class="data-format-default">
+        <span>指标默认数据格式：</span>
+        <select name="default">
+            <option value="">请选择</option>
+            {{each dataformatOptions as $optionValue optionKey}}
+            <option value={{optionKey}} {{if optionKey === defaultFormat}} selected="selected" {{/if}}>{{$optionValue}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div class="data-format-alone">
+        <span>对各指标进行单独设置</span>
+        {{each dataformat as ind indkey}}
+        <div class="data-format-alone-dim">
+            <span>{{ind.name}}：</span>
+            <select name="{{indkey}}">
+                <option value="">请选择</option>
+                {{each dataformatOptions as $optionValue optionKey}}
+                <option value={{optionKey}} {{if optionKey === ind.format}} selected="selected"
+                {{/if}}>{{$optionValue}}</option>
+                {{/each}}
+            </select>
+        </div>
+        {{/each}}
+    </div>
+</div>
