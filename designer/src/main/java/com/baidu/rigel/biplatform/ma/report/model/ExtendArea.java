@@ -65,6 +65,12 @@ public class ExtendArea implements Serializable {
      */
     private Widget widget;
     
+    /**
+     * 数据格式定义
+     */
+    private FormatModel formatModel;
+    
+    
     public String getId() {
         return id;
     }
@@ -175,4 +181,21 @@ public class ExtendArea implements Serializable {
     public Item getItem(String itemId) {
         return this.logicModel.getItem(itemId);
     }
+
+	/**
+	 * @return the formatModel
+	 */
+	public FormatModel getFormatModel() {
+		return formatModel;
+	}
+
+	/**
+	 * @param formatModel the formatModel to set
+	 */
+	public void setFormatModel(FormatModel formatModel) {
+		this.formatModel = formatModel;
+	}
+
+    
+    
 }

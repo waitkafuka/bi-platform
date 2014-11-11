@@ -20,11 +20,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,11 +51,13 @@ import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -415,5 +420,37 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         });
         return true;
     }
+
+	@Override
+	public void updateAreaWithDataFormat(ExtendArea area, String dataFormat) {
+		FormatModel model = area.getFormatModel();
+		if (model == null) {
+			model = new FormatModel();
+		}
+		if (model.getDataFormat() == null) {
+			model.setDataFormat(Maps.newHashMap());
+		}
+		
+		model.getDataFormat().putAll(convertStr2Map(dataFormat));
+		
+	}
+
+	/**
+	 * 讲json串转换为map
+	 * @param dataFormat
+	 * @return Map<String, String>
+	 */
+	private Map<String, String> convertStr2Map(String dataFormat) {
+		try {
+			JSONObject json = new JSONObject(dataFormat);
+			Map<String, String> rs = Maps.newHashMap();
+			for (String str : JSONObject.getNames(json)) {
+				rs.put(str, json.getString(str));
+			}
+			return rs;
+		} catch (JSONException e) {
+			throw new IllegalArgumentException("数据格式必须为Json格式， dataFormat = " + dataFormat);
+		}
+	}
     
 }

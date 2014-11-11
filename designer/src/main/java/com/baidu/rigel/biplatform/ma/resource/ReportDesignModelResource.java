@@ -891,6 +891,79 @@ public class ReportDesignModelResource {
     }
     
     /**
+     * 修改报表模型数据格式配置
+     * @param reportId 报表id
+     * @param areaId 区域id
+     * @param request http servlet request
+     * @return 处理结果
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/dataformat",
+            method = { RequestMethod.POST })
+    public ResponseResult updateFormatDef(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId,
+            HttpServletRequest request) {
+    		ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        
+        logger.info("successfully create area for current report");
+        result.setStatus(0);
+        ExtendArea area = model.getExtendById(areaId);
+        ExtendAreaViewObject areaVo = ResourceUtils.buildValueObject(model, area);
+        result.setData(areaVo);
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 修改报表模型数据格式配置
+     * @param reportId 报表id
+     * @param areaId 区域id
+     * @param request http servlet request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/dataformat",
+            method = { RequestMethod.GET })
+    public ResponseResult queryDataFormat(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+    		ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        
+        logger.info("successfully create area for current report");
+        result.setStatus(0);
+        String dataFormat = request.getParameter("dataFormat");
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaWithDataFormat(area, dataFormat);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getFormatModel().getDataFormat());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
      * 返回发布信息
      * @param requestUri 请求url
      * @param token   产品线

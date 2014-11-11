@@ -30,6 +30,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
@@ -880,7 +881,7 @@ public class DataModelUtils {
     /**
      * 
      * @param fields
-     * @return
+     * @return int 孩子节点个数
      */
     private static int getChildSize(List<HeadField> fields) {
         if (fields == null || fields.isEmpty()) {
@@ -890,5 +891,34 @@ public class DataModelUtils {
             return getChildSize(field.getChildren()) + field.getChildren().size(); 
         }).reduce(0, (x, y) -> x + y);
     }
+
+    /**
+     * 
+     * @param formatModel 格式模型
+     * @param table 透视表
+     */
+	public static void decorateTable(FormatModel formatModel, PivotTable table) {
+		if (formatModel == null) {
+			return;
+		}
+		
+		Map<String, String> dataFormat = formatModel.getDataFormat();
+		if (CollectionUtils.isEmpty(dataFormat)) {
+			return;
+		}
+		
+		List<List<CellData>> colDatas = table.getDataSourceColumnBased();
+		for (int i = 0; i < colDatas.size(); ++i) {
+			ColDefine define = table.getColDefine().get(i);
+			String uniqueName = define.getUniqueName();
+			String formatStr = dataFormat.get("default_format");
+			if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
+				formatStr = dataFormat.get(uniqueName);
+			}
+			for (CellData data : colDatas.get(i)) {
+				data.setFormattedValue(formatStr);
+			}
+		}
+	}
     
 }

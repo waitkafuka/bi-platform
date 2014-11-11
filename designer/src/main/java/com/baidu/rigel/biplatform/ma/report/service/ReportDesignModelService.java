@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.report.service;
 
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 
 /**
@@ -96,5 +97,12 @@ public interface ReportDesignModelService {
      * @throws DataSourceOperationException 
      */
     boolean publishReport(ReportDesignModel model) throws ReportModelOperationException, DataSourceOperationException;
+
+    /**
+     * 根据区域数据格式信息更新区域定义
+     * @param area 区域定义
+     * @param dataFormat 数据格式
+     */
+	void updateAreaWithDataFormat(ExtendArea area, String dataFormat);
 
 }
