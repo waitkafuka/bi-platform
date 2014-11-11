@@ -3,9 +3,12 @@
  * @author 赵晓强(v_zhaoxiaoqiang@baidu.com)
  * @date 2014-8-14
  */
-define(['url'], function (Url) {
+define(['url', 'constant'], function (Url, Constant) {
 
     return Backbone.Model.extend({
+        defaults: {
+            dataformatOptions: Constant.DATA_FORMAT_OPTIONS
+        },
         /**
          * 构造函数
          *
@@ -126,6 +129,54 @@ define(['url'], function (Url) {
                 url: Url.sortingCompDataItem(this.reportId, compId),
                 type: 'POST',
                 data: data,
+                success: function () {
+                    success();
+                }
+            });
+        },
+
+        /**
+         * 获取数据格式数据
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        getDataFormatList: function (compId, success) {
+            var that = this;
+
+            $.ajax({
+                url: Url.getDataFormatList(this.reportId, compId),
+                type: 'get',
+                success: function (data) {
+                    var dataFormatList = data.data;
+                    dataFormatList.dataformatOptions = that.get('dataformatOptions');
+                    var indList = window.dataInsight.main.model.get('indList').data;
+                    // TODO:遍历
+                    for(var i = 0, iLen = indList.length; i < iLen; i ++) {
+                        if (dataFormatList.dataformat[indList[i].name]) {
+                            dataFormatList.dataformat[indList[i].name].name = indList[i].caption;
+                        }
+                    }
+                    success(dataFormatList);
+                }
+            });
+        },
+
+        /**
+         * 提交数据格式数据
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        saveDataFormatInfo: function (compId, data, success) {
+            var formData = {
+                areaId: compId,
+                dataFormat: JSON.stringify(data)
+            };
+            $.ajax({
+                url: Url.getDataFormatList(this.reportId, compId),
+                type: 'POST',
+                data: formData,
                 success: function () {
                     success();
                 }

@@ -466,3 +466,51 @@
     word-break: break-all;
     overflow: auto;
 }
+
+/**
+ * @name                      :数据格式设置
+ * @author                    :lizhantong
+ * @email                     :lztlovely@126.com
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :数据格式设置模块
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.data-format {
+    width: 300px;
+}
+.data-format select {
+    width: 150px;
+    height: 25px;
+    margin-left: 5px;
+}
+.data-format .data-format-default {
+    padding: 10px 10px;
+    border-bottom: 1px solid #C5C5C5;
+}
+.data-format .data-format-alone {
+    padding: 10px 10px;
+}
+.data-format-alone > span {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.data-format-alone .data-format-alone-dim {
+    float: left;
+    margin-top: 10px;
+}
+.data-format-alone-dim > span {
+    width: 110px;
+    float: left;
+    text-align: right;
+    line-height: 25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.data-format-alone-dim > select {
+    float: left;
+}

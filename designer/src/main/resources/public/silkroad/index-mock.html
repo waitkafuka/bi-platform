@@ -14,8 +14,48 @@
 <script src="/silkroad/asset/-di-product-min.js"></script>
 <script type="text/javascript">
 
+//    require.config({
+//        baseUrl: 'src/',  //本地模拟为src，线上版问asset
+//        paths: {
+//            'underscore': '../dep/underscore-1.6.0.min',
+//            'jquery': '../dep/jquery-1.11.1.min',
+//            'backbone': '../dep/backbone-1.1.2.min',
+//            'template': '../dep/template-3.0.0',
+//            'jqueryui': '../dep/jquery-ui.custom-1.10.4',
+//            'jquerydi': 'common/jquery.di',
+//            'dialog': 'core/dialog',
+//            'url': 'core/url',
+//            'constant': 'core/constant',
+//            'processUrl': '../test/process-url'
+//        },
+//        shim: {
+//            'dialog': {
+//                deps: [
+//                    'jqueryui'
+//                ]
+//            },
+//            'jqueryui': {
+//                'deps': [
+//                    'jquery'
+//                ]
+//            },
+//            'jquerydi': {
+//                'deps': [
+//                    'jquery'
+//                ]
+//            },
+//            'backbone': {
+//                deps: [
+//                    'underscore',
+//                    'jquery',
+//                    'jquerydi',
+//                    'template'
+//                ]
+//            }
+//        }
+//    });
     require.config({
-        baseUrl: 'src/',  //本地模拟为src，线上版问asset
+        baseUrl: 'asset',  //本地模拟为src，线上版问asset
         paths: {
             'underscore': '../dep/underscore-1.6.0.min',
             'jquery': '../dep/jquery-1.11.1.min',
@@ -24,9 +64,7 @@
             'jqueryui': '../dep/jquery-ui.custom-1.10.4',
             'jquerydi': 'common/jquery.di',
             'dialog': 'core/dialog',
-            'url': 'core/url',
-
-            'processUrl': '../test/process-url'
+            'url': 'core/url'
         },
         shim: {
             'dialog': {

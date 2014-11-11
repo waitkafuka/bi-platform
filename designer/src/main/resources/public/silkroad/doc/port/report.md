@@ -680,3 +680,24 @@
         "status": 0,
         "statusInfo": ""
     }
+
+
+### 设置--数据格式
+
+    请求路径
+
+        get: reports/[report_id]/extend_area/[areaId]/dataformat  //areaId 组件ID
+
+    前台模拟
+
+        无
+
+    后台模拟
+
+        {
+            "status": 0,
+            "statusInfo": ""
+            "data": {
+                default: '',
+            }
+        }

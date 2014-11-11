@@ -716,5 +716,19 @@ define(function () {
             + measureId;
     };
 
+    /**
+     * 报表新建（编辑）-edit-setting
+     * 获取数据格式信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getDataFormatList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/dataformat';
+    };
+
     return Url;
 });
