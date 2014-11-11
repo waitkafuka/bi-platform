@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.tesseract.qsservice.query.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * 查询接口实现
@@ -293,7 +295,7 @@ public class QueryServiceImpl implements QueryService {
                             dimCondition = new DimensionCondition(dimName);
                         }
                         queryContext.addMemberNodeTreeByAxisType(axisType,
-                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, false, params));
+                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, params));
                         i++;
                     }
                 }
@@ -319,9 +321,9 @@ public class QueryServiceImpl implements QueryService {
                     }
                     if (condition instanceof DimensionCondition) {
                         DimensionCondition dimCondition = (DimensionCondition) condition;
-                        MemberNodeTree node = buildQueryMemberTree(dsInfo, cube, dimCondition, false, true, params);
-                        if (node != null) {
-                            queryContext.getFilterMemberValues().put(node.getQuerySource(), node.getLeafIds());
+                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, params);
+                        if (MapUtils.isNotEmpty(filterCondition)) {
+                            queryContext.getFilterMemberValues().putAll(filterCondition);
                         }
                     } else {
                         MeasureCondition measureCon = (MeasureCondition) condition;
@@ -334,6 +336,51 @@ public class QueryServiceImpl implements QueryService {
         }
         return queryContext;
     }
+    
+    /**
+     * 构造过滤条件
+     * 
+     * @param dataSourceInfo 数据源信息
+     * @param cube cube信息
+     * @param dimCondition 维度信息
+     * @param params 查询条件
+     * @return 过滤条件
+     * @throws MiniCubeQueryException 查询异常
+     * @throws MetaException 元数据异常信息
+     */
+    public Map<String, Set<String>> buildFilterCondition(DataSourceInfo dataSourceInfo, Cube cube,
+            DimensionCondition dimCondition, Map<String, String> params) throws MiniCubeQueryException, MetaException {
+        if (dimCondition == null) {
+            throw new IllegalArgumentException("dimension condition is null");
+        }
+        if (dimCondition.getQueryDataNodes().isEmpty()) {
+            logger.info("filter axises ignore all member filter");
+            return null;
+        }
+        Map<String, Set<String>> filterValues = new HashMap<>();
+        for (QueryData queryData : dimCondition.getQueryDataNodes()) {
+            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())) {
+                logger.info("filter axises ignore all member filter");
+                return null;
+            }
+            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
+            if (member != null) {
+                String querySource = member.getLevel().getFactTableColumn();
+                Set<String> nodes =
+                        CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
+                                .getQueryNodes();
+                if (filterValues.containsKey(querySource)) {
+                    filterValues.get(querySource).addAll(nodes);
+                } else {
+                    filterValues.put(querySource, nodes);
+                }
+            } else {
+                logger.warn("can not found member by query data:" + queryData);
+            }
+        }
+
+        return filterValues;
+    }
 
     /**
      * 根据维值选中条件构造维值查询的树
@@ -342,23 +389,18 @@ public class QueryServiceImpl implements QueryService {
      * @param cube cube模型
      * @param dimCondition 维值查询条件
      * @param isFirstInRow 是否是行上的第一个维度
-     * @param isFilter 是否是filter
      * @return 维值树
      * @throws MiniCubeQueryException 查询维值异常
      * @throws MetaException
      */
     private MemberNodeTree buildQueryMemberTree(DataSourceInfo dataSourceInfo, Cube cube,
-            DimensionCondition dimCondition, boolean isFirstInRow, boolean isFilter, Map<String, String> params)
+            DimensionCondition dimCondition, boolean isFirstInRow, Map<String, String> params)
             throws MiniCubeQueryException, MetaException {
         if (dimCondition == null) {
             throw new IllegalArgumentException("dimension condition is null");
         }
         MemberNodeTree nodeTree = new MemberNodeTree(null);
         if (dimCondition.getQueryDataNodes().isEmpty()) {
-            if (isFilter) {
-                logger.info("filter axises ignore all member filter");
-                return null;
-            }
             String allMemberUniqueName =
                     cube.getDimensions().get(dimCondition.getMetaName()).getAllMember().getUniqueName();
             QueryData queryData = new QueryData(allMemberUniqueName);
@@ -367,18 +409,13 @@ public class QueryServiceImpl implements QueryService {
             dimCondition.getQueryDataNodes().add(queryData);
         }
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
-            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName()) && isFilter) {
-                logger.info("filter axises ignore all member filter");
-                return null;
-            }
-
             MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
 
             MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
             List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
             boolean isCallBack = member.getLevel().getType().equals(LevelType.CALL_BACK);
             // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点
-            if (!isFilter && (queryData.isExpand() || isCallBack)) {
+            if (queryData.isExpand() || isCallBack) {
                 List<MiniCubeMember> children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
                 if (CollectionUtils.isNotEmpty(children)) {
                     children.forEach((child) -> {
@@ -388,10 +425,6 @@ public class QueryServiceImpl implements QueryService {
                         member.getQueryNodes().addAll(child.getQueryNodes());
                     });
                 }
-            }
-            if (isFilter) {
-                buildMemberNodeByMember(memberNode, member);
-                return memberNode;
             }
             // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
             if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
@@ -407,6 +440,11 @@ public class QueryServiceImpl implements QueryService {
         return nodeTree;
     }
 
+    /**
+     * 根据维值创建查询树的节点
+     * @param node 查询节点
+     * @param member 维值
+     */
     private void buildMemberNodeByMember(MemberNodeTree node, MiniCubeMember member) {
         node.setCaption(member.getCaption());
         if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
