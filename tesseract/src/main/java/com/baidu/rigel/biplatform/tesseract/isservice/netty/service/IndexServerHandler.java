@@ -136,7 +136,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                 || indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_INITINDEX)) {
             // 如果是索引更新、初始化过程
             // 清理写索引路径
-            idxFile.deleteOnExit();
+            FileUtils.deleteFile(idxFile);
             if (indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_UPDATE)
                     && idxServiceFile.exists()) {
                 // 索引更新，复制索引目录
