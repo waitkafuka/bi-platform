@@ -18,6 +18,7 @@ define(function () {
         'D天HH:mm:ss': '时间格式（2天1小时23分45秒）'
     };
 
+
     return {
         DATA_FORMAT_OPTIONS: DATA_FORMAT_OPTIONS
     };
