@@ -1,5 +1,5 @@
 /**
- * @file: 报表新建（编辑）--  维度设置模块View
+ * @file: 报表新建（编辑）-- 维度设置模块View
  * @author: lizhantong(lztlovely@126.com)
  * @depend:
  * @date: 2014-07-07

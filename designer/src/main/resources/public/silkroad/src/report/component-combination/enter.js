@@ -13,7 +13,9 @@ define(function () {
     var Engine = di.shared.model.Engine;
     var engine;
     var globalModel;
-    var options =  {};
+    var options = {
+        webRoot: '/silkroad'
+    };
 
     //------------------------------------------
     // 对外提供接口

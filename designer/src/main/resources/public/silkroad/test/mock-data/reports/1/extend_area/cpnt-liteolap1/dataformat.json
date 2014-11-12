@@ -1,0 +1,17 @@
+{
+    "status": 0,
+    "statusInfo": "",
+    "data": {
+        "defaultFormat": "I,III",
+        "dataformat": {
+            "chechi_guo": {
+                "name": "车迟国",
+                "format": "I,III.DD"
+            },
+            "nver_guo": {
+                "name": "女儿国",
+                "format": "HH:mm:ss"
+            }
+        }
+    }
+}
