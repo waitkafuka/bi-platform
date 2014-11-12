@@ -48,6 +48,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 /**
@@ -283,13 +284,15 @@ public class QueryRequestUtil {
         long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
             .transQueryRequest2LeafMap(query, allDimVal);
-        
+        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
+        current = System.currentTimeMillis();
+        List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
             ResultRecord record = null;
             while ((record = ((SearchResultSet) dataSet).getResultQ().poll()) != null) {
                 // 替换维度数据的明细节点的上层结点信息
                 if (!MapUtils.isEmpty(leafValueMap)) {
-                    transList.addAll(mapLeafValue2ValueOfRecord(record, leafValueMap, query.getGroupBy().getGroups()));
+                    transList.addAll(mapLeafValue2ValueOfRecord(record, leafValueMap, groupList));
                 } else {
                     transList.add(record);
                 }
@@ -322,7 +325,7 @@ public class QueryRequestUtil {
                 for(ResultRecord record : preResultList){
                     ResultRecord vRecord = DeepcopyUtils.deepCopy(record);
                     vRecord.setField(properties, allDimVal.get(properties));
-                    generateGroupBy(vRecord, query.getGroupBy().getGroups());
+                    generateGroupBy(vRecord, groupList);
                     summaryCalcList.add(vRecord);
                 }
                 transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
@@ -346,7 +349,7 @@ public class QueryRequestUtil {
      *             NoSuchFieldException
      */
     public static List<ResultRecord> mapLeafValue2ValueOfRecord(ResultRecord record,
-            Map<String, Map<String, Set<String>>> leafValueMap, Set<String> groups) throws NoSuchFieldException {
+            Map<String, Map<String, Set<String>>> leafValueMap, List<String> groups) throws NoSuchFieldException {
         //TODO 考虑将groups改成List，后续不用遍历meta中的所有直接遍历groups就可以
         if (record == null || leafValueMap == null || leafValueMap.isEmpty()) {
             return new ArrayList<ResultRecord>();
@@ -378,7 +381,7 @@ public class QueryRequestUtil {
         
     }
     
-    public static void generateGroupBy(ResultRecord record, Set<String> groups) throws NoSuchFieldException{
+    public static void generateGroupBy(ResultRecord record, List<String> groups) throws NoSuchFieldException{
         if(CollectionUtils.isNotEmpty(groups)){
             String groupBy = "";
             for(String meta : record.getMeta().getFieldNameArray()){
