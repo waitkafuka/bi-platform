@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
@@ -634,6 +635,10 @@ public class ReportDesignModelResource {
         }
         try {
             model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
+            // 需要移到业务方法中处理，此处为临时方案
+            if (element instanceof Measure) {
+            		area.getFormatModel().getDataFormat().put(element.getName(), "");
+            }
         } catch (ReportModelOperationException e) {
             logger.error("Exception when add or update item in area: " + areaId, e);
         }
@@ -768,6 +773,9 @@ public class ReportDesignModelResource {
             result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
             return result;
         }
+        ExtendArea oriArea = model.getExtendById(areaId);
+        OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(), 
+        		oriArea.getCubeId(), olapElementId);
         try {
             model = manageService.removeItem(model, areaId, olapElementId, PositionType.valueOf(type.toUpperCase()));
         } catch (ReportModelOperationException e) {
@@ -778,6 +786,11 @@ public class ReportDesignModelResource {
             result.setStatus(1);
             result.setStatusInfo("不能将该列删除");
             return result;
+        }
+        // remove unused format define
+        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getName());
+        if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
+        		model.getExtendById(areaId).getFormatModel().getDataFormat().clear();
         }
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         /**
@@ -902,7 +915,7 @@ public class ReportDesignModelResource {
     public ResponseResult updateFormatDef(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
-    		ResponseResult result = new ResponseResult();
+    	ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -919,9 +932,11 @@ public class ReportDesignModelResource {
         
         logger.info("successfully create area for current report");
         result.setStatus(0);
+        String dataFormat = request.getParameter("dataFormat");
         ExtendArea area = model.getExtendById(areaId);
-        ExtendAreaViewObject areaVo = ResourceUtils.buildValueObject(model, area);
-        result.setData(areaVo);
+        reportDesignModelService.updateAreaWithDataFormat(area, dataFormat);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getFormatModel().getDataFormat());
         result.setStatusInfo(SUCCESS);
         return result;
     }
@@ -954,11 +969,12 @@ public class ReportDesignModelResource {
         
         logger.info("successfully create area for current report");
         result.setStatus(0);
-        String dataFormat = request.getParameter("dataFormat");
         ExtendArea area = model.getExtendById(areaId);
-        reportDesignModelService.updateAreaWithDataFormat(area, dataFormat);
-        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
-        result.setData(area.getFormatModel().getDataFormat());
+        if (area.getFormatModel().getDataFormat().isEmpty()) {
+        		result.setData(null);
+        } else {
+        		result.setData(area.getFormatModel().getDataFormat());
+        }
         result.setStatusInfo(SUCCESS);
         return result;
     }

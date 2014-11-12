@@ -424,15 +424,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 	@Override
 	public void updateAreaWithDataFormat(ExtendArea area, String dataFormat) {
 		FormatModel model = area.getFormatModel();
-		if (model == null) {
-			model = new FormatModel();
-		}
-		if (model.getDataFormat() == null) {
-			model.setDataFormat(Maps.newHashMap());
-		}
-		
 		model.getDataFormat().putAll(convertStr2Map(dataFormat));
-		
 	}
 
 	/**

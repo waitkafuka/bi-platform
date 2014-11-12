@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -911,12 +912,17 @@ public class DataModelUtils {
 		for (int i = 0; i < colDatas.size(); ++i) {
 			ColDefine define = table.getColDefine().get(i);
 			String uniqueName = define.getUniqueName();
-			String formatStr = dataFormat.get("default_format");
+			String formatStr = dataFormat.get("defaultFormat");
+			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","");
 			if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
 				formatStr = dataFormat.get(uniqueName);
 			}
-			for (CellData data : colDatas.get(i)) {
-				data.setFormattedValue(formatStr);
+			if (!StringUtils.isEmpty(formatStr)) {
+//				DecimalFormat format = new DecimalFormat(formatStr);
+				define.setFormat(formatStr);
+//				for (CellData data : colDatas.get(i)) {
+//					data.setFormattedValue(format.format(data.getV()));
+//				}
 			}
 		}
 	}
