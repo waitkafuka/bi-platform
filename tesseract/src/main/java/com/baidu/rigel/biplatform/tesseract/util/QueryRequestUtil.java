@@ -26,12 +26,12 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,10 +156,11 @@ public class QueryRequestUtil {
         // process and condition
         Map<String, List<String>> andCondition = transQueryRequestAndList2Map(query);
         for (String fieldName : andCondition.keySet()) {
-            QueryParser parser = new QueryParser(fieldName, new StandardAnalyzer());
+            //QueryParser parser = new QueryParser(fieldName, new StandardAnalyzer());
             BooleanQuery subQuery = new BooleanQuery();
             for (String qs : andCondition.get(fieldName)) {
-                subQuery.add(parser.parse(qs), Occur.SHOULD);
+				subQuery.add(new TermQuery(new Term(fieldName, qs)),
+						Occur.SHOULD);
             }
             queryAll.add(subQuery, Occur.MUST);
         }

@@ -6,9 +6,6 @@
 define(['url', 'constant'], function (Url, Constant) {
 
     return Backbone.Model.extend({
-        defaults: {
-            dataformatOptions: Constant.DATA_FORMAT_OPTIONS
-        },
         /**
          * 构造函数
          *
@@ -148,16 +145,36 @@ define(['url', 'constant'], function (Url, Constant) {
                 url: Url.getDataFormatList(this.reportId, compId),
                 type: 'get',
                 success: function (data) {
-                    var dataFormatList = data.data;
-                    dataFormatList.dataformatOptions = that.get('dataformatOptions');
-                    var indList = window.dataInsight.main.model.get('indList').data;
-                    // TODO:遍历
-                    for(var i = 0, iLen = indList.length; i < iLen; i ++) {
-                        if (dataFormatList.dataformat[indList[i].name]) {
-                            dataFormatList.dataformat[indList[i].name].name = indList[i].caption;
+                    var sourceData = data.data;
+                    var targetData;
+                    var indList;
+
+                    if (sourceData) {
+                        // 组合数据格式列表项
+                        targetData = {
+                            options: Constant.DATA_FORMAT_OPTIONS,
+                            dataFormat: {}
+                        };
+                        /**
+                         * 后端返回的数据格式，name:format
+                         * 需要组合成的数据格式：name: { format: '', caption: ''}
+                         * 获取左侧所有指标，遍历,为了获取caption
+                         *
+                         */
+                        indList = dataInsight.main.model.get('indList').data;
+                        for(var i = 0, iLen = indList.length; i < iLen; i ++) {
+                            var name = indList[i].name;
+                            if (sourceData.hasOwnProperty(name)) {
+                                var formatObj = {
+                                    format: sourceData[name],
+                                    caption: indList[i].caption
+                                };
+                                targetData.dataFormat[name] = formatObj;
+                            }
                         }
+                        targetData.defaultFormat = sourceData.defaultFormat;
                     }
-                    success(dataFormatList);
+                    success(targetData);
                 }
             });
         },

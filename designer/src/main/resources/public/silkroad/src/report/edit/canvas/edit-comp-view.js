@@ -678,16 +678,22 @@ define([
                  * 打开数据格式设置弹框
                  */
                 function openDataFormatDialog(data) {
-                    var html = dataFormatSettingTemplate.render(
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+
+                    html = dataFormatSettingTemplate.render(
                         data
                     );
                     dialog.showDialog({
                         title: '数据格式',
                         content: html,
-                        resizable: false,
                         dialog: {
                             width: 340,
-                            height: 500,
+                            height: 400,
+                            resizable: false,
                             buttons: [
                                 {
                                     text: '提交',
@@ -719,6 +725,7 @@ define([
                     });
                     that.model.saveDataFormatInfo(compId, data, function () {
                         $dialog.dialog('close');
+                        that.canvasView.showReport();
                     });
                 }
             },
