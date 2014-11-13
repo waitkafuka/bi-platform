@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-logging</artifactId>
-            <scope>provide</scope>
+            <scope>provided</scope>
         </dependency>
         <dependency>
 				<groupId>commons-lang</groupId>
