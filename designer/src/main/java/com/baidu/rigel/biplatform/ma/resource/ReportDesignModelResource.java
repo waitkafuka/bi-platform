@@ -788,7 +788,7 @@ public class ReportDesignModelResource {
             return result;
         }
         // remove unused format define
-        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getName());
+        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
         if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
         		model.getExtendById(areaId).getFormatModel().getDataFormat().clear();
         }

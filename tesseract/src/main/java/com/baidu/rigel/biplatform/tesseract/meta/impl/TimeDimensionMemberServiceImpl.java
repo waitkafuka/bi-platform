@@ -453,6 +453,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
             dayMember.setParent(parentMember);
             dayMember.setName(day);
             dayMember.setVisible(true);
+            dayMember.getQueryNodes().add(day);
             members.add(dayMember);
         }
         return members;
@@ -477,12 +478,12 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         for (String month : months) {
             String memberName = "[Time]." + tmpArray[1] + ".[" + month.substring(0, 2) + "]";
             MiniCubeMember monthMember = new MiniCubeMember(memberName);
-            monthMember.setCaption(tmpArray[1] + "年" + month.substring(0, 2) + "月");
+            monthMember.setCaption(tmpArray[1].substring(1, 5) + "年" + month.substring(0, 2) + "月");
             monthMember.setLevel(level);
-            monthMember.setName(name);
+            monthMember.setName(tmpArray[1].substring(1, 5) + month);
             monthMember.setParent(parentMember);
             monthMember.setVisible(true);
-            cal.set(Calendar.YEAR, Integer.valueOf(tmpArray[1]));
+            cal.set(Calendar.YEAR, Integer.valueOf(tmpArray[1].substring(1, 5)));
             cal.set(Calendar.MONTH, Integer.valueOf(month.substring(0, 2))-1);
             cal.set(Calendar.DATE, 1);
             int daysOfMonth = cal.getActualMaximum(Calendar.DATE);
