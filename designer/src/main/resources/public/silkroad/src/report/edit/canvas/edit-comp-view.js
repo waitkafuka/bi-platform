@@ -13,7 +13,8 @@ define([
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
         'report/edit/canvas/comp-setting-liteolap-template',
-        'report/edit/canvas/default-selected-time-setting-template'
+        'report/edit/canvas/default-selected-time-setting-template',
+        'report/edit/canvas/data-format-setting-template'
     ],
     function (
         template,
@@ -22,14 +23,16 @@ define([
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
         compSettingLITEOLAPTemplate,
-        defaultSelectedTimeSettingTemplate
+        defaultSelectedTimeSettingTemplate,
+        dataFormatSettingTemplate
     ) {
 
         return Backbone.View.extend({
             events: {
                 'click .j-comp-setting .j-delete': 'deleteCompAxis',
                 'click .j-report': 'removeCompEditBar',
-                'click .j-set-default-time': 'openTimeSettingDialog'
+                'click .j-set-default-time': 'openTimeSettingDialog',
+                'click .j-set-data-format': 'getDataFormatList'
             },
 
             /**
@@ -658,6 +661,73 @@ define([
                         ]
                     }
                 });
+            },
+            /**
+             * 获取数据格式信息，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getDataFormatList: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+
+                that.model.getDataFormatList(compId, openDataFormatDialog);
+
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+
+                    html = dataFormatSettingTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '数据格式',
+                        content: html,
+                        dialog: {
+                            width: 340,
+                            height: 400,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveDataFormInfo($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveDataFormInfo($dialog) {
+                    var selects = $('.data-format').find('select');
+                    var data = {};
+
+                    selects.each(function () {
+                        var $this = $(this);
+                        var name = $this.attr('name');
+                        data[name] = $this.val();
+                    });
+                    that.model.saveDataFormatInfo(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
             },
 
             /**

@@ -546,6 +546,7 @@ public class QueryDataResource {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
+        DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * 每次查询以后，清除选中行，设置新的
@@ -814,6 +815,7 @@ public class QueryDataResource {
             runTimeModel.getContext().put("bread_key", mainDims);
         } 
         this.reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
         resultMap.put("pivottable", table);
         resultMap.put("rowCheckMin", 1);
         resultMap.put("rowCheckMax", 5);
@@ -985,6 +987,7 @@ public class QueryDataResource {
         }
         
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+        		DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
             resultMap.put("pivottable", table);
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);

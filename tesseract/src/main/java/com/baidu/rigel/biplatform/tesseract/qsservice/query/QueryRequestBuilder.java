@@ -84,7 +84,7 @@ public class QueryRequestBuilder {
         }
 
         int start = 0;
-        int size = 1000000;
+        int size = -1;
         if (questionModel.getPageInfo() != null) {
             start = questionModel.getPageInfo().getPageNo() * questionModel.getPageInfo().getPageSize();
             size = questionModel.getPageInfo().getPageSize();

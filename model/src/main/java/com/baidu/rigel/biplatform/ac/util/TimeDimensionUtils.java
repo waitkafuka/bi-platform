@@ -22,7 +22,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -40,7 +41,7 @@ public class TimeDimensionUtils {
     /**
      * LOG
      */
-    private static Logger LOG = Logger.getLogger(TimeDimensionUtils.class);
+    private static Logger LOG = LoggerFactory.getLogger(TimeDimensionUtils.class);
 
     /**
      * DEFAULT_SIMPLE_DATEFORMAT yyyy-MM-dd
