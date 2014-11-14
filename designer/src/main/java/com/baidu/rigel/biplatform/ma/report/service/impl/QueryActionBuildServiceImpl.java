@@ -39,6 +39,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
+import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
@@ -346,7 +347,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             Object value = update && values.containsKey(elementId) ? values.get(elementId) : item
                     .getParams().get(elementId);
             OlapElement element = ItemUtils.getOlapElementByItem(item, schema, cubeId);
-            if (value != null && element instanceof TimeDimension) {
+            if (value != null && element instanceof TimeDimension && 
+            		!value.toString().toLowerCase().contains("all")) {
                 String start;
                 String end;
                 try {
@@ -356,6 +358,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                      */
                     start = json.getString("start").replace("-", "");
                     end = json.getString("end").replace("-", "");
+                    TimeDimension timeDim = (TimeDimension) element;
+                    Map<String, String> time= TimeUtils.getTimeCondition(start, end, timeDim.getDataTimeType());
+                    start = time.get("start");
+                    end = time.get("end");
                 } catch (JSONException e) {
                     logger.warn(
                             "Time Condition not Correct. Maybe from row."
@@ -391,12 +397,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     calendar.add(Calendar.MONTH, -1);
                     range = new TimeRangeDetail(df.format(calendar.getTime()), end);
                 }
-                String[] days = new String[range.getDays().length];
+                /**
+				 * TODO 
+                 * modify by jiangyichao at 2014-11-10
+                 *  仅处理单选
+                 */
+                String[] days = new String[1];
                 for (int i = 0; i < days.length; i++) {
                     days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
                 }
                 value = days;
-
+                logger.debug(value.toString());
             }
             itemValues.put(item, value);
         }
