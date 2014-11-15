@@ -151,7 +151,7 @@ public class TimeRangeDetail {
         }
         
         List<String> days = Lists.newArrayList();
-        if (beginYear - endYear >= 1) {
+        if (endYear - beginYear >= 1) {
             String[] allDays = getDaysMoreThanOneYear(beginYear, beginMonth, 
                     beginDay, endYear, endMonth, endDay);
             Collections.addAll(days, allDays); 
@@ -211,7 +211,8 @@ public class TimeRangeDetail {
      */
     private String[] getDaysToDayFromBeginOfYear(int endYear, int endMonth, int endDay) {
         List<String> days = Lists.newArrayList();
-        Collections.addAll(days, getDayOfMonth(endYear, endMonth, endDay));
+        // modify by jiangyichao at 2014-11-12 获取截止月到截止日期
+        Collections.addAll(days, getDayOfMonth(endYear, endMonth, 1, endDay));
         for (int begin = endMonth - 1; begin >= 1; --begin) {
             Collections.addAll(days, getDayOfMonth(endYear, begin));
         }

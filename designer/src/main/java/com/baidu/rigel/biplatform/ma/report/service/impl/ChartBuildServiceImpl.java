@@ -70,6 +70,8 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         SeriesInputInfo seriesInput = new SeriesInputInfo();
         if (isTimeOnX) {
             seriesInput.setType(SeriesUnitType.LINE);
+        } else if (tableResult.getRowDefine().size() == 1) {
+        		seriesInput.setType(SeriesUnitType.PIE);
         } else {
             seriesInput.setType(SeriesUnitType.BAR);
         }
