@@ -93,6 +93,9 @@ public class QueryRequest implements Serializable {
      */
     private ReportDesignModel reportModel;
     
+    /**
+     * 数据源定义
+     */
     private DataSourceInfo dataSourceInfo;
 
     
