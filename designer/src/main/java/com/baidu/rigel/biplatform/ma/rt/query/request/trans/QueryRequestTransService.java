@@ -17,8 +17,8 @@ package com.baidu.rigel.biplatform.ma.rt.query.request.trans;
 
 import org.springframework.util.StringUtils;
 
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryRequest;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryRequest;
 
 /**
  * 查询请求转换服务类

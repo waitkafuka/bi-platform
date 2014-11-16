@@ -35,8 +35,8 @@ import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryStrategy;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 

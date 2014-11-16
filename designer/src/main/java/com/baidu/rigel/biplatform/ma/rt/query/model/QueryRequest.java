@@ -16,7 +16,7 @@
 /**
  * 
  */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
+package com.baidu.rigel.biplatform.ma.rt.query.model;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;

@@ -42,11 +42,11 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.utils.ItemUtils;
+import com.baidu.rigel.biplatform.ma.rt.query.model.OrderType;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryRequest;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 import com.baidu.rigel.biplatform.ma.rt.query.request.asst.SchemaManageServiceHelper;
-import com.baidu.rigel.biplatform.ma.rt.query.service.OrderType;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryRequest;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryStrategy;
 import com.baidu.rigel.biplatform.ma.rt.utils.OlapElementQueryUtils;
 import com.google.common.collect.Maps;
 

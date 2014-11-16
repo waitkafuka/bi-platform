@@ -13,24 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
-
 /**
  * 
- * 图类型名称
- *
+ */
+package com.baidu.rigel.biplatform.ma.rt.query.model;
+
+/**
+ * 排序方式
  * @author wangyuxue
  * @version 1.0.0.1
  */
-public interface ChartTypeNames {
+public enum OrderType {
     
     /**
-     * 柱状图
+     * 升序
      */
-    String bar = "BAR";
+    ASC,
     
     /**
-     * 趋势图
+     * 降序
      */
-    String trend = "TREND";
+    DESC;
 }

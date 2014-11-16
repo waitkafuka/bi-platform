@@ -13,25 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 
- */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
 
 /**
- * 排序方式
+ * QueryRequest构建包，用于构建查询请求
  * @author wangyuxue
  * @version 1.0.0.1
  */
-public enum OrderType {
-    
-    /**
-     * 升序
-     */
-    ASC,
-    
-    /**
-     * 降序
-     */
-    DESC;
-}
+package com.baidu.rigel.biplatform.ma.rt.request.build;
