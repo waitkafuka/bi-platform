@@ -20,6 +20,8 @@ package com.baidu.rigel.biplatform.ma.rt;
 
 import java.io.Serializable;
 
+import org.springframework.context.ApplicationContext;
+
 /**
  * 运行时上下文：用来存储运行时全局变量信息，比如全局过滤条件，全局ACL参数等
  * 注意：运行时上下文只对当前浏览报表有关，不同报表有不同上下文,不同报表之间上下文完全隔离
@@ -34,6 +36,27 @@ public final class Context implements Serializable {
      * description:
      */
     private static final long serialVersionUID = -8040634498675056473L;
+    
+    /**
+     * spring application，每个运行时包含一个全局的ApplicationContext
+     */
+    private ApplicationContext appContext;
+    
+    /**
+     * 构造函数
+     * @param context ApplicationContext
+     */
+    public Context(ApplicationContext context) {
+    		this.appContext = context;
+    }
+    
+    /**
+     *  获取当前运行时上下文环境对应的spring 运行时
+     * @return ApplicationContext spring运行时
+     */
+    public ApplicationContext getApplicationContext() {
+    		return appContext;
+    }
     
     
     

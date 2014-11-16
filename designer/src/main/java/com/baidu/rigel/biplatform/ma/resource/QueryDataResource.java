@@ -585,8 +585,7 @@ public class QueryDataResource {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
-                chart = chartBuildService.parseToChart(table,
-                        element instanceof TimeDimension);
+                chart = chartBuildService.parseToChart(table, element instanceof TimeDimension );
             } else {
                 chart = chartBuildService.parseToChart(table, false);
             }

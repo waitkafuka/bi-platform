@@ -51,10 +51,6 @@ public final class QueryRequestTransService {
             throw new IllegalArgumentException("查询请求异常，未指定正确请求策略。当前策略为null");
         }
         
-        if (StringUtils.isEmpty(request.getReportId())) {
-            throw new IllegalArgumentException("查询请求异常，未指定正确报表id。当前报表ID为nulll");
-        }
-        
         if (StringUtils.isEmpty(request.getAreaId())) {
             throw new IllegalArgumentException("查询请求异常，未指定正确报表扩展区域id。当前报表areaId为nulll");
         }

@@ -16,7 +16,6 @@
 package com.baidu.rigel.biplatform.ma.report.model;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Map;
 
 import org.springframework.util.StringUtils;
@@ -133,10 +132,10 @@ public class Item implements Serializable {
     
     public Map<String, Object> getParams() {
         if (params != null) {
-            return Collections.unmodifiableMap(this.params);
+            return this.params;
         }
         params = Maps.newHashMap();
-        return Collections.unmodifiableMap(this.params);
+        return this.params;
     }
     
     public void setParams(Map<String, Object> params) {

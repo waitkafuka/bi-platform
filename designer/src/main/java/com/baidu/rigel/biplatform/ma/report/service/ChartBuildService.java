@@ -32,5 +32,5 @@ public interface ChartBuildService {
      * @param tableResult
      * @return
      */
-    DIReportChart parseToChart(PivotTable tableResult, boolean isTimeOnX);
+    DIReportChart parseToChart(PivotTable tableResult, boolean chartType);
 }
