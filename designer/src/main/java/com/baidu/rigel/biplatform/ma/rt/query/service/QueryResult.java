@@ -35,7 +35,7 @@ public class QueryResult implements Serializable {
     private static final long serialVersionUID = 7182582173101126929L;
     
     /**
-     * 为失陪rest service的JSON结构结果，将查询结果封装成map结构
+     * rest service的JSON结构结果，将查询结果封装成map结构
      */
     private final Map<String, Serializable> mapDatas;
     

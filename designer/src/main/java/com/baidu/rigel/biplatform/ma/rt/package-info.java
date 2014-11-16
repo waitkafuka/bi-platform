@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 /**
- * 工具包：提供方便的工具操作类
- * @author wangyuxue
+ * 运行时基础包
+ *  @author wangyuxue
  * @version 1.0.0.1
  */
-package com.baidu.rigel.biplatform.ma.rt.utils;
+package com.baidu.rigel.biplatform.ma.rt;

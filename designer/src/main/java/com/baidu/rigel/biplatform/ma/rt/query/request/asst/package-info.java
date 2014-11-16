@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 /**
- * 工具包：提供方便的工具操作类
+ * 助手包：为查询请求提供方便的类型变换操作接口
  * @author wangyuxue
  * @version 1.0.0.1
  */
-package com.baidu.rigel.biplatform.ma.rt.utils;
+package com.baidu.rigel.biplatform.ma.rt.query.request.asst;

@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * 工具包：提供方便的工具操作类
+ * 查询服务接口实现
  * @author wangyuxue
  * @version 1.0.0.1
  */
-package com.baidu.rigel.biplatform.ma.rt.utils;
+package com.baidu.rigel.biplatform.ma.rt.query.service.impl;
