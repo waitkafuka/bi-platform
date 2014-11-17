@@ -143,9 +143,9 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     logger.debug("can not get item with item id : " + item.getOlapElementId());
                     return null;
                 }
-                if (item.getFormatModel() != null) {
-                    oldItem.setFormatModel(item.getFormatModel());
-                }
+//                if (item.getFormatModel() != null) {
+//                    oldItem.setFormatModel(item.getFormatModel());
+//                }
                 if (item.getParams() != null) {
                     oldItem.setParams(item.getParams());
                 }

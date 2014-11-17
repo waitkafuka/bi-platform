@@ -71,7 +71,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         if (chartType) {
             seriesInput.setType(SeriesUnitType.LINE);
         }  else {
-            seriesInput.setType(SeriesUnitType.BAR);
+            seriesInput.setType(SeriesUnitType.PIE);
         }
         seriesInput.setyAxisName("test_axis");
         List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInput, tableResult);

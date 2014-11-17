@@ -67,10 +67,10 @@ public class Item implements Serializable {
      */
     private String areaId;
     
-    /**
-     * 格式定义
-     */
-    private FormatModel formatModel;
+//    /**
+//     * 格式定义
+//     */
+//    private FormatModel formatModel;
     
     /**
      * 参数定义 key 为 参数名称 value为默认值
@@ -122,13 +122,13 @@ public class Item implements Serializable {
         this.areaId = areaId;
     }
     
-    public FormatModel getFormatModel() {
-        return formatModel;
-    }
-    
-    public void setFormatModel(FormatModel formatModel) {
-        this.formatModel = formatModel;
-    }
+//    public FormatModel getFormatModel() {
+//        return formatModel;
+//    }
+//    
+//    public void setFormatModel(FormatModel formatModel) {
+//        this.formatModel = formatModel;
+//    }
     
     public Map<String, Object> getParams() {
         if (params != null) {

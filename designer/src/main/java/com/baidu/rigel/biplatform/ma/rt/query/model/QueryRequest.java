@@ -25,6 +25,7 @@ import java.util.Map;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.rt.Context;
+import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Maps;
 
 /**
@@ -86,17 +87,18 @@ public class QueryRequest implements Serializable {
     /**
      * 当前请求报表查询对应的运行时上下文
      */
-    private Context context;
+    private ExtendAreaContext context;
     
     /**
      * 当前查询请求对应的报表定义
      */
     private ReportDesignModel reportModel;
     
+    private final Map<String, Object> globalParams;
+    
     /**
      * 数据源定义
      */
-    private DataSourceInfo dataSourceInfo;
 
     
     /**
@@ -104,9 +106,9 @@ public class QueryRequest implements Serializable {
      * @param queryStrategy 查询策略
      * QueryRequest
      */
-    public QueryRequest(QueryStrategy queryStrategy, Context context, 
-    		    ReportDesignModel model, DataSourceInfo ds) {
-    		this.dataSourceInfo = ds;
+    public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context, 
+    		    ReportDesignModel model, Map<String, Object> globalParams) {
+    		this.globalParams = globalParams;
     		this.reportModel = model;
         this.queryStrategy = queryStrategy;
         this.context = context;
@@ -247,7 +249,7 @@ public class QueryRequest implements Serializable {
 	 * 查询请求对应报表的运行时上下文
 	 * @return the context
 	 */
-	public Context getContext() {
+	public ExtendAreaContext getContext() {
 		return context;
 	}
 
@@ -262,7 +264,7 @@ public class QueryRequest implements Serializable {
 	 * @return the dataSourceInfo
 	 */
 	public DataSourceInfo getDataSourceInfo() {
-		return dataSourceInfo;
+		return context.getDefaultDsInfo();
 	}
 	
 }

@@ -265,7 +265,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     break;
                 }
             }
-            if (timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
+            if (timeDimItem != null && timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
             		Map<String, Object> params = DeepcopyUtils.deepCopy(timeDimItem.getParams());
             		params.put("range", true);
             		timeDimItem.setParams(params);
