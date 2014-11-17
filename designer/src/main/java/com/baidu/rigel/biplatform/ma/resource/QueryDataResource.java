@@ -70,6 +70,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
+import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo.SeriesUnitType;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
@@ -585,9 +586,16 @@ public class QueryDataResource {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
-                chart = chartBuildService.parseToChart(table, element instanceof TimeDimension );
+                if (element instanceof TimeDimension) {
+                	chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
+//                } else if(action.getColumns().size() == 1 && runTimeModel.getContext().get("hasPieChart") == null) {
+//	                runTimeModel.getContext().put("hasPieChart", 1);
+//                		chart = chartBuildService.parseToChart(table, SeriesUnitType.PIE);
+                } else {
+                	chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
+                }
             } else {
-                chart = chartBuildService.parseToChart(table, false);
+                chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
             }
             
             resultMap.put("reportChart", chart);

@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.report.service;
 
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
+import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo.SeriesUnitType;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 
 /**
@@ -32,5 +33,5 @@ public interface ChartBuildService {
      * @param tableResult
      * @return
      */
-    DIReportChart parseToChart(PivotTable tableResult, boolean chartType);
+    DIReportChart parseToChart(PivotTable tableResult, SeriesUnitType chartType);
 }
