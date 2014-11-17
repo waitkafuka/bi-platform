@@ -13,18 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.rt.query.request.asst;
-
-import org.junit.Test;
-import org.springframework.util.Assert;
-
-public class BiPlatformServiceLocatorTest {
-    
-    /**
-     * 
-     */
-    @Test
-    public void testGetService() {
-        Assert.notNull(BiPlatformServiceLocator.getDataSourceService());
-    }
-}
+/**
+ * 
+ * 查询结果协议转换包：负责将查询的DataModel转换成能够适应客户端展现的结果
+ * 展现结果包括：查询状态、查询结果、查询异常信息等，不同的查询请求策略，有不同的转换方式
+ * 
+ * @author wangyuxue
+ * @version 1.0.0.1
+ */
+package com.baidu.rigel.biplatform.ma.rt.query.result.trans;

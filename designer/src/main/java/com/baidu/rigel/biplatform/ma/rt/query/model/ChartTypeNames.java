@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.baidu.rigel.biplatform.ma.rt.query.model;
+
 /**
  * 
- */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
-
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
-
-/**
+ * 图类型名称
  *
  * @author wangyuxue
  * @version 1.0.0.1
  */
-public interface QuestionModelBuildService {
+public interface ChartTypeNames {
     
     /**
-     * 构建问题模型
-     * @param action query action
-     * @return 问题模型
+     * 柱状图
      */
-    QuestionModel buildQuestionModel (QueryAction action);
+    String bar = "BAR";
     
+    /**
+     * 趋势图
+     */
+    String trend = "TREND";
 }

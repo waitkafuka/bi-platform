@@ -186,6 +186,9 @@ public class ExtendArea implements Serializable {
 	 * @return the formatModel
 	 */
 	public FormatModel getFormatModel() {
+	    if (this.formatModel == null) {
+	        this.formatModel = new FormatModel();
+	    }
 		return formatModel;
 	}
 

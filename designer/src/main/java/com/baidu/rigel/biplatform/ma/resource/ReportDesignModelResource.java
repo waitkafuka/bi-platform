@@ -788,7 +788,7 @@ public class ReportDesignModelResource {
             return result;
         }
         // remove unused format define
-        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getName());
+        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
         if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
         		model.getExtendById(areaId).getFormatModel().getDataFormat().clear();
         }
@@ -966,15 +966,9 @@ public class ReportDesignModelResource {
             result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
             return result;
         }
-        
-        logger.info("successfully create area for current report");
         result.setStatus(0);
         ExtendArea area = model.getExtendById(areaId);
-        if (area.getFormatModel().getDataFormat().isEmpty()) {
-        		result.setData(null);
-        } else {
-        		result.setData(area.getFormatModel().getDataFormat());
-        }
+        	result.setData(area.getFormatModel().getDataFormat());
         result.setStatusInfo(SUCCESS);
         return result;
     }

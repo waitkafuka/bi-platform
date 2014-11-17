@@ -13,24 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
-
 /**
- * 
- * 图类型名称
- *
+ * 查询服务接口定义
  * @author wangyuxue
  * @version 1.0.0.1
  */
-public interface ChartTypeNames {
-    
-    /**
-     * 柱状图
-     */
-    String bar = "BAR";
-    
-    /**
-     * 趋势图
-     */
-    String trend = "TREND";
-}
+package com.baidu.rigel.biplatform.ma.rt.query.service;

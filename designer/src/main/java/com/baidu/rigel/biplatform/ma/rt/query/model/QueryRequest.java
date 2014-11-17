@@ -16,12 +16,16 @@
 /**
  * 
  */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
+package com.baidu.rigel.biplatform.ma.rt.query.model;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.rt.Context;
+import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Maps;
 
 /**
@@ -43,11 +47,6 @@ public class QueryRequest implements Serializable {
      * 请求参数：封装用户请求的个性化参数
      */
     private Map<String, Object> params = Maps.newHashMap();
-    
-    /**
-     * 报表id
-     */
-    private String reportId;
     
     /**
      * 区域id
@@ -84,6 +83,22 @@ public class QueryRequest implements Serializable {
      * 查询策略
      */
     private final QueryStrategy queryStrategy;
+    
+    /**
+     * 当前请求报表查询对应的运行时上下文
+     */
+    private ExtendAreaContext context;
+    
+    /**
+     * 当前查询请求对应的报表定义
+     */
+    private ReportDesignModel reportModel;
+    
+    private final Map<String, Object> globalParams;
+    
+    /**
+     * 数据源定义
+     */
 
     
     /**
@@ -91,8 +106,12 @@ public class QueryRequest implements Serializable {
      * @param queryStrategy 查询策略
      * QueryRequest
      */
-    public QueryRequest(QueryStrategy queryStrategy) {
+    public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context, 
+    		    ReportDesignModel model, Map<String, Object> globalParams) {
+    		this.globalParams = globalParams;
+    		this.reportModel = model;
         this.queryStrategy = queryStrategy;
+        this.context = context;
     }
     
     /**
@@ -121,23 +140,6 @@ public class QueryRequest implements Serializable {
     public void setParams(Map<String, Object> params) {
         this.params = params;
     }
-
-
-    /**
-     * @return the reportId
-     */
-    public String getReportId() {
-        return reportId;
-    }
-
-
-    /**
-     * @param reportId the reportId to set
-     */
-    public void setReportId(String reportId) {
-        this.reportId = reportId;
-    }
-
 
     /**
      * @return the areaId
@@ -243,4 +245,26 @@ public class QueryRequest implements Serializable {
         this.conditions = conditions;
     }
 
+	/**
+	 * 查询请求对应报表的运行时上下文
+	 * @return the context
+	 */
+	public ExtendAreaContext getContext() {
+		return context;
+	}
+
+	/**
+	 * @return the reportModel
+	 */
+	public ReportDesignModel getReportModel() {
+		return reportModel;
+	}
+
+	/**
+	 * @return the dataSourceInfo
+	 */
+	public DataSourceInfo getDataSourceInfo() {
+		return context.getDefaultDsInfo();
+	}
+	
 }

@@ -13,31 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.rt.utils;
+package com.baidu.rigel.biplatform.ma.rt.request.build;
 
-import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import java.util.Map;
+
 import com.baidu.rigel.biplatform.ma.rt.Context;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryRequest;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 
 /**
- * 工具类：用于提供运行时环境初始化、运行时上下文操作等
- *
+ * 查询请求构建工具类：负责将用户的请求封装成查询请求（QueryRequest）
  * @author wangyuxue
- * @version 1.0.0.1
+ * @since 1.1.0
+ * 
  */
-public final class RuntimeEvnUtil {
-    
+public final class QueryRequestBuilder {
+	
 	/**
-	 * 构造函数
+	 * 查询请求
 	 */
-	private RuntimeEvnUtil () {
+	private QueryRequestBuilder() {
 	}
 	
 	/**
-	 * 根据报表id初始化报表对应运行时啥下文
-	 * @param designModel 报表模型
-	 * @return Context 运行时上下文
+	 * 查询请求构建对象
+	 * @param context
+	 * @param params
+	 * @return QueryRequest
 	 */
-	public static final Context initContext(ReportDesignModel designModel) {
+	public static QueryRequest buildQueryRequest(Context context, QueryStrategy queryStrategy, 
+				Map<String, Object> params) {
 		return null;
 	}
 }

@@ -16,23 +16,22 @@
 /**
  * 
  */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
-
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+package com.baidu.rigel.biplatform.ma.rt.query.model;
 
 /**
- *
+ * 排序方式
  * @author wangyuxue
  * @version 1.0.0.1
  */
-public interface QuestionModelBuildService {
+public enum OrderType {
     
     /**
-     * 构建问题模型
-     * @param action query action
-     * @return 问题模型
+     * 升序
      */
-    QuestionModel buildQuestionModel (QueryAction action);
+    ASC,
     
+    /**
+     * 降序
+     */
+    DESC;
 }

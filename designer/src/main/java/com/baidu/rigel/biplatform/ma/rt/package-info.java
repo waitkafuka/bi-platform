@@ -14,24 +14,8 @@
  * limitations under the License.
  */
 /**
- * 
- */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
-
-/**
- * 排序方式
- * @author wangyuxue
+ * 运行时基础包
+ *  @author wangyuxue
  * @version 1.0.0.1
  */
-public enum OrderType {
-    
-    /**
-     * 升序
-     */
-    ASC,
-    
-    /**
-     * 降序
-     */
-    DESC;
-}
+package com.baidu.rigel.biplatform.ma.rt;

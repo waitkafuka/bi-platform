@@ -14,25 +14,8 @@
  * limitations under the License.
  */
 /**
- * 
- */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
-
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
-
-/**
- *
+ * 助手包：为查询请求提供方便的类型变换操作接口
  * @author wangyuxue
  * @version 1.0.0.1
  */
-public interface QuestionModelBuildService {
-    
-    /**
-     * 构建问题模型
-     * @param action query action
-     * @return 问题模型
-     */
-    QuestionModel buildQuestionModel (QueryAction action);
-    
-}
+package com.baidu.rigel.biplatform.ma.rt.query.request.asst;

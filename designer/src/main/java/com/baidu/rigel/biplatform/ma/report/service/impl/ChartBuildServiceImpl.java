@@ -56,7 +56,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * (com.baidu.rigel.biplatform.ma.report.query.pivotTable.PivotTable)
      */
     @Override
-    public DIReportChart parseToChart(PivotTable tableResult, boolean isTimeOnX) {
+    public DIReportChart parseToChart(PivotTable tableResult, boolean chartType) {
 
         DIReportChart reportChart = new DIReportChart();
         reportChart.setTitle("趋势图");
@@ -68,10 +68,10 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         // continue;
         // }
         SeriesInputInfo seriesInput = new SeriesInputInfo();
-        if (isTimeOnX) {
+        if (chartType) {
             seriesInput.setType(SeriesUnitType.LINE);
-        } else {
-            seriesInput.setType(SeriesUnitType.BAR);
+        }  else {
+            seriesInput.setType(SeriesUnitType.PIE);
         }
         seriesInput.setyAxisName("test_axis");
         List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInput, tableResult);
@@ -88,8 +88,8 @@ public class ChartBuildServiceImpl implements ChartBuildService {
          * use the x axis from query result from first series.
          */
 
-        reportChart.setxAxisCategories(getXAxisCategories(tableResult, isTimeOnX));
-        if (isTimeOnX) {
+        reportChart.setxAxisCategories(getXAxisCategories(tableResult, chartType));
+        if (chartType) {
             reportChart.setxAxisType(XAxisType.DATETIME.getName());
         } else {
             reportChart.setxAxisType(XAxisType.CATEGORY.getName());

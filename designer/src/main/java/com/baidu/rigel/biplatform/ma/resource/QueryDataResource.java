@@ -386,6 +386,18 @@ public class QueryDataResource {
         
         Map<String, String[]> contextParams = request.getParameterMap();
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
+        Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
+        Map<String, Object> newParams = Maps.newHashMap();
+        for (String key : oldParams.keySet()) {
+        	String value = oldParams.get(key).toString();
+        	if (!(value.contains("start") && value.contains("end"))) {
+        		newParams.put(key, value);
+        	}
+        }
+        runTimeModel.getContext().reset();
+        runTimeModel.getContext().setParams(newParams);
+        
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
@@ -423,7 +435,17 @@ public class QueryDataResource {
         /**
          * TODO 暂时用全局的覆盖本地的参数，以后考虑是否会有问题
          */
-        queryParams.putAll(localContext.getParams());
+        Map<String, Object> localParams = localContext.getParams();
+        /**
+         * 仅保留一个时间条件
+         */
+        for (String key : localParams.keySet()) {
+        	String value = localParams.get(key).toString();
+        	if (value.contains("start") && value.contains("end")) {
+        		localParams.remove(key);
+        	}
+        }
+        queryParams.putAll(localParams);
         if (runTimeModel.getContext() != null) {
             queryParams.putAll(runTimeModel.getContext().getParams());
         } else {
@@ -563,8 +585,7 @@ public class QueryDataResource {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
-                chart = chartBuildService.parseToChart(table,
-                        element instanceof TimeDimension);
+                chart = chartBuildService.parseToChart(table, element instanceof TimeDimension );
             } else {
                 chart = chartBuildService.parseToChart(table, false);
             }
