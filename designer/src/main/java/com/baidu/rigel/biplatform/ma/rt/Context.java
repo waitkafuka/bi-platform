@@ -73,7 +73,7 @@ public final class Context implements Serializable {
 	/**
 	 * @return the globalParams
 	 */
-	public Map<String, Object> getGlobalParams() {
+	public ConcurrentHashMap<String, Object> getGlobalParams() {
 		return globalParams;
 	}
 

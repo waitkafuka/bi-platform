@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 
- */
 package com.baidu.rigel.biplatform.ma.rt.query.model;
 
 import java.io.Serializable;
@@ -108,8 +105,8 @@ public class QueryRequest implements Serializable {
      */
     public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context, 
     		    ReportDesignModel model, Map<String, Object> globalParams) {
-    		this.globalParams = globalParams;
-    		this.reportModel = model;
+        this.globalParams = globalParams;
+        this.reportModel = model;
         this.queryStrategy = queryStrategy;
         this.context = context;
     }
