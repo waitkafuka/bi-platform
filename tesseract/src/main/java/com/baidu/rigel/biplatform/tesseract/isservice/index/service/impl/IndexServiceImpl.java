@@ -404,7 +404,7 @@ public class IndexServiceImpl implements IndexService {
                         whereList = new ArrayList<String>();
                     }
                     BigDecimal maxId = idxMeta.getDataDescInfo().getMaxDataId(tableName);
-                    if (!maxId.equals(BigDecimal.ZERO)) {
+                    if (maxId != null && !maxId.equals(BigDecimal.ZERO)) {
                         String where = idxMeta.getDataDescInfo().getIdStr() + " > "
                             + maxId.longValue();
                         whereList.add(where);
