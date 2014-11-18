@@ -35,10 +35,8 @@ import org.apache.lucene.search.TermQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
-import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
@@ -118,7 +116,7 @@ public class QueryRequestUtil {
                     if (valueSet == null) {
                         valueSet = new HashSet<String>();
                     }
-                    if(MetaNameUtil.isAllMemberName(qo.getValue()) || StringUtils.equals(MiniCubeMember.SUMMARY_NODE_NAME, qo.getValue())){
+                    if(qo.isSummary()){
                         allDims.put(ex.getProperties(), qo.getValue());
                     }else if(!StringUtils.equals(leaf, qo.getValue())){
                         valueSet.add(qo.getValue());
@@ -280,7 +278,7 @@ public class QueryRequestUtil {
     public static TesseractResultSet processGroupBy(TesseractResultSet dataSet,
             QueryRequest query) throws NoSuchFieldException {
         
-        LinkedList<ResultRecord> transList = new LinkedList<ResultRecord>();
+        LinkedList<ResultRecord> transList = null;
         Map<String,String> allDimVal = new HashMap<String, String>();
         long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
@@ -289,15 +287,38 @@ public class QueryRequestUtil {
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
-            ResultRecord record = null;
-            while ((record = ((SearchResultSet) dataSet).getResultQ().poll()) != null) {
-                // 替换维度数据的明细节点的上层结点信息
-                if (!MapUtils.isEmpty(leafValueMap)) {
-                    transList.addAll(mapLeafValue2ValueOfRecord(record, leafValueMap, groupList));
-                } else {
-                    transList.add(record);
-                }
-            }
+        	transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
+        
+        	if(!MapUtils.isEmpty(leafValueMap)) {
+        		transList.forEach( record -> {
+        			leafValueMap.forEach((prop,valueMap) -> {
+        				try {
+							String currValue = record.getField(prop) != null ? record.getField(
+									prop).toString() : null;
+							    Set<String> valueSet = leafValueMap.get(prop).get(currValue);
+							    if(valueSet != null){
+					                for (String value : valueSet) {
+					                	// TODO 这种方法暂时只支持一个节点对应一个父节点
+					                	record.setField(prop, value);
+					                }
+					            }
+						} catch (Exception e) {
+							e.printStackTrace();
+							throw new RuntimeException(e);
+						}
+        			});
+        			
+        			try {
+        				generateGroupBy(record, groupList);
+//						mapLeafValue2ValueOfRecord(record,leafValueMap,groupList);
+					} catch (Exception e) {
+						e.printStackTrace();
+						throw new RuntimeException(e);
+					}
+        		});
+        	}
+        } else {
+        	return new SearchResultSet(null);
         }
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
         current = System.currentTimeMillis();

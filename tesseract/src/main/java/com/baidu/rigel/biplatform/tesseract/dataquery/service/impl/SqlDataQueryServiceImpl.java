@@ -35,6 +35,7 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.tesseract.dataquery.service.DataQueryService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
@@ -111,6 +112,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "queryForDocListWithSQLQuery", "[sqlQuery:" + sqlQuery + "][dataSource:" + dataSource
                 + "][limitStart:" + limitStart + "][limitEnd:" + limitEnd + "]"));
+        long current = System.currentTimeMillis();
         if (sqlQuery == null || dataSource == null || limitEnd < 0) {
             throw new IllegalArgumentException();
         }
@@ -120,6 +122,8 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
         this.initJdbcTemplate(dataSource);
         
         LinkedList<ResultRecord> resultList = new LinkedList<ResultRecord>();
+        
+        Meta meta = new Meta(sqlQuery.getSelectList().toArray(new String[0]));
         
         jdbcTemplate.query(sqlQuery.toSql(), new RowCallbackHandler() {
             @Override
@@ -154,8 +158,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
                     }
                 }
                 
-                ResultRecord record = new ResultRecord(fieldValues.toArray(new Serializable[0]),
-                        sqlQuery.getSelectList().toArray(new String[0]));
+                ResultRecord record = new ResultRecord(fieldValues.toArray(new Serializable[0]), meta);
                 record.setGroupBy(groupBy);
                 resultList.add(record);
                 // }
@@ -164,7 +167,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
         TesseractResultSet result = new SearchResultSet(resultList);
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
             "queryForDocListWithSQLQuery", "[sqlQuery:" + sqlQuery + "][dataSource:" + dataSource
-                + "][limitStart:" + limitStart + "][limitEnd:" + limitEnd + "]"));
+                + "][limitStart:" + limitStart + "][limitEnd:" + limitEnd + "] cost" + (System.currentTimeMillis() - current + "ms!")));
         return result;
     }
     
