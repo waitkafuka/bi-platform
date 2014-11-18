@@ -587,12 +587,12 @@ public class QueryDataResource {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
                 if (element instanceof TimeDimension) {
-                	chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
+                		chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
 //                } else if(action.getColumns().size() == 1 && runTimeModel.getContext().get("hasPieChart") == null) {
 //	                runTimeModel.getContext().put("hasPieChart", 1);
 //                		chart = chartBuildService.parseToChart(table, SeriesUnitType.PIE);
                 } else {
-                	chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
+                		chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
                 }
             } else {
                 chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
