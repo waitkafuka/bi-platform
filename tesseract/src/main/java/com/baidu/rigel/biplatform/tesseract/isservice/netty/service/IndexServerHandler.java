@@ -179,7 +179,8 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         String feedBackIndexServicePath = null;
         String feedBackIndexFilePath = null;
         // 如果当前分片写满了 or 是当前数据的最后一片，释放indexWriter\设置服务路径
-        if (currDiskSize > indexMsg.getBlockSize() || indexMsg.isLastPiece()) {
+        long totalDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
+        if (totalDiskSize > indexMsg.getBlockSize() || indexMsg.isLastPiece()) {
             IndexWriterFactory.destoryWriters(indexMsg.getIdxPath());
             feedBackIndexServicePath = indexMsg.getIdxPath();
             feedBackIndexFilePath = indexMsg.getIdxServicePath();
@@ -188,7 +189,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
             feedBackIndexFilePath = indexMsg.getIdxPath();
         }
         
-        long totalDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
+        
         MessageHeader messageHeader = new MessageHeader(NettyAction.NETTY_ACTION_INDEX_FEEDBACK);
         
         IndexMessage indexFeedbackMsg = new IndexMessage(messageHeader, indexMsg.getDataBody());
