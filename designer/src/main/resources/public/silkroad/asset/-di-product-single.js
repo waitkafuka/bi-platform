@@ -68148,7 +68148,7 @@ _global['zrender'] = zrender;
      */
     UI_E_CHART_CLASS.$setupSeries = function (options) {
         var series = [];
-
+        var xAxis = this._aXAxis;
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             ser = { data: [] };
             ser.name = serDef.name || '';
@@ -68162,19 +68162,24 @@ _global['zrender'] = zrender;
             series.push(ser);
         }
 
-        // 目前对饼图的处理：不允许在混合图形中出现饼图（有各种冲突不太好弄）
-        // 所以series中只允许有一个饼图。
+        // series中只允许有一个饼图。
         if (this._bHasPie) {
-            for (var k = 0, kser; kser = series[k]; ) {
-                kser.type !== 'pie'
-                    ? series.splice(k, 1)
-                    : k ++;
+            var targetSeries = [{}];
+            for(var key in series[0]) {
+                series[0].hasOwnProperty(key) && (targetSeries[0][key] = series[0][key]);
             }
-            // 只保留第一个
-            series.length > 1 && series.splice(1, series.length - 1);
+            targetSeries[0].data = [];
+            for (var k = 0, kser; kser = series[0].data[k]; k ++) {
+                var tarData = {
+                    value: kser,
+                    name: xAxis.data[k]
+                };
+                targetSeries[0].data.push(tarData);
+            }
+            series = targetSeries;
         }
         options.series = series;
-    }
+    };
     /**
      * 设置x轴
      *
@@ -68299,8 +68304,9 @@ _global['zrender'] = zrender;
             else {
                 dataZoom.end = Math.round(101 / xNums * this._zoomEnd);
             }
+            options.dataZoom = dataZoom;
         }
-        options.dataZoom = dataZoom;
+
     };
     function setupRangSelector(options, enabled) {
         var me = this;
@@ -68515,7 +68521,9 @@ _global['zrender'] = zrender;
         var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
-        this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
+        if (!this._bHasPie) {
+            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
+        }
         function zoomChage(param) {
             start = param.zoom.xStart;
             end = param.zoom.xEnd;

@@ -19,6 +19,7 @@
 package com.baidu.rigel.biplatform.ma.rt.query.service;
 
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
 
 /**
  *

@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.report.service.impl;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -35,10 +36,12 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
+import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
@@ -254,8 +257,21 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     cubeId, targetLogicModel, context, logicModelAreaId, true);
         } else {
             targetLogicModel = targetArea.getLogicModel();
-            return generateQueryAction(model.getSchema(),
-                    cubeId, targetLogicModel, context, logicModelAreaId, false);
+            List<String> timeItemIds = runTimeModel.getTimeDimItemIds();
+            Item timeDimItem = null;
+            for (String timeItemId : timeItemIds) {
+                timeDimItem = targetLogicModel.getItemByOlapElementId(timeItemId);
+                if (timeDimItem != null) {
+                    break;
+                }
+            }
+            if (timeDimItem != null && timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
+            		Map<String, Object> params = DeepcopyUtils.deepCopy(timeDimItem.getParams());
+            		params.put("range", true);
+            		timeDimItem.setParams(params);
+            }
+           return generateQueryAction(model.getSchema(),
+        		       cubeId, targetLogicModel, context, logicModelAreaId, false);
         }
         
     }
@@ -346,7 +362,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             Object value = update && values.containsKey(elementId) ? values.get(elementId) : item
                     .getParams().get(elementId);
             OlapElement element = ItemUtils.getOlapElementByItem(item, schema, cubeId);
-            if (value != null && element instanceof TimeDimension) {
+            if (value != null && element instanceof TimeDimension && 
+            		!value.toString().toLowerCase().contains("all")) {
                 String start;
                 String end;
                 try {
@@ -356,7 +373,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                      */
                     start = json.getString("start").replace("-", "");
                     end = json.getString("end").replace("-", "");
-                } catch (JSONException e) {
+                    if (item.getParams().get("range") != null && start.equals(end)) {
+                    		TimeRangeDetail tail = TimeUtils.getMonthDays(TimeRangeDetail.getTime(start));
+						start = tail.getStart();
+						end = tail.getEnd();
+                    } else {
+	                    	TimeDimension timeDim = (TimeDimension) element;
+	                    	Map<String, String> time= TimeUtils.getTimeCondition(start, end, timeDim.getDataTimeType());
+	                    	start = time.get("start");
+	                    	end = time.get("end");
+                    }
+                } catch (Exception e) {
                     logger.warn(
                             "Time Condition not Correct. Maybe from row."
                             + " Try to use it as UniqueName. Time: " + value, e);
@@ -391,12 +418,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     calendar.add(Calendar.MONTH, -1);
                     range = new TimeRangeDetail(df.format(calendar.getTime()), end);
                 }
+                /**
+				 * TODO 
+                 * modify by jiangyichao at 2014-11-10
+                 *  仅处理单选
+                 */
                 String[] days = new String[range.getDays().length];
                 for (int i = 0; i < days.length; i++) {
                     days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
                 }
                 value = days;
-
+                logger.debug(value.toString());
             }
             itemValues.put(item, value);
         }

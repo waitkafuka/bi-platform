@@ -24,11 +24,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
@@ -40,13 +42,11 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.utils.ItemUtils;
-import com.baidu.rigel.biplatform.ma.rt.query.request.asst.DataSourceServiceHelper;
-import com.baidu.rigel.biplatform.ma.rt.query.request.asst.ReportDesignModelServiceHelper;
+import com.baidu.rigel.biplatform.ma.rt.query.model.OrderType;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryRequest;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 import com.baidu.rigel.biplatform.ma.rt.query.request.asst.SchemaManageServiceHelper;
-import com.baidu.rigel.biplatform.ma.rt.query.service.OrderType;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryRequest;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryStrategy;
 import com.baidu.rigel.biplatform.ma.rt.utils.OlapElementQueryUtils;
 import com.google.common.collect.Maps;
 
@@ -76,10 +76,11 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
     QueryAction transRequest(QueryRequest request) {
         QueryAction action = new QueryAction();
         // 数据源
-        DataSourceInfo dataSource = DataSourceServiceHelper.getInstance().getDsInfoByReportId(request.getReportId());
+        DataSourceInfo dataSource = request.getDataSourceInfo();
         action.setDataSource(dataSource);
         // 立方体
-        Cube cube  = SchemaManageServiceHelper.getInstance().getCube(request.getReportId(), request.getAreaId());
+        SchemaManageServiceHelper helper = new SchemaManageServiceHelper(request.getReportModel());
+        Cube cube  = helper.getCube(request.getAreaId());
         action.setCube(cube);
         // 纵轴
         LinkedHashMap<Item, Object> columns = genColumns(request);
@@ -103,8 +104,7 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
      * @return 查询动作横轴定义
      */
     private LinkedHashMap<Item, Object> genRows(QueryRequest request) {
-        ReportDesignModel model = ReportDesignModelServiceHelper.getInstance()
-                .getReportDesignModel(request.getReportId());
+        ReportDesignModel model = request.getReportModel();
         ExtendArea area = model.getExtendById(request.getAreaId());
         // 由于表结构是静态的，因此逻辑模型中轴的定义就是静态表的查询轴定义
         Item[] items = area.getLogicModel().getRows();
@@ -233,8 +233,7 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
      * @return LinkedHashMap<Item, Object>
      */
     private LinkedHashMap<Item, Object> genColumns(QueryRequest request) {
-        ReportDesignModel model = ReportDesignModelServiceHelper.getInstance()
-                .getReportDesignModel(request.getReportId());
+        ReportDesignModel model = request.getReportModel();
         ExtendArea area = model.getExtendById(request.getAreaId());
         Item[] items = area.getLogicModel().getColumns();
         return generateItemValues(request, model, area, items);
@@ -248,10 +247,10 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
     private LinkedHashMap<Item, Object> genSlice(QueryRequest request) {
         LinkedHashMap<Item, Object> slices = Maps.newLinkedHashMap();
         Map<String, String[]> conditions = request.getConditions();
-        String reportId = request.getReportId();
         String areaId = request.getAreaId();
-        LogicModel logicModel = SchemaManageServiceHelper.getInstance().queryLogicModel(reportId, areaId);
-        Cube defineCube = SchemaManageServiceHelper.getInstance().getCubeDefine(reportId, areaId);
+        SchemaManageServiceHelper helper = new SchemaManageServiceHelper(request.getReportModel());
+        LogicModel logicModel = helper.queryLogicModel( areaId);
+        Cube defineCube = helper.getCubeDefine(areaId);
         conditions.keySet().parallelStream().forEach(key -> {
             OlapElement element = OlapElementQueryUtils.queryElementById(defineCube, key);
             if (element != null && !logicModel.containsOlapElement(element.getId())) {

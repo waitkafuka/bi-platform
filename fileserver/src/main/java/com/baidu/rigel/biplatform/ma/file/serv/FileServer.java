@@ -34,9 +34,9 @@ import io.netty.handler.logging.LoggingHandler;
 import java.io.File;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Request;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Response;

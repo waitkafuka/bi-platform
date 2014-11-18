@@ -68,7 +68,7 @@ public class ExtendArea implements Serializable {
     /**
      * 数据格式定义
      */
-    private FormatModel formatModel;
+    private FormatModel formatModel = new FormatModel();;
     
     
     public String getId() {
@@ -186,16 +186,10 @@ public class ExtendArea implements Serializable {
 	 * @return the formatModel
 	 */
 	public FormatModel getFormatModel() {
+	    if (this.formatModel == null) {
+	        this.formatModel = new FormatModel();
+	    }
 		return formatModel;
 	}
 
-	/**
-	 * @param formatModel the formatModel to set
-	 */
-	public void setFormatModel(FormatModel formatModel) {
-		this.formatModel = formatModel;
-	}
-
-    
-    
 }
