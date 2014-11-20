@@ -522,6 +522,7 @@ public class QueryDataResource {
                 action.setChartQuery(false);
             }
         }
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         /**
          * 6. 完成查询
          */
@@ -550,7 +551,6 @@ public class QueryDataResource {
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * 每次查询以后，清除选中行，设置新的
