@@ -17,16 +17,17 @@ package com.baidu.rigel.biplatform.ma.rt;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -60,7 +61,7 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * 面包屑路径
 	 */
-	private String curBreadCrumPath;
+	private Map<String, String> curBreadCrumPath;
 	
 	/**
 	 * 当前操作下钻条目
@@ -105,7 +106,7 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * 查询请求历史纪录
 	 */
-	private LinkedHashSet<DataModel> queryStatus = Sets.newLinkedHashSet();
+	private LinkedList<ResultSet> queryStatus = Lists.newLinkedList();
 	
 	/**
 	 * 区域默认使用的数据源列表
@@ -167,14 +168,14 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * @return the curBreadCrumPath
 	 */
-	public String getCurBreadCrumPath() {
+	public Map<String, String> getCurBreadCrumPath() {
 		return curBreadCrumPath;
 	}
 
 	/**
 	 * @param curBreadCrumPath the curBreadCrumPath to set
 	 */
-	public void setCurBreadCrumPath(String curBreadCrumPath) {
+	public void setCurBreadCrumPath(Map<String, String> curBreadCrumPath) {
 		this.curBreadCrumPath = curBreadCrumPath;
 	}
 
@@ -293,14 +294,14 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * @return the queryStatus
 	 */
-	public LinkedHashSet<DataModel> getQueryStatus() {
+	public LinkedList<ResultSet> getQueryStatus() {
 		return queryStatus;
 	}
 
 	/**
 	 * @param queryStatus the queryStatus to set
 	 */
-	public void setQueryStatus(LinkedHashSet<DataModel> queryStatus) {
+	public void setQueryStatus(LinkedList<ResultSet> queryStatus) {
 		this.queryStatus = queryStatus;
 	}
 
