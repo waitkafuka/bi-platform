@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.ma.rt.utils;
 
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
@@ -27,10 +29,13 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.rt.Context;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
+import com.google.common.collect.Maps;
 
 /**
  * 工具类：用于提供运行时环境初始化、运行时上下文操作等
@@ -90,19 +95,49 @@ public final class RuntimeEvnUtil {
 	    ExtendAreaContext context = new ExtendAreaContext();
 	    context.setAreaId(extendArea.getId());
 	    context.setAreaType(extendArea.getType());
+	    // 对数据源信息进行处理
 	    DataSourceDefine dsDefine = new DataSourceDefine();
         try {
             dsDefine = dsService.getDsDefine(designModel.getDsId());
         } catch (DataSourceOperationException e) {
             logger.error("fail to get datasource define ", e);
         }
+        // 设置默认数据源信息
 	    context.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine));
+	    // 设置数据格式模型
 	    context.setFormatModel(extendArea.getFormatModel());
 	    
 	    // 获取区域逻辑模型
 	    LogicModel logicModel = extendArea.getLogicModel();
+	    // 利用逻辑模型获取行轴，列轴，以及切片轴信息
+	    Item[] columns = logicModel.getColumns();
+	    Item[] rows = logicModel.getRows();
+	    Item[] slices = logicModel.getSlices();
+	    Map<Item, Object> x = Maps.newLinkedHashMap();
+	    for (Item item : rows) {
+	        x.put(item, null);
+	    }
+	    Map<Item, Object> y = Maps.newLinkedHashMap();
+        for (Item item : columns) {
+            y.put(item, null);
+        }
+	    Map<Item, Object> s = Maps.newLinkedHashMap();
+        for (Item item : slices) {
+            s.put(item, null);
+        } 
+        // 将行轴，列轴，切片轴信息添加到上下文中
+        context.setX(x);
+        context.setY(y);
+        context.setS(s);
+        
 	    switch (extendArea.getType()) {
 	        case LITEOLAP:
+	            LiteOlapExtendArea liteOlapExtendArea = (LiteOlapExtendArea) extendArea;
+	            // 获取候选维度，候选指标
+	            Map<String, Item> canDims = liteOlapExtendArea.getCandDims();
+	            Map<String, Item> canInds = liteOlapExtendArea.getCandInds();
+	            context.setCanDim((Set<Item>) canDims.values());
+	            context.setCanInd((Set<Item>) canInds.values());
 	        default:
 	    }
 	    return context;
