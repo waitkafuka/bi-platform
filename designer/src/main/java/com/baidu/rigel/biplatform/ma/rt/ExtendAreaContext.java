@@ -16,15 +16,18 @@
 package com.baidu.rigel.biplatform.ma.rt;
 
 import java.io.Serializable;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
-import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -58,7 +61,7 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * 面包屑路径
 	 */
-	private String curBreadCrumPath;
+	private Map<String, String> curBreadCrumPath;
 	
 	/**
 	 * 当前操作下钻条目
@@ -78,17 +81,17 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * 区域x轴对应的查询条目
 	 */
-	private Map<Item, Object> x = Maps.newLinkedHashMap();
+	private LinkedHashMap<Item, Object> x = Maps.newLinkedHashMap();
 	
 	/**
 	 * 区域y轴对应的查询条目
 	 */
-	private Map<Item, Object> y = Maps.newConcurrentMap();
+	private LinkedHashMap<Item, Object> y = Maps.newLinkedHashMap();
 	
 	/**
 	 * 区域过滤轴对应的查询条目
 	 */
-	private Map<Item, Object> s = Maps.newLinkedHashMap();
+	private LinkedHashMap<Item, Object> s = Maps.newLinkedHashMap();
 	
 	/**
 	 * 区域备选维度轴对应的条目信息
@@ -103,7 +106,7 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * 查询请求历史纪录
 	 */
-	private LinkedHashSet<DataModel> queryStatus = Sets.newLinkedHashSet();
+	private LinkedList<ResultSet> queryStatus = Lists.newLinkedList();
 	
 	/**
 	 * 区域默认使用的数据源列表
@@ -114,6 +117,11 @@ public class ExtendAreaContext implements Serializable {
 	 * 备用条目、数据源信息对应关系，后续跨库查询使用
 	 */
 	private Map<Item, DataSourceInfo> dsInfo;
+	
+	/**
+	 * 依据扩展区域定义生成的cube，在运行时，此cube不会发生变化
+	 */
+	private Cube cubeDefine;
 
 	/**
 	 * @return the areaId
@@ -160,14 +168,14 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * @return the curBreadCrumPath
 	 */
-	public String getCurBreadCrumPath() {
+	public Map<String, String> getCurBreadCrumPath() {
 		return curBreadCrumPath;
 	}
 
 	/**
 	 * @param curBreadCrumPath the curBreadCrumPath to set
 	 */
-	public void setCurBreadCrumPath(String curBreadCrumPath) {
+	public void setCurBreadCrumPath(Map<String, String> curBreadCrumPath) {
 		this.curBreadCrumPath = curBreadCrumPath;
 	}
 
@@ -216,42 +224,42 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * @return the x
 	 */
-	public Map<Item, Object> getX() {
+	public LinkedHashMap<Item, Object> getX() {
 		return x;
 	}
 
 	/**
 	 * @param x the x to set
 	 */
-	public void setX(Map<Item, Object> x) {
+	public void setX(LinkedHashMap<Item, Object> x) {
 		this.x = x;
 	}
 
 	/**
 	 * @return the y
 	 */
-	public Map<Item, Object> getY() {
+	public LinkedHashMap<Item, Object> getY() {
 		return y;
 	}
 
 	/**
 	 * @param y the y to set
 	 */
-	public void setY(Map<Item, Object> y) {
+	public void setY(LinkedHashMap<Item, Object> y) {
 		this.y = y;
 	}
 
 	/**
 	 * @return the s
 	 */
-	public Map<Item, Object> getS() {
+	public LinkedHashMap<Item, Object> getS() {
 		return s;
 	}
 
 	/**
 	 * @param s the s to set
 	 */
-	public void setS(Map<Item, Object> s) {
+	public void setS(LinkedHashMap<Item, Object> s) {
 		this.s = s;
 	}
 
@@ -286,14 +294,14 @@ public class ExtendAreaContext implements Serializable {
 	/**
 	 * @return the queryStatus
 	 */
-	public LinkedHashSet<DataModel> getQueryStatus() {
+	public LinkedList<ResultSet> getQueryStatus() {
 		return queryStatus;
 	}
 
 	/**
 	 * @param queryStatus the queryStatus to set
 	 */
-	public void setQueryStatus(LinkedHashSet<DataModel> queryStatus) {
+	public void setQueryStatus(LinkedList<ResultSet> queryStatus) {
 		this.queryStatus = queryStatus;
 	}
 
@@ -323,6 +331,20 @@ public class ExtendAreaContext implements Serializable {
 	 */
 	public void setDsInfo(Map<Item, DataSourceInfo> dsInfo) {
 		this.dsInfo = dsInfo;
+	}
+
+	/**
+	 * @return the cubeDefine
+	 */
+	public Cube getCubeDefine() {
+		return cubeDefine;
+	}
+
+	/**
+	 * @param cubeDefine the cubeDefine to set
+	 */
+	public void setCubeDefine(Cube cubeDefine) {
+		this.cubeDefine = cubeDefine;
 	}
 	
 }

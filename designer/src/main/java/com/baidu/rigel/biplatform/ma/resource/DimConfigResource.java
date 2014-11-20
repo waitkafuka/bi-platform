@@ -205,7 +205,9 @@ public class DimConfigResource {
                 } else {
                     NormalDimDetail dateDim = starModelBuildService
                         .generateNormalDimBindView((StandardDimTableMetaDefine) dimTable);
-                    normal.getChildren().add(dateDim);
+                    if (dateDim != null) {
+                    		normal.getChildren().add(dateDim);
+                    }
                 }
             }
             

@@ -47,6 +47,7 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
+import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
@@ -388,7 +389,7 @@ public class QueryUtils {
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
         if (StringUtils.isEmpty(cube.getId())) {
-            cube.setId(area.getCubeId());
+            cube.setId(oriCube.getId() + "_" + area.getId());
         }
         return cube;
     }
