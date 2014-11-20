@@ -3,10 +3,10 @@
         <span class="letter">时间维度:</span>
         {{each xAxis as item}}
         <div class="item hover-bg j-root-line" data-id="{{item.id}}" data-name="{{item.name}}">
-            <span class="item-text j-item-text" title="{{item.caption}}（{{item.name}}）">
+            <span class="item-text j-item-text icon-font" title="{{item.caption}}（{{item.name}}）">
             {{item.caption}}（{{item.name}}）
             </span>
-            <span class="icon-letter j-delete" title="删除">×</span>
+            <span class="icon hide j-delete" title="删除">×</span>
         </div>
         {{/each}}
     </div>

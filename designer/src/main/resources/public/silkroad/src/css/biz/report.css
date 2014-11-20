@@ -305,6 +305,7 @@
     position: relative;
     border-radius: 3px;
     border: 1px solid #e6e3e3;
+    height: 20px
 }
 .comp-setting .item:hover .icon{
     position: absolute;
@@ -319,7 +320,8 @@
     cursor: pointer;
 }
 .comp-setting .item .icon-font {
-    float: left;
+    /*float: left;*/
+    display: inline-block;
     margin-top: 2px;
 }
 .comp-setting .item .icon-chart {

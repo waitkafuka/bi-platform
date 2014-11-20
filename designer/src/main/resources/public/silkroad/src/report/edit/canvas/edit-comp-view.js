@@ -349,14 +349,6 @@ define([
                 else {
                     $spans.eq(1).remove();
                 }
-                //$item.addClass('xy-item');
-                // TODO:添加图形图标
-                var str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
-                $item.prepend(str);
-                str = '<span class="icon hide j-delete" title="删除">×</span>';
-                $item.append(str);
-                $($item.find('span')[1]).removeClass('ellipsis').addClass('icon-font');
-
 
                 // 使维度指标不能互换 - 因为维度或指标被使用了
                 ui.draggable.removeClass('j-can-to-dim j-can-to-ind');
@@ -365,6 +357,16 @@ define([
                 selector = '.j-data-sources-setting-con-ind';
                 oLapElemenType = ui.draggable.parents(selector);
                 oLapElemenType = oLapElemenType.length ? 'ind' : 'dim';
+
+                // TODO:添加图X轴Y轴的判断
+                var str;
+                if (oLapElemenType === 'ind') {
+                    str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
+                    $item.prepend(str);
+                }
+                str = '<span class="icon hide j-delete" title="删除">×</span>';
+                $item.append(str);
+                $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
 
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
@@ -424,6 +426,7 @@ define([
                 else {
                     that.chartList.redraw(indMenuTemplate.render(chartTypes));
                 }
+                // FIXME:这块的实现不是很好，需要修改
                 $('.comp-setting-charticons span').unbind();
                 $('.comp-setting-charticons span').click(function () {
                     var $this =  $(this);
@@ -436,13 +439,12 @@ define([
                         function () {
                             $target.removeClass(oldChartType).addClass(selectedChartType);
                             $target.attr('chart-type', selectedChartType);
-
                             that.chartList.hide();
+                            that.canvasView.showReport();
                         }
                     );
                 });
                 that.chartList.show($(event.target).parent());
-
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理
