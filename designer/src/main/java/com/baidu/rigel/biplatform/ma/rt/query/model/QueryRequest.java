@@ -23,8 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
-import com.baidu.rigel.biplatform.ma.rt.Context;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Maps;
 
@@ -90,10 +88,8 @@ public class QueryRequest implements Serializable {
     private ExtendAreaContext context;
     
     /**
-     * 当前查询请求对应的报表定义
+     * 全局参数定义
      */
-    private ReportDesignModel reportModel;
-    
     private final Map<String, Object> globalParams;
     
     /**
@@ -107,9 +103,8 @@ public class QueryRequest implements Serializable {
      * QueryRequest
      */
     public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context, 
-    		    ReportDesignModel model, Map<String, Object> globalParams) {
+    		    Map<String, Object> globalParams) {
     		this.globalParams = globalParams;
-    		this.reportModel = model;
         this.queryStrategy = queryStrategy;
         this.context = context;
     }
@@ -253,18 +248,19 @@ public class QueryRequest implements Serializable {
 		return context;
 	}
 
-	/**
-	 * @return the reportModel
-	 */
-	public ReportDesignModel getReportModel() {
-		return reportModel;
-	}
 
 	/**
 	 * @return the dataSourceInfo
 	 */
 	public DataSourceInfo getDataSourceInfo() {
 		return context.getDefaultDsInfo();
+	}
+
+	/**
+	 * @return the globalParams
+	 */
+	public Map<String, Object> getGlobalParams() {
+		return globalParams;
 	}
 	
 }

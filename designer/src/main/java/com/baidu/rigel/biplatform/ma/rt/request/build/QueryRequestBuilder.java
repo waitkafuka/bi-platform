@@ -16,8 +16,9 @@
 package com.baidu.rigel.biplatform.ma.rt.request.build;
 
 import java.util.Map;
+import java.util.function.Function;
 
-import com.baidu.rigel.biplatform.ma.rt.Context;
+import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryRequest;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 
@@ -37,12 +38,15 @@ public final class QueryRequestBuilder {
 	
 	/**
 	 * 查询请求构建对象
-	 * @param context
-	 * @param params
-	 * @return QueryRequest
+	 * @param context ExtendAreaContext 扩展区域上下文
+	 * @param params Map<String, Object> 请求参数
+	 * @param queryStrategy QueryStrategy 查询策略
+	 * @param customizationFunc 个性化处理函数，可以提供，也可以不提供，默认为空
+	 * @return QueryRequest 查询请求
 	 */
-	public static QueryRequest buildQueryRequest(Context context, QueryStrategy queryStrategy, 
-				Map<String, Object> params) {
-		return null;
+	public static QueryRequest buildQueryRequest(ExtendAreaContext context, QueryStrategy queryStrategy, 
+			Map<String, Object> params, Function<QueryRequest, QueryRequest> customizationFunc) {
+		QueryRequest queryRequest = new QueryRequest(queryStrategy, context, params);
+		return customizationFunc.apply(queryRequest);
 	}
 }

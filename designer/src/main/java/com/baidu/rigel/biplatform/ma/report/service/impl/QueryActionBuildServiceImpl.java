@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ma.report.service.impl;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -25,7 +24,6 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +34,6 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
-import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
@@ -140,6 +137,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         return action;
     }
     
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
             Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
@@ -191,7 +191,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             /**
              * 3.
              */
-            ResultSet resultSet = runTimeModel.getDatas().get(actionForTable.getDistinctId());
+            ResultSet resultSet = runTimeModel.getPreviousQueryResult(actionForTable);
             if (resultSet == null) {
                 logger.error("There is no result of table for querying liteOlap Chart!!");
                 throw new RuntimeException("There is no result of table for querying liteOlap Chart!!");

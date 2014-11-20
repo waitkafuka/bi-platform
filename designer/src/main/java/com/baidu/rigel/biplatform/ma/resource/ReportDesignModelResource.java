@@ -904,6 +904,61 @@ public class ReportDesignModelResource {
     }
     
     /**
+     * 添加条目
+     * 
+     * @return 操作结果
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{itemId}/chart/{type}", method = { RequestMethod.POST })
+    public ResponseResult updateItem(@PathVariable("id") String reportId, @PathVariable("itemId") String itemId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request, 
+            @PathVariable("type") String type) {
+        
+        ReportDesignModel model;
+        try {
+            model = reportModelCacheManager.getReportModel(reportId);
+        } catch (CacheOperationException e) {
+            logger.error("no such report model in cache for report id: " + reportId);
+            return ResourceUtils.getErrorResult("no such report model in cache for report id: " + reportId, 1);
+        }
+        /**
+         * check whether the element exist
+         */
+        ExtendArea targetArea = model.getExtendById(areaId);
+        Item item = targetArea.getItem(itemId);
+        ResponseResult result = new ResponseResult();
+        if (item == null || item.getPositionType() == PositionType.X) {
+        		logger.error("can't set chart type on dimension");
+        		result.setStatus(1);
+            result.setStatusInfo("纬度不能设置图形格式");
+            return result;
+        }
+        item.getParams().put("chartType", type);
+        try {
+            model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
+        } catch (ReportModelOperationException e) {
+            logger.error("Exception when add or update item in area: " + areaId, e);
+        }
+        
+        if (model == null) {
+            result.setStatus(1);
+            result.setStatusInfo("图形类型属性设置失败");
+            return result;
+        }
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        /**
+         * 配置端，在修改Item以后，需要重新初始化上下文
+         */
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        runTimeModel.init(model, true);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        logger.info("successfully add item into current area");
+        result.setStatus(0);
+        result.setData(model);
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
      * 修改报表模型数据格式配置
      * @param reportId 报表id
      * @param areaId 区域id

@@ -17,9 +17,20 @@ define(function () {
         'HH:mm:ss': '时间（13:23:22）',
         'D天HH:mm:ss': '时间格式（2天1小时23分45秒）'
     };
-
+    /**
+     * 图类型
+     *
+     * @const
+     * @type {string}
+     */
+    var CHART_TYPES = {
+        'bar': false,
+        'pie': false,
+        'line': false
+    };
 
     return {
-        DATA_FORMAT_OPTIONS: DATA_FORMAT_OPTIONS
+        DATA_FORMAT_OPTIONS: DATA_FORMAT_OPTIONS,
+        CHART_TYPES: CHART_TYPES
     };
 });
