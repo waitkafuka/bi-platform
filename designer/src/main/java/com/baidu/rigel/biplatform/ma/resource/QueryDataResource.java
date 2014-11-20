@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.ma.resource;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -621,28 +622,26 @@ public class QueryDataResource {
      * @return SeriesUnitType
      */
     private SeriesUnitType getChartTypeWithExtendArea(ExtendArea targetArea) {
-    		StringBuilder rs = new StringBuilder();
+    		LinkedHashSet<String> types = Sets.newLinkedHashSet();
     		targetArea.getAllItems().values().stream().filter(item -> {
-    			return item.getPositionType() == PositionType.X;
+    			return item.getPositionType() == PositionType.Y;
     		}).map(item -> {
     			return item.getParams().get("chartType");
     		}).filter(chartType -> {
     			return !StringUtils.isEmpty(chartType);
     		}).forEach(str -> {
-    			rs.append(str.toString().toUpperCase());
-    			rs.append("_");
+    			types.add(str.toString());
     		});
-    		if (rs.length() == 0) {
+    		if (types.size() == 0) {
     			return SeriesUnitType.BAR;
     		}
-    		String typeName = rs.toString();
-    		if (typeName.indexOf("_") == 0) {
-    			typeName = typeName.substring(1);
-    		}
-    		if (typeName.lastIndexOf("_") == typeName.length() - 1) {
-    			typeName = typeName.substring(0, typeName.length() -1);
-    		}
-		return SeriesUnitType.valueOf(typeName);
+    		StringBuilder typeName = new StringBuilder();
+    		types.forEach(s -> {
+    			typeName.append(s);
+    			typeName.append("_");
+    		});
+    		String realTypeName = typeName.substring(0, typeName.length() - 1);
+		return SeriesUnitType.valueOf(realTypeName.toUpperCase());
 	}
 
 	/**
@@ -732,7 +731,6 @@ public class QueryDataResource {
      * @param request 请求对象
      * @return 下钻操作 操作结果
      */
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/drill", method = { RequestMethod.POST })
     public ResponseResult drillDown(@PathVariable("reportId") String reportId, 
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
