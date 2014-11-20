@@ -247,7 +247,6 @@ public class SqlQuery {
                 sb.append(limitStringBuffer);
             }
         }
-        System.out.println("query sql:" + sb.toString());
         return sb.toString();
     }
     

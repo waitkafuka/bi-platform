@@ -154,6 +154,23 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     while (leafResultSet.next()) {
                         member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
                     }
+                } else if (queryLevel.isParentChildLevel()) {
+                	QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
+                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
+
+                    request.setWhere(new Where());
+                    Expression expression = new Expression(queryLevel.getParent());
+                    expression.getQueryValues().add(new QueryObject(member.getName()));
+                    request.getWhere().getAndList().add(expression);
+                    log.info("query member leaf nodes,queryRequest:" + request);
+                    TesseractResultSet leafResultSet = searchService.query(request);
+                    if(leafResultSet == null || leafResultSet.size() == 0) {
+                        member.getQueryNodes().add(member.getName());
+                    }else {
+                        while (leafResultSet.next()) {
+                            member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
+                        }
+                    }
                 } else {
                     member.getQueryNodes().add(member.getName());
                 }
@@ -298,7 +315,12 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeMember result = new MiniCubeMember(name);
         result.setLevel(queryLevel);
         try {
+        	// 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
             TesseractResultSet resultSet = searchService.query(queryRequest);
+            if(!resultSet.next()){
+            	log.error("no result return by query:" + queryRequest);
+            	throw new MetaException("no result return by query:" + queryRequest);
+            }
             if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
                 result.setCaption(resultSet.getString(queryLevel.getCaptionColumn()));
             }
@@ -329,6 +351,19 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
 
                 request.setWhere(new Where());
                 expression = new Expression(queryLevel.getSource());
+                expression.getQueryValues().add(new QueryObject(result.getName()));
+                request.getWhere().getAndList().add(expression);
+                log.info("query member leaf nodes,queryRequest:" + request);
+                TesseractResultSet leafResultSet = searchService.query(request);
+                while (leafResultSet.next()) {
+                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
+                }
+            } else if (queryLevel.isParentChildLevel()){
+            	QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
+                request.selectAndGroupBy(queryLevel.getPrimaryKey());
+
+                request.setWhere(new Where());
+                expression = new Expression(queryLevel.getParent());
                 expression.getQueryValues().add(new QueryObject(result.getName()));
                 request.getWhere().getAndList().add(expression);
                 log.info("query member leaf nodes,queryRequest:" + request);

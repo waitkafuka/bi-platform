@@ -341,10 +341,10 @@ public class QueryRequestUtil {
         }
         
         if(MapUtils.isNotEmpty(allDimVal)){
-            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);
+//            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);
             for(String properties : allDimVal.keySet()){
-                List<ResultRecord> summaryCalcList = new ArrayList<ResultRecord>();
-                for(ResultRecord record : preResultList){
+                LinkedList<ResultRecord> summaryCalcList = new LinkedList<ResultRecord>();
+                for(ResultRecord record : transList){
                     ResultRecord vRecord = DeepcopyUtils.deepCopy(record);
                     vRecord.setField(properties, allDimVal.get(properties));
                     generateGroupBy(vRecord, groupList);
