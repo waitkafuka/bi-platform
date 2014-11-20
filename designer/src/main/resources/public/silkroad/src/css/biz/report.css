@@ -298,12 +298,45 @@
 }
 .comp-setting .item {
     display: inline-block;
-    background: #e6e3e3;
+    background: white;
     font-size: 12px;
-    padding: 2px 23px 2px 3px;
+    padding: 2px 18px 2px 3px;
     margin: 3px;
     position: relative;
     border-radius: 3px;
+    border: 1px solid #e6e3e3;
+}
+.comp-setting .item:hover .icon{
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    display: block;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: #65b0fa;
+    color: #ffffff;
+    font-weight: normal;
+    cursor: pointer;
+}
+.comp-setting .item .icon-font {
+    float: left;
+    margin-top: 2px;
+}
+.comp-setting .item .icon-chart {
+    float: left;
+    width: 20px;
+    height: 20px;
+    margin-right: 2px;
+    cursor: pointer;
+}
+.comp-setting .item .bar {
+    background: url(../img/bar.png) no-repeat;
+}
+.comp-setting .item .pie {
+    background: url(../img/pie.png) no-repeat;
+}
+.comp-setting .item .line {
+    background: url(../img/line.png) no-repeat;
 }
 .comp-setting .icon-letter {
     right: 3px;
@@ -311,6 +344,45 @@
 }
 .canvas .active {
     border: 1px solid #65b0fa;
+}
+/*Y轴图标列表选项*/
+.comp-setting-charticons {
+    background-color: white;
+    border: 1px solid #e6e3e3;
+}
+.comp-setting-charticons .icon {
+    margin: 5px 0 5px 10px;
+    width: 30px;
+    height: 20px;
+    cursor: pointer;
+    display: block;
+}
+.comp-setting-charticons .bar {
+    background: url(../img/bar.png) no-repeat;
+}
+.comp-setting-charticons .line {
+    background: url(../img/line.png) no-repeat;
+}
+.comp-setting-charticons .pie {
+    background: url(../img/pie.png) no-repeat;
+}
+.comp-setting-charticons .bar:hover {
+    background: url(../img/bar-hover.png) no-repeat;
+}
+.comp-setting-charticons .line:hover {
+    background: url(../img/line-hover.png) no-repeat;
+}
+.comp-setting-charticons .pie:hover {
+    background: url(../img/pie-hover.png) no-repeat;
+}
+.comp-setting-charticons .bar-focus {
+    background: url(../img/bar-hover.png) no-repeat;
+}
+.comp-setting-charticons .line-focus {
+    background: url(../img/line-hover.png) no-repeat;
+}
+.comp-setting-charticons .pie-focus{
+    background: url(../img/pie-hover.png) no-repeat;
 }
 /* 保存/发布按钮 */
 .canvas .button-save-report {

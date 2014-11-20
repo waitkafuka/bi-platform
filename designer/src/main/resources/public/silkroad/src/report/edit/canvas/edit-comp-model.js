@@ -198,6 +198,24 @@ define(['url', 'constant'], function (Url, Constant) {
                     success();
                 }
             });
+        },
+        /**
+         * 更换组件的中维度图形种类
+         *
+         * @param {string} compId 组件id
+         * @param {string} olapId 报表组件id
+         * @param {string} chartType 图形种类
+         * @param {Function} success 交互完成后的回调函数
+         * @public
+         */
+        changeCompItemChartType: function (compId, olapId, chartType, success) {
+            $.ajax({
+                url: Url.changeCompItemChartType(this.reportId, compId, olapId, chartType),
+                type: 'POST',
+                success: function () {
+                    success();
+                }
+            });
         }
     });
 });
