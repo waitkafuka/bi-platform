@@ -926,7 +926,7 @@ public class ReportDesignModelResource {
         ExtendArea targetArea = model.getExtendById(areaId);
         Item item = targetArea.getItem(itemId);
         ResponseResult result = new ResponseResult();
-        if (item == null || item.getPositionType() == PositionType.Y) {
+        if (item == null || item.getPositionType() == PositionType.X) {
         		logger.error("can't set chart type on dimension");
         		result.setStatus(1);
             result.setStatusInfo("纬度不能设置图形格式");
