@@ -113,7 +113,7 @@ public class QueryRequestBuilder {
                         expression = new Expression(node.getQuerySource());
                         expressions.put(node.getQuerySource(), expression);
                     }
-                    expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds()));
+                    expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
                 }
                 buildSelectAndGroupBy(node.getChildren(), request, expressions);
             }
