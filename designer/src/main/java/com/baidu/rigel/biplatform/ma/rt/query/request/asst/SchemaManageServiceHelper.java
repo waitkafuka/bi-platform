@@ -18,6 +18,7 @@
  */
 package com.baidu.rigel.biplatform.ma.rt.query.request.asst;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -51,7 +52,9 @@ public class SchemaManageServiceHelper {
     public Cube getCube(String areaId) {
         ExtendArea area = queryArea(areaId);
         try {
-            return QueryUtils.getCubeWithExtendArea(reportModel, area);
+            MiniCube cube =  (MiniCube) QueryUtils.getCubeWithExtendArea(reportModel, area);
+            // TODO 设置产品线名称
+            return cube;
         } catch (QueryModelBuildException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

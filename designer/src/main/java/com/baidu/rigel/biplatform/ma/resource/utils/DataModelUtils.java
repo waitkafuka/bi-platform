@@ -16,7 +16,6 @@
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

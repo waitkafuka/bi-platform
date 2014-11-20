@@ -54,6 +54,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
@@ -86,6 +87,7 @@ import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.DimensionMemberViewObject;
+import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -548,6 +550,7 @@ public class QueryDataResource {
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * 每次查询以后，清除选中行，设置新的
@@ -567,7 +570,11 @@ public class QueryDataResource {
             resultMap.put("totalSize", table.getDataRows());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
             List<Map<String, String>> mainDims = Lists.newArrayList();
-            Map<String, String> root = genRootDimCaption(table);
+            Map<String, String> root = areaContext.getCurBreadCrumPath();
+            if (root == null) {
+            		root = genRootDimCaption(table);
+            		areaContext.setCurBreadCrumPath(root);
+            }
             // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径
             if (!root.get("uniqName").toLowerCase().contains("all")) {
                 String vertualDimKey = "[vertual_all]";
@@ -577,29 +584,30 @@ public class QueryDataResource {
             }
             mainDims.add(root);
             resultMap.put("mainDimNodes", mainDims);
-            runTimeModel.getContext().put(areaId, root);
+//            runTimeModel.getContext().put(areaId, root);
             Collections.reverse(mainDims);
+            areaContext.setCurBreadCrumPath(root);
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
+            SeriesUnitType chartType = getChartTypeWithExtendArea(targetArea);
             if (action.getRows().size() == 1) {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
                 if (element instanceof TimeDimension) {
-                	chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
-//                } else if(action.getColumns().size() == 1 && runTimeModel.getContext().get("hasPieChart") == null) {
-//	                runTimeModel.getContext().put("hasPieChart", 1);
-//                		chart = chartBuildService.parseToChart(table, SeriesUnitType.PIE);
+                		chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
                 } else {
-                	chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
+                		chart = chartBuildService.parseToChart(table, chartType);
                 }
             } else {
-                chart = chartBuildService.parseToChart(table, SeriesUnitType.BAR);
+                chart = chartBuildService.parseToChart(table, chartType);
             }
             
             resultMap.put("reportChart", chart);
         }
+        areaContext.getQueryStatus().add(result);
+        reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         
@@ -608,8 +616,40 @@ public class QueryDataResource {
     }
 
     /**
+     * 获取扩展区域中定义的chartType
+     * @param targetArea ExtendArea
+     * @return SeriesUnitType
+     */
+    private SeriesUnitType getChartTypeWithExtendArea(ExtendArea targetArea) {
+    		StringBuilder rs = new StringBuilder();
+    		targetArea.getAllItems().values().stream().filter(item -> {
+    			return item.getPositionType() == PositionType.X;
+    		}).map(item -> {
+    			return item.getParams().get("chartType");
+    		}).filter(chartType -> {
+    			return !StringUtils.isEmpty(chartType);
+    		}).forEach(str -> {
+    			rs.append(str.toString().toUpperCase());
+    			rs.append("_");
+    		});
+    		if (rs.length() == 0) {
+    			return SeriesUnitType.BAR;
+    		}
+    		String typeName = rs.toString();
+    		if (typeName.indexOf("_") == 0) {
+    			typeName = typeName.substring(1);
+    		}
+    		if (typeName.lastIndexOf("_") == typeName.length() - 1) {
+    			typeName = typeName.substring(0, typeName.length() -1);
+    		}
+		return SeriesUnitType.valueOf(typeName);
+	}
+
+	/**
+	 * 
      * @param table
-     * @return
+     * @return Map<String, String>
+     * 
      */
     private Map<String, String> genRootDimCaption(PivotTable table) {
         RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
@@ -794,7 +834,7 @@ public class QueryDataResource {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
-        
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         if (targetArea.getType() == ExtendAreaType.TABLE 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
@@ -806,7 +846,7 @@ public class QueryDataResource {
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName);
                 if (isRoot) {
-                    showName = ((Map<String, String>) runTimeModel.getContext().get(areaId)).get("showName");
+                    showName = areaContext.getCurBreadCrumPath().get("showName");
                 }
                 dims3.put("showName", showName);
                 mainDims.add(dims3);
@@ -814,14 +854,16 @@ public class QueryDataResource {
             } while (drillTargetUniqueName != null && 
                     !drillTargetUniqueName.toLowerCase().contains("all"));
             if (!isRoot) {
-                Map<String, String> root = ((Map<String, String>) runTimeModel.getContext().get(areaId));
+                Map<String, String> root = areaContext.getCurBreadCrumPath();
                 mainDims.add(root);
             }
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             runTimeModel.getContext().put("bread_key", mainDims);
         } 
-        this.reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        areaContext.getQueryStatus().add(result);
+        reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
         resultMap.put("pivottable", table);
         resultMap.put("rowCheckMin", 1);
@@ -892,8 +934,10 @@ public class QueryDataResource {
         /**
          * TODO 合并当前的全局上下文，需要重构下，整理上下文处理逻辑
          */
-        QueryAction previousAction = runTimeModel.getPreviousQueryAction(areaId);
-        ResultSet previousResult = runTimeModel.getPreviousQueryResult(previousAction);
+//        QueryAction previousAction = runTimeModel.getPreviousQueryAction(areaId);
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        
+        ResultSet previousResult = areaContext.getQueryStatus().getLast();
         LogicModel targetLogicModel = null;
         String logicModelAreaId = areaId;
         if (targetArea.getType() == ExtendAreaType.CHART || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
@@ -988,6 +1032,8 @@ public class QueryDataResource {
                         areaId, previousContext.getParams());
                 runTimeModel.updateDatas(recordAction, result);
             }
+            areaContext.getQueryStatus().add(result);
+            reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -1003,11 +1049,6 @@ public class QueryDataResource {
             resultMap.put("totalSize", table.getActualSize());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
         } 
-//        else if (targetArea.getType() == ExtendAreaType.CHART) {
-//            DIReportChart chart = chartBuildService.parseToChart(table);
-//            resultMap.put("reportChart", chart);
-//        }
-        
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
                 "Fail Getting VM of Report", resultMap);
         return rs;
