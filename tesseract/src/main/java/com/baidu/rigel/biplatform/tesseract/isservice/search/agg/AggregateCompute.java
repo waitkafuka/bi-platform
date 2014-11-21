@@ -84,7 +84,7 @@ public class AggregateCompute {
         Set<Integer> countIndex = Sets.newHashSet();
         for (int i = 0 ; i < queryMeasures.size() ; i++) {
             if (queryMeasures.get(i).getAggregator().equals(Aggregator.COUNT)) {
-                countIndex.add(i);
+                countIndex.add(dimSize + i);
             }
         }
         
@@ -106,14 +106,13 @@ public class AggregateCompute {
                     }
                     return var;
                 })));
+        LOGGER.info("group agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
         Map<String, Long> countRes = null;
         if (CollectionUtils.isNotEmpty(countIndex)) {
+            current = System.currentTimeMillis();
            countRes = dataList.parallelStream().collect(Collectors.groupingBy(ResultRecord::getGroupBy,Collectors.counting()));
-            
+           LOGGER.info("group count cost:" + (System.currentTimeMillis() - current) + "ms!");
         }
-        
-        
-        LOGGER.info("group cost:" + (System.currentTimeMillis() - current) + "ms!");
         
         for(String key : groupResult.keySet()) {
             int i = 0 ;

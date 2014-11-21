@@ -55,7 +55,7 @@ public class Aggregate {
     public static Serializable aggregate(Serializable src1, Serializable src2, Aggregator aggregator) {
         switch (aggregator.name()) {
             case AGGREGATE_SUM:
-                if(src2 == null || StringUtils.isBlank(src2.toString()) || !StringUtils.isNumeric(src2.toString())) {
+                if(src2 == null || StringUtils.isBlank(src2.toString())) {
                     return src1; 
                 }
                 if(src1 == null) {
