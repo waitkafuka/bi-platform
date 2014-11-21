@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 
- */
 package com.baidu.rigel.biplatform.ma.rt;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.context.ApplicationContext;
+
 
 /**
  * 运行时上下文：用来存储运行时全局变量信息，比如全局过滤条件，全局ACL参数等
@@ -34,6 +36,68 @@ public final class Context implements Serializable {
      * description:
      */
     private static final long serialVersionUID = -8040634498675056473L;
+    
+    /**
+     * spring application，每个运行时包含一个全局的ApplicationContext
+     */
+    private ApplicationContext appContext;
+    
+    /**
+     * global params
+     */
+    private ConcurrentHashMap<String, Object> globalParams = 
+    		    new ConcurrentHashMap<String, Object>();
+    
+    /**
+     * 
+     */
+    private ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = 
+    		    new ConcurrentHashMap<String, ExtendAreaContext>();
+    
+    /**
+     * 构造函数
+     * @param context ApplicationContext
+     */
+    public Context(ApplicationContext context) {
+    		this.appContext = context;
+    }
+    
+    /**
+     *  获取当前运行时上下文环境对应的spring 运行时
+     * @return ApplicationContext spring运行时
+     */
+    public ApplicationContext getApplicationContext() {
+    		return appContext;
+    }
+
+	/**
+	 * @return the globalParams
+	 */
+	public Map<String, Object> getGlobalParams() {
+		return globalParams;
+	}
+
+	/**
+	 * @param globalParams the globalParams to set
+	 */
+	public void setGlobalParams(ConcurrentHashMap<String, Object> globalParams) {
+		this.globalParams = globalParams;
+	}
+
+	/**
+	 * @return the localCtxMap
+	 */
+	public ConcurrentHashMap<String, ExtendAreaContext> getLocalCtxMap() {
+		return localCtxMap;
+	}
+
+	/**
+	 * @param localCtxMap the localCtxMap to set
+	 */
+	public void setLocalCtxMap(
+			ConcurrentHashMap<String, ExtendAreaContext> localCtxMap) {
+		this.localCtxMap = localCtxMap;
+	}
     
     
     

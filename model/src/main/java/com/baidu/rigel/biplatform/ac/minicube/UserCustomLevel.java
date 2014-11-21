@@ -20,14 +20,13 @@ package com.baidu.rigel.biplatform.ac.minicube;
 
 import java.util.Map;
 
-import org.springframework.beans.BeanUtils;
-
 import com.baidu.rigel.biplatform.ac.annotation.GsonIgnore;
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeException;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -189,10 +188,8 @@ public class UserCustomLevel extends OlapElementDef implements Level {
      * {@inheritDoc}
      */
     @Override
-    public Object clone() throws CloneNotSupportedException {
-        UserCustomLevel target = new UserCustomLevel(this.getName());
-        BeanUtils.copyProperties(this, target);
-        return target;
+    public UserCustomLevel clone() throws CloneNotSupportedException {
+        return DeepcopyUtils.deepCopy(this);
     }
 
     @Override

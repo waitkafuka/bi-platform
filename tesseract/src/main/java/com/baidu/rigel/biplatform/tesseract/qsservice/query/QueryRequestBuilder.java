@@ -84,7 +84,7 @@ public class QueryRequestBuilder {
         }
 
         int start = 0;
-        int size = 1000000;
+        int size = -1;
         if (questionModel.getPageInfo() != null) {
             start = questionModel.getPageInfo().getPageNo() * questionModel.getPageInfo().getPageSize();
             size = questionModel.getPageInfo().getPageSize();
@@ -113,7 +113,7 @@ public class QueryRequestBuilder {
                         expression = new Expression(node.getQuerySource());
                         expressions.put(node.getQuerySource(), expression);
                     }
-                    expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds()));
+                    expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
                 }
                 buildSelectAndGroupBy(node.getChildren(), request, expressions);
             }

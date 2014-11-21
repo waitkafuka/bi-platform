@@ -26,10 +26,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.WebFault;
 
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
@@ -71,7 +69,7 @@ public class UniversalContextSettingFilter implements Filter {
         response.setCharacterEncoding("utf-8");
         // modify by jiangyichao at 2014-09-12
         String sessionId = null;
-        String productLine = "tieba";
+        String productLine = null;
         if (httpRequest.getCookies() != null && httpRequest.getCookies().length > 0) {
             List<Cookie> cookies = Lists.newArrayList();
             Collections.addAll(cookies, httpRequest.getCookies());

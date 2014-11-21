@@ -136,7 +136,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                 || indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_INITINDEX)) {
             // 如果是索引更新、初始化过程
             // 清理写索引路径
-            idxFile.deleteOnExit();
+            FileUtils.deleteFile(idxFile);
             if (indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_UPDATE)
                     && idxServiceFile.exists()) {
                 // 索引更新，复制索引目录
@@ -179,7 +179,8 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         String feedBackIndexServicePath = null;
         String feedBackIndexFilePath = null;
         // 如果当前分片写满了 or 是当前数据的最后一片，释放indexWriter\设置服务路径
-        if (currDiskSize > indexMsg.getBlockSize() || indexMsg.isLastPiece()) {
+        long totalDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
+        if (totalDiskSize > indexMsg.getBlockSize() || indexMsg.isLastPiece()) {
             IndexWriterFactory.destoryWriters(indexMsg.getIdxPath());
             feedBackIndexServicePath = indexMsg.getIdxPath();
             feedBackIndexFilePath = indexMsg.getIdxServicePath();
@@ -188,7 +189,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
             feedBackIndexFilePath = indexMsg.getIdxPath();
         }
         
-        long totalDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
+        
         MessageHeader messageHeader = new MessageHeader(NettyAction.NETTY_ACTION_INDEX_FEEDBACK);
         
         IndexMessage indexFeedbackMsg = new IndexMessage(messageHeader, indexMsg.getDataBody());

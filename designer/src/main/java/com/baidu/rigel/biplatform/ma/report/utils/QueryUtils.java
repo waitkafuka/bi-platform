@@ -47,6 +47,7 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
+import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
@@ -57,6 +58,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -103,7 +105,10 @@ public class QueryUtils {
         questionModel.setCubeId(area.getCubeId());
         ((MiniCube) cube).setProductLine(dsDefine.getProductLine());
         // TODO 动态更新cube 针对查询过程中动态添加的属性 需要仔细考虑此处逻辑
-        updateLogicCubeWithSlices(cube, queryAction.getSlices().keySet(),
+        Set<Item> tmp = Sets.newHashSet();
+        tmp.addAll(queryAction.getSlices().keySet());
+        tmp.addAll(queryAction.getRows().keySet());
+        updateLogicCubeWithSlices(cube, tmp,
                 reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
@@ -241,7 +246,7 @@ public class QueryUtils {
      * @param reportModel
      * @param area
      * @param queryAction
-     * @return
+     * @return Map<AxisType, AxisMeta>
      */
     private static Map<AxisType, AxisMeta> buildAxisMeta(Schema schema,
         ExtendArea area, QueryAction queryAction) throws QueryModelBuildException {
@@ -387,9 +392,9 @@ public class QueryUtils {
         cube.setMeasures(measures);
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
-        if (StringUtils.isEmpty(cube.getId())) {
-            cube.setId(area.getCubeId());
-        }
+//        if (StringUtils.isEmpty(cube.getId())) {
+        cube.setId(oriCube.getId() + "_" + area.getId());
+//        }
         return cube;
     }
 

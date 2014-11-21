@@ -9,27 +9,37 @@
 define([
         'template',
         'dialog',
+        'constant',
         'report/edit/canvas/edit-comp-model',
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
         'report/edit/canvas/comp-setting-liteolap-template',
-        'report/edit/canvas/default-selected-time-setting-template'
+        'report/edit/canvas/default-selected-time-setting-template',
+        'report/edit/canvas/data-format-setting-template',
+        'common/float-window',
+        'report/edit/canvas/chart-icon-list-template'
     ],
     function (
         template,
         dialog,
+        Constant,
         EditCompModel,
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
         compSettingLITEOLAPTemplate,
-        defaultSelectedTimeSettingTemplate
+        defaultSelectedTimeSettingTemplate,
+        dataFormatSettingTemplate,
+        FloatWindow,
+        indMenuTemplate
     ) {
 
         return Backbone.View.extend({
             events: {
                 'click .j-comp-setting .j-delete': 'deleteCompAxis',
                 'click .j-report': 'removeCompEditBar',
-                'click .j-set-default-time': 'openTimeSettingDialog'
+                'click .j-set-default-time': 'openTimeSettingDialog',
+                'click .j-set-data-format': 'getDataFormatList',
+                'click .item .j-icon-chart': 'showChartList'
             },
 
             /**
@@ -328,6 +338,8 @@ define([
                 var compId = $root.attr('data-comp-id');
                 var compType = $root.attr('data-comp-type');
                 var $item = $draggedUi.clone().attr('style', '');
+
+
                 var $spans = $item.find('span');
                 // 维度组
                 if ($item.hasClass('j-group-title')) {
@@ -337,8 +349,14 @@ define([
                 else {
                     $spans.eq(1).remove();
                 }
-                str = '<span class="icon-letter j-delete" title="删除">×</span>';
+                //$item.addClass('xy-item');
+                // TODO:添加图形图标
+                var str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
+                $item.prepend(str);
+                str = '<span class="icon hide j-delete" title="删除">×</span>';
                 $item.append(str);
+                $($item.find('span')[1]).removeClass('ellipsis').addClass('icon-font');
+
 
                 // 使维度指标不能互换 - 因为维度或指标被使用了
                 ui.draggable.removeClass('j-can-to-dim j-can-to-ind');
@@ -376,7 +394,56 @@ define([
                     that.canvasView.parentView.ueView.setSize();
                 });
             },
+            /**
+             * 显示图形列表
+             *
+             * @param {Object} ui 被拖拽的对象（里面包含被拖拽的本体元素）
+             * @param {$HTMLElement} $acceptUi 接收拖拽元素的元素
+             * @public
+             */
+            showChartList: function (event) {
+                var that = this;
+                var $target = $(event.target);
+                var selector = '.j-comp-setting';
+                var $compSetting = $target.parents(selector);
+                var compId = $compSetting.attr('data-comp-id');
+                var olapId = $target.parent().attr('data-id');
+                var oldChartType = $target.attr('chart-type');
 
+                var chartTypes = Constant.CHART_TYPES;
+                for (var key in chartTypes) {
+                    chartTypes[key] = false;
+                }
+                chartTypes[oldChartType] = true;
+                if(!that.chartList) {
+                    that.chartList = new FloatWindow({
+                        direction: 'vertical',
+                        content: indMenuTemplate.render(chartTypes)
+                    });
+                }
+                else {
+                    that.chartList.redraw(indMenuTemplate.render(chartTypes));
+                }
+                $('.comp-setting-charticons span').unbind();
+                $('.comp-setting-charticons span').click(function () {
+                    var $this =  $(this);
+                    var selectedChartType = $this.attr('chart-type');
+
+                    that.model.changeCompItemChartType(
+                        compId,
+                        olapId,
+                        selectedChartType,
+                        function () {
+                            $target.removeClass(oldChartType).addClass(selectedChartType);
+                            $target.attr('chart-type', selectedChartType);
+
+                            that.chartList.hide();
+                        }
+                    );
+                });
+                that.chartList.show($(event.target).parent());
+
+            },
             /**
              * 添加完成数据项之后要做的特殊dom处理
              *
@@ -658,6 +725,73 @@ define([
                         ]
                     }
                 });
+            },
+            /**
+             * 获取数据格式信息，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getDataFormatList: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+
+                that.model.getDataFormatList(compId, openDataFormatDialog);
+
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+
+                    html = dataFormatSettingTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '数据格式',
+                        content: html,
+                        dialog: {
+                            width: 340,
+                            height: 400,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveDataFormInfo($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveDataFormInfo($dialog) {
+                    var selects = $('.data-format').find('select');
+                    var data = {};
+
+                    selects.each(function () {
+                        var $this = $(this);
+                        var name = $this.attr('name');
+                        data[name] = $this.val();
+                    });
+                    that.model.saveDataFormatInfo(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
             },
 
             /**

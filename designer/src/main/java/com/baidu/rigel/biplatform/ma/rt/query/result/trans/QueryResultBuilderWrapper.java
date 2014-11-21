@@ -16,8 +16,8 @@
 package com.baidu.rigel.biplatform.ma.rt.query.result.trans;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction;
-import com.baidu.rigel.biplatform.ma.rt.query.service.QueryResult;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+import com.baidu.rigel.biplatform.ma.rt.query.model.QueryResult;
 
 /**
  * QueryResultBuilderWrapper

@@ -152,6 +152,7 @@ public class ResourceUtils {
             obj.setCubeId(cubeId);
             obj.setId(item.getId());
             obj.setOlapElementId(item.getOlapElementId());
+            obj.setChartType((String) item.getParams().get("chartType"));
             if (usedItemOlapIdSet != null) {
                 obj.setUsed(usedItemOlapIdSet.contains(item.getOlapElementId()));
             }

@@ -44,9 +44,9 @@ public class ColumnMetaDefine implements Serializable {
     private String name;
     
     /**
-     * 字段类型
+     * 数据库中字段类型
      */
-    private DataType type;
+    private String type;
     
     /**
      * 
@@ -87,7 +87,7 @@ public class ColumnMetaDefine implements Serializable {
      * @return 数据类型
      * @see DataType
      */
-    public DataType getType() {
+    public String getType() {
         return type;
     }
     
@@ -96,7 +96,7 @@ public class ColumnMetaDefine implements Serializable {
      * @param type
      *            DataType 数据类型
      */
-    public void setType(DataType type) {
+    public void setType(String type) {
         this.type = type;
     }
     

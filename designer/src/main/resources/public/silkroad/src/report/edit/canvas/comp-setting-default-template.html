@@ -14,10 +14,11 @@
         <span class="letter">纵轴:</span>
         {{each yAxis as item}}
         <div class="item hover-bg j-root-line c-m" data-id="{{item.id}}">
-            <span class="item-text j-item-text" title="{{item.caption}}（{{item.name}}）">
+            <span class="icon-chart {{item.chartType}} j-icon-chart" chart-type="{{item.chartType}}" ></span>
+            <span class="item-text j-item-text icon-font" title="{{item.caption}}（{{item.name}}）">
             {{item.caption}}{{if item.name}}（{{item.name}}）{{/if}}
             </span>
-            <span class="icon-letter j-delete" title="删除">×</span>
+            <span class="icon hide j-delete" title="删除">×</span>
         </div>
         {{/each}}
     </div>
@@ -31,5 +32,9 @@
             <span class="icon-letter j-delete" title="删除">×</span>
         </div>
         {{/each}}
+    </div>
+    <div class="data-axis-line data-axis-line-48 data-btn-line">
+        <span class="letter">设置:</span>
+        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>
     </div>
 </div>
