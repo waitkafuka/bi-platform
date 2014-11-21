@@ -358,7 +358,7 @@ define([
                 oLapElemenType = ui.draggable.parents(selector);
                 oLapElemenType = oLapElemenType.length ? 'ind' : 'dim';
 
-                // TODO:添加图X轴Y轴的判断
+                // 维度与指标项的样式不一样，分别添加
                 var str;
                 if (oLapElemenType === 'ind') {
                     str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
@@ -367,6 +367,7 @@ define([
                 str = '<span class="icon hide j-delete" title="删除">×</span>';
                 $item.append(str);
                 $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
+                // TODO:需要判断下两个饼图
 
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
@@ -377,7 +378,6 @@ define([
 
                 // 避免调顺序产生拖入的干扰
                 $item.removeClass('j-olap-element').addClass('c-m');
-
                 that.model.addCompAxis(compId, data, function () {
                     // 去除时间维度的接收拖拽与调序的冲突
                     $item.removeClass('j-time-dim');
