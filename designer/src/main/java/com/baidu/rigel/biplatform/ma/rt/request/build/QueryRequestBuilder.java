@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.ma.rt.request.build;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryRequest;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
@@ -46,7 +47,43 @@ public final class QueryRequestBuilder {
 	 */
 	public static QueryRequest buildQueryRequest(ExtendAreaContext context, QueryStrategy queryStrategy, 
 			Map<String, Object> params, Function<QueryRequest, QueryRequest> customizationFunc) {
-		QueryRequest queryRequest = new QueryRequest(queryStrategy, context, params);
-		return customizationFunc.apply(queryRequest);
+		Map<String, Object> localParams = context.getParams();
+        /**
+         * TODO 添加到函数处理，仅保留一个时间条件
+         */
+        for (String key : localParams.keySet()) {
+            String value = localParams.get(key).toString();
+            if (value.contains("start") && value.contains("end")) {
+                localParams.remove(key);
+            }
+        }
+        localParams.putAll(params);
+        context.setParams(localParams);
+        
+        final QueryRequest queryRequest = new QueryRequest(queryStrategy, context, params);
+        queryRequest.setAreaId(context.getAreaId());
+        // 行
+        Map<Item, Object> x = context.getX();
+        x.keySet().stream().forEach(item -> {
+            queryRequest.getRows().put(item.getOlapElementId(), null);
+        });
+        // 列
+        Map<Item, Object> y = context.getY();
+        y.keySet().stream().forEach(item -> {
+            queryRequest.getCols().put(item.getOlapElementId(), null);
+        });
+        // 切片轴
+        Map<Item, Object> s = context.getS();
+        s.keySet().stream().forEach(item -> {
+           queryRequest.getFilter().put(item.getOlapElementId(), null); 
+        });
+        // 设置报表ID
+		queryRequest.setReportId(context.getReportId());
+		// 自定义处理函数
+		if (customizationFunc != null) {
+		    QueryRequest queryRequestFun = customizationFunc.apply(queryRequest);
+		    return queryRequestFun;
+		}
+        return queryRequest;
 	}
 }

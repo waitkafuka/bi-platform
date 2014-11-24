@@ -15,26 +15,25 @@
  */
 package com.baidu.rigel.biplatform.ma.rt.utils;
 
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 
-import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
-import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
-import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.rt.Context;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -48,11 +47,6 @@ public final class RuntimeEvnUtil {
      * 日期
      */
     private static Logger logger = Logger.getLogger(RuntimeEvnUtil.class);
-    /**
-     * 数据源服务
-     */
-    @Resource(name = "dsService")
-    static DataSourceService dsService;
 	/**
 	 * 构造函数
 	 */
@@ -60,29 +54,81 @@ public final class RuntimeEvnUtil {
 	}
 	
 	/**
+	 * 内部上下文类，包含全局上下文context，以及区域上下文列表
+	 */
+	public class ContextEntity {
+	    /**
+	     * 全局上下文
+	     */
+	    private Context context;
+	    /**
+	     * 区域上下文列表
+	     */
+	    private List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
+	    /**
+	     * 
+	     * 构造函数
+	     */
+	    public ContextEntity() {
+	        
+	    }
+	    /**
+	     * 
+	     * getContext
+	     * @return
+	     */
+        public Context getContext() {           
+            return context;            
+        }
+        /**
+         * 
+         * setContext
+         * @param context
+         */
+        public void setContext(Context context) {           
+            this.context = context;           
+        }
+        /**
+         * 
+         * getExtendAreaContextLists
+         * @return
+         */
+        public List<ExtendAreaContext> getExtendAreaContextLists() {            
+            return extendAreaContextLists;           
+        }
+        /**
+         * 
+         * setExtendAreaContextLists
+         * @param extendAreaContextLists
+         */
+        public void setExtendAreaContextLists(List<ExtendAreaContext> extendAreaContextLists) {            
+            this.extendAreaContextLists = extendAreaContextLists;          
+        }
+	}
+	/**
 	 * 根据报表id初始化报表对应运行时啥下文
 	 * @param designModel 报表模型
 	 * @return Context 运行时上下文
 	 */
-	public static final Context initContext(ReportDesignModel designModel) {
-	    //TODO Spring的ApplicationContext
-	    ApplicationContext applicationContext = null; 
+	public static final ContextEntity initRuntimeEvn(ReportDesignModel designModel, ApplicationContext applicationContext) {
+	    ContextEntity contextEntity = new RuntimeEvnUtil().new ContextEntity();
 	    // 上下文信息
 	    Context context = new Context(applicationContext);
+	    contextEntity.setContext(context);
+	    
 	    // 局部上下文参数
-	    ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = context.getLocalCtxMap();
+	    List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
 	    // 获取扩展区域列表
 	    ExtendArea[] extendAreas = designModel.getExtendAreaList();
 	    if (extendAreas != null) {
 	        // 遍历扩展区，获取每个扩展区的上下文信息
 	        for (ExtendArea extendArea : extendAreas) {
 	            ExtendAreaContext localContext = getLocalContextOfExtendArea(extendArea, designModel);
-	            localCtxMap.put(extendArea.getId(), localContext);
+	            extendAreaContextLists.add(localContext);
 	        }
 	    }
-	    // 更新局部上下文信息
-	    context.setLocalCtxMap(localCtxMap);
-		return context;
+	    contextEntity.setExtendAreaContextLists(extendAreaContextLists);
+		return contextEntity;
 	}
 	
 	/**
@@ -95,33 +141,31 @@ public final class RuntimeEvnUtil {
 	    ExtendAreaContext context = new ExtendAreaContext();
 	    context.setAreaId(extendArea.getId());
 	    context.setAreaType(extendArea.getType());
-	    // 对数据源信息进行处理
-	    DataSourceDefine dsDefine = new DataSourceDefine();
-        try {
-            dsDefine = dsService.getDsDefine(designModel.getDsId());
-        } catch (DataSourceOperationException e) {
-            logger.error("fail to get datasource define ", e);
-        }
-        // 设置默认数据源信息
-	    context.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine));
+	    context.setReportId(designModel.getId());
 	    // 设置数据格式模型
 	    context.setFormatModel(extendArea.getFormatModel());
-	    
+	    // 设置cube定义
+        try {
+            Cube cubeDefine = QueryUtils.getCubeWithExtendArea(designModel, extendArea);
+            context.setCubeDefine(cubeDefine);
+        } catch (QueryModelBuildException e) {
+            logger.error("fail to get cube define", e);            
+        }
 	    // 获取区域逻辑模型
 	    LogicModel logicModel = extendArea.getLogicModel();
 	    // 利用逻辑模型获取行轴，列轴，以及切片轴信息
 	    Item[] columns = logicModel.getColumns();
 	    Item[] rows = logicModel.getRows();
 	    Item[] slices = logicModel.getSlices();
-	    Map<Item, Object> x = Maps.newLinkedHashMap();
+	    LinkedHashMap<Item, Object> x = Maps.newLinkedHashMap();
 	    for (Item item : rows) {
 	        x.put(item, null);
 	    }
-	    Map<Item, Object> y = Maps.newLinkedHashMap();
+	    LinkedHashMap<Item, Object> y = Maps.newLinkedHashMap();
         for (Item item : columns) {
             y.put(item, null);
         }
-	    Map<Item, Object> s = Maps.newLinkedHashMap();
+	    LinkedHashMap<Item, Object> s = Maps.newLinkedHashMap();
         for (Item item : slices) {
             s.put(item, null);
         } 

@@ -58,6 +58,10 @@ public class QueryAction implements Serializable {
     private QueryStrategy queryStrategy;
     
     /**
+     * 报表ID
+     */
+    private String reportId;
+    /**
      * 查询列轴信息 key item's id
      */
     private LinkedHashMap<Item, Object> columns = new LinkedHashMap<Item, Object>();
@@ -225,6 +229,28 @@ public class QueryAction implements Serializable {
      */
     public void setRequestParams(Map<String, Object> requestParams) {
         this.requestParams = requestParams;
+    }
+
+    
+    /** 
+     * 获取 reportId 
+     * @return the reportId 
+     */
+    public String getReportId() {
+        
+        return reportId;
+        
+    }
+
+    
+    /** 
+     * 设置 reportId 
+     * @param reportId the reportId to set 
+     */
+    public void setReportId(String reportId) {
+        
+        this.reportId = reportId;
+        
     }
     
 }

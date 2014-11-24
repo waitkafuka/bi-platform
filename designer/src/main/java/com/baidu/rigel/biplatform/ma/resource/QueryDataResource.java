@@ -203,7 +203,7 @@ public class QueryDataResource {
         return rs;
     }
     
-    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
+    @RequestMapping(value = "/{reportId}/report_vm1", method = { RequestMethod.GET },
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
@@ -312,7 +312,7 @@ public class QueryDataResource {
         return builder.toString();
     }
     
-    @RequestMapping(value = "/{reportId}/report_json", method = { RequestMethod.GET },
+    @RequestMapping(value = "/{reportId}/report_json1", method = { RequestMethod.GET },
             produces = "text/plain;charset=utf-8")
     public String queryJson(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
@@ -336,7 +336,7 @@ public class QueryDataResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime_model", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{reportId}/runtime_model1", method = { RequestMethod.POST })
     public ResponseResult initRunTimeModel(@PathVariable("reportId") String reportId,
             HttpServletRequest request) {
         boolean edit = Boolean.valueOf(request.getParameter("isEdit"));
@@ -383,7 +383,7 @@ public class QueryDataResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime/context", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{reportId}/runtime/context1", method = { RequestMethod.POST })
     public ResponseResult updateContext(@PathVariable("reportId") String reportId,
             HttpServletRequest request) {
         
@@ -464,7 +464,7 @@ public class QueryDataResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}1", method = { RequestMethod.POST })
     public ResponseResult queryArea(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
 
