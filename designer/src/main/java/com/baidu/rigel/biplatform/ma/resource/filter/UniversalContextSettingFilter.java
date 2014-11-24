@@ -28,12 +28,14 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
+import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.google.common.collect.Lists;
 
@@ -45,7 +47,12 @@ import com.google.common.collect.Lists;
  *         2014-8-13
  */
 public class UniversalContextSettingFilter implements Filter {
+	
+	/**
+	 * LOG
+	 */
     private static final Logger LOG = Logger.getLogger(UniversalContextSettingFilter.class);
+    
     /*
      * (non-Javadoc)
      * 
@@ -53,8 +60,8 @@ public class UniversalContextSettingFilter implements Filter {
      */
     @Override
     public void destroy() {
-        
     }
+    
     /*
      * (non-Javadoc)
      * 
@@ -64,44 +71,124 @@ public class UniversalContextSettingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        HttpServletRequest httpRequest = (HttpServletRequest) request; 
-        request.setCharacterEncoding("utf-8");
-        response.setCharacterEncoding("utf-8");
-        // modify by jiangyichao at 2014-09-12
-        String sessionId = null;
-        String productLine = null;
-        if (httpRequest.getCookies() != null && httpRequest.getCookies().length > 0) {
-            List<Cookie> cookies = Lists.newArrayList();
-            Collections.addAll(cookies, httpRequest.getCookies());
-            Object[] tmp = cookies.stream().filter(cookie -> {
-               return Constants.BIPLATFORM_PRODUCTLINE.equals(cookie.getName()); 
-            }).map(encryptProductLine).toArray();
-            if (tmp != null && tmp.length > 0) {
-                productLine = tmp[0].toString();
-            }
-            tmp = cookies.stream().filter(cookie -> {
-                return Constants.SESSION_ID.equals(cookie.getName());
-            }).map(genSessionId).toArray();
-            
-            if (tmp != null && tmp.length > 0) {
-                sessionId = tmp[0].toString();
-            }
-        }
-
-        
-        try { 
-            ContextManager.setSessionId(sessionId);
-            ContextManager.setProductLine(productLine);
-            chain.doFilter(request, response);
-        } finally {
-            /**
-             * 清空线程里面的东西
-             */
-            ContextManager.cleanSessionId();
-            ContextManager.cleanProductLine();
+    		HttpServletRequest httpRequest = (HttpServletRequest) request; 
+    		HttpServletResponse httpResponse = (HttpServletResponse) response;
+        try {
+			request.setCharacterEncoding("utf-8");
+	        response.setCharacterEncoding("utf-8");
+	        String sessionId = null;
+	        String productLine = null;
+	        if (httpRequest.getCookies() != null && httpRequest.getCookies().length > 0) {
+	            List<Cookie> cookies = Lists.newArrayList();
+	            Collections.addAll(cookies, httpRequest.getCookies());
+				productLine = getProductLine(cookies);
+	            sessionId = getSessionId(cookies);
+	        }
+	        if (StringUtils.isEmpty(productLine) && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
+	        	 	productLine = decryptProductLIne(httpRequest, httpResponse);
+     	        sessionId = generateSessionId(httpResponse);
+	        }
+	        setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
+        } catch(Exception e) {
+	        	throw new RuntimeException("productline encrypt happened exception," 
+	        			+ "message:" + e);
         }
     }
     
+	/**
+	 * 初始化用户会话id
+	 * @param response HttpServletResponse
+	 * @return String
+	 */
+	private String generateSessionId(HttpServletResponse response) {
+		String sessionId;
+		sessionId = UuidGeneratorUtils.generate();
+		Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID,sessionId);
+		sessionIdCookie.setPath(Constants.COOKIE_PATH);
+		response.addCookie(sessionIdCookie);
+		return sessionId;
+	}
+
+	/**
+	 * 初始化用户产品线信息
+	 * @param request HttpServletRequest
+	 * @param response HttpServletResponse
+	 * @return String
+	 * @throws Exception
+	 * 
+	 */
+	private String decryptProductLIne(HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		String productLine = null;
+		productLine = request.getParameter(Constants.TOKEN);
+        if (StringUtils.hasText(productLine)) {
+		    Cookie productLineCookie = new Cookie(Constants.BIPLATFORM_PRODUCTLINE, productLine);
+		    productLineCookie.setPath(Constants.COOKIE_PATH);
+		    ((HttpServletResponse) response).addCookie(productLineCookie);
+		    // 对productLine进行重新解密，以便放到ContextManager中
+		    productLine = AesUtil.getInstance().decrypt(productLine);
+        }
+		return productLine;
+	}
+
+	/**
+	 * 从cookie中查找用户的会话信息
+	 * @param cookies
+	 * @return String
+	 */
+	private String getSessionId (List<Cookie> cookies) {
+		String sessionId = null;
+		Object[] tmp;
+		tmp = cookies.stream().filter(cookie -> {
+		    return Constants.SESSION_ID.equals(cookie.getName());
+		}).map(genSessionId).toArray();
+		
+		if (tmp != null && tmp.length > 0) {
+		    sessionId = tmp[0].toString();
+		}
+		return sessionId;
+	}
+
+	/**
+	 * 从cookie中查找用户的产品线信息
+	 * @param cookies request cookies
+	 * @return String
+	 */
+	private String getProductLine(List<Cookie> cookies) {
+		String productLine = null;
+		Object[] tmp = cookies.stream().filter(cookie -> {
+		   return Constants.BIPLATFORM_PRODUCTLINE.equals(cookie.getName()); 
+		}).map(encryptProductLine).toArray();
+		if (tmp != null && tmp.length > 0) {
+		    productLine = tmp[0].toString();
+		}
+		return productLine;
+	}
+    
+	/**
+	 * 
+	 * 将运行时变量放到当前线程
+	 * @param request HttpServletRequest
+	 * @param response HttpServletRequest
+	 * @param chain FilterChain
+	 * @param productLine 产品线信息
+	 * @param sessionId 会话id
+	 * @throws Exception
+	 * 
+	 */
+	private void setSessionInfoIntoThread(HttpServletRequest request,
+			HttpServletResponse response, FilterChain chain,
+			String productLine, String sessionId) throws Exception {
+		try {
+		    	ContextManager.setSessionId(sessionId);
+		    	ContextManager.setProductLine(productLine);
+		    	chain.doFilter(request, response);
+		} finally {
+		    	ContextManager.cleanSessionId();
+		    	ContextManager.cleanProductLine();
+		}
+	}
+	
     /*
      * (non-Javadoc)
      * 

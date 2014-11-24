@@ -204,8 +204,8 @@ public class QueryDataResource {
         return rs;
     }
     
-    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
-            produces = "text/html;charset=utf-8")
+//    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
+//            produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
         // modify by jiangyichao at 2014-09-12 
@@ -389,7 +389,7 @@ public class QueryDataResource {
             HttpServletRequest request) {
         
         Map<String, String[]> contextParams = request.getParameterMap();
-        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
         Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
         Map<String, Object> newParams = Maps.newHashMap();
