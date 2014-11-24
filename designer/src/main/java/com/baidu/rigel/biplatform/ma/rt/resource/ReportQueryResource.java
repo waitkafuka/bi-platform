@@ -68,7 +68,6 @@ public class ReportQueryResource {
     private DataSourceService dsService;
     
     /**
-     * TODO：对布局进行重新设计与调整，此类布局方式不灵活
      * 运行态报表查询服务请求入口：用户查询报表模型定义中的vm信息，用于展现报表时客户端布局
      * @param reportId 报表id
      * @param request HttpServletRequest
@@ -90,6 +89,8 @@ public class ReportQueryResource {
         response.setCharacterEncoding("utf-8");
         return builder.toString();
     }
+    
+    
 
 	/**
 	 * TODO 临时方案，后续需要调整，删除此处

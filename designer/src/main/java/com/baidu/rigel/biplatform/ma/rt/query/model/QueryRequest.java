@@ -88,11 +88,6 @@ public class QueryRequest implements Serializable {
     private ExtendAreaContext context;
     
     /**
-     * 全局参数定义
-     */
-    private final Map<String, Object> globalParams;
-    
-    /**
      * 数据源定义
      */
 
@@ -102,9 +97,7 @@ public class QueryRequest implements Serializable {
      * @param queryStrategy 查询策略
      * QueryRequest
      */
-    public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context, 
-    		    Map<String, Object> globalParams) {
-    		this.globalParams = globalParams;
+    public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context) {
         this.queryStrategy = queryStrategy;
         this.context = context;
     }
@@ -256,11 +249,4 @@ public class QueryRequest implements Serializable {
 		return context.getDefaultDsInfo();
 	}
 
-	/**
-	 * @return the globalParams
-	 */
-	public Map<String, Object> getGlobalParams() {
-		return globalParams;
-	}
-	
 }
