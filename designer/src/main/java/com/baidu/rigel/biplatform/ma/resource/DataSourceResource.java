@@ -53,7 +53,7 @@ import com.google.common.collect.Maps;
  */
 @RestController
 @RequestMapping("/silkroad/datasources")
-public class DataSourceResource {
+public class DataSourceResource extends BaseResource {
     
     /**
      * logger
@@ -154,7 +154,7 @@ public class DataSourceResource {
                 rs.setStatus(1);
                 rs.setStatusInfo("未能找到对于数据源定义，id : " + id);
             } else {
-                define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd()));
+                define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
                 rs.setData(define);
@@ -235,7 +235,7 @@ public class DataSourceResource {
                 logger.info("successfully update datasource with id " + id);
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
-                define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd()));
+                define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
                 rs.setData(define);
             }
         } catch (Exception e) {

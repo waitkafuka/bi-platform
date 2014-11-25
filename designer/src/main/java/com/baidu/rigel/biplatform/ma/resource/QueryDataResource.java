@@ -102,7 +102,7 @@ import com.google.common.collect.Sets;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
-public class QueryDataResource {
+public class QueryDataResource extends BaseResource {
     
     /**
      * logger
@@ -218,7 +218,7 @@ public class QueryDataResource {
                 productLineCookie.setPath(Constants.COOKIE_PATH);
                 ((HttpServletResponse) response).addCookie(productLineCookie);
                 // 对productLine进行重新解密，以便放到ContextManager中
-                productLine = AesUtil.getInstance().decrypt(productLine);
+                productLine = AesUtil.getInstance().decrypt(productLine, securityKey);
             } catch(Exception e){
                 logger.error("productline encrypt happened exception," 
                         + "message:" + e);

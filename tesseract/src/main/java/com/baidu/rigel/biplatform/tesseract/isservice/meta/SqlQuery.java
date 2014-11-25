@@ -216,7 +216,7 @@ public class SqlQuery {
                     sb.append(" ");
                     sb.append(where);
                     if (i < whereList.size() - 1) {
-                        sb.append("and");
+                        sb.append(" and ");
                     }
                 }
                 

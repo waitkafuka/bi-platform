@@ -42,15 +42,17 @@ public final class QueryRequestBuilder {
 	 * @param golbalParams Map<String, Object> 请求参数
 	 * @param queryStrategy QueryStrategy 查询策略
 	 * @param callBack BiFunction 回调函数
+	 * @param params 回调函数需要的额外参数，比如:drillItemValue等
 	 * @return QueryRequest 查询请求
 	 */
 	public static QueryRequest buildQueryRequest(ExtendAreaContext context, QueryStrategy queryStrategy, 
-			Map<String, Object> golbalParams, BiFunction<Map<String, Object>, QueryRequest, QueryRequest> callBack) {
+			Map<String, Object> golbalParams, BiFunction<Map<String, Object>, QueryRequest, QueryRequest> callBack, 
+			Map<String, Object> params) {
 		QueryRequest queryRequest = new QueryRequest(queryStrategy, context);
 		// TODO 是否考虑只将需要的参数放到局部上下文
 		context.getParams().putAll(golbalParams);
 		if (callBack != null) {
-			return callBack.apply(golbalParams, queryRequest);
+			return callBack.apply(params, queryRequest);
 		}
 		return queryRequest;
 	}
