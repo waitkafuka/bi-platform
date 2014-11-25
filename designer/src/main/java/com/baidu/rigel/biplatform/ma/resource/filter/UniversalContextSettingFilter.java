@@ -31,7 +31,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
@@ -52,6 +55,11 @@ public class UniversalContextSettingFilter implements Filter {
 	 * LOG
 	 */
     private static final Logger LOG = Logger.getLogger(UniversalContextSettingFilter.class);
+
+    /**
+     * securityKey
+     */
+	private String securityKey;
     
     /*
      * (non-Javadoc)
@@ -71,6 +79,12 @@ public class UniversalContextSettingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+    		if (StringUtils.isEmpty(securityKey)) {
+    			WebApplicationContext context = 
+    					WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
+    			securityKey = ((ConfigurableApplicationContext) context)
+    					.getBeanFactory().resolveEmbeddedValue("${biplatform.ma.ser_key}");
+    		}
     		HttpServletRequest httpRequest = (HttpServletRequest) request; 
     		HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
@@ -126,7 +140,7 @@ public class UniversalContextSettingFilter implements Filter {
 		    productLineCookie.setPath(Constants.COOKIE_PATH);
 		    ((HttpServletResponse) response).addCookie(productLineCookie);
 		    // 对productLine进行重新解密，以便放到ContextManager中
-		    productLine = AesUtil.getInstance().decrypt(productLine);
+		    productLine = AesUtil.getInstance().decrypt(productLine, securityKey);
         }
 		return productLine;
 	}
@@ -180,8 +194,12 @@ public class UniversalContextSettingFilter implements Filter {
 			HttpServletResponse response, FilterChain chain,
 			String productLine, String sessionId) throws Exception {
 		try {
-		    	ContextManager.setSessionId(sessionId);
-		    	ContextManager.setProductLine(productLine);
+			if (!StringUtils.isEmpty(sessionId)) {
+				ContextManager.setSessionId(sessionId);
+			}
+			if (!StringUtils.isEmpty(productLine)) {
+				ContextManager.setProductLine(productLine);
+			}
 		    	chain.doFilter(request, response);
 		} finally {
 		    	ContextManager.cleanSessionId();
@@ -204,7 +222,7 @@ public class UniversalContextSettingFilter implements Filter {
         if (StringUtils.hasText(innerProductLine)) {
             // 调用解密算法，对productLine进行解密
             try {
-                innerProductLine = AesUtil.getInstance().decrypt(innerProductLine);
+                innerProductLine = AesUtil.getInstance().decrypt(innerProductLine, securityKey);
             } catch (Exception e) {
                 LOG.error(innerProductLine);
                 LOG.error(e.getMessage(),e);
