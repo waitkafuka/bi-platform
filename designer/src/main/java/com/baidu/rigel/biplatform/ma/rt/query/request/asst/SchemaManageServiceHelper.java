@@ -52,7 +52,7 @@ public class SchemaManageServiceHelper {
     public Cube getCube(String areaId) {
         ExtendArea area = queryArea(areaId);
         try {
-            MiniCube cube =  (MiniCube) QueryUtils.getCubeWithExtendArea(reportModel, area);
+            MiniCube cube =  (MiniCube) QueryUtils.getCubeWithExtendArea(reportModel, area, null);
             // TODO 设置产品线名称
             return cube;
         } catch (QueryModelBuildException e) {

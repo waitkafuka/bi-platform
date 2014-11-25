@@ -47,7 +47,6 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
-import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
@@ -94,7 +93,7 @@ public class QueryUtils {
         if (area == null) {
             throw new QueryModelBuildException("can not get area with id : " + areaId);
         }
-        Cube cube = getCubeWithExtendArea(reportModel, area);
+        Cube cube = getCubeWithExtendArea(reportModel, area, null);
         if (cube == null) {
             throw new QueryModelBuildException("can not get cube define in area : " + areaId);
         }
@@ -331,7 +330,7 @@ public class QueryUtils {
      * @return 立方体定义
      * @throws QueryModelBuildException
      */
-    public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area)
+    public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area, Map<String, List<Dimension>> filterDims)
             throws QueryModelBuildException {
         Cube oriCube = getCubeFromReportModel(reportModel, area);
         MiniCube cube = new MiniCube(area.getCubeId());
@@ -388,13 +387,17 @@ public class QueryUtils {
                 measures.put(element.getName(), (Measure) element);
             }
         }
+        if (filterDims != null && filterDims.get(area.getCubeId()) != null) {
+        		List<Dimension> dims = filterDims.get(area.getCubeId());
+        		for(Dimension dim : dims) {
+        			dimensions.put(dim.getName(), dim);
+        		}
+        }
         cube.setDimensions(dimensions);
         cube.setMeasures(measures);
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
-//        if (StringUtils.isEmpty(cube.getId())) {
         cube.setId(oriCube.getId() + "_" + area.getId());
-//        }
         return cube;
     }
 
@@ -423,5 +426,15 @@ public class QueryUtils {
         rs.setLevels(levels);
         return rs;
     }
+
+    /**
+     * 
+     * @param model
+     * @param area
+     * @return Cube
+     */
+	public static Cube getCubeWithLiteOlapArea(ReportDesignModel model, ExtendArea area) {
+		return null;
+	}
 
 }

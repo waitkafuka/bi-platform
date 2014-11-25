@@ -18,7 +18,6 @@ package com.baidu.rigel.biplatform.ma.resource;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -92,6 +91,7 @@ import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 
 /**
  * CubeTable的页面交互
@@ -591,18 +591,18 @@ public class QueryDataResource extends BaseResource {
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
-            SeriesUnitType chartType = getChartTypeWithExtendArea(targetArea);
+            String[] chartType = getChartTypeWithExtendArea(targetArea);
             if (action.getRows().size() == 1) {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
                 if (element instanceof TimeDimension) {
-                		chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
+                		chart = chartBuildService.parseToChart(table, chartType, true);
                 } else {
-                		chart = chartBuildService.parseToChart(table, chartType);
+                		chart = chartBuildService.parseToChart(table, chartType, false);
                 }
             } else {
-                chart = chartBuildService.parseToChart(table, chartType);
+                chart = chartBuildService.parseToChart(table, chartType, false);
             }
             
             resultMap.put("reportChart", chart);
@@ -621,27 +621,23 @@ public class QueryDataResource extends BaseResource {
      * @param targetArea ExtendArea
      * @return SeriesUnitType
      */
-    private SeriesUnitType getChartTypeWithExtendArea(ExtendArea targetArea) {
-    		LinkedHashSet<String> types = Sets.newLinkedHashSet();
+    private String[] getChartTypeWithExtendArea(ExtendArea targetArea) {
+    		if (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
+    			return new String[]{SeriesUnitType.LINE.name()};
+    		}
+    		List<String> types = Lists.newArrayList();
     		targetArea.getAllItems().values().stream().filter(item -> {
     			return item.getPositionType() == PositionType.Y;
     		}).map(item -> {
     			return item.getParams().get("chartType");
-    		}).filter(chartType -> {
-    			return !StringUtils.isEmpty(chartType);
     		}).forEach(str -> {
-    			types.add(str.toString());
+    			if (StringUtils.isEmpty(str)) {
+    				types.add(SeriesUnitType.BAR.name());
+    			} else {
+    				types.add(str.toString().toUpperCase());
+    			}
     		});
-    		if (types.size() == 0) {
-    			return SeriesUnitType.BAR;
-    		}
-    		StringBuilder typeName = new StringBuilder();
-    		types.forEach(s -> {
-    			typeName.append(s);
-    			typeName.append("_");
-    		});
-    		String realTypeName = typeName.substring(0, typeName.length() - 1);
-		return SeriesUnitType.valueOf(realTypeName.toUpperCase());
+		return types.toArray(new String[0]);
 	}
 
 	/**
@@ -1146,7 +1142,7 @@ public class QueryDataResource extends BaseResource {
                 params.put(key, value.toString());
             }
         }
-        cube = QueryUtils.getCubeWithExtendArea(model, area);
+        cube = QueryUtils.getCubeWithExtendArea(model, area, null);
         ((MiniCube) cube).setSchema(model.getSchema());
         final Dimension newDim = QueryUtils.convertDim2Dim(dim);
         List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params);
