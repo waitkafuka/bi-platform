@@ -65,7 +65,11 @@ public class Aggregate {
                 BigDecimal arg2 = new BigDecimal(src2.toString());
                 return arg1.add(arg2);
             case AGGREGATE_COUNT:
-                return 0;
+                if(src1 == null || src2 == null) {
+                    return 1;
+                }else {
+                    return Integer.parseInt(src1.toString()) + 1;
+                }
             default:
                 throw new UnsupportedOperationException("unsupported aggregator:" + aggregator);
         }
