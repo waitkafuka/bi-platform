@@ -360,9 +360,13 @@ define([
 
                 // 维度与指标项的样式不一样，分别添加
                 var str;
+                // 指标
                 if (oLapElemenType === 'ind') {
-                    str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
-                    $item.prepend(str);
+                    if (compType !== 'TABLE') {
+                        str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
+                        $item.prepend(str);
+                    }
+
                 }
                 str = '<span class="icon hide j-delete" title="删除">×</span>';
                 $item.append(str);
@@ -431,6 +435,21 @@ define([
                 $('.comp-setting-charticons span').click(function () {
                     var $this =  $(this);
                     var selectedChartType = $this.attr('chart-type');
+                    // 如果是饼图的话，比较麻烦，不能同时选择两个饼图
+                    if (selectedChartType === 'pie') {
+                        var $chartTypes = $target.parent().siblings('div');
+                        var flag = false;
+                        $chartTypes.each(function () {
+                            var $chartType = $($(this).find('span')[0]);
+                            if ($chartType.attr('chart-type') === 'pie') {
+                                alert('不能选择两个饼图');
+                                flag = true;
+                            }
+                        });
+                        if (flag) {
+                            return;
+                        }
+                    }
 
                     that.model.changeCompItemChartType(
                         compId,

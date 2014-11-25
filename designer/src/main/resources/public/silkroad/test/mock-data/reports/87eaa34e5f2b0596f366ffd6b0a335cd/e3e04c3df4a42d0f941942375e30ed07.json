@@ -3,7 +3,7 @@
         "title": "趋势图",
         "subTitle": "",
         "xAxisType": "category",
-        "xAxisCategories": ["广告及包装  -  包装", "广告及包装  -  印刷", "广告及包装  -  工艺品", "广告及包装  -  广告", "广告及包装  -  广告及包装其他", "广告及包装  -  广播电视服务", "广告及包装  -  广播通信其他", "广告及包装  -  房产买卖", "广告及包装  -  房地产其他", "广告及包装  -  房屋出租", "广告及包装  -  服装", "广告及包装  -  服装鞋帽其他", "广告及包装  -  皮革", "广告及包装  -  礼品", "广告及包装  -  礼品饰品其他", "广告及包装  -  箱包", "广告及包装  -  纺织辅料", "广告及包装  -  通信服务", "广告及包装  -  通信终端", "广告及包装  -  通信设备", "广告及包装  -  鞋帽", "广告及包装  -  饰品", "广播通信  -  包装", "广播通信  -  印刷", "广播通信  -  工艺品", "广播通信  -  广告", "广播通信  -  广告及包装其他", "广播通信  -  广播电视服务", "广播通信  -  广播通信其他", "广播通信  -  房产买卖", "广播通信  -  房地产其他", "广播通信  -  房屋出租", "广播通信  -  服装", "广播通信  -  服装鞋帽其他", "广播通信  -  皮革", "广播通信  -  礼品", "广播通信  -  礼品饰品其他", "广播通信  -  箱包", "广播通信  -  纺织辅料", "广播通信  -  通信服务", "广播通信  -  通信终端", "广播通信  -  通信设备", "广播通信  -  鞋帽", "广播通信  -  饰品", "房地产  -  包装", "房地产  -  印刷", "房地产  -  工艺品", "房地产  -  广告", "房地产  -  广告及包装其他", "房地产  -  广播电视服务", "房地产  -  广播通信其他", "房地产  -  房产买卖", "房地产  -  房地产其他", "房地产  -  房屋出租", "房地产  -  服装", "房地产  -  服装鞋帽其他", "房地产  -  皮革", "房地产  -  礼品", "房地产  -  礼品饰品其他", "房地产  -  箱包", "房地产  -  纺织辅料", "房地产  -  通信服务", "房地产  -  通信终端", "房地产  -  通信设备", "房地产  -  鞋帽", "房地产  -  饰品", "服装鞋帽  -  包装", "服装鞋帽  -  印刷", "服装鞋帽  -  工艺品", "服装鞋帽  -  广告", "服装鞋帽  -  广告及包装其他", "服装鞋帽  -  广播电视服务", "服装鞋帽  -  广播通信其他", "服装鞋帽  -  房产买卖", "服装鞋帽  -  房地产其他", "服装鞋帽  -  房屋出租", "服装鞋帽  -  服装", "服装鞋帽  -  服装鞋帽其他", "服装鞋帽  -  皮革", "服装鞋帽  -  礼品", "服装鞋帽  -  礼品饰品其他", "服装鞋帽  -  箱包", "服装鞋帽  -  纺织辅料", "服装鞋帽  -  通信服务", "服装鞋帽  -  通信终端", "服装鞋帽  -  通信设备", "服装鞋帽  -  鞋帽", "服装鞋帽  -  饰品", "礼品饰品  -  包装", "礼品饰品  -  印刷", "礼品饰品  -  工艺品", "礼品饰品  -  广告", "礼品饰品  -  广告及包装其他", "礼品饰品  -  广播电视服务", "礼品饰品  -  广播通信其他", "礼品饰品  -  房产买卖", "礼品饰品  -  房地产其他", "礼品饰品  -  房屋出租", "礼品饰品  -  服装", "礼品饰品  -  服装鞋帽其他", "礼品饰品  -  皮革", "礼品饰品  -  礼品", "礼品饰品  -  礼品饰品其他", "礼品饰品  -  箱包", "礼品饰品  -  纺织辅料", "礼品饰品  -  通信服务", "礼品饰品  -  通信终端", "礼品饰品  -  通信设备", "礼品饰品  -  鞋帽", "礼品饰品  -  饰品"],
+        "xAxisCategories": ["包装", "印刷", "工艺品", "广告", "广告及包装其他", "广播电视服务"],
         "yAxises": [
             {
                 "name": "纵轴",
@@ -12,21 +12,21 @@
         ],
         "seriesData": [
             {
-                "data": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                "data": [210, 222, 234, 245, 356, 212],
                 "format": null,
                 "name": "展现",
                 "type": "bar",
                 "yAxisName": "test_axis"
             },
             {
-                "data": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                "data": [1023, 1122, 987, 879, 789, 777],
                 "format": null,
                 "name": "自增ID",
                 "type": "bar",
                 "yAxisName": "test_axis"
             },
             {
-                "data": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+                "data": [567, 678, 789, 606, 555, 450],
                 "format": null,
                 "name": "点击消费",
                 "type": "bar",
