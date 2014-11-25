@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +27,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
@@ -36,7 +34,6 @@ import com.baidu.rigel.biplatform.tesseract.resultset.Aggregate;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
 
 /**
  * 
@@ -74,23 +71,23 @@ public class AggregateCompute {
      */
     public static LinkedList<ResultRecord> aggregate(LinkedList<ResultRecord> dataList,
         int dimSize, List<QueryMeasure> queryMeasures) {
-        LinkedList<ResultRecord> result = new LinkedList<ResultRecord>();
         
-        if (CollectionUtils.isEmpty(queryMeasures) || dataList.size() == 1) {
+        if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList) ||dataList.size() == 1) {
             LOGGER.info("no need to group.");
             return dataList;
         }
+        LinkedList<ResultRecord> result = new LinkedList<ResultRecord>();
         
-        Set<Integer> countIndex = Sets.newHashSet();
-        for (int i = 0 ; i < queryMeasures.size() ; i++) {
-            if (queryMeasures.get(i).getAggregator().equals(Aggregator.COUNT)) {
-                countIndex.add(dimSize + i);
-            }
-        }
+//        Set<Integer> countIndex = Sets.newHashSet();
+//        for (int i = 0 ; i < queryMeasures.size() ; i++) {
+//            if (queryMeasures.get(i).getAggregator().equals(Aggregator.COUNT)) {
+//                countIndex.add(dimSize + i);
+//            }
+//        }
         
         Meta meta = dataList.get(0).getMeta();
         long current = System.currentTimeMillis();
-        Map<String, ResultRecord> groupResult = dataList.parallelStream().collect(Collectors.groupingBy(ResultRecord::getGroupBy,
+        Map<String, ResultRecord> groupResult = dataList.parallelStream().collect(Collectors.groupingByConcurrent(ResultRecord::getGroupBy,
                 Collectors.reducing(new ResultRecord(new Serializable[meta.getFieldNameArray().length], DeepcopyUtils.deepCopy(meta)), (x,y) ->{
                     ResultRecord var = new ResultRecord(new Serializable[meta.getFieldNameArray().length], meta);
                     var.setGroupBy(y.getGroupBy());
@@ -107,12 +104,11 @@ public class AggregateCompute {
                     return var;
                 })));
         LOGGER.info("group agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
-        Map<String, Long> countRes = null;
-        if (CollectionUtils.isNotEmpty(countIndex)) {
-            current = System.currentTimeMillis();
-           countRes = dataList.parallelStream().collect(Collectors.groupingBy(ResultRecord::getGroupBy,Collectors.counting()));
-           LOGGER.info("group count cost:" + (System.currentTimeMillis() - current) + "ms!");
-        }
+//        if (CollectionUtils.isNotEmpty(countIndex)) {
+//            current = System.currentTimeMillis();
+//           countRes = dataList.parallelStream().collect(Collectors.groupingBy(ResultRecord::getGroupBy,Collectors.counting()));
+//           LOGGER.info("group count cost:" + (System.currentTimeMillis() - current) + "ms!");
+//        }
         
         for(String key : groupResult.keySet()) {
             int i = 0 ;
@@ -120,9 +116,9 @@ public class AggregateCompute {
                 groupResult.get(key).setField(i, value);
                 i++;
             }
-            for (int index : countIndex) {
-                groupResult.get(key).setField(index, countRes.get(key));
-            }
+//            for (int index : countIndex) {
+//                groupResult.get(key).setField(index, countRes.get(key));
+//            }
         }
         result.addAll(groupResult.values());
         
