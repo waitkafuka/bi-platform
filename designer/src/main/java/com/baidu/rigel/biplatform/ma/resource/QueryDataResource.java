@@ -204,8 +204,8 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
-//    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
-//            produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
+            produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
         // modify by jiangyichao at 2014-09-12 
