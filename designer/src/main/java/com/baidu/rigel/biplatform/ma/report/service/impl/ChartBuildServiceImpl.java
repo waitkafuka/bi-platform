@@ -56,27 +56,30 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * (com.baidu.rigel.biplatform.ma.report.query.pivotTable.PivotTable)
      */
     @Override
-    public DIReportChart parseToChart(PivotTable tableResult, SeriesUnitType chartType) {
+    public DIReportChart parseToChart(PivotTable tableResult, String[] chartType, boolean isTimeChart) {
 
         DIReportChart reportChart = new DIReportChart();
-        reportChart.setTitle("趋势图");
-        reportChart.setSubTitle("");
+//        reportChart.setTitle("趋势图");
+//        reportChart.setSubTitle("");
         reportChart.setSeriesData(Lists.<SeriesDataUnit> newArrayList());
         // for(int i=0; i<tableResult.getColDefine().size(); i++){
         // SeriesInputInfo seriesInput = chartMeta.getSeriesSet().get(i);
         // if(!dataSets.containsKey(String.valueOf(i))){
         // continue;
         // }
-        SeriesInputInfo seriesInput = new SeriesInputInfo();
-//        if (chartType == 0) {
-//            seriesInput.setType(SeriesUnitType.LINE);
-//        }  else if(chartType == 2) {
-//            seriesInput.setType(SeriesUnitType.PIE);
-//        } else if (chartType == 1) {
-    		seriesInput.setType(chartType);
-//        }
-        seriesInput.setyAxisName("test_axis");
-        List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInput, tableResult);
+        List<SeriesInputInfo> seriesInputs = Lists.newArrayList();
+        for(String type : chartType) {
+	        	SeriesInputInfo seriesInput = new SeriesInputInfo();
+        		if (isTimeChart) {
+        			seriesInput.setType(SeriesUnitType.LINE);
+        		} else {
+        			seriesInput.setType(SeriesUnitType.valueOf(type));
+        		}
+	        	seriesInput.setyAxisName(type);
+	        	seriesInputs.add(seriesInput);
+        	
+        }
+        List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInputs, tableResult);
         reportChart.getSeriesData().addAll(seriesUnits);
         // }
         // ChartMetaData chartMeta = new ChartMetaData();
@@ -89,8 +92,8 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         /**
          * use the x axis from query result from first series.
          */
-        reportChart.setxAxisCategories(getXAxisCategories(tableResult, chartType == SeriesUnitType.LINE));
-        if (chartType == SeriesUnitType.LINE) {
+        reportChart.setxAxisCategories(getXAxisCategories(tableResult, isTimeChart));
+		if (isTimeChart) {
             reportChart.setxAxisType(XAxisType.DATETIME.getName());
         } else {
             reportChart.setxAxisType(XAxisType.CATEGORY.getName());
@@ -143,7 +146,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @param pTable
      * @return
      */
-    private List<SeriesDataUnit> getSeriesUnitsByInputUnit(SeriesInputInfo seriesInput, PivotTable pTable) {
+    private List<SeriesDataUnit> getSeriesUnitsByInputUnit(List<SeriesInputInfo> seriesInput, PivotTable pTable) {
 
         List<SeriesDataUnit> units = Lists.newArrayList();
 
@@ -153,8 +156,9 @@ public class ChartBuildServiceImpl implements ChartBuildService {
             ColDefine col = columnDefs.get(i);
             // TODO the showName should be put in generateSeriesBranch method as
             // third parameter.
-            SeriesDataUnit branchData = generateSeriesBranch(pTable, col.getUniqueName(), col.getCaption(), seriesInput
-                    .getType().getName(), col.getFormat(), seriesInput.getyAxisName(), i);
+            SeriesInputInfo info = seriesInput.get(i);
+            SeriesDataUnit branchData = generateSeriesBranch(pTable, col.getUniqueName(), col.getCaption(), info
+                    .getType().getName(), col.getFormat(), info.getyAxisName(), i);
             units.add(branchData);
         }
         return units;

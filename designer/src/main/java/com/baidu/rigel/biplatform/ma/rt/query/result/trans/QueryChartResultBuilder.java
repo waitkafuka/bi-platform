@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 
- */
 package com.baidu.rigel.biplatform.ma.rt.query.result.trans;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;

@@ -51,6 +51,7 @@ import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
@@ -404,8 +405,15 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         List<Cube> cubes = Lists.newArrayList();
         for (ExtendArea area : model.getExtendAreaList()) {
             try {
-                Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
-                cubes.add(cube);
+            		// 忽略此类区域
+            		if (area.getType() == ExtendAreaType.TIME_COMP 
+            				|| area.getType() == ExtendAreaType.LITEOLAP_TABLE
+            				|| area.getType() == ExtendAreaType.SELECTION_AREA 
+            				|| area.getType() == ExtendAreaType.LITEOLAP_CHART) {
+            			continue;
+            		}  
+        			Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
+        			cubes.add(cube);
             } catch (QueryModelBuildException e) {
                 logger.warn("It seems that logicmodel of area is null. Ingore this area. ");
                 continue;

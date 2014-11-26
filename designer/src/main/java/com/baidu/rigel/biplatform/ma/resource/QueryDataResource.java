@@ -92,6 +92,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+
 /**
  * CubeTable的页面交互
  * 
@@ -101,7 +102,7 @@ import com.google.common.collect.Sets;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
-public class QueryDataResource {
+public class QueryDataResource extends BaseResource {
     
     /**
      * logger
@@ -203,8 +204,8 @@ public class QueryDataResource {
         return rs;
     }
     
-    @RequestMapping(value = "/{reportId}/report_vm1", method = { RequestMethod.GET },
-            produces = "text/html;charset=utf-8")
+//    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
+//            produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
         // modify by jiangyichao at 2014-09-12 
@@ -217,7 +218,7 @@ public class QueryDataResource {
                 productLineCookie.setPath(Constants.COOKIE_PATH);
                 ((HttpServletResponse) response).addCookie(productLineCookie);
                 // 对productLine进行重新解密，以便放到ContextManager中
-                productLine = AesUtil.getInstance().decrypt(productLine);
+                productLine = AesUtil.getInstance().decrypt(productLine, securityKey);
             } catch(Exception e){
                 logger.error("productline encrypt happened exception," 
                         + "message:" + e);
@@ -312,7 +313,7 @@ public class QueryDataResource {
         return builder.toString();
     }
     
-    @RequestMapping(value = "/{reportId}/report_json1", method = { RequestMethod.GET },
+    @RequestMapping(value = "/{reportId}/report_json", method = { RequestMethod.GET },
             produces = "text/plain;charset=utf-8")
     public String queryJson(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
@@ -336,7 +337,7 @@ public class QueryDataResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime_model1", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{reportId}/runtime_model", method = { RequestMethod.POST })
     public ResponseResult initRunTimeModel(@PathVariable("reportId") String reportId,
             HttpServletRequest request) {
         boolean edit = Boolean.valueOf(request.getParameter("isEdit"));
@@ -383,12 +384,12 @@ public class QueryDataResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime/context1", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{reportId}/runtime/context", method = { RequestMethod.POST })
     public ResponseResult updateContext(@PathVariable("reportId") String reportId,
             HttpServletRequest request) {
         
         Map<String, String[]> contextParams = request.getParameterMap();
-        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
         Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
         Map<String, Object> newParams = Maps.newHashMap();
@@ -464,7 +465,7 @@ public class QueryDataResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}1", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}", method = { RequestMethod.POST })
     public ResponseResult queryArea(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
 
@@ -522,6 +523,7 @@ public class QueryDataResource {
                 action.setChartQuery(false);
             }
         }
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         /**
          * 6. 完成查询
          */
@@ -550,7 +552,6 @@ public class QueryDataResource {
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * 每次查询以后，清除选中行，设置新的
@@ -590,18 +591,18 @@ public class QueryDataResource {
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
-            SeriesUnitType chartType = getChartTypeWithExtendArea(targetArea);
+            String[] chartType = getChartTypeWithExtendArea(targetArea);
             if (action.getRows().size() == 1) {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
                 if (element instanceof TimeDimension) {
-                		chart = chartBuildService.parseToChart(table, SeriesUnitType.LINE);
+                		chart = chartBuildService.parseToChart(table, chartType, true);
                 } else {
-                		chart = chartBuildService.parseToChart(table, chartType);
+                		chart = chartBuildService.parseToChart(table, chartType, false);
                 }
             } else {
-                chart = chartBuildService.parseToChart(table, chartType);
+                chart = chartBuildService.parseToChart(table, chartType, false);
             }
             
             resultMap.put("reportChart", chart);
@@ -620,29 +621,23 @@ public class QueryDataResource {
      * @param targetArea ExtendArea
      * @return SeriesUnitType
      */
-    private SeriesUnitType getChartTypeWithExtendArea(ExtendArea targetArea) {
-    		StringBuilder rs = new StringBuilder();
+    private String[] getChartTypeWithExtendArea(ExtendArea targetArea) {
+    		if (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
+    			return new String[]{SeriesUnitType.LINE.name()};
+    		}
+    		List<String> types = Lists.newArrayList();
     		targetArea.getAllItems().values().stream().filter(item -> {
-    			return item.getPositionType() == PositionType.X;
+    			return item.getPositionType() == PositionType.Y;
     		}).map(item -> {
     			return item.getParams().get("chartType");
-    		}).filter(chartType -> {
-    			return !StringUtils.isEmpty(chartType);
     		}).forEach(str -> {
-    			rs.append(str.toString().toUpperCase());
-    			rs.append("_");
+    			if (StringUtils.isEmpty(str)) {
+    				types.add(SeriesUnitType.BAR.name());
+    			} else {
+    				types.add(str.toString().toUpperCase());
+    			}
     		});
-    		if (rs.length() == 0) {
-    			return SeriesUnitType.BAR;
-    		}
-    		String typeName = rs.toString();
-    		if (typeName.indexOf("_") == 0) {
-    			typeName = typeName.substring(1);
-    		}
-    		if (typeName.lastIndexOf("_") == typeName.length() - 1) {
-    			typeName = typeName.substring(0, typeName.length() -1);
-    		}
-		return SeriesUnitType.valueOf(typeName);
+		return types.toArray(new String[0]);
 	}
 
 	/**
@@ -732,7 +727,6 @@ public class QueryDataResource {
      * @param request 请求对象
      * @return 下钻操作 操作结果
      */
-    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/drill", method = { RequestMethod.POST })
     public ResponseResult drillDown(@PathVariable("reportId") String reportId, 
             @PathVariable("areaId") String areaId, HttpServletRequest request) {

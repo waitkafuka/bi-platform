@@ -168,7 +168,8 @@ public class SearchIndexServiceImpl implements SearchService {
                 
             }
             TesseractResultSet currResult =
-                    this.dataQueryService.queryForDocListWithSQLQuery(sqlQuery, dataSourceWrape, limitStart, limitSize);
+                    this.dataQueryService.queryForListWithSQLQueryAndGroupBy(sqlQuery, dataSourceWrape, limitStart,
+                            limitSize, query);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "db return "
                     + currResult.size() + " records"));
             result = currResult;

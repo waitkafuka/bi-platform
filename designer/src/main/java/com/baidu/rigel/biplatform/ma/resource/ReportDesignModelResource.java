@@ -67,7 +67,7 @@ import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
-public class ReportDesignModelResource {
+public class ReportDesignModelResource extends BaseResource {
     
     /**
      * 日志记录器
@@ -152,7 +152,6 @@ public class ReportDesignModelResource {
         ReportDesignModel model = reportModelCacheManager.getReportModel(id);
         if (model != null) {
             logger.info("get model from cache");
-            
         } else {
             model = reportDesignModelService.getModelByIdOrName(id, false);
         }
@@ -926,7 +925,7 @@ public class ReportDesignModelResource {
         ExtendArea targetArea = model.getExtendById(areaId);
         Item item = targetArea.getItem(itemId);
         ResponseResult result = new ResponseResult();
-        if (item == null || item.getPositionType() == PositionType.Y) {
+        if (item == null || item.getPositionType() == PositionType.X) {
         		logger.error("can't set chart type on dimension");
         		result.setStatus(1);
             result.setStatusInfo("纬度不能设置图形格式");
@@ -1041,7 +1040,7 @@ public class ReportDesignModelResource {
         // modify by jiangyichao at 2014-09-28 token 加密
         String tokenEncrypt = token;
         try {
-            tokenEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(token);
+            tokenEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(token, securityKey);
         } catch (Exception e) {
             throw new RuntimeException("token encrpt happen exception, please check");
         }

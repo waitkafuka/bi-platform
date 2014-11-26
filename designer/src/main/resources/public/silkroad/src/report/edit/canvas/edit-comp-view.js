@@ -349,14 +349,6 @@ define([
                 else {
                     $spans.eq(1).remove();
                 }
-                //$item.addClass('xy-item');
-                // TODO:添加图形图标
-                var str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
-                $item.prepend(str);
-                str = '<span class="icon hide j-delete" title="删除">×</span>';
-                $item.append(str);
-                $($item.find('span')[1]).removeClass('ellipsis').addClass('icon-font');
-
 
                 // 使维度指标不能互换 - 因为维度或指标被使用了
                 ui.draggable.removeClass('j-can-to-dim j-can-to-ind');
@@ -365,6 +357,21 @@ define([
                 selector = '.j-data-sources-setting-con-ind';
                 oLapElemenType = ui.draggable.parents(selector);
                 oLapElemenType = oLapElemenType.length ? 'ind' : 'dim';
+
+                // 维度与指标项的样式不一样，分别添加
+                var str;
+                // 指标
+                if (oLapElemenType === 'ind') {
+                    if (compType !== 'TABLE') {
+                        str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
+                        $item.prepend(str);
+                    }
+
+                }
+                str = '<span class="icon hide j-delete" title="删除">×</span>';
+                $item.append(str);
+                $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
+                // TODO:需要判断下两个饼图
 
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
@@ -375,7 +382,6 @@ define([
 
                 // 避免调顺序产生拖入的干扰
                 $item.removeClass('j-olap-element').addClass('c-m');
-
                 that.model.addCompAxis(compId, data, function () {
                     // 去除时间维度的接收拖拽与调序的冲突
                     $item.removeClass('j-time-dim');
@@ -424,10 +430,26 @@ define([
                 else {
                     that.chartList.redraw(indMenuTemplate.render(chartTypes));
                 }
+                // FIXME:这块的实现不是很好，需要修改
                 $('.comp-setting-charticons span').unbind();
                 $('.comp-setting-charticons span').click(function () {
                     var $this =  $(this);
                     var selectedChartType = $this.attr('chart-type');
+                    // 如果是饼图的话，比较麻烦，不能同时选择两个饼图
+                    if (selectedChartType === 'pie') {
+                        var $chartTypes = $target.parent().siblings('div');
+                        var flag = false;
+                        $chartTypes.each(function () {
+                            var $chartType = $($(this).find('span')[0]);
+                            if ($chartType.attr('chart-type') === 'pie') {
+                                alert('不能选择两个饼图');
+                                flag = true;
+                            }
+                        });
+                        if (flag) {
+                            return;
+                        }
+                    }
 
                     that.model.changeCompItemChartType(
                         compId,
@@ -436,13 +458,12 @@ define([
                         function () {
                             $target.removeClass(oldChartType).addClass(selectedChartType);
                             $target.attr('chart-type', selectedChartType);
-
                             that.chartList.hide();
+                            that.canvasView.showReport();
                         }
                     );
                 });
                 that.chartList.show($(event.target).parent());
-
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理

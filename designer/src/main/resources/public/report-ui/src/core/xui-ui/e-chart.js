@@ -256,7 +256,7 @@
             if (this._aSeries && this._aSeries.length > 0) {
                 for (var i = 0; i < this._aSeries.length; i++) {
                     data[i] = this._aSeries[i].name;
-                };
+                }
             }
         }
 
@@ -265,6 +265,23 @@
         legend.padding = 5;
         legend.itemGap = 10;
         options.legend = legend;
+    };
+    /**
+     * 设置工具箱
+     *
+     * @protected
+     */
+    UI_E_CHART_CLASS.$setupToolBox = function (options) {
+        var toolbox = {
+            show: true,
+            orient : 'vertical',
+            y : 'center',
+            feature : {
+                magicType : {show: true, type: ['stack', 'tiled']}
+            }
+        };
+        options.toolbox = toolbox;
+
     };
     /**
      * 设置dataRoom
@@ -522,20 +539,20 @@
         var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
-        if (!this._bHasPie) {
-            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
-        }
-        function zoomChage(param) {
-            start = param.zoom.xStart;
-            end = param.zoom.xEnd;
-            changeDateRange();
-        }
-        function changeDateRange() {
-            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
-            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
-            oMinDate.value = xDatas[start];
-            oMaxDate.value = xDatas[end - 1];
-        }
+//        if (!this._bHasPie) {
+//            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
+//        }
+//        function zoomChage(param) {
+//            start = param.zoom.xStart;
+//            end = param.zoom.xEnd;
+//            changeDateRange();
+//        }
+//        function changeDateRange() {
+//            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
+//            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
+//            oMinDate.value = xDatas[start];
+//            oMaxDate.value = xDatas[end - 1];
+//        }
     };
 
     /**
@@ -559,14 +576,13 @@
                 this._bHasBar = true;
             }
         }
-
+        this.$setupToolBox(options);
         this.$setupDataRoom(options);
         this.$setupSeries(options);
         this.$setupXAxis(options);
         this.$setupYAxis(options);
         this.$setupTooptip(options);
         this.$setupLegend(options);
-        
         return options;
     };
 

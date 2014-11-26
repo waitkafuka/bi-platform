@@ -36,6 +36,7 @@ import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
@@ -171,10 +172,11 @@ public final class QueryUtils {
 	}
 
 	/**
-	 * @param chartQuery
-	 * @param item
-	 * @param dim
-	 * @return
+	 * 构建查询请求数据以及节点状态
+	 * @param chartQuery 是否是图表查询
+	 * @param item 查询条目
+	 * @param dim 查询维度
+	 * @return List<QueryData> 查询请求数据状态以及节点状态
 	 */
 	private static List<QueryData> genDefaultCondition(boolean chartQuery, Item item, Dimension dim) {
 		List<QueryData> datas = new ArrayList<QueryData>();
@@ -260,5 +262,28 @@ public final class QueryUtils {
         return meta;
     }
     
-    
+    /**
+     * 
+     * 依据区域的类型，生成查询策略
+     * 注意：此方法不能覆盖所有查询策略，比如：下钻，上卷等，此类查询策略需要针对具体业务具体处理
+     * @param type ExtendAreaType 查询区域类型
+     * @return QueryStrategy 查询策略
+     */
+    public static QueryStrategy genQueryStrategyWithAreaType(ExtendAreaType type) {
+    		switch(type) {
+	    		case TABLE:
+	    			return QueryStrategy.TABLE_QUERY;
+	    		case CHART:
+	    			return QueryStrategy.CHART_QUERY;
+	    		case LITEOLAP_TABLE:
+	    			return QueryStrategy.LITE_OLAP_TABLE_QUERY;
+	    		case LITEOLAP_CHART:
+	    			return QueryStrategy.LITE_OLAP_CHART_QUERY;
+	    		case TIME_COMP:
+	    		case QUERY_COMP:
+	    			return QueryStrategy.CONTEXT_UPDATE;
+    			default:
+    				return QueryStrategy.UNKNOW;
+    		}
+    }
 }
