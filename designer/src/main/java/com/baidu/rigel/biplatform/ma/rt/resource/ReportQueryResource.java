@@ -151,13 +151,72 @@ public class ReportQueryResource {
      */
     @Resource
     private ReportQueryService reportQueryService;
+    
     /**
+     * TODO 临时方案，后续需要调整，删除此处
+     * @param model
+     * @return StringBuilder
+     */
+    private StringBuilder genVm(ReportDesignModel model) {
+        String reportId = model.getId();
+        String vm = model.getVmContent();
+        String js = "<script type='text/javascript'>" + "\r\n" + "        (function(NS) {" + "\r\n"
+                + "            NS.xui.XView.start(" + "\r\n"
+                + "                'di.product.display.ui.LayoutPage'," + "\r\n"
+                + "                {" + "\r\n" + "                    externalParam: {" + "\r\n"
+                + "                    'reportId':'"
+                + reportId
+                + "','phase':'dev','token':'tieba'},"
+                + "\r\n"
+                + "                    globalType: 'PRODUCT',"
+                + "\r\n"
+                + "                    diAgent: '',"
+                + "\r\n"
+                + "                    reportId: '"
+                + reportId
+                + "',"
+                + "\r\n"
+                + "                    webRoot: '/silkroad',"
+                + "\r\n"
+                + "                    phase: 'dev',"
+                + "\r\n"
+                + "                    serverTime: ' " + new Date().getTime() + "',"
+                + "\r\n"
+                + "                    funcAuth: null,"
+                + "\r\n"
+                + "                    extraOpt: (window.__$DI__NS$__ || {}).OPTIONS"
+                + "\r\n"
+                + "                }"
+                + "\r\n"
+                + "            );"
+                + "\r\n"
+                + "        })(window);"
+                + "\r\n" + "    </script>" + "\r\n";
+        StringBuilder builder = new StringBuilder();
+        builder.append("<!DOCTYPE html>");
+        builder.append("<html>");
+        builder.append("<head>");
+        builder.append("<meta content='text/html' 'charset=UTF-8'>");
+        builder.append("<link rel='stylesheet' href='/silkroad/asset/css/-di-product-min.css'/>");
+        builder.append("</head>");
+        builder.append("<body>");
+        builder.append(vm);
+        
+        builder.append("<script src='/silkroad/asset/-di-product-min.js'>");
+        builder.append("</script>");
+        builder.append(js);
+        builder.append("</body>");
+        builder.append("</html>");
+        return builder;
+    }
+    
+    /**
+     * 运行态报表查询服务请求入口：用户查询报表模型定义中的vm信息，用于展现报表时客户端布局
+     * @param reportId 报表id
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @return String vm字符串
      * 
-     * queryVM
-     * @param reportId
-     * @param request
-     * @param response
-     * @return
      */
     @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
             produces = "text/html;charset=utf-8")
@@ -219,59 +278,8 @@ public class ReportQueryResource {
         if (model == null) {
             return "";
         }
-        // TODO 临时方案，以后前端做
-        String vm = model.getVmContent();
-        String js =
-                "<script type='text/javascript'>" + "\r\n" + "        (function(NS) {" + "\r\n"
-                        + "            NS.xui.XView.start(" + "\r\n"
-                        + "                'di.product.display.ui.LayoutPage'," + "\r\n" + "                {" + "\r\n"
-                        + "                    externalParam: {" + "\r\n" + "                    'reportId':'"
-                        + reportId
-                        + "','phase':'dev','token':'tieba'},"
-                        + "\r\n"
-                        + "                    globalType: 'PRODUCT',"
-                        + "\r\n"
-                        + "                    diAgent: '',"
-                        + "\r\n"
-                        + "                    reportId: '"
-                        + reportId
-                        + "',"
-                        + "\r\n"
-                        + "                    webRoot: '/silkroad',"
-                        + "\r\n"
-                        + "                    phase: 'dev',"
-                        + "\r\n"
-                        + "                    serverTime: ' "
-                        + new Date().getTime()
-                        + "',"
-                        + "\r\n"
-                        + "                    funcAuth: null,"
-                        + "\r\n"
-                        + "                    extraOpt: (window.__$DI__NS$__ || {}).OPTIONS"
-                        + "\r\n"
-                        + "                }"
-                        + "\r\n"
-                        + "            );"
-                        + "\r\n"
-                        + "        })(window);"
-                        + "\r\n"
-                        + "    </script>" + "\r\n";
-        StringBuilder builder = new StringBuilder();
-        builder.append("<!DOCTYPE html>");
-        builder.append("<html>");
-        builder.append("<head>");
-        builder.append("<meta content='text/html' 'charset=UTF-8'>");
-        builder.append("<link rel='stylesheet' href='/silkroad/asset/css/-di-product-min.css'/>");
-        builder.append("</head>");
-        builder.append("<body>");
-        builder.append(vm);
-
-        builder.append("<script src='/silkroad/asset/-di-product-min.js'>");
-        builder.append("</script>");
-        builder.append(js);
-        builder.append("</body>");
-        builder.append("</html>");
-        response.setCharacterEncoding("utf-8");
+        // 
+        StringBuilder builder = this.genVm(model);
         return builder.toString();
     }
 

@@ -16,7 +16,7 @@
 package com.baidu.rigel.biplatform.ma.rt.request.build;
 
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
@@ -40,13 +40,13 @@ public final class QueryRequestBuilder {
 	/**
 	 * 查询请求构建对象
 	 * @param context ExtendAreaContext 扩展区域上下文
-	 * @param params Map<String, Object> 请求参数
+	 * @param globalParams Map<String, Object> 请求参数
 	 * @param queryStrategy QueryStrategy 查询策略
-	 * @param customizationFunc 个性化处理函数，可以提供，也可以不提供，默认为空
+	 * @param callBack BiFunction 回调函数
 	 * @return QueryRequest 查询请求
 	 */
 	public static QueryRequest buildQueryRequest(ExtendAreaContext context, QueryStrategy queryStrategy, 
-			Map<String, Object> params, Function<QueryRequest, QueryRequest> customizationFunc) {
+			Map<String, Object> globalParams, BiFunction<Map<String, Object>, QueryRequest, QueryRequest> callBack) {
 		Map<String, Object> localParams = context.getParams();
         /**
          * TODO 添加到函数处理，仅保留一个时间条件
@@ -57,10 +57,10 @@ public final class QueryRequestBuilder {
                 localParams.remove(key);
             }
         }
-        localParams.putAll(params);
+        localParams.putAll(globalParams);
         context.setParams(localParams);
         
-        final QueryRequest queryRequest = new QueryRequest(queryStrategy, context, params);
+        final QueryRequest queryRequest = new QueryRequest(queryStrategy, context, globalParams);
         queryRequest.setAreaId(context.getAreaId());
         // 行
         Map<Item, Object> x = context.getX();
@@ -80,8 +80,8 @@ public final class QueryRequestBuilder {
         // 设置报表ID
 		queryRequest.setReportId(context.getReportId());
 		// 自定义处理函数
-		if (customizationFunc != null) {
-		    QueryRequest queryRequestFun = customizationFunc.apply(queryRequest);
+		if (callBack != null) {
+		    QueryRequest queryRequestFun = callBack.apply(globalParams, queryRequest);
 		    return queryRequestFun;
 		}
         return queryRequest;

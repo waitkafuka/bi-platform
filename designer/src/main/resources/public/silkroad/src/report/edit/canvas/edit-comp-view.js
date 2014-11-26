@@ -3,7 +3,7 @@
  *       删除某一组件
  *       打开组件配置器
  *       接收数据项
- * @author 赵晓强(v_zhaoxiaoqiang@baidu.com)
+ * @author 赵晓强(longze_xq@163.com)
  * @date 2014-8-14
  */
 define([
@@ -536,6 +536,10 @@ define([
                 }
             },
 
+            afterAddChartCompAxis: function (option){
+
+            },
+
             /**
              * 添加完成 时间控件 数据项之后要 特别处理json（采用了拼字符串的方式调用）
              *
@@ -584,6 +588,9 @@ define([
                         break;
                     case 'TIME_COMP':
                         newType = 'Time';
+                        break;
+                    case 'CHART':
+                        newType = 'Chart';
                         break;
                 }
                 return newType;
