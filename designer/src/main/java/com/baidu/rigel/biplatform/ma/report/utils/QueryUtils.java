@@ -335,12 +335,14 @@ public class QueryUtils {
         Cube oriCube = getCubeFromReportModel(reportModel, area);
         Map<String, List<Dimension>> filterDims = collectFilterDim(reportModel);
         MiniCube cube = new MiniCube(area.getCubeId());
+        String areaId = area.getId();
         LogicModel logicModel = area.getLogicModel();
         if (area.getType() == ExtendAreaType.SELECTION_AREA
                 || area.getType() == ExtendAreaType.LITEOLAP_CHART 
                 || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) reportModel.getExtendById(area.getReferenceAreaId());
             logicModel = liteOlapArea.getLogicModel();
+            areaId = area.getReferenceAreaId();
         }
         if (logicModel == null) {
             throw new QueryModelBuildException("logic model is empty");
@@ -398,7 +400,7 @@ public class QueryUtils {
         cube.setMeasures(measures);
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
-        cube.setId(oriCube.getId() + "_" + area.getId());
+        cube.setId(oriCube.getId() + "_" + areaId);
         return cube;
     }
 
