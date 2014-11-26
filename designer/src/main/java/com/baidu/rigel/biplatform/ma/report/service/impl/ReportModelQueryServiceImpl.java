@@ -124,25 +124,29 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             return Lists.newArrayList();
         }
         Level[] parentLevels = dim.getLevels().values().toArray(new Level[0]);
-        List<Member> rootMembers = null;
-        try {
-            rootMembers = getMembers(cube, dim, parentLevels[0], params);
-        } catch (MiniCubeQueryException | DataSourceOperationException e) {
-            logger.error("Exception happened when getMemebers of dim " + dim.getName(),
-                    e);
-            throw e;
+        for (Level level : parentLevels) {
+            List<Member> levelMembers = getMembers(cube, dim, level, params);
+            members.add(levelMembers);
         }
-        members.add(rootMembers);
-        if (parentLevels.length > 1) {
-            for (int i = 1; i < parentLevels.length; ++i) {
-                List<Member> tmpMember = Lists.newArrayList();
-                for (Member m : rootMembers) {
-                    tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params));
-                }
-                members.add(tmpMember);
-                rootMembers = tmpMember;
-            }
-        }
+//        List<Member> rootMembers = null;
+//        try {
+//            rootMembers = getMembers(cube, dim, parentLevels[0], params);
+//        } catch (MiniCubeQueryException | DataSourceOperationException e) {
+//            logger.error("Exception happened when getMemebers of dim " + dim.getName(),
+//                    e);
+//            throw e;
+//        }
+//        members.add(rootMembers);
+//        if (parentLevels.length > 1) {
+//            for (int i = 1; i < parentLevels.length; ++i) {
+//                List<Member> tmpMember = Lists.newArrayList();
+//                for (Member m : rootMembers) {
+//                    tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params));
+//                }
+//                members.add(tmpMember);
+//                rootMembers = tmpMember;
+//            }
+//        }
         return members;
     }
     
