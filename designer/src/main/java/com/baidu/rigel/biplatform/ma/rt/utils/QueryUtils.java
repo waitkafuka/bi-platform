@@ -46,7 +46,7 @@ import com.google.common.collect.Maps;
 /**
  * 
  * QueryUtils
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public final class QueryUtils {

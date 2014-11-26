@@ -39,7 +39,7 @@ import com.google.common.collect.Maps;
 /**
  * 工具类：用于提供运行时环境初始化、运行时上下文操作等
  *
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public final class RuntimeEvnUtil {

@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationContext;
  * 运行时上下文：用来存储运行时全局变量信息，比如全局过滤条件，全局ACL参数等
  * 注意：运行时上下文只对当前浏览报表有关，不同报表有不同上下文,不同报表之间上下文完全隔离
  * TODO 待考虑
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public final class Context implements Serializable {

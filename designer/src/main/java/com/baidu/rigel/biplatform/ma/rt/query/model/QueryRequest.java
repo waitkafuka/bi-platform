@@ -30,7 +30,7 @@ import com.google.common.collect.Maps;
  *
  * 查询请求对象：封装用户的查询请求
  * 
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public class QueryRequest implements Serializable {
