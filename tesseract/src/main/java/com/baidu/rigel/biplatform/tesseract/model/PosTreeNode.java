@@ -24,7 +24,7 @@ import java.util.List;
  * 请求的岗位树和请求的岗位ID的层级，0表示只需要显示请求的岗位ID的信息，如1 表示当前ID和当前ID有 直接管辖关系的一层孩子节点的信息 needCsPosition 1表示需要显示当前节点的一线岗位ID，0则不需要，不传默认为0
  * appId 产品线的appid
  * 
- * @author chenxiaoming01 2013-12-15 下午8:49:10
+ * @author xiaoming.chen 2013-12-15 下午8:49:10
  */
 public class PosTreeNode implements TreeModel {
 

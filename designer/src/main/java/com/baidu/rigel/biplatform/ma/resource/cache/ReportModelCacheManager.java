@@ -31,7 +31,7 @@ import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
  * 
  * 报表缓存管理服务
  * 
- * @author peizhongyi01
+ * @author zhongyi
  * 
  *         2014-7-31
  */

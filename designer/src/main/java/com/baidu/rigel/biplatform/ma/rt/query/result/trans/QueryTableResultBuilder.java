@@ -25,7 +25,7 @@ import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 
 /**
  * QueryTableResultBuilder
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public class QueryTableResultBuilder extends AbsQueryResultBuilder {

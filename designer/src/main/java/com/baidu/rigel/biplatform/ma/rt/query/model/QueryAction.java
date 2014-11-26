@@ -27,7 +27,7 @@ import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 /**
  * 查询请求动作
  *
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public class QueryAction implements Serializable {

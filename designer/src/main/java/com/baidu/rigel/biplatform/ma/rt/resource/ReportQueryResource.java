@@ -37,7 +37,7 @@ import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 /**
  * 
  * 报表查询服务入口，接收客户端的http请求，将查询数据以json格式返回给客户端
- * @author wangyuxue
+ * @author david.wang
  *
  */
 @RestController

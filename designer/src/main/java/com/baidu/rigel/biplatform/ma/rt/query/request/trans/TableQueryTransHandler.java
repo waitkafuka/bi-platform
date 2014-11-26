@@ -31,7 +31,7 @@ import com.google.common.collect.Maps;
 
 /**
  *
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 class TableQueryTransHandler extends QueryRequestTransHandler {

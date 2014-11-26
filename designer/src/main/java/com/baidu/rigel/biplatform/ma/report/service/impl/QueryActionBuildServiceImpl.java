@@ -66,7 +66,7 @@ import com.google.common.collect.Maps;
  * 
  * QueryAction构建服务
  * 
- * @author peizhongyi01
+ * @author zhongyi
  *
  *         2014-8-5
  */

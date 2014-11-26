@@ -27,7 +27,7 @@ import com.baidu.rigel.biplatform.ma.rt.utils.QueryUtils;
 
 /**
  *
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public class QuestionModelBuildServiceImpl implements QuestionModelBuildService {

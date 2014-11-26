@@ -24,7 +24,7 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
 /**
  * 
  * OlapElementQueryUtils
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  * 
  */

@@ -24,7 +24,7 @@ import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 
 /**
  * 查询请求构建工具类：负责将用户的请求封装成查询请求（QueryRequest）
- * @author wangyuxue
+ * @author david.wang
  * @since 1.1.0
  * 
  */

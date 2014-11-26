@@ -41,7 +41,7 @@ import com.baidu.rigel.biplatform.ma.rt.query.service.ReportQueryService;
 
 /**
  *
- * @author wangyuxue
+ * @author david.wang
  * @version 1.0.0.1
  */
 public class ReportQueryServiceImpl  implements ReportQueryService {
