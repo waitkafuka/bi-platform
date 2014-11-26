@@ -16,7 +16,6 @@
 package com.baidu.rigel.biplatform.ma.rt;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.ApplicationContext;
@@ -48,11 +47,11 @@ public final class Context implements Serializable {
     private ConcurrentHashMap<String, Object> globalParams = 
     		    new ConcurrentHashMap<String, Object>();
     
-    /**
-     * 
-     */
-    private ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = 
-    		    new ConcurrentHashMap<String, ExtendAreaContext>();
+//    /**
+//     * 
+//     */
+//    private ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = 
+//    		    new ConcurrentHashMap<String, ExtendAreaContext>();
     
     /**
      * 构造函数
@@ -73,7 +72,7 @@ public final class Context implements Serializable {
 	/**
 	 * @return the globalParams
 	 */
-	public Map<String, Object> getGlobalParams() {
+	public ConcurrentHashMap<String, Object> getGlobalParams() {
 		return globalParams;
 	}
 
@@ -82,23 +81,5 @@ public final class Context implements Serializable {
 	 */
 	public void setGlobalParams(ConcurrentHashMap<String, Object> globalParams) {
 		this.globalParams = globalParams;
-	}
-
-	/**
-	 * @return the localCtxMap
-	 */
-	public ConcurrentHashMap<String, ExtendAreaContext> getLocalCtxMap() {
-		return localCtxMap;
-	}
-
-	/**
-	 * @param localCtxMap the localCtxMap to set
-	 */
-	public void setLocalCtxMap(
-			ConcurrentHashMap<String, ExtendAreaContext> localCtxMap) {
-		this.localCtxMap = localCtxMap;
-	}
-    
-    
-    
+	}    
 }
