@@ -93,7 +93,7 @@ public class QueryUtils {
         if (area == null) {
             throw new QueryModelBuildException("can not get area with id : " + areaId);
         }
-        Cube cube = getCubeWithExtendArea(reportModel, area, null);
+        Cube cube = getCubeWithExtendArea(reportModel, area);
         if (cube == null) {
             throw new QueryModelBuildException("can not get cube define in area : " + areaId);
         }
@@ -330,9 +330,10 @@ public class QueryUtils {
      * @return 立方体定义
      * @throws QueryModelBuildException
      */
-    public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area, Map<String, List<Dimension>> filterDims)
+    public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area)
             throws QueryModelBuildException {
         Cube oriCube = getCubeFromReportModel(reportModel, area);
+        Map<String, List<Dimension>> filterDims = collectFilterDim(reportModel);
         MiniCube cube = new MiniCube(area.getCubeId());
         LogicModel logicModel = area.getLogicModel();
         if (area.getType() == ExtendAreaType.SELECTION_AREA
@@ -430,11 +431,24 @@ public class QueryUtils {
     /**
      * 
      * @param model
-     * @param area
-     * @return Cube
+     * @return Map<String, List<Dimension>>
      */
-	public static Cube getCubeWithLiteOlapArea(ReportDesignModel model, ExtendArea area) {
-		return null;
+    private static Map<String, List<Dimension>> collectFilterDim(ReportDesignModel model) {
+		Map<String, List<Dimension>> rs = Maps.newHashMap();
+		for (ExtendArea area : model.getExtendAreaList()) {
+			if (area.getType() == ExtendAreaType.TIME_COMP) {
+				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
+				if (rs.get(area.getCubeId()) == null) {
+					List<Dimension> dims = Lists.newArrayList();
+					area.getAllItems().values().forEach(key -> {
+						dims.add(cube.getDimensions().get(key.getId()));
+					});
+					rs.put(area.getCubeId(), dims);
+				}
+	    		} 
+		}
+		return rs;
 	}
+    
 
 }

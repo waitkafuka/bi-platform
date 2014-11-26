@@ -37,7 +37,6 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -403,7 +402,6 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             throw e;
         }
         DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
-        Map<String, List<Dimension>> conDims = collectFilterDim(model);
         List<Cube> cubes = Lists.newArrayList();
         for (ExtendArea area : model.getExtendAreaList()) {
             try {
@@ -414,7 +412,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             				|| area.getType() == ExtendAreaType.LITEOLAP_CHART) {
             			continue;
             		}  
-        			Cube cube = QueryUtils.getCubeWithExtendArea(model, area, conDims);
+        			Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
         			cubes.add(cube);
             } catch (QueryModelBuildException e) {
                 logger.warn("It seems that logicmodel of area is null. Ingore this area. ");
@@ -430,23 +428,6 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         });
         return true;
     }
-
-	private Map<String, List<Dimension>> collectFilterDim(ReportDesignModel model) {
-		Map<String, List<Dimension>> rs = Maps.newHashMap();
-		for (ExtendArea area : model.getExtendAreaList()) {
-			if (area.getType() == ExtendAreaType.TIME_COMP) {
-				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
-				if (rs.get(area.getCubeId()) == null) {
-					List<Dimension> dims = Lists.newArrayList();
-					area.getAllItems().values().forEach(key -> {
-						dims.add(cube.getDimensions().get(key.getId()));
-					});
-					rs.put(area.getCubeId(), dims);
-				}
-	    		} 
-		}
-		return rs;
-	}
 
 	@Override
 	public void updateAreaWithDataFormat(ExtendArea area, String dataFormat) {

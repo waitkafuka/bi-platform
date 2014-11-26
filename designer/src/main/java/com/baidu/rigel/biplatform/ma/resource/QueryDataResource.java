@@ -1142,7 +1142,7 @@ public class QueryDataResource extends BaseResource {
                 params.put(key, value.toString());
             }
         }
-        cube = QueryUtils.getCubeWithExtendArea(model, area, null);
+        cube = QueryUtils.getCubeWithExtendArea(model, area);
         ((MiniCube) cube).setSchema(model.getSchema());
         final Dimension newDim = QueryUtils.convertDim2Dim(dim);
         List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params);
