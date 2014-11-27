@@ -25,7 +25,7 @@ parentPath=$(dirname $(pwd))
 current_product_version=`cat ./version.txt>&1`
 
 echo "[INFO]************current product version is : $current_product_version"
-#JAVA_HOME/bin/java -jar  $parentPath/lib/fileServer-$current_product_version.jar 9090 $parentPath/staticfile > $parentPath/log/fileserver.log &
-$JAVA_HOME/bin/java -jar  $parentPath/lib/tesseract-$current_product_version.jar -Dserver.port=9999 > $parentPath/log/ter.log &
-$JAVA_HOME/bin/java -jar  $parentPath/lib/designer-$current_product_version.jar  > $parentPath/log/designer.log &
+#JAVA_HOME/bin/java -jar  $parentPath/lib/fileServer-$current_product_version.jar 9090 $parentPath/staticfile > $parentPath/demo_home/log/fileserver.log &
+$JAVA_HOME/bin/java -jar  $parentPath/lib/tesseract-$current_product_version.jar -Dserver.port=9999 > $parentPath/demo_home/log/ter.log &
+$JAVA_HOME/bin/java -jar  $parentPath/lib/designer-$current_product_version.jar  > $parentPath/demo_home/designer.log &
 echo "Congratulation! you can using BI-Platform  with URL :[http://localhost:8090/silkroad/home.html ] and user [demo/demo] through Chrome Browser "
