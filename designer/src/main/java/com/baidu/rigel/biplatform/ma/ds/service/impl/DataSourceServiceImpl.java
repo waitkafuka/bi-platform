@@ -288,7 +288,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         Collections.addAll(tmp, ds);
         Set<String> dict = new HashSet<String>();
         tmp.stream().forEach((String s) -> {
-        		dict.add(s.substring(s.indexOf("_")));
+        		dict.add(s.substring(0, s.indexOf("_")));
             dict.add(s.substring(s.indexOf("_") + 1));
         });
         if (!dict.contains(idOrName)) {
