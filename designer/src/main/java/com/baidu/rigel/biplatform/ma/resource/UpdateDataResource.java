@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
@@ -60,13 +61,14 @@ public class UpdateDataResource {
 			ResponseResult rs = new ResponseResult();
 			rs.setStatus(1);
 			rs.setStatusInfo("请求中需要包含dsName, rbk和factTables信息。"
-					+ "其中dsName为数据源名称，factTables为更新的事实表，多张表以’,‘分割");
+					+ "其中dsName为数据源名称，factTables为更新的事实表列表，多张表以’,‘分割");
 			return rs;
 		}
 		String[] factTableArray = factTables.split(",");
 		ResponseResult rs = new ResponseResult();
 		DataSourceDefine ds = dsService.getDsDefine(productLine, dsName);
 		DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds);
+		MiniCubeConnection.refresh(dsInfo, factTableArray);
 		rs.setStatus(0);
 		rs.setStatusInfo("successfully");
 		return rs;

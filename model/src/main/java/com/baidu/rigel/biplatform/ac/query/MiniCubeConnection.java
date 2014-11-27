@@ -127,7 +127,7 @@ public interface MiniCubeConnection {
     /**
      * 刷新当前connection的缓存
      */
-    default boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {
+    public static boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {
         Map<String, String> params = new HashMap<String, String>(5);
         params.put(DATASOURCEINFO_PARAM_KEY, AnswerCoreConstant.GSON.toJson(dataSourceInfo));
         params.put(DATASET_PARAM_KEY, StringUtils.join(dataSets, ','));
