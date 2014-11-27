@@ -90,4 +90,12 @@ public interface DataSourceService {
      * @throws DataSourceOperationException
      */
     public DataSourceDefine getDsDefine(String id) throws DataSourceOperationException;
+
+    /**
+     * 依据产品线和数据源名称获取数据源定义信息
+     * @param productLine 产品线名称
+     * @param dsName 数据源名称
+     * @return DataSourceDefine
+     */
+	public DataSourceDefine getDsDefine(String productLine, String dsName) throws DataSourceOperationException;
 }
