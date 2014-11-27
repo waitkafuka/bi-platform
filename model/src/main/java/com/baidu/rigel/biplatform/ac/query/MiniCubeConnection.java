@@ -124,21 +124,7 @@ public interface MiniCubeConnection {
      */
     void close();
 
-    /**
-     * 刷新当前connection的缓存
-     */
-    public static boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {
-        Map<String, String> params = new HashMap<String, String>(5);
-        params.put(DATASOURCEINFO_PARAM_KEY, AnswerCoreConstant.GSON.toJson(dataSourceInfo));
-        params.put(DATASET_PARAM_KEY, StringUtils.join(dataSets, ','));
-
-        String responseJson = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/publish", params);
-        ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(responseJson, ResponseResult.class);
-        if (responseResult.getData() != null) {
-            return true;
-        }
-        return false;
-    }
+    
 
     /**
      * connnection type
@@ -174,6 +160,31 @@ public interface MiniCubeConnection {
             return id;
         }
 
+    }
+    
+    /**
+     * TODO
+     * @author david.wang
+     *
+     */
+    public static class ConnectionUtil {
+    	
+    		/**
+         * 刷新当前connection的缓存
+         */
+        public static boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {
+            Map<String, String> params = new HashMap<String, String>(5);
+            params.put(DATASOURCEINFO_PARAM_KEY, AnswerCoreConstant.GSON.toJson(dataSourceInfo));
+            params.put(DATASET_PARAM_KEY, StringUtils.join(dataSets, ','));
+
+            String responseJson = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/publish", params);
+            ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(responseJson, ResponseResult.class);
+            if (responseResult.getData() != null) {
+                return true;
+            }
+            return false;
+        }
+        
     }
 
 }
