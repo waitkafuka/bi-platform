@@ -34,4 +34,9 @@ public interface Constants {
     String COOKIE_PATH = "/";
     // token
     String TOKEN = "token";
+    // TODO jpass url传参数临时方案
+    // orgname
+    String ORG_NAME = "orgname";
+    // appname
+    String APP_NAME = "appname";
 }

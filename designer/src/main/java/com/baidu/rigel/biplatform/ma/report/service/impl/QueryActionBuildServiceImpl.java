@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.report.service.impl;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
@@ -39,6 +43,7 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
@@ -359,9 +364,47 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             if (StringUtils.isEmpty(elementId)) {
                 continue;
             }
-            Object value = update && values.containsKey(elementId) ? values.get(elementId) : item
-                    .getParams().get(elementId);
             OlapElement element = ItemUtils.getOlapElementByItem(item, schema, cubeId);
+            Object value = null;
+            // TODO 支持url传参数，需后续修改,dirty solution
+            // 第一个条件判断是否包含url规定的参数
+            // 第二个条件判断是否为下钻,下钻不走此流程
+            if (values.containsKey(Constants.ORG_NAME) && 
+                    ! (values.containsKey("action") && values.get("action").equals("expand")) &&
+                    element instanceof StandardDimension && item.getPositionType() == PositionType.X
+                   ) {
+                StandardDimension standardDim = (StandardDimension) element;
+                Map<String, Level> levels = standardDim.getLevels();
+                List<String> list = new ArrayList<String> ();
+                if (levels != null) {
+                    for (String key : levels.keySet()) {
+                        Level level = levels.get(key);
+                        // 获取level所属的维度
+                        Dimension dim = level.getDimension();
+                        String tableName = dim.getTableName();
+                        String name = dim.getName();
+                        // 维度的列名
+                        String columnName = name.replace(tableName+"_", "");
+                        if (columnName.equals(Constants.ORG_NAME)) {
+                            Object val = values.get(columnName);
+                            if (val instanceof String) {
+                                String [] vals = ( (String) val).split(",");
+                                for (int i = 0; i<vals.length; i++) {
+                                    String temp = "[" + standardDim.getName() + "]";
+                                    temp += ".[" + vals[i] + "]";
+                                    list.add(temp);
+                                }
+                            }
+                        }
+                    }
+                }
+                value = list.toArray(new String[0]);
+            } else {
+                value = update && values.containsKey(elementId) ? values.get(elementId) : item
+                    .getParams().get(elementId);
+            }
+                
+            // 时间维度特殊处理
             if (value != null && element instanceof TimeDimension && 
             		!value.toString().toLowerCase().contains("all")) {
                 String start;
