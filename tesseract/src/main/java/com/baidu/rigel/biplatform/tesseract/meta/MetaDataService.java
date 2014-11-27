@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -38,10 +37,6 @@ import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
  */
 public interface MetaDataService {
 
-    /**
-     * LOG
-     */
-    Logger LOG = Logger.getLogger(MetaDataService.class);
     /**
      * CUBE_CACHE_NAME cube对象的缓存
      */
@@ -71,6 +66,16 @@ public interface MetaDataService {
      * @throws Exception
      */
     void publish(List<Cube> cubes, DataSourceInfo dataSourceInfo) throws Exception;
+    
+    
+    
+    /** 
+     * refresh 刷新
+     * @param dataSourceInfo
+     * @param dataSetStr
+     * @throws Exception
+     */
+    void refresh(DataSourceInfo dataSourceInfo, String dataSetStr) throws Exception;
 
     /**
      * 获取level的members

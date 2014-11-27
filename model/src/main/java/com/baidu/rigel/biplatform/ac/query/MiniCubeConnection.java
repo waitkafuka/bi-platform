@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
@@ -81,6 +83,12 @@ public interface MiniCubeConnection {
      * CUBE_PARAM_KEY
      */
     String CUBE_PARAM_KEY = "cube";
+    
+    
+    /** 
+     * DATASET_PARAM_KEY
+     */
+    String DATASET_PARAM_KEY = "datasets";
 
     /**
      * 查询结果
@@ -119,7 +127,18 @@ public interface MiniCubeConnection {
     /**
      * 刷新当前connection的缓存
      */
-    void refresh();
+    default boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {
+        Map<String, String> params = new HashMap<String, String>(5);
+        params.put(DATASOURCEINFO_PARAM_KEY, AnswerCoreConstant.GSON.toJson(dataSourceInfo));
+        params.put(DATASET_PARAM_KEY, StringUtils.join(dataSets, ','));
+
+        String responseJson = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/publish", params);
+        ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(responseJson, ResponseResult.class);
+        if (responseResult.getData() != null) {
+            return true;
+        }
+        return false;
+    }
 
     /**
      * connnection type
