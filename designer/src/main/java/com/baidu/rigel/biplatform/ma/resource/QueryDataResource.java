@@ -247,14 +247,14 @@ public class QueryDataResource extends BaseResource {
         ReportRuntimeModel runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         // modify by jiangyichao at 2014-10-10 
         // 将url参数添加到全局上下文中
-        QueryContext context = runtimeModel.getContext();
         Enumeration<String> params = request.getParameterNames();
         while (params.hasMoreElements()) {
             String paramName = params.nextElement();
-            context.put(paramName, request.getParameter(paramName));
+            runtimeModel.getContext().put(paramName, request.getParameter(paramName));
         }
         // 添加cookie内容
-        context.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
+        runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
+        
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         if (model == null) {
             return "";
@@ -389,7 +389,7 @@ public class QueryDataResource extends BaseResource {
             HttpServletRequest request) {
         
         Map<String, String[]> contextParams = request.getParameterMap();
-        ReportRuntimeModel runTimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
         Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
         Map<String, Object> newParams = Maps.newHashMap();
@@ -1145,6 +1145,12 @@ public class QueryDataResource extends BaseResource {
         cube = QueryUtils.getCubeWithExtendArea(model, area);
         ((MiniCube) cube).setSchema(model.getSchema());
         final Dimension newDim = QueryUtils.convertDim2Dim(dim);
+        if (params.containsKey(Constants.ORG_NAME)) {
+            ResponseResult rs = new ResponseResult();
+            rs.setStatus(0);
+            rs.setStatusInfo("OK");
+            return rs;
+        }
         List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params);
         QueryContext context = runTimeModel.getLocalContextByAreaId(area.getId());
         List<DimensionMemberViewObject> datas = Lists.newArrayList();
