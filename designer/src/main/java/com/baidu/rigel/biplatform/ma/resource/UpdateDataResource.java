@@ -68,7 +68,7 @@ public class UpdateDataResource {
 		ResponseResult rs = new ResponseResult();
 		DataSourceDefine ds = dsService.getDsDefine(productLine, dsName);
 		DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds);
-		MiniCubeConnection.refresh(dsInfo, factTableArray);
+		MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray);
 		rs.setStatus(0);
 		rs.setStatusInfo("successfully");
 		return rs;

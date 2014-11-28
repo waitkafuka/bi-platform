@@ -287,10 +287,9 @@ public class DataSourceServiceImpl implements DataSourceService {
         Set<String> tmp = new HashSet<String>();
         Collections.addAll(tmp, ds);
         Set<String> dict = new HashSet<String>();
-        tmp.stream().map((String s) -> {
-            return s.split("_");
-        }).forEach((String[] ids) ->{
-            Collections.addAll(dict, ids);
+        tmp.stream().forEach((String s) -> {
+        		dict.add(s.substring(0, s.indexOf("_")));
+            dict.add(s.substring(s.indexOf("_") + 1));
         });
         if (!dict.contains(idOrName)) {
             return null;

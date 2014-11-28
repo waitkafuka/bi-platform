@@ -221,7 +221,7 @@ public class DynamicSqlDataSource {
             throw new IllegalArgumentException("can not get datasource by empty datasources!");
         }
         List<String> allKeys = Lists.newArrayList(dataSources.keySet());
-        LOGGER.info("get " + allKeys.size() + " size avaliable datasources");
+        LOGGER.debug("get " + allKeys.size() + " size avaliable datasources");
         if (!failedMap.isEmpty()) {
             Set<String> failedKeys = failedMap.keySet();
             LOGGER.warn("found failed datasource keys :" + failedKeys);
@@ -231,10 +231,10 @@ public class DynamicSqlDataSource {
         if (allKeys.size() > 0) {
             allKeys.removeAll(accessValidDataSourceKeys);
             if (allKeys.size() > 0) {
-                LOGGER.info("after filter access valid datasource," + allKeys);
+                LOGGER.debug("after filter access valid datasource," + allKeys);
                 return allKeys.get(0);
             } else {
-                LOGGER.info("return first time access datasource key:" + accessValidDataSourceKeys);
+                LOGGER.debug("return first time access datasource key:" + accessValidDataSourceKeys);
                 return (String) accessValidDataSourceKeys.toArray()[0];
             }
         }
@@ -275,7 +275,7 @@ public class DynamicSqlDataSource {
                                                                  // is ok
         stmt.executeQuery();
         stmt.close();
-        LOGGER.info("validate connection cost:" + (System.currentTimeMillis() - current));
+        LOGGER.debug("validate connection cost:" + (System.currentTimeMillis() - current));
     }
 
     /**
@@ -359,7 +359,7 @@ public class DynamicSqlDataSource {
                     try {
                         con = ds.getConnection();
                         dynamicDataSource.validateConnection(con);
-                        LOGGER.info("Datasource key='" + key + "' valid ok.");
+                        LOGGER.debug("Datasource key='" + key + "' valid ok.");
                         dynamicDataSource.failedMap.remove(key);
                     } catch (SQLException e) {
                         LOGGER.warn("Datasource key='" + key + "' valid failed.");
