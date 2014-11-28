@@ -15,10 +15,9 @@
  */
 package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.Resource;
@@ -51,6 +50,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Where;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+import com.google.common.collect.Lists;
 
 /**
  * sql类型维度维值获取实现
@@ -119,7 +119,11 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     private List<MiniCubeMember> buildMembersFromCellSet(TesseractResultSet resultSet, MiniCubeLevel queryLevel,
             Member parentMember, DataSourceInfo dataSourceInfo, Cube cube) throws MiniCubeQueryException {
         try {
-            List<MiniCubeMember> result = new ArrayList<MiniCubeMember>(resultSet.size());
+            
+            Map<String, MiniCubeMember> members = new TreeMap<String, MiniCubeMember>();
+            
+            
+//            List<MiniCubeMember> result = new ArrayList<MiniCubeMember>(resultSet.size());
              CountDownLatch latch = new CountDownLatch(resultSet.size());
             while (resultSet.next()) {
                 ResultRecord record = resultSet.getCurrentRecord();
@@ -138,7 +142,12 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                                 // continue;
                                 return;
                             }
-                            MiniCubeMember member = new MiniCubeMember(value);
+                            MiniCubeMember member = members.get(value);
+                                    
+                            if(member == null) {
+                                member = new MiniCubeMember(value);
+                                members.put(member.getName(), member);
+                            }
                             member.setLevel(queryLevel);
                             if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
                                 member.setCaption(record.getField(queryLevel.getCaptionColumn()).toString());
@@ -147,41 +156,50 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                             // 手动调用生成一下UniqueName，这时候生成代价最小
                             member.generateUniqueName(null);
                             // 需要查询Member对应的最细粒度节点，即与事实表关联的字段的外键
-                            if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
+                            if(StringUtils.isNotBlank(queryLevel.getPrimaryKey())
                                     && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-                                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-                                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-
-                                request.setWhere(new Where());
-                                Expression expression = new Expression(queryLevel.getSource());
-                                expression.getQueryValues().add(new QueryObject(member.getName()));
-                                request.getWhere().getAndList().add(expression);
-                                // 发起查询叶子节点的查询
-                                TesseractResultSet leafResultSet = searchService.query(request);
-                                while (leafResultSet.next()) {
-                                    member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-                                }
-                            } else if (queryLevel.isParentChildLevel()) {
-                                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-                                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-
-                                request.setWhere(new Where());
-                                Expression expression = new Expression(queryLevel.getParent());
-                                expression.getQueryValues().add(new QueryObject(member.getName()));
-                                request.getWhere().getAndList().add(expression);
-                                log.info("query member leaf nodes,queryRequest:" + request);
-                                TesseractResultSet leafResultSet = searchService.query(request);
-                                if (leafResultSet == null || leafResultSet.size() == 0) {
-                                    member.getQueryNodes().add(member.getName());
-                                } else {
-                                    while (leafResultSet.next()) {
-                                        member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-                                    }
-                                }
+                                member.getQueryNodes().add(record.getField(queryLevel.getPrimaryKey()).toString());
                             } else {
-                                member.getQueryNodes().add(member.getName());
+                                member.getQueryNodes().add(value);
                             }
-                            result.add(member);
+                            
+//                            
+//                            if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
+//                                    && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
+//                                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
+//                                request.selectAndGroupBy(queryLevel.getPrimaryKey());
+//
+//                                request.setWhere(new Where());
+//                                Expression expression = new Expression(queryLevel.getSource());
+//                                expression.getQueryValues().add(new QueryObject(member.getName()));
+//                                request.getWhere().getAndList().add(expression);
+//                                // 发起查询叶子节点的查询
+//                                TesseractResultSet leafResultSet = searchService.query(request);
+//                                while (leafResultSet.next()) {
+//                                    member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
+//                                }
+//                                // 父子层级的维度后续需要修改
+//                            } else if (queryLevel.isParentChildLevel()) {
+//                                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
+//                                request.selectAndGroupBy(queryLevel.getPrimaryKey());
+//
+//                                request.setWhere(new Where());
+//                                Expression expression = new Expression(queryLevel.getParent());
+//                                expression.getQueryValues().add(new QueryObject(member.getName()));
+//                                request.getWhere().getAndList().add(expression);
+//                                log.info("query member leaf nodes,queryRequest:" + request);
+//                                TesseractResultSet leafResultSet = searchService.query(request);
+//                                if (leafResultSet == null || leafResultSet.size() == 0) {
+//                                    member.getQueryNodes().add(member.getName());
+//                                } else {
+//                                    while (leafResultSet.next()) {
+//                                        member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
+//                                    }
+//                                }
+//                            } else {
+//                                member.getQueryNodes().add(member.getName());
+//                            }
+                            
                             latch.countDown();
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -193,10 +211,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             latch.await();
             
             log.info("execute complete active count:{} poll size:{} core pool size:{} ",taskExecutor.getActiveCount(), taskExecutor.getPoolSize(), taskExecutor.getCorePoolSize());
-            Collections.sort(result, (m1,m2) -> {
-               return m1.getName().compareTo(m2.getName());
-            });
-            return result;
+//            Collections.sort(result, (m1,m2) -> {
+//               return m1.getName().compareTo(m2.getName());
+//            });
+            return Lists.newArrayList(members.values());
         } catch (Exception e) {
             log.error("build members error:" + e.getMessage(), e);
             throw new MiniCubeQueryException(e.getMessage(), e);
@@ -244,6 +262,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
         // 查询的ID字段，需要groupBy
         queryRequest.selectAndGroupBy(queryLevel.getSource());
+        if(StringUtils.isNotBlank(queryLevel.getPrimaryKey())
+                && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
+            queryRequest.selectAndGroupBy(queryLevel.getPrimaryKey());
+        }
         // 先把caption也进行groupby吧，要不一个ID对应多个名称不知道怎么取
         if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
             queryRequest.selectAndGroupBy(queryLevel.getCaptionColumn());
