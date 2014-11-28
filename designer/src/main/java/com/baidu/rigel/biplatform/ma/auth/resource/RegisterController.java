@@ -110,8 +110,10 @@ public class RegisterController extends BaseResource {
             // 获取用户信息        
             ProductlineInfo user = this.getUserFromUrl(request, false);
             LOG.info("begin open online service for user [" + user.getName() + "]");
-            // 开通线上服务
-            productLineRegisterService.openOnlineService(user);
+            // 开通线上服务，如果发生异常，直接抛出
+            if (productLineRegisterService.openOnlineService(user) != 0) {
+                throw new RuntimeException("open online service for user [" + user.getName() + "] failed");
+            };
             // 发送开通服务信息给用户
             productLineRegisterService.sendOpenServiceMsgToUser(user, 1);           
             LOG.info("open online service for user [" 
@@ -140,7 +142,9 @@ public class RegisterController extends BaseResource {
             ProductlineInfo user = this.getUserFromUrl(request, false);
             LOG.info("begin open offline service for user [" + user.getName() + "]");
             // 开通线下服务
-            productLineRegisterService.openOfflineService(user);
+            if (productLineRegisterService.openOfflineService(user) != 0) {
+                throw new RuntimeException("open offline service for user [" + user.getName() + "] failed");
+            };
             // 发送开通服务信息给用户
             productLineRegisterService.sendOpenServiceMsgToUser(user, 0);
             LOG.info("open offline service for user [" + user.getName() + "] successfully");

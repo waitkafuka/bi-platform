@@ -21,6 +21,7 @@ import java.net.URLEncoder;
 import javax.annotation.Resource;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
@@ -49,7 +50,8 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     /**
      * 报表目录
      */
-    public static final String REPORT_PATH = "report";
+    @Value("${biplatform.ma.report.location}")
+    public String report;
     
     /**
      * dev目录
@@ -64,7 +66,8 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     /**
      * 数据源目录
      */
-    public static final String DS_PATH = "ds";
+    @Value("${biplatform.ma.ds.location}")
+    public String ds;
  
     /**
      * 编码方式
@@ -310,8 +313,8 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             // userRootDir = OFFLINE_PATH + File.separator + name;
         }
         // 所有所需目录
-        String reportDir = userRootDir + File.separator + REPORT_PATH;
-        String dsDir = userRootDir + File.separator + DS_PATH;
+        String reportDir = userRootDir + File.separator + report;
+        String dsDir = userRootDir + File.separator + ds;
         String devDir = reportDir + File.separator + DEV_PATH;
         String releaseDir = reportDir + File.separator + RELEASE_PATH; 
         try {
