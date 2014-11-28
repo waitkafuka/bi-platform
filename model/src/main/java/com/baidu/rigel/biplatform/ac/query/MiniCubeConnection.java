@@ -177,7 +177,7 @@ public interface MiniCubeConnection {
             params.put(DATASOURCEINFO_PARAM_KEY, AnswerCoreConstant.GSON.toJson(dataSourceInfo));
             params.put(DATASET_PARAM_KEY, StringUtils.join(dataSets, ','));
 
-            String responseJson = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/publish", params);
+            String responseJson = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/refresh", params);
             ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(responseJson, ResponseResult.class);
             if (responseResult.getData() != null) {
                 return true;
