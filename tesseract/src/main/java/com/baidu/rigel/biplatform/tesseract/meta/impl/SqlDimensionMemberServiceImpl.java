@@ -123,9 +123,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
              CountDownLatch latch = new CountDownLatch(resultSet.size());
             while (resultSet.next()) {
                 ResultRecord record = resultSet.getCurrentRecord();
-
-                if(taskExecutor.getThreadGroup() != null) {
-                    taskExecutor.getThreadGroup().list();
+                
+                while(taskExecutor.getThreadPoolExecutor().getQueue().size() >= 200) {
+                    Thread.sleep(10);
                 }
                 
                 taskExecutor.submit(new Runnable() {
@@ -192,8 +192,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             }
             latch.await();
             
-            log.info("execute complete active count:{} poll size:{} core pool size:{} ",
-                    taskExecutor.getActiveCount(), taskExecutor.getPoolSize(), taskExecutor.getCorePoolSize());
+            log.info("execute complete active count:{} poll size:{} core pool size:{} ",taskExecutor.getActiveCount(), taskExecutor.getPoolSize(), taskExecutor.getCorePoolSize());
             Collections.sort(result, (m1,m2) -> {
                return m1.getName().compareTo(m2.getName());
             });
