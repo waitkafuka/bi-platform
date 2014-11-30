@@ -23,9 +23,26 @@ fi
 
 parentPath=$(dirname $(pwd))
 current_product_version=`cat ./version.txt>&1`
-
+demo_location=$parentPath/demo_home 
 echo "[INFO]************current product version is : $current_product_version"
-#JAVA_HOME/bin/java -jar  $parentPath/lib/fileServer-$current_product_version.jar 9090 $parentPath/staticfile > $parentPath/demo_home/log/fileserver.log &
-$JAVA_HOME/bin/java -jar  $parentPath/lib/tesseract-$current_product_version.jar -Dserver.port=9999 > $parentPath/demo_home/log/ter.log &
-$JAVA_HOME/bin/java -jar  $parentPath/lib/designer-$current_product_version.jar  > $parentPath/demo_home/designer.log &
-echo "Congratulation! you can using BI-Platform  with URL :[http://localhost:8090/silkroad/home.html ] and user [demo/demo] through Chrome Browser "
+$JAVA_HOME/bin/java -cp  $demo_location/db/h2-1.3.175.jar org.h2.tools.Server -tcp -tcpAllowOthers -tcpPort 9999 >$demo_location/log/db.log &
+echo "[INFO]************db server start successfully"
+# sleep 10 seconds wait the db prepared 
+echo "[INFO]************begin init db info, it's need a long time, please wait a moment please ... ... "
+sleep 10
+$JAVA_HOME/bin/java -jar $demo_location/db/DbTool.jar $demo_location/sql/init.sql 
+echo "[INFO]************db server init successfully"
+echo "[INFO]************begin start fileserver"
+sleep 2
+$JAVA_HOME/bin/java -jar  $parentPath/lib/fileServer-$current_product_version.jar 9090 $demo_location > $demo_location/log/fileserver.log &
+sleep 2
+echo "[INFO]************fileserver start successfully"
+echo "[INFO]************begin start tesseract"
+$JAVA_HOME/bin/java -jar  $parentPath/lib/tesseract-$current_product_version.jar -Dserver.port=9191 > $demo_location/log/ter.log &
+sleep 5
+echo "[INFO]************tesseract started successfully"
+echo "[INFO]************begin start silkroad"
+$JAVA_HOME/bin/java -jar  $parentPath/lib/designer-$current_product_version.jar  > $demo_location/log/designer.log &
+sleep 5
+echo "[INFO]************silkroad started successfully"
+echo "[INFO]************Congratulation! you can using BI-Platform  with URL :[http://localhost:8090/silkroad/home.html ] and user [demo/demo] through Chrome Browser "
