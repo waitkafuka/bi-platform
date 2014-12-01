@@ -13,8 +13,8 @@
 
 	<cache:annotation-driven />
 	
-	<bean id="hazelcastNoticePort"
-		class="com.baidu.rigel.biplatform.tesseract.store.service.HazelcastNoticePort" />
+<!-- 	<bean id="hazelcastNoticePort" -->
+<!-- 		class="com.baidu.rigel.biplatform.tesseract.store.service.HazelcastNoticePort" /> -->
 
 	<hz:hazelcast id="hazelcastServer">
 		<hz:config>
@@ -33,9 +33,9 @@
 			</hz:queue>
 			
 			<hz:topic name="topics">
-				<hz:message-listeners>
-					<hz:message-listener implementation="hazelcastNoticePort" />
-				</hz:message-listeners>
+<!-- 				<hz:message-listeners> -->
+<!-- 					<hz:message-listener implementation="hazelcastNoticePort" /> -->
+<!-- 				</hz:message-listeners> -->
 			</hz:topic>			
 			
 		</hz:config>

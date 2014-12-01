@@ -80,15 +80,12 @@ public interface IndexService {
     boolean initMiniCubeIndex(List<Cube> cubeList, DataSourceInfo dataSourceInfo,
         boolean indexAsap, boolean limited) throws IndexAndSearchException;
     
-    /**
-     * 
-     * updateIndexByDataSourceKey
-     * 
-     * @param dataSourceKey
-     *            dataSourceKey
-     * @throws IndexAndSearchException
-     *             可能抛出的异常
-     */
-    void updateIndexByDataSourceKey(String dataSourceKey) throws IndexAndSearchException;
     
+    /**
+     * updateIndexByDataSourceKey 跟据数据源、事实表增量更新索引数据
+     * @param dataSourceKey 数据源信息
+     * @param dataSetNames 事实表信息
+     * @throws IndexAndSearchException
+     */
+    void updateIndexByDataSourceKey(String dataSourceKey, String[] dataSetNames) throws IndexAndSearchException;
 }

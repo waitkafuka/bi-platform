@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -247,7 +248,8 @@ public class IndexServiceImpl implements IndexService {
         }
     }
     
-    public void updateIndexByDataSourceKey(String dataSourceKey) throws IndexAndSearchException {
+    
+    public void updateIndexByDataSourceKey(String dataSourceKey, String[] dataSetNames) throws IndexAndSearchException {
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "updateIndexByDataSourceKey", dataSourceKey));
@@ -258,8 +260,20 @@ public class IndexServiceImpl implements IndexService {
         }
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
             "updateIndexByDataSourceKey", dataSourceKey));
-        List<IndexMeta> metaList = this.indexMetaService
-            .getIndexMetasByDataSourceKey(dataSourceKey);
+        
+        List<IndexMeta> metaList = new ArrayList<IndexMeta>();
+        
+		if (!ArrayUtils.isEmpty(dataSetNames)) {
+			for (String factTableName : dataSetNames) {
+				metaList.addAll(this.indexMetaService
+						    .getIndexMetasByFactTableName(factTableName,
+								dataSourceKey));
+			}
+		} else {
+			metaList = this.indexMetaService
+					.getIndexMetasByDataSourceKey(dataSourceKey);
+		}
+        
         for (IndexMeta meta : metaList) {
             try {
                 this.doIndex(meta, IndexAction.INDEX_UPDATE);
