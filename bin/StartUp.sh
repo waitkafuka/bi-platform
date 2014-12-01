@@ -27,10 +27,9 @@ demo_location=$parentPath/demo_home
 echo "[INFO]************current product version is : $current_product_version"
 $JAVA_HOME/bin/java -cp  $demo_location/db/h2-1.3.175.jar org.h2.tools.Server -tcp -tcpAllowOthers -tcpPort 9999 >$demo_location/log/db.log &
 echo "[INFO]************db server start successfully"
-echo "[INFO]************begin init db info, it's need a long time, please wait a moment please ... ... "
+echo "[INFO]************init DB need a long time, please wait a moment please ... ... "
 sleep 10
-$JAVA_HOME/bin/java -jar $demo_location/db/DbTool.jar $demo_location/sql/init.sql 
-echo "[INFO]************db server init successfully"
+echo "[INFO]************successfully init db"
 echo "[INFO]************begin start fileserver"
 sleep 2
 $JAVA_HOME/bin/java -jar  $parentPath/lib/fileServer-$current_product_version.jar 9090 $demo_location > $demo_location/log/fileserver.log &
@@ -42,6 +41,6 @@ sleep 5
 echo "[INFO]************tesseract started successfully"
 echo "[INFO]************begin start silkroad"
 $JAVA_HOME/bin/java -jar  $parentPath/lib/designer-$current_product_version.jar  > $demo_location/log/designer.log &
-sleep 5
+sleep 60
 echo "[INFO]************silkroad started successfully"
 echo "[INFO]************Congratulation! you can using BI-Platform  with URL :[http://localhost:8090/silkroad/home.html ] and user [demo/demo] through Chrome Browser "

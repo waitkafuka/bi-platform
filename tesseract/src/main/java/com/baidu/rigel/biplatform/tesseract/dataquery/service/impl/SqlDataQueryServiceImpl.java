@@ -145,7 +145,9 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pstmt =
                         con.prepareStatement(sqlQuery.toSql(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                pstmt.setFetchSize(Integer.MIN_VALUE);
+                if (con.getMetaData().getDriverName().toLowerCase().contains("mysql")) {
+                		pstmt.setFetchSize(Integer.MIN_VALUE);
+                }
                 return pstmt;
             }
         }, new RowCallbackHandler() {
