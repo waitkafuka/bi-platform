@@ -44,3 +44,4 @@ $JAVA_HOME/bin/java -jar  $parentPath/lib/designer-$current_product_version.jar 
 sleep 60
 echo "[INFO]************silkroad started successfully"
 echo "[INFO]************Congratulation! you can using BI-Platform  with URL :[http://localhost:8090/silkroad/home.html ] and user [demo/demo] through Chrome Browser "
+exit 0
