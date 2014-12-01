@@ -27,7 +27,6 @@ demo_location=$parentPath/demo_home
 echo "[INFO]************current product version is : $current_product_version"
 $JAVA_HOME/bin/java -cp  $demo_location/db/h2-1.3.175.jar org.h2.tools.Server -tcp -tcpAllowOthers -tcpPort 9999 >$demo_location/log/db.log &
 echo "[INFO]************db server start successfully"
-# sleep 10 seconds wait the db prepared 
 echo "[INFO]************begin init db info, it's need a long time, please wait a moment please ... ... "
 sleep 10
 $JAVA_HOME/bin/java -jar $demo_location/db/DbTool.jar $demo_location/sql/init.sql 
