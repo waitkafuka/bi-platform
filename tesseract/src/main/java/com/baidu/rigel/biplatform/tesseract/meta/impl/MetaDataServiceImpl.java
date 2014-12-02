@@ -25,6 +25,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -43,6 +45,7 @@ import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.isservice.event.InitMiniCubeEvent;
 import com.baidu.rigel.biplatform.tesseract.isservice.event.InitMiniCubeEvent.InitMiniCubeInfo;
+import com.baidu.rigel.biplatform.tesseract.isservice.event.UpdateIndexByDatasourceEvent;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
@@ -56,6 +59,12 @@ import com.google.common.collect.Lists;
  */
 @Service
 public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
+    
+    
+    /** 
+     * LOG
+     */
+    private Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     /**
      * dataSourcePoolService
@@ -228,6 +237,18 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
 
         InitMiniCubeEvent miniCubeEvent = new InitMiniCubeEvent(miniCubeInfo);
         storeManager.putEvent(miniCubeEvent);
+    }
+
+    @Override
+    public void refresh(DataSourceInfo dataSourceInfo, String dataSetStr) throws Exception {
+        MetaDataService.checkDataSourceInfo(dataSourceInfo);
+        if(StringUtils.isBlank(dataSetStr)) {
+            LOG.error("dataSet name String is null,refresh all datasource");
+            dataSetStr = "";
+        }
+        LOG.info("refresh datasource:{} dataSet:{}",dataSourceInfo,dataSetStr);
+        UpdateIndexByDatasourceEvent updateEvent = new UpdateIndexByDatasourceEvent(dataSourceInfo.getDataSourceKey(), StringUtils.split(dataSetStr, ','));
+        storeManager.putEvent(updateEvent);
     }
 
 }

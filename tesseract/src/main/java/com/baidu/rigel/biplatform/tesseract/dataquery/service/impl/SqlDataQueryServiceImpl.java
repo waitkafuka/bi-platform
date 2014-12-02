@@ -82,11 +82,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     
     @Override
     public List<Map<String, Object>> queryForListWithSql(String sql, DataSource dataSource) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-            "queryForListWithSql", "[sql:" + sql + "][dataSource:" + dataSource + "]"));
         initJdbcTemplate(dataSource);
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
-            "queryForListWithSql", "[sql:" + sql + "][dataSource:" + dataSource + "]"));
         return this.jdbcTemplate.queryForList(sql);
         
     }
@@ -116,16 +112,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     @Override
     public TesseractResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, DataSource dataSource, long limitStart,
             long limitEnd) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "queryForDocListWithSQLQuery",
-                "[sqlQuery:" + sqlQuery + "][dataSource:" + dataSource + "][limitStart:" + limitStart + "][limitEnd:"
-                        + limitEnd + "]"));
-        long current = System.currentTimeMillis();
-
-        TesseractResultSet result = new SearchResultSet(querySqlList(sqlQuery, dataSource, limitStart, limitEnd));
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "queryForDocListWithSQLQuery",
-                "[sqlQuery:" + sqlQuery + "][dataSource:" + dataSource + "][limitStart:" + limitStart + "][limitEnd:"
-                        + limitEnd + "] cost" + (System.currentTimeMillis() - current + "ms!")));
-        return result;
+        return new SearchResultSet(querySqlList(sqlQuery, dataSource, limitStart, limitEnd));
     }
     
     
@@ -139,8 +126,6 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
      */
     private LinkedList<ResultRecord> querySqlList(SqlQuery sqlQuery, DataSource dataSource, long limitStart,
             long limitEnd) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "querySqlList", "[sqlQuery:" + sqlQuery.toSql()
-                + "][dataSource:" + dataSource + "][limitStart:" + limitStart + "][limitEnd:" + limitEnd + "]"));
         long current = System.currentTimeMillis();
         if (sqlQuery == null || dataSource == null || limitEnd < 0) {
             throw new IllegalArgumentException();
@@ -160,7 +145,9 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pstmt =
                         con.prepareStatement(sqlQuery.toSql(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                pstmt.setFetchSize(Integer.MIN_VALUE);
+                if (con.getMetaData().getDriverName().toLowerCase().contains("mysql")) {
+                		pstmt.setFetchSize(Integer.MIN_VALUE);
+                }
                 return pstmt;
             }
         }, new RowCallbackHandler() {
@@ -181,7 +168,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
                 resultList.add(record);
             }
         });
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "querySqlList", "[sqlQuery:" + sqlQuery
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "querySqlList", "[sqlQuery:" + sqlQuery.toSql()
                 + "][dataSource:" + dataSource + "][limitStart:" + limitStart + "][limitEnd:" + limitEnd + "] cost"
                 + (System.currentTimeMillis() - current + "ms!")));
         return resultList;

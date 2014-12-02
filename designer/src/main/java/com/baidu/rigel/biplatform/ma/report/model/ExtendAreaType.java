@@ -65,6 +65,11 @@ public enum ExtendAreaType {
     SELECTION_AREA,
     
     /**
+     * 下拉列表
+     */
+    SELECT,
+    
+    /**
      * LiteOlap组件
      */
     LITEOLAP;

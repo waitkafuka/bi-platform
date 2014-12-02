@@ -143,7 +143,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     @Override
     public boolean isNameExist(String name) throws DataSourceOperationException {
         
-        String dir = getDsFileStoreDir();
+        String dir = getDsFileStoreDir(ContextManager.getProductLine());
         try {
             String[] fileList = fileService.ls(dir);
             if (fileList == null || fileList.length == 0) {
@@ -187,7 +187,7 @@ public class DataSourceServiceImpl implements DataSourceService {
     public DataSourceDefine[] listAll() throws DataSourceOperationException {
         String[] listFile = null;
         try {
-            listFile = fileService.ls(getDsFileStoreDir());
+            listFile = fileService.ls(getDsFileStoreDir(ContextManager.getProductLine()));
         } catch (FileServiceException e) {
             logger.error(e.getMessage(), e);
             throw new DataSourceOperationException(e);
@@ -245,7 +245,7 @@ public class DataSourceServiceImpl implements DataSourceService {
      * @return
      */
     private String genDsFilePath(String file) {
-        return getDsFileStoreDir() + File.separator + file;
+        return getDsFileStoreDir(ContextManager.getProductLine()) + File.separator + file;
     }
     
     /**
@@ -253,7 +253,7 @@ public class DataSourceServiceImpl implements DataSourceService {
      */
     @Override
     public DataSourceDefine getDsDefine(String id) throws DataSourceOperationException {
-        String fileName = getDatasourceDefineNameByIdOrName(id);
+        String fileName = getDatasourceDefineNameByIdOrName(ContextManager.getProductLine(), id);
         if (fileName == null) {
             return null;
         }
@@ -271,8 +271,8 @@ public class DataSourceServiceImpl implements DataSourceService {
      * @param idOrName
      * @return
      */
-    private String getDatasourceDefineNameByIdOrName(String idOrName) {
-        String dir = getDsFileStoreDir();
+    private String getDatasourceDefineNameByIdOrName(String productLine, String idOrName) {
+        String dir = getDsFileStoreDir(productLine);
         String[] ds = null;
         try {
             ds = fileService.ls(dir);
@@ -287,10 +287,9 @@ public class DataSourceServiceImpl implements DataSourceService {
         Set<String> tmp = new HashSet<String>();
         Collections.addAll(tmp, ds);
         Set<String> dict = new HashSet<String>();
-        tmp.stream().map((String s) -> {
-            return s.split("_");
-        }).forEach((String[] ids) ->{
-            Collections.addAll(dict, ids);
+        tmp.stream().forEach((String s) -> {
+        		dict.add(s.substring(0, s.indexOf("_")));
+            dict.add(s.substring(s.indexOf("_") + 1));
         });
         if (!dict.contains(idOrName)) {
             return null;
@@ -318,7 +317,7 @@ public class DataSourceServiceImpl implements DataSourceService {
             throw new DataSourceOperationException("不能通过指定数据源id找到数据源定义： id ＝ " + id);
         }
         try {
-            return fileService.rm(genDsFilePath(getDatasourceDefineNameByIdOrName(id)));
+            return fileService.rm(genDsFilePath(getDatasourceDefineNameByIdOrName(ContextManager.getProductLine(), id)));
         } catch (FileServiceException e) {
             logger.error(e.getMessage(), e);
             throw new DataSourceOperationException(e);
@@ -332,16 +331,16 @@ public class DataSourceServiceImpl implements DataSourceService {
      * @return 返回数据源定义文件文件名（绝对路径）
      */
     private String getDsFileName(DataSourceDefine ds) {
-        return getDsFileStoreDir() + File.separator + ds.getId() + "_" + ds.getName();
+        return getDsFileStoreDir(ContextManager.getProductLine()) + File.separator + ds.getId() + "_" + ds.getName();
     }
     
     /**
      * 获取数据源的存储路径
-     * 
-     * @return
+     * @param productLine
+     * @return String
      */
-    private String getDsFileStoreDir() {
-        String productLine = ContextManager.getProductLine();
+    private String getDsFileStoreDir(String productLine) {
+//        String productLine = ContextManager.getProductLine();
         String basePath = productLine + File.separator + dsFileBaseDir;
         return basePath;
     }
@@ -358,5 +357,23 @@ public class DataSourceServiceImpl implements DataSourceService {
     public void setFileService(FileService fileService) {
         this.fileService = fileService;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	public DataSourceDefine getDsDefine(String productLine, String dsName) throws DataSourceOperationException {
+		String fileName = getDatasourceDefineNameByIdOrName(productLine, dsName);
+        if (fileName == null) {
+            return null;
+        }
+        try {
+            return buildResult(fileName);
+        } catch (FileServiceException e) {
+            logger.error("error : " + e.getMessage());
+            throw new DataSourceOperationException("未找到正确的数据源定义信息", e);
+        }
+
+	}
     
 }

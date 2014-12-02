@@ -1,13 +1,13 @@
 /**
  * @file
- * @author 赵晓强(v_zhaoxiaoqiang@baidu.com)
+ * @author 赵晓强(longze_xq@163.com)
  * @date 2014-8-4
  */
 define([
         'template',
         'dialog',
-        'report/component-box/main-model',
-        'report/component-box/main-template'
+        'report/edit/component-box/main-model',
+        'report/edit/component-box/main-template'
     ],
     function (
         template,
@@ -30,6 +30,7 @@ define([
              * @constructor
              */
             initialize: function (option) {
+                var that = this;
                 this.model = new MainModel({
                     id: this.id
                 });
@@ -98,11 +99,7 @@ define([
                         var compData = that.model.getComponentData(compType);
                         startScrollTop = $report.scrollTop();
 
-                        // TODO:拖拽时候显示的占位div，宽度与高度统一了，不合适，需要优化一下 by lzt
-                        // 方案：每个组件config配置，在此处调用其配置
                         ui.helper.html('临时展示').css({
-//                            'width': compData.defaultWidth  + 'px',
-//                            'height': compData.defaultHeight + 'px',
                             'width': '100px',
                             'height': '100px',
                             'cursor': 'move',

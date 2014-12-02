@@ -213,7 +213,7 @@ public class SearchIndexServiceImpl implements SearchService {
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                 "merging final result"));
-        if (query.getGroupBy() != null) {
+        if (query.getGroupBy() != null && CollectionUtils.isNotEmpty(query.getGroupBy().getGroups())) {
             try {
                 result = QueryRequestUtil.processGroupBy(result, query);
             } catch (NoSuchFieldException e) {

@@ -126,7 +126,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         Level[] parentLevels = dim.getLevels().values().toArray(new Level[0]);
         List<Member> rootMembers = null;
         try {
-            rootMembers = getMembers(cube, dim, parentLevels[0], params);
+                rootMembers = getMembers(cube, dim, parentLevels[0], params);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
             logger.error("Exception happened when getMemebers of dim " + dim.getName(),
                     e);
@@ -158,7 +158,15 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
     private List<Member> getMembers(Cube cube, Dimension dim,
             Member parent, Level level, Map<String, String> params)
             throws MiniCubeQueryException, DataSourceOperationException {
-        List<Member> members = getMembers(cube, dim, level, params);
+        DataSourceDefine dsDefine = null;
+        try {
+            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+        } catch (DataSourceOperationException e) {
+            logger.error("Fail in Finding datasource define. ", e);
+            throw e;
+        }
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
+        List<Member> members = parent.getChildMembers(cube, dsInfo, params);
         for (Member m : members) {
             MiniCubeMember member = (MiniCubeMember) m;
             member.setParent(parent);

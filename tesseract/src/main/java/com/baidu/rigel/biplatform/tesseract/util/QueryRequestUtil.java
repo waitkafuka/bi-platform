@@ -408,7 +408,7 @@ public class QueryRequestUtil {
             String groupBy = "";
             for(String meta : record.getMeta().getFieldNameArray()){
                 if(groups.contains(meta)){
-                    groupBy += record.getField(meta).toString();
+                    groupBy += record.getField(meta).toString() + ",";
                 }
             }
             record.setGroupBy(groupBy);

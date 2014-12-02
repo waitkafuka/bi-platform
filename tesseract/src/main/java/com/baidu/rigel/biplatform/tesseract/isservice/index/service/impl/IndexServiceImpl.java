@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -247,7 +248,8 @@ public class IndexServiceImpl implements IndexService {
         }
     }
     
-    public void updateIndexByDataSourceKey(String dataSourceKey) throws IndexAndSearchException {
+    
+    public void updateIndexByDataSourceKey(String dataSourceKey, String[] dataSetNames) throws IndexAndSearchException {
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "updateIndexByDataSourceKey", dataSourceKey));
@@ -258,8 +260,20 @@ public class IndexServiceImpl implements IndexService {
         }
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
             "updateIndexByDataSourceKey", dataSourceKey));
-        List<IndexMeta> metaList = this.indexMetaService
-            .getIndexMetasByDataSourceKey(dataSourceKey);
+        
+        List<IndexMeta> metaList = new ArrayList<IndexMeta>();
+        
+		if (!ArrayUtils.isEmpty(dataSetNames)) {
+			for (String factTableName : dataSetNames) {
+				metaList.addAll(this.indexMetaService
+						    .getIndexMetasByFactTableName(factTableName,
+								dataSourceKey));
+			}
+		} else {
+			metaList = this.indexMetaService
+					.getIndexMetasByDataSourceKey(dataSourceKey);
+		}
+        
         for (IndexMeta meta : metaList) {
             try {
                 this.doIndex(meta, IndexAction.INDEX_UPDATE);
@@ -396,7 +410,19 @@ public class IndexServiceImpl implements IndexService {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                     "doIndex", "process update before index"));
                 // 正常更新               
-                
+                for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
+                    List<String> whereList = sqlQueryMap.get(tableName).getWhereList();
+                    if (whereList == null) {
+                        whereList = new ArrayList<String>();
+                    }
+                    BigDecimal maxId = idxMeta.getDataDescInfo().getMaxDataId(tableName);
+                    if (maxId != null && !maxId.equals(BigDecimal.ZERO)) {
+                        String where = idxMeta.getDataDescInfo().getIdStr() + " > "
+                            + maxId.longValue();
+                        whereList.add(where);
+                    }
+                    sqlQueryMap.get(tableName).setWhereList(whereList);
+                }
                 isUpdate = Boolean.TRUE;
                 
             }
@@ -425,6 +451,9 @@ public class IndexServiceImpl implements IndexService {
         long startIndex=System.nanoTime();
         
         long totalTime=0;
+        long totalForTime=0;
+        long totalOtherTime=0;
+        long totalSqlTime=0;
         IndexShard currIdxShard = getFreeIndexShardForIndex(idxMeta);
         for (String tableName : sqlQueryMap.keySet()) {
             SqlQuery sqlQuery = sqlQueryMap.get(tableName);
@@ -438,6 +467,7 @@ public class IndexServiceImpl implements IndexService {
             
             boolean isLastPiece = false;
             boolean isInit = true;
+            
             BigDecimal currMaxId = BigDecimal.ZERO;
             
             //初始化maxId
@@ -457,6 +487,8 @@ public class IndexServiceImpl implements IndexService {
             
             String currWhereStr="";
             for (int i = 0; i * pcount < total; i++) {
+            	long startForTime=System.nanoTime();
+            	
                 long limitStart = 0;
                 long limitEnd = pcount;
                 if ((i + 1) * pcount >= total) {
@@ -469,11 +501,12 @@ public class IndexServiceImpl implements IndexService {
                 
                 currWhereStr=sqlQuery.getIdName() + " > " + currMaxId.longValue();
 				sqlQuery.getWhereList().add(currWhereStr);
-                
+                long startSqlTime=System.nanoTime();
                 TesseractResultSet currResult = this.dataQueryService.queryForDocListWithSQLQuery(
                     sqlQuery, dataSourceWrape, limitStart, limitEnd);
-                
-                
+                long endTime=System.nanoTime();
+                totalOtherTime+=(endTime-startForTime);
+                totalSqlTime+=(endTime-startSqlTime);
                 
                 while (currResult.size() != 0) {
                     // 向索引分片中写入数据
@@ -509,6 +542,9 @@ public class IndexServiceImpl implements IndexService {
                     
                 }
                 
+                long endForTime=System.nanoTime();
+                totalForTime=totalForTime+(endForTime-startForTime);
+                
                 
             }
             maxDataIdMap.put(tableName, currMaxId);
@@ -518,6 +554,9 @@ public class IndexServiceImpl implements IndexService {
         long endIndex=System.nanoTime();
         System.out.println("******************************************index cost : "+(endIndex-startIndex)+" ns ******************************************");
         System.out.println("******************************************write index cost : "+totalTime +" ns ***************************************");
+        System.out.println("******************************************total for time cost : " +totalForTime+" ns ***************************************");
+        System.out.println("******************************************total other time cost : " +totalOtherTime+" ns ***************************************");
+        System.out.println("******************************************total sql time cost : " +totalSqlTime+" ns ***************************************");
         idxMeta.getDataDescInfo().setMaxDataIdMap(maxDataIdMap);
         if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
             idxMeta.getCubeIdSet().addAll(idxMeta.getCubeIdMergeSet());

@@ -36,7 +36,12 @@ public enum DatasourceType {
     /**
      * ORACLE
      */
-    ORACLE("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:", ":");
+    ORACLE("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:", ":"),
+    
+    /**
+     * H2
+     */
+    H2("org.h2.Driver", "jdbc:h2:tcp://", "/");
     
     /**
      * driver

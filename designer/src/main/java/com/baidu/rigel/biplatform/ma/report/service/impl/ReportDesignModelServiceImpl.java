@@ -409,7 +409,8 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             		if (area.getType() == ExtendAreaType.TIME_COMP 
             				|| area.getType() == ExtendAreaType.LITEOLAP_TABLE
             				|| area.getType() == ExtendAreaType.SELECTION_AREA 
-            				|| area.getType() == ExtendAreaType.LITEOLAP_CHART) {
+            				|| area.getType() == ExtendAreaType.LITEOLAP_CHART
+            				|| area.getType() == ExtendAreaType.SELECT) {
             			continue;
             		}  
         			Cube cube = QueryUtils.getCubeWithExtendArea(model, area);

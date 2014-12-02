@@ -37,6 +37,11 @@ public class UpdateIndexByDatasourceEvent extends ApplicationEvent {
      */
     private String dataSourceKey;
     
+    /** 
+     * dataSetNames 更新的数据集名称
+     */
+    private String[] dataSetNames;
+    
     /**
      * Constructor by
      * 
@@ -47,6 +52,14 @@ public class UpdateIndexByDatasourceEvent extends ApplicationEvent {
         if (source != null) {
             dataSourceKey = (String) source;
         }
+    }
+    
+    /** 
+     * 构造函数
+     */
+    public UpdateIndexByDatasourceEvent(String dataSourceKey, String[] dataSetNames) {
+        this(dataSourceKey);
+        this.dataSetNames = dataSetNames;
     }
     
     /**
@@ -67,6 +80,16 @@ public class UpdateIndexByDatasourceEvent extends ApplicationEvent {
     public void setDataSourceKey(String dataSourceKey) {
         this.dataSourceKey = dataSourceKey;
     }
+    
+    /** 
+     * getDataSetNames
+     * @return
+     */
+    public String[] getDataSetNames() {
+    
+        return dataSetNames;
+    }
+
     
     /*
      * (non-Javadoc)

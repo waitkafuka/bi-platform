@@ -3,7 +3,7 @@
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
  * @file:   工程基础
- * @author:  sushuang(sushuang@baidu.com)
+ * @author:  sushuang(sushuang)
  */
 
 /**
@@ -18,8 +18,7 @@ var xui = {};
  *          [功能]
  *              (1) 各级名空间建立
  *              (2) 交叉引用/文件依赖的一种解决方案（闭包变量注入）
- * @author:  sushuang(sushuang@baidu.com)
- * @version: 1.0.1
+ * @author:  sushuang(sushuang@baidu.comion: 1.0.1
  */
 
 /**
@@ -1147,8 +1146,7 @@ baidu.ejson = function () {
  * @author:  sushuang(sushuang@baidu.com)
  */
 
-/**
- * @namespace
+/**pace
  */
 var xutil = {
     lang: {},
@@ -1174,10 +1172,7 @@ var xutil = {
  *           做为队列、链表等结构使用
  * @author:  sushuang(sushuang@baidu.com)
  * @depend:  none
- */
-
-/**
- * @usage 
+* @usage
  *    (1) 作为HashMap
  *        var h1 = new LinkedHashMap();
  *        h1.set('name', 'ss');
@@ -1932,7 +1927,7 @@ var xutil = {
  *          (7) 多个请求同步（最后一个请求返回时才执行回调）的支持。
  *              参见createSyncWrap方法
  * @author:  sushuang(sushuang@baidu.com)
- * @depend:  tangram.ajax, e-json, xutil.ajax
+ * @depend:  tangram.ajax, eil.ajax
  */
 
 (function () {
@@ -2513,8 +2508,7 @@ var xutil = {
  * @depend:  xutil.object
  */
 
-(function () {
-    
+(functi
     var COLLECTION = xutil.collection;
     var OBJECT = xutil.object;
     
@@ -2832,8 +2826,7 @@ var xutil = {
  * @depend: xutil.lang, xutil.number
  */
 
-(function () {
-    
+(funct
     var DATE = xutil.date;
     var LANG = xutil.lang;
     var NUMBER = xutil.number;
@@ -3381,7 +3374,7 @@ var xutil = {
 (function () {
     
     var DOM = xutil.dom;
-    var objProtoToString = Object.prototype.toString;
+    var String = Object.prototype.toString;
     var TRIMER_REG = new RegExp(
             "(^[\\s\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\s\\t]+\x24)", "g"
         );
@@ -3599,8 +3592,7 @@ var xutil = {
 
 (function () {
     
-    var FILE = xutil.file;
-            
+    var FILE = xutil.file
     /**
      * 过滤文件名的非法字符
      * 只考虑了windows和linux
@@ -3654,7 +3646,7 @@ var xutil = {
 (function () {
     
     var FN = xutil.fn;
-    var LANG = xutil.lang;
+    vautil.lang;
     var slice = Array.prototype.slice;
     var nativeBind = Function.prototype.bind;
     
@@ -3698,7 +3690,7 @@ var xutil = {
     var GRAPHIC = xutil.graphic; 
 
     /**
-     * 合并外界矩形
+  形
      *
      * @public
      * @param {Object...} bound...，可传入多个。
@@ -3756,7 +3748,7 @@ var xutil = {
 (function () {
     
     var LANG = xutil.lang;
-    var STRING = xutil.string;
+    var util.string;
     var objProto = Object.prototype;
     var objProtoToString = objProto.toString;
     var hasOwnProperty = objProto.hasOwnProperty;
@@ -4028,7 +4020,7 @@ var xutil = {
 (function () {
     
     var NUMBER = xutil.number;
-    var DATE = xutil.date; // Add by MENGRAN at 2013-12-6
+    var DATE = xutil.date; // Add  at 2013-12-6
             
     /**
      * 得到序数词(1st, 2nd, 3rd, 4th, ...)的英文后缀
@@ -4230,8 +4222,7 @@ var xutil = {
 (function () {
     
     var OBJECT = xutil.object;
-    var objProtoToString = Object.prototype.toString;
-    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var objProtoToString = Object.prototype.    var hasOwnProperty = Object.prototype.hasOwnProperty;
     var arraySlice = Array.prototype.slice;
     
     /**
@@ -4913,8 +4904,7 @@ var xutil = {
     
     var STRING = xutil.string;
     var LANG = xutil.lang;
-    var TRIMER = new RegExp(
-            "(^[\\s\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\s\\t]+\x24)", "g"
+    var TRIMER = new           "(^[\\s\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\s\\t]+\x24)", "g"
         );
     
     /**
@@ -5221,8 +5211,7 @@ var xutil = {
     
     var UID = xutil.uid;
     var INCREASED_UID_BASE_PUBLIC = 1;
-    var INCREASED_UID_BASE_PRIVATE = {};
-    
+    var INCREASED_UID_BASE_PRIV
     /**
      * 获取不重复的随机串（自增，在单浏览器实例，无worker情况下保证唯一）
      * @public
@@ -5265,8 +5254,7 @@ var xutil = {
     
     var URL = xutil.url;
     var LANG = xutil.lang;
-    var objProtoToString = Object.prototype.toString;
-    var arrayProtoSlice = Array.prototype.slice;
+    var objProtoToString = Object.prototype.toS var arrayProtoSlice = Array.prototype.slice;
 
     /**
      * 包装js原生的decodeURIComponent，
@@ -5518,7 +5506,7 @@ var xutil = {
     var VALIDATOR = xutil.validator = {};
 
     var REGEXP_CASH = /^\d+(\.\d{1,2})?$/;
-    var REGEXP_CASH_CAN_NAGE = /^(\+|-)?\d+(\.\d{1,2})?$/;
+    var REGEXP_CASH_CAN(\+|-)?\d+(\.\d{1,2})?$/;
     var REGEXP_EMAIL = /^[_\w-]+(\.[_\w-]+)*@([\w-])+(\.[\w-]+)*((\.[\w]{2,})|(\.[\w]{2,}\.[\w]{2,}))$/;
     var REGEXP_URL = /^[^.。，]+(\.[^.，。]+)+$/;
     var REGEXP_MOBILE = /^1\d{10}$/;
@@ -5599,7 +5587,7 @@ var xutil = {
     // 引用
     //----------------------------------
     
-    var xobject = xutil.object;
+    v = xutil.object;
     var inheritsObject = xobject.inheritsObject;
     var objProtoToString = Object.prototype.toString;
     var arrayProtoSlice = Array.prototype.slice;
@@ -6042,7 +6030,7 @@ var xutil = {
 /**
  *                             -----------------
  *                             |   使用说明    |
- *                             -----------------
+ *                             -------
  * ____________________________________________________________________________
  * @usage 使用XDatasource
  *        [举例] 
@@ -7186,7 +7174,7 @@ var xutil = {
  *          (1) 须实现xui.XView.domReady函数
  *          (2) 页面中使用：
  *              <script type="text/javascript">
- *                  xui.XView.start("aaa.bbb.ccc.SomePageView");
+ *                  xui.XView.start("aaa.bbbageView");
  *              </script>
  *              则启动了SomePageView类
  */
@@ -7316,10 +7304,7 @@ var xutil = {
  
 // DI名空间基础
 xui.XProject.setNamespaceBase(
-    window.__$DI__NS$__ = window.__$DI__NS$__ || {}
-);
-
-// 声明名空间用方法
+    window.__$DI__NS$__ = window.__$DI__NS$__ // 声明名空间用方法
 var $namespace = xui.XProject.namespace;
 
 // 注册依赖连接用方法
@@ -20760,7 +20745,7 @@ Combox - 定义可输入下拉框行为的基本操作。
         util = core.util,
         string = core.string,
 
-        $fastCreate = core.$fastCreate,
+        $fastCreateastCreate,
         inheritsControl = core.inherits,
         triggerEvent = core.triggerEvent,
         disposeControl = core.dispose,
@@ -20849,8 +20834,7 @@ Combox - 定义可输入下拉框行为的基本操作。
     var string = ecui.string;
     var MAX = Math.max;
 
-    var indexOf = array.indexOf;
-    var $fastCreate = ecui.$fastCreate;
+    var indexOf = array.in var $fastCreate = ecui.$fastCreate;
     var inheritsControl = ecui.inherits;
     var triggerEvent = ecui.triggerEvent;
     var disposeControl = ecui.dispose;
@@ -21170,13 +21154,12 @@ Combox - 定义可输入下拉框行为的基本操作。
 (function() {
 
     var core = ecui;
-    var array = core.array;
-    var dom = core.dom;
+    var array = core. var dom = core.dom;
     var ui = core.ui;
     var string = core.string;
     var util = core.util;
 
-    var DATE = Date;
+    var DA
     var REGEXP = RegExp;
     var DOCUMENT = document;
 
@@ -22096,7 +22079,7 @@ Combox - 定义可输入下拉框行为的基本操作。
         string = core.string,
         util = core.util,
 
-        $fastCreate = core.$fastCreate,
+        $fastCreate = corete,
         getMouseX = core.getMouseX,
         inheritsControl = core.inherits,
         getOptions = core.getOptions,
@@ -24935,7 +24918,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     var cutil = ui.XCalendarUtil;
 
     var DATE = Date;
-    var REGEXP = RegExp;
+    var REGEp;
     var DOCUMENT = document;
     var objProtoToString = Object.prototype.toString;
 
@@ -25832,7 +25815,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
  *     // 不能变为其他表示（如不可写为"Day"、"Week"）
  *     "timeTypeList": [
  *         // 此为日周月季的切换下拉框的内容和文字配置
- *         // 例如，如果只要显示“日”和“月”，那么不配置“周”和“季”即可
+ *  例如，如果只要显示“日”和“月”，那么不配置“周”和“季”即可
  *         { "value": "D", "text": "日" },
  *         { "value": "W", "text": "周" },
  *         { "value": "M", "text": "月" },
@@ -26624,8 +26607,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     /**
      * 可定制皮肤的左右结构的button
      *
-     * @class
-     * @param {Object} options 选项
+     * @classaram {Object} options 选项
      * @param {string} options.skin 皮肤（的css类）
      * @param {string} options.text 按钮上的文字
      */
@@ -26672,7 +26654,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     var createDom = ecui.dom.create;
     var triggerEvent = ecui.triggerEvent;
     var addClass = ecui.dom.addClass;
-    var extend = ecui.util.extend;
+    var extend = ectend;
 
     /**
      * 可切换状态的button
@@ -26755,8 +26737,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     var xajax = xutil.ajax;
     //var URL = di.config.URL;
 
-    var $fastCreate = core.$fastCreate;
-    var inheritsControl = core.inherits;
+    var $fastCreate = core.$fastCreat inheritsControl = core.inherits;
     var triggerEvent = core.triggerEvent;
     var disposeControl = core.dispose;
     var createDom = dom.create;
@@ -28012,7 +27993,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         $fastCreate = core.$fastCreate,
         inheritsControl = core.inherits,
         triggerEvent = core.triggerEvent,
-        disposeControl = core.dispose,
+        disp = core.dispose,
         $disposeControl = core.$dispose,
         createDom = dom.create,
         first = dom.first,
@@ -29592,7 +29573,7 @@ change:     切换了分页
      * 面包屑导航
      *
      * @class
-     * @extends {ecui.ui.Control}
+   ds {ecui.ui.Control}
      */
     var UI_BREADCRUMB = ui.Breadcrumb =
         inheritsControl(
@@ -29762,7 +29743,7 @@ change:     切换了分页
     var UI_CONTROL_CLASS = UI_CONTROL.prototype;
     var UI_ITEMS = ui.Items;
     var UI_ITEM = ui.Item;
-    var UI_ITEM_CLASS = UI_ITEM.prototype;
+    var UI_ITEM_CLASS =rototype;
 
     ui.IndTree = core.inherits(
         ui.Control,
@@ -30519,9 +30500,9 @@ change:     切换了分页
         attachEvent = util.attachEvent,
         createDom = dom.create,
         addClass = dom.addClass,
-        removeClass = dom.removeClass,
+        remodom.removeClass,
         removeDom = dom.remove,
-        insertAfter = dom.insertAfter,
+    After = dom.insertAfter,
         trim = string.trim,
         setFocused = core.setFocused,
         blank = util.blank,
@@ -30736,7 +30717,7 @@ change:     切换了分页
         setFocused = core.setFocused,
         disposeControl = core.dispose,
         createDom = dom.create,
-        addClass = dom.addClass,
+        addClasdClass,
         children = dom.children,
         encodeHTML = string.encodeHTML,
         moveElements = dom.moveElements,
@@ -32330,7 +32311,7 @@ _uOptions     - 下拉选择框
     var UI_ITEM_CLASS = UI_ITEM.prototype;
 
     ui.DroppableList = core.inherits(
-        UI_CONTROL,
+       L,
         'ui-droppable-list',
         function(el, options) {
         },
@@ -32925,7 +32906,7 @@ xui.ui = {};
 //Going sloppy to avoid 'use strict' string cost, but strict practices should
 //be followed.
 /*jslint sloppy: true */
-/*global setTimeout: false */
+/*global s false */
 
 var requirejs, require, define;
 (function (undef) {
@@ -33341,8 +33322,7 @@ define('echarts/config',[],function() {
         CHART_TYPE_RADAR: 'radar',
         CHART_TYPE_MAP: 'map',
         CHART_TYPE_K: 'k',
-        CHART_TYPE_ISLAND: 'island',
-        CHART_TYPE_FORCE: 'force',
+        CHART_TYPE_ISLAND: 'i      CHART_TYPE_FORCE: 'force',
         CHART_TYPE_CHORD: 'chord',
         CHART_TYPE_GAUGE: 'gauge',
         CHART_TYPE_FUNNEL: 'funnel',
@@ -36046,8 +36026,7 @@ define(
             '[object Function]': 1,
             '[object RegExp]': 1,
             '[object Date]': 1,
-            '[object Error]': 1,
-            '[object CanvasGradient]': 1
+            '[object Error]        '[object CanvasGradient]': 1
         };
 
         /**
@@ -36278,7 +36257,7 @@ define('zrender/mixin/Eventful',['require'],function (require) {
      * 
      * @param {string} event 事件名
      * @param {Function} handler 响应函数
-     * @param {Object} context
+     * @par} context
      */
     Eventful.prototype.one = function (event, handler, context) {
         var _h = this._handlers;
@@ -36545,7 +36524,7 @@ define(
         */
         function getX(e) {
             return typeof e.zrenderX != 'undefined' && e.zrenderX
-                   || typeof e.offsetX != 'undefined' && e.offsetX
+          | typeof e.offsetX != 'undefined' && e.offsetX
                    || typeof e.layerX != 'undefined' && e.layerX
                    || typeof e.clientX != 'undefined' && e.clientX;
         }
@@ -36706,8 +36685,7 @@ define('zrender/config',[],function () {
             CLICK : 'click',
             /**
              * 双击事件
-             * @type {string}
-             */
+             * @type {str        */
             DBLCLICK : 'dblclick',
             /**
              * 鼠标滚轮变化，事件对象是：目标图形元素或空
@@ -36819,8 +36797,7 @@ define(
             else if (config.debugMode > 1) {
                 for (var k in arguments) {
                     console.log(arguments[k]);
-                }
-            }
+                    }
         };
 
         /* for debug
@@ -37302,7 +37279,7 @@ define(
         var eventTool = require('./tool/event');
         var util = require('./tool/util');
         var vec2 = require('./tool/vector');
-        var mat2d = require('./tool/matrix');
+    t2d = require('./tool/matrix');
         var EVENT = config.EVENT;
 
         var Eventful = require('./mixin/Eventful');
@@ -38753,7 +38730,7 @@ define(
         var _textWidthCache = {};
         var _textHeightCache = {};
         var _textWidthCacheCounter = 0;
-        var _textHeightCacheCounter = 0;
+        var _textHeighter = 0;
         var TEXT_CACHE_MAX = 5000;
             
         var PI2 = Math.PI * 2;
@@ -39821,7 +39798,7 @@ define('zrender/tool/color',['require','../tool/util'],function(require) {
     // 默认色板
     var palette = [
         '#ff9277', ' #dddd00', ' #ffc877', ' #bbe3ff', ' #d5ffbb',
-        '#bbbbff', ' #ddb000', ' #b0dd00', ' #e2bbff', ' #ffbbe3',
+        '#bbbbff', ' #ddb000', ' #b0dd00'f', ' #ffbbe3',
         '#ff7777', ' #ff9900', ' #83dd00', ' #77e3ff', ' #778fff',
         '#c877ff', ' #ff77ab', ' #ff6600', ' #aa8800', ' #77c7ff',
         '#ad77ff', ' #ff77ff', ' #dd0083', ' #777700', ' #00aa00',
@@ -40874,7 +40851,7 @@ define('zrender/tool/color',['require','../tool/util'],function(require) {
  * @property {number} [opacity=1] 绘制透明度
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
  * @property {string} [shadowColor='#000000'] 阴影颜色
- * @property {number} [shadowOffsetX=0] 阴影横向偏移
+ * {number} [shadowOffsetX=0] 阴影横向偏移
  * @property {number} [shadowOffsetY=0] 阴影纵向偏移
  * @property {string} [text] 图形中的附加文本
  * @property {string} [textColor='#000000'] 文本颜色
@@ -41520,7 +41497,7 @@ define(
  * @property {number} y 纵坐标
  * @property {string} text 文本内容
  * @property {number} [maxWidth=null] 最大宽度限制
- * @property {string} [textFont] 附加文本样式，eg:'bold 18px verdana'
+ * @property {string} [textFont] 附加文本样 18px verdana'
  * @property {string} [textAlign] 默认根据textPosition自动设置，附加文本水平对齐。
  *                                可以是start, end, left, right, center
  * @property {string} [textBaseline] 默认根据textPosition自动设置，附加文本垂直对齐。
@@ -41733,8 +41710,8 @@ define(
  * @property {number} x 左上角x坐标
  * @property {number} y 左上角y坐标
  * @property {number} width 宽度
- * @property {number} height 高度
- * @property {number|Array.<number>} radius 矩形圆角，可以用数组分别指定四个角的圆角
+ * @prober} height 高度
+ * @property {number|Array.<number>} 角，可以用数组分别指定四个角的圆角
  * @property {string} [brushType='fill']
  * @property {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
@@ -41937,7 +41914,7 @@ define(
          * @constructor
          * 
          * @param {Object} options 选项
-         * @param {color} options.backgroundColor 背景颜色
+         *olor} options.backgroundColor 背景颜色
          * @param {Object} options.textStyle 文字样式，同shape/text.style
          * @param {number=} options.progress 进度参数，部分特效有用
          * @param {Object=} options.effect 特效参数，部分特效有用
@@ -42300,7 +42277,7 @@ define(
         // var vec2 = require('./tool/vector');
         var log = require('./tool/log');
         var matrix = require('./tool/matrix');
-        var BaseLoadingEffect = require('./loadingEffect/Base');
+        var BaseLoa = require('./loadingEffect/Base');
         var Transformable = require('./mixin/Transformable');
 
         // retina 屏幕优化
@@ -43459,7 +43436,7 @@ define(
         function shapeCompareFunc(a, b) {
             if (a.zlevel == b.zlevel) {
                 if (a.z == b.z) {
-                    return a.__renderidx - b.__renderidx;
+                 a.__renderidx - b.__renderidx;
                 }
                 return a.z - b.z;
             }
@@ -44940,8 +44917,7 @@ define(
         zrender.init = function(dom) {
             var zr = new ZRender(guid(), dom);
             _instances[zr.id] = zr;
-            return zr;
-        };
+            r        };
 
         /**
          * zrender实例销毁
@@ -45422,7 +45398,7 @@ define('echarts/util/ecQuery',['zrender/tool/util'],function() {
         optionLocation = optionLocation.split('.');
         var length = optionLocation.length;
         var curIdx = 0;
-        while (curIdx < length) {
+        whx < length) {
             optionTarget = optionTarget[optionLocation[curIdx]];
             if (typeof optionTarget == 'undefined') {
                 return;
@@ -45509,7 +45485,7 @@ define('echarts/util/number',[],function() {
      */ 
     function parseCenter(zr, center) {
         return [
-            parsePercent(center[0], zr.getWidth()),
+            parsenter[0], zr.getWidth()),
             parsePercent(center[1], zr.getHeight())
         ];
     }
@@ -45567,7 +45543,7 @@ define('echarts/component/base',['require','../config','../util/ecQuery','../uti
         this.zr =zr;
         this.option = option;
         this.series = option.series;
-        this.myChart = myChart;
+        tt = myChart;
         this.component = myChart.component;
         
         this._zlevelBase = this.getZlevelBase();
@@ -45801,7 +45777,7 @@ define(
          * @param {number} angle 弧度（角度）参数
          * @param {boolean} isDegrees angle参数是否为角度计算，默认为false，angle为以弧度计量的角度
          */
-        function cos(angle, isDegrees) {
+        functioe, isDegrees) {
             return Math.cos(isDegrees ? angle * _radians : angle);
         }
 
@@ -45856,8 +45832,7 @@ define(
  * @property {number} [r0] n角星内部顶点（凹点）的外接圆半径。
  *                         如果不指定此参数，则自动计算：取相隔外部顶点连线的交点作内部顶点。
  * @property {number} n 指明几角星
- * @property {string} [brushType='fill']
- * @property {string} [color='#000000'] 填充颜色
+ * @property {string} [brushType='fillperty {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
  * @property {number} [lineWidth=1] 描边宽度
@@ -46022,7 +45997,7 @@ define(
  * @property {number} y 心形内部尖端纵坐标
  * @property {number} a 心形横宽（中轴线到水平边缘最宽处距离）
  * @property {number} b 心形纵高（内尖到外尖距离）
- * @property {string} [brushType='fill']
+ * @property {string} [brushTy
  * @property {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
@@ -46158,8 +46133,7 @@ define(
  * @property {number} y 水滴中心y坐标
  * @property {number} a 水滴横宽（中心到水平边缘最宽处距离）
  * @property {number} b 水滴纵高（中心到尖端距离）
- * @property {string} [brushType='fill']
- * @property {string} [color='#000000'] 填充颜色
+ * @property {string} [brushType='fproperty {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
  * @property {number} [lineWidth=1] 描边宽度
@@ -46288,7 +46262,7 @@ define(
            iconType      : {string},  // 必须，icon类型
        },
 
-       // 样式属性，高亮样式属性，当不存在highlightStyle时使用基于默认样式扩展显示
+       // 样式属性，高亮样式属性，当不存在highlightStyle展显示
        highlightStyle : {
            // 同style
        }
@@ -46786,7 +46760,7 @@ define(
                 return;
             }
 
-            dashLength = typeof dashLength != 'number'
+            dashLength = typeof dashLenmber'
                             ? 5 
                             : dashLength;
 
@@ -46841,7 +46815,7 @@ define(
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
  * @property {number} [lineWidth=1] 描边宽度
- * @property {number} [opacity=1] 绘制透明度
+ * {number} [opacity=1] 绘制透明度
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
  * @property {string} [shadowColor='#000000'] 阴影颜色
  * @property {number} [shadowOffsetX=0] 阴影横向偏移
@@ -46965,7 +46939,7 @@ define(
         /**
          * @alias module:zrender/shape/util/smoothSpline
          * @param {Array} points 线段顶点数组
-         * @param {boolean} isLoop
+         * @param {booop
          * @param {Array} constraint 
          * @return {Array}
          */
@@ -47036,7 +47010,7 @@ define(
          *                           整个折线的包围盒做一个并集用来约束控制点。
          * @param {Array} 计算出来的控制点数组
          */
-        return function (points, smooth, isLoop, constraint) {
+        return function (pointsisLoop, constraint) {
             var cps = [];
 
             var v = [];
@@ -47139,7 +47113,7 @@ define(
  * @property {string} [brushType='fill']
  * @property {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
- * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
+ * @property {string} [lineCape='butt'] 线帽样式，可ound, square
  * @property {number} [lineWidth=1] 描边宽度
  * @property {number} [opacity=1] 绘制透明度
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
@@ -47414,7 +47388,7 @@ define(
  * @property {number} [smoothConstraint] 平滑约束
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
- * @property {string} [lineJoin='miter'] 线段连接样式，可以是 miter, round, bevel
+ * @property {strJoin='miter'] 线段连接样式，可以是 miter, round, bevel
  * @property {number} [lineWidth=1] 描边宽度
  * @property {number} [opacity=1] 绘制透明度
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
@@ -47560,7 +47534,7 @@ define('echarts/util/shape/MarkLine',['require','zrender/shape/Base','./Icon','z
 
     var matrix = require('zrender/tool/matrix');
     var area = require('zrender/tool/area');
-    var dashedLineTo = require('zrender/shape/util/dashedLineTo');
+    var da = require('zrender/shape/util/dashedLineTo');
     var smoothSpline = require('zrender/shape/util/smoothSpline');
     var zrUtil = require('zrender/tool/util');
 
@@ -47965,8 +47939,6 @@ define('echarts/util/shape/normalIsCover',[],function () {
        // 样式属性，高亮样式属性，当不存在highlightStyle时使用基于默认样式扩展显示
        highlightStyle : {
            // 同style
-       }
-
        // 交互属性，详见shape.Base
 
        // 事件属性，详见shape.Base
@@ -48162,7 +48134,7 @@ define('echarts/util/ecData',[],function() {
             '_series' : series,
             '_seriesIndex' : seriesIndex,
             '_data' : data,
-            '_dataIndex' : dataIndex,
+     ataIndex' : dataIndex,
             '_name' : name,
             '_value' : value,
             '_special' : special,
@@ -48272,7 +48244,7 @@ define('echarts/util/ecAnimation',['require','zrender/tool/util','zrender/shape/
             oldPointList = [];
             if (newShape._orient != 'vertical') {
                 var y = newPointList[0][1];
-                for (var i = 0; i < newPointListLen; i++) {
+          (var i = 0; i < newPointListLen; i++) {
                     oldPointList[i] = [newPointList[i][0], y];
                 }
             }
@@ -48819,8 +48791,7 @@ define('echarts/util/ecAnimation',['require','zrender/tool/util','zrender/shape/
  * @property {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
- * @property {number} [lineWidth=1] 描边宽度
- * @property {number} [opacity=1] 绘制透明度
+ * @property {number} [lineWidth* @property {number} [opacity=1] 绘制透明度
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
  * @property {string} [shadowColor='#000000'] 阴影颜色
  * @property {number} [shadowOffsetX=0] 阴影横向偏移
@@ -48925,7 +48896,7 @@ define('echarts/util/ecEffect',['require','../util/ecData','zrender/shape/Circle
     function point(zr, effectList, shape, zlevel) {
         var effect = shape.effect;
         var color = effect.color || shape.style.strokeColor || shape.style.color;
-        var shadowColor = effect.shadowColor || color;
+        var shadowColor = effect.shadowolor;
         var size = effect.scaleSize;
         var shadowBlur = typeof effect.shadowBlur != 'undefined'
                          ? effect.shadowBlur : size;
@@ -49275,7 +49246,7 @@ define('echarts/chart/base',['require','zrender/shape/Image','../util/shape/Icon
     var ecAnimation = require('../util/ecAnimation');
     var ecEffect = require('../util/ecEffect');
     var accMath = require('../util/accMath');
-    var zrUtil = require('zrender/tool/util');
+   l = require('zrender/tool/util');
     var zrArea = require('zrender/tool/area');
     
     function Base(){
@@ -50624,7 +50595,7 @@ define('echarts/chart',[],function (/*require*/) {     //chart
  * @author Kener (@Kener-林峰, linzhifeng@baidu.com)
  *
  */
-define('echarts/chart/island',['require','../component/base','./base','zrender/shape/Circle','../config','../util/ecData','zrender/tool/util','zrender/tool/event','zrender/tool/color','../util/accMath','../chart'],function (require) {
+define('echarts/chart/island',['require','../component/base','./base','zrender/shape/Circle','../config','../util/ecData','zr/util','zrender/tool/event','zrender/tool/color','../util/accMath','../chart'],function (require) {
     var ComponentBase = require('../component/base');
     var ChartBase = require('./base');
     
@@ -50642,7 +50613,7 @@ define('echarts/chart/island',['require','../component/base','./base','zrender/s
      * @param {ZRender} zr zrender实例
      * @param {Object} option 图表选项
      */
-    function Island(ecTheme, messageCenter, zr, option, myChart) {
+    function Island(ecTheme, mes, zr, option, myChart) {
         // 基类
         ComponentBase.call(this, ecTheme, messageCenter, zr, {}, myChart);
         // 图表基类
@@ -50905,8 +50876,7 @@ define('echarts/component',[],function (/*require*/) {     // component
  * @author Kener (@Kener-林峰, linzhifeng@baidu.com)
  *
  */
-define('echarts/component/dataView',['require','./base','../config','zrender/tool/util','../component'],function (require) {
-    var Base = require('./base');
+define('echarts/component/dataView',['require','./base','../config','zrender/tool/util','../component'],function (requirer Base = require('./base');
 
     var ecConfig = require('../config');
     var zrUtil = require('zrender/tool/util');
@@ -50926,7 +50896,7 @@ define('echarts/component/dataView',['require','./base','../config','zrender/too
         // dataview dom & css
         this._tDom = document.createElement('div');
         this._textArea = document.createElement('textArea');
-        this._buttonRefresh = document.createElement('button');
+        this._buttonRefresh .createElement('button');
         this._buttonClose = document.createElement('button');
         this._hasShow = false;
 
@@ -51385,8 +51355,7 @@ define('echarts/component/toolbox',['require','./base','zrender/shape/Line','zre
     
     var _MAGICTYPE_STACK = 'stack';
     var _MAGICTYPE_TILED = 'tiled';
-        
-    /**
+    **
      * 构造函数
      * @param {Object} messageCenter echart消息中心
      * @param {ZRender} zr zrender实例
@@ -52502,7 +52471,7 @@ define('echarts/component/title',['require','./base','zrender/shape/Text','zrend
      * @param {Object} option 图表参数
      */
     function Title(ecTheme, messageCenter, zr, option, myChart) {
-        Base.call(this, ecTheme, messageCenter, zr, option, myChart);
+        Base.call(this, ecThemCenter, zr, option, myChart);
         
         this.refresh(option);
     }
@@ -52789,7 +52758,7 @@ define('echarts/component/title',['require','./base','zrender/shape/Text','zrend
    }
  */
 define('echarts/util/shape/Cross',['require','zrender/shape/Base','zrender/shape/Line','zrender/tool/util','./normalIsCover'],function (require) {
-    var Base = require('zrender/shape/Base');
+    var Base = require('zrendese');
     var LineShape = require('zrender/shape/Line');
     var zrUtil = require('zrender/tool/util');
 
@@ -52854,7 +52823,7 @@ define('echarts/component/tooltip',['require','./base','../util/shape/Cross','zr
     var zrConfig = require('zrender/config');
     var zrEvent = require('zrender/tool/event');
     var zrArea = require('zrender/tool/area');
-    var zrColor = require('zrender/tool/color');
+    var zrColor = reqder/tool/color');
     var zrUtil = require('zrender/tool/util');
     var zrShapeBase = require('zrender/shape/Base');
 
@@ -54520,8 +54489,7 @@ define('echarts/component/tooltip',['require','./base','../util/shape/Cross','zr
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
  * @property {string} [shadowColor='#000000'] 阴影颜色
  * @property {number} [shadowOffsetX=0] 阴影横向偏移
- * @property {number} [shadowOffsetY=0] 阴影纵向偏移
- * @property {string} [text] 图形中的附加文本
+ * @property {number} [shadowOffsetY=0] @property {string} [text] 图形中的附加文本
  * @property {string} [textColor='#000000'] 文本颜色
  * @property {string} [textFont] 附加文本样式，eg:'bold 18px verdana'
  * @property {string} [textPosition='end'] 附加文本位置, 可以是 inside, left, right, top, bottom
@@ -54634,7 +54602,7 @@ define(
  * @property {string} [color='#000000'] 填充颜色
  * @property {string} [strokeColor='#000000'] 描边颜色
  * @property {string} [lineCape='butt'] 线帽样式，可以是 butt, round, square
- * @property {number} [lineWidth=1] 描边宽度
+ * @property {ineWidth=1] 描边宽度
  * @property {number} [opacity=1] 绘制透明度
  * @property {number} [shadowBlur=0] 阴影模糊度，大于0有效
  * @property {string} [shadowColor='#000000'] 阴影颜色
@@ -54866,7 +54834,7 @@ define(
            color : '#eee',
            text : 'Baidu'
        },
-       myName : 'kener',  // 可自带任何有效自定义属性
+       myner',  // 可自带任何有效自定义属性
 
        clickable : true,
        onClick : function (eventPacket) {
@@ -54966,7 +54934,7 @@ define('echarts/component/legend',['require','./base','zrender/shape/Text','zren
     /**
      * 构造函数
      * @param {Object} messageCenter echart消息中心
-     * @param {ZRender} zr zrender实例
+     * @param zr zrender实例
      * @param {Object} option 图表参数
      */
     function Legend(ecTheme, messageCenter, zr, option, myChart) {
@@ -55910,8 +55878,7 @@ define('echarts/util/shape/Chain',['require','zrender/shape/Base','./Icon','zren
          * @param updateCallback 需要异步加载资源的shape可以通过这个callback(e)
          *                       让painter更新视图，base.brush没用，需要的话重载brush
          */
-        brush : function (ctx, isHighlight) {
-            var style = this.style;
+        brush : function (ctx, isHighlight      var style = this.style;
 
             if (isHighlight) {
                 // 根据style扩展默认高亮样式
@@ -56089,7 +56056,7 @@ define('echarts/component/timeline',['require','./base','zrender/shape/Rectangle
      * @param {Object} option 图表参数
      */
     function Timeline(ecTheme, messageCenter, zr, option, myChart) {
-        Base.call(this, ecTheme, messageCenter, zr, option, myChart);
+        Base.call(this, ecTheme, ter, zr, option, myChart);
 
         var self = this;
         self._onclick = function(param) {
@@ -57681,7 +57648,7 @@ define('echarts/theme/default',[],function() {
  * @author Kener (@Kener-林峰, linzhifeng@baidu.com)
  *
  */
-define('echarts/echarts',['require','./config','zrender/tool/util','zrender/tool/event','zrender/tool/env','zrender','zrender/config','zrender','./chart/island','./component/toolbox','./component','./component/title','./component/tooltip','./component/legend','./util/ecData','./chart','./component','zrender/tool/color','./component/timeline','zrender','zrender/shape/Image','zrender/loadingEffect/Bar','zrender/loadingEffect/Bubble','zrender/loadingEffect/DynamicLine','zrender/loadingEffect/Ring','zrender/loadingEffect/Spin','zrender/loadingEffect/Whirling','./theme/default'],function (require) {
+define('echarts/echarts',['require','./config','zrender/tool/util','zrender/tool/event','zrender/tool/env','zrender','zrender/config','zrender','./chart/island','./component/toolbox','./component','./component/title','./component/tooltip','./component/legend','./util/ecData','./chart','./component','zrender/tool/color','./component/timeline','zrender','zrender/shape/Image','zrender/loadingEffect/Bar','zrender/loadingEffect/Bubble','zrender/loadingEffect/Dyn'zrender/loadingEffect/Ring','zrender/loadingEffect/Spin','zrender/loadingEffect/Whirling','./theme/default'],function (require) {
     var ecConfig = require('./config');
     var zrUtil = require('zrender/tool/util');
     var zrEvent = require('zrender/tool/event');
@@ -57690,8 +57657,7 @@ define('echarts/echarts',['require','./config','zrender/tool/util','zrender/tool
     
     var _canvasSupported = require('zrender/tool/env').canvasSupported;
     var _idBase = new Date() - 0;
-    var _instances = { };    // ECharts实例map索引
-    var DOM_ATTRIBUTE_KEY = '_echarts_instance_';
+    var _instances = { };    // EChar    var DOM_ATTRIBUTE_KEY = '_echarts_instance_';
     
     self.version = '2.0.4';
     self.dependencies = {
@@ -59366,7 +59332,7 @@ define('echarts', ['echarts/echarts'], function (main) { return main; });
  */
 define('echarts/util/shape/GaugePointer',['require','zrender/shape/Base','zrender/tool/util','./normalIsCover'],function (require) {
     var Base = require('zrender/shape/Base');
-    var zrUtil = require('zrender/tool/util');
+    var zrUtil = render/tool/util');
 
     function GaugePointer(options) {
         Base.call(this, options);
@@ -59458,8 +59424,7 @@ define('echarts/chart/gauge',['require','../component/base','./base','../util/sh
     var ecConfig = require('../config');
     var ecData = require('../util/ecData');
     var accMath = require('../util/accMath');
-    var zrUtil = require('zrender/tool/util');
-    
+    var zrUtil = require('zrender/too
     /**
      * 构造函数
      * @param {Object} messageCenter echart消息中心
@@ -60012,7 +59977,7 @@ define('echarts/chart/funnel',['require','../component/base','./base','zrender/s
      * 构造函数
      * @param {Object} messageCenter echart消息中心
      * @param {ZRender} zr zrender实例
-     * @param {Object} series 数据
+     * @paramseries 数据
      * @param {Object} component 组件
      */
     function Funnel(ecTheme, messageCenter, zr, option, myChart){
@@ -60690,8 +60655,7 @@ define('echarts/component/categoryAxis',['require','./base','zrender/shape/Text'
     function CategoryAxis(ecTheme, messageCenter, zr, option, myChart, axisBase) {
         if (option.data.length < 1) {
             console.error('option.data.length < 1.');
-            return;
-        }
+            retur }
         
         Base.call(this, ecTheme, messageCenter, zr, option, myChart);
         
@@ -61394,7 +61358,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
             return;
         }
         
-        Base.call(this, ecTheme, messageCenter, zr, option, myChart);
+        Base, ecTheme, messageCenter, zr, option, myChart);
 
         this.series = series;
         this.grid = this.component.grid;
@@ -61926,7 +61890,7 @@ define('echarts/component/valueAxis',['require','./base','zrender/shape/Text','z
 
          this._min = 10; this._max = 78; console.log(this._min, this._max); this._reformValue();
          console.log('result is :', this._min, this._max, this._valueList);
-         console.log('should be : 0 100 [0, 20, 40, 60, 80, 100]',
+         console.log('shou100 [0, 20, 40, 60, 80, 100]',
                     (this._min == 0 && this._max == 100) ? 'success' : 'failed');
 
          this._min = -31; this._max = -3; console.log(this._min, this._max); this._reformValue();
@@ -62257,7 +62221,7 @@ define('echarts/component/axis',['require','./base','zrender/shape/Line','../con
      * @param {Object} messageCenter echart消息中心
      * @param {ZRender} zr zrender实例
      * @param {Object} option 图表选项
-     *     @param {string=} option.xAxis.type 坐标轴类型，横轴默认为类目型'category'
+     *     @param {string=} option.xAxis.type 坐标轴类型，横轴默认为类目'
      *     @param {string=} option.yAxis.type 坐标轴类型，纵轴默认为类目型'value'
      * @param {Object} component 组件
      * @param {string} axisType 横走or纵轴
@@ -62601,7 +62565,7 @@ define('echarts/component/grid',['require','./base','zrender/shape/Rectangle','.
     }
     
     Grid.prototype = {
-        type: ecConfig.COMPONENT_TYPE_GRID,
+        type: ecConfig.TYPE_GRID,
 
         getX: function () {
             return this._x;
@@ -62766,7 +62730,7 @@ define('echarts/component/dataZoom',['require','./base','zrender/shape/Rectangle
         self._ondrift = function (dx, dy) {
             return self.__ondrift(this, dx, dy);
         };
-        self._ondragend = function () {
+        self._ondragendn () {
             return self.__ondragend();
         };
 
@@ -63875,7 +63839,7 @@ define('echarts/util/shape/HandlePolygon',['require','zrender/shape/Base','zrend
             // 不能缓存rect！
             var rect = this.style.rect;
             if (x >= rect.x
-                && x <= (rect.x + rect.width)
+                && x <= (rectwidth)
                 && y >= rect.y
                 && y <= (rect.y + rect.height)
             ) {
@@ -63921,7 +63885,7 @@ define('echarts/component/dataRange',['require','./base','zrender/shape/Text','z
      */
     function DataRange(ecTheme, messageCenter, zr, option, myChart) {
         if (typeof this.query(option, 'dataRange.min') == 'undefined'
-            || typeof this.query(option, 'dataRange.max') == 'undefined'
+          f this.query(option, 'dataRange.max') == 'undefined'
         ) {
             console.error('option.dataRange.min or option.dataRange.max has not been defined.');
             return;
@@ -65191,7 +65155,7 @@ define('echarts/chart/scatter',['require','../component/base','./base','../util/
      */
     function Scatter(ecTheme, messageCenter, zr, option, myChart){
         // 基类
-        ComponentBase.call(this, ecTheme, messageCenter, zr, option, myChart);
+        ComponentBase.call(thi, messageCenter, zr, option, myChart);
         // 图表基类
         ChartBase.call(this);
 
@@ -65637,8 +65601,7 @@ define('echarts/chart/k',['require','../component/base','./base','../util/shape/
         ComponentBase.call(this, ecTheme, messageCenter, zr, option, myChart);
         // 图表基类
         ChartBase.call(this);
-
-        this.refresh(option);
+his.refresh(option);
     }
     
     K.prototype = {
@@ -66150,7 +66113,7 @@ define(
  * @author Neil (杨骥, yangji01@baidu.com)
  *
  */
-define('echarts/component/polar',['require','./base','zrender/shape/Text','zrender/shape/Line','zrender/shape/Polygon','zrender/shape/Circle','zrender/shape/Ring','../config','zrender/tool/util','../util/coordinates','../component'],function (require) {
+define('echarts/component/polar',['require','./base'shape/Text','zrender/shape/Line','zrender/shape/Polygon','zrender/shape/Circle','zrender/shape/Ring','../config','zrender/tool/util','../util/coordinates','../component'],function (require) {
     var Base = require('./base');
     
     // 图形依赖
@@ -66177,7 +66140,7 @@ define('echarts/component/polar',['require','./base','zrender/shape/Text','zrend
          * 绘制图形
          */
         _buildShape : function () {
-            for (var i = 0; i < this.polar.length; i ++) {
+            fo 0; i < this.polar.length; i ++) {
                 this._index = i;
                 this.reformOption(this.polar[i]);
 
@@ -67197,7 +67160,7 @@ define('echarts/component/polar',['require','./base','zrender/shape/Text','zrend
         // 图表基类
         ChartBase.call(this);
 
-        this.refresh(option);
+is.refresh(option);
     }
     
     Radar.prototype = {
@@ -73088,7 +73051,7 @@ define('echarts/chart/force',['require','../component/base','./base','../data/Gr
        }
    }
  */
-define('echarts/util/shape/HalfSmoothPolygon',['require','zrender/shape/Base','zrender/shape/util/smoothBezier','zrender/tool/util','zrender/shape/Polygon'],function (require) {
+define('echarts/util/shape/HalfSmoothPolygon',['require','zrender/shazrender/shape/util/smoothBezier','zrender/tool/util','zrender/shape/Polygon'],function (require) {
     var Base = require('zrender/shape/Base');
     var smoothBezier = require('zrender/shape/util/smoothBezier');
     var zrUtil = require('zrender/tool/util');
@@ -73175,8 +73138,7 @@ define('echarts/chart/line',['require','../component/base','./base','zrender/sha
      * @param {Object} messageCenter echart消息中心
      * @param {ZRender} zr zrender实例
      * @param {Object} series 数据
-     * @param {Object} component 组件
-     */
+     * @param {Object} com     */
     function Line(ecTheme, messageCenter, zr, option, myChart){
         // 基类
         ComponentBase.call(this, ecTheme, messageCenter, zr, option, myChart);
@@ -74247,7 +74209,7 @@ define('echarts/chart/bar',['require','../component/base','./base','zrender/shap
         // 基类
         ComponentBase.call(this, ecTheme, messageCenter, zr, option, myChart);
         // 图表基类
-        ChartBase.call(this);
+       .call(this);
         
         this.refresh(option);
     }
@@ -75271,7 +75233,7 @@ define('echarts/chart/pie',['require','../component/base','./base','zrender/shap
      * @param {Object} series 数据
      * @param {Object} component 组件
      */
-    function Pie(ecTheme, messageCenter, zr, option, myChart){
+    fe(ecTheme, messageCenter, zr, option, myChart){
         // 基类
         ComponentBase.call(this, ecTheme, messageCenter, zr, option, myChart);
         // 图表基类
@@ -76268,8 +76230,8 @@ _global['zrender'] = zrender;
                         '<div class="' + type + '-content"></div>'
                 ].join('');
 
-                this._eHeader = el.childNodes[0];
-                this._eContent = el.childNodes[1];
+                ter = el.childNodes[0];
+                this = el.childNodes[1];
             }
         );
     var UI_E_CHART_CLASS = UI_E_CHART.prototype;
@@ -76923,7 +76885,7 @@ $namespace('di.config');
      */
     AJAX.handleDefaultFailure = function(status, ejsonObj, defaultCase) {
         switch (status) {
-            case 100: // 未登陆
+         0: // 未登陆
             case 201: 
             case 301: // 重定向的情况
             case 302: // 重定向的情况
@@ -77075,8 +77037,7 @@ $namespace('di.config');
     DICT.GRAPH_DEFS = [
         { name: 'line', text: '折线', yAxisNameSet: ['left', 'right'] },
         { name: 'bar', text: '柱', yAxisNameSet: ['left', 'right'] },
-        { name: 'pie', text: '饼', yAxisNameSet: [] },
-        { name: 'beaker', text: '烧杯', yAxisNameSet: []}
+        { name: 'pie', text: '饼', yAxisNameS        { name: 'beaker', text: '烧杯', yAxisNameSet: []}
     ];
     DICT.getGraphByType = function (type) {
         for (var i = 0, o; o = DICT.GRAPH_DEFS[i]; i ++) {
@@ -77201,8 +77162,7 @@ $namespace('di.config');
     };
     LANG.SOME_ERROR = '抱歉，出现错误。';
     LANG.NEED_CREATE = '请先保存再执行此操作';
-    LANG.OPT_SUCCESS = '操作成功';
-    LANG.NO_SEL = '请选择';
+    LANG.OPT_SUCCESS = '操LANG.NO_SEL = '请选择';
     LANG.NO_DATA = '缺失数据';
     LANG.NO_AUTH = '抱歉，您没有查看当前页面的权限';
     LANG.NO_AUTH_OPERATION = '抱歉，您没有权限进行此操作';
@@ -77401,9 +77361,7 @@ $namespace('di.config');
                     "clzKey": "GENERAL_SNIPPET",
                     "clzPath": "di.shared.ui.GeneralSnippet",
                     "clzType": "SNIPPET"
-                },
-
-                //-------------------------------
+                          //-------------------------------
                 // VPART
                 //-------------------------------
 
@@ -77926,7 +77884,7 @@ $namespace('di.config');
     };
 
     URL.setWebRoot = function(root) {
-        webRoot = root;
+      = root;
     };
 
     /**
@@ -78173,7 +78131,7 @@ $namespace('di.helper');
      *
      * @public
      * @param {Object} def 定义
-     * @param {string} def.anchor 值可为：
+ram {string} def.anchor 值可为：
      *      'I'：internal，在报表引擎内部定位，如果是iframe加载报表引擎，这样则定位不理想），默认
      *      'E'：external，在报表引擎外定位（报表引擎所在的iframe的window上）
      * @param {string} diAgent 是否为stub
@@ -78541,7 +78499,7 @@ $namespace('di.helper');
      */
     var FORMATTER = $namespace().Formatter = function(formatterName) {
         var args = arraySlice.call(arguments, 1);
-        return function(data) {
+        return ata) {
             var argsInput = arraySlice.call(arguments, 1);
             return FORMATTER[formatterName].apply(
                 this, 
@@ -78770,7 +78728,7 @@ $namespace('di.helper');
         var els = getAllEls(el);
         var domAttrName = prodDef.domAttrName || DEFAULT_DOM_ATTR_NAME;
 
-        // 便利dom节点
+  利dom节点
         for (var i = 0, eo, attr; eo = els[i]; i ++) {
             // 事件通道
             attr = eo.getAttribute(domAttrName);
@@ -79028,7 +78986,7 @@ $namespace('di.helper');
 
     $link(function () {
         ECUI_CONTROL = getByPath('ecui.ui.Control');
-        DIALOG = di.helper.Dialog;
+        DIALOG = di.hog;
         LANG = di.config.Lang;
     });
         
@@ -80184,8 +80142,7 @@ $namespace('di.shared.arg');
      *          [null, 'handlerName2', 'zxz', 1242, ...]
      *      );
      * 则得到了一个argHandler，其中会顺序调用handlerName1, handlerName2
-     * handlerName1调用时，'asdf', 'zxcv', ... 会作为后面的参数自动传入，
-     * handlerName2同理。
+     * handlerName1调用时，'asdf', 'zxcv', ... 会作为后面的参数自动传handlerName2同理。
      *
      * @param {Array...} descs 
      *          每个Array：
@@ -80484,8 +80441,7 @@ $namespace('di.shared.vui');
      * @public
      * @param {Object} data 数据
      * @param {(Object|Array}} data.datasource 数据集
-     * @param {*} data.value 当前数据
-     */
+     * @param {*} data.va    */
     HIDDEN_INPUT_CLASS.setData = function (data) {
         this._oData = data;
     };
@@ -80559,7 +80515,7 @@ $namespace('di.shared.vui');
      * 设置数据（根据数据源 生成组件内容）
      *
      * @param {Object} data 数据对象
-     * @param {Array<Object>} data.datasource 数据源
+     * @param {Array<Object>} data.da据源
      */
     MULTI_CHECKBOX_CLASS.setData = function (data) {
         render.call(this, data.datasource || []);
@@ -80696,7 +80652,7 @@ $namespace('di.shared.vui');
      * @param {string} options.skin 皮肤（的css类）
      * @param {string} options.text 按钮上的文字，默认为'离线下载'
      * @param {string} options.confirmText 确定按钮上的文字，默认为'确定'
-     * @param {string} options.cancelText 取消按钮上的文字，默认为'取消'
+    {string} options.cancelText 取消按钮上的文字，默认为'取消'
      * @param {string} options.headText 提示文字，默认为'请输入邮箱'
      * @param {string} options.inputInfo 输入信息
      */
@@ -80864,8 +80820,7 @@ $namespace('di.shared.model');
      * @extends xui.XDatasource
      */
     var MULTIDIM_SELECT_MODEL = 
-            $namespace().MultiDimSelectModel = 
-            inheritsObject(XDATASOURCE, constructor);
+            $namespace().MultiDimSelectModel =    inheritsObject(XDATASOURCE, constructor);
     var MULTIDIM_SELECT_MODEL_CLASS = 
     		MULTIDIM_SELECT_MODEL.prototype;
   
@@ -81047,7 +81002,7 @@ $namespace('di.shared.ui');
 
     /**
      * 维度树选择浮层
-     * 单例，直接使用MULTIDIM_SELECT_PANEL()可得到实例
+    MULTIDIM_SELECT_PANEL()可得到实例
      * 
      * @class
      * @extends xui.XView
@@ -81584,7 +81539,7 @@ $namespace('di.shared.model');
      */
     var DIM_SELECT_MODEL = 
             $namespace().DimSelectModel = 
-            inheritsObject(XDATASOURCE, constructor);
+            inheritsObject(XD constructor);
     var DIM_SELECT_MODEL_CLASS = 
             DIM_SELECT_MODEL.prototype;
   
@@ -81851,8 +81806,7 @@ $namespace('di.shared.ui');
 
     /**
      * 维度树选择浮层
-     * 单例，直接使用DIM_SELECT_PANEL()可得到实例
-     * 
+     * 单例，直接使用DIM_SELECT_PANEL(  *
      * @class
      * @extends xui.XView
      */
@@ -82247,7 +82201,7 @@ $namespace('di.shared.vui');
      * @extends xui.XView
      * @param {Object} options
      * @param {HTMLElement} options.el 容器元素
-     * @param {Object} options.reportType 类型，
+     Object} options.reportType 类型，
      *          TABLE(默认)或者CHART
      * @param {Function=} options.commonParamGetter 公共参数获取     
      */
@@ -83025,7 +82979,7 @@ $namespace('di.shared.vui');
     var TPL_SEL = [
         '<span>',
             '<span class="olap-meta-select-txt">#{colName}</span>',
-            '<span class="olap-meta-select-sel"></span>',
+            '<span c-meta-select-sel"></span>',
         '</span>'
     ].join('');
 
@@ -84285,7 +84239,7 @@ $namespace('di.shared.vui');
      * @param {Array<Object>} data.datasource 数据源
      */
     SIMPLE_RADIO_CLASS.setData = function (data) {
-        render.call(this, data.datasource || []);
+ der.call(this, data.datasource || []);
     };
 
     /**
@@ -84429,9 +84383,7 @@ $namespace('di.shared.vui');
      */
     function constructor(options) {
         var el = this._eMain = options.el;
-        addClass(el, 'vui-text-area');
-
-        this._sInitTpl = el.innerHTML;
+        addClass(el, 'vui-text-area'  this._sInitTpl = el.innerHTML;
         el.innerHTML = '';
 
         this.setData(options);
@@ -84570,7 +84522,7 @@ $namespace('di.shared.adapter');
  * author:  sushuang(sushuang@baidu.com)
  */
 
-$namespace('di.shared.model');
+$ndi.shared.model');
 
 (function () {
     
@@ -84629,8 +84581,7 @@ $namespace('di.shared.model');
      * 获得服务器的当前时间
      * 不保证准确的地方：
      * 1. 网路延迟没有考虑
-     * 2. 如果用户在打开了网页后修改了客户端的系统时间，则此值会错误
-     * @public
+     * 2. 如果用户在打开了网页后修改了客户端的系统时间，则此值 @public
      * 
      * @return {Date} 当前时间
      */
@@ -84660,8 +84611,7 @@ $namespace('di.shared.model');
     var XDATASOURCE = xui.XDatasource;
         
     /* 类型声明 */
-    var USER_MODEL = $namespace().UserModel = inheritsObject(XDATASOURCE);
-    var USER_MODEL_CLASS = USER_MODEL.prototype;
+    var USER_MODEL = $namespace().UserModel = inheritsObject(XDATASOURCE USER_MODEL_CLASS = USER_MODEL.prototype;
         
     /**
      * 获得用户Id
@@ -84710,7 +84660,7 @@ $namespace('di.shared.model');
     /* 类型声明 */
     var GLOBAL_MODEL = $namespace().GlobalModel = function(options) {
             if (instance && options) {
-                throw new Error('global model has been created');
+                throw new Error(del has been created');
             }
             if (!instance && !options) {
                 throw new Error('global model creation needs options');
@@ -84731,8 +84681,7 @@ $namespace('di.shared.model');
         // 初始化全局模型
         this._mUserModel = new USER_MODEL();
         this._mAuthModel = new AUTH_MODEL();
-        this._mDateModel = new DATE_MODEL();
-        this._mDateModel.setData(options);
+        this._mDateModel = new DATE_MO     this._mDateModel.setData(options);
 
         this._sGlobalType = options.globalType;
         if (this._sGlobalType == 'CONSOLE') {
@@ -84846,7 +84795,7 @@ $namespace('di.shared.model');
                 delete data[STRINGIFY_FLAG];
             }
             else {
-                data[STRINGIFY_FLAG] = paramMode;
+                data[STRINGIFY_FLAGode;
             }
         }
         return data;
@@ -85501,7 +85450,7 @@ $namespace('di.shared.model');
     var XOBJECT = xui.XObject;
     var COMMON_PARAM_FACTORY;
     var ARG_HANDLER_FACTORY;
-    var replaceIntoParam = xutil.url.replaceIntoParam;
+    var replaceIntotil.url.replaceIntoParam;
 
     $link(function () {
         ARG_HANDLER_FACTORY = di.shared.arg.ArgHandlerFactory;
@@ -88019,8 +87968,7 @@ $namespace('di.shared.ui');
 
                 // 禁用自身的notify和attach（只允许使用$di提供的）
                 this.notify = this.attach = this.attachOnce =                 
-                    function () {
-                        throw new Error('Forbiden function');
+                    function (                  throw new Error('Forbiden function');
                     };
 
                 // 挂主cssClass
@@ -88243,8 +88191,7 @@ $namespace('di.shared.ui');
      * @param {Object=} scope updater执行的scope，缺省则为window
      * @param {...*} args updater执行时传递的参数
      */
-    PANEL_PAGE_CLASS.updateView = function(updater, scope, args) {
-        if (this._bVisible) {
+    PANEL_PAGE_CLASS.updateView = function(updater, scope, ar    if (this._bVisible) {
             updater.apply(scope, arraySlice.call(arguments, 2));
         }
         else {
@@ -88412,7 +88359,7 @@ $namespace('di.shared.adapter');
      * @return {Object} 创建的实例
      */
     function create(def, options) {
-        return ecuiCreate(CALENDAR_PLUS, def.el, null, prepareData(options));
+        return ecuiCreate(CALENDAR_PLUS, def.el, null, preptions));
     }
 
     /**
@@ -88587,7 +88534,7 @@ $namespace('di.shared.adapter');
 
 
 /**
- * di.shared.adapter.EcuiCustomTableVUIAdapter
+ * di.shared.adapter.EcuiCustomTpter
  * Copyright 2013 Baidu Inc. All rights reserved.
  *
  * @file:    ecui提供的平面表控件的适配器
@@ -88654,9 +88601,7 @@ $namespace('di.shared.adapter');
     //  */
     // function getValue() {
     //     // TODO
-    // }
-
-})();
+   );
 
 
 /**
@@ -88729,7 +88674,7 @@ $namespace('di.shared.adapter');
             );
         }
 
-        // 赋予全局浮层id，用于自动化测试的dom定位
+        // 赋予全局测试的dom定位
         ctrl._uLayer.getOuter().setAttribute(DICT.TEST_ATTR, def.id);
 
         return ctrl;
@@ -88865,7 +88810,7 @@ $namespace('di.shared.adapter');
  * di.shared.adapter.EcuiSelectVUIAdapter
  * Copyright 2013 Baidu Inc. All rights reserved.
  *
- * @file:    IstCalendar的适配器
+ * @ftCalendar的适配器
  * @author:  sushuang(sushuang@baidu.com)
  * @depend:  xui, xutil, ecui
  */
@@ -88897,7 +88842,7 @@ $namespace('di.shared.adapter');
      * 
      * @public
      * @param {Object} data 数据
-     * @param {Array.<Object>} data.datasource 数据集
+     * @param {Array.<Object>asource 数据集
      *      每个节点：
      *          {string} text
      *          {string} value
@@ -88930,7 +88875,7 @@ $namespace('di.shared.adapter');
                     ? value
                     : (value && value[0])
             )
-            || (datasource[0] && datasource[0].value);
+            urce[0] && datasource[0].value);
         value != null && this.setValue(value);
     }
 
@@ -89041,7 +88986,7 @@ $namespace('di.shared.adapter');
      * 获得当前选中数据
      *
      * @public
-     * @this {Object} 目标实例
+   {Object} 目标实例
      * @return {string} 数据
      */
     var getValueFunc = {
@@ -89120,7 +89065,7 @@ $namespace('di.shared.adapter');
         opt.date = defTime.start || new Date();
         opt.dateEnd = defTime.end;
 
-        var range = parseTimeUnitDef(options.range, [now, now]);
+        var range = parseTimptions.range, [now, now]);
         if (range) {
             opt.start = range.start;
             opt.end = range.end;
@@ -89221,8 +89166,7 @@ $namespace('di.shared.adapter');
     };
 
     function create4Dragger(def, options) {
-        var ins = new def.clz(options)            
-        ins.$di('registerEventAgent', 'change');
+        var ins = new def.clz(options)           ins.$di('registerEventAgent', 'change');
 
         ins.attach(
             'sellinechange', 
@@ -89378,7 +89322,7 @@ $namespace('di.shared.adapter');
      * @return {Object} 创建的实例
      */
     function create(def, options) {
-        return ecuiCreate(X_CALENDAR, def.el, null, prepareInitData(options));
+        return ecuiCreate(X_CALENDAR, def.el, null, preparoptions));
     }
 
     /**
@@ -89550,7 +89494,7 @@ $namespace('di.shared.model');
             $namespace().CubeMetaModel = 
             inheritsObject(XDATASOURCE, constructor);
     var CUBE_META_MODEL_CLASS = 
-            CUBE_META_MODEL.prototype;
+            CUBE_METototype;
   
     //------------------------------------------
     // 常量
@@ -89869,8 +89813,7 @@ $namespace('di.shared.model');
          * 图前台显示的数据
          *
          * @type {Object}
-         * @private
-         */
+         * @pri    */
         this._oChartData = {};
     }
 
@@ -90198,7 +90141,7 @@ $namespace('di.shared.model');
      */
     DI_FORM_MODEL_CLASS.url = new XDATASOURCE.Set(
         {
-            DATA: URL.fn('FORM_DATA'),
+     A: URL.fn('FORM_DATA'),
             ASYNC_DATA: URL.fn('FORM_ASYNC_DATA'),
             UPDATE_CONTEXT: URL.fn('FORM_UPDATE_CONTEXT')
         }
@@ -90372,7 +90315,7 @@ $namespace('di.shared.model');
      * @override
      * @see xui.XDatasource.prototype.OPTIONS_NAME
      */
-    DI_PLANE_TABLE_MODEL_CLASS.url = new XDATASOURCE.Set(
+    ABLE_MODEL_CLASS.url = new XDATASOURCE.Set(
         {
             DATA: URL.fn('PLANE_TABLE_DATA'),
             CHECK: URL.fn('PLANE_TABLE_CHECK'),
@@ -90742,7 +90685,6 @@ $namespace('di.shared.model');
      * @see xui.XDatasource.prototype.OPTIONS_NAME
      */
     DI_RTPLCLONE_MODEL_CLASS.url = new XDATASOURCE.Set(
-        {
             GET_DEFAUL_IMAGENAME: URL.fn('RTPL_CLONE_GETDEFAULTIMAGENAME'),
             SAVE: URL.fn('RTPL_CLONE_SAVE'),
             CLEAR: URL.fn('RTPL_CLONE_CLEAR')
@@ -90903,7 +90845,7 @@ $namespace('di.shared.model');
      */
     DI_TABLE_MODEL_CLASS.url = new XDATASOURCE.Set(
         {
-            DATA: URL.fn('OLAP_TABLE_DATA'),
+            DATA: URL.fn('OLATA'),
             DRILL: URL.fn('OLAP_TABLE_DRILL'),
             LINK_DRILL: URL.fn('OLAP_TABLE_LINK_DRILL'),
             SORT: URL.fn('OLAP_TABLE_SORT'),
@@ -91335,7 +91277,7 @@ $namespace('di.shared.model');
      */
     GLOBAL_MENU_MANAGER_CLASS.getControlClass = function() {
         var classPath = (this.getSelected() || {}).menuPage;
-        return classPath ? getByPath(classPath) : null;
+        return c getByPath(classPath) : null;
     };
     
     /**
@@ -91435,7 +91377,7 @@ $namespace('di.shared.model');
 //             'page.active', 
 //             this.$pageActiveHandler, 
 //             this
-//         );
+/);
 //     };
     
 //     /**
@@ -91606,7 +91548,7 @@ $namespace('di.shared.model');
             $namespace().MetaConditionModel = 
             inheritsObject(XDATASOURCE, constructor);
     var META_CONDITION_MODEL_CLASS = 
-            META_CONDITION_MODEL.prototype;
+         NDITION_MODEL.prototype;
   
     //------------------------------------------
     // 方法
@@ -92404,8 +92346,7 @@ $namespace('di.shared.model');
         /**
          * 类型，TABLE 或者 CHART
          *
-         * @type {string}
-         * @private
+         * @type {strin  * @private
          */
         this._sReportType = options.reportType || 'RTPL_OLAP_TABLE';
         /**
@@ -93141,8 +93082,7 @@ $namespace('di.shared.model');
         if (pageInfo) {
             if (pageInfo.disabled != null) {
                 this.disabled = pageInfo.disabled;
-            }
-            if (pageInfo.totalRecordCount != null) {
+                if (pageInfo.totalRecordCount != null) {
                 this.totalRecordCount = pageInfo.totalRecordCount;
             }
             if (pageInfo.pageSize != null) {
@@ -93307,8 +93247,7 @@ $namespace('di.shared.model');
 
 $namespace('di.shared.model');
 
-(function () {
-    
+(funct
     var bind = xutil.fn.bind;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
@@ -93367,7 +93306,7 @@ $namespace('di.shared.model');
     /**
      * 更改标题
      */
-    PANEL_PAGE_TAB_ADAPTER.$setTitle = function (pageId, title) {
+    PANEL_PAPTER.$setTitle = function (pageId, title) {
         var pageWrap = this._oPanelPageSet.get(pageId);
         pageWrap && pageWrap.item.setTitle(title);
     }    
@@ -93456,8 +93395,7 @@ $namespace('di.shared.model');
      *
      * @public 
      * @param {string} uri 如di.some.SomePage?pageId=XXX&pageTitle=XXX&otherParam=XXX
-     * @param {Object} options 其他要传入页面的参数（所有在uri中的参数，都可以用这个覆盖）
-     * @param {string} options.pageId
+     * @param {Object} options 其他要传入页面的参数（所有在uri中的参数，     * @param {string} options.pageId
      * @param {string} options.pageTitle
      * @param {boolean} options.forceCreate 强制创建新页面。如果为true，则传入的pageId不起作用，会新建pageId
      * @param {boolean} options.forceActive 强制激活, 默认为false
@@ -93855,7 +93793,7 @@ $namespace('di.shared.model');
 
     //-------------------------------------------
     // 方法
-    //-------------------------------------------
+    //---------------------------------
 
     /**
      * 构造方法
@@ -94211,7 +94149,7 @@ $namespace('di.shared.ui');
 
     //-----------------------------------
     // 模板
-    //-----------------------------------
+ ------------------------------
 
     var TPL_MAIN = [
             '<div class="q-di-form">',
@@ -94782,7 +94720,7 @@ $namespace('di.shared.ui');
             sync: { datasourceId: 'DATA' },
             syncX: { datasourceId: 'X_DATA' },
             syncLiteOlapChart: { datasourceId: 'LITEOLAPCHART_DATA' },
-            syncS: { datasourceId: 'S_DATA' },
+            syasourceId: 'S_DATA' },
             syncSAdd: { datasourceId: 'S_ADD_DATA' },
             syncSRemove: { datasourceId: 'S_REMOVE_DATA' },
             clear: {}
@@ -95132,7 +95070,7 @@ $namespace('di.shared.ui');
      */
     DI_FORM_CLASS.$createView = function (options) {
         this._oOptions = extend({}, options);
-        options.submitMode = options.submitMode || 'IMMEDIATE';
+        options.submitions.submitMode || 'IMMEDIATE';
 
         // 创建参数输入控件
         this._aInput = [];
@@ -95596,7 +95534,7 @@ $namespace('di.shared.ui');
         exportHandler: {
             sync: { datasourceId: 'DATA' },
             syncX: { datasourceId: 'X_DATA' },
-            syncLiteOlapChart: { datasourceId: 'LITEOLAPCHART_DATA' },
+            syncLiteOlapChart: { datasourceId: 'LITEOLAPC },
             syncS: { datasourceId: 'S_DATA' },
             syncSAdd: { datasourceId: 'S_ADD_DATA' },
             syncSRemove: { datasourceId: 'S_REMOVE_DATA' },
@@ -95946,7 +95884,7 @@ $namespace('di.shared.ui');
         }
     };
 
-    //------------------------------------------
+    //--------------------------------
     // 方法
     //------------------------------------------
 
@@ -96994,8 +96932,7 @@ $namespace('di.shared.ui');
      * 创建View
      *
      * @private
-     * @param {Object} options 参数
-     */
+     * @param {Object} o     */
     DI_RTPLCLONE_CLASS.$createView = function (options) {
         var el = this.$di('getEl');
          // 
@@ -97285,8 +97222,7 @@ $namespace('di.shared.ui');
      */
     function constructor(options) {
         var el = this.$di('getEl');
-        var o = document.createElement('div');
-        el.appendChild(o);
+        var o = document.createElement('     el.appendChild(o);
 
         this._bAutoDeaf = options.autoDeaf == null ? true : options.autoDeaf;
         this._bAutoComponentValueDisabled = 
@@ -97548,8 +97484,7 @@ $namespace('di.shared.ui');
 
     /**
      * 创建View
-     *
-     * @private
+     *rivate
      * @param {Object} options 参数
      */
     DI_TABLE_CLASS.$createView = function (options) {
@@ -98291,7 +98226,7 @@ $namespace('di.shared.ui');
 
         this._bFolded = true;
         this._bAutoDeaf = options.autoDeaf == null 
-            ? true : options.autoDeaf;
+         : options.autoDeaf;
         this._bAutoComponentValueDisabled = 
             options.autoComponentValueDisabled == null
                 ? false : options.autoComponentValueDisabled;
@@ -98521,8 +98456,7 @@ $namespace('di.shared.ui');
     var XVIEW = xui.XView;
         
     //------------------------------------------
-    // 类型声明 
-    //------------------------------------------
+    // 类型声明 ---------------------------------------
 
     /**
      * VCONTAINER
@@ -98579,8 +98513,7 @@ $namespace('di.shared.ui');
     var q = xutil.dom.q;
     var assign = xutil.object.assign;
     var bind = xutil.fn.bind;
-    var objKey = xutil.object.objKey;
-    var XVIEW = xui.XView;
+    var objKey = xutil.object.obvar XVIEW = xui.XView;
         
     //------------------------------------------
     // 类型声明 
@@ -98642,7 +98575,7 @@ $namespace('di.shared.ui');
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
     var ecuiDispose = UTIL.ecuiDispose;
-    var extend = xutil.object.extend;
+    var etil.object.extend;
     var assign = xutil.object.assign;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
@@ -98686,8 +98619,7 @@ $namespace('di.shared.ui');
         },
         // 主元素的css
         className: 'olap-meta-config',
-        // model配置
-        model: {
+        // model model: {
             clzPath: 'di.shared.model.OlapMetaConfigModel'
         }
     };
@@ -99079,8 +99011,7 @@ $namespace('di.shared.ui');
             XVIEW,
             function (options) {
                 createModel.call(this, options);
-                createView.call(this, options);
-            }
+                createView.call(this, opti        }
         );
     var META_CONDITOIN_CLASS = META_CONDITOIN.prototype;
     
@@ -99744,7 +99675,7 @@ $namespace('di.shared.ui');
         className: 'olap-meta-config',
         // model配置
         model: {
-            clzPath: 'di.shared.model.OlapMetaConfigModel'
+            clzPath:d.model.OlapMetaConfigModel'
         }
     };
 
@@ -100151,7 +100082,7 @@ $namespace('di.product.display.ui');
         /**
          * 预存报表镜像id,每次报表刷新时，会向后台提交镜像id
          * 报表初始化时，又需要这个id，就在这预存一份
-         * 使用时:var diFactory = DI_FACTORY();
+         *iFactory = DI_FACTORY();
          * var currentImgId = diFactory.getDIReportImageId();
          */
         me._reportImageId = options.externalParam.reportImageId;

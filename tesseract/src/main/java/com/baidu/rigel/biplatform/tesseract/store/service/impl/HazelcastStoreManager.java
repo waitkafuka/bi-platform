@@ -18,12 +18,15 @@ package com.baidu.rigel.biplatform.tesseract.store.service.impl;
 import java.util.EventObject;
 import java.util.concurrent.locks.Lock;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.tesseract.store.service.HazelcastNoticePort;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.hazelcast.config.ClasspathXmlConfig;
@@ -50,6 +53,9 @@ public class HazelcastStoreManager implements StoreManager {
      * cacheManager
      */
     private CacheManager cacheManager;
+    
+    @Resource
+    private HazelcastNoticePort hazelcastNoticePort;
     
     /**
      * hazelcast
@@ -141,6 +147,8 @@ public class HazelcastStoreManager implements StoreManager {
             throw new IllegalArgumentException();
         }
         ITopic<Object> topics = this.hazelcast.getTopic("topics");
+        topics.addMessageListener(hazelcastNoticePort);
+
         topics.publish(event);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "postEvent",

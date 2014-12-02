@@ -282,7 +282,7 @@ public class QueryServiceImpl implements QueryService {
         if (queryContext == null) {
             queryContext = new QueryContext();
             QuestionModel cloneQuestionModel = DeepcopyUtils.deepCopy(questionModel);
-
+            long current = System.currentTimeMillis();
             AxisMeta axisMeta = null;
             AxisType axisType = AxisType.COLUMN;
             while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
@@ -299,6 +299,8 @@ public class QueryServiceImpl implements QueryService {
                         i++;
                     }
                 }
+                logger.info("0...cost:{}ms in build axisTye:{},axisMeta:{}",System.currentTimeMillis() - current,axisType,axisMeta);
+                current = System.currentTimeMillis();
                 if (CollectionUtils.isNotEmpty(axisMeta.getQueryMeasures())) {
                     for (String measureName : axisMeta.getQueryMeasures()) {
                         if (cube.getMeasures().containsKey(measureName)) {
@@ -307,12 +309,15 @@ public class QueryServiceImpl implements QueryService {
                         // 需要判断，如果cube里面不包含的话，那么这个名称可能是个计算公式，需要进行构造一个虚拟的名称扔进去
                     }
                 }
+                logger.info("1..cost:{}ms in build axisTye:{},axisMeta:{}",System.currentTimeMillis() - current,axisType,axisMeta);
+                current = System.currentTimeMillis();
                 if (axisType.equals(AxisType.ROW)) {
                     axisType = null;
                 } else {
                     axisType = AxisType.ROW;
                 }
             }
+            
             if (!cloneQuestionModel.getQueryConditions().isEmpty()) {
                 for (MetaCondition condition : cloneQuestionModel.getQueryConditions().values()) {
                     if (condition == null) {
@@ -331,6 +336,8 @@ public class QueryServiceImpl implements QueryService {
                         queryContext.getFilterExpression().put(measureCon.getMetaName(),
                                 measureCon.getMeasureConditions());
                     }
+                    logger.info("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
+                    current = System.currentTimeMillis();
                 }
             }
         }
@@ -399,6 +406,7 @@ public class QueryServiceImpl implements QueryService {
         if (dimCondition == null) {
             throw new IllegalArgumentException("dimension condition is null");
         }
+        long current = System.currentTimeMillis();
         MemberNodeTree nodeTree = new MemberNodeTree(null);
         if (dimCondition.getQueryDataNodes().isEmpty()) {
             String allMemberUniqueName =
@@ -407,6 +415,8 @@ public class QueryServiceImpl implements QueryService {
             queryData.setExpand(isFirstInRow);
             queryData.setShow(true);
             dimCondition.getQueryDataNodes().add(queryData);
+            logger.info("cost:{}ms,in build default member:{}",System.currentTimeMillis() - current, dimCondition);
+            current = System.currentTimeMillis();
         }
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
@@ -416,9 +426,9 @@ public class QueryServiceImpl implements QueryService {
             boolean isCallBack = member.getLevel().getType().equals(LevelType.CALL_BACK);
             // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点
             if (queryData.isExpand() || isCallBack) {
-            	memberNode.setSummary(true);
                 List<MiniCubeMember> children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
                 if (CollectionUtils.isNotEmpty(children)) {
+                    memberNode.setSummary(true);
                     children.forEach((child) -> {
                         MemberNodeTree childNode = new MemberNodeTree(nodeTree);
                         buildMemberNodeByMember(childNode, child);
@@ -436,6 +446,8 @@ public class QueryServiceImpl implements QueryService {
             } else {
                 nodeTree.getChildren().addAll(childNodes);
             }
+            logger.info("cost:{}ms,in build query data:{}",System.currentTimeMillis() - current, queryData);
+            current = System.currentTimeMillis();
         }
 
         return nodeTree;

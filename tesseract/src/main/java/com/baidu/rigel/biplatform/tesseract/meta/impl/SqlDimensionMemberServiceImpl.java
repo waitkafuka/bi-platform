@@ -15,16 +15,15 @@
  */
 package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.core.task.TaskExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
@@ -49,6 +48,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Where;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+import com.google.common.collect.Lists;
 
 /**
  * sql类型维度维值获取实现
@@ -62,7 +62,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     /**
      * log
      */
-    private Logger log = Logger.getLogger(this.getClass());
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
      * searchService
@@ -70,16 +70,15 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     @Resource
     private SearchService searchService;
     
-    @Resource
-    private TaskExecutor taskExecutor;
-
     @Override
     public List<MiniCubeMember> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, Member parentMember,
             Map<String, String> params) throws MiniCubeQueryException {
+        long current = System.currentTimeMillis();
         if (cube == null || level == null || dataSourceInfo == null || !dataSourceInfo.validate()) {
             StringBuilder sb = new StringBuilder();
             sb.append("param illegal,cube:").append(cube).append(" level:").append(level).append(" datasourceInfo:")
                     .append(dataSourceInfo);
+            log.error(sb.toString());
             throw new IllegalArgumentException(sb.toString());
         }
         MiniCubeLevel queryLevel = (MiniCubeLevel) level;
@@ -89,7 +88,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         // 调用查询接口开始查询，查询返回一个resultSet
         List<MiniCubeMember> members = null;
         try {
+            current = System.currentTimeMillis();
             TesseractResultSet resultSet = searchService.query(nameQuery);
+            log.info("cost:{}ms in query request.level:{}",System.currentTimeMillis() - current,nameQuery);
             members = buildMembersFromCellSet(resultSet, queryLevel, parentMember, dataSourceInfo, cube);
         } catch (MiniCubeQueryException e) {
             log.error("get members error,queryLevel:" + queryLevel + " parentMember:" + parentMember, e);
@@ -99,6 +100,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             throw new MiniCubeQueryException("get members error,queryLevel:" + queryLevel + " parentMember:"
                     + parentMember, e);
         }
+        log.info("cost:{}ms in get members,size:{}",System.currentTimeMillis() - current, members.size());
         return members;
 
     }
@@ -117,21 +119,23 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     private List<MiniCubeMember> buildMembersFromCellSet(TesseractResultSet resultSet, MiniCubeLevel queryLevel,
             Member parentMember, DataSourceInfo dataSourceInfo, Cube cube) throws MiniCubeQueryException {
         try {
-            List<MiniCubeMember> result = new ArrayList<MiniCubeMember>(resultSet.size());
-            // CountDownLatch latch = new CountDownLatch(resultSet.size());
+            long current = System.currentTimeMillis();
+            Map<String, MiniCubeMember> members = new TreeMap<String, MiniCubeMember>();
             while (resultSet.next()) {
                 ResultRecord record = resultSet.getCurrentRecord();
-                // taskExecutor.execute(new Runnable() {
-                // @Override
-                // public void run() {
-                // try {
+
                 String value = record.getField(queryLevel.getSource()).toString();
                 if (value == null) {
                     log.warn("can not get:" + queryLevel.getSource() + " from record:" + record);
                     continue;
                     // return;
                 }
-                MiniCubeMember member = new MiniCubeMember(value);
+                MiniCubeMember member = members.get(value);
+
+                if (member == null) {
+                    member = new MiniCubeMember(value);
+                    members.put(member.getName(), member);
+                }
                 member.setLevel(queryLevel);
                 if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
                     member.setCaption(record.getField(queryLevel.getCaptionColumn()).toString());
@@ -142,52 +146,13 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 // 需要查询Member对应的最细粒度节点，即与事实表关联的字段的外键
                 if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
                         && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-                    QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
-
-                    request.setWhere(new Where());
-                    Expression expression = new Expression(queryLevel.getSource());
-                    expression.getQueryValues().add(new QueryObject(member.getName()));
-                    request.getWhere().getAndList().add(expression);
-                    // 发起查询叶子节点的查询
-                    TesseractResultSet leafResultSet = searchService.query(request);
-                    while (leafResultSet.next()) {
-                        member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-                    }
-                } else if (queryLevel.isParentChildLevel()) {
-                	QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
-
-                    request.setWhere(new Where());
-                    Expression expression = new Expression(queryLevel.getParent());
-                    expression.getQueryValues().add(new QueryObject(member.getName()));
-                    request.getWhere().getAndList().add(expression);
-                    log.info("query member leaf nodes,queryRequest:" + request);
-                    TesseractResultSet leafResultSet = searchService.query(request);
-                    if(leafResultSet == null || leafResultSet.size() == 0) {
-                        member.getQueryNodes().add(member.getName());
-                    }else {
-                        while (leafResultSet.next()) {
-                            member.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-                        }
-                    }
+                    member.getQueryNodes().add(record.getField(queryLevel.getPrimaryKey()).toString());
                 } else {
-                    member.getQueryNodes().add(member.getName());
+                    member.getQueryNodes().add(value);
                 }
-                result.add(member);
-                // latch.countDown();
-                // } catch (Exception e) {
-                // e.printStackTrace();
-                // throw new RuntimeException(e);
-                // }
-                // }
-                // });
             }
-//            latch.await();
-            Collections.sort(result, (m1,m2) -> {
-               return m1.getName().compareTo(m2.getName());
-            });
-            return result;
+            log.info("cost:{} in build dimension:{} member,size:{}",System.currentTimeMillis() - current , queryLevel.getDimension().getName(), members.size());
+            return Lists.newArrayList(members.values());
         } catch (Exception e) {
             log.error("build members error:" + e.getMessage(), e);
             throw new MiniCubeQueryException(e.getMessage(), e);
@@ -235,6 +200,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
         // 查询的ID字段，需要groupBy
         queryRequest.selectAndGroupBy(queryLevel.getSource());
+        if(StringUtils.isNotBlank(queryLevel.getPrimaryKey())
+                && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
+            queryRequest.selectAndGroupBy(queryLevel.getPrimaryKey());
+        }
         // 先把caption也进行groupby吧，要不一个ID对应多个名称不知道怎么取
         if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
             queryRequest.selectAndGroupBy(queryLevel.getCaptionColumn());

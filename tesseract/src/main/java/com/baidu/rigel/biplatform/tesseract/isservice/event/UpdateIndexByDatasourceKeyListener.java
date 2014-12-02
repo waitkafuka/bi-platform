@@ -23,6 +23,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexService;
@@ -34,6 +35,7 @@ import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
  * @author lijin
  *
  */
+@Service
 public class UpdateIndexByDatasourceKeyListener implements
         ApplicationListener<UpdateIndexByDatasourceEvent> {
     
@@ -68,7 +70,7 @@ public class UpdateIndexByDatasourceKeyListener implements
         if (event.getDataSourceKey() != null) {
             String dataSourceKey = event.getDataSourceKey();
             try {
-                this.indexService.updateIndexByDataSourceKey(dataSourceKey);
+                this.indexService.updateIndexByDataSourceKey(dataSourceKey, event.getDataSetNames());
             } catch (IndexAndSearchException e) {
                 LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
                     "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event), e);

@@ -389,13 +389,13 @@ public class MetaQueryAction {
 
             Map<String, String> requestParams = parseRequestJson(requestJson);
 
-            String listCubeJson = requestParams.get(MiniCubeConnection.CUBE_PARAM_KEY);
+            String dataSetString = requestParams.get(MiniCubeConnection.DATASET_PARAM_KEY);
             String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
-            List<Cube> cubes = AnswerCoreConstant.GSON.fromJson(listCubeJson, new TypeToken<List<Cube>>() {
-            }.getType());
             DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
-            metaDataService.publish(cubes, dataSourceInfo);
-            return ResponseResultUtils.getCorrectResult("success", "public cubes success.");
+            
+            metaDataService.refresh(dataSourceInfo, dataSetString);
+            
+            return ResponseResultUtils.getCorrectResult("success", "refresh success.");
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
             errorMsg = "json parse error," + e.getMessage();
