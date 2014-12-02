@@ -3774,7 +3774,7 @@ define('zrender/config',[],function () {
      */
     var config = {
         /**
-         * @namespace module:zrender/config.EVENT
+         * @namespace module:zrender/config.EVENT 123
          */
         EVENT : {
             /**
@@ -30580,9 +30580,9 @@ define('echarts/component/dataZoom',['require','./base','zrender/shape/Rectangle
             }
 
             if (!this._isSilence && (this.zoomOption.realtime || dispatchNow)) {
-//                // 当zoom改变后，把x轴的起始位置的索引带回去；
-//                // 起始位置是数组中的索引，不是0-100中的位置，因为0-100的位置，带出去，还要反过来计算数组中的位置，怎么算都会有点差异;直接带出去使用
-//                // lzt 2014-10-28
+                // 当zoom改变后，把x轴的起始位置的索引带回去；
+                // 起始位置是数组中的索引，不是0-100中的位置，因为0-100的位置，带出去，还要反过来计算数组中的位置，怎么算都会有点差异;直接带出去使用
+                // lzt 2014-10-28
                 this._zoom.xStart = start;
                 this._zoom.xEnd = end;
                 this.messageCenter.dispatch(

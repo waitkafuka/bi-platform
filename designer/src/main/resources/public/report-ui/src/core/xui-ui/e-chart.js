@@ -150,7 +150,12 @@
     UI_E_CHART_CLASS.$setupSeries = function (options) {
         var series = [];
         var xAxis = this._aXAxis;
+        var seryKind = {};
+        var tempData = [];
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
+            seryKind[serDef.type] =  seryKind[serDef.type]
+                ? seryKind[serDef.type] + 1
+                : 1;
             ser = { data: [] };
             ser.name = serDef.name || '';
             ser.yAxisIndex = serDef.yAxisIndex || 0;
@@ -160,9 +165,17 @@
             ser.symbol = 'none'; // 线图上的点的形状
             (serDef.id !== null) && (ser.id = serDef.id);
             ser.data = serDef.data;
-            series.push(ser);
+            if (serDef.type === 'line') {
+                tempData.push(ser);
+            }
+            else {
+                series.push(ser);
+            }
         }
-
+        series = series.concat(tempData);
+        if (seryKind.line >= 1 && seryKind.bar >= 1) {
+            this._isAddYxis = true;
+        }
         // series中只允许有一个饼图。
         if (this._bHasPie) {
             var targetSeries = [{}];
@@ -211,8 +224,9 @@
         if (!this._bHasPie) {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
+                var yAxisOption;
                 for (var i = 0, option; option = this._aYAxis[i]; i++) {
-                    var yAxisOption = {};
+                    yAxisOption = {};
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
@@ -227,12 +241,24 @@
                 };
             }
             else {
-                var yAxisOption = {};
+                yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
                 yAxisOption.boundaryGap = [0.1, 0.1];
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
+            }
+            if (this._isAddYxis && yAxis.length <= 1) {
+                yAxis.push(yAxisOption);
+                for (var i = 0, iLen = options.series.length; i < iLen; i ++) {
+                    var o = options.series[i];
+                    if (o.type === 'line') {
+                        o.yAxisIndex = 1;
+                    }
+                    else {
+                        o.yAxisIndex = 0;
+                    }
+                }
             }
         }
         options.yAxis = yAxis;

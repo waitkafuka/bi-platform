@@ -36691,7 +36691,7 @@ define('zrender/config',[],function () {
      */
     var config = {
         /**
-         * @namespace module:zrender/config.EVENT
+         * @namespace module:zrender/config.EVENT 123
          */
         EVENT : {
             /**
@@ -63497,9 +63497,9 @@ define('echarts/component/dataZoom',['require','./base','zrender/shape/Rectangle
             }
 
             if (!this._isSilence && (this.zoomOption.realtime || dispatchNow)) {
-//                // 当zoom改变后，把x轴的起始位置的索引带回去；
-//                // 起始位置是数组中的索引，不是0-100中的位置，因为0-100的位置，带出去，还要反过来计算数组中的位置，怎么算都会有点差异;直接带出去使用
-//                // lzt 2014-10-28
+                // 当zoom改变后，把x轴的起始位置的索引带回去；
+                // 起始位置是数组中的索引，不是0-100中的位置，因为0-100的位置，带出去，还要反过来计算数组中的位置，怎么算都会有点差异;直接带出去使用
+                // lzt 2014-10-28
                 this._zoom.xStart = start;
                 this._zoom.xEnd = end;
                 this.messageCenter.dispatch(
@@ -76230,7 +76230,7 @@ _global['zrender'] = zrender;
  *
  * @file:    基于highcharts的js图
  *           (最早源自pl-charts.js by cxl(chenxinle@baidu.com))
- * @author:  sushuang(sushuang@baidu.com)
+ * @author:  sushuang
  * @depend:  xui, xutil, echarts
  */
 
@@ -76376,7 +76376,12 @@ _global['zrender'] = zrender;
     UI_E_CHART_CLASS.$setupSeries = function (options) {
         var series = [];
         var xAxis = this._aXAxis;
+        var seryKind = {};
+        var tempData = [];
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
+            seryKind[serDef.type] =  seryKind[serDef.type]
+                ? seryKind[serDef.type] + 1
+                : 1;
             ser = { data: [] };
             ser.name = serDef.name || '';
             ser.yAxisIndex = serDef.yAxisIndex || 0;
@@ -76386,9 +76391,17 @@ _global['zrender'] = zrender;
             ser.symbol = 'none'; // 线图上的点的形状
             (serDef.id !== null) && (ser.id = serDef.id);
             ser.data = serDef.data;
-            series.push(ser);
+            if (serDef.type === 'line') {
+                tempData.push(ser);
+            }
+            else {
+                series.push(ser);
+            }
         }
-
+        series = series.concat(tempData);
+        if (seryKind.line >= 1 && seryKind.bar >= 1) {
+            this._isAddYxis = true;
+        }
         // series中只允许有一个饼图。
         if (this._bHasPie) {
             var targetSeries = [{}];
@@ -76437,8 +76450,9 @@ _global['zrender'] = zrender;
         if (!this._bHasPie) {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
+                var yAxisOption;
                 for (var i = 0, option; option = this._aYAxis[i]; i++) {
-                    var yAxisOption = {};
+                    yAxisOption = {};
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
@@ -76453,12 +76467,24 @@ _global['zrender'] = zrender;
                 };
             }
             else {
-                var yAxisOption = {};
+                yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
                 yAxisOption.boundaryGap = [0.1, 0.1];
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
+            }
+            if (this._isAddYxis && yAxis.length <= 1) {
+                yAxis.push(yAxisOption);
+                for (var i = 0, iLen = options.series.length; i < iLen; i ++) {
+                    var o = options.series[i];
+                    if (o.type === 'line') {
+                        o.yAxisIndex = 1;
+                    }
+                    else {
+                        o.yAxisIndex = 0;
+                    }
+                }
             }
         }
         options.yAxis = yAxis;
