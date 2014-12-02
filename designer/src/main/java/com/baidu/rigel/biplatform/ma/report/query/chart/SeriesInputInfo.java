@@ -70,6 +70,16 @@ public class SeriesInputInfo implements Serializable {
         EMPTY(""),
         
         /**
+         * 
+         */
+        
+        
+        /**
+         * map
+         */
+        MAP("map"),
+        
+        /**
          * TIME_TREND
          */
         TIME_TREND("TIME_TREND");

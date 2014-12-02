@@ -42,6 +42,16 @@ public class SortRecord implements Serializable {
      */
     private String sortColumnUniquename;
     
+    /**
+     * 指标排序
+     * @param sortType
+     * @param sortColumnUniqueName
+     */
+    public SortRecord(SortType sortType, String sortColumnUniqueName) {
+    		this.sortType = sortType;
+    		this.sortColumnUniquename = sortColumnUniqueName;
+    }
+    
     public enum SortType {
         /**
          * NONE 不排序
