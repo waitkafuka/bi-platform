@@ -14,6 +14,7 @@ define([
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
         'report/edit/canvas/comp-setting-liteolap-template',
+        'report/edit/canvas/vui-setting-select-template',
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'common/float-window',
@@ -27,6 +28,7 @@ define([
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
         compSettingLITEOLAPTemplate,
+        vuiSettingSelectTemplate,
         defaultSelectedTimeSettingTemplate,
         dataFormatSettingTemplate,
         FloatWindow,
@@ -115,6 +117,9 @@ define([
                     case 'LITEOLAP' :
                         template = compSettingLITEOLAPTemplate;
                         break ;
+                    case 'SELECT' :
+                        template = vuiSettingSelectTemplate;
+                        break;
                     default :
                         template = compSettingDefaultTemplate;
                         break;
@@ -314,10 +319,15 @@ define([
                 }
                 delete json.dataSetOpt.timeTypeOpt[letter];
                 delete json.dateKey[letter];
-                json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
+                //json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
                 this.model.canvasModel.saveReport();
             },
+            afterDeleteChartCompAxis: function (option) {
 
+            },
+            afterDeleteSelectCompAxis: function (option) {
+
+            },
             /**
              * 添加组件的数据关联配置（指标 或 维度）
              *
@@ -332,14 +342,16 @@ define([
                 var str;
                 var cubeId;
                 var oLapElemenType;
-
+                var alert = dialog.alert;
                 selector = '.j-comp-setting';
                 var $root = $acceptUi.parents(selector);
                 var compId = $root.attr('data-comp-id');
                 var compType = $root.attr('data-comp-type');
                 var $item = $draggedUi.clone().attr('style', '');
-
-
+                if (compType === 'SELECT' && $('.data-axis-line .item').length >= 1) {
+                    alert('只能拖一个维度或者维度组');
+                    return;
+                }
                 var $spans = $item.find('span');
                 // 维度组
                 if ($item.hasClass('j-group-title')) {
@@ -362,7 +374,7 @@ define([
                 var str;
                 // 指标
                 if (oLapElemenType === 'ind') {
-                    if (compType !== 'TABLE') {
+                    if (compType === 'CHART') {
                         str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
                         $item.prepend(str);
                     }
@@ -371,7 +383,6 @@ define([
                 str = '<span class="icon hide j-delete" title="删除">×</span>';
                 $item.append(str);
                 $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
-                // TODO:需要判断下两个饼图
 
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
@@ -408,6 +419,7 @@ define([
              * @public
              */
             showChartList: function (event) {
+                var alert = dialog.alert;
                 var that = this;
                 var $target = $(event.target);
                 var selector = '.j-comp-setting';
@@ -438,17 +450,21 @@ define([
                     // 如果是饼图的话，比较麻烦，不能同时选择两个饼图
                     if (selectedChartType === 'pie') {
                         var $chartTypes = $target.parent().siblings('div');
-                        var flag = false;
-                        $chartTypes.each(function () {
-                            var $chartType = $($(this).find('span')[0]);
-                            if ($chartType.attr('chart-type') === 'pie') {
-                                alert('不能选择两个饼图');
-                                flag = true;
-                            }
-                        });
-                        if (flag) {
+                        if ($chartTypes.length >= 1) {
+                            alert('不能选择两个饼图');
                             return;
                         }
+//                        var flag = false;
+//                        $chartTypes.each(function () {
+//                            var $chartType = $($(this).find('span')[0]);
+//                            if ($chartType.attr('chart-type') === 'pie') {
+//                                alert('不能选择两个饼图');
+//                                flag = true;
+//                            }
+//                        });
+//                        if (flag) {
+//                            return;
+//                        }
                     }
 
                     that.model.changeCompItemChartType(
@@ -535,8 +551,46 @@ define([
                     }
                 }
             },
-
+            /**
+             * 添加完成数据项之后要做的特殊dom处理-图形
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
             afterAddChartCompAxis: function (option){
+
+            },
+            /**
+             * 添加完成数据项之后要做的特殊dom处理-下拉框
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddSelectCompAxis: function (option){
+
+            },
+            /**
+             * 添加完成数据项之后要做的特殊dom处理-表格
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddTableCompAxis: function (option){
 
             },
 
@@ -555,17 +609,17 @@ define([
                 // 数据项的name和id
                 var name = option.$item.attr('data-name');
                 var id = option.$item.attr('data-id');
-                var calendarConfig = calendarModel.config;
+                var calendarConfig = calendarModel.timeTypeConfig;
                 // 获取两个设置，分别push
-                var timeTypeListConfig;
-                var timeTypeOptConfig;
+                var timeTypeList;
+                var timeTypeOpt;
                 var letter = calendarModel.switchLetter(name);
 
-                timeTypeListConfig = calendarConfig.timeTypeListConfig[letter];
-                timeTypeOptConfig = calendarConfig.timeTypeOptConfig[letter];
+                timeTypeList = calendarConfig.timeTypeList[letter];
+                timeTypeOpt = calendarConfig.timeTypeOpt[letter];
                 // TODO （先不注意顺序，后续需要对顺序做处理）
-                json.dataSetOpt.timeTypeList.push(timeTypeListConfig);
-                json.dataSetOpt.timeTypeOpt[letter] = timeTypeOptConfig;
+                json.dataSetOpt.timeTypeList.push(timeTypeList);
+                json.dataSetOpt.timeTypeOpt[letter] = timeTypeOpt;
                 json.dateKey[letter] = id;
                 json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
                 this.model.canvasModel.saveJsonVm();
@@ -592,6 +646,11 @@ define([
                     case 'CHART':
                         newType = 'Chart';
                         break;
+                    case 'SELECT':
+                        newType = 'Select';
+                        break;
+                    case 'TABLE':
+                        newType = 'Table';
                 }
                 return newType;
             },

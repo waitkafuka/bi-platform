@@ -8,7 +8,7 @@ define([
         'dialog',
         'report/edit/canvas/canvas-model',
         'report/report-view',
-        'report/edit/component-box/main-view',
+        'report/component-box/main-view',
         'report/edit/canvas/edit-comp-view',
         'report/edit/canvas/edit-btns-template',
         'report/edit/canvas/guides-template'
@@ -103,7 +103,7 @@ define([
 
                         $realComp.removeClass(compData.class + ' active');
                         $realComp.addClass(compData.renderClass);
-                        $realComp.css({'cursor': 'auto'});
+                        $realComp.css({ 'cursor': 'auto' });
                         $report.removeClass('active');
                         var defaultWidth = $realComp.attr('data-default-width');
                         $realComp.css({

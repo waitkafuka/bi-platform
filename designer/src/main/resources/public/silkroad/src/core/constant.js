@@ -29,8 +29,21 @@ define(function () {
         'line': false
     };
 
+    /**
+     * 组件id后缀
+     *
+     * @const
+     * @type {string}
+     */
+    var COMPONENT_ID_SUFFIX = {
+       SELECT: '-vu-form-select',
+       CALENDAR: '-vu-form-calendar'
+
+    };
+
     return {
         DATA_FORMAT_OPTIONS: DATA_FORMAT_OPTIONS,
-        CHART_TYPES: CHART_TYPES
+        CHART_TYPES: CHART_TYPES,
+        COMPONENT_ID_SUFFIX: COMPONENT_ID_SUFFIX
     };
 });

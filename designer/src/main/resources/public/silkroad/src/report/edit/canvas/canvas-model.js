@@ -5,7 +5,7 @@
  */
 define([
         'url',
-        'report/edit/component-box/form-model'
+        'report/component-box/components/form-config'
     ], function (Url, formModel) {
         var rootId = 'snpt.';
 
@@ -36,10 +36,11 @@ define([
                     url: Url.initJson(that.id),
                     success: function (data) {
                         if (data.data !== null) {
-                            that.reportJson = eval('(' + data.data + ')');
+                            //that.reportJson = eval('(' + data.data + ')');
+                            that.reportJson = JSON.parse(data.data);
                         }
                         else {
-                            that.reportJson = that.compBoxModel.config.defaultJson;
+                            that.reportJson = $.extend(true, {}, that.compBoxModel.config.defaultJson);
                             // 添加form（始终有form）
                             var formModel = that.compBoxModel.config.formModel;
                             that.reportJson.entityDefs.push(formModel.processRenderData(rootId));
@@ -161,10 +162,12 @@ define([
             ) {
                 var vm = createShell(serverData.id);
 
-                vm.html(compData.vm.render({
-                    rootId: rootId,
-                    serverData: serverData
-                }));
+                vm.html(
+                    compData.vm.render({
+                        rootId: rootId,
+                        serverData: serverData
+                    })
+                );
                 this.$reportVm.append(vm);
             },
 
@@ -187,16 +190,26 @@ define([
                 });
 
                 // 添加compId，方便删除组件
-                for (var i = 0, len = compRenderData.length; i < len; i++) {
-                    compRenderData[i].compId = serverData.id;
+                // TODO:重构
+                if ($.isArray(compRenderData)) {
+                    for (var i = 0, len = compRenderData.length; i < len; i++) {
+                        compRenderData[i].compId = serverData.id;
+                    }
+                }
+                else {
+                    compRenderData.compId = serverData.id;
                 }
 
                 var entityDefs = reportJson.entityDefs;
                 // 如果是vui，需要向form中添加配置
-                if (compData.componentType == 'vui') {
+
+                if (
+                    !$.isArray(compData.entityDescription)
+                    && compData.entityDescription.clzType == 'VUI'
+                ) {
                     formJson = this._getFormJson();
                     // 址引用，直接赋值可以生效
-                    formJson.vuiRef.input.push(compRenderData[0].id);
+                    formJson.vuiRef.input.push(compRenderData.id);
                 }
 
                 this.reportJson.entityDefs = entityDefs.concat(compRenderData);
@@ -243,13 +256,11 @@ define([
                         // 如果是vui（条件组件）要删除form中的配置
                         if (
                             arr[i].clzType == 'VUI'
-                            &&
-                            arr[i].clzKey == 'X_CALENDAR'
+                            && (arr[i].clzKey == 'X_CALENDAR' || arr[i].clzKey == 'SELECT')
                         ) {
                             that._deleteCompFromForm(arr[i].id);
                             isDeleteVUI = true;
                         }
-
                         arr.splice(i, 1);
                         // 某些组件的数据项可能是一组而并非一个，比如table
                         i--;
