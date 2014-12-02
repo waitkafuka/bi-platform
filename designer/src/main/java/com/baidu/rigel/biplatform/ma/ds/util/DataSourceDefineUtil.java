@@ -104,6 +104,8 @@ public class DataSourceDefineUtil {
                 return DataBase.MYSQL;
             case ORACLE:
                 return DataBase.ORACLE;
+            case H2:
+            		return DataBase.H2;
             default:
                 return DataBase.OTHER;
         }

@@ -1178,6 +1178,14 @@ public class QueryDataResource extends BaseResource {
     }
     
     /**
+     * 按照指标指定排序方式显示数据
+     * @return ResponseResult
+     */
+    public ResponseResult sortByMeasure() {
+    		return null;
+    }
+    
+    /**
      * 
      * @param tmpMembers
      * @param context 
