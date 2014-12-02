@@ -36,6 +36,7 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
@@ -163,6 +164,7 @@ public class QueryUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        ds.setDataBase(DataBase.valueOf(dsDefine.getType().name()));
         ds.setJdbcUrls(jdbcUrls);
         return ds;
     }
