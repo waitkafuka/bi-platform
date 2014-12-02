@@ -6,8 +6,8 @@
 define([
         'template',
         'dialog',
-        'report/edit/component-box/main-model',
-        'report/edit/component-box/main-template'
+        'report/component-box/main-model',
+        'report/component-box/main-template'
     ],
     function (
         template,
