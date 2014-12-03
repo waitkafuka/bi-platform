@@ -420,13 +420,12 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 continue;
             }
         }
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-        executor.submit(new Runnable() {
+        new Thread() {
             public void run() {
                 MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
                 connection.publishCubes(cubes, dsInfo);
             }
-        });
+        }.start();
         return true;
     }
 

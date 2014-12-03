@@ -96,6 +96,7 @@ public class FileServerClient {
                     rs.setDatas(tmpRs.getDatas()); 
                     rs.setMessage(tmpRs.getMessage());
                     rs.setStatus(tmpRs.getStatus());
+                    ctx.flush();
                     ctx.close();
                 }
                 
