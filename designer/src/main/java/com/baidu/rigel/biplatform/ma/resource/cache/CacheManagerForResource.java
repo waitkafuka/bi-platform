@@ -77,7 +77,6 @@ public class CacheManagerForResource {
             logger.info("can not get obj from cache with key : " + key);
             return null;
         }
-        logger.info("get object from cache : " + value.toString());
         return value;
     }
     
@@ -94,7 +93,6 @@ public class CacheManagerForResource {
             throw new CacheOperationException("Key is empty when setToCache Operation. ");
         }
         cache.put(key, value);
-        logger.info("set object to cache : {} ", value);
     }
     
     /**
