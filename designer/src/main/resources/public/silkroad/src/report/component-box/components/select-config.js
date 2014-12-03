@@ -18,7 +18,6 @@ define(
         // 单选下拉框 实例 描述信息（从report-ui里面获取）
         var entityDescription = {
             "clzType": "VUI",
-            "name": "dim_product_line",
             "clzKey": "ECUI_SELECT"
         };
 
@@ -33,7 +32,7 @@ define(
             var id = dynamicData.rootId + dynamicData.serverData.id;
             var data = $.extend(true, {}, entityDescription);
             data.id = id + selectIdSuffix;
-
+            data.name = dynamicData.serverData.id;
             return data;
         }
 
