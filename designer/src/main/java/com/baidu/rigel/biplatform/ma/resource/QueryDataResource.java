@@ -21,6 +21,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
@@ -42,17 +44,21 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
+import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
@@ -157,6 +163,9 @@ public class QueryDataResource extends BaseResource {
     @Resource
     private ChartBuildService chartBuildService;
     
+    @Resource
+    private DataSourceService dataSourceService;
+    
     /**
      * director
      */
@@ -170,18 +179,73 @@ public class QueryDataResource extends BaseResource {
     private DataSourceService dsService;
     
     /**
-     * TODO 初始化查询参数
+     * 初始化查询参数,初始化查询区域参数
      * @param reportId
      * @param request
-     * @return
+     * @return ResponseResult
      */
     @RequestMapping(value = "/{reportId}/init_params", method = { RequestMethod.POST })
     public ResponseResult initParams(@PathVariable("reportId") String reportId,
             HttpServletRequest request) {
+    		String[] areaIds = request.getParameter("paramList").split(",");
+    		final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+    		Map<String, List<Map<String, String>>> datas = Maps.newConcurrentMap();
+    		ExecutorService service = Executors.newFixedThreadPool(10);
+    		DataSourceDefine dsDefine;
+        try {
+            dsDefine = dataSourceService.getDsDefine(model.getDsId());
+        } catch (DataSourceOperationException e) {
+            logger.error("Fail in Finding datasource define. ", e);
+            ResponseResult rs = new ResponseResult();
+            rs.setStatus(1);
+            rs.setStatusInfo("failed");
+            return rs;
+        }
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
+
+    		for (final String areaId : areaIds) {
+    			service.submit(new Runnable() {
+    				public void run() {
+    					ExtendArea area = model.getExtendById(areaId);
+    					if (isQueryComp(area.getType())) {
+    						Item item = area.getAllItems().keySet().toArray(new Item[0])[0];
+    						Cube cube = model.getSchema().getCubes().get(area.getCubeId());
+						String dimId = item.getOlapElementId();
+						Dimension dim = cube.getDimensions().get(dimId);
+						if (dim != null) {
+							Level level = dim.getLevels().keySet().toArray(new Level[0])[0];
+							List<Map<String, String>> values;
+							try {
+								List<Member> members = level.getMembers(cube, dsInfo, null);
+								values = Lists.newArrayList();
+								members.forEach(m -> {
+									Map<String, String> tmp = Maps.newHashMap();
+									tmp.put("value", m.getUniqueName());
+									tmp.put("text", m.getCaption());
+									values.add(tmp);
+								});
+								datas.put(dim.getId(), values);
+							} catch (MiniCubeQueryException e) {
+							}
+						}
+    					}
+    				}
+    			});
+    		}
+    		service.shutdown();
         ResponseResult rs = new ResponseResult();
         rs.setStatus(0);
         rs.setStatusInfo("OK");
         return rs;
+    }
+    
+    /**
+     * 
+     * @param type 区域类型
+     * @return
+     */
+    private boolean isQueryComp(ExtendAreaType type) {
+    		return type == ExtendAreaType.SELECT;
     }
     
     /**

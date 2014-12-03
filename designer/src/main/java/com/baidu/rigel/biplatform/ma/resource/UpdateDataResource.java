@@ -56,17 +56,17 @@ public class UpdateDataResource {
 	public ResponseResult updateData(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		String dsName = request.getParameter("dsName");
 		String factTables = request.getParameter("factTables");
-		String productLine = request.getParameter("rbk");
-		if (StringUtils.isEmpty(productLine) || StringUtils.isEmpty(dsName) || StringUtils.isEmpty("factTables")) {
+//		String productLine = request.getParameter("rbk");
+		if (StringUtils.isEmpty(dsName) || StringUtils.isEmpty("factTables")) {
 			ResponseResult rs = new ResponseResult();
 			rs.setStatus(1);
-			rs.setStatusInfo("请求中需要包含dsName, rbk和factTables信息。"
+			rs.setStatusInfo("请求中需要包含dsName, factTables信息。"
 					+ "其中dsName为数据源名称，factTables为更新的事实表列表，多张表以’,‘分割");
 			return rs;
 		}
 		String[] factTableArray = factTables.split(",");
 		ResponseResult rs = new ResponseResult();
-		DataSourceDefine ds = dsService.getDsDefine(productLine, dsName);
+		DataSourceDefine ds = dsService.getDsDefine(dsName);
 		DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds);
 		MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray);
 		rs.setStatus(0);
