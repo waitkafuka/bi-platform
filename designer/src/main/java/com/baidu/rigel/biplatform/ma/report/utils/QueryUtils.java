@@ -453,6 +453,32 @@ public class QueryUtils {
 		}
 		return rs;
 	}
+
+    /**
+     * trans cube
+     * @param cube
+     * @return new Cube
+     */
+	public static Cube transformCube(Cube cube) {
+		MiniCube newCube = (MiniCube) DeepcopyUtils.deepCopy(cube);
+		final Map<String, Measure> measures = Maps.newConcurrentMap();
+		cube.getMeasures().values().forEach(m -> {
+			measures.put(m.getName(), m);
+		});
+		newCube.setMeasures(measures);
+		final Map<String, Dimension> dimensions = Maps.newLinkedHashMap();
+		cube.getDimensions().values().forEach(dim -> {
+			MiniCubeDimension tmp = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
+			LinkedHashMap<String, Level> tmpLevel = Maps.newLinkedHashMap();
+			dim.getLevels().values().forEach(level -> {
+				tmpLevel.put(level.getName(), level);
+			});
+			tmp.setLevels(tmpLevel);
+			dimensions.put(tmp.getName(), tmp);
+		});
+		newCube.setDimensions(dimensions);
+		return newCube;
+	}
     
 
 }
