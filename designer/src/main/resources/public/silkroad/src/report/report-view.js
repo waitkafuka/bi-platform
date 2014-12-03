@@ -1,6 +1,6 @@
 ﻿/**
  * @file 报表的公共功能 - view
- * @author 赵晓强(longze_xq@163.com)
+ * @author 赵晓强(v_zhaoxiaoqiang@baidu.com)
  * @date 2014-10-10
  */
 define([
@@ -14,7 +14,7 @@ define([
         dialog,
         ReportModel,
         publishReportDialogTemplate
-    ) {
+        ) {
         return Backbone.View.extend({
 
             /**
@@ -107,16 +107,16 @@ define([
                 clip.addEventListener('load', function (client) {
                     //debugstr("Flash movie loaded and ready.");
                 });
-                clip.addEventListener('mouseOver', function (client) {
-                    // update the text on mouse over
+                clip.addEventListener('mouseDown', function (client) {
+                    // update the text on mouse down
                     var contentId = btnId + 'CopyContent';
                     var copyContent = $('#' + contentId).html();
-                    copyContent = copyContent.replace('&lt;', '<');
-                    copyContent = copyContent.replace('&gt;', '>');
+                    copyContent = copyContent.replace(/&lt;/g, '<');
+                    copyContent = copyContent.replace(/&gt;/g, '>');
                     clip.setText(copyContent);
                 });
-                clip.addEventListener('complete', function (client, text) {
-                    clip.setText(copyContent);
+                clip.addEventListener('complete', function () {
+                    alert('复制成功');
                 });
                 clip.glue(btnId, btnId + 'Container');
             }
