@@ -95250,7 +95250,7 @@ $namespace('di.shared.ui');
             paramList.push(input.$di('getDef').name);
         }
         paramList = paramList.join(',');
-        
+
         this.$sync(
             this.getModel(),
             'DATA',

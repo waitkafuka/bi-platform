@@ -451,7 +451,7 @@ define([
                     if (selectedChartType === 'pie') {
                         var $chartTypes = $target.parent().siblings('div');
                         if ($chartTypes.length >= 1) {
-                            alert('不能选择两个饼图');
+                            alert('饼图只能选择一个指标');
                             return;
                         }
 //                        var flag = false;

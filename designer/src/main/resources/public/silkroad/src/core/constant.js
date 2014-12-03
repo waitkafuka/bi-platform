@@ -26,7 +26,9 @@ define(function () {
     var CHART_TYPES = {
         'bar': false,
         'pie': false,
-        'line': false
+        'line': false,
+        'column': false,
+        'map': false
     };
 
     /**

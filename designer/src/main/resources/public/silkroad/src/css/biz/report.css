@@ -340,6 +340,12 @@
 .comp-setting .item .line {
     background: url(../img/line.png) no-repeat;
 }
+.comp-setting .item .column {
+    background: url(../img/column.png) no-repeat;
+}
+.comp-setting .item .map {
+    background: url(../img/map.png) no-repeat;
+}
 .comp-setting .icon-letter {
     right: 3px;
     top: 2px;
@@ -368,6 +374,12 @@
 .comp-setting-charticons .pie {
     background: url(../img/pie.png) no-repeat;
 }
+.comp-setting-charticons .column{
+    background: url(../img/column.png) no-repeat;
+}
+.comp-setting-charticons .map {
+    background: url(../img/map.png) no-repeat;
+}
 .comp-setting-charticons .bar:hover {
     background: url(../img/bar-hover.png) no-repeat;
 }
@@ -377,6 +389,12 @@
 .comp-setting-charticons .pie:hover {
     background: url(../img/pie-hover.png) no-repeat;
 }
+.comp-setting-charticons .column:hover {
+    background: url(../img/column-hover.png) no-repeat;
+}
+.comp-setting-charticons .map:hover {
+    background: url(../img/map-hover.png) no-repeat;
+}
 .comp-setting-charticons .bar-focus {
     background: url(../img/bar-hover.png) no-repeat;
 }
@@ -385,6 +403,12 @@
 }
 .comp-setting-charticons .pie-focus{
     background: url(../img/pie-hover.png) no-repeat;
+}
+.comp-setting-charticons .column-focus {
+    background: url(../img/column-hover.png) no-repeat;
+}
+.comp-setting-charticons .map-focus{
+    background: url(../img/map-hover.png) no-repeat;
 }
 /* 保存/发布按钮 */
 .canvas .button-save-report {
