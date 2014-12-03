@@ -9,7 +9,8 @@ define([
         'report/component-box/components/calendar-config',
         'report/component-box/components/liteolap-config',
         'report/component-box/components/form-config',
-        'report/component-box/components/select-config'
+        'report/component-box/components/select-config',
+        'report/component-box/components/text-config'
     ],
     function (
         tableConfig,
@@ -17,7 +18,8 @@ define([
         calendarConfig,
         liteolapConfig,
         formConfig,
-        selectConfig
+        selectConfig,
+        textConfig
     ) {
         var rootId = 'snpt';
 
@@ -62,7 +64,8 @@ define([
                             chartConfig,
                             calendarConfig,
                             selectConfig,
-                            liteolapConfig
+                            liteolapConfig,
+                            textConfig
                         ]
                     }
                 ],

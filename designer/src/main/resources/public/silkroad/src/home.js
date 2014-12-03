@@ -1,75 +1,60 @@
 /**
  * @file: 报表首页
- * @author: weiboxue(weiboxue)
+ * @author: weiboxue(wbx_901118@sina.com)
  * @date: 2014-11-20
  */
-$(function () {
+(function () {
     // dom元素容器
-    var dom = {
-        register_sign: $('#home-button'),
-        register_top: $('.register-top'),
-        sign_top: $('.sign-top'),
-        body: $('body'),
-        register_infor: $('.register-infor'),
-        register_title: $('.register-title'),
-        register: $('#register'),
-        sign: $('#sign'),
-        sign_usename: $('#infor-5'),
-        sign_pass: $('#infor-6'),
-        register_usename: $('#infor-0'),
-        register_pass: $('#infor-1'),
-        register_repass: $('#infor-2'),
-        register_company: $('#infor-3'),
-        register_email: $('#infor-4'),
-        home_title: $('.home-title'),
-        home_content: $('.home-content'),
-        home_pic: $('.home-pic'),
-        home_register_title: $('.home-register-title'),
-        home_register_line: $('.home-register-line'),
-        home_sign_title: $('.home-sign-title'),
-        home_sign_line: $('.home-sign-line'),
-        servicetype: $('#servicetype')
-    };
-    //输入框清空所用的判断条件数组
-    var arrInpVal = [];
-    /**
-     * 初始化页面
-     */
-    function initView() {
-        var $regInfo = dom.register_infor;
-        //输入框清空所用的判断条件数组初始化
-        for (var i = 0; i < $regInfo.length; i ++) {
-            arrInpVal.push($($regInfo[i]).val());
-        }
-        //登录错误提示初始化
-        $regInfo.siblings('div').html('');
-    }
+    var dom;
+    // 提示信息
+    var textcompany = '请填写所在部门名称';
+    var textemail = '请填写您的邮箱';
+    var textrepass = '请确认密码';
+    var textpass = '请输入密码';
+    var textusename = '请输入用户名';
+    var textdoublepass = '两次密码输入不一致，请重新输入';
+    // 入口
+    $(function () {
+        dom = {
+            register_sign: $('#home-button'),
+            register_top: $('.register-top'),
+            sign_top: $('.sign-top'),
+            register_infor: $('.register-infor'),
+            register_title: $('.register-title'),
+            register: $('#register'),
+            sign: $('#sign'),
+            sign_usename: $('#sign-usename'),
+            sign_pass: $('#sign-pass'),
+            register_usename: $('#register-usename'),
+            register_pass: $('#register-pass'),
+            register_repass: $('#register-repass'),
+            register_company: $('#register-company'),
+            register_email: $('#register-email'),
+            home_title: $('.home-title'),
+            home_content: $('.home-content'),
+            home_pic: $('.home-pic'),
+            home_register_title: $('.home-register-title'),
+            home_register_line: $('.home-register-line'),
+            home_sign_title: $('.home-sign-title'),
+            home_sign_line: $('.home-sign-line'),
+            servicetype: $('#servicetype')
+        };
+        bindEvents();
+    });
     /**
      * 页面事件绑定
      */
     function bindEvents() {
-        //登录注册的事件
+        // 登录注册的事件
         fnRegisterSign();
-        //输入框内容清空恢复事件
+        // 输入框内容清空恢复事件
         inputText();
-        //关闭登录和注册框
+        // 关闭登录和注册框
         closeSignReg();
-        //登录事件
+        // 登录事件
         signIn();
-        //注册事件
+        // 注册事件
         registerIn();
-        // 阻止注册框事件冒泡
-        dom.register_top.click(function (event) {
-            event.stopPropagation();
-        });
-        // 阻止登录狂事件冒泡
-        dom.sign_top.click(function (event) {
-            event.stopPropagation();
-        });
-        // 点击页面非登录注册区域，关闭弹出框
-        dom.body.click(function () {
-            fnAnimateReturn();
-        })
     }
     /**
      * 注册事件
@@ -82,60 +67,63 @@ $(function () {
             var $pass = dom.register_pass;
             var $usename = dom.register_usename;
             var $servicetype = dom.servicetype;
-            if($company.val() == arrInpVal[3]) {
-                $company.next('div').html('请填写所在部门名称');
+            if ($company.val() == '') {
+                $company.next('div').html(textcompany);
             }
-            if($email.val() == arrInpVal[4]) {
-                $email.next('div').html('请填写您的百度邮箱');
+            if ($email.val() == '') {
+                $email.next('div').html(textemail);
             }
-            if($repass.val() == arrInpVal[2]) {
-                $repass.next('div').html('请确认密码');
+            if ($repass.val() == '') {
+                $repass.next('div').html(textrepass);
             }
-            if($pass.val() == arrInpVal[1]) {
-                $pass.next('div').html('请输入密码');
+            if ($pass.val() == '') {
+                $pass.next('div').html(textpass);
             }
-            if($usename.val() == arrInpVal[0]) {
-                $usename.next('div').html('请输入用户名');
+            if ($usename.val() == '') {
+                $usename.next('div').html(textusename);
             }
-            if($pass.val() != arrInpVal[1] && $repass.val() != arrInpVal[2]) {
-                if($usename.val() != arrInpVal[0] && $email.val() != arrInpVal[4]) {
-                    if($company.val() != arrInpVal[3]) {
-                        if($pass.val() == $repass.val()) {
-                            $.ajax({
-                                //客户端向服务器发送请求时采取的方式
-                                type : "post",
-                                cache : false,
-                                //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
-                                dataType : 'Json',
-                                //指明客户端要向哪个页面里面的哪个方法发送请求
-                                url : "/silkroad/register",
-                                data : {
-                                    name : $usename.val(),
-                                    pwd : $pass.val(),
-                                    department: $company.val(),
-                                    email: $email.val(),
-                                    serviceType: $servicetype.val()
-                                },
-                                //客户端调用服务器端方法成功后执行的回调函数
-                                success : function(msg) {
-                                    alert('注册成功,请注意查收邮件');
-                                    //$.get('www.baidu.com');
-                                    //$("#resText").html(msg);
-                                    /*
-                                     if (result.d=="success") {
-                                     alert("登陆成功");
-                                     } else {
-                                     alert("登录失败");
-                                     }*/
-                                }
-                            });
-                        }else {
-                            $pass.val('两次密码输入不一致，请重新输入');
-                            $repass.val('两次密码输入不一致，请重新输入');
-                            $pass.css('color', 'red');
-                            $repass.css('color', 'red');
+            if (
+                $pass.val() != ''
+                && $repass.val() != ''
+                && $usename.val() != ''
+                && $email.val() != ''
+                && $company.val() != ''
+                ) {
+                if ($pass.val() == $repass.val()) {
+                    $.ajax({
+                        //客户端向服务器发送请求时采取的方式
+                        type : "post",
+                        cache : false,
+                        //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
+                        dataType : 'Json',
+                        //指明客户端要向哪个页面里面的哪个方法发送请求
+                        url : "/silkroad/register",
+                        data : {
+                            name : $usename.val(),
+                            pwd : $pass.val(),
+                            department: $company.val(),
+                            email: $email.val(),
+                            serviceType: $servicetype.val()
+                        },
+                        //客户端调用服务器端方法成功后执行的回调函数
+                        success : function(msg) {
+                            alert('注册成功,请注意查收邮件');
+                            //$.get('www.baidu.com');
+                            //$("#resText").html(msg);
+                            /*
+                             if (result.d=="success") {
+                             alert("登陆成功");
+                             } else {
+                             alert("登录失败");
+                             }*/
                         }
-                    }
+                    });
+                }
+                else {
+                    $pass.val('');
+                    $repass.val('');
+                    $pass.attr('placeholder', textdoublepass);
+                    $repass.attr('placeholder', textdoublepass);
                 }
             }
         });
@@ -147,13 +135,13 @@ $(function () {
         dom.sign.click(function () {
             var $pass = dom.sign_pass;
             var $usename = dom.sign_usename;
-            if($usename.val() == arrInpVal[5]) {
-                $usename.next('div').html('请填写邮箱');
+            if ($usename.val() == '') {
+                $usename.next('div').html(textusename);
             }
-            if($pass.val() == arrInpVal[6]) {
-                $pass.next('div').html('请输入密码');
+            if ($pass.val() == '') {
+                $pass.next('div').html(textpass);
             }
-            if($usename.val() != arrInpVal[5] && $pass.val() != arrInpVal[6]) {
+            if ($usename.val() != '' && $pass.val() != '') {
                 $.ajax({
                     //客户端向服务器发送请求时采取的方式
                     type : "post",
@@ -196,26 +184,15 @@ $(function () {
      */
     var inputText = function () {
         dom.register_infor.focus(function () {
-            if($(this).val() == '所属部门' || $(this).val() == '您的百度邮箱' || $(this).val() == '用户名' || $(this).val() == '密码' || $(this).val() == '确认密码' || $(this).val() == '两次密码输入不一致，请重新输入') {
-                $(this).css('color', '#919191');
-                $(this).val('');
-                $(this).next('div').html('');
-            }
+            $(this).next('div').html('');
         });
-        var num = 0;
-        dom.register_infor.blur(function () {
-            if($(this).val() == '') {
-                num = Number($(this).attr('id').split('-')[1]);
-                $(this).val(arrInpVal[num]);
-            }
-        })
     };
     /**
      * 登录，注册按钮事件
      */
     var fnRegisterSign = function () {
         // 登录，注册弹出框
-        dom.register_sign.find('div').click(function (event) {
+        dom.register_sign.find('div').click(function () {
             var $retitle = dom.home_register_title;
             var $sititle = dom.home_sign_title;
             var $reline = dom.home_register_line;
@@ -224,14 +201,14 @@ $(function () {
             var $sitop = dom.sign_top;
             $retop.hide();
             $sitop.hide();
-            if($(this).attr('class') == 'registration') {
+            if ($(this).attr('class') == 'registration') {
                 fnAnimateHide('0px', '575px', '260px', 300);
                 fnAnimateShow('200px', '407px', $retitle, $reline, $retop);
-            }else if($(this).attr('class') == 'experience') {
+            }
+            else if ($(this).attr('class') == 'experience') {
                 fnAnimateHide('500px', '375px', '460px', 300);
                 fnAnimateShow('-50px', '365px', $sititle, $siline, $sitop)
             }
-            event.stopPropagation();
         });
         /**
          * 切换动画函数(主页元素)
@@ -271,7 +248,7 @@ $(function () {
             $hopic.animate({'left': lepic, 'opacity': '0'}, 300, function () {
                 $hopic.hide();
                 title.fadeIn(200);
-                line.animate({'width': widthline},300);
+                line.animate({'width': widthline}, 300);
                 box.show();
             });
         };
@@ -306,6 +283,4 @@ $(function () {
             $hopic.animate({'left': '100px', 'opacity': '1'}, 200);
         });
     };
-    initView();
-    bindEvents();
-});
+})();

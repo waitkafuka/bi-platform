@@ -11,7 +11,8 @@ define([
         'report/edit/ind-template',
         'report/edit/dim-template',
         'report/edit/drag-ind-dim/main-view',
-        'report/edit/ue-view'
+        'report/edit/ue-view',
+        'report/global-setting-btns/global-view'
     ],
     function (
         template,
@@ -21,13 +22,14 @@ define([
         indTemplate,
         dimTemplate,
         DragView,
-        UEView
+        UEView,
+        GlobalView
     ) {
-
         return Backbone.View.extend({
             // view事件绑定
             events: {
-                'change .j-cube-select': 'changeCube'
+                'change .j-cube-select': 'changeCube',
+                'click .j-globalbtn': 'setglobalbtn'
             },
 
             /**
@@ -43,9 +45,18 @@ define([
                     isEdit: option.isEdit
                 });
                 this.model.loadCubeList();
-
+                this.globalView = new GlobalView();
                 this.initListening();
-                window.dataInsight.main = this;
+            },
+
+            /**
+             * 获取cube列表
+             *
+             * @param {event} event 下拉框值改变的事件
+             * @public
+             */
+            setglobalbtn: function (event) {
+                this.globalView.setGlobal();
             },
 
             /**

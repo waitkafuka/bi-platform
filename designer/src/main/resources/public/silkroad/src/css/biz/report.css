@@ -523,6 +523,7 @@
 }
 /* 表2,3的按钮部分 */
 .con-copy {
+    position: relative;
     float: left;
     width: 70px;
     height: 25px;
@@ -588,4 +589,12 @@
 }
 .data-format-alone-dim > select {
     float: left;
+}
+/* 文本框组件样式 */
+.text-div {
+    width: 100%;
+    border: 0;
+    height: 20px;
+    cursor: pointer;
+    color: #919191;
 }
