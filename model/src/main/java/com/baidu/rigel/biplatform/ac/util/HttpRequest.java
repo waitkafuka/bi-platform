@@ -267,7 +267,7 @@ public class HttpRequest {
             prefix = requestUrl.substring(0, requestUrl.indexOf("["));
             suffix = requestUrl.substring(requestUrl.indexOf("]") + 1);
         }
-        LOGGER.info("start to send get:" + requestUrl);
+        LOGGER.info("start to send post:" + requestUrl);
         long current = System.currentTimeMillis();
         for (String address : addresses) {
             String postUrl = prefix + address + suffix;

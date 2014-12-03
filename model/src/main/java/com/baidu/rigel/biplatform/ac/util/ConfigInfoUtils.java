@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.ac.util;
 import java.io.IOException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 /**
@@ -28,6 +30,12 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
  */
 public class ConfigInfoUtils {
 
+    
+    /** 
+     * LOG 
+     */
+    private static Logger LOG = LoggerFactory.getLogger(ConfigInfoUtils.class);
+    
     private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
     /**
      * serverAddress
@@ -36,8 +44,9 @@ public class ConfigInfoUtils {
 
     static {
         try {
-            Properties properties = PropertiesLoaderUtils.loadAllProperties("/config/ac.properties");
-            SERVERADDRESS = properties.getProperty("server.tesseract.address", DEFAULT_SERVER_ADDRESS);
+            Properties properties = PropertiesLoaderUtils.loadAllProperties("config/ac.properties");
+            SERVERADDRESS = properties.getProperty("server.tesseract.address",DEFAULT_SERVER_ADDRESS);
+            LOG.info("load serveraddress from properties:{}",SERVERADDRESS);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -59,6 +68,10 @@ public class ConfigInfoUtils {
      */
     public static String getServerAddress() {
         return SERVERADDRESS;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(SERVERADDRESS);
     }
 
 }
