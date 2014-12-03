@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
@@ -52,6 +53,7 @@ public class MiniCubeSqlConnectionTest {
      * @throws IOException
      */
     @Test
+    @Ignore
     public void testQuery() throws IOException {
 
         File f = new File("c:/test.json");

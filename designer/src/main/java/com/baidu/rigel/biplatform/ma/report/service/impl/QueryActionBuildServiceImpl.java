@@ -369,7 +369,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             // TODO 支持url传参数，需后续修改,dirty solution
             // 第一个条件判断是否包含url规定的参数
             // 第二个条件判断是否为下钻,下钻不走此流程
-            if (values.containsKey(Constants.ORG_NAME) && 
+            if ((values.containsKey(Constants.ORG_NAME) || values.containsKey(Constants.APP_NAME)) && 
                     ! (values.containsKey("action") && values.get("action").equals("expand")) &&
                     element instanceof StandardDimension && item.getPositionType() == PositionType.X
                    ) {
@@ -385,7 +385,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         String name = dim.getName();
                         // 维度的列名
                         String columnName = name.replace(tableName+"_", "");
-                        if (columnName.equals(Constants.ORG_NAME)) {
+                        if (columnName.equals(Constants.ORG_NAME)|| values.containsKey(Constants.APP_NAME)) {
                             Object val = values.get(columnName);
                             if (val instanceof String) {
                                 String [] vals = ( (String) val).split(",");

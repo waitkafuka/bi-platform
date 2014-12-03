@@ -1145,7 +1145,7 @@ public class QueryDataResource extends BaseResource {
         cube = QueryUtils.getCubeWithExtendArea(model, area);
         ((MiniCube) cube).setSchema(model.getSchema());
         final Dimension newDim = QueryUtils.convertDim2Dim(dim);
-        if (params.containsKey(Constants.ORG_NAME)) {
+        if (params.containsKey(Constants.ORG_NAME) || params.containsKey(Constants.APP_NAME)) {
             ResponseResult rs = new ResponseResult();
             rs.setStatus(0);
             rs.setStatusInfo("OK");
@@ -1175,6 +1175,14 @@ public class QueryDataResource extends BaseResource {
         rs.setData(dimValue);
         
         return rs;
+    }
+    
+    /**
+     * 按照指标指定排序方式显示数据
+     * @return ResponseResult
+     */
+    public ResponseResult sortByMeasure() {
+    		return null;
     }
     
     /**
