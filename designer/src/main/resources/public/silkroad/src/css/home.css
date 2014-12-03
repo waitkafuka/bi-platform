@@ -86,27 +86,47 @@ body
     font-weight: 600;
     text-decoration: none;
     border-radius: 8px;
-}
-.home-button div a{
     line-height: 200%;
     font-size: 20px;
-    color: white;
-    font-family: "微软雅黑";
-    font-weight: 600;
-    text-decoration: none;
-    display: block;
-    width: 100%;
-    height:100%;
-    padding: 0;
-    margin: 0;
+    cursor: pointer;
 }
 .registration {
     margin-right: 10px;
+    background: -moz-linear-gradient(limegreen, green);
+    background: -webkit-linear-gradient(limegreen, green);
+    background: -o-linear-gradient(limegreen, green);
+    background: -ms-linear-gradient(limegreen, green);
+    background: linear-gradient(limegreen, green);
+    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = 'limegreen', endColorstr = 'green', GradientType = 0);
+    background-color: limegreen;
+}
+.registration:hover {
     background-color: green;
+    background: -moz-linear-gradient(darkgreen, green);
+    background: -webkit-linear-gradient(darkgreen, green);
+    background: -o-linear-gradient(darkgreen, green);
+    background: -ms-linear-gradient(darkgreen, green);
+    background: linear-gradient(darkgreen, green);
+    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#1e5ca6', endColorstr = 'green', GradientType = 0)
 }
 .experience {
     margin-left: 10px;
+    background: -moz-linear-gradient(deepskyblue, #0167cc);
+    background: -webkit-linear-gradient(deepskyblue, #0167cc);
+    background: -o-linear-gradient(deepskyblue, #0167cc);
+    background: -ms-linear-gradient(deepskyblue, #0167cc);
+    background: linear-gradient(deepskyblue, #0167cc);
+    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#4698E9', endColorstr = '#0167CC', GradientType = 0);
     background-color: deepskyblue;
+}
+.experience:hover {
+    background-color: #0167cc;
+    background: -moz-linear-gradient(#1e5ca6, #0167cc);
+    background: -webkit-linear-gradient(#1e5ca6, #0167cc);
+    background: -o-linear-gradient(#1e5ca6, #0167cc);
+    background: -ms-linear-gradient(#1e5ca6, #0167cc);
+    background: linear-gradient(#1e5ca6, #0167cc);
+    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#1e5ca6', endColorstr = '#0167CC', GradientType = 0)
 }
 /*报表图片区域样式*/
 .home-pic {
@@ -121,7 +141,7 @@ body
     left: 325px;
     width:350px;
     height:176px;
-    background: url("img/pivbar.png");
+    background: url('../css/img/pivbar.png');
     z-index: 2;
 }
 .pic-table {
@@ -130,7 +150,7 @@ body
     left: 155px;
     width:350px;
     height:176px;
-    background: url("img/pictable.png");
+    background: url("../css/img/pictable.png");
 }
 .pic-pie {
     position: absolute;
@@ -138,7 +158,7 @@ body
     right: 155px;
     width:350px;
     height:176px;
-    background: url("img/picpie.png");
+    background: url("../css/img/picpie.png");
 }
 .infor-margin-top {
     margin-top: 24px;
@@ -220,10 +240,11 @@ body
 .register-title div {
     width: 20px;
     height: 20px;
-    background: url("img/close.png");
+    background: url("../css/img/close.png");
     float: right;
     margin-top: 1px;
     margin-right: 20px;
+    cursor: pointer;
 }
 .register-title div a {
     width: 100%;
@@ -277,16 +298,13 @@ body
     background: royalblue;
     border-radius: 5px;
     margin: 0 auto;
-}
-.register-btn a {
-    width: 100%;
-    height: 100%;
     text-align: center;
     padding-top: 5px;
     padding-bottom: 5px;
     color: #ffffff;
     font-family: '微软雅黑';
     text-decoration: none;
+    cursor: pointer;
 }
 /*登录区域标题*/
 .sign-top{

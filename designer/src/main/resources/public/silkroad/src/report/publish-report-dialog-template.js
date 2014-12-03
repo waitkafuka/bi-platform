@@ -18,7 +18,7 @@ define(['template'], function (template) {
         $out+=$escape(url);
         $out+='"&gt;&lt;/iframe&gt;\r\n                </li>\r\n            </ul>\r\n            <ul id="copyTiledBtnContainer" class="con-copy">\r\n                <li id="copyTiledBtn"><a href="javascript:;"><span class="conspan">复制代码</span></a></li>\r\n            </ul>\r\n        </div>\r\n        <div class="con-embedded">\r\n            <ul class="con-report">\r\n                <li class="con-report-title">嵌入式报表</li>\r\n                <li>下面的代码，能够适应各业务系统的个性化布局展现，可以实现报表的自适应调整</li>\r\n                <li id="copyEmbeddedBtnCopyContent" class="con-report-text con-br">\r\n                    &lt;iframe height="600" allowTransparency="true"\r\n                    style="width:100%;border:none;overflow:auto;" frameborder="0"\r\n                    src="';
         $out+=$escape(url);
-        $out+='"&gt;&lt;/iframe&gt;</li>\r\n            </ul>\r\n            <ul id="copyEmbeddedBtnContainer" class="con-copy">\r\n                <li id="copyEmbeddedBtn"><a href="javascript:;"><span class="conspan">复制代码</span></a></li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>';
+        $out+='"&gt;&lt;/iframe&gt;\r\n                </li>\r\n            </ul>\r\n            <ul id="copyEmbeddedBtnContainer" class="con-copy">\r\n                <li id="copyEmbeddedBtn"><a href="javascript:;"><span class="conspan">复制代码</span></a></li>\r\n            </ul>\r\n        </div>\r\n    </div>\r\n</div>';
         return $out;
     }
     return { render: anonymous };

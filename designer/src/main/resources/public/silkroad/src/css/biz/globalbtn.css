@@ -1,0 +1,62 @@
+/*-------------------------------------------------*/
+/* 业务逻辑 -- 参数维度                                  */
+/*-------------------------------------------------*/
+.j-globalbtn {
+    width: 100%;
+    padding: 5px;
+}
+.j-globalbtn div {
+    width: 100px;
+    height: 29px;
+    background: -moz-linear-gradient(#4698e9, #0167cc);
+    background: -webkit-linear-gradient(#4698e9, #0167cc);
+    background: -o-linear-gradient(#4698e9, #0167cc);
+    background: -ms-linear-gradient(#4698e9, #0167cc);
+    background: linear-gradient(#4698e9, #0167cc);
+    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#4698E9', endColorstr = '#0167CC', GradientType = 0);
+    background-color: #4698e9;
+    cursor: pointer;
+    color: #FFF;
+    text-align: center;
+    font-size: 13px;
+    line-height: 28px;
+}
+.j-globalbtn div:hover {
+    background-color: #0167cc;
+    background: -moz-linear-gradient(#1e5ca6, #0167cc);
+    background: -webkit-linear-gradient(#1e5ca6, #0167cc);
+    background: -o-linear-gradient(#1e5ca6, #0167cc);
+    background: -ms-linear-gradient(#1e5ca6, #0167cc);
+    background: linear-gradient(#1e5ca6, #0167cc);
+    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#1e5ca6', endColorstr = '#0167CC', GradientType = 0)
+}
+/* 参数维度列表 */
+.j-global-box {
+    margin: 0 auto;
+    width: 360px;
+}
+/* 添加维度按钮 */
+.j-global-add {
+    cursor: pointer;
+    margin-top: 5px;
+}
+/* 维度属性 */
+.j-global-attr {
+    margin-top: 5px;
+}
+.j-global-attr input {
+    height: 20px;
+    width: 165px;
+}
+.j-global-attr select {
+    height: 24px;
+    width: 165px;
+}
+/* 确认编辑切换按钮 */
+.j-global-close {
+    cursor: pointer;
+    width: 16px;
+    height: 20px;
+    float: right;
+    background-image: url("../img/acteer.png");
+}

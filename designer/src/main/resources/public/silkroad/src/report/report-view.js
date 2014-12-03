@@ -107,16 +107,16 @@ define([
                 clip.addEventListener('load', function (client) {
                     //debugstr("Flash movie loaded and ready.");
                 });
-                clip.addEventListener('mouseOver', function (client) {
-                    // update the text on mouse over
+                clip.addEventListener('mouseDown', function (client) {
+                    // update the text on mouse down
                     var contentId = btnId + 'CopyContent';
                     var copyContent = $('#' + contentId).html();
-                    copyContent = copyContent.replace('&lt;', '<');
-                    copyContent = copyContent.replace('&gt;', '>');
+                    copyContent = copyContent.replace(/&lt;/g, '<');
+                    copyContent = copyContent.replace(/&gt;/g, '>');
                     clip.setText(copyContent);
                 });
-                clip.addEventListener('complete', function (client, text) {
-                    clip.setText(copyContent);
+                clip.addEventListener('complete', function () {
+                    alert('复制成功');
                 });
                 clip.glue(btnId, btnId + 'Container');
             }
