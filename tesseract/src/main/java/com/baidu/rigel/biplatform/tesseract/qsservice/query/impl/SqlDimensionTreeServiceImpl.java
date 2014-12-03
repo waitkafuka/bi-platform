@@ -19,7 +19,6 @@
 package com.baidu.rigel.biplatform.tesseract.qsservice.query.impl;
 
 import org.apache.commons.collections.MapUtils;
-import org.apache.log4j.Logger;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -46,7 +45,7 @@ public class SqlDimensionTreeServiceImpl implements DimensionTreeService<SqlData
     /**
      * log
      */
-    private Logger log = Logger.getLogger(this.getClass());
+//    private Logger log = Logger.getLogger(this.getClass());
 
     /**
      * construct with
