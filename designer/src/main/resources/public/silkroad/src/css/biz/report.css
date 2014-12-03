@@ -592,9 +592,9 @@
 }
 /* 文本框组件样式 */
 .text-div {
-    width: 200px;
+    width: 100%;
+    border: 0;
     height: 20px;
-    border: 1px solid #919191;
     cursor: pointer;
     color: #919191;
 }
