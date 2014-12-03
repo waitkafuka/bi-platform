@@ -1,6 +1,6 @@
 /**
  * @file:   文本框的配置信息
- * @author: weiboxue(weiboxue@baidu.com)
+ * @author: weiboxue(wbx_901118@sina.com)
  * @date:   2014/11/26
  */
 define(
@@ -11,7 +11,7 @@ define(
     function (
         Constant,
         TextVmTemplate
-        ) {
+    ) {
         // 文本框下拉框id后缀
         var textIdSuffix = Constant.COMPONENT_ID_SUFFIX.TEXT;
 

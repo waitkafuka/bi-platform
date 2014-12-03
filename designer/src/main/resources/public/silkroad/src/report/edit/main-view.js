@@ -1,6 +1,6 @@
 /**
  * @file
- * @author 赵晓强(v_zhaoxiaoqiang@baidu.com)
+ * @author 赵晓强(longze_xq@163.com)
  * @date 2014-7-28
  */
 define([
@@ -24,8 +24,7 @@ define([
         DragView,
         UEView,
         GlobalView
-        ) {
-
+    ) {
         return Backbone.View.extend({
             // view事件绑定
             events: {
