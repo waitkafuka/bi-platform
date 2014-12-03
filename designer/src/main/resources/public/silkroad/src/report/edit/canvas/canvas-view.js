@@ -100,8 +100,7 @@ define([
                         var $realComp = ui.helper.clone().html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
                         var compType = $realComp.attr('data-component-type');
                         var compData = compBoxModel.getComponentData(compType);
-
-                        $realComp.removeClass(compData.class + ' active');
+                        $realComp.removeClass(compData.iconClass + ' active');
                         $realComp.addClass(compData.renderClass);
                         $realComp.css({ 'cursor': 'auto' });
                         $report.removeClass('active');
@@ -138,7 +137,6 @@ define([
                     }
                 });
             },
-
             /**
              * 添加一个组件(提交后台获取id，并在vm与json中添加相关数据)
              *

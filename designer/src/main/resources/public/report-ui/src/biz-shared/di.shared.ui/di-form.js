@@ -186,9 +186,12 @@ $namespace('di.shared.ui');
 
         // 初始化参数
         var paramList = [];
-        for (var i = 0, input; input = this._aInput[i]; i ++ ) {
+        for (var i = 0, input; i < this._aInput.length; i ++ ) {
+            input = this._aInput[i];
             paramList.push(input.$di('getDef').name);
         }
+        paramList = paramList.join(',');
+
         this.$sync(
             this.getModel(),
             'DATA',
@@ -218,18 +221,23 @@ $namespace('di.shared.ui');
         var inputs = this._aInput;
         var dateName;
         var dateKey;
-        for (var i = 0, input = inputs[i]; i < inputs.length; i++ ) {
+        var name;
+        var options = {};
+        for (var i = 0, input; i < inputs.length; i++ ) {
+            input = inputs[i];
             if (input.$di('getDef').clzKey === 'X_CALENDAR') {
                 dateName = input.$di('getDef').name;
                 dateKey = input.$di('getDef').dateKey;
             }
+            else {
+                name = input.$di('getDef').name;
+                options[name] = this.$di('getValue')[name];
+            }
         }
         if (dateName) {
             var dateParam = this.$di('getValue')[dateName];
-            var options = {};
             options[dateKey[dateParam.granularity]] = dateParam;
         }
-
         this.$sync(
             this.getModel(),
             'UPDATE_CONTEXT',
