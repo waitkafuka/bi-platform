@@ -95290,7 +95290,7 @@ $namespace('di.shared.ui');
             }
             else {
                 name = input.$di('getDef').name;
-                options[name] = this.$di('getValue')[name];
+                options[ input.$di('getDef').dimId] = this.$di('getValue')[name];
             }
         }
         if (dateName) {
@@ -95342,14 +95342,14 @@ $namespace('di.shared.ui');
     function buildData(data, el) {
     	 var curData;
          var def = el.$di('getDef');
-         var sourceData;
+         var sourceData = data;
          var defaultData;
          
          // 如果data存在，再进行赋值
-         if (data) {
-         	sourceData = data.params;
-         	defaultData = data.interactResult;
-         } 
+//         if (data) {
+//         	sourceData = data.params;
+//         	defaultData = data.interactResult;
+//         }
          
          // 如果是时间，把时间默认数据格式重组为{ timeType: 'M' }返回
          if (def.clzKey === 'X_CALENDAR') {
