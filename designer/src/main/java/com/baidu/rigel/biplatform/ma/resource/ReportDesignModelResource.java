@@ -802,7 +802,8 @@ public class ReportDesignModelResource extends BaseResource {
             runTimeModel.getLocalContextByAreaId(area.getChartAreaId()).reset();
             runTimeModel.getLocalContextByAreaId(area.getTableAreaId()).reset();
         }
-        runTimeModel.getLocalContextByAreaId(areaId).reset();
+        runTimeModel.getLocalContext().values().forEach(ctx -> ctx.reset());
+//        runTimeModel.getLocalContextByAreaId(areaId).reset();
         runTimeModel.getContext().reset();
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("successfully remode item from area");

@@ -185,7 +185,7 @@ public class QueryDataResource extends BaseResource {
     	        return rs;
     		}
     		final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
-    		Map<String, List<Map<String, String>>> datas = Maps.newConcurrentMap();
+    		Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
     		for (final String areaId : areaIds) {
 			ExtendArea area = model.getExtendById(areaId);
 			if (area != null && isQueryComp(area.getType())
@@ -212,7 +212,9 @@ public class QueryDataResource extends BaseResource {
 							tmp.put("text", m.getCaption());
 							values.add(tmp);
 						});
-						datas.put(dim.getId(), values);
+						Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
+						datasource.put("datasource", values);
+						datas.put(areaId, datasource);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -452,14 +454,15 @@ public class QueryDataResource extends BaseResource {
         }
         runTimeModel.getContext().reset();
         runTimeModel.getContext().setParams(newParams);
-        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
              */
+        		
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
-                runTimeModel.getContext().put(key, value[0]);
+                runTimeModel.getContext().put(getRealKey(model, key), value[0]);
             }
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -468,7 +471,23 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
-    private Map<String, Object> updateLocalContextAndReturn(ReportRuntimeModel runTimeModel,
+    /**
+     * 
+     * @param model {@link ReportDesignModel}
+     * @param key String
+     * @return String real key
+     */
+    private String getRealKey(ReportDesignModel model, String key) {
+    		if (model != null && model.getExtendById(key) != null) {
+    			if (model.getExtendById(key).getAllItems().isEmpty()) {
+    				return key;
+    			} 
+    			return model.getExtendById(key).getAllItems().keySet().toArray(new String[0])[0];
+    		}
+		return key;
+	}
+
+	private Map<String, Object> updateLocalContextAndReturn(ReportRuntimeModel runTimeModel,
             String areaId, Map<String, String[]> contextParams) {
         /**
          * 查询区域的时候，会按照当前的参数更新区域上下文

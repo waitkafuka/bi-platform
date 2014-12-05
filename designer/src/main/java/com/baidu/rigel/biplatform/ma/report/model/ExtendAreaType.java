@@ -70,6 +70,11 @@ public enum ExtendAreaType {
     SELECT,
     
     /**
+     * 文本框
+     */
+    TEXT,
+    
+    /**
      * LiteOlap组件
      */
     LITEOLAP;

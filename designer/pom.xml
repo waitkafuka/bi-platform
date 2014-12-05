@@ -28,11 +28,11 @@
     </build>
     
     <dependencies>
-        <dependency>
-            <groupId>com.baidu.rigel.biplatform</groupId>
-            <artifactId>fileserver</artifactId>
-            <scope>provided</scope>
-        </dependency>
+    		<dependency>
+			<groupId>com.baidu.rigel.biplatform</groupId>
+			<artifactId>fileserver</artifactId>
+			<scope>provided</scope>
+    		</dependency>
 		<dependency>
             <groupId>com.baidu.rigel.biplatform</groupId>
             <artifactId>model</artifactId>
