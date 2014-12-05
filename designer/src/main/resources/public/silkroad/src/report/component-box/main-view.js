@@ -69,11 +69,17 @@ define([
              * @public
              */
             blurText: function () {
+                var divTitle = '点击进行输入';
                 var $divText = $('#comp-div');
                 var $inpText = $('#comp-text');
                 $inpText.hide();
                 $divText.show();
-                $divText.html($inpText.val());
+                if ($inpText.val() != '') {
+                    $divText.html($inpText.val());
+                }
+                else {
+                    $divText.html(divTitle);
+                }
             },
 
             /**

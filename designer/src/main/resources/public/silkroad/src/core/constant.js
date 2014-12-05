@@ -38,9 +38,10 @@ define(function () {
      * @type {string}
      */
     var COMPONENT_ID_SUFFIX = {
-       SELECT: '-vu-form-select',
-       CALENDAR: '-vu-form-calendar',
-       TEXT: '-vu-form-text'
+        SELECT: '-vu-form-select',
+        CALENDAR: '-vu-form-calendar',
+        TEXT: '-vu-form-text',
+        MULTISELECT: '-vu-form-multiselect'
     };
 
     return {

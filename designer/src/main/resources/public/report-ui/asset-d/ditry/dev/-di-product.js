@@ -107,7 +107,7 @@
    document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/auth-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/date-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/user-model.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/global-model.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/btns-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/common-param-factory.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/engine.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/src/biz-shared/di.shared.model/di-factory.js" type="text/javascript"><\/script>' );
