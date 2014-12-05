@@ -216,32 +216,10 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_FORM_CLASS.$submit = function() {
-        // 提交之前，先更换日历参数的key
-        // 应后端要求，日历中的每个粒度的参数key都是不一样的
-        var inputs = this._aInput;
-        var dateName;
-        var dateKey;
-        var name;
-        var options = {};
-        for (var i = 0, input; i < inputs.length; i++ ) {
-            input = inputs[i];
-            if (input.$di('getDef').clzKey === 'X_CALENDAR') {
-                dateName = input.$di('getDef').name;
-                dateKey = input.$di('getDef').dateKey;
-            }
-            else {
-                name = input.$di('getDef').name;
-                options[ input.$di('getDef').dimId] = this.$di('getValue')[name];
-            }
-        }
-        if (dateName) {
-            var dateParam = this.$di('getValue')[dateName];
-            options[dateKey[dateParam.granularity]] = dateParam;
-        }
         this.$sync(
             this.getModel(),
             'UPDATE_CONTEXT',
-            options
+            buildContextParam(this)
         );
     };
 
@@ -254,9 +232,10 @@ $namespace('di.shared.ui');
     DI_FORM_CLASS.$renderMain = function(data, ejsonObj, options) {
 
         var setDataOpt = { diEvent: this.$diEvent(options) };
-
+        var inputs = this._aInput;
         // 设置数据并渲染
-        for (var i = 0, input; input = this._aInput[i]; i ++ ) {
+        for (var i = 0, input; i < inputs.length; i++ ) {
+            input = inputs[i];
         	var curData = buildData(ejsonObj.data, input);
             input.$di(
                 'setData',
@@ -264,61 +243,14 @@ $namespace('di.shared.ui');
                 setDataOpt
             );
         }
-
         this.$sync(
             this.getModel(),
             'UPDATE_CONTEXT',
-            this.$di('getValue')
+            buildContextParam(this)
         );
 
     };
     
-    /**
-     * 重组form里面input标签需要的默认数据
-     * 
-     * @private
-     * @param {Object} data 数据
-     * @param {HTMLElement} el form里面的表单元素
-     */
-    function buildData(data, el) {
-    	 var curData;
-         var def = el.$di('getDef');
-         var sourceData = data;
-         var defaultData;
-         
-         // 如果data存在，再进行赋值
-//         if (data) {
-//         	sourceData = data.params;
-//         	defaultData = data.interactResult;
-//         }
-         
-         // 如果是时间，把时间默认数据格式重组为{ timeType: 'M' }返回
-         if (def.clzKey === 'X_CALENDAR') {
-             defaultData && (curData = defaultData[def.name]);
-             
-             if (curData && curData.value) {
-                 curData = {
-                     timeType: curData.value.granularity
-                 };
-             }
-         }
-         else {
-         	 // 如果渲染数据存在，就获取到当前渲染数据
-             sourceData && (curData = sourceData[def.name]);
-             // 如果当前渲染数据存在
-             curData
-             && curData.datasource
-             // 渲染数据的默认值存在
-             && defaultData 
-             && defaultData[def.name]
-             && defaultData[def.name].value
-             // 更新渲染数据里面的value为默认值
-             && (curData.value = defaultData[def.name].value);
-         }
-         
-         return curData;
-    }
-
     /**
      * 渲染同步
      * 
@@ -475,5 +407,82 @@ $namespace('di.shared.ui');
         // TODO
         this.$di('dispatchEvent', 'rendered');
     };
+    /**
+     * 重组form里面input标签需要的默认数据
+     *
+     * @private
+     * @param {Object} data 数据
+     * @param {HTMLElement} el form里面的表单元素
+     */
+    function buildData(data, el) {
+        var curData;
+        var def = el.$di('getDef');
+        var sourceData = data;
+        var defaultData;
+
+        // 如果data存在，再进行赋值
+//         if (data) {
+//         	sourceData = data.params;
+//         	defaultData = data.interactResult;
+//         }
+
+        // 如果是时间，把时间默认数据格式重组为{ timeType: 'M' }返回
+        if (def.clzKey === 'X_CALENDAR') {
+            defaultData && (curData = defaultData[def.name]);
+
+            if (curData && curData.value) {
+                curData = {
+                    timeType: curData.value.granularity
+                };
+            }
+        }
+        else {
+            // 如果渲染数据存在，就获取到当前渲染数据
+            sourceData && (curData = sourceData[def.name]);
+            // 如果当前渲染数据存在
+            curData
+            && curData.datasource
+                // 渲染数据的默认值存在
+            && defaultData
+            && defaultData[def.name]
+            && defaultData[def.name].value
+                // 更新渲染数据里面的value为默认值
+            && (curData.value = defaultData[def.name].value);
+        }
+
+        return curData;
+    }
+
+    /**
+     * 提交context请求时，需要的form里面的参数
+     *
+     * @private
+     * @param {Object} that DI_FORM_CLASS指向
+     */
+    function buildContextParam(that) {
+        // 提交之前，先更换日历参数的key
+        // 应后端要求，日历中的每个粒度的参数key都是不一样的
+        var inputs = that._aInput;
+        var dateName;
+        var dateKey;
+        var name;
+        var options = {};
+        for (var i = 0, input; i < inputs.length; i++ ) {
+            input = inputs[i];
+            if (input.$di('getDef').clzKey === 'X_CALENDAR') {
+                dateName = input.$di('getDef').name;
+                dateKey = input.$di('getDef').dateKey;
+            }
+            else {
+                name = input.$di('getDef').name;
+                options[input.$di('getDef').dimId] = that.$di('getValue')[name][0];
+            }
+        }
+        if (dateName) {
+            var dateParam = that.$di('getValue')[dateName];
+            options[dateKey[dateParam.granularity]] = dateParam;
+        }
+        return options;
+    }
 
 })();
