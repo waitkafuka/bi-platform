@@ -67,6 +67,7 @@
         <com.mchange.version>0.9.5-pre8</com.mchange.version>
         <maven.checkstyle.plugin.version>2.11</maven.checkstyle.plugin.version>
         <license.maven.plugin.version>2.6</license.maven.plugin.version>
+        <biplatform.version>1.2.0-SNAPSHOT</biplatform.version>
 	</properties>
 
 	<modules>
@@ -81,12 +82,12 @@
 			<dependency>
 				<groupId>com.baidu.rigel.biplatform</groupId>
 				<artifactId>model</artifactId>
-				<version>0.0.1-SNAPSHOT</version>
+				<version>${biplatform.version}</version>
 			</dependency>
 			<dependency>
                 <groupId>com.baidu.rigel.biplatform</groupId>
                 <artifactId>fileserver</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${biplatform.version}</version>
             </dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
