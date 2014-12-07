@@ -80,6 +80,11 @@ public class SeriesInputInfo implements Serializable {
         MAP("map"),
         
         /**
+         * column
+         */
+        COLUMN("column"),
+        
+        /**
          * TIME_TREND
          */
         TIME_TREND("TIME_TREND");

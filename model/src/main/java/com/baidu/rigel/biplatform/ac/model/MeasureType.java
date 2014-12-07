@@ -43,6 +43,11 @@ public enum MeasureType {
     RR,
     
     /**
+     * 回调维度
+     */
+    CALLBACK,
+    
+    /**
      * 自定义指标
      */
     DEFINE;

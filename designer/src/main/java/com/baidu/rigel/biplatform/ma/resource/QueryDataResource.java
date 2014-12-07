@@ -42,11 +42,14 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
@@ -231,10 +234,10 @@ public class QueryDataResource extends BaseResource {
     /**
      * 
      * @param type 区域类型
-     * @return
+     * @return boolean
      */
     private boolean isQueryComp(ExtendAreaType type) {
-    		return type == ExtendAreaType.SELECT;
+    		return QueryUtils.isFilterArea(type);
     }
     
     /**
@@ -1251,7 +1254,26 @@ public class QueryDataResource extends BaseResource {
      * 按照指标指定排序方式显示数据
      * @return ResponseResult
      */
-    public ResponseResult sortByMeasure() {
+    public ResponseResult sortByMeasure(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    		String areaId = "";
+    		String reportId = "";
+    		String measureId = "";
+    		String sort = request.getParameter("sort");
+    		if (StringUtils.isEmpty(sort)) {
+    			sort = "NONE";
+    		}
+    		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
+    		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
+    		DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
+    		ReportDesignModel reportModel = this.reportModelCacheManager.getReportModel(reportId);
+    		String cubeId = reportModel.getExtendById(areaId).getCubeId();
+    		Measure m = reportModel.getSchema().getCubes().get(cubeId).getMeasures().get(measureId);
+    		String columnUniqueName = "[Measuers].[" + m.getName() +"]";
+    		SortRecord type = new SortRecord(sortType, columnUniqueName);
+    		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
+    		ResultSet rs = new ResultSet();
+    		rs.setDataModel(model);
+    		context.getQueryStatus().add(rs);
     		return null;
     }
     
