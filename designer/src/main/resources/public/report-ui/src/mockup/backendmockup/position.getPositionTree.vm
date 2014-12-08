@@ -1,8 +1,0 @@
-{"status":$!status, 
-    "data": [
-        { id : 11, name : '岗位名1' , canopen: true, status: 1},
-        { id : 22, name : '岗位名2' , canopen: true, status: 1},
-        { id : 33, name : '岗位名3' , canopen: false, status: 1},
-        { id : 44, name : '岗位名4' , canopen: true, status: 0}
-    ]
-}

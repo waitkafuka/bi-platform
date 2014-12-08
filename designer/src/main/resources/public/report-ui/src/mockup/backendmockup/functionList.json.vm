@@ -1,7 +1,0 @@
-{"status":$!{status}, "data":{"dataList":[
-    {"id": 1001, "fName": "功能名称功能名称功能名称功能名称功能名称", "sysUnitStr": "系统单元1,系统单元1,系统单元1,系统单元1,系统单元1,系统单元1,系统单元1系统单元", "sysUnit": 1001, "permissions": "0111", url: "wwwwwwwwwwwwwww"},
-    {"id": 1002, "fName": "功能名称2", "sysUnitStr": "系统单元2", "sysUnit": "1002,1003", "permissions": "0101", "desc": "这个是描这个是描述这个是描述这个是描述这个是描述述", tagName: "xxxx"},
-    {"id": 1003, "fName": "功能名称3", "sysUnitStr": "系统单元3", "sysUnit": 1003, "permissions": "1101"},
-    {"id": 1004, "fName": "功能名称4", "sysUnitStr": "系统单元4", "sysUnit": 1004, "permissions": "1111"},
-    {"id": 1005, "fName": "功能名称5", "sysUnitStr": "系统单元5", "sysUnit": 1005, "permissions": "1000"}
-], "pager":{"page":$!pager.page, "pagesize":$!pager.pageSize, "total":$!pager.total}, "sortinfo":{"orderby": "$!sortInfo.orderby", "sortby":"$!sortInfo.sortby"}}}
