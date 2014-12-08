@@ -1,9 +1,0 @@
-{"status":$!status, 
-    "data": [
-        { id:111, name:'医疗' },
-        { id:222, name:'医疗2' },
-        { id:333, name:'医疗3' },
-        { id:444, name:'医疗4' },
-        { id:555, name:'医疗5' }
-    ]
-}
