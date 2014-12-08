@@ -1,0 +1,2 @@
+biplatform.fileserver.rootdir=/tmp
+biplatform.fileserver.port=9090

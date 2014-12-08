@@ -471,9 +471,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
                 }
                 value = days;
+                itemValues.put(item, value);
                 logger.debug(value.toString());
+            } else if (!StringUtils.isEmpty(value)) {
+            		itemValues.put(item, value.toString().split(","));
+            } else {
+            		itemValues.put(item, value);
             }
-            itemValues.put(item, value);
         }
         return itemValues;
     }

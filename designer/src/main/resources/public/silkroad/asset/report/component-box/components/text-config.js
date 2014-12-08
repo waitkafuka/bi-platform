@@ -1,0 +1,1 @@
+define(["constant","report/component-box/components/text-vm-template"],function(a,b){function c(a){var b=a.rootId+a.serverData.id,c=$.extend(!0,{},e);return c.id=b+d,c}var d=a.COMPONENT_ID_SUFFIX.TEXT,e={};return{type:"TEXT",iconClass:"text",caption:"文本框",defaultWidth:300,defaultHeight:27,vm:{render:function(){return b.render()}},processRenderData:c,entityDescription:e}});

@@ -404,11 +404,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         for (ExtendArea area : model.getExtendAreaList()) {
             try {
             		// 忽略此类区域
-            		if (area.getType() == ExtendAreaType.TIME_COMP 
-            				|| area.getType() == ExtendAreaType.LITEOLAP_TABLE
+            		if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
             				|| area.getType() == ExtendAreaType.SELECTION_AREA 
             				|| area.getType() == ExtendAreaType.LITEOLAP_CHART
-            				|| area.getType() == ExtendAreaType.SELECT) {
+            				|| QueryUtils.isFilterArea(area.getType())) {
             			continue;
             		}  
         			Cube cube = QueryUtils.getCubeWithExtendArea(model, area);

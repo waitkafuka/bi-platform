@@ -563,7 +563,8 @@ define([
              * @public
              */
             afterAddChartCompAxis: function (option){
-
+//                this.model.canvasModel.saveJsonVm();
+//                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-下拉框
@@ -577,7 +578,14 @@ define([
              * @public
              */
             afterAddSelectCompAxis: function (option){
+                var compId = this.getActiveCompId();
+                var editCompModel = this.canvasView.editCompView.model;
+                var json = editCompModel.getCompDataById(compId)[0];
+                var id = option.$item.attr('data-id');
+                json.dimId = id;
 
+//                this.model.canvasModel.saveJsonVm();
+//                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
@@ -591,7 +599,8 @@ define([
              * @public
              */
             afterAddTableCompAxis: function (option){
-
+//                this.model.canvasModel.saveJsonVm();
+//                this.model.canvasModel.saveReport();
             },
 
             /**

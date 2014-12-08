@@ -32,7 +32,9 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -97,41 +99,67 @@ public class FileServer extends ChannelHandlerAdapter {
     private static LocalFileOperationService service = null;
     
     /**
+     * file server root directory property key
+     */
+    private static final String ROOT_DIR_KEY = "biplatform.fileserver.rootdir";
+    
+    /**
+     * file server port property key
+     */
+    private static final String PORT_NUM_KEY = "biplatform.fileserver.port";
+    
+    /**
      * 
      * 程序入口，用于启动文件server
      * 
      * @param args
      */
-    public static void main(String[] args) {
-        if (args.length != 2) {
-            LOGGER.error("can not get enough parameters for starting file server");
-            printUsage();
-            System.exit(-1);
-        }
-        
+    public static void main(String[] args) throws Exception {
+//        if (args.length != 1) {
+//            LOGGER.error("can not get enough parameters for starting file server");
+//            printUsage();
+//            System.exit(-1);
+//        }
+    		
+    		FileInputStream fis = null;
+    		String classLocation = FileServer.class.getProtectionDomain()
+    				.getCodeSource().getLocation().toString();
+    		final File configFile = new File(classLocation + "/../conf/fileserver.conf");
+    		Properties properties = new Properties();
+    		try {
+    			if (configFile.exists()) {
+    				fis = new FileInputStream(configFile);
+    			} else if (StringUtils.isNotEmpty(args[0])) {
+    				fis = new FileInputStream(args[0]);
+    			} else {
+    				printUsage();
+    				throw new RuntimeException("can't find correct file server configuration file!");
+    			}
+    			properties.load(fis);
+    		} finally {
+    			if (fis != null) {
+    				fis.close();
+    			}
+    		}
         int port = -1;
         try {
-            port = Integer.valueOf(args[0]);
+            port = Integer.valueOf(properties.getProperty(PORT_NUM_KEY));
         } catch (NumberFormatException e) {
             LOGGER.error("parameter is not correct, [port = {}]", args[0]);
-            printUsage();
             System.exit(-1);
         }
         
-        String location = args[1];
+        String location = properties.getProperty(ROOT_DIR_KEY);
         if (StringUtils.isEmpty(location)) {
             LOGGER.error("the location can not be empty");
-            printUsage();
             System.exit(-1);
         }
         
         File f = new File(location);
         if (!f.exists() && !f.mkdirs()) {
             LOGGER.error("invalidation location [{}] please verify the input", args[1]);
-            printUsage();
             System.exit(-1);
         }
-        
         startServer(location, port);
     }
     
@@ -180,10 +208,8 @@ public class FileServer extends ChannelHandlerAdapter {
      */
     private static void printUsage() {
         LOGGER.info("=====================================================");
-        LOGGER.info("=  Usage: java -jar <jar file> port location         ");
-        LOGGER.info("=  eg: java -jar <jar file> 8080 /tmp                ");
-        LOGGER.info("=  location: the root path of the file store location");
-        LOGGER.info("=  port: the server port                             ");
+        LOGGER.info("=  Usage: java -jar <jar file> <config_file_location>");
+        LOGGER.info("=  eg: java -jar <jar file> /tmp/config.properties   ");
         LOGGER.info("=====================================================");
     }
     

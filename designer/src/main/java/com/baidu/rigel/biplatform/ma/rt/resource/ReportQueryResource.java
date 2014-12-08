@@ -389,6 +389,10 @@ public class ReportQueryResource {
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
                 newParams.put(key, value[0]);
+            } else if (newParams.contains(key)){
+            		newParams.remove(key);
+            } else { // 设置为null，避免由于脏数据导致查询条件异常
+            		newParams.put(key, null);
             }
         }       
         context.setGlobalParams(newParams);
