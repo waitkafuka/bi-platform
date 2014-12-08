@@ -9,20 +9,17 @@
  */
 
 (function () {
-
-    var ieVersion = xutil.dom.ieVersion;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
     var q = xutil.dom.q;
     var domChildren = xutil.dom.children;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
-    var extend = xutil.object.extend;
+//    var extend = xutil.object.extend;
     var XOBJECT = xui.XObject;
-
-    var DI_ATTR_PREFIX = '\x06diA^_^';
+//    var DI_ATTR_PREFIX = '\x06diA^_^';
     /**
-     * 基于highcharts的JS图
+     * 基于e-chart的JS图
      *
      * @class
      * @extends {xui.ui.Control}
@@ -35,13 +32,12 @@
                 this._sType = 'xui-e-chart';
                 addClass(el, this._sType);
                 var type = this._sType;
-
+                // FIXME:优化，header估计得干掉
                 el.innerHTML = [
                         '<div class="' + type + '-header">',
                         '</div>',
                         '<div class="' + type + '-content"></div>'
                 ].join('');
-
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
             }
@@ -64,8 +60,6 @@
     UI_E_CHART_CLASS.setData = function (dataWrap, isSilent) {
         this._zoomSelectedButton = 0;
         dataWrap = dataWrap || {};
-
-        // this._sChartType = fixChartType(dataWrap.chartType, 'line');
         this._bSeriesHasValue = null;
         this._nWidth = dataWrap.width;
         this._nHeight = dataWrap.height;
@@ -149,11 +143,12 @@
      */
     UI_E_CHART_CLASS.$setupSeries = function (options) {
         var series = [];
-        var xAxis = this._aXAxis;
         var seryKind = {};
         var tempData = [];
+        var xAxis = this._aXAxis;
+
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
-            seryKind[serDef.type] =  seryKind[serDef.type]
+            seryKind[serDef.type] = seryKind[serDef.type]
                 ? seryKind[serDef.type] + 1
                 : 1;
             ser = { data: [] };
@@ -161,14 +156,27 @@
             ser.yAxisIndex = serDef.yAxisIndex || 0;
             ser.color = serDef.color || void 0;
             ser.format = serDef.format || void 0;
-            ser.type = fixChartType(serDef.type);
-            ser.symbol = 'none'; // 线图上的点的形状
+            ser.type = serDef.type;
             (serDef.id !== null) && (ser.id = serDef.id);
+            // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
-            if (serDef.type === 'line') {
+            if (serDef.type === 'bar') {
+                series.push(ser);
+            }
+            else if (serDef.type === 'column') {
+                series.push(ser);
+            }
+            else if (serDef.type === 'line') {
+                ser.symbol = 'none'; // 线图上的点的形状
                 tempData.push(ser);
             }
-            else {
+            else if (serDef.type === 'map') {
+                ser.mapType = 'china';
+                ser.roam = false;
+                ser.itemStyle = {
+                    normal:{ label:{ show:true } },
+                    emphasis:{ label:{ show:true } }
+                };
                 series.push(ser);
             }
         }
@@ -177,7 +185,7 @@
             this._isAddYxis = true;
         }
         // series中只允许有一个饼图。
-        if (this._bHasPie) {
+        if (this._chartType === 'pie') {
             var targetSeries = [{}];
             for(var key in series[0]) {
                 series[0].hasOwnProperty(key) && (targetSeries[0][key] = series[0][key]);
@@ -204,13 +212,13 @@
 
         var xAxis =  {
             type: 'category',
-            boundaryGap: me._bHasBar ? true : false,
+            boundaryGap: (me._chartType === 'bar') ? true : false,
             axisLine: {
                 onZero: false
             },
             data: this._aXAxis.data
         };
-        if (!this._bHasPie) {
+        if (!this._chartType === 'pie') {
             options.xAxis = xAxis;
         }
     }
@@ -221,7 +229,7 @@
      * @private
      */
     UI_E_CHART_CLASS.$setupYAxis = function (options) {
-        if (!this._bHasPie) {
+        if (!this._chartType === 'pie') {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
                 var yAxisOption;
@@ -272,7 +280,7 @@
         var legend = {};
         var data = [];
 
-        if (this._bHasPie) {
+        if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             };
@@ -323,7 +331,11 @@
             categories = this._aXAxis;
         }
 
-        if(!this._bHasPie){
+        if (
+            this._chartType === 'column'
+            || this._chartType === 'bar'
+            || this._chartType === 'line'
+        ) {
             dataZoom.show = false;
             var xNums = categories.data ? categories.data.length : 0;
             var enableSelectRange = false;
@@ -503,7 +515,7 @@
     UI_E_CHART_CLASS.$setupTooptip = function (options) {
         var toolTip = {};
 
-        if (this._bHasPie) {
+        if (this._chartType === 'pie') {
             toolTip.formatter = "{a} <br/>{b} : {c} ({d}%)";
             toolTip.trigger = 'item';
         }
@@ -533,9 +545,7 @@
         }
         options.tooltip = toolTip;
     };
-    function fixChartType(rawType, defaultType) {
-        return rawType || defaultType || 'line';
-    }
+
     /**
      * 重新渲染图表
      *
@@ -560,27 +570,164 @@
      * @public
      */
     UI_E_CHART_CLASS.$createChart = function (options) {
+//        var options = {
+//            title : {
+//                text: 'iphone销量',
+//                subtext: '纯属虚构',
+//                x:'center'
+//            },
+//            tooltip : {
+//                trigger: 'item'
+//            },
+//            legend: {
+//                orient: 'vertical',
+//                x:'left',
+//                data:['iphone3','iphone4','iphone5']
+//            },
+//            dataRange: {
+//                min: 0,
+//                max: 2500,
+//                x: 'left',
+//                y: 'bottom',
+//                text:['高','低'],           // 文本，默认为数值文本
+//                calculable : true
+//            },
+//            toolbox: {
+//                show: true,
+//                orient : 'vertical',
+//                x: 'right',
+//                y: 'center',
+//                feature : {
+//                    mark : {show: true},
+//                    dataView : {show: true, readOnly: false},
+//                    restore : {show: true},
+//                    saveAsImage : {show: true}
+//                }
+//            },
+//            roamController: {
+//                show: true,
+//                x: 'right',
+//                mapTypeControl: {
+//                    'china': true
+//                }
+//            },
+//            series : [
+//                {
+//                    name: 'iphone3',
+//                    type: 'map',
+//                    mapType: 'china',
+//                    roam: false,
+//                    itemStyle:{
+//                        normal:{label:{show:true}},
+//                        emphasis:{label:{show:true}}
+//                    },
+//                    data:[
+//                        {name: '北京',value: Math.round(Math.random()*1000)},
+//                        {name: '天津',value: Math.round(Math.random()*1000)},
+//                        {name: '上海',value: Math.round(Math.random()*1000)},
+//                        {name: '重庆',value: Math.round(Math.random()*1000)},
+//                        {name: '河北',value: Math.round(Math.random()*1000)},
+//                        {name: '河南',value: Math.round(Math.random()*1000)},
+//                        {name: '云南',value: Math.round(Math.random()*1000)},
+//                        {name: '辽宁',value: Math.round(Math.random()*1000)},
+//                        {name: '黑龙江',value: Math.round(Math.random()*1000)},
+//                        {name: '湖南',value: Math.round(Math.random()*1000)},
+//                        {name: '安徽',value: Math.round(Math.random()*1000)},
+//                        {name: '山东',value: Math.round(Math.random()*1000)},
+//                        {name: '新疆',value: Math.round(Math.random()*1000)},
+//                        {name: '江苏',value: Math.round(Math.random()*1000)},
+//                        {name: '浙江',value: Math.round(Math.random()*1000)},
+//                        {name: '江西',value: Math.round(Math.random()*1000)},
+//                        {name: '湖北',value: Math.round(Math.random()*1000)},
+//                        {name: '广西',value: Math.round(Math.random()*1000)},
+//                        {name: '甘肃',value: Math.round(Math.random()*1000)},
+//                        {name: '山西',value: Math.round(Math.random()*1000)},
+//                        {name: '内蒙古',value: Math.round(Math.random()*1000)},
+//                        {name: '陕西',value: Math.round(Math.random()*1000)},
+//                        {name: '吉林',value: Math.round(Math.random()*1000)},
+//                        {name: '福建',value: Math.round(Math.random()*1000)},
+//                        {name: '贵州',value: Math.round(Math.random()*1000)},
+//                        {name: '广东',value: Math.round(Math.random()*1000)},
+//                        {name: '青海',value: Math.round(Math.random()*1000)},
+//                        {name: '西藏',value: Math.round(Math.random()*1000)},
+//                        {name: '四川',value: Math.round(Math.random()*1000)},
+//                        {name: '宁夏',value: Math.round(Math.random()*1000)},
+//                        {name: '海南',value: Math.round(Math.random()*1000)},
+//                        {name: '台湾',value: Math.round(Math.random()*1000)},
+//                        {name: '香港',value: Math.round(Math.random()*1000)},
+//                        {name: '澳门',value: Math.round(Math.random()*1000)}
+//                    ]
+//                },
+//                {
+//                    name: 'iphone4',
+//                    type: 'map',
+//                    mapType: 'china',
+//                    itemStyle:{
+//                        normal:{label:{show:true}},
+//                        emphasis:{label:{show:true}}
+//                    },
+//                    data:[
+//                        {name: '北京',value: Math.round(Math.random()*1000)},
+//                        {name: '天津',value: Math.round(Math.random()*1000)},
+//                        {name: '上海',value: Math.round(Math.random()*1000)},
+//                        {name: '重庆',value: Math.round(Math.random()*1000)},
+//                        {name: '河北',value: Math.round(Math.random()*1000)},
+//                        {name: '安徽',value: Math.round(Math.random()*1000)},
+//                        {name: '新疆',value: Math.round(Math.random()*1000)},
+//                        {name: '浙江',value: Math.round(Math.random()*1000)},
+//                        {name: '江西',value: Math.round(Math.random()*1000)},
+//                        {name: '山西',value: Math.round(Math.random()*1000)},
+//                        {name: '内蒙古',value: Math.round(Math.random()*1000)},
+//                        {name: '吉林',value: Math.round(Math.random()*1000)},
+//                        {name: '福建',value: Math.round(Math.random()*1000)},
+//                        {name: '广东',value: Math.round(Math.random()*1000)},
+//                        {name: '西藏',value: Math.round(Math.random()*1000)},
+//                        {name: '四川',value: Math.round(Math.random()*1000)},
+//                        {name: '宁夏',value: Math.round(Math.random()*1000)},
+//                        {name: '香港',value: Math.round(Math.random()*1000)},
+//                        {name: '澳门',value: Math.round(Math.random()*1000)}
+//                    ]
+//                },
+//                {
+//                    name: 'iphone5',
+//                    type: 'map',
+//                    mapType: 'china',
+//                    itemStyle:{
+//                        normal:{label:{show:true}},
+//                        emphasis:{label:{show:true}}
+//                    },
+//                    data:[
+//                        {name: '北京',value: Math.round(Math.random()*1000)},
+//                        {name: '天津',value: Math.round(Math.random()*1000)},
+//                        {name: '上海',value: Math.round(Math.random()*1000)},
+//                        {name: '广东',value: Math.round(Math.random()*1000)},
+//                        {name: '台湾',value: Math.round(Math.random()*1000)},
+//                        {name: '香港',value: Math.round(Math.random()*1000)},
+//                        {name: '澳门',value: Math.round(Math.random()*1000)}
+//                    ]
+//                }
+//            ]
+//        };
         var start;
         var end;
         var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
-//        if (!this._bHasPie) {
-//            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
-//        }
-//        function zoomChage(param) {
-//            start = param.zoom.xStart;
-//            end = param.zoom.xEnd;
-//            changeDateRange();
-//        }
-//        function changeDateRange() {
-//            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
-//            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
-//            oMinDate.value = xDatas[start];
-//            oMaxDate.value = xDatas[end - 1];
-//        }
+        if (!this._chartType === 'pie') {
+            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
+        }
+        function zoomChage(param) {
+            start = param.zoom.xStart;
+            end = param.zoom.xEnd;
+            changeDateRange();
+        }
+        function changeDateRange() {
+            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
+            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
+            oMinDate.value = xDatas[start];
+            oMaxDate.value = xDatas[end - 1];
+        }
     };
-
     /**
      * 构建图表参数
      *
@@ -592,26 +739,43 @@
         };
 
         // 特殊判断：是否有饼图
-        this._bHasPie = false;
-        this._bHasBar = false;
+        this._chartType = 'column';
         for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
-            if (fixChartType(ser.type) == 'pie') {
-                this._bHasPie = true;
-            }
-            if (fixChartType(ser.type) == 'bar') {
-                this._bHasBar = true;
-            }
+            this._chartType = ser.type;
         }
-        this.$setupToolBox(options);
-        this.$setupDataRoom(options);
         this.$setupSeries(options);
-        this.$setupXAxis(options);
-        this.$setupYAxis(options);
         this.$setupTooptip(options);
-        this.$setupLegend(options);
+        if (
+            this._chartType === 'column'
+            || this._chartType === 'bar'
+            || this._chartType === 'line'
+        ) {
+            this.$setupDataRoom(options);
+            this.$setupToolBox(options);
+            this.$setupYAxis(options);
+            this.$setupLegend(options);
+            this.$setupXAxis(options);
+        }
+        else if ( this._chartType === 'map') {
+            options.roamController = {
+                show: true,
+                x: 'right',
+                mapTypeControl: {
+                    'china': true
+                }
+            };
+            // TODO:需要后端返回最大最小值
+            options.dataRange = {
+                min: 0,
+                max: 2500,
+                x: 'left',
+                y: 'bottom',
+                text:['高','低'],           // 文本，默认为数值文本
+                calculable : true
+            };
+        }
         return options;
     };
-
      /**
      * 销毁图表
      *
@@ -627,7 +791,6 @@
         this._eContent && (this._eContent.innerHTML = '');
         this._eHeader && (this._eHeader.innerHTML = '');
     };
-
     /**
      * @override
      */
