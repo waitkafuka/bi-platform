@@ -20,9 +20,7 @@ define([
             // 事件
             events: {
                 'change #component-group-selector': 'showCompByGroup',
-                'click .j-component-box-fold': 'fold',
-                'focus .text-div': 'focusText',
-                'blur .text-div': 'blurText'
+                'click .j-component-box-fold': 'fold'
             },
 
             /**
@@ -41,45 +39,6 @@ define([
                 this.$el.append(mainTemplate.render(this.model.config));
                 this.showCompByGroup();
                 this.initDrag();
-            },
-
-            /**
-             * 文本框组件获取焦点切换
-             *
-             * @public
-             */
-            focusText: function () {
-                var divTitle = '点击进行输入';
-                var $divText = $('#comp-div');
-                var $inpText = $('#comp-text');
-                var divHtml = $divText.html();
-                $divText.hide();
-                $inpText.show().focus();
-                if (divHtml != divTitle) {
-                    $inpText.val($divText.html());
-                }
-                else {
-                    $inpText.val('');
-                }
-            },
-
-            /**
-             * 文本框组件失去焦点切换
-             *
-             * @public
-             */
-            blurText: function () {
-                var divTitle = '点击进行输入';
-                var $divText = $('#comp-div');
-                var $inpText = $('#comp-text');
-                $inpText.hide();
-                $divText.show();
-                if ($inpText.val() != '') {
-                    $divText.html($inpText.val());
-                }
-                else {
-                    $divText.html(divTitle);
-                }
             },
 
             /**

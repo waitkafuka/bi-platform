@@ -322,6 +322,18 @@ define([
                 this.saveJsonVm();
             },
 
+
+            /**
+             * 失去焦点后，更新vm中组件的内容信息
+             *
+             * @param {element} object 焦点元素
+             * @public
+             */
+            dateCompPositing: function (object) {
+                this.$reportVm.find('#comp-report').html(object);
+                this.saveJsonVm();
+            },
+
             /**
              * 组件调整大小后，更新vm中组件的width与height
              *

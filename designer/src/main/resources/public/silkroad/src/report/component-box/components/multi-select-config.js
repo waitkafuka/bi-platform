@@ -11,7 +11,7 @@ define(
     function (
         Constant,
         MultiselectVmTemplate
-        ) {
+    ) {
         // 多选下拉框id后缀
         var multiselectIdSuffix = Constant.COMPONENT_ID_SUFFIX.MULTISELECT;
 
@@ -32,7 +32,7 @@ define(
             var id = dynamicData.rootId + dynamicData.serverData.id;
             var data = $.extend(true, {}, entityDescription);
             data.id = id + multiselectIdSuffix;
-
+            data.name = dynamicData.serverData.id;
             return data;
         }
 
