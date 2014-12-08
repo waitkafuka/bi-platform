@@ -607,12 +607,11 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_TABLE_CLASS.$handleSort = function (colDefineItem) {
-        // TODO:到时候需要把下面注释去掉，并与后端约定一下sort路径
-//        this.$sync(
-//            this.getModel(),
-//            'SORT',
-//            colDefineItem
-//        );
+        this.$sync(
+            this.getModel(),
+            'SORT',
+            colDefineItem
+        );
     };  
     /**
     * 根据返回数据设置olap表格的指标解释到表格td的title标签中
