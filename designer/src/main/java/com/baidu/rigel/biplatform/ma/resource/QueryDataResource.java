@@ -636,7 +636,14 @@ public class QueryDataResource extends BaseResource {
                 }
             }
             String[] dims = new String[0];
-            resultMap.put("pivottable", table);
+            if (table.getDataSourceColumnBased().size() == 0) {
+            		ResponseResult rs = new ResponseResult();
+            		rs.setStatus(1);
+            		rs.setStatusInfo("未查到任何数据");
+            		return rs;
+            } else {
+            		resultMap.put("pivottable", table);
+            }
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
             resultMap.put("mainDimNodes", dims);
