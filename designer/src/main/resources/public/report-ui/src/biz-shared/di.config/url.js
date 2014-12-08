@@ -176,7 +176,7 @@ $namespace('di.config');
     URL_SET.OLAP_TABLE_DRILL =  '/reports/#{reportId}/runtime/extend_area/#{componentId}/drill/#{action}';
     URL_SET.OLAP_TABLE_LINK_DRILL = '/reports/#{reportId}/runtime/extend_area/#{componentId}/drill';
     URL_SET.OLAP_TABLE_SELECT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/selected_row';
-
+    URL_SET.OLAP_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
 
     // PLANE表（平面表）
     URL_SET.PLANE_TABLE_DATA = '/reportTemplate/planeTable/transform.action';
@@ -235,8 +235,8 @@ $namespace('di.config');
     URL_SET.RTPL_CLONE_GETDEFAULTIMAGENAME = '/image/getDefaultImageName.action';
     URL_SET.RTPL_CLONE_CLEAR = '/image/deleteImage.action';
     //报表保存镜像操作url
-    URL_SET.RTPL_SAVE_ADD='/image/addImage.action';
-    URL_SET.RTPL_SAVE_UPDATE='/image/updateImage.action';
-    URL_SET.RTPL_SAVE_GETIMAGES='/image/getUserImages.action';
-    URL_SET.RTPL_SAVE_DELETE='/image/deleteImage.action';
+    URL_SET.RTPL_SAVE_ADD = '/image/addImage.action';
+    URL_SET.RTPL_SAVE_UPDATE = '/image/updateImage.action';
+    URL_SET.RTPL_SAVE_GETIMAGES = '/image/getUserImages.action';
+    URL_SET.RTPL_SAVE_DELETE = '/image/deleteImage.action';
 })();
