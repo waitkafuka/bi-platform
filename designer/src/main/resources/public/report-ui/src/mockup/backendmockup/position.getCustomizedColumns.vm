@@ -1,9 +1,0 @@
-{"status":$!status, 
-    "data": [
-        { field:'positionname', name:'系统单元名称',default:1, select:0 },
-        { field:'positiontype1', name:'系统单元名称',default:1, select:0 },
-        { field:'positionstatus', name:'系统单元名称',default:1, select:0 },
-        { field:'parentposition', name:'系统单元名称',default:0, select:1 },
-        { field:'positiontype2', name:'系统单元名称',default:1, select:0 }
-    ]
-}
