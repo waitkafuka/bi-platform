@@ -42,7 +42,6 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
@@ -1261,27 +1260,49 @@ public class QueryDataResource extends BaseResource {
      * 按照指标指定排序方式显示数据
      * @return ResponseResult
      */
-    public ResponseResult sortByMeasure(HttpServletRequest request, HttpServletResponse response) throws Exception {
-    		String areaId = "";
-    		String reportId = "";
-    		String measureId = "";
-    		String sort = request.getParameter("sort");
+    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/sort", method = { RequestMethod.POST , RequestMethod.GET})
+    public ResponseResult sortByMeasure(@PathVariable("reportId")String reportId,
+    		    @PathVariable("areaId")String areaId,
+    		    HttpServletRequest request, HttpServletResponse response) throws Exception {
+    		String uniqueName = request.getParameter("uniqueName");
+    		String sort = request.getParameter("sortType");
     		if (StringUtils.isEmpty(sort)) {
     			sort = "NONE";
     		}
+    		ReportDesignModel reportModel = reportModelCacheManager.getReportModel(reportId);
     		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
     		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
     		DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
-    		ReportDesignModel reportModel = this.reportModelCacheManager.getReportModel(reportId);
-    		String cubeId = reportModel.getExtendById(areaId).getCubeId();
-    		Measure m = reportModel.getSchema().getCubes().get(cubeId).getMeasures().get(measureId);
-    		String columnUniqueName = "[Measuers].[" + m.getName() +"]";
-    		SortRecord type = new SortRecord(sortType, columnUniqueName);
+    		SortRecord type = new SortRecord(sortType, uniqueName);
     		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
     		ResultSet rs = new ResultSet();
     		rs.setDataModel(model);
     		context.getQueryStatus().add(rs);
-    		return null;
+    		PivotTable table = null;
+        Map<String, Object> resultMap = Maps.newHashMap();
+        try {
+            table = queryBuildService.parseToPivotTable(model);
+        } catch (PivotTableParseException e) {
+            logger.error(e.getMessage(), e);
+            return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
+        }
+        DataModelUtils.decorateTable(reportModel.getExtendById(areaId).getFormatModel(), table);
+        if (table.getDataSourceColumnBased().size() == 0) {
+        		ResponseResult tmp = new ResponseResult();
+        		tmp.setStatus(1);
+        		tmp.setStatusInfo("未查到任何数据");
+        		return tmp;
+        } else {
+        		resultMap.put("pivottable", table);
+        }
+        resultMap.put("rowCheckMin", 1);
+        resultMap.put("rowCheckMax", 5);
+        resultMap.put("reportTemplateId", reportId);
+        resultMap.put("totalSize", table.getDataRows());
+        resultMap.put("currentSize", table.getDataSourceRowBased().size());
+        context.getQueryStatus().add(rs);
+        reportModelCacheManager.updateAreaContext(areaId, context);
+        return ResourceUtils.getResult("Success", "Fail", resultMap);
     }
     
     /**
