@@ -181,7 +181,10 @@ public class QueryRequestUtil {
         
         SqlQuery result = new SqlQuery();
         // 处理from
-        result.setGroupBy(query.getGroupBy().getGroups());
+        if(query.getGroupBy()!=null){
+        	result.setGroupBy(query.getGroupBy().getGroups());
+        }
+        
         LinkedList<String> fromList = new LinkedList<String>();
         fromList.add(query.getFrom().getFrom());
         result.setFromList(fromList);

@@ -176,7 +176,10 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      */
     private SeriesDataUnit generateSeriesBranch(PivotTable pTable, String columnUniqName, String showName, String type,
             String format, String yAxisName, int i) {
-
+    		
+    		if (pTable.getDataSourceColumnBased() == null || pTable.getDataSourceColumnBased().size() <= i) { 
+    			return null;
+    		}
         List<CellData> columnData = pTable.getDataSourceColumnBased().get(i);
         SeriesDataUnit seriesUnit = new SeriesDataUnit();
         seriesUnit.setData(getDataFromCells(columnData));
