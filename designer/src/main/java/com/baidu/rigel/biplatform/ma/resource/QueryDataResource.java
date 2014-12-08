@@ -42,11 +42,14 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
@@ -185,7 +188,7 @@ public class QueryDataResource extends BaseResource {
     	        return rs;
     		}
     		final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
-    		Map<String, List<Map<String, String>>> datas = Maps.newConcurrentMap();
+    		Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
     		for (final String areaId : areaIds) {
 			ExtendArea area = model.getExtendById(areaId);
 			if (area != null && isQueryComp(area.getType())
@@ -212,7 +215,9 @@ public class QueryDataResource extends BaseResource {
 							tmp.put("text", m.getCaption());
 							values.add(tmp);
 						});
-						datas.put(dim.getId(), values);
+						Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
+						datasource.put("datasource", values);
+						datas.put(areaId, datasource);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
@@ -229,10 +234,10 @@ public class QueryDataResource extends BaseResource {
     /**
      * 
      * @param type 区域类型
-     * @return
+     * @return boolean
      */
     private boolean isQueryComp(ExtendAreaType type) {
-    		return type == ExtendAreaType.SELECT;
+    		return QueryUtils.isFilterArea(type);
     }
     
     /**
@@ -452,14 +457,15 @@ public class QueryDataResource extends BaseResource {
         }
         runTimeModel.getContext().reset();
         runTimeModel.getContext().setParams(newParams);
-        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
              */
+        		
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
-                runTimeModel.getContext().put(key, value[0]);
+                runTimeModel.getContext().put(getRealKey(model, key), value[0]);
             }
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -468,7 +474,23 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
-    private Map<String, Object> updateLocalContextAndReturn(ReportRuntimeModel runTimeModel,
+    /**
+     * 
+     * @param model {@link ReportDesignModel}
+     * @param key String
+     * @return String real key
+     */
+    private String getRealKey(ReportDesignModel model, String key) {
+    		if (model != null && model.getExtendById(key) != null) {
+    			if (model.getExtendById(key).getAllItems().isEmpty()) {
+    				return key;
+    			} 
+    			return model.getExtendById(key).getAllItems().keySet().toArray(new String[0])[0];
+    		}
+		return key;
+	}
+
+	private Map<String, Object> updateLocalContextAndReturn(ReportRuntimeModel runTimeModel,
             String areaId, Map<String, String[]> contextParams) {
         /**
          * 查询区域的时候，会按照当前的参数更新区域上下文
@@ -1232,7 +1254,26 @@ public class QueryDataResource extends BaseResource {
      * 按照指标指定排序方式显示数据
      * @return ResponseResult
      */
-    public ResponseResult sortByMeasure() {
+    public ResponseResult sortByMeasure(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    		String areaId = "";
+    		String reportId = "";
+    		String measureId = "";
+    		String sort = request.getParameter("sort");
+    		if (StringUtils.isEmpty(sort)) {
+    			sort = "NONE";
+    		}
+    		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
+    		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
+    		DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
+    		ReportDesignModel reportModel = this.reportModelCacheManager.getReportModel(reportId);
+    		String cubeId = reportModel.getExtendById(areaId).getCubeId();
+    		Measure m = reportModel.getSchema().getCubes().get(cubeId).getMeasures().get(measureId);
+    		String columnUniqueName = "[Measuers].[" + m.getName() +"]";
+    		SortRecord type = new SortRecord(sortType, columnUniqueName);
+    		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
+    		ResultSet rs = new ResultSet();
+    		rs.setDataModel(model);
+    		context.getQueryStatus().add(rs);
     		return null;
     }
     

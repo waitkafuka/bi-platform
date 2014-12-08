@@ -440,7 +440,7 @@ public class QueryUtils {
     private static Map<String, List<Dimension>> collectFilterDim(ReportDesignModel model) {
 		Map<String, List<Dimension>> rs = Maps.newHashMap();
 		for (ExtendArea area : model.getExtendAreaList()) {
-			if (area.getType() == ExtendAreaType.TIME_COMP || area.getType() == ExtendAreaType.SELECT) {
+			if (isFilterArea(area.getType())) {
 				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
 				if (rs.get(area.getCubeId()) == null) {
 					List<Dimension> dims = Lists.newArrayList();
@@ -452,6 +452,18 @@ public class QueryUtils {
 	    		} 
 		}
 		return rs;
+	}
+
+	/**
+	 * 
+	 * @param type
+	 * @return boolean
+	 * 
+	 */
+	public static boolean isFilterArea(ExtendAreaType type) {
+		return type == ExtendAreaType.TIME_COMP 
+				|| type == ExtendAreaType.SELECT 
+				|| type == ExtendAreaType.MULTISELECT;
 	}
 
     /**
