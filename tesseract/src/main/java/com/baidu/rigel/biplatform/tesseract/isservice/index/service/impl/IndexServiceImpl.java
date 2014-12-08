@@ -455,6 +455,8 @@ public class IndexServiceImpl implements IndexService {
         long totalOtherTime=0;
         long totalSqlTime=0;
         IndexShard currIdxShard = getFreeIndexShardForIndex(idxMeta);
+        
+        boolean finishIndex=false;
         for (String tableName : sqlQueryMap.keySet()) {
             SqlQuery sqlQuery = sqlQueryMap.get(tableName);
             long total = 0;
@@ -468,8 +470,12 @@ public class IndexServiceImpl implements IndexService {
             boolean isLastPiece = false;
             boolean isInit = true;
             
-            BigDecimal currMaxId = BigDecimal.ZERO;
+            //初始化finishIndex
+            if(!isLastPiece){
+            	finishIndex=false;
+            }
             
+            BigDecimal currMaxId = BigDecimal.ZERO;            
             //初始化maxId
             if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null){
             	currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
@@ -531,6 +537,9 @@ public class IndexServiceImpl implements IndexService {
                         idxMeta.setIdxState(IndexState.INDEX_UNAVAILABLE);
                         idxMeta = saveIndexShardIntoIndexMeta(currIdxShard, idxMeta);
 						currIdxShard = null;
+						if(isLastPiece){
+							finishIndex=true;
+						}
                     }
                     
                     if (isInit) {
@@ -566,9 +575,11 @@ public class IndexServiceImpl implements IndexService {
             idxMeta.getDimInfoMergeMap().clear();
             idxMeta.getMeasureInfoMergeMap().clear();
         }
+        if(finishIndex){
+        	idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
+            this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
+        }
         
-        idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
-        this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "doIndex",
             "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"));
