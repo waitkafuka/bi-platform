@@ -1,6 +1,6 @@
 /**
  * @file
- * @author 赵晓强(v_zhaoxiaoqiang@163.com)
+ * @author 赵晓强(longze_xq@163.com)
  * @date 2014-8-4
  */
 define([
@@ -10,7 +10,8 @@ define([
         'report/component-box/components/liteolap-config',
         'report/component-box/components/form-config',
         'report/component-box/components/select-config',
-        'report/component-box/components/text-config'
+        'report/component-box/components/text-config',
+        'report/component-box/components/multi-select-config'
     ],
     function (
         tableConfig,
@@ -19,7 +20,8 @@ define([
         liteolapConfig,
         formConfig,
         selectConfig,
-        textConfig
+        textConfig,
+        multiCongifg
     ) {
         var rootId = 'snpt';
 
@@ -44,6 +46,12 @@ define([
                             "dataOpt": {
                                 "optionSize": 10
                             }
+                        },
+                        {
+                            "clzKey": "ECUI_MULTI_SELECT",
+                            "dataOpt": {
+                                "optionSize": 10
+                            }
                         }
                     ],
                     "entityDefs": [
@@ -65,7 +73,8 @@ define([
                             calendarConfig,
                             selectConfig,
                             liteolapConfig,
-                            textConfig
+                            textConfig,
+                            multiCongifg
                         ]
                     }
                 ],

@@ -1,21 +1,21 @@
 /**
- * Created by weiboxue on 2014/11/30.
- */
-/**
- * @file 报表的公共功能 - view
- * @author 赵晓强(longze_xq@163.com)
- * @date 2014-10-10
+ * @file 参数维度-view
+ * @author weiboxue(wbx_901118@sina.com)
+ * @date 2014-12-1
  */
 define([
         'template',
         'dialog',
-        'report/global-setting-btns/global-template'
+        'report/global-setting-btns/btns-template'
     ],
     function (
         template,
         dialog,
-        GlobalTemplate
-    ) {
+        BtnsTemplate
+        ) {
+        var btnAttr = {
+            ID: 'global-set-'
+        };
         return Backbone.View.extend({
 
             /**
@@ -34,7 +34,7 @@ define([
              */
             setGlobal: function () {
                 dialog.showDialog({
-                    content: GlobalTemplate.render(),
+                    content: BtnsTemplate.render(),
                     title: '参数维度设置',
                     dialog: {
                         height: 400,
@@ -61,6 +61,25 @@ define([
                         }
                     }
                 });
+            },
+            // 参数区域按钮属性
+            btnBox: [
+                {
+                    id: btnAttr.ID + 'Dimension',
+                    btnsHTML: '参数维度设置'
+                }
+            ],
+
+            /**
+             * 创建按钮函数
+             */
+            createBtns: function () {
+                var div = '';
+                var btnBox = this.btnBox;
+                for(var i = 0; i < btnBox.length; i ++) {
+                    div += "<div id='" + btnBox[i].id + "'>" + btnBox[i].btnsHTML + "</div>"
+                }
+                return div;
             }
         });
     }
