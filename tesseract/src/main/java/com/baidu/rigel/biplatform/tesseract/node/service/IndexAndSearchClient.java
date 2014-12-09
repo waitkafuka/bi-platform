@@ -95,7 +95,7 @@ public class IndexAndSearchClient {
     private static final String LOCAL_HOST_ADDRESS = "127.0.0.1";
     
     // private ConcurrentHashMap<NodeAddress, Channel> channelMaps;
-    private ConcurrentHashMap<String, ChannelHandler> actionHandlerMaps;
+    //private ConcurrentHashMap<String, ChannelHandler> actionHandlerMaps;
     private Bootstrap b;
     private EventLoopGroup group;
     
@@ -103,7 +103,7 @@ public class IndexAndSearchClient {
     
     public IndexAndSearchClient() {
         // channelMaps = new ConcurrentHashMap<NodeAddress, Channel>();
-        actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
+        //actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
         b = new Bootstrap();
         group = new NioEventLoopGroup();
         b.group(group);
@@ -247,28 +247,28 @@ public class IndexAndSearchClient {
         
     }
     
-    public ChannelHandler getActionHandler(String actionMove) {
-        logger.info("getActionHandler:[actionMove=" + actionMove + "]");
-        if (!StringUtils.isEmpty(actionMove) && this.actionHandlerMaps.containsKey(actionMove)) {
-            return this.actionHandlerMaps.get(actionMove);
-        }
-        logger.info("getActionHandler:[actionMove=" + actionMove + "] has no handler");
-        return null;
-    }
+//    public ChannelHandler getActionHandler(String actionMove) {
+//        logger.info("getActionHandler:[actionMove=" + actionMove + "]");
+//        if (!StringUtils.isEmpty(actionMove) && this.actionHandlerMaps.containsKey(actionMove)) {
+//            return this.actionHandlerMaps.get(actionMove);
+//        }
+//        logger.info("getActionHandler:[actionMove=" + actionMove + "] has no handler");
+//        return null;
+//    }
     
-    private boolean registerActionHandler(NettyAction nettyAction,
-        AbstractChannelInboundHandler handler) throws InstantiationException,
-        IllegalAccessException {
-        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
-            + "] start");
-        if (nettyAction == null || handler == null) {
-            return false;
-        }
-        this.actionHandlerMaps.put(nettyAction.getActionName(), handler);
-        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
-            + "] success");
-        return true;
-    }
+//    private boolean registerActionHandler(NettyAction nettyAction,
+//        AbstractChannelInboundHandler handler) throws InstantiationException,
+//        IllegalAccessException {
+//        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
+//            + "] start");
+//        if (nettyAction == null || handler == null) {
+//            return false;
+//        }
+//        this.actionHandlerMaps.put(nettyAction.getActionName(), handler);
+//        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
+//            + "] success");
+//        return true;
+//    }
     
     public Channel getChannelByAddressAndPort(String ipAddress, int port)
         throws IndexAndSearchException {
@@ -520,10 +520,10 @@ public class IndexAndSearchClient {
                 + "][Handler=" + handler + "]-Exception:IllegalArgumentException");
             throw new IllegalArgumentException();
         }
-        if (!registerActionHandler(action, handler)) {
-            logger.info("executeAction-Exception:HandlerRegistException");
-            throw new HandlerRegistException();
-        }
+//        if (!registerActionHandler(action, handler)) {
+//            logger.info("executeAction-Exception:HandlerRegistException");
+//            throw new HandlerRegistException();
+//        }
         Channel channel = null;
         channel = this.getChannelByAddressAndPort(node.getAddress(), node.getPort());
         channel.pipeline().addLast(handler);
@@ -531,6 +531,9 @@ public class IndexAndSearchClient {
         channel.writeAndFlush(message);
         channel.closeFuture().sync();
         returnMessage = handler.getMessage();
+        
+        handler.setMessage(null);
+        
         logger.info("executeAction:[NettyAction=" + action + "][Message=" + message + "][Handler="
             + handler + "] success");
         
@@ -540,17 +543,17 @@ public class IndexAndSearchClient {
     
     public void shutDown() {
         
-        if (this.actionHandlerMaps != null && !this.actionHandlerMaps.isEmpty()) {
-            this.actionHandlerMaps.clear();
-        }
+//        if (this.actionHandlerMaps != null && !this.actionHandlerMaps.isEmpty()) {
+//            this.actionHandlerMaps.clear();
+//        }
         this.b.group().shutdownGracefully();
     }
     
-    public ConcurrentHashMap<String, ChannelHandler> getActionHandlerMaps() {
-        if (this.actionHandlerMaps == null) {
-            this.actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
-        }
-        return actionHandlerMaps;
-    }
-    
+//    public ConcurrentHashMap<String, ChannelHandler> getActionHandlerMaps() {
+//        if (this.actionHandlerMaps == null) {
+//            this.actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
+//        }
+//        return actionHandlerMaps;
+//    }
+//    
 }

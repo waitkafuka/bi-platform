@@ -139,6 +139,12 @@ public abstract class AbstractChannelInboundHandler extends ChannelInboundHandle
      */
     public abstract <T extends AbstractMessage> T getMessage();
     
+    /**
+     * setMessage
+     * @param t
+     */
+    public abstract <T extends AbstractMessage> void setMessage(T t);
+    
     /*
      * (non-Javadoc)
      * 
