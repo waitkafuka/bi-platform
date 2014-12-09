@@ -37,7 +37,11 @@
             home_register_line: $('.home-register-line'),
             home_sign_title: $('.home-sign-title'),
             home_sign_line: $('.home-sign-line'),
-            servicetype: $('#servicetype')
+            servicetype: $('#servicetype'),
+            sign_enter: $('#sign-enter'),
+            register_enter: $('#register-enter'),
+            prompt: $('.prompt'),
+            body: $('body')
         };
         bindEvents();
     });
@@ -57,91 +61,52 @@
         registerIn();
     }
     /**
-     * 注册事件
+     * 注册按钮以及回车触发事件函数
      */
     var registerIn = function () {
         dom.register.click(function () {
-            var $company = dom.register_company;
-            var $email = dom.register_email;
-            var $repass = dom.register_repass;
-            var $pass = dom.register_pass;
-            var $usename = dom.register_usename;
-            var $servicetype = dom.servicetype;
-            if ($company.val() == '') {
-                $company.next('div').html(textcompany);
-            }
-            if ($email.val() == '') {
-                $email.next('div').html(textemail);
-            }
-            if ($repass.val() == '') {
-                $repass.next('div').html(textrepass);
-            }
-            if ($pass.val() == '') {
-                $pass.next('div').html(textpass);
-            }
-            if ($usename.val() == '') {
-                $usename.next('div').html(textusename);
-            }
-            if (
-                $pass.val() != ''
-                && $repass.val() != ''
-                && $usename.val() != ''
-                && $email.val() != ''
-                && $company.val() != ''
-                ) {
-                if ($pass.val() == $repass.val()) {
-                    $.ajax({
-                        //客户端向服务器发送请求时采取的方式
-                        type : "post",
-                        cache : false,
-                        //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
-                        dataType : 'Json',
-                        //指明客户端要向哪个页面里面的哪个方法发送请求
-                        url : "/silkroad/register",
-                        data : {
-                            name : $usename.val(),
-                            pwd : $pass.val(),
-                            department: $company.val(),
-                            email: $email.val(),
-                            serviceType: $servicetype.val()
-                        },
-                        //客户端调用服务器端方法成功后执行的回调函数
-                        success : function(msg) {
-                            alert('注册成功,请注意查收邮件');
-                            //$.get('www.baidu.com');
-                            //$("#resText").html(msg);
-                            /*
-                             if (result.d=="success") {
-                             alert("登陆成功");
-                             } else {
-                             alert("登录失败");
-                             }*/
-                        }
-                    });
-                }
-                else {
-                    $pass.val('');
-                    $repass.val('');
-                    $pass.attr('placeholder', textdoublepass);
-                    $repass.attr('placeholder', textdoublepass);
-                }
-            }
+            reisterJudge();
         });
+        dom.register_enter.keydown(function (event) {
+            if (event.keyCode == 13) {
+                reisterJudge();
+            }
+        })
     };
     /**
-     * 登录事件
+     * 注册判定函数
      */
-    var signIn = function () {
-        dom.sign.click(function () {
-            var $pass = dom.sign_pass;
-            var $usename = dom.sign_usename;
-            if ($usename.val() == '') {
-                $usename.next('div').html(textusename);
-            }
-            if ($pass.val() == '') {
-                $pass.next('div').html(textpass);
-            }
-            if ($usename.val() != '' && $pass.val() != '') {
+    var reisterJudge = function () {
+
+        var $company = dom.register_company;
+        var $email = dom.register_email;
+        var $repass = dom.register_repass;
+        var $pass = dom.register_pass;
+        var $usename = dom.register_usename;
+        var $servicetype = dom.servicetype;
+        if ($company.val() == '') {
+            $company.next('div').html(textcompany);
+        }
+        if ($email.val() == '') {
+            $email.next('div').html(textemail);
+        }
+        if ($repass.val() == '') {
+            $repass.next('div').html(textrepass);
+        }
+        if ($pass.val() == '') {
+            $pass.next('div').html(textpass);
+        }
+        if ($usename.val() == '') {
+            $usename.next('div').html(textusename);
+        }
+        if (
+            $pass.val() != ''
+            && $repass.val() != ''
+            && $usename.val() != ''
+            && $email.val() != ''
+            && $company.val() != ''
+            ) {
+            if ($pass.val() == $repass.val()) {
                 $.ajax({
                     //客户端向服务器发送请求时采取的方式
                     type : "post",
@@ -149,14 +114,17 @@
                     //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
                     dataType : 'Json',
                     //指明客户端要向哪个页面里面的哪个方法发送请求
-                    url : "/silkroad/login",
+                    url : "/silkroad/register",
                     data : {
                         name : $usename.val(),
-                        pwd : $pass.val()
+                        pwd : $pass.val(),
+                        department: $company.val(),
+                        email: $email.val(),
+                        serviceType: $servicetype.val()
                     },
                     //客户端调用服务器端方法成功后执行的回调函数
                     success : function(msg) {
-                        window.location="/silkroad/index.html";
+                        alert('注册成功,请注意查收邮件');
                         //$.get('www.baidu.com');
                         //$("#resText").html(msg);
                         /*
@@ -168,7 +136,67 @@
                     }
                 });
             }
+            else {
+                $pass.val('');
+                $repass.val('');
+                $pass.attr('placeholder', textdoublepass);
+                $repass.attr('placeholder', textdoublepass);
+            }
+        }
+    };
+    /**
+     * 登录按钮以及回车触发事件函数
+     */
+    var signIn = function () {
+        dom.sign.click(function () {
+            signJudge();
         });
+        dom.sign_enter.keydown(function (event) {
+            if (event.keyCode == 13) {
+                signJudge();
+            }
+        })
+    };
+    /**
+     * 登录判定函数
+     */
+    var signJudge  = function () {
+
+        var $pass = dom.sign_pass;
+        var $usename = dom.sign_usename;
+        if ($usename.val() == '') {
+            $usename.next('div').html(textusename);
+        }
+        if ($pass.val() == '') {
+            $pass.next('div').html(textpass);
+        }
+        if ($usename.val() != '' && $pass.val() != '') {
+            $.ajax({
+                //客户端向服务器发送请求时采取的方式
+                type : "post",
+                cache : false,
+                //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
+                dataType : 'Json',
+                //指明客户端要向哪个页面里面的哪个方法发送请求
+                url : "/silkroad/login",
+                data : {
+                    name : $usename.val(),
+                    pwd : $pass.val()
+                },
+                //客户端调用服务器端方法成功后执行的回调函数
+                success : function(msg) {
+                    window.location="/silkroad/index.html";
+                    //$.get('www.baidu.com');
+                    //$("#resText").html(msg);
+                    /*
+                     if (result.d=="success") {
+                     alert("登陆成功");
+                     } else {
+                     alert("登录失败");
+                     }*/
+                }
+            });
+        }
     };
     /**
      * 关闭登录和注册框
@@ -176,6 +204,11 @@
     var closeSignReg = function () {
         dom.register_title.find('div').click(function () {
             fnAnimateReturn();
+        });
+        dom.body.keydown(function (event) {
+            if(event.keyCode == 27) {
+                fnAnimateReturn();
+            }
         })
     };
 
@@ -282,5 +315,8 @@
             $resign.animate({'left': '360px', 'opacity': '1'}, 300);
             $hopic.animate({'left': '100px', 'opacity': '1'}, 200);
         });
+        // 关闭登录注册框时清空信息
+        dom.register_infor.val('');
+        dom.prompt.html('');
     };
 })();

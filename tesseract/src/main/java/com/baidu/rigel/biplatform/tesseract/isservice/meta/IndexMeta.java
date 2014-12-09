@@ -17,18 +17,12 @@ package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.Level;
-import com.baidu.rigel.biplatform.ac.model.Measure;
-import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.store.meta.StoreMeta;
 
@@ -96,11 +90,11 @@ public class IndexMeta extends StoreMeta implements Serializable {
     /**
      * 维度信息
      */
-    private Map<String, Dimension> dimInfoMap;
+    private Set<String> dimSet;
     /**
      * 指标信息
      */
-    private Map<String, Measure> measureInfoMap;
+    private Set<String> measureSet;
     
     // /**
     // * 索引分片规则
@@ -140,11 +134,11 @@ public class IndexMeta extends StoreMeta implements Serializable {
     /**
      * 待合并的维度
      */
-    private Map<String, Dimension> dimInfoMergeMap;
+    private Set<String> dimInfoMergeSet;
     /**
      * 待合并的指标
      */
-    private Map<String, Measure> measureInfoMergeMap;
+    private Set<String> measureInfoMergeSet;
     
     /**
      * 默认构造函数
@@ -192,32 +186,7 @@ public class IndexMeta extends StoreMeta implements Serializable {
         return idxShardList;
     }
     
-    /**
-     * 
-     * getDimInfoMap
-     * 
-     * @return Map<String, Dimension>
-     */
-    public Map<String, Dimension> getDimInfoMap() {
-        if (this.dimInfoMap == null) {
-            this.dimInfoMap = new HashMap<String, Dimension>();
-        }
-        return dimInfoMap;
-    }
-    
-    /**
-     * 
-     * getMeasureInfoMap
-     * 
-     * @return Map<String, Measure>
-     */
-    public Map<String, Measure> getMeasureInfoMap() {
-        if (this.measureInfoMap == null) {
-            this.measureInfoMap = new HashMap<String, Measure>();
-        }
-        return measureInfoMap;
-    }
-    
+   
     /**
      * 
      * 获取存储区域名称
@@ -375,25 +344,7 @@ public class IndexMeta extends StoreMeta implements Serializable {
         this.cubeIdSet = cubeIdSet;
     }
     
-    /**
-     * setter method for property dimInfoMap
-     * 
-     * @param dimInfoMap
-     *            the dimInfoMap to set
-     */
-    public void setDimInfoMap(Map<String, Dimension> dimInfoMap) {
-        this.dimInfoMap = dimInfoMap;
-    }
     
-    /**
-     * setter method for property measureInfoMap
-     * 
-     * @param measureInfoMap
-     *            the measureInfoMap to set
-     */
-    public void setMeasureInfoMap(Map<String, Measure> measureInfoMap) {
-        this.measureInfoMap = measureInfoMap;
-    }
     
     /**
      * setter method for property idxShardList
@@ -424,24 +375,9 @@ public class IndexMeta extends StoreMeta implements Serializable {
     // this.idxShardRule = idxShardRule;
     // }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("IndexMeta [clusterName=" + clusterName + ", cubeIdSet=" + cubeIdSet
-            + ", productLine=" + productLine + ", dataDescInfo=" + dataDescInfo
-            + ", dataSourceInfo=" + dataSourceInfo + ", dimInfoMap=" + dimInfoMap
-            + ", measureInfoMap=" + "");
-        sb.append(measureInfoMap == null ? "[null]" : measureInfoMap.keySet());
-        sb.append(", idxShardList=" + idxShardList + ", replicaNum=" + replicaNum + ", idxState="
-            + idxState + "]");
-        return sb.toString();
-    }
     
+    
+   
     /**
      * 获取事实表名
      * 
@@ -495,49 +431,6 @@ public class IndexMeta extends StoreMeta implements Serializable {
         this.idxVersion = idxVersion;
     }
     
-    /**
-     * getter method for property dimInfoMergeMap
-     * 
-     * @return the dimInfoMergeMap
-     */
-    public Map<String, Dimension> getDimInfoMergeMap() {
-        if (dimInfoMergeMap == null) {
-            dimInfoMergeMap = new HashMap<String, Dimension>();
-        }
-        return dimInfoMergeMap;
-    }
-    
-    /**
-     * setter method for property dimInfoMergeMap
-     * 
-     * @param dimInfoMergeMap
-     *            the dimInfoMergeMap to set
-     */
-    public void setDimInfoMergeMap(Map<String, Dimension> dimInfoMergeMap) {
-        this.dimInfoMergeMap = dimInfoMergeMap;
-    }
-    
-    /**
-     * getter method for property measureInfoMergeMap
-     * 
-     * @return the measureInfoMergeMap
-     */
-    public Map<String, Measure> getMeasureInfoMergeMap() {
-        if (measureInfoMergeMap == null) {
-            measureInfoMergeMap = new HashMap<String, Measure>();
-        }
-        return measureInfoMergeMap;
-    }
-    
-    /**
-     * setter method for property measureInfoMergeMap
-     * 
-     * @param measureInfoMergeMap
-     *            the measureInfoMergeMap to set
-     */
-    public void setMeasureInfoMergeMap(Map<String, Measure> measureInfoMergeMap) {
-        this.measureInfoMergeMap = measureInfoMergeMap;
-    }
     
     /**
      * getter method for property cubeIdMergeSet
@@ -580,7 +473,77 @@ public class IndexMeta extends StoreMeta implements Serializable {
         this.indexMetaId = indexMetaId;
     }
     
-    /*
+    
+    
+    /**
+	 * @return the dimSet
+	 */
+	public Set<String> getDimSet() {
+		if(dimSet==null){
+			dimSet=new HashSet<String>();
+		}
+		return dimSet;
+	}
+
+	/**
+	 * @param dimSet the dimSet to set
+	 */
+	public void setDimSet(Set<String> dimSet) {
+		this.dimSet = dimSet;
+	}
+
+	/**
+	 * @return the measureSet
+	 */
+	public Set<String> getMeasureSet() {
+		if(measureSet==null){
+			measureSet=new HashSet<String>();
+		}
+		return measureSet;
+	}
+
+	/**
+	 * @param measureSet the measureSet to set
+	 */
+	public void setMeasureSet(Set<String> measureSet) {
+		this.measureSet = measureSet;
+	}
+
+	/**
+	 * @return the dimInfoMergeSet
+	 */
+	public Set<String> getDimInfoMergeSet() {
+		if(dimInfoMergeSet==null){
+			dimInfoMergeSet=new HashSet<String>();
+		}
+		return dimInfoMergeSet;
+	}
+
+	/**
+	 * @param dimInfoMergeSet the dimInfoMergeSet to set
+	 */
+	public void setDimInfoMergeSet(Set<String> dimInfoMergeSet) {
+		this.dimInfoMergeSet = dimInfoMergeSet;
+	}
+
+	/**
+	 * @return the measureInfoMergeSet
+	 */
+	public Set<String> getMeasureInfoMergeSet() {
+		if(measureInfoMergeSet==null){
+			measureInfoMergeSet=new HashSet<String>();
+		}
+		return measureInfoMergeSet;
+	}
+
+	/**
+	 * @param measureInfoMergeSet the measureInfoMergeSet to set
+	 */
+	public void setMeasureInfoMergeSet(Set<String> measureInfoMergeSet) {
+		this.measureInfoMergeSet = measureInfoMergeSet;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#hashCode()
@@ -623,37 +586,38 @@ public class IndexMeta extends StoreMeta implements Serializable {
     /**
      * 
      * getSelectList 抽取索引元数据中的指标与维度字段，生成集合
-     * 
+     * @param needMerge 是否需要合并
      * @return Set<String> 如果指标与维度为空，则反回空集，而不是null
      */
-    public Set<String> getSelectList() {
+    public Set<String> getSelectList(boolean needMerge) {
         Set<String> selectList = new HashSet<String>();
-        // 处理维度
-        for (String dimKey : this.dimInfoMap.keySet()) {
-            Dimension dim = this.dimInfoMap.get(dimKey);
-            
-            // selectList.add(dim.getFacttableColumn());
-            // 处理维度不同层级
-            if (dim.getLevels() != null) {
-                for (String levelKey : dim.getLevels().keySet()) {
-                    Level dimLevel = dim.getLevels().get(levelKey);
-                    selectList.add(dimLevel.getFactTableColumn());
-                }
-            }
-        }
-        // 处理指标
-        for (String measureKey : this.measureInfoMap.keySet()) {
-            Measure measure = this.measureInfoMap.get(measureKey);
-            if (measure.getType().equals(MeasureType.COMMON)) {
-                // 普通指标，直接加入到select表列中
-                selectList.add(measure.getDefine());
-            } else if (measure.getType().equals(MeasureType.DEFINE)) {
-                // 当前不支持
-            } else if (measure.getType().equals(MeasureType.CAL)) {
-                // 当前不支持
+        if(this.dimSet!=null){
+        	for(String dimKey:this.dimSet){
+            	selectList.add(dimKey);
             }
         }
         
+        if(this.measureSet!=null){
+        	for(String measureKey:this.measureSet){
+            	selectList.add(measureKey);
+            }
+        }
+        
+        
+        if(needMerge){
+        	if(this.dimInfoMergeSet!=null && this.dimInfoMergeSet.size()>0){
+        		for(String dimKey:this.dimInfoMergeSet){
+        			selectList.add(dimKey);
+        		}
+        	}
+        	
+        	if(this.measureInfoMergeSet!=null && this.measureInfoMergeSet.size()>0){
+        		for(String measureKey:this.measureInfoMergeSet){
+        			selectList.add(measureKey);
+        		}
+        	}
+        }        
+       
         return selectList;
     }
     

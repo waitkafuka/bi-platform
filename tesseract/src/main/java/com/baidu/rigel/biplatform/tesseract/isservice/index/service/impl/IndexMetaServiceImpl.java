@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,9 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.DataDescInfo;
@@ -162,8 +165,40 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             idxMeta.setDataDescInfo(dataDescInfo);
             
             idxMeta.getCubeIdSet().add(currCube.getId());
-            idxMeta.setDimInfoMap(currCube.getDimensions());
-            idxMeta.setMeasureInfoMap(currCube.getMeasures());
+            
+			// 处理维度
+			Set<String> dimSet = new HashSet<String>();
+			if (currCube.getDimensions() != null) {
+				for (String dimKey : currCube.getDimensions().keySet()) {
+					Dimension dim = currCube.getDimensions().get(dimKey);
+					// 处理维度不同层级
+					if (dim.getLevels() != null) {
+						for (String levelKey : dim.getLevels().keySet()) {
+							Level dimLevel = dim.getLevels().get(levelKey);
+							dimSet.add(dimLevel.getFactTableColumn());
+						}
+					}
+				}
+			}
+			idxMeta.setDimSet(dimSet);
+
+			// 处理指标
+			Set<String> measureSet = new HashSet<String>();
+			if (currCube.getMeasures() != null) {
+				for (String measureKey : currCube.getMeasures().keySet()) {
+					Measure measure = currCube.getMeasures().get(measureKey);
+					if (measure.getType().equals(MeasureType.COMMON)) {
+						// 普通指标，直接加入到select表列中
+						measureSet.add(measure.getDefine());
+					} else if (measure.getType().equals(MeasureType.DEFINE)) {
+						// 当前不支持
+					} else if (measure.getType().equals(MeasureType.CAL)) {
+						// 当前不支持
+					}
+				}
+			}
+			idxMeta.setMeasureSet(measureSet);
+            
             idxMeta.setReplicaNum(IndexShard.getDefaultShardReplicaNum());
             idxMeta.setDataSourceInfo(dataSourceInfo);
             idxMeta.setDataDescInfo(dataDescInfo);
@@ -497,20 +532,17 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         }
         if (idxMeta1 != null && idxMeta2 != null) {
             // 维度信息
-            Map<String, Dimension> dimInfoMap1 = idxMeta1.getDimInfoMap();
-            Map<String, Dimension> dimInfoMap2 = idxMeta2.getDimInfoMap();
-            Collection<Dimension> dimInfos1 = dimInfoMap1.values();
-            Collection<Dimension> dimInfos2 = dimInfoMap2.values();
-            Collection<Dimension> dimInfoIntersection = getIntersectionOf2Collection(dimInfos1,
-                dimInfos2);
+            Set<String> dimInfoSet1 = idxMeta1.getDimSet();
+            Set<String> dimInfoSet2 = idxMeta2.getDimSet();
+            Collection<String> dimInfoIntersection = getIntersectionOf2Collection(dimInfoSet1,dimInfoSet2);
             if (dimInfoIntersection != null) {
                 dimScore += dimInfoIntersection.size();
             }
             // 指标信息
-            Map<String, Measure> measureMap1 = idxMeta1.getMeasureInfoMap();
-            Map<String, Measure> measureMap2 = idxMeta2.getMeasureInfoMap();
-            Collection<Measure> measureIntersection = getIntersectionOf2Collection(
-                measureMap1.values(), measureMap2.values());
+            Set<String> measureSet1 = idxMeta1.getMeasureSet();
+            Set<String> measureSet2 = idxMeta2.getMeasureSet();
+            Collection<String> measureIntersection = getIntersectionOf2Collection(
+            		measureSet1, measureSet2);
             if (measureIntersection != null) {
                 measureScore += measureIntersection.size();
             }
@@ -595,8 +627,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
              */
             
             // s2 calculate score of idxMeta
-            IndexMetaSimilarityScore mainScore = new IndexMetaSimilarityScore(idxMeta
-                .getDimInfoMap().values().size(), idxMeta.getMeasureInfoMap().values().size());
+            IndexMetaSimilarityScore mainScore = new IndexMetaSimilarityScore(idxMeta.getDimSet().size(), idxMeta.getMeasureSet().size());
             // s3 calculate the most similar indexMeta with curr idxMeta
             Map<IndexMetaSimilarityScore, List<IndexMeta>> mostSimilarIndexMetaMap = getMostSimilarIndexMeta(
                 currFactTableIdxMetaList, idxMeta);
@@ -617,7 +648,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                         // 合并策略：1.维度相同，指标不同，合并后复用
                         IndexMeta currIdxMeta = mostSimilarIndexMetaMap.get(mScore).get(0);
                         currIdxMeta.getCubeIdMergeSet().addAll(idxMeta.getCubeIdSet());
-                        currIdxMeta.getMeasureInfoMap().putAll(idxMeta.getMeasureInfoMap());
+                        currIdxMeta.getMeasureInfoMergeSet().addAll(idxMeta.getMeasureSet());
                         // 设置currIdxMeta的状态为需要合并
                         currIdxMeta.setIdxState(IndexState.INDEX_AVAILABLE_NEEDMERGE);
                         idxMeta = currIdxMeta;
