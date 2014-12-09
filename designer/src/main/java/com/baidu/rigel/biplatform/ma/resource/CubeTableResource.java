@@ -102,7 +102,7 @@ public class CubeTableResource {
      * 
      * @param reportId
      * @param request
-     * @return
+     * @return ResonseResult
      */
     @RequestMapping(value = "/{id}/star_models", method = { RequestMethod.POST })
     public ResponseResult saveCubeTables(@PathVariable("id") String reportId,

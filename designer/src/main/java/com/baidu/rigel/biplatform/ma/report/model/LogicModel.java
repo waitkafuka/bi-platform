@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.baidu.rigel.biplatform.ma.report.utils.LinkedHashMapUtils;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -57,6 +58,17 @@ public class LogicModel implements Serializable {
      * 切片轴
      */
     private Map<String, Item> slices = new LinkedHashMap<String, Item>();
+    
+    /**
+     * 备选维度
+     */
+    private Map<String, Item> selectionDims = Maps.newLinkedHashMap();
+    
+    /**
+     * 备选指标
+     */
+    private Map<String, Item> selectionMeasures = Maps.newLinkedHashMap();
+    
     
     public Item[] getColumns() {
         return this.columns.values().toArray(new Item[0]);
