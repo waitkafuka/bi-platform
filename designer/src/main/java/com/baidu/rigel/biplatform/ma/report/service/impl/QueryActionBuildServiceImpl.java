@@ -254,7 +254,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 context.put(row.getOlapElementId(), uniqName);
             }
             for (String indName : indNames) {
-                cols.add(liteOlapArea.getAllItems().get(indName));
+                cols.add(liteOlapArea.listAllItems().get(indName));
             }
             targetLogicModel = analysisChartBuildService.generateTrendChartModel(targetLogicModel,
                     model.getSchema(), liteOlapArea.getCubeId(), rows, cols, timeDimItem);

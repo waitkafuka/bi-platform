@@ -16,7 +16,6 @@
 package com.baidu.rigel.biplatform.ma.report.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -247,18 +246,35 @@ public class LogicModel implements Serializable {
         /**
          * 这里一定要使用linkedHashMap，保留顺序
          */
-        Map<String, Item> allItems = new LinkedHashMap<String, Item>();
-        allItems.putAll(this.columns);
-        allItems.putAll(this.rows);
-        allItems.putAll(this.slices);
+        Map<String, Item> allItems = collectItems();
         return allItems.values().toArray(new Item[0]);
     }
-    
-    public Item getItem(String itemId) {
-        Map<String, Item> allItems = new HashMap<String, Item>();
+
+	/**
+	 * @return
+	 */
+	private Map<String, Item> collectItems() {
+		Map<String, Item> allItems = new LinkedHashMap<String, Item>();
         allItems.putAll(this.columns);
         allItems.putAll(this.rows);
         allItems.putAll(this.slices);
+        allItems.putAll(this.getSelectionDims());
+        allItems.putAll(this.getSelectionMeasures());
+		return allItems;
+	}
+    
+	/**
+	 * 
+	 * @param itemId
+	 * @return Item
+	 */
+    public Item getItem(String itemId) {
+        Map<String, Item> allItems = collectItems();
+//        allItems.putAll(this.columns);
+//        allItems.putAll(this.rows);
+//        allItems.putAll(this.slices);
+//        allItems.putAll(this.getSelectionDims());
+//        allItems.putAll(this.getSelectionMeasures());
         for (Item item : allItems.values()) {
             // TODO 需要确认这里没有问题
             if (item.getOlapElementId().equals(itemId)) {
@@ -269,17 +285,12 @@ public class LogicModel implements Serializable {
     }
     
     public Item getItemByOlapElementId(String olapElementId) {
-        Map<String, Item> allItems = new HashMap<String, Item>();
-        allItems.putAll(this.columns);
-        allItems.putAll(this.rows);
-        allItems.putAll(this.slices);
+        Map<String, Item> allItems = collectItems();
         return allItems.get(olapElementId);
     }
     
     public boolean containsOlapElement(String olapElementId) {
-        return this.columns.containsKey(olapElementId)
-                || this.rows.containsKey(olapElementId)
-                || this.slices.containsKey(olapElementId);
+        return collectItems().containsKey(olapElementId);
     }
 
     /**
@@ -303,4 +314,40 @@ public class LogicModel implements Serializable {
             this.columns.put(item.getOlapElementId(), item);
         }
     }
+
+	/**
+	 * @return the selectionDims
+	 */
+	public Map<String, Item> getSelectionDims() {
+		if (this.selectionDims == null) {
+			this.selectionDims = Maps.newLinkedHashMap();
+		}
+		return selectionDims;
+	}
+
+	/**
+	 * @param selectionDims the selectionDims to set
+	 */
+	public void setSelectionDims(Map<String, Item> selectionDims) {
+		this.selectionDims = selectionDims;
+	}
+
+	/**
+	 * @return the selectionMeasures
+	 */
+	public Map<String, Item> getSelectionMeasures() {
+		if (this.selectionMeasures == null) {
+			this.selectionMeasures = Maps.newLinkedHashMap();
+		}
+		return selectionMeasures;
+	}
+
+	/**
+	 * @param selectionMeasures the selectionMeasures to set
+	 */
+	public void setSelectionMeasures(Map<String, Item> selectionMeasures) {
+		this.selectionMeasures = selectionMeasures;
+	}
+    
+    
 }

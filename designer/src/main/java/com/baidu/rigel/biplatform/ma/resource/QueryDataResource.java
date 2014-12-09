@@ -191,8 +191,8 @@ public class QueryDataResource extends BaseResource {
     		for (final String areaId : areaIds) {
 			ExtendArea area = model.getExtendById(areaId);
 			if (area != null && isQueryComp(area.getType())
-					&& !area.getAllItems().isEmpty()) {
-				Item item = area.getAllItems().values()
+					&& !area.listAllItems().isEmpty()) {
+				Item item = area.listAllItems().values()
 						.toArray(new Item[0])[0];
 				Cube cube = model.getSchema().getCubes()
 						.get(area.getCubeId());
@@ -481,10 +481,10 @@ public class QueryDataResource extends BaseResource {
      */
     private String getRealKey(ReportDesignModel model, String key) {
     		if (model != null && model.getExtendById(key) != null) {
-    			if (model.getExtendById(key).getAllItems().isEmpty()) {
+    			if (model.getExtendById(key).listAllItems().isEmpty()) {
     				return key;
     			} 
-    			return model.getExtendById(key).getAllItems().keySet().toArray(new String[0])[0];
+    			return model.getExtendById(key).listAllItems().keySet().toArray(new String[0])[0];
     		}
 		return key;
 	}
@@ -705,7 +705,7 @@ public class QueryDataResource extends BaseResource {
     			return new String[]{SeriesUnitType.LINE.name()};
     		}
     		List<String> types = Lists.newArrayList();
-    		targetArea.getAllItems().values().stream().filter(item -> {
+    		targetArea.listAllItems().values().stream().filter(item -> {
     			return item.getPositionType() == PositionType.Y;
     		}).map(item -> {
     			return item.getParams().get("chartType");

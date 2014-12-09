@@ -329,7 +329,7 @@ public class ReportDesignModelResource extends BaseResource {
              * TODO 这里的逻辑要移除到别处
              */
             ExtendArea area = model.getExtendById(areaId);
-            for (final Item item : area.getAllItems().values()) {
+            for (final Item item : area.listAllItems().values()) {
                 String dimId = item.getOlapElementId();
                 runTimeModel.getContext().getParams().remove(dimId);
                 runTimeModel.getLocalContext().values().forEach(ctx -> {

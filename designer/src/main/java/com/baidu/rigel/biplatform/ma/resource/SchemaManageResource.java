@@ -760,7 +760,7 @@ public class SchemaManageResource {
                 if (model.getExtendAreas() != null && !model.getExtendAreas().isEmpty()) {
                     Map<String, ExtendArea> areas = DeepcopyUtils.deepCopy(model.getExtendAreas());
                     areas.values().forEach(area -> {
-                        area.getAllItems().values().stream().filter(item -> {
+                        area.listAllItems().values().stream().filter(item -> {
                             return item != null && item.getOlapElementId().equals(measureId);
                         }).forEach(item -> {
                             ExtendArea tmp = model.getExtendAreas().get(area.getId());

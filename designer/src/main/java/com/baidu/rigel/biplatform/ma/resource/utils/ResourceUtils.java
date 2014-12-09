@@ -125,7 +125,7 @@ public class ResourceUtils {
         }
         if (area.getType() == ExtendAreaType.LITEOLAP) {
             LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) area;
-            Set<String> usedItemOlapIdSet = area.getAllItems().keySet();
+            Set<String> usedItemOlapIdSet = area.listAllItems().keySet();
             Item[] candDims = liteOlapArea.getCandDims().values().toArray(new Item[0]);
             rs.setCandDims(buildItemViewObject(model.getSchema(), cubeId, candDims, usedItemOlapIdSet));
             Item[] candInds = liteOlapArea.getCandInds().values().toArray(new Item[0]);

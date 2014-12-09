@@ -444,7 +444,7 @@ public class QueryUtils {
 				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
 				if (rs.get(area.getCubeId()) == null) {
 					List<Dimension> dims = Lists.newArrayList();
-					area.getAllItems().values().forEach(key -> {
+					area.listAllItems().values().forEach(key -> {
 						dims.add(cube.getDimensions().get(key.getId()));
 					});
 					rs.put(area.getCubeId(), dims);

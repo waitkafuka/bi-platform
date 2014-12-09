@@ -143,16 +143,21 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     logger.debug("can not get item with item id : " + item.getOlapElementId());
                     return null;
                 }
-//                if (item.getFormatModel() != null) {
-//                    oldItem.setFormatModel(item.getFormatModel());
-//                }
                 if (item.getParams() != null) {
                     oldItem.setParams(item.getParams());
                 }
-                if (position == PositionType.CAND_DIM) {
-                    ((LiteOlapExtendArea) area).addCandDim(item);
+                if (position == PositionType.CAND_DIM ) {
+                		if (area instanceof LiteOlapExtendArea) {
+                			((LiteOlapExtendArea) area).addCandDim(item);
+                		} else {
+                			 area.addSelectionDimItem(item);
+                		}
                 } else if (position == PositionType.CAND_IND) {
-                    ((LiteOlapExtendArea) area).addCandInd(item);
+                    if (area instanceof LiteOlapExtendArea) {
+                    		((LiteOlapExtendArea) area).addCandInd(item);
+	            		} else {
+	            			 area.addSelectionMeasureItem(item);
+	            		}
                 }
             } else {
                 addNewInfoIntoArea(ori, areaId, item, position, area);
@@ -170,7 +175,7 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
      * @return
      */
     private Item getItem(ExtendArea area, String id) {
-        Map<String, Item> allItems = area.getAllItems();
+        Map<String, Item> allItems = area.listAllItems();
         if (allItems != null) {
             return allItems.get(id);
         }
@@ -230,15 +235,17 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 break;
             case CAND_DIM:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
-                    throw new ReportModelOperationException("can not add candicate dim to non liteolap area!");
+                		area.addSelectionDimItem(item);
+                } else {
+                		((LiteOlapExtendArea) area).addCandDim(item);
                 }
-                ((LiteOlapExtendArea) area).addCandDim(item);
                 break;
             case CAND_IND:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
-                    throw new ReportModelOperationException("can not add candicate dim to non liteolap area!");
+                		area.addSelectionMeasureItem(item);
+                } else {
+                		((LiteOlapExtendArea) area).addCandInd(item);
                 }
-                ((LiteOlapExtendArea) area).addCandInd(item);
                 break;
             default:
         }
@@ -280,21 +287,23 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     break;
                 case CAND_DIM:
                     if (area.getType() != ExtendAreaType.LITEOLAP) {
-                        throw new ReportModelOperationException("can not remove candicate dim from non liteolap area!");
+                    		area.removeSelectDimItem(olapElementId);
+                    } else {
+	                    	((LiteOlapExtendArea) area).removeCandDim(olapElementId);
                     }
-                    if (area.getAllItems().containsKey(olapElementId)) {
-                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
-                    }
-                    ((LiteOlapExtendArea) area).removeCandDim(olapElementId);
+//                    if (area.listAllItems().containsKey(olapElementId)) {
+//                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
+//                    }
                     break;
                 case CAND_IND:
                     if (area.getType() != ExtendAreaType.LITEOLAP) {
-                        throw new ReportModelOperationException("can not remove candicate dim from non liteolap area!");
+                        area.removeSelectMeasureItem(olapElementId);
+                    } else {
+	                    	((LiteOlapExtendArea) area).removeCandInd(olapElementId);
                     }
-                    if (area.getAllItems().containsKey(olapElementId)) {
-                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
-                    }
-                    ((LiteOlapExtendArea) area).removeCandInd(olapElementId);
+//                    if (area.listAllItems().containsKey(olapElementId)) {
+//                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
+//                    }
                     break;
                 default:
             }

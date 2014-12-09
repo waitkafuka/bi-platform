@@ -59,7 +59,7 @@ public class ElementUtils {
          * get rid of ones used in table or chart
          */
         for (ExtendArea area : model.getExtendAreaList()) {
-            for (Item item : area.getAllItems().values()) {
+            for (Item item : area.listAllItems().values()) {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         area.getCubeId(), item.getOlapElementId());
                 if (element != null) {
@@ -101,7 +101,7 @@ public class ElementUtils {
          * get rid of ones used in table or chart
          */
         for (ExtendArea area : model.getExtendAreaList()) {
-            for (Item item : area.getAllItems().values()) {
+            for (Item item : area.listAllItems().values()) {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                         cube.getId(), item.getOlapElementId());
                 if (element != null) {
