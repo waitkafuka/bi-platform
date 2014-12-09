@@ -346,6 +346,9 @@ define([
              */
             addEditBtns: function ($component) {
                 $component.append(editBtnsTemplate.render());
+                if($component.attr('data-component-type') == 'TEXT') {
+                    $component.find('.j-setting').hide();
+                }
                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
                     if ($conBtn.width() < 20) {
@@ -388,13 +391,7 @@ define([
              * @public
              */
             initCompConfigBar: function (event) {
-                var $textBox = $(event.target).parent().parent();
-                if ($textBox.find('textarea').length != 0) {
-                    alert("此控件无此功能");
-                }
-                else {
-                    this.editCompView.initCompConfigBar(event);
-                }
+                this.editCompView.initCompConfigBar(event);
             },
 
             /**
