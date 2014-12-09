@@ -709,7 +709,6 @@ $namespace('di.shared.ui');
      */
     DI_TABLE_CLASS.$handleDataError = function (status, ejsonObj, options) {
         this.$di('getEl').style.display = '';
-        
         foreachDo(
             [
                 this._uTable,

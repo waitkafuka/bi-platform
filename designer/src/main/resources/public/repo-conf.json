@@ -45,7 +45,7 @@
             "<%= prop.dirSrc %>/biz-shared/di.config/*.js",
             "<%= prop.dirSrc %>/biz-shared/di.helper/*.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.arg/*.js",
-            "<%= prop.dirSrc %>/biz-shared/di.shared.model/global-model.js",
+            "<%= prop.dirSrc %>/biz-shared/di.shared.model/btns-model.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/engine.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/di-factory.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/common-param-factory.js",
@@ -62,7 +62,7 @@
             "<%= prop.dirSrc %>/biz-shared/di.shared.arg/*.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.vui/*.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.adapter/general-adapter-method.js", // 先引用
-            "<%= prop.dirSrc %>/biz-shared/di.shared.model/global-model.js",
+            "<%= prop.dirSrc %>/biz-shared/di.shared.model/btns-model.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/common-param-factory.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/engine.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/di-factory.js",
@@ -82,7 +82,7 @@
             "<%= prop.dirSrc %>/biz-shared/di.shared.arg/*.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.vui/*.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.adapter/general-adapter-method.js", // 先引用
-            "<%= prop.dirSrc %>/biz-shared/di.shared.model/global-model.js",
+            "<%= prop.dirSrc %>/biz-shared/di.shared.model/btns-model.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/common-param-factory.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.model/di-factory.js",
             "<%= prop.dirSrc %>/biz-shared/di.shared.ui/interact-entity.js",
@@ -302,8 +302,8 @@
         { "filePath": "<%= prop.dirSrc %>/biz-shared/di.helper/dialog.js", "depends": ["<%= prop.dirECUICore %>/messagebox.js"] },
 
         // DI Models （只包含了有depends的models）
-        { "filePath": "<%= prop.dirDIModel %>/global-model.js", "depends": ["<%= prop.dirDIModel %>/auth-model.js", "<%= prop.dirDIModel %>/date-model.js", "<%= prop.dirDIModel %>/user-model.js"] },
-        // { "filePath": "<%= prop.dirDIModel %>/console-page-manager.js", "depends": ["<%= prop.dirDIModel %>/global-model.js"] },
+        { "filePath": "<%= prop.dirDIModel %>/btns-model.js", "depends": ["<%= prop.dirDIModel %>/auth-model.js", "<%= prop.dirDIModel %>/date-model.js", "<%= prop.dirDIModel %>/user-model.js"] },
+        // { "filePath": "<%= prop.dirDIModel %>/console-page-manager.js", "depends": ["<%= prop.dirDIModel %>/btns-model.js"] },
         { "filePath": "<%= prop.dirDIModel %>/panel-page-manager.js", "depends": ["<%= prop.dirDIModel %>/panel-page-radio-adapter.js", "<%= prop.dirDIModel %>/panel-page-tab-adapter.js"] },
         { "filePath": "<%= prop.dirDIModel %>/table-model.js", "depends": ["<%= prop.dirDIModel %>/page-info.js"] },
 
