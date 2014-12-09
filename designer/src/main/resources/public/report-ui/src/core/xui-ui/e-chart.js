@@ -218,10 +218,10 @@
             },
             data: this._aXAxis.data
         };
-        if (!this._chartType === 'pie') {
+        if (this._chartType !== 'pie') {
             options.xAxis = xAxis;
         }
-    }
+    };
     /**
      * 设置y轴
      * 支持多轴
@@ -229,7 +229,7 @@
      * @private
      */
     UI_E_CHART_CLASS.$setupYAxis = function (options) {
-        if (!this._chartType === 'pie') {
+        if (this._chartType !== 'pie') {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
                 var yAxisOption;
