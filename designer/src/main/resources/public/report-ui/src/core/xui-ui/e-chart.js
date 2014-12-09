@@ -283,7 +283,7 @@
         if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
-            };
+            }
             legend.orient = 'vertical';
         }
         else {
