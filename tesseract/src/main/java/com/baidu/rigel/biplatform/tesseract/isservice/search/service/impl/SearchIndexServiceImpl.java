@@ -263,7 +263,7 @@ public class SearchIndexServiceImpl implements SearchService {
         if (idxMeta == null || query == null) {
             return result;
         }
-        Set<String> idxSelect = idxMeta.getSelectList();
+        Set<String> idxSelect = idxMeta.getSelectList(false);
         
         if (!CollectionUtils.isEmpty(idxSelect)
                 && idxSelect.containsAll(query.getSelect().getQueryProperties())) {
