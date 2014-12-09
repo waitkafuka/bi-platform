@@ -20,6 +20,8 @@
     text-align: center;
     font-size: 13px;
     line-height: 28px;
+    display: inline-block;
+    margin-right: 10px;
 }
 .j-globalbtn div:hover {
     background-color: #0167cc;

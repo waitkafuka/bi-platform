@@ -1,7 +1,7 @@
 /**
  * @file:   文本框的配置信息
  * @author: weiboxue(wbx_901118@sina.com)
- * @date:   2014/11/26
+ * @date:   2014/12/1
  */
 define(
     [

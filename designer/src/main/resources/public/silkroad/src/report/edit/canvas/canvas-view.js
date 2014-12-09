@@ -29,7 +29,10 @@ define([
                 'click .j-con-edit-btns .j-setting': 'initCompConfigBar',
                 'click .j-con-edit-btns .j-delete': 'deleteComp',
                 'click .j-button-save-report': 'saveReport',
-                'click .j-button-publish-report': 'publishReport'
+                'click .j-button-publish-report': 'publishReport',
+                'click #comp-div': 'focusText',
+                'blur #comp-text': 'blurText',
+                'keydown #comp-text': 'keyDownText'
             },
 
             /**
@@ -136,6 +139,65 @@ define([
                         ui.helper.html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
                     }
                 });
+            },
+            /**
+             * 文本框组件点击切换
+             *
+             * @public
+             */
+            focusText: function () {
+                var divTitle = '点击进行输入';
+                var $divTextBox = $('#comp-div');
+                var $divText = $('#comp-report');
+                var $inpText = $('#comp-text');
+                var divHtml = $divText.html();
+                $divTextBox.hide();
+                $inpText.show().focus();
+                if (divHtml != divTitle) {
+                    $inpText.val($divText.html());
+                }
+                else {
+                    $inpText.val('');
+                }
+            },
+
+            /**
+             * 文本框组件失去焦点切换
+             *
+             * @public
+             */
+            blurText: function (event) {
+                var divtext = $(event.target).val();
+                var that = this;
+                that.saveBtnsText(divtext);
+            },
+
+            keyDownText: function (event) {
+                var divtext = $(event.target).val();
+                var that = this;
+                if (event.keyCode == 13) {
+                    that.saveBtnsText(divtext);
+                }
+            },
+            /**
+             * 文本框组件失去焦点切换
+             *
+             * @public
+             */
+            saveBtnsText: function (content) {
+                var divTitle = '点击进行输入';
+                var $divTextBox = $('#comp-div');
+                var $divText = $('#comp-report');
+                var $inpText = $('#comp-text');
+                $inpText.hide();
+                $divTextBox.show();
+                if (content != '') {
+                    $divText.html(content);
+                }
+                else {
+                    $divText.html(divTitle);
+                }
+                this.model.dateCompPositing(content);
             },
             /**
              * 添加一个组件(提交后台获取id，并在vm与json中添加相关数据)
@@ -326,7 +388,13 @@ define([
              * @public
              */
             initCompConfigBar: function (event) {
-                this.editCompView.initCompConfigBar(event);
+                var $textBox = $(event.target).parent().parent();
+                if ($textBox.find('textarea').length != 0) {
+                    alert("此控件无此功能");
+                }
+                else {
+                    this.editCompView.initCompConfigBar(event);
+                }
             },
 
             /**
