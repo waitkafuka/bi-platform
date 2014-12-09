@@ -108,6 +108,7 @@ define([
                         that.dragView.initAll();
                     }
                 );
+
             },
 
             /**
