@@ -120,6 +120,9 @@ define([
                     case 'SELECT' :
                         template = vuiSettingSelectTemplate;
                         break;
+                    case 'MULTISELECT' :
+                        template = vuiSettingSelectTemplate;
+                        break;
                     default :
                         template = compSettingDefaultTemplate;
                         break;
