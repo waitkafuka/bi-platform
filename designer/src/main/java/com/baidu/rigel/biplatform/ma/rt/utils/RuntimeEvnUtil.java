@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
@@ -106,29 +107,31 @@ public final class RuntimeEvnUtil {
         }
 	}
 	/**
-	 * 根据报表id初始化报表对应运行时啥下文
+	 * 根据报表id初始化报表对应运行时上下文
 	 * @param designModel 报表模型
+	 * @param params 全局初始化参数
 	 * @return Context 运行时上下文
 	 */
-	public static final ContextEntity initRuntimeEvn(ReportDesignModel designModel, ApplicationContext applicationContext) {
-	    ContextEntity contextEntity = new RuntimeEvnUtil().new ContextEntity();
+	public static final Context initRuntimeEvn(ReportDesignModel designModel, ApplicationContext applicationContext, ConcurrentHashMap<String,Object> params) {
+//	    ContextEntity contextEntity = new RuntimeEvnUtil().new ContextEntity();
 	    // 上下文信息
 	    Context context = new Context(applicationContext);
-	    contextEntity.setContext(context);
-	    
-	    // 局部上下文参数
-	    List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
-	    // 获取扩展区域列表
-	    ExtendArea[] extendAreas = designModel.getExtendAreaList();
-	    if (extendAreas != null) {
-	        // 遍历扩展区，获取每个扩展区的上下文信息
-	        for (ExtendArea extendArea : extendAreas) {
-	            ExtendAreaContext localContext = getLocalContextOfExtendArea(extendArea, designModel);
-	            extendAreaContextLists.add(localContext);
-	        }
-	    }
-	    contextEntity.setExtendAreaContextLists(extendAreaContextLists);
-		return contextEntity;
+	    context.setGlobalParams(params);
+//	    contextEntity.setContext(context);
+//	    
+//	    // 局部上下文参数
+//	    List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
+//	    // 获取扩展区域列表
+//	    ExtendArea[] extendAreas = designModel.getExtendAreaList();
+//	    if (extendAreas != null) {
+//	        // 遍历扩展区，获取每个扩展区的上下文信息
+//	        for (ExtendArea extendArea : extendAreas) {
+//	            ExtendAreaContext localContext = getLocalContextOfExtendArea(extendArea, designModel);
+//	            extendAreaContextLists.add(localContext);
+//	        }
+//	    }
+//	    contextEntity.setExtendAreaContextLists(extendAreaContextLists);
+		return context;
 	}
 	
 	/**
