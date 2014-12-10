@@ -218,7 +218,11 @@
             },
             data: this._aXAxis.data
         };
-        if (this._chartType !== 'pie') {
+
+        if (this._chartType === 'bar') {
+            options.yAxis = xAxis;
+        }
+        if (this._chartType === 'column' || this._chartType === 'line') {
             options.xAxis = xAxis;
         }
     };
@@ -269,7 +273,12 @@
                 }
             }
         }
-        options.yAxis = yAxis;
+        if (this._chartType === 'bar') {
+            options.xAxis = yAxis;
+        }
+        if (this._chartType === 'column' || this._chartType === 'line') {
+            options.yAxis = yAxis;
+        }
     };
     /**
      * 设置图例
@@ -739,7 +748,7 @@
         };
 
         // 特殊判断：是否有饼图
-        this._chartType = 'column';
+       // this._chartType = 'column';
         for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
             this._chartType = ser.type;
         }
