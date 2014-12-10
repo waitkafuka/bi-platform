@@ -120,7 +120,8 @@ $namespace('di.shared.model');
                 return this._fCommonParamGetter(
                     {
                         uniqueName: param.uniqueName,
-                        sortType: param.currentSort
+                        sortType: param.sortType,
+                        componentId : param.componentId
                     }
                 );
             },

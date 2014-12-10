@@ -607,10 +607,15 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_TABLE_CLASS.$handleSort = function (colDefineItem) {
+
         this.$sync(
             this.getModel(),
             'SORT',
-            colDefineItem
+            {
+                uniqueName: colDefineItem.uniqueName,
+                componentId : this.$di('getId').split('.')[1],
+                sortType: colDefineItem.currentSort
+            }
         );
     };  
     /**
