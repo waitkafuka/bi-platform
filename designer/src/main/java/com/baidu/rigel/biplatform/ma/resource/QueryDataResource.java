@@ -568,6 +568,8 @@ public class QueryDataResource extends BaseResource {
          */
         Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
         runTimeModel.getLocalContextByAreaId(areaId).getParams().putAll(queryParams);
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        areaContext.getParams().putAll(queryParams);
         /**
          * 5. 生成查询动作QueryAction
          */
@@ -590,12 +592,11 @@ public class QueryDataResource extends BaseResource {
                 return ResourceUtils.getCorrectResult(msg, chart);
             }
         } else {
-            action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
+            action = queryBuildService.generateTableQueryAction(model, areaId, areaContext.getParams());
             if (action != null) {
                 action.setChartQuery(false);
             }
         }
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
         /**
          * 6. 完成查询
          */
@@ -1269,6 +1270,11 @@ public class QueryDataResource extends BaseResource {
     		if (StringUtils.isEmpty(sort)) {
     			sort = "NONE";
     		}
+    		if (sort.equalsIgnoreCase("NONE") || sort.equalsIgnoreCase("ASC")) {
+    			sort = "DESC";
+    		} else if (sort.equalsIgnoreCase("DESC")) {
+    			sort = "ASC";
+    		} 
     		ReportDesignModel reportModel = reportModelCacheManager.getReportModel(reportId);
     		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
     		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
@@ -1276,6 +1282,9 @@ public class QueryDataResource extends BaseResource {
     		SortRecord type = new SortRecord(sortType, uniqueName);
     		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
     		ResultSet rs = new ResultSet();
+    		model.getColumnHeadFields().forEach(headField -> {
+    			headField.getExtInfos().put("sortType", sortType.name());
+    		});
     		rs.setDataModel(model);
     		context.getQueryStatus().add(rs);
     		PivotTable table = null;
@@ -1392,9 +1401,12 @@ public class QueryDataResource extends BaseResource {
      * 
      */
     private void updateLocalContext(String dimId, ReportRuntimeModel model, String[] selectedDims,
-            String chartAreaId) {
-        QueryContext localContext = model.getLocalContextByAreaId(chartAreaId);
+            String areaId) {
+        QueryContext localContext = model.getLocalContextByAreaId(areaId);
         localContext.getParams().put(dimId, selectedDims);
+        ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
+        context.getParams().put(dimId, selectedDims);
+        reportModelCacheManager.updateAreaContext(areaId, context);
     }
     
 }

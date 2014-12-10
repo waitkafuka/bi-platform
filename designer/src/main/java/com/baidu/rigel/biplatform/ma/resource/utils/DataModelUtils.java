@@ -195,7 +195,8 @@ public class DataModelUtils {
             // membershowname,当前member的caption
             colDefine.setShowAxis(transStrList2Str(getAllCaptionofHeadField(headField),
                 DIV_DIM_NODE, true));
-            colDefine.setCurrentSort("NONE");
+            colDefine.setCurrentSort(headField.getExtInfos().get("sortType") == null 
+            			? "NONE" : headField.getExtInfos().get("sortType").toString());
             colDefineList.add(colDefine);
             
         }

@@ -473,7 +473,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 value = days;
                 itemValues.put(item, value);
                 logger.debug(value.toString());
-            } else if (!StringUtils.isEmpty(value)) {
+            } else if (value instanceof String && !StringUtils.isEmpty(value)) {
             		itemValues.put(item, value.toString().split(","));
             } else {
             		itemValues.put(item, value);

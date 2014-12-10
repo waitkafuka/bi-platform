@@ -206,15 +206,22 @@ public class QueryUtils {
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
+                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "]";
                     // TODO QeuryData value如何处理
                     for (String value : values) {
-                        if (!queryAction.isChartQuery() && value.toLowerCase().contains("all")) {
+                        if (!queryAction.isChartQuery() && value.equals(rootUniqueName)) {
                             datas.clear();
                             break;
                         }
                         QueryData data = new QueryData(value);
                         Object drillValue = queryAction.getDrillDimValues().get(item);
-                        if (drillValue != null && valueObj.equals(drillValue)) {
+                        String tmpValue = null;
+                        if (valueObj instanceof String[]) {
+                        		tmpValue = ((String[]) valueObj)[0];
+                        } else {
+                        		tmpValue = valueObj.toString();
+                        }
+                        if (drillValue != null && tmpValue.equals(drillValue)) {
                             data.setExpand(true);
                         } else if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
                             data.setExpand(true);
