@@ -223,7 +223,6 @@ $namespace('di.shared.ui');
         );
     };
 
-
     /**
      * 渲染主体
      * 
@@ -467,15 +466,16 @@ $namespace('di.shared.ui');
         var dateKey;
         var name;
         var options = {};
-        for (var i = 0, input; i < inputs.length; i++ ) {
+        for (var i = 0, input; i < inputs.length; i ++ ) {
             input = inputs[i];
-            if (input.$di('getDef').clzKey === 'X_CALENDAR') {
+            var clzKey = input.$di('getDef').clzKey;
+            if (clzKey === 'X_CALENDAR') {
                 dateName = input.$di('getDef').name;
                 dateKey = input.$di('getDef').dateKey;
             }
             else {
                 name = input.$di('getDef').name;
-                options[input.$di('getDef').dimId] = that.$di('getValue')[name][0];
+                options[input.$di('getDef').dimId] = that.$di('getValue')[name].join(',');
             }
         }
         if (dateName) {
