@@ -69,8 +69,11 @@ import com.google.common.collect.Sets;
  * @version 1.0.0.1
  */
 public class QueryUtils {
-    
+  
+
+	
     /**
+     * 
      * 将查询动作转化成问题模型
      * @param dsDefine 
      * 

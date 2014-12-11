@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.utils.LinkedHashMapUtils;
 import com.google.common.collect.Maps;
 
@@ -347,6 +348,20 @@ public class LogicModel implements Serializable {
 	 */
 	public void setSelectionMeasures(Map<String, Item> selectionMeasures) {
 		this.selectionMeasures = selectionMeasures;
+	}
+
+	/**
+	 * 
+	 * @param oLapElementId
+	 * @param axisType
+	 * @return boolean
+	 */
+	public boolean containsOlapElement(String olapElementId, String axisType) {
+		final Item item = this.getItemByOlapElementId(olapElementId);
+		if (item != null && item.getPositionType() == PositionType.valueOf(axisType)) {
+			return true;
+		}
+		return false;
 	}
     
     
