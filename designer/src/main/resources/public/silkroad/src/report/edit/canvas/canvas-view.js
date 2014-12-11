@@ -302,6 +302,13 @@ define([
                 // 对表格组件设置拖拽的最小高度
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
+                // 固定单选和多选下拉框的高度
+                var dataCompType = $component.attr('data-component-type');
+                if (dataCompType == 'SELECT' || dataCompType == 'MULTISELECT') {
+                    $component.resizable({minHeight: '27', maxHeight: '27'});
+                    $component.resizable("option", "maxHeight", 27);
+                    $component.resizable("option", "minHeight", 27);
+                }
             },
 
             /**

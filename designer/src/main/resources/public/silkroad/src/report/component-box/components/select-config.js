@@ -41,7 +41,7 @@ define(
             iconClass: 'select',
             caption: '单选下拉框',
             defaultWidth: 300,
-            defaultHeight: 45,
+            defaultHeight: 27,
             vm: {
                 render: function (data) {
                     return SelectVmTemplate.render({
