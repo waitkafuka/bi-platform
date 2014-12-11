@@ -12,7 +12,7 @@ define([
         template,
         dialog,
         BtnsTemplate
-        ) {
+    ) {
         var btnAttr = {
             ID: 'global-set-'
         };
