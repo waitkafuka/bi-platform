@@ -14,10 +14,12 @@
         <span class="letter">纵轴:</span>
         {{each yAxis as item}}
         <div class="item hover-bg j-root-line c-m" data-id="{{item.id}}">
-            {{if item.chartType === null}}
-                <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>
-            {{else}}
-                <span class="icon-chart {{item.chartType}} j-icon-chart" chart-type="{{item.chartType}}" ></span>
+            {{if $data.compType === "CHART"}}
+                {{if item.chartType === null}}
+                    <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>
+                {{else}}
+                    <span class="icon-chart {{item.chartType}} j-icon-chart" chart-type="{{item.chartType}}" ></span>
+                {{/if}}
             {{/if}}
             <span class="item-text j-item-text icon-font" title="{{item.caption}}（{{item.name}}）">
             {{item.caption}}{{if item.name}}（{{item.name}}）{{/if}}
