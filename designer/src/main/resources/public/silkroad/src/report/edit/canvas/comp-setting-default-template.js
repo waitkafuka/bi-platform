@@ -28,14 +28,18 @@ define(['template'], function (template) {
         $out+='\r\n        <div class="item hover-bg j-root-line c-m" data-id="';
         $out+=$escape(item.id);
         $out+='">\r\n            ';
+        if($data.compType === "CHART"){
+        $out+='\r\n                ';
         if(item.chartType === null){
-        $out+='\r\n                <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>\r\n            ';
+        $out+='\r\n                    <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>\r\n                ';
         }else{
-        $out+='\r\n                <span class="icon-chart ';
+        $out+='\r\n                    <span class="icon-chart ';
         $out+=$escape(item.chartType);
         $out+=' j-icon-chart" chart-type="';
         $out+=$escape(item.chartType);
-        $out+='" ></span>\r\n            ';
+        $out+='" ></span>\r\n                ';
+        }
+        $out+='\r\n            ';
         }
         $out+='\r\n            <span class="item-text j-item-text icon-font" title="';
         $out+=$escape(item.caption);
