@@ -610,7 +610,7 @@ public class ReportDesignModelResource extends BaseResource {
                 targetArea.setLogicModel(new TimerAreaLogicModel());
             }
         }
-        if (logicModel.containsOlapElement(oLapElementId, axisType)) {
+        if (logicModel.containsOlapElement(oLapElementId, axisType.toUpperCase())) {
             return ResourceUtils.getErrorResult("该维度或者指标已经存在于区域中！", 1);
         }
         Item item = new Item();
