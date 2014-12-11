@@ -684,7 +684,7 @@ public class QueryDataResource extends BaseResource {
             } else {
                 chart = chartBuildService.parseToChart(table, chartType, false);
             }
-            
+            QueryUtils.decorateChart(chart, targetArea, model.getSchema());
             resultMap.put("reportChart", chart);
         }
         areaContext.getQueryStatus().add(result);
@@ -707,12 +707,13 @@ public class QueryDataResource extends BaseResource {
     		}
     		List<String> types = Lists.newArrayList();
     		targetArea.listAllItems().values().stream().filter(item -> {
-    			return item.getPositionType() == PositionType.Y;
+    			return item.getPositionType() == PositionType.Y 
+    					|| item.getPositionType() == PositionType.CAND_IND;
     		}).map(item -> {
     			return item.getParams().get("chartType");
     		}).forEach(str -> {
     			if (StringUtils.isEmpty(str)) {
-    				types.add(SeriesUnitType.BAR.name());
+    				types.add(SeriesUnitType.COLUMN.name());
     			} else {
     				types.add(str.toString().toUpperCase());
     			}

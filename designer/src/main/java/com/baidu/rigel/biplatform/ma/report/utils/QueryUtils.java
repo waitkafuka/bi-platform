@@ -56,6 +56,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -500,6 +501,71 @@ public class QueryUtils {
 		});
 		newCube.setDimensions(dimensions);
 		return newCube;
+	}
+
+	/**
+	 * decorate chart with extend area
+	 * @param chart
+	 * @param area
+	 */
+	public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
+		if (area.getType() == ExtendAreaType.CHART || area.getType() == ExtendAreaType.TABLE) {
+			String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
+				return getOlapElementName(area, schema, item);
+			}).filter(x -> x != null).toArray(String[] :: new);
+			chart.setAllDims(allDims);
+			String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
+				return getOlapElementName(area, schema, item);
+			}).filter(x -> x != null).toArray(String[] :: new);
+			chart.setAllMeasures(allMeasures);
+			
+			List<String> tmp = getOlapElementNames(
+					area.getLogicModel().getColumns(), area.getCubeId(), schema);
+			if (tmp.size() > 0) {
+				chart.setDefaultMeasuers(tmp.toArray(new String[0]));
+			}
+			List<String>  defaultDims = getOlapElementNames(
+					area.getLogicModel().getRows(), area.getCubeId(), schema);
+			if (defaultDims.size() > 0) {
+				chart.setDefaultDims(defaultDims.toArray(new String[0]));
+			}
+		}
+	}
+
+	/**
+	 * @param area
+	 * @param schema
+	 * @return
+	 */
+	private static List<String> getOlapElementNames(Item[] items, String cubeId, Schema schema) {
+		List<String> tmp = Lists.newArrayList();
+		if (items == null || items.length == 0) {
+			return tmp;
+		}
+		for (Item item : items) {
+			OlapElement olapElement = 
+					ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, item.getOlapElementId());
+			tmp.add(olapElement.getCaption());
+		}
+		return tmp;
+	}
+
+	/**
+	 * 
+	 * @param area
+	 * @param schema
+	 * @param item
+	 * @return String
+	 * 
+	 */
+	private static String getOlapElementName(ExtendArea area, Schema schema,
+			Item item) {
+		OlapElement olapElement = 
+				ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
+		if (olapElement != null) {
+			return olapElement.getCaption();
+		}
+		return null;
 	}
     
 

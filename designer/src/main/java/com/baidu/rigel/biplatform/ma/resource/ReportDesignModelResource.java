@@ -33,6 +33,7 @@ import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
@@ -641,24 +642,22 @@ public class ReportDesignModelResource extends BaseResource {
         } catch (ReportModelOperationException e) {
             logger.error("Exception when add or update item in area: " + areaId, e);
         }
-        /**
-         * 如果是向liteOlap中加维度和指标，需要将维度指标加入到候选区中
-         */
-        if (area.getType() == ExtendAreaType.LITEOLAP) {
-            if (item.getPositionType() != PositionType.CAND_DIM && item.getPositionType() != PositionType.CAND_IND) {
-                try {
-                    if (element instanceof Dimension) {
-                        model = manageService.addOrUpdateItemIntoArea(model, areaId, item, PositionType.CAND_DIM);
-                    } else {
-                        model = manageService.addOrUpdateItemIntoArea(model, areaId, item, PositionType.CAND_IND);
-                    }
-                } catch (ReportModelOperationException e) {
-                    logger.error("Fail in adding or updating item into area for id: " + areaId, e);
-                    return ResourceUtils.getErrorResult(
-                            "Fail in adding or updating item into area for id: " + areaId, 1);
+        
+        if (item.getPositionType() != PositionType.CAND_DIM && item.getPositionType() != PositionType.CAND_IND) {
+            try {
+                if (element instanceof Dimension) {
+                    model = manageService
+                    		.addOrUpdateItemIntoArea(model, areaId, DeepcopyUtils.deepCopy(item), PositionType.CAND_DIM);
+                } else {
+                    model = manageService
+                    		.addOrUpdateItemIntoArea(model, areaId, DeepcopyUtils.deepCopy(item), PositionType.CAND_IND);
                 }
-                
+            } catch (ReportModelOperationException e) {
+                logger.error("Fail in adding or updating item into area for id: " + areaId, e);
+                return ResourceUtils.getErrorResult(
+                        "Fail in adding or updating item into area for id: " + areaId, 1);
             }
+            
         }
         if (model == null) {
             result.setStatus(1);
@@ -806,6 +805,7 @@ public class ReportDesignModelResource extends BaseResource {
 //        runTimeModel.getLocalContextByAreaId(areaId).reset();
         runTimeModel.getContext().reset();
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remode item from area");
         result.setStatus(0);
         result.setData(model);
