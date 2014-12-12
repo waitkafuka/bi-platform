@@ -785,12 +785,13 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("不能将该列删除");
             return result;
         }
+        // remove condition in context
+        
         // remove unused format define
         model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
         if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
         		model.getExtendById(areaId).getFormatModel().getDataFormat().clear();
         }
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
         /**
          * 配置端，在修改Item以后，需要重新初始化上下文
          */
@@ -801,9 +802,7 @@ public class ReportDesignModelResource extends BaseResource {
             runTimeModel.getLocalContextByAreaId(area.getChartAreaId()).reset();
             runTimeModel.getLocalContextByAreaId(area.getTableAreaId()).reset();
         }
-        runTimeModel.getLocalContext().values().forEach(ctx -> ctx.reset());
-//        runTimeModel.getLocalContextByAreaId(areaId).reset();
-        runTimeModel.getContext().reset();
+        runTimeModel.getContext().removeParam(element.getId());
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remode item from area");

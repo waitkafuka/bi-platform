@@ -295,9 +295,6 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         
         action.setExtendAreaId(areaId);
         
-        /**
-         * 从context里面查看，否是有时间维度
-         */
         for (String key : context.keySet()) {
             OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, key);
             if (element != null && !targetLogicModel.containsOlapElement(element.getId())) {

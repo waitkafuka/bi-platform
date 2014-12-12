@@ -122,5 +122,9 @@ public class QueryContext implements Serializable {
             this.params.clear();
         }
     }
+
+	public void removeParam(String id) {
+		this.getParams().remove(id);
+	}
     
 }
