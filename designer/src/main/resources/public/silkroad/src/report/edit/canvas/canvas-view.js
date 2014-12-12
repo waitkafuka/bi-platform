@@ -149,7 +149,7 @@ define([
                 var $now = $(event.target);
                 var $divTextBox = $now.parent();
                 var $divText = $now;
-                var $inpText = $now.parent().next();
+                var $inpText = $divTextBox.next();
                 var divHtml = $divText.html();
                 $divTextBox.hide();
                 $inpText.show().focus();
@@ -188,7 +188,7 @@ define([
                 var divTitle = '点击进行输入';
                 var $now = $(event.target);
                 var $divTextBox = $now.prev();
-                var $divText = $now.prev().find('div');
+                var $divText = $divTextBox.find('div');
                 var textId = $divText.attr('id');
                 $now.hide();
                 $divTextBox.show();
