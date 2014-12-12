@@ -139,6 +139,7 @@ define([
                     }
                 });
             },
+
             /**
              * 文本框组件点击切换
              *
@@ -179,6 +180,7 @@ define([
                     that.saveBtnsText(event, divtext);
                 }
             },
+
             /**
              * 文本框组件失去焦点切换
              *
@@ -200,6 +202,7 @@ define([
                 }
                 this.model.dateCompPositing(textId, content);
             },
+
             /**
              * 添加一个组件(提交后台获取id，并在vm与json中添加相关数据)
              *
@@ -361,8 +364,11 @@ define([
              */
             addEditBtns: function ($component) {
                 $component.append(editBtnsTemplate.render());
-                if($component.attr('data-component-type') == 'TEXT') {
-                    $component.find('.j-setting').hide();
+                // 文本框编辑数据及关联隐藏
+                for (var i = 0; i < $component.length; i ++) {
+                    if ($($component[i]).attr('data-component-type') == 'TEXT') {
+                        $($component[i]).find('.j-setting').remove();
+                    }
                 }
                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
