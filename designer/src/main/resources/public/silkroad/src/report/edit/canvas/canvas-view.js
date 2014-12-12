@@ -30,9 +30,9 @@ define([
                 'click .j-con-edit-btns .j-delete': 'deleteComp',
                 'click .j-button-save-report': 'saveReport',
                 'click .j-button-publish-report': 'publishReport',
-                'click #comp-div': 'focusText',
-                'blur #comp-text': 'blurText',
-                'keydown #comp-text': 'keyDownText'
+                'click .j-comp-div': 'focusText',
+                'blur .j-comp-text': 'blurText',
+                'keydown .j-comp-text': 'keyDownText'
             },
 
             /**
@@ -68,7 +68,6 @@ define([
 
                 // 初始化报表公共功能模块
                 that.reportView = new ReportView({id: that.id});
-
                 // 初始化json与vm文件
                 that.model.initJson(function () {
                     that.model.initVm(function () {
@@ -145,11 +144,12 @@ define([
              *
              * @public
              */
-            focusText: function () {
+            focusText: function (event) {
                 var divTitle = '点击进行输入';
-                var $divTextBox = $('#comp-div');
-                var $divText = $('#comp-report');
-                var $inpText = $('#comp-text');
+                var $now = $(event.target);
+                var $divTextBox = $now.parent();
+                var $divText = $now;
+                var $inpText = $now.parent().next();
                 var divHtml = $divText.html();
                 $divTextBox.hide();
                 $inpText.show().focus();
@@ -169,14 +169,14 @@ define([
             blurText: function (event) {
                 var divtext = $(event.target).val();
                 var that = this;
-                that.saveBtnsText(divtext);
+                that.saveBtnsText(event, divtext);
             },
 
             keyDownText: function (event) {
                 var divtext = $(event.target).val();
                 var that = this;
                 if (event.keyCode == 13) {
-                    that.saveBtnsText(divtext);
+                    that.saveBtnsText(event, divtext);
                 }
             },
             /**
@@ -184,12 +184,13 @@ define([
              *
              * @public
              */
-            saveBtnsText: function (content) {
+            saveBtnsText: function (event, content) {
                 var divTitle = '点击进行输入';
-                var $divTextBox = $('#comp-div');
-                var $divText = $('#comp-report');
-                var $inpText = $('#comp-text');
-                $inpText.hide();
+                var $now = $(event.target);
+                var $divTextBox = $now.prev();
+                var $divText = $now.prev().find('div');
+                var textId = $divText.attr('id');
+                $now.hide();
                 $divTextBox.show();
                 if (content != '') {
                     $divText.html(content);
@@ -197,7 +198,7 @@ define([
                 else {
                     $divText.html(divTitle);
                 }
-                this.model.dateCompPositing(content);
+                this.model.dateCompPositing(textId, content);
             },
             /**
              * 添加一个组件(提交后台获取id，并在vm与json中添加相关数据)
@@ -227,7 +228,9 @@ define([
                             'width': 'auto',
                             'height': 'auto'
                         }).find('.j-fold').html('－');
-                        that.editCompView.hideEditBar();
+                        if ($realComp.attr('data-component-type') == 'TEXT') {
+                            that.showReport(true);
+                        }
                     }
                 );
             },
@@ -292,7 +295,6 @@ define([
                     stop: function (event, resizeObj) {
                         var paramObj = resizeObj.size;
                         paramObj.compId = $(this).attr('data-comp-id');
-
                         that.model.resizeComp(paramObj);
                         that.showReport(true);
                     }
@@ -308,6 +310,12 @@ define([
                     $component.resizable({minHeight: '27', maxHeight: '27'});
                     $component.resizable("option", "maxHeight", 27);
                     $component.resizable("option", "minHeight", 27);
+                }
+                // 固定文本框的高度
+                else if (dataCompType == 'TEXT') {
+                    $component.resizable({minHeight: '34', maxHeight: '34'});
+                    $component.resizable("option", "maxHeight", 34);
+                    $component.resizable("option", "minHeight", 34);
                 }
             },
 
