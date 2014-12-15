@@ -311,15 +311,11 @@ define([
                 var dataCompType = $component.attr('data-component-type');
                 if (dataCompType == 'SELECT' || dataCompType == 'MULTISELECT') {
                     $component.resizable({minHeight: '27', maxHeight: '27'});
-                    $component.resizable("option", "maxHeight", 27);
-                    $component.resizable("option", "minHeight", 27);
                 }
-                // 固定文本框的高度
-                else if (dataCompType == 'TEXT') {
-                    $component.resizable({minHeight: '34', maxHeight: '34'});
-                    $component.resizable("option", "maxHeight", 34);
-                    $component.resizable("option", "minHeight", 34);
-                }
+//                // 固定文本框的高度
+//                else if (dataCompType == 'TEXT') {
+//                    $component.resizable({minHeight: '34', maxHeight: '34'});
+//                }
             },
 
             /**
