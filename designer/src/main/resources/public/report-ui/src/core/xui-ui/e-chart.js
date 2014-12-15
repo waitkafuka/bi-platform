@@ -224,6 +224,14 @@
                     normal:{ label:{ show:true } },
                     emphasis:{ label:{ show:true } }
                 };
+                var serData = [];
+                for (var x = 0; x < ser.data.length; x ++) {
+                    serData.push({
+                        name: xAxis.data[x],
+                        value: ser.data[x]
+                    });
+                }
+                ser.data = serData;
                 series.push(ser);
             }
         }
