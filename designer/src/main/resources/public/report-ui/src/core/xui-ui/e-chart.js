@@ -137,7 +137,8 @@
         this._defaultMeasures = dataWrap.defaultMeasures;
         this._allDims = dataWrap.allDims;
         this._defaultDims = dataWrap.defaultDims;
-             
+        this._mapMinValue = dataWrap.mapMinValue;
+        this._mapMaxValue = dataWrap.mapMaxValue;
         !isSilent && this.render();
     };
     /**
@@ -224,6 +225,14 @@
                     normal:{ label:{ show:true } },
                     emphasis:{ label:{ show:true } }
                 };
+                var serData = [];
+                for (var x = 0; x < ser.data.length; x ++) {
+                    serData.push({
+                        name: xAxis.data[x],
+                        value: ser.data[x]
+                    });
+                }
+                ser.data = serData;
                 series.push(ser);
             }
         }
@@ -715,8 +724,8 @@
             };
             // TODO:需要后端返回最大最小值
             options.dataRange = {
-                min: 0,
-                max: 2500,
+                min: this._mapMinValue,
+                max: this._mapMaxValue,
                 x: 'left',
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
