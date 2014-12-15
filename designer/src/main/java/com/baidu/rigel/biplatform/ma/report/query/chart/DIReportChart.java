@@ -69,7 +69,7 @@ public class DIReportChart implements Serializable {
     /**
      * 
      */
-    private String[] defaultMeasuers;
+    private String[] defaultMeasures;
     
     /**
      * 
@@ -146,15 +146,15 @@ public class DIReportChart implements Serializable {
 	/**
 	 * @return the defaultMeasuers
 	 */
-	public String[] getDefaultMeasuers() {
-		return defaultMeasuers;
+	public String[] getDefaultMeasures() {
+		return defaultMeasures;
 	}
 
 	/**
 	 * @param defaultMeasuers the defaultMeasuers to set
 	 */
-	public void setDefaultMeasuers(String[] defaultMeasuers) {
-		this.defaultMeasuers = defaultMeasuers;
+	public void setDefaultMeasures(String[] defaultMeasuers) {
+		this.defaultMeasures = defaultMeasuers;
 	}
 
 	/**

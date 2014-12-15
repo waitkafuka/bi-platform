@@ -522,7 +522,7 @@ public class QueryUtils {
 			List<String> tmp = getOlapElementNames(
 					area.getLogicModel().getColumns(), area.getCubeId(), schema);
 			if (tmp.size() > 0) {
-				chart.setDefaultMeasuers(tmp.toArray(new String[0]));
+				chart.setDefaultMeasures(tmp.toArray(new String[0]));
 			}
 			List<String>  defaultDims = getOlapElementNames(
 					area.getLogicModel().getRows(), area.getCubeId(), schema);
