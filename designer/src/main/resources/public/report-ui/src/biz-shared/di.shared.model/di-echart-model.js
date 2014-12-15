@@ -279,6 +279,10 @@ $namespace('di.shared.model');
                     ser.yAxisIndex = yNameMap[ser.yAxisName];
                 }
             }
+            chartData.allMeasures = rawData.allMeasures;
+            chartData.defaultMeasures = rawData.defaultMeasures;
+            chartData.allDims = rawData.allDims;
+            chartData.defaultDims = rawData.defaultDims;
             this._oChartData = chartData;                    
         }
         catch (e) {
