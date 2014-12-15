@@ -307,15 +307,26 @@ define([
                 // 对表格组件设置拖拽的最小高度
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
-                // 固定单选和多选下拉框的高度
-                var dataCompType = $component.attr('data-component-type');
-                if (dataCompType == 'SELECT' || dataCompType == 'MULTISELECT') {
-                    $component.resizable({minHeight: '27', maxHeight: '27'});
-                }
-//                // 固定文本框的高度
-//                else if (dataCompType == 'TEXT') {
-//                    $component.resizable({minHeight: '34', maxHeight: '34'});
-//                }
+                // 固定单选下拉框的高度
+                that.dragWidthHeight($component, 'SELECT', 27, 27);
+                // 固定多选下拉框的高度
+                that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
+                // 固定文本框的高度
+                that.dragWidthHeight($component, 'TEXT', 34, 34);
+            },
+
+            /**
+             * 设置组件最大最小高度
+             *
+             * @param {$HTMLElement} $ele 组件外壳
+             * @param {string} type 组件类型
+             * @param {number} minHeight 组件拖拽最小高度
+             * @param {number} maxHeight 组件拖拽最大高度
+             * @public
+             */
+            dragWidthHeight: function ($ele, type, minHeight, maxHeight) {
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minHeight", minHeight);
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "maxHeight", maxHeight);
             },
 
             /**
