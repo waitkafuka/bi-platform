@@ -101,7 +101,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
             reportChart.setxAxisType(XAxisType.CATEGORY.getName());
         }
 		List<BigDecimal> maxAndMinValue = getMaxAndMinValue(reportChart);
-		if (maxAndMinValue != null && maxAndMinValue.size() > 2) {
+		if (maxAndMinValue != null && maxAndMinValue.size() >= 2) {
 			reportChart.setMaxValue(maxAndMinValue.get(0));
 			reportChart.setMinValue(maxAndMinValue.get(1));
 		}
