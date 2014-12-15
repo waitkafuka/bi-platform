@@ -132,9 +132,59 @@
          * 数据为空时的html
          */
         this._sEmptyHTML = dataWrap.emptyHTML || '数据为空';
+
+        this._allMeasures = dataWrap.allMeasures;
+        this._defaultMeasures = dataWrap.defaultMeasures;
+        this._allDims = dataWrap.allDims;
+        this._defaultDims = dataWrap.defaultDims;
              
         !isSilent && this.render();
     };
+    /**
+     * 生成指标切换按钮
+     *
+     * @protected
+     */
+    UI_E_CHART_CLASS.$renderCheckBoxs = function () {
+        var me = this;
+        var allMeasures = me._allMeasures;
+        var defaultMeasures = me._defaultMeasures;
+        var measureHtml = [];
+        if (allMeasures.length > 0) {
+            for (var i = 0; i < allMeasures.length; i ++) {
+                measureHtml.push(
+                    '<label>',
+                        allMeasures[i],
+                    '</label>',
+                    '<input type="checkbox" name="ecahrts-candidate" ',
+                    isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                    '/>'
+                );
+            }
+            this._eHeader.innerHTML = '<div class="echarts-candidate">' + measureHtml.join('') + '</div>';
+            document.getElementByName('ecahrts-candidate').onclick = function () {
+
+            };
+//            this._eCandidateBox = domChildren(this._eHeader)[0];
+//            this._eCandidateBox.onclick = function (ev) {
+//                var oEv = ev || window.event;
+//                candidateClick.call(me, ev);
+//            };
+        }
+    };
+
+    function candidateClick(ev) {
+
+    }
+    function isInArray(item, array) {
+        var flag = false;
+        for (var i = 0; i < array.length; i ++) {
+            if (item === array[i]) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
 
     /**
      * 设置数据
@@ -207,7 +257,7 @@
     UI_E_CHART_CLASS.$setupXAxis = function (options) {
         var xAxis =  {
             type: 'category',
-            boundaryGap: (this._chartType === 'bar') ? true : false,
+            boundaryGap: true,
             axisLine: {
                 onZero: false
             },
@@ -288,14 +338,20 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
-        var legend = {};
+        var legend = {
+            orient: 'horizontal',
+            x: 'left',
+            y: 'top',
+            borderColor: '#ccc',
+            borderWidth: 0.5
+        };
         var data = [];
 
         if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             }
-            legend.orient = 'vertical';
+
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
@@ -306,9 +362,6 @@
         }
 
         legend.data = data;
-        legend.x = 'left';
-        legend.padding = 5;
-        legend.itemGap = 10;
         options.legend = legend;
     };
     /**
@@ -337,8 +390,9 @@
             }
             toolbox = {
                 show: true,
-                orient : 'vertical',
-                y : 'center',
+                orient : 'horizontal',
+                x: 'right',
+                y : 'top',
                 feature : {
                     magicType : {show: true, type: ['stack', 'tiled']}
                 }
@@ -633,6 +687,7 @@
 
         // 特殊判断：是否有饼图
        // this._chartType = 'column';
+        // this.$renderCheckBoxs();
         for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
             this._chartType = ser.type;
         }
@@ -650,7 +705,7 @@
             this.$setupLegend(options);
             this.$setupXAxis(options);
         }
-        else if ( this._chartType === 'map') {
+        else if (this._chartType === 'map') {
             options.roamController = {
                 show: true,
                 x: 'right',
@@ -667,6 +722,9 @@
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable : true
             };
+        }
+        if (this._chartType === 'pie') {
+            options.calculable = true;
         }
         return options;
     };
