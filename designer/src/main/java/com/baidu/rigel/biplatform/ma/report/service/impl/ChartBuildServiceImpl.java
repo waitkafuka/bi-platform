@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.ma.report.service.impl;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +35,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
 import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
 import com.google.common.collect.Lists;
 
@@ -98,10 +100,34 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         } else {
             reportChart.setxAxisType(XAxisType.CATEGORY.getName());
         }
-        return reportChart;
+		List<BigDecimal> maxAndMinValue = getMaxAndMinValue(reportChart);
+		if (maxAndMinValue != null && maxAndMinValue.size() > 2) {
+			reportChart.setMaxValue(maxAndMinValue.get(0));
+			reportChart.setMinValue(maxAndMinValue.get(1));
+		}
+		return reportChart;
     }
 
     /**
+     * 
+     * @param reportChart
+     * @return List<BigDecimal>
+     */
+    private List<BigDecimal> getMaxAndMinValue(DIReportChart reportChart) {
+    		List<BigDecimal> tmp = Lists.newArrayList();
+    		reportChart.getSeriesData().forEach(data -> {
+    			Collections.addAll(tmp, data.getData());
+    		});
+    		Collections.sort(tmp);
+    		List<BigDecimal> rs = Lists.newArrayList();
+    		if (tmp.size() >= 2) {
+    			rs.add(tmp.get(tmp.size() - 1));
+    			rs.add(tmp.get(0));
+    		}
+		return rs;
+	}
+
+	/**
      * 
      * @param pTable
      * @return
@@ -157,14 +183,52 @@ public class ChartBuildServiceImpl implements ChartBuildService {
             // TODO the showName should be put in generateSeriesBranch method as
             // third parameter.
             SeriesInputInfo info = seriesInput.get(i);
-            SeriesDataUnit branchData = generateSeriesBranch(pTable, col.getUniqueName(), col.getCaption(), info
-                    .getType().getName(), col.getFormat(), info.getyAxisName(), i);
+            SeriesDataUnit branchData = null;
+            if (info.getType() == SeriesUnitType.MAP) {
+            		List<RowHeadField> rowHeadFields = pTable.getRowHeadFields().get(0);
+	            	branchData = generateSeriesBranch(pTable, col, info, i, rowHeadFields);
+            } else {
+	            	branchData = generateSeriesBranch(pTable, col, info, i);
+            }
             units.add(branchData);
         }
         return units;
     }
 
     /**
+     * 
+     * @param pTable
+     * @param col
+     * @param info
+     * @param i
+     * @param rowHeadFields
+     * @return SeriesDataUnit
+     */
+    private SeriesDataUnit generateSeriesBranch(PivotTable pTable, ColDefine col, 
+    			SeriesInputInfo info,
+    			int i, List<RowHeadField> rowHeadFields) {
+	    	if (pTable.getDataSourceColumnBased() == null 
+					|| pTable.getDataSourceColumnBased().size() <= i) { 
+			return null;
+		}
+	    List<CellData> columnData = pTable.getDataSourceColumnBased().get(i);
+	    SeriesDataUnit seriesUnit = new SeriesDataUnit();
+	    seriesUnit.setData(getDataFromCells(columnData));
+	    seriesUnit.setName(col.getCaption());
+	    seriesUnit.setType(info.getType().getName());
+	    seriesUnit.setFormat(col.getFormat());
+//	    seriesUnit.setProperties(genDataCaptions(rowHeadFields));
+	    seriesUnit.setyAxisName(info.getyAxisName());
+	    return seriesUnit;
+	}
+
+//	private String[][] genDataCaptions(List<RowHeadField> rowHeadFields) {
+//		return rowHeadFields.stream().map(headField -> {
+//			return new String[]{headField.getV(), headField.getUniqueName()};
+//		}).toArray(String[][] :: new);
+//	}
+
+	/**
      * 
      * @param pTable
      * @param columnUniqName
@@ -174,19 +238,19 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @param yAxisName
      * @return
      */
-    private SeriesDataUnit generateSeriesBranch(PivotTable pTable, String columnUniqName, String showName, String type,
-            String format, String yAxisName, int i) {
+    private SeriesDataUnit generateSeriesBranch(PivotTable pTable, ColDefine col, SeriesInputInfo info, int i) {
     		
-    		if (pTable.getDataSourceColumnBased() == null || pTable.getDataSourceColumnBased().size() <= i) { 
+    		if (pTable.getDataSourceColumnBased() == null 
+    				|| pTable.getDataSourceColumnBased().size() <= i) { 
     			return null;
     		}
         List<CellData> columnData = pTable.getDataSourceColumnBased().get(i);
         SeriesDataUnit seriesUnit = new SeriesDataUnit();
         seriesUnit.setData(getDataFromCells(columnData));
-        seriesUnit.setName(showName);
-        seriesUnit.setType(type);
-        seriesUnit.setFormat(format);
-        seriesUnit.setyAxisName(yAxisName);
+        seriesUnit.setName(col.getCaption());
+        seriesUnit.setType(info.getType().getName());
+        seriesUnit.setFormat(col.getFormat());
+        seriesUnit.setyAxisName(info.getyAxisName());
         return seriesUnit;
     }
 

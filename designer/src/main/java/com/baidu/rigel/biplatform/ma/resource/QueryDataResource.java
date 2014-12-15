@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.io.OutputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -1408,6 +1409,23 @@ public class QueryDataResource extends BaseResource {
         ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
         context.getParams().put(dimId, selectedDims);
         reportModelCacheManager.updateAreaContext(areaId, context);
+    }
+    
+    /**
+     * 下载请求
+     * @return
+     */
+    @RequestMapping(value = "/{reportId}/download", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult download(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    		response.setCharacterEncoding("utf-8");
+    		response.setContentType("application/vnd.ms-excel;charset=utf-8");
+    		response.setContentType("application/x-msdownload;charset=utf-8");
+    		response.setHeader("Content-Disposition", "attachment;filename=abc.csv"); 
+    		response.setContentLength("你好".getBytes().length);
+    		OutputStream os = response.getOutputStream();
+    		os.write("你好".getBytes());
+    		os.flush();
+    		return null;
     }
     
 }
