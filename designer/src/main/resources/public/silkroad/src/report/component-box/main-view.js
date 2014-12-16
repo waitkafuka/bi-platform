@@ -81,7 +81,6 @@ define([
                     opacity: 1, // 被拖拽元素的透明度
                     // 修正由于滚动条产生的偏移
                     drag: function (event, ui) {
-
                         // 矫正值
                         //var correctVal = $report.scrollTop()/1 - startScrollTop/1;
                         //var topValue = parseInt(ui.helper.css('top')) + correctVal;

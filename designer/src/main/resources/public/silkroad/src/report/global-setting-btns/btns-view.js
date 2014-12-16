@@ -64,10 +64,11 @@ define([
             },
             // 参数区域按钮属性
             btnBox: [
-                {
-                    id: btnAttr.ID + 'Dimension',
-                    btnsHTML: '参数维度设置'
-                }
+            // 暂时去掉此功能
+//                {
+//                    id: btnAttr.ID + 'Dimension',
+//                    btnsHTML: '参数维度设置'
+//                }
             ],
 
             /**
@@ -75,9 +76,14 @@ define([
              */
             createBtns: function () {
                 var div = '';
-                var btnBox = this.btnBox;
-                for(var i = 0; i < btnBox.length; i ++) {
-                    div += "<div id='" + btnBox[i].id + "'>" + btnBox[i].btnsHTML + "</div>"
+                var btnBox = this.btnBox || [];
+                if (btnBox.length == 0) {
+                    div = '';
+                }
+                else {
+                    for(var i = 0; i < btnBox.length; i ++) {
+                        div += "<div id='" + btnBox[i].id + "'>" + btnBox[i].btnsHTML + "</div>"
+                    }
                 }
                 return div;
             }
