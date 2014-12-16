@@ -1124,7 +1124,7 @@ define(
                 var id = model.get('id');
 
                 require(['report/edit/main-view'], function (EditReportView) {
-                    new EditReportView({
+                    window.dataInsight.main = new EditReportView({
                         el: $('.j-main'),
                         id: id,
                         isEdit: false

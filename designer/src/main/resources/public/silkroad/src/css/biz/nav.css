@@ -9,7 +9,7 @@
     z-index: 10;
 }
 .nav-main {
-    padding-left: 500px;
+    padding-left: 560px;
     height: 40px;
     background: -moz-linear-gradient(#4698e9, #0167cc);
     background: -webkit-linear-gradient(#4698e9, #0167cc);
@@ -57,5 +57,4 @@
     font-size: 14px;
     font-family: "微软雅黑"
 }
-
 
