@@ -1433,6 +1433,7 @@ public class QueryDataResource extends BaseResource {
     @RequestMapping(value = "/{reportId}/download/{areaId}", method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseResult download(@PathVariable("reportId") String reportId, @PathVariable("areaId")String areaId,
     		HttpServletRequest request, HttpServletResponse response) throws Exception {
+    		long begin = System.currentTimeMillis();
     		ReportDesignModel report  = reportModelCacheManager.getReportModel(reportId);
     		if (report == null) {
     			throw new IllegalStateException("未知报表定义，请确认下载信息");
@@ -1447,17 +1448,23 @@ public class QueryDataResource extends BaseResource {
         }
         ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true, areaContext.getParams());
     		DataModel dataModel = queryRs.getDataModel();
+    		logger.info("query data cost : " + (System.currentTimeMillis() - begin) + " ms");
+    		begin = System.currentTimeMillis();
     		String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
+    		logger.info("convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
     		response.setCharacterEncoding("utf-8");
     		response.setContentType("application/vnd.ms-excel;charset=utf-8");
     		response.setContentType("application/x-msdownload;charset=utf-8");
     		response.setHeader("Content-Disposition", "attachment;filename=" + report.getName() + ".csv"); 
-    		byte[] content = csvString.getBytes();
+    		byte[] content = csvString.getBytes("GBK");
     		response.setContentLength(content.length);
     		OutputStream os = response.getOutputStream();
     		os.write(content);
     		os.flush();
-    		return null;
+    		ResponseResult rs = new ResponseResult();
+    		rs.setStatus(ResponseResult.SUCCESS);
+    		rs.setStatusInfo("successfully");
+    		return rs;
     }
     
 }

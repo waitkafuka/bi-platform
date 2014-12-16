@@ -945,7 +945,7 @@ public class DataModelUtils {
 		// 组织数据
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
-				rs.append(tmp.get(height * i + j));
+				rs.append(tmp.get(j * height + i));
 				if (j != width - 1) {
 					rs.append(",");
 				} else{
@@ -963,9 +963,23 @@ public class DataModelUtils {
 	 */
 	private static List<String> dataModel2StrBaseCol(DataModel dataModel) {
 		List<String> rs = getRowCaptions(dataModel.getRowHeadFields());
+		List<HeadField> colFields = dataModel.getColumnHeadFields();
+		for (int i = 0; i < dataModel.getColumnBaseData().size(); ++i) {
+			rs.add(colFields.get(i).getCaption());
+			String[] tmp = dataModel.getColumnBaseData()
+					.get(i).stream().map(data -> {
+						return data.toString();
+					}).toArray(String[] :: new);
+			Collections.addAll(rs, tmp);
+		}
 		return rs;
 	}
 	
+	/**
+	 * 
+	 * @param headFields
+	 * @return List<String>
+	 */
 	private static List<String> getRowCaptions(List<HeadField> headFields) {
 		List<String> rs = Lists.newArrayList();
 		if (headFields == null || headFields.size() == 0) {
