@@ -918,12 +918,13 @@ public class DataModelUtils {
 				formatStr = dataFormat.get(uniqueName);
 			}
 			if (!StringUtils.isEmpty(formatStr)) {
-//				DecimalFormat format = new DecimalFormat(formatStr);
 				define.setFormat(formatStr);
-//				for (CellData data : colDatas.get(i)) {
-//					data.setFormattedValue(format.format(data.getV()));
-//				}
 			}
+			String toolTip = formatModel.getToolTips().get(uniqueName);
+			if (StringUtils.isEmpty(toolTip)) {
+				toolTip = uniqueName;
+			}
+			define.setToolTip(toolTip);
 		}
 	}
 

@@ -508,19 +508,30 @@ public class QueryDataResource extends BaseResource {
         /**
          * 查询参数，首先载入全局上下文，再覆盖局部上下文
          */
-        Map<String, Object> queryParams = Maps.newHashMap();
+        final Map<String, Object> queryParams = Maps.newHashMap();
         /**
          * TODO 暂时用全局的覆盖本地的参数，以后考虑是否会有问题
          */
         Map<String, Object> localParams = localContext.getParams();
+        
+        if ("true".equals(localParams.get("isOverride"))) {
+        		queryParams.putAll(localParams);
+        		
+        		runTimeModel.getContext().getParams().forEach((key, value) -> {
+        			if (!queryParams.containsKey(key)) {
+        				queryParams.put(key, value);
+        			}
+        		});
+        		return queryParams;
+        }
         /**
          * 仅保留一个时间条件
          */
         for (String key : localParams.keySet()) {
-        	String value = localParams.get(key).toString();
-        	if (value.contains("start") && value.contains("end")) {
-        		localParams.remove(key);
-        	}
+	        	String value = localParams.get(key).toString();
+	        	if (value.contains("start") && value.contains("end")) {
+	        		localParams.remove(key);
+	        	}
         }
         queryParams.putAll(localParams);
         if (runTimeModel.getContext() != null) {

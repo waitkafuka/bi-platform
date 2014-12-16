@@ -42,6 +42,11 @@ public class FormatModel implements Serializable {
      * 条件格式
      */
     private Map<String, String> conditionFormat = Maps.newHashMap();
+    
+    /**
+     * 指标提示信息
+     */
+    private Map<String, String> toolTips = Maps.newHashMap();
 
     /**
      * @return the dataFormat
@@ -57,4 +62,41 @@ public class FormatModel implements Serializable {
         return conditionFormat;
     }
 
+	/**
+	 * @return the toolTips
+	 */
+	public Map<String, String> getToolTips() {
+		if (this.toolTips == null) {
+			this.toolTips = Maps.newConcurrentMap();
+		}
+		return toolTips;
+	}
+
+	/**
+	 * @param toolTips the toolTips to set
+	 */
+	public void setToolTips(Map<String, String> toolTips) {
+		this.toolTips = toolTips;
+	}
+
+	/**
+	 * reset format model;
+	 */
+	public void reset() {
+		this.dataFormat = Maps.newHashMap();
+		this.conditionFormat = Maps.newHashMap();
+		this.toolTips = Maps.newHashMap();
+	}
+
+	public void removeItem(String id) {
+		this.getDataFormat().remove(id);
+		this.getToolTips().remove(id);
+		this.getConditionFormat().remove(id);
+	}
+
+	public void init(String name) {
+		this.getDataFormat().put(name, null);
+		this.getToolTips().put(name, name);
+		this.getConditionFormat().put(name, null);
+	}
 }

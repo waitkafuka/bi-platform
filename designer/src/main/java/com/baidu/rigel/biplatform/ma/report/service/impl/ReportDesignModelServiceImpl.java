@@ -449,5 +449,11 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 			throw new IllegalArgumentException("数据格式必须为Json格式， dataFormat = " + dataFormat);
 		}
 	}
+
+	@Override
+	public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
+		FormatModel model = area.getFormatModel();
+		model.getToolTips().putAll(convertStr2Map(toolTips));
+	}
     
 }
