@@ -237,12 +237,13 @@ public class QueryUtils {
                 } else {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
-                    if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                    		&& queryAction.isChartQuery()) {
-                        QueryData data = new QueryData(dim.getAllMember().getUniqueName());
-                        data.setExpand(true);
-                        data.setShow(false);
-                        datas.add(data);
+                    if (queryAction.isChartQuery()) {
+                    		datas.clear();
+                    } else if (item.getPositionType() == PositionType.X) {
+						QueryData data = new QueryData(dim.getAllMember().getUniqueName());
+						data.setExpand(true);
+						data.setShow(false);
+						datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
