@@ -926,5 +926,78 @@ public class DataModelUtils {
 			}
 		}
 	}
+
+	/**
+	 * 将dataModel转化为csv文件
+	 * @param dataModel
+	 * @return 转换后的文件
+	 */
+	public static String convertDataModel2CsvString(DataModel dataModel) {
+		StringBuilder rs = new StringBuilder();
+		// 将二维表数据打平
+		List<String> tmp = dataModel2StrBaseCol(dataModel);
+		// 获取维度数目
+		int depth = getMaxDepth4Dim(dataModel.getRowHeadFields());
+		// 获取横向单元格数据
+		int width = depth + dataModel.getColumnHeadFields().size();
+		// 获取纵向单元格数目
+		int height = dataModel.getColumnBaseData().get(0).size() + 1;
+		// 组织数据
+		for (int i = 0; i < height; ++i) {
+			for (int j = 0; j < width; ++j) {
+				rs.append(tmp.get(height * i + j));
+				if (j != width - 1) {
+					rs.append(",");
+				} else{
+					rs.append("\r\n");
+				}
+			}
+		}
+		return rs.toString();
+	}
+
+	/**
+	 * 
+	 * @param dataModel
+	 * @return List<String>
+	 */
+	private static List<String> dataModel2StrBaseCol(DataModel dataModel) {
+		List<String> rs = getRowCaptions(dataModel.getRowHeadFields());
+		return rs;
+	}
+	
+	private static List<String> getRowCaptions(List<HeadField> headFields) {
+		List<String> rs = Lists.newArrayList();
+		if (headFields == null || headFields.size() == 0) {
+			return rs;
+		}
+		headFields.forEach(field -> {
+			rs.add(" ");
+			rs.add(field.getCaption());
+			if (field.getChildren() != null) {
+				field.getChildren().forEach(f -> {
+					rs.add(f.getCaption());
+				});
+			}
+			if (field.getNodeList() != null) {
+				rs.addAll(getRowCaptions(field.getNodeList()));
+			}
+		});
+		return rs;
+	}
+
+	/**
+	 * 获取表格中不同维度的最大数目
+	 * @param dataModel
+	 * @return int
+	 */
+	private static int getMaxDepth4Dim(List<HeadField> headFields) {
+		int rs = 0;
+		if (headFields == null || headFields.size() == 0) {
+			return rs;
+		}
+		rs += getMaxDepth4Dim(headFields.get(0).getNodeList());
+		return rs + 1;
+	}
     
 }

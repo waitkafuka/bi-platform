@@ -567,10 +567,7 @@ public class QueryDataResource extends BaseResource {
         /**
          * 4. 更新区域本地的上下文
          */
-        Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
-        runTimeModel.getLocalContextByAreaId(areaId).getParams().putAll(queryParams);
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
-        areaContext.getParams().putAll(queryParams);
+        ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
         /**
          * 5. 生成查询动作QueryAction
          */
@@ -582,7 +579,8 @@ public class QueryDataResource extends BaseResource {
                 indNames = request.getParameter("indNames").split(",");
             }
             try {
-                action = queryBuildService.generateChartQueryAction(model, areaId, queryParams, indNames, runTimeModel);
+                action = queryBuildService.generateChartQueryAction(model, areaId, 
+                			areaContext.getParams(), indNames, runTimeModel);
                 if (action != null) {
                     action.setChartQuery(true);
                 }
@@ -606,7 +604,7 @@ public class QueryDataResource extends BaseResource {
             if (action == null || CollectionUtils.isEmpty(action.getRows()) || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
-            result = reportModelQueryService.queryDatas(model, action, true, true, queryParams);
+            result = reportModelQueryService.queryDatas(model, action, true, true, areaContext.getParams());
         } catch (DataSourceOperationException e1) {
             logger.error("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
@@ -696,6 +694,23 @@ public class QueryDataResource extends BaseResource {
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
     }
+
+	/**
+	 * @param areaId
+	 * @param request
+	 * @param targetArea
+	 * @param runTimeModel
+	 * @return
+	 */
+	private ExtendAreaContext getAreaContext(String areaId,
+			HttpServletRequest request, ExtendArea targetArea,
+			ReportRuntimeModel runTimeModel) {
+		Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
+        runTimeModel.getLocalContextByAreaId(areaId).getParams().putAll(queryParams);
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        areaContext.getParams().putAll(queryParams);
+		return areaContext;
+	}
 
     /**
      * 获取扩展区域中定义的chartType
@@ -1415,15 +1430,32 @@ public class QueryDataResource extends BaseResource {
      * 下载请求
      * @return
      */
-    @RequestMapping(value = "/{reportId}/download", method = { RequestMethod.GET, RequestMethod.POST })
-    public ResponseResult download(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    @RequestMapping(value = "/{reportId}/download/{areaId}", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult download(@PathVariable("reportId") String reportId, @PathVariable("areaId")String areaId,
+    		HttpServletRequest request, HttpServletResponse response) throws Exception {
+    		ReportDesignModel report  = reportModelCacheManager.getReportModel(reportId);
+    		if (report == null) {
+    			throw new IllegalStateException("未知报表定义，请确认下载信息");
+    		}
+    		ExtendArea targetArea = report.getExtendById(areaId);
+    		ReportRuntimeModel model = reportModelCacheManager.getRuntimeModel(reportId);
+    		
+    		ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
+    		QueryAction action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
+        if (action != null) {
+            action.setChartQuery(false);
+        }
+        ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true, areaContext.getParams());
+    		DataModel dataModel = queryRs.getDataModel();
+    		String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
     		response.setCharacterEncoding("utf-8");
     		response.setContentType("application/vnd.ms-excel;charset=utf-8");
     		response.setContentType("application/x-msdownload;charset=utf-8");
-    		response.setHeader("Content-Disposition", "attachment;filename=abc.csv"); 
-    		response.setContentLength("你好".getBytes().length);
+    		response.setHeader("Content-Disposition", "attachment;filename=" + report.getName() + ".csv"); 
+    		byte[] content = csvString.getBytes();
+    		response.setContentLength(content.length);
     		OutputStream os = response.getOutputStream();
-    		os.write("你好".getBytes());
+    		os.write(content);
     		os.flush();
     		return null;
     }

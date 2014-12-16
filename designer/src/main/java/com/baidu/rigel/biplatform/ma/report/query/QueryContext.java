@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.google.common.collect.Maps;
 
 /**
@@ -98,7 +100,9 @@ public class QueryContext implements Serializable {
         if (this.params == null) {
             this.params = new ConcurrentHashMap<String, Object>();
         }
-        this.params.put(id, value);
+        if (StringUtils.isNotEmpty(id) && value != null && StringUtils.isNotEmpty(value.toString())) {
+        		this.params.put(id, value);
+        }
     }
     
     /**
