@@ -348,7 +348,7 @@
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
         var legend = {
-            orient: 'horizontal',
+            orient: 'vertical',
             x: 'left',
             y: 'top',
             borderColor: '#ccc',
