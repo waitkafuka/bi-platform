@@ -237,7 +237,8 @@ public class QueryUtils {
                 } else {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
-                    if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                    if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                    		&& queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);
