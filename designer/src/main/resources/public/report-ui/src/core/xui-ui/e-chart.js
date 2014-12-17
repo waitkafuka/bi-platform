@@ -247,7 +247,8 @@
                 series[0].hasOwnProperty(key) && (targetSeries[0][key] = series[0][key]);
             }
             targetSeries[0].data = [];
-            for (var k = 0, kser; kser = series[0].data[k]; k ++) {
+            for (var k = 0; k < series[0].data.length; k ++) {
+                var  kser = series[0].data[k];
                 var tarData = {
                     value: kser,
                     name: xAxis.data[k]
@@ -350,9 +351,9 @@
         var legend = {
             orient: 'vertical',
             x: 'left',
-            y: 'top',
-            borderColor: '#ccc',
-            borderWidth: 0.5
+            y: 'top'
+//            borderColor: '#ccc',
+//            borderWidth: 0.5
         };
         var data = [];
 
