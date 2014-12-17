@@ -1141,7 +1141,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @return ResponseResult
      */
     @RequestMapping(value = "/{id}/extend_area/{areaId}/topn",
-            method = { RequestMethod.POST })
+            method = { RequestMethod.GET })
     public ResponseResult getMesaureTopSettiong(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
 	    	logger.info("begin query measuer top setting");
