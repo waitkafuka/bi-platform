@@ -790,7 +790,7 @@ public class ReportDesignModelResource extends BaseResource {
         // remove condition in context
         
         // remove unused format define
-        model.getExtendById(areaId).getFormatModel().removeItem(element.getId());
+        model.getExtendById(areaId).getFormatModel().removeItem(element.getName());
 //        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
 //        model.getExtendById(areaId).getFormatModel().getToolTips().remove(element.getId());
         if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
