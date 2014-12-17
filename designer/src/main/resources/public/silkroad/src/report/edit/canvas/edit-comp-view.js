@@ -898,7 +898,6 @@ define([
                         dialog.alert('没有指标');
                         return;
                     }
-
                     html = normInfoDepictTemplate.render(
                         data
                     );
@@ -913,7 +912,7 @@ define([
                                 {
                                     text: '提交',
                                     click: function() {
-                                        saveDataFormInfo($(this));
+                                        saveNormInfoDepict($(this));
                                     }
                                 },
                                 {
@@ -929,16 +928,16 @@ define([
                 /**
                  * 保存数据格式
                  */
-                function saveDataFormInfo($dialog) {
-                    var selects = $('.data-format').find('select');
+                function saveNormInfoDepict($dialog) {
+                    var texts = $('.data-format').find('input');
                     var data = {};
 
-                    selects.each(function () {
+                    texts.each(function () {
                         var $this = $(this);
                         var name = $this.attr('name');
                         data[name] = $this.val();
                     });
-                    that.model.saveDataFormatInfo(compId, data, function () {
+                    that.model.saveNormInfoDepict(compId, data, function () {
                         $dialog.dialog('close');
                         that.canvasView.showReport();
                     });

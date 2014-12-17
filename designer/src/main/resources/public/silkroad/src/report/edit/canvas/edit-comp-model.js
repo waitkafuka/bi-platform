@@ -218,7 +218,6 @@ define(['url', 'constant'], function (Url, Constant) {
                                 targetData.dataFormat[name] = formatObj;
                             }
                         }
-                        targetData.defaultFormat = sourceData.defaultFormat;
                     }
                     success(targetData);
                 }
@@ -245,6 +244,28 @@ define(['url', 'constant'], function (Url, Constant) {
                 }
             });
         },
+
+        /**
+         * 提交指标描述信息提交
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        saveNormInfoDepict: function (compId, data, success) {
+            var formData = {
+                areaId: compId,
+                toolTips: JSON.stringify(data)
+            };
+            $.ajax({
+                url: Url.getNormInfoDepict(this.reportId, compId),
+                type: 'POST',
+                data: formData,
+                success: function () {
+                    success();
+                }
+            });
+        },
+
         /**
          * 更换组件的中维度图形种类
          *
