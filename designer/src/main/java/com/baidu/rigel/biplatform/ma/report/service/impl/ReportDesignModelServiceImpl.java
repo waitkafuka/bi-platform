@@ -45,12 +45,14 @@ import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
@@ -452,8 +454,17 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 
 	@Override
 	public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
+		logger.info("[INFO] update tooltips define with : " + toolTips);
 		FormatModel model = area.getFormatModel();
 		model.getToolTips().putAll(convertStr2Map(toolTips));
+	}
+
+	@Override
+	public void updateAreaWithTopSetting(ExtendArea area, String topSetting) {
+		logger.info("[INFO] receive user top N setting define : " + topSetting);
+		MeasureTopSetting setting = GsonUtils.fromJson(topSetting, MeasureTopSetting.class);
+		setting.setAreaId(area.getId());
+		area.getLogicModel().setTopSetting(setting);
 	}
     
 }

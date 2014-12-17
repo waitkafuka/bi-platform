@@ -69,6 +69,7 @@ public class LogicModel implements Serializable {
      */
     private Map<String, Item> selectionMeasures = Maps.newLinkedHashMap();
     
+    private MeasureTopSetting topSetting;
     
     public Item[] getColumns() {
         return this.columns.values().toArray(new Item[0]);
@@ -363,6 +364,19 @@ public class LogicModel implements Serializable {
 		}
 		return false;
 	}
-    
+
+	/**
+	 * @return the topSetting
+	 */
+	public MeasureTopSetting getTopSetting() {
+		return topSetting;
+	}
+
+	/**
+	 * @param topSetting the topSetting to set
+	 */
+	public void setTopSetting(MeasureTopSetting topSetting) {
+		this.topSetting = topSetting;
+	}
     
 }

@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
@@ -637,7 +638,7 @@ public class ReportDesignModelResource extends BaseResource {
             model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
             // 需要移到业务方法中处理，此处为临时方案 TODO 需要确认
             if (element instanceof Measure) {
-            		area.getFormatModel().init(element.getId());
+            		area.getFormatModel().init(element.getName());
 //            		area.getFormatModel().getDataFormat().put(element.getName(), "");
             }
         } catch (ReportModelOperationException e) {
@@ -1008,7 +1009,7 @@ public class ReportDesignModelResource extends BaseResource {
     public ResponseResult updateFormatDef(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
-    	ResponseResult result = new ResponseResult();
+    		ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -1098,6 +1099,68 @@ public class ReportDesignModelResource extends BaseResource {
     }
     
     /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/topn",
+            method = { RequestMethod.POST })
+    public ResponseResult updateMesaureTopSettiong(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+    		ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        String topSetting = request.getParameter("top");
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaWithTopSetting(area, topSetting);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getLogicModel().getTopSetting());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/topn",
+            method = { RequestMethod.POST })
+    public ResponseResult getMesaureTopSettiong(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+	    	logger.info("begin query measuer top setting");
+	    	long begin = System.currentTimeMillis();
+    		ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        String topSetting = request.getParameter("top");
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaWithTopSetting(area, topSetting);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getLogicModel().getTopSetting());
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms", 
+        		GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    /**
      * 返回发布信息
      * @param requestUri 请求url
      * @param token   产品线
@@ -1117,5 +1180,7 @@ public class ReportDesignModelResource extends BaseResource {
         publishInfoBuilder.append("?token=" + tokenEncrypt);
         return publishInfoBuilder.toString();
     }
+    
+    
     
 }
