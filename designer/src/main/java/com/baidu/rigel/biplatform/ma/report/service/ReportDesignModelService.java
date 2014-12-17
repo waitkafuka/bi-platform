@@ -112,4 +112,11 @@ public interface ReportDesignModelService {
 	 */
 	void updateAreaWithToolTips(ExtendArea area, String toolTips);
 
+	/**
+	 * 
+	 * @param area
+	 * @param topSetting
+	 */
+	void updateAreaWithTopSetting(ExtendArea area, String topSetting);
+
 }
