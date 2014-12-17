@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.report.query.chart;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -80,6 +81,16 @@ public class DIReportChart implements Serializable {
      * 
      */
     private String[] defaultDims;
+    
+    /**
+     * 分析指标中的最大值
+     */
+    private BigDecimal maxValue = BigDecimal.valueOf(10000000000D);
+    
+    /**
+     * 分析指标中的最小值
+     */
+    private BigDecimal minValue = BigDecimal.ZERO;
     
     public String getTitle() {
         return title;
@@ -183,6 +194,34 @@ public class DIReportChart implements Serializable {
 	 */
 	public void setDefaultDims(String[] defaultDims) {
 		this.defaultDims = defaultDims;
+	}
+
+	/**
+	 * @return the maxValue
+	 */
+	public BigDecimal getMaxValue() {
+		return maxValue;
+	}
+
+	/**
+	 * @param maxValue the maxValue to set
+	 */
+	public void setMaxValue(BigDecimal maxValue) {
+		this.maxValue = maxValue;
+	}
+
+	/**
+	 * @return the minValue
+	 */
+	public BigDecimal getMinValue() {
+		return minValue;
+	}
+
+	/**
+	 * @param minValue the minValue to set
+	 */
+	public void setMinValue(BigDecimal minValue) {
+		this.minValue = minValue;
 	}
     
     

@@ -227,17 +227,25 @@ public class QueryUtils {
                         }
                         if (drillValue != null && tmpValue.equals(drillValue)) {
                             data.setExpand(true);
-                        } else if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                        } else if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                        		&& queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
                         }
+                        datas.add(data);
+                    } 
+                    if (values.isEmpty() && queryAction.isChartQuery()) {
+                    		QueryData data = new QueryData(rootUniqueName);
+                        data.setExpand(true);
+                        data.setShow(false);
                         datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 } else {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
-                    if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                    if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                    		&& queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);

@@ -262,6 +262,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     cubeId, targetLogicModel, context, logicModelAreaId, true);
         } else {
             targetLogicModel = targetArea.getLogicModel();
+            LogicModel cpModel = DeepcopyUtils.deepCopy(targetArea.getLogicModel());
             List<String> timeItemIds = runTimeModel.getTimeDimItemIds();
             Item timeDimItem = null;
             for (String timeItemId : timeItemIds) {
@@ -275,8 +276,11 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             		params.put("range", true);
             		timeDimItem.setParams(params);
             }
+            if (!CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
+            		cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
+            }
            return generateQueryAction(model.getSchema(),
-        		       cubeId, targetLogicModel, context, logicModelAreaId, false);
+        		       cubeId, cpModel, context, logicModelAreaId, false);
         }
         
     }
