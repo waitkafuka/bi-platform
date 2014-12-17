@@ -114,10 +114,14 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @return List<BigDecimal>
      */
     private List<BigDecimal> getMaxAndMinValue(DIReportChart reportChart) {
-    		List<BigDecimal> tmp = Lists.newArrayList();
-    		reportChart.getSeriesData().forEach(data -> {
+    		final List<BigDecimal> tmp = Lists.newArrayList();
+    		reportChart.getSeriesData().stream().forEach(data -> {
     			Collections.addAll(tmp, data.getData());
     		});
+    		BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } )
+    				.toArray(BigDecimal[] :: new);
+    		tmp.clear();
+    		Collections.addAll(tmp,tmpArray);
     		Collections.sort(tmp);
     		List<BigDecimal> rs = Lists.newArrayList();
     		if (tmp.size() >= 2) {
