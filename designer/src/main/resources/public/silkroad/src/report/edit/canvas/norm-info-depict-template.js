@@ -6,7 +6,7 @@ define(['template'], function (template) {
         $each(dataFormat,function($formatItem,name){
         $out+='\r\n        <div class="data-format-alone-dim">\r\n            <span>';
         $out+=$escape($formatItem.caption);
-        $out+='：</span>\r\n            <input type="text"/s>\r\n        </div>\r\n        ';
+        $out+='：</span>\r\n            <input type="text"/>\r\n        </div>\r\n        ';
         });
         $out+='\r\n    </div>\r\n</div>';
         return $out;

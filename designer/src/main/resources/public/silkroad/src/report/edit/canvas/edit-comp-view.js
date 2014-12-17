@@ -888,7 +888,7 @@ define([
             getNormInfoDepict: function (event) { //TODO:实现业务逻辑
                 var that = this;
                 var compId = that.getActiveCompId();
-                that.model.getDataFormatList(compId, openDataFormatDialog);
+                that.model.getNormInfoDepict(compId, openDataFormatDialog);
                 /**
                  * 打开数据格式设置弹框
                  */
