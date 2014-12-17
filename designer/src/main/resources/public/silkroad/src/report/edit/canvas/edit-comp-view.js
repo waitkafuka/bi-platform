@@ -19,7 +19,8 @@ define([
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'common/float-window',
-        'report/edit/canvas/chart-icon-list-template'
+        'report/edit/canvas/chart-icon-list-template',
+        'report/edit/canvas/norm-info-depict-template'
     ],
     function (
         template,
@@ -34,7 +35,8 @@ define([
         defaultSelectedTimeSettingTemplate,
         dataFormatSettingTemplate,
         FloatWindow,
-        indMenuTemplate
+        indMenuTemplate,
+        normInfoDepictTemplate
     ) {
 
         return Backbone.View.extend({
@@ -43,6 +45,7 @@ define([
                 'click .j-report': 'removeCompEditBar',
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
+                'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList'
             },
 
@@ -835,6 +838,73 @@ define([
                     );
                     dialog.showDialog({
                         title: '数据格式',
+                        content: html,
+                        dialog: {
+                            width: 340,
+                            height: 400,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveDataFormInfo($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveDataFormInfo($dialog) {
+                    var selects = $('.data-format').find('select');
+                    var data = {};
+
+                    selects.each(function () {
+                        var $this = $(this);
+                        var name = $this.attr('name');
+                        data[name] = $this.val();
+                    });
+                    that.model.saveDataFormatInfo(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
+            },
+
+            /**
+             * 获取指标描述信息，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getNormInfoDepict: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+                that.model.getDataFormatList(compId, openDataFormatDialog);
+
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+
+                    html = normInfoDepictTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '指标信息描述',
                         content: html,
                         dialog: {
                             width: 340,
