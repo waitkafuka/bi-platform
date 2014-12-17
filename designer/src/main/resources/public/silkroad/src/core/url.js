@@ -749,5 +749,19 @@ define(function () {
             + '/dataformat';
     };
 
+    /**
+     * 报表新建（编辑）-edit-setting
+     * 获取指标提示信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getNormInfoDepict = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/tooltips';
+    };
+
     return Url;
 });

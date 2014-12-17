@@ -13,6 +13,7 @@
     var textpass = '请输入密码';
     var textusename = '请输入用户名';
     var textdoublepass = '两次密码输入不一致，请重新输入';
+    var errorsign = '用户名或密码输入错误';
     // 入口
     $(function () {
         dom = {
@@ -185,15 +186,14 @@
                 },
                 //客户端调用服务器端方法成功后执行的回调函数
                 success : function(msg) {
-                    window.location="/silkroad/index.html";
-                    //$.get('www.baidu.com');
-                    //$("#resText").html(msg);
-                    /*
-                     if (result.d=="success") {
-                     alert("登陆成功");
-                     } else {
-                     alert("登录失败");
-                     }*/
+                    var sign = msg.status;
+                    if (sign != 1) {
+                        window.location="/silkroad/index.html";
+                    }
+                    else {
+                        $pass.next('div').html(errorsign);
+                        $usename.next('div').html(errorsign);
+                    }
                 }
             });
         }

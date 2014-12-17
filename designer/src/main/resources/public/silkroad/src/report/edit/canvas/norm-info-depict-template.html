@@ -5,7 +5,7 @@
         {{each dataFormat as $formatItem name}}
         <div class="data-format-alone-dim">
             <span>{{$formatItem.caption}}：</span>
-            <input type="text"/s>
+            <input type="text" name={{name}} value={{$formatItem.format}} placeholder="请输入描述信息"/>
         </div>
         {{/each}}
     </div>
