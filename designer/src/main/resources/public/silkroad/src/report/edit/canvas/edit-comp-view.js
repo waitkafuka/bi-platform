@@ -889,7 +889,6 @@ define([
                 var that = this;
                 var compId = that.getActiveCompId();
                 that.model.getDataFormatList(compId, openDataFormatDialog);
-
                 /**
                  * 打开数据格式设置弹框
                  */
