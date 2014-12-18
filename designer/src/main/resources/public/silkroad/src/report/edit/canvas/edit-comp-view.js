@@ -20,7 +20,8 @@ define([
         'report/edit/canvas/data-format-setting-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
-        'report/edit/canvas/norm-info-depict-template'
+        'report/edit/canvas/norm-info-depict-template',
+        'report/edit/canvas/filter-blank-line-template'
     ],
     function (
         template,
@@ -36,7 +37,8 @@ define([
         dataFormatSettingTemplate,
         FloatWindow,
         indMenuTemplate,
-        normInfoDepictTemplate
+        normInfoDepictTemplate,
+        filterBlankLineTemplate
     ) {
 
         return Backbone.View.extend({
@@ -46,7 +48,8 @@ define([
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
-                'click .item .j-icon-chart': 'showChartList'
+                'click .item .j-icon-chart': 'showChartList',
+                'click .j-others-operate': 'filterBlankLine'
             },
 
             /**
@@ -573,8 +576,29 @@ define([
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
 
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
+                this.model.canvasModel.saveJsonVm();
+                this.model.canvasModel.saveReport();
+            },
+            /**
+             * 添加完成数据项之后要做的特殊dom处理-多选下拉框
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddMultiSelectCompAxis: function (option){
+                var compId = this.getActiveCompId();
+                var editCompModel = this.canvasView.editCompView.model;
+                var json = editCompModel.getCompDataById(compId)[0];
+                var id = option.$item.attr('data-id');
+                json.dimId = id;
+
+                this.model.canvasModel.saveJsonVm();
+                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
@@ -646,6 +670,9 @@ define([
                         break;
                     case 'SELECT':
                         newType = 'Select';
+                        break;
+                    case 'MULTISELECT':
+                        newType = 'MultiSelect';
                         break;
                     case 'TABLE':
                         newType = 'Table';
@@ -938,6 +965,71 @@ define([
                         data[name] = $this.val();
                     });
                     that.model.saveNormInfoDepict(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
+            },
+
+            /**
+             * 获取过滤空白行，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            filterBlankLine: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+                that.model.getFilterBlankLine(compId, openDataFormatDialog);
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+                    html = filterBlankLineTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '其他操作',
+                        content: html,
+                        dialog: {
+                            width: 320,
+                            height: 170,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveFilterBlankLine($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveFilterBlankLine($dialog) {
+                    var $check = $('.data-format-black').find('input').eq(0);
+                    var data = {};
+                    if ($check.is(':checked')) {
+                        data['filterBlank'] = 'true';
+                    }
+                    else {
+                        data['filterBlank'] = 'false';
+                    }
+                    that.model.saveFilterBlankLine(compId, data, function () {
                         $dialog.dialog('close');
                         that.canvasView.showReport();
                     });
