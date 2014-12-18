@@ -112,36 +112,36 @@ public class QueryUtils {
         Set<Item> tmp = Sets.newHashSet();
         tmp.addAll(queryAction.getSlices().keySet());
         tmp.addAll(queryAction.getRows().keySet());
-        updateLogicCubeWithSlices(cube, tmp,
-                reportModel.getSchema().getCubes().get(area.getCubeId()));
+//        updateLogicCubeWithSlices(cube, tmp,
+//                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
         return questionModel;
     }
     
-    /**
-     * 
-     * @param cube
-     * @param keySet
-     * @param defineCube
-     */
-    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
-        if (keySet == null || keySet.isEmpty()) {
-            return;
-        }
-        
-        keySet.forEach(item -> {
-            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
-            if (dim != null) {
-                Dimension tmp = DeepcopyUtils.deepCopy(dim);
-                tmp.getLevels().clear();
-                dim.getLevels().values().forEach(level -> {
-                    tmp.getLevels().put(level.getName(), level);
-                });
-                cube.getDimensions().put(tmp.getName(), tmp);
-            }
-        });
-    }
+//    /**
+//     * 
+//     * @param cube
+//     * @param keySet
+//     * @param defineCube
+//     */
+//    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
+//        if (keySet == null || keySet.isEmpty()) {
+//            return;
+//        }
+//        
+//        keySet.forEach(item -> {
+//            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
+//            if (dim != null) {
+//                Dimension tmp = DeepcopyUtils.deepCopy(dim);
+//                tmp.getLevels().clear();
+//                dim.getLevels().values().forEach(level -> {
+//                    tmp.getLevels().put(level.getName(), level);
+//                });
+//                cube.getDimensions().put(tmp.getName(), tmp);
+//            }
+//        });
+//    }
 
     /**
      * 

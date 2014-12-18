@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
@@ -189,8 +190,8 @@ public class DirectorImpl implements Director {
         }
         dims = addOrReplaceDims(oriDims, newDimensions);
 
-        dims = modifyDimGroup(dims, oriDims);
-        resetMeasures(dims, oriDims, cube);
+        dims = modifyDimGroup(dims, DeepcopyUtils.deepCopy(oriDims));
+        resetMeasures(dims, oriCube.getDimensions(), cube);
         cube.setDimensions(dims);
         return cube;
     }

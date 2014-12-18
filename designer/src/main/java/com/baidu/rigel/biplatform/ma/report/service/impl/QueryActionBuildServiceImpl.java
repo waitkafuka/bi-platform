@@ -345,15 +345,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         Map<String, Measure> measures = schema.getCubes().get(cubeId).getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
         QueryAction.MeasuerOrderDesc orderDesc = null;
-        if (topSet == null) {
-        		String measureId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
-        		orderDesc = new QueryAction.MeasuerOrderDesc(
-        				measures.get(measureId).getName(), 
-	        			"DESC", 500);
-        } else {
-        		orderDesc = new QueryAction.MeasuerOrderDesc(
-	        			measures.get(topSet.getMeasureId()).getName(), 
-	        			topSet.getTopType().name(), topSet.getRecordSize());
+        if (!action.getColumns().isEmpty()) {
+	        	if (topSet == null) {
+	        		String measureId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
+	        		orderDesc = new QueryAction.MeasuerOrderDesc(
+	        				measures.get(measureId).getName(), 
+		        			"DESC", 500);
+	        } else {
+	        		orderDesc = new QueryAction.MeasuerOrderDesc(
+		        			measures.get(topSet.getMeasureId()).getName(), 
+		        			topSet.getTopType().name(), topSet.getRecordSize());
+	        }
         }
         action.setMeasureOrderDesc(orderDesc);
         return action;
@@ -388,7 +390,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             // 第二个条件判断是否为下钻,下钻不走此流程
             if ((values.containsKey(Constants.ORG_NAME) || values.containsKey(Constants.APP_NAME)) && 
                     ! (values.containsKey("action") && values.get("action").equals("expand")) &&
-                    element instanceof StandardDimension && item.getPositionType() == PositionType.X
+                    element instanceof StandardDimension
+                    && (item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
                    ) {
                 StandardDimension standardDim = (StandardDimension) element;
                 Map<String, Level> levels = standardDim.getLevels();

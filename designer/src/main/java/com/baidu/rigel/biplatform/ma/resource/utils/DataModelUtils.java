@@ -31,7 +31,6 @@ import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
-import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;

@@ -686,6 +686,7 @@ public class QueryDataResource extends BaseResource {
 		Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
         runTimeModel.getLocalContextByAreaId(areaId).getParams().putAll(queryParams);
         ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        areaContext.getParams().clear();
         areaContext.getParams().putAll(queryParams);
 		return areaContext;
 	}
