@@ -666,7 +666,7 @@ public class QueryDataResource extends BaseResource {
             		root = genRootDimCaption(table);
             		areaContext.setCurBreadCrumPath(root);
             }
-            // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径
+            // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
             if (!root.get("uniqName").toLowerCase().contains("all")) {
                 String vertualDimKey = "[vertual_all]";
                 root.put("uniqName", vertualDimKey);

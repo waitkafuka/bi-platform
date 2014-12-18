@@ -414,7 +414,9 @@ public class QueryUtils {
         if (filterDims != null && filterDims.get(area.getCubeId()) != null) {
         		List<Dimension> dims = filterDims.get(area.getCubeId());
         		for(Dimension dim : dims) {
-        			dimensions.put(dim.getName(), dim);
+        			if (dim != null) {
+        				dimensions.put(dim.getName(), dim);
+        			}
         		}
         }
         cube.setDimensions(dimensions);

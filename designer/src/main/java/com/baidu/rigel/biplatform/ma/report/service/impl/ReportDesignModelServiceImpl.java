@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -452,6 +453,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
 		logger.info("[INFO] update tooltips define with : " + toolTips);
@@ -459,12 +463,25 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		model.getToolTips().putAll(convertStr2Map(toolTips));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void updateAreaWithTopSetting(ExtendArea area, String topSetting) {
 		logger.info("[INFO] receive user top N setting define : " + topSetting);
 		MeasureTopSetting setting = GsonUtils.fromJson(topSetting, MeasureTopSetting.class);
 		setting.setAreaId(area.getId());
 		area.getLogicModel().setTopSetting(setting);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithOtherSetting(ExtendArea area, String otherSetting) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> setting = GsonUtils.fromJson(otherSetting, HashMap.class);
+		area.setOtherSetting(setting);
 	}
     
 }

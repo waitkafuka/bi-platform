@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 /**
  * 扩展区域定义： 扩展区域指报表中的一片数据区域。数据区域中可能是 报表、图、部件等，
  * 我们可以认为一张报表由扩展区域组成。每一扩展区域包含区域的定义信息（逻辑模型） 参数信息（参数定义）格式样式信息（格式模型）以及扩展区域类型。
@@ -68,7 +70,12 @@ public class ExtendArea implements Serializable {
     /**
      * 数据格式定义
      */
-    private FormatModel formatModel = new FormatModel();;
+    private FormatModel formatModel = new FormatModel();
+    
+    /**
+     * 表格的其他个性化配置，如是否过滤空白行等
+     */
+    private Map<String, Object> otherSetting = Maps.newHashMap();
     
     
     public String getId() {
@@ -229,5 +236,24 @@ public class ExtendArea implements Serializable {
 	public void removeSelectMeasureItem(String olapElementId) {
 		this.logicModel.getSelectionMeasures().remove(olapElementId);
 	}
+
+	/**
+	 * @return the otherSetting
+	 */
+	public Map<String, Object> getOtherSetting() {
+		if (this.otherSetting == null) {
+			this.otherSetting = Maps.newHashMap();
+		}
+		return otherSetting;
+	}
+
+	/**
+	 * @param otherSetting the otherSetting to set
+	 */
+	public void setOtherSetting(Map<String, Object> otherSetting) {
+		this.otherSetting = otherSetting;
+	}
+	
+	
 
 }
