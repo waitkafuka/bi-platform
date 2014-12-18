@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -48,7 +47,6 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
@@ -59,7 +57,6 @@ import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
-import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
@@ -83,7 +80,6 @@ import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportModelQueryService;
-import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -264,35 +260,6 @@ public class QueryDataResource extends BaseResource {
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
-        // modify by jiangyichao at 2014-09-12 
-        // 获取产品线名称和产生sessionId
-        String productLine = request.getParameter(Constants.TOKEN);
-        // 添加产品线到cookie中
-        if (StringUtils.hasText(productLine)) {
-            try {
-                Cookie productLineCookie = new Cookie(Constants.BIPLATFORM_PRODUCTLINE, productLine);
-                productLineCookie.setPath(Constants.COOKIE_PATH);
-                ((HttpServletResponse) response).addCookie(productLineCookie);
-                // 对productLine进行重新解密，以便放到ContextManager中
-                productLine = AesUtil.getInstance().decrypt(productLine, securityKey);
-            } catch(Exception e){
-                logger.error("productline encrypt happened exception," 
-                        + "message:" + e);
-                throw new RuntimeException("productline encrypt happened exception," 
-                        + "message:" + e);
-            }
-        }
-        // 添加SessionId到cookie中
-        String sessionId = UuidGeneratorUtils.generate();
-        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID,sessionId);
-        sessionIdCookie.setPath(Constants.COOKIE_PATH);
-        response.addCookie(sessionIdCookie);
-        
-        ContextManager.cleanSessionId();
-        ContextManager.cleanProductLine();
-        ContextManager.setSessionId(sessionId);
-        ContextManager.setProductLine(productLine);
-        
         ReportDesignModel model = null;
         try {
             model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
@@ -311,10 +278,10 @@ public class QueryDataResource extends BaseResource {
         // 添加cookie内容
         runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
         
-        reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         if (model == null) {
             return "";
         }
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
         // TODO 临时方案，以后前端做
         String vm = model.getVmContent();
@@ -634,7 +601,7 @@ public class QueryDataResource extends BaseResource {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
-        DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+		DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * 每次查询以后，清除选中行，设置新的
@@ -1142,6 +1109,7 @@ public class QueryDataResource extends BaseResource {
         }
         
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+        		// TODO 临时解决方案，此处应将查询条件设置到QuestionModel中
         		DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
             resultMap.put("pivottable", table);
             resultMap.put("rowCheckMin", 1);

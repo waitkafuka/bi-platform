@@ -47,7 +47,6 @@ import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 
 /**
@@ -191,28 +190,30 @@ public class DirectorImpl implements Director {
         dims = addOrReplaceDims(oriDims, newDimensions);
 
         dims = modifyDimGroup(dims, oriDims);
+        resetMeasures(dims, oriDims, cube);
         cube.setDimensions(dims);
-        resetMeasures(dims, cube);
         return cube;
     }
 
     /**
      * 修正指标定义，将原来已经转换为维度的指标替换掉
      * @param dims
+     * @param oriDims 
      * @param cube
      */
-    private void resetMeasures(Map<String, Dimension> dims, MiniCube cube) {
+    private void resetMeasures(Map<String, Dimension> dims, Map<String, Dimension> oriDims, MiniCube cube) {
 		Iterator<String> it = cube.getMeasures().keySet().iterator();
-		final Set<String> tmp = Sets.newHashSet();
-		dims.values().forEach(dim -> {
+		final Map<String, Dimension> tmp = Maps.newHashMap();
+		oriDims.values().forEach(dim -> {
 			if (dim.getTableName().equals(cube.getSource())) {
-				tmp.add(dim.getPrimaryKey());
+				tmp.put(dim.getPrimaryKey(), dim);
 			}
 		});
 		while (it.hasNext()) {
 			Measure m = cube.getMeasures().get(it.next());
-			if (tmp.contains(m.getName())) {
-				it.remove();
+			if (tmp.containsKey(m.getName())) {
+				Dimension dim = tmp.get(m.getName());
+				dims.put(dim.getId(), dim);
 			}
 		}
 	}
@@ -277,14 +278,18 @@ public class DirectorImpl implements Director {
      * 
      */
     private Map<String, Dimension> addOrReplaceDims(Map<String, Dimension> oriDims, List<Dimension> buildDims) {
-        
-        Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
+	    	Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
+//        if (oriDims.isEmpty()) {
+//    		buildDims.forEach(dim -> {
+//    			oriDims.put(dim.getId(), dim);
+//    		});
+//        		return dims;
+//        }
         final Map<String, Dimension> dimIdents = new LinkedHashMap<String, Dimension>();
-        buildDims.forEach(dim -> {
+        oriDims.values().forEach(dim -> {
             dimIdents.put(buildDimIdent(dim), dim);
         });
-        
-        oriDims.values().forEach(dim -> {
+        buildDims.forEach(dim -> {
             String dimIdent = buildDimIdent(dim);
             if (dimIdents.containsKey(dimIdent)) {
                 Dimension tmp = dimIdents.get(dimIdent);

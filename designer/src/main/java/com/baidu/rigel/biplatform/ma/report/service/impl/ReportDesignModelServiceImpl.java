@@ -410,6 +410,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             		if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
             				|| area.getType() == ExtendAreaType.SELECTION_AREA 
             				|| area.getType() == ExtendAreaType.LITEOLAP_CHART
+            				|| area.getType() == ExtendAreaType.SELECT
+            				|| area.getType() == ExtendAreaType.MULTISELECT
+            				|| area.getType() == ExtendAreaType.TEXT
             				|| QueryUtils.isFilterArea(area.getType())) {
             			continue;
             		}  

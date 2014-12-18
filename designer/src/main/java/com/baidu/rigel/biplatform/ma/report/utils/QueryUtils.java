@@ -469,6 +469,10 @@ public class QueryUtils {
 						dims.add(cube.getDimensions().get(key.getId()));
 					});
 					rs.put(area.getCubeId(), dims);
+				} else {
+					area.listAllItems().values().forEach(key -> {
+						rs.get(area.getCubeId()).add(cube.getDimensions().get(key.getId()));
+					});
 				}
 	    		} 
 		}
