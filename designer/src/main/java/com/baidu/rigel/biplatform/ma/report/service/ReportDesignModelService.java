@@ -119,4 +119,11 @@ public interface ReportDesignModelService {
 	 */
 	void updateAreaWithTopSetting(ExtendArea area, String topSetting);
 
+	/**
+	 * 
+	 * @param area
+	 * @param otherSetting
+	 */
+	void updateAreaWithOtherSetting(ExtendArea area, String otherSetting);
+
 }

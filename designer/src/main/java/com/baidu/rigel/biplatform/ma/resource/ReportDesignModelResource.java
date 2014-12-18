@@ -1161,6 +1161,58 @@ public class ReportDesignModelResource extends BaseResource {
     }
     
     /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/othersetting",
+            method = { RequestMethod.POST })
+    public ResponseResult updateAreaOtherSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+	    	logger.info("begin query measuer top setting");
+	    	long begin = System.currentTimeMillis();
+    		ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        String otherSetting = request.getParameter("others");
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaWithOtherSetting(area, otherSetting);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getLogicModel().getTopSetting());
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms", 
+        		GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/othersetting",
+            method = { RequestMethod.GET })
+    public ResponseResult getAreaOtherSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+	    	logger.info("begin query measuer other setting");
+	    	long begin = System.currentTimeMillis();
+    		ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getOtherSetting());
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms", 
+        		GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    /**
      * 返回发布信息
      * @param requestUri 请求url
      * @param token   产品线
