@@ -225,6 +225,51 @@ define(['url', 'constant'], function (Url, Constant) {
         },
 
         /**
+         * 获取过滤空白行数据
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        getFilterBlankLine: function (compId, success) {
+            var that = this;
+
+            $.ajax({
+                url: Url.getFilterBlankLine(this.reportId, compId),
+                type: 'get',
+                success: function (data) {
+                    var sourceData = data.data;
+                    var targetData;
+                    var indList;
+
+                    if (sourceData) {
+                        // 组合数据格式列表项
+                        targetData = {
+                            dataFormat: {}
+                        };
+                        /**
+                         * 后端返回的数据格式，name:format
+                         * 需要组合成的数据格式：name: { format: '', caption: ''}
+                         * 获取左侧所有指标，遍历,为了获取caption
+                         *
+                         */
+                        indList = dataInsight.main.model.get('indList').data;
+                        for(var i = 0, iLen = indList.length; i < iLen; i ++) {
+                            var name = indList[i].name;
+                            if (sourceData.hasOwnProperty(name)) {
+                                var formatObj = {
+                                    format: sourceData[name],
+                                    caption: indList[i].caption
+                                };
+                                targetData.dataFormat[name] = formatObj;
+                            }
+                        }
+                    }
+                    success(targetData);
+                }
+            });
+        },
+
+        /**
          * 提交数据格式数据
          *
          * @param {Function} success 回调函数
@@ -246,7 +291,7 @@ define(['url', 'constant'], function (Url, Constant) {
         },
 
         /**
-         * 提交指标描述信息提交
+         * 提交指标描述信息
          *
          * @param {Function} success 回调函数
          * @public
@@ -258,6 +303,27 @@ define(['url', 'constant'], function (Url, Constant) {
             };
             $.ajax({
                 url: Url.getNormInfoDepict(this.reportId, compId),
+                type: 'POST',
+                data: formData,
+                success: function () {
+                    success();
+                }
+            });
+        },
+
+        /**
+         * 提交过滤空白行信息
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        saveFilterBlankLine: function (compId, data, success) {
+            var formData = {
+                areaId: compId,
+                others: JSON.stringify(data)
+            };
+            $.ajax({
+                url: Url.getFliterBlankLine(this.reportId, compId),
                 type: 'POST',
                 data: formData,
                 success: function () {

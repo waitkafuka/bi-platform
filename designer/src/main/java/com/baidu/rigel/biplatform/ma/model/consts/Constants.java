@@ -39,4 +39,8 @@ public interface Constants {
     String ORG_NAME = "orgname";
     // appname
     String APP_NAME = "appname";
+    /**
+     * 过滤空白行设置
+     */
+    String FILTER_BLANK = "filterBlank";
 }

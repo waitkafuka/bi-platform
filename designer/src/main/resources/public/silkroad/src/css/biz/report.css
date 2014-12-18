@@ -614,6 +614,10 @@
 .data-format-alone-dim > select {
     float: left;
 }
+.data-format-black {
+    text-align: center;
+    margin: 0 auto;
+}
 /* 文本框组件样式 */
 .text-div {
     width: 100%;

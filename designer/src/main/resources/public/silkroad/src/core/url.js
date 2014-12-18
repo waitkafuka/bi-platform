@@ -763,5 +763,19 @@ define(function () {
             + '/tooltips';
     };
 
+    /**
+     * 报表新建（编辑）-edit-setting
+     * 过滤空白行
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getFilterBlankLine = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/othersetting';
+    };
+
     return Url;
 });
