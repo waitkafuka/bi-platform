@@ -576,8 +576,29 @@ define([
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
 
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
+                this.model.canvasModel.saveJsonVm();
+                this.model.canvasModel.saveReport();
+            },
+            /**
+             * 添加完成数据项之后要做的特殊dom处理-多选下拉框
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddMultiSelectCompAxis: function (option){
+                var compId = this.getActiveCompId();
+                var editCompModel = this.canvasView.editCompView.model;
+                var json = editCompModel.getCompDataById(compId)[0];
+                var id = option.$item.attr('data-id');
+                json.dimId = id;
+
+                this.model.canvasModel.saveJsonVm();
+                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
@@ -649,6 +670,9 @@ define([
                         break;
                     case 'SELECT':
                         newType = 'Select';
+                        break;
+                    case 'MULTISELECT':
+                        newType = 'MultiSelect';
                         break;
                     case 'TABLE':
                         newType = 'Table';
