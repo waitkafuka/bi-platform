@@ -34,8 +34,10 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
+import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
@@ -53,6 +55,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
@@ -340,6 +343,29 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         String queryPath = "";
         action.setQueryPath(queryPath);
         
+        final Cube cube = schema.getCubes().get(cubeId);
+		Map<String, Measure> measures = cube.getMeasures();
+        MeasureTopSetting topSet = targetLogicModel.getTopSetting();
+        QueryAction.MeasuerOrderDesc orderDesc = null;
+        if (!action.getColumns().isEmpty()) {
+	        	if (topSet == null) {
+	        		Measure[] tmp = action.getColumns().keySet().stream().filter(item -> {
+	        			return cube.getMeasures().get(item.getOlapElementId()) != null;
+	        		}).map(item -> {
+	        			return cube.getMeasures().get(item.getOlapElementId());
+	        		}).toArray(Measure[] :: new);
+	        		if (tmp != null && tmp.length > 0) {
+	        			orderDesc = new QueryAction.MeasuerOrderDesc(
+	        					tmp[0].getName(), 
+	        					"DESC", 500);
+	        		}
+	        } else {
+	        		orderDesc = new QueryAction.MeasuerOrderDesc(
+		        			measures.get(topSet.getMeasureId()).getName(), 
+		        			topSet.getTopType().name(), topSet.getRecordSize());
+	        }
+        }
+        action.setMeasureOrderDesc(orderDesc);
         return action;
     }
     
@@ -372,7 +398,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             // 第二个条件判断是否为下钻,下钻不走此流程
             if ((values.containsKey(Constants.ORG_NAME) || values.containsKey(Constants.APP_NAME)) && 
                     ! (values.containsKey("action") && values.get("action").equals("expand")) &&
-                    element instanceof StandardDimension && item.getPositionType() == PositionType.X
+                    element instanceof StandardDimension
+                    && (item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
                    ) {
                 StandardDimension standardDim = (StandardDimension) element;
                 Map<String, Level> levels = standardDim.getLevels();

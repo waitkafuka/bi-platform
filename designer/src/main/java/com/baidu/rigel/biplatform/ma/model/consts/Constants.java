@@ -43,4 +43,6 @@ public interface Constants {
      * 过滤空白行设置
      */
     String FILTER_BLANK = "filterBlank";
+    
+    String TOP = "top";
 }
