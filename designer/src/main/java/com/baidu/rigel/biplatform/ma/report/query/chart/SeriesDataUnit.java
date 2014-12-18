@@ -56,6 +56,11 @@ public class SeriesDataUnit implements Serializable {
     private String yAxisName;
     
     /**
+     * 地图数据对应地域信息，后期考虑此处模型逻辑是否合法
+     */
+    private String[][] properties;
+    
+    /**
      * 通过这个方法得到不同的数据对象
      * 
      * @return
@@ -99,4 +104,19 @@ public class SeriesDataUnit implements Serializable {
     public void setyAxisName(String yAxisName) {
         this.yAxisName = yAxisName;
     }
+
+	/**
+	 * @return the properties
+	 */
+	public String[][] getProperties() {
+		return properties;
+	}
+
+	/**
+	 * @param properties the properties to set
+	 */
+	public void setProperties(String[][] properties) {
+		this.properties = properties;
+	}
+    
 }

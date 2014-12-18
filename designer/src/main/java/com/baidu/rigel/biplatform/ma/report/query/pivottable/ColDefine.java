@@ -64,6 +64,11 @@ public class ColDefine implements Serializable {
 	 * currentSort
 	 */
 	private String currentSort = "NULL";
+	
+	/**
+	 * 指标提示文本
+	 */
+	private String toolTip;
 
 	/**
 	 * @return the uniqueName
@@ -146,4 +151,19 @@ public class ColDefine implements Serializable {
 		this.linkBridge = linkBridge;
 	}
 
+	/**
+	 * @return the toolTip
+	 */
+	public String getToolTip() {
+		return toolTip;
+	}
+
+	/**
+	 * @param toolTip the toolTip to set
+	 */
+	public void setToolTip(String toolTip) {
+		this.toolTip = toolTip;
+	}
+
+	
 }
