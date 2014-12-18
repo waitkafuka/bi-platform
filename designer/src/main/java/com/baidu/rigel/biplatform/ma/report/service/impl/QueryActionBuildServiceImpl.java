@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
+import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
@@ -342,15 +343,22 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         String queryPath = "";
         action.setQueryPath(queryPath);
         
-        Map<String, Measure> measures = schema.getCubes().get(cubeId).getMeasures();
+        final Cube cube = schema.getCubes().get(cubeId);
+		Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
         QueryAction.MeasuerOrderDesc orderDesc = null;
         if (!action.getColumns().isEmpty()) {
 	        	if (topSet == null) {
-	        		String measureId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
-	        		orderDesc = new QueryAction.MeasuerOrderDesc(
-	        				measures.get(measureId).getName(), 
-		        			"DESC", 500);
+	        		Measure[] tmp = action.getColumns().keySet().stream().filter(item -> {
+	        			return cube.getMeasures().get(item.getOlapElementId()) != null;
+	        		}).map(item -> {
+	        			return cube.getMeasures().get(item.getOlapElementId());
+	        		}).toArray(Measure[] :: new);
+	        		if (tmp != null && tmp.length > 0) {
+	        			orderDesc = new QueryAction.MeasuerOrderDesc(
+	        					tmp[0].getName(), 
+	        					"DESC", 500);
+	        		}
 	        } else {
 	        		orderDesc = new QueryAction.MeasuerOrderDesc(
 		        			measures.get(topSet.getMeasureId()).getName(), 
