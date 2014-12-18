@@ -617,6 +617,9 @@
             classStr.push(type + '-hcell-sort-' + colDefItem.orderby);
             attrStr.push('data-orderby="' + colDefItem.orderby + '"');
         }
+        if (colDefItem && colDefItem.toolTip) {
+            attrStr.push('title="' + colDefItem.toolTip + '"');
+        }
         classStr.push(type + '-olap-ind-describe');
         attrStr.push('data-cell-pos="' + x + '-' + y + '"');
 
@@ -627,6 +630,7 @@
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr);
         //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
         //不然文本过多的话会显示不全
+        // TODO:支持tips
         var useBag = dom.ieVersion < 8;
         html.push(
             '<th ', 

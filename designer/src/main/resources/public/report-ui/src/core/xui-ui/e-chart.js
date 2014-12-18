@@ -1,5 +1,5 @@
 /**
- * xui.ui.HChart  
+ * xui.ui.HChart
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
  * @file:    基于highcharts的js图
@@ -13,6 +13,7 @@
     var removeClass = xutil.dom.removeClass;
     var q = xutil.dom.q;
     var domChildren = xutil.dom.children;
+    var getPreviousSibling = xutil.dom.getPreviousSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
 //    var extend = xutil.object.extend;
@@ -34,9 +35,9 @@
                 var type = this._sType;
                 // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                    '<div class="' + type + '-header">',
+                        '<div class="' + type + '-header">',
                     '</div>',
-                    '<div class="' + type + '-content"></div>'
+                        '<div class="' + type + '-content"></div>'
                 ].join('');
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
@@ -88,7 +89,7 @@
          *      }
          *  ];
          */
-        this._aYAxis = dataWrap.yAxis || [];   
+        this._aYAxis = dataWrap.yAxis || [];
         /**
          * 系列数据
          * 例如：
@@ -141,6 +142,11 @@
         this._mapMaxValue = dataWrap.mapMaxValue;
         !isSilent && this.render();
     };
+
+    //------------------------------------------
+    // 图形备选区域模块
+    //------------------------------------------
+
     /**
      * 生成指标切换按钮
      *
@@ -151,32 +157,77 @@
         var allMeasures = me._allMeasures;
         var defaultMeasures = me._defaultMeasures;
         var measureHtml = [];
-        if (allMeasures.length > 0) {
-            for (var i = 0; i < allMeasures.length; i ++) {
-                measureHtml.push(
-                    '<label>',
-                        allMeasures[i],
-                    '</label>',
-                    '<input type="checkbox" name="ecahrts-candidate" ',
-                    isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                    '/>'
-                );
-            }
-            this._eHeader.innerHTML = '<div class="echarts-candidate">' + measureHtml.join('') + '</div>';
-            document.getElementByName('ecahrts-candidate').onclick = function () {
 
-            };
-//            this._eCandidateBox = domChildren(this._eHeader)[0];
-//            this._eCandidateBox.onclick = function (ev) {
-//                var oEv = ev || window.event;
-//                candidateClick.call(me, ev);
-//            };
+        // 渲染图形中备选区模块
+        if (allMeasures.length > 0) {
+            if (this._chartType === 'pie') {
+                // 多选
+                for (var i = 0; i < allMeasures.length; i ++) {
+                    measureHtml.push(
+                        '<label>',
+                        allMeasures[i],
+                        '</label>',
+                        '<input type="radio" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                this._eCandidateBox.onclick = function (ev) {
+                    candidateClick.call(me, ev || window.event);
+                };
+            }
+            else {
+                // 多选
+                for (var i = 0; i < allMeasures.length; i ++) {
+                    measureHtml.push(
+                        '<label>',
+                        allMeasures[i],
+                        '</label>',
+                        '<input type="checkbox" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                // 绑定备选区按钮事件
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                this._eCandidateBox.onclick = function (ev) {
+                    candidateClick.call(me, ev || window.event);
+                };
+            }
+
+
+
+
         }
     };
-
+    // 备选区按钮点击事件
     function candidateClick(ev) {
+        var resultName = '';
+        var oTarget = ev.target;
 
+        if (oTarget.tagName.toLowerCase() === 'input') {
+            resultName = getPreviousSibling(oTarget).innerHTML;
+            if (oTarget.type === 'radio') {
+                this._defaultMeasures = [resultName];
+            }
+            else {
+                // oTarget.checked = oTarget.checked ? false : true;
+                this._defaultMeasures = getCurrentCandidate(resultName, this._defaultMeasures);
+            }
+
+            //this.$disposeHeader();
+            this.$disposeChart();
+            this.$createChart(this.$initOptions());
+        }
     }
+    // 在数组中是否存在
     function isInArray(item, array) {
         var flag = false;
         for (var i = 0; i < array.length; i ++) {
@@ -185,6 +236,25 @@
             }
         }
         return flag;
+    }
+    // 获取备选区中当前显示的内容
+    function getCurrentCandidate(name, currentSelects) {
+        var isHave = false;
+        var result = [];
+
+        for (var i = 0; i < currentSelects.length; i ++) {
+            if (currentSelects[i] === name) {
+                isHave = true;
+            }
+            else {
+                result.push(currentSelects[i]);
+            }
+        }
+        // 如果本身就没有name元素，就添加进去
+        if (!isHave) {
+            result.push(name);
+        }
+        return result;
     }
 
     /**
@@ -197,6 +267,7 @@
         var seryKind = {};
         var tempData = [];
         var xAxis = this._aXAxis;
+        var defaultMeasures = this._defaultMeasures;
 
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
@@ -211,12 +282,21 @@
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
-            if (ser.type === 'bar' || ser.type === 'pie') {
-                series.push(ser);
+            if (ser.type === 'bar') {
+                if (isInArray(ser.name, defaultMeasures)) {
+                    series.push(ser);
+                }
+            }
+            else if (ser.type === 'pie') {
+                if (isInArray(ser.name, defaultMeasures)) {
+                    series.push(ser);
+                }
             }
             else if (ser.type === 'line') {
                 ser.symbol = 'none'; // 线图上的点的形状
-                tempData.push(ser);
+                if (isInArray(ser.name, defaultMeasures)) {
+                    tempData.push(ser);
+                }
             }
             else if (ser.type === 'map') {
                 ser.mapType = 'china';
@@ -356,6 +436,7 @@
 //            borderWidth: 0.5
         };
         var data = [];
+        var defaultMeasures = this._defaultMeasures;
 
         if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
@@ -366,7 +447,9 @@
         else {
             if (this._aSeries && this._aSeries.length > 0) {
                 for (var i = 0; i < this._aSeries.length; i++) {
-                    data[i] = this._aSeries[i].name;
+                    if (isInArray(this._aSeries[i].name, defaultMeasures)) {
+                        data.push(this._aSeries[i].name);
+                    }
                 }
             }
         }
@@ -430,7 +513,7 @@
             this._chartType === 'column'
             || this._chartType === 'bar'
             || this._chartType === 'line'
-        ) {
+            ) {
             dataZoom.show = false;
             var xNums = categories.data ? categories.data.length : 0;
             var enableSelectRange = false;
@@ -587,7 +670,7 @@
         if ((start === 0 || start) && end) {
             if ((xDatas[start] === this._oldMinDate)
                 && (xDatas[end] === this._oldMaxDate)
-            ) {
+                ) {
                 return;
             }
             this._zoomStart = start;
@@ -650,12 +733,13 @@
         this.$disposeChart();
         // 如果没有数据，图形显示空
         if (!this._aSeries || this._aSeries.length == 0) {
-            this._eContent.innerHTML = '' 
-                + '<div class="' + this._sType + '-empty">' 
+            this._eContent.innerHTML = ''
+                + '<div class="' + this._sType + '-empty">'
                 +     this._sEmptyHTML
                 + '</div>';
             return;
         }
+        this.$preload();
         this.$createChart(this.$initOptions());
     };
 
@@ -695,12 +779,6 @@
             title: { text: '' }
         };
 
-        // 特殊判断：是否有饼图
-       // this._chartType = 'column';
-        // this.$renderCheckBoxs();
-        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
-            this._chartType = ser.type;
-        }
         this.$setupSeries(options);
         this.$setupTooptip(options);
         if (
@@ -708,7 +786,7 @@
             || this._chartType === 'bar'
             || this._chartType === 'line'
             || this._chartType === 'pie'
-        ) {
+            ) {
             this.$setupDataRoom(options);
             this.$setupToolBox(options);
             this.$setupYAxis(options);
@@ -738,7 +816,13 @@
         }
         return options;
     };
-     /**
+    UI_E_CHART_CLASS.$preload = function () {
+        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
+            this._chartType = ser.type;
+        }
+        this.$renderCheckBoxs();
+    };
+    /**
      * 销毁图表
      *
      * @private
@@ -751,6 +835,13 @@
             this._oChart = null;
         }
         this._eContent && (this._eContent.innerHTML = '');
+    };
+    /**
+     * 销毁图表
+     *
+     * @private
+     */
+    UI_E_CHART_CLASS.$disposeHeader = function () {
         this._eHeader && (this._eHeader.innerHTML = '');
     };
     /**
