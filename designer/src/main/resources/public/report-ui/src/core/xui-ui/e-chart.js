@@ -282,39 +282,84 @@
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
-            if (ser.type === 'bar') {
-                if (isInArray(ser.name, defaultMeasures)) {
-                    series.push(ser);
+            if (defaultMeasures) {
+                if (ser.type === 'bar') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        ser.yAxisIndex = 0;
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'column') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        ser.type = 'bar';
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'pie') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'line') {
+                    ser.symbol = 'none'; // 线图上的点的形状
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        tempData.push(ser);
+                    }
+                }
+                else if (ser.type === 'map') {
+                    ser.mapType = 'china';
+                    ser.roam = false;
+                    ser.itemStyle = {
+                        normal:{ label:{ show:true } },
+                        emphasis:{ label:{ show:true } }
+                    };
+                    var serData = [];
+                    for (var x = 0; x < ser.data.length; x ++) {
+                        serData.push({
+                            name: xAxis.data[x],
+                            value: ser.data[x]
+                        });
+                    }
+                    ser.data = serData;
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        series.push(ser);
+                    }
                 }
             }
-            else if (ser.type === 'pie') {
-                if (isInArray(ser.name, defaultMeasures)) {
+            else {
+                if (ser.type === 'bar') {
+                    ser.yAxisIndex = 0;
                     series.push(ser);
                 }
-            }
-            else if (ser.type === 'line') {
-                ser.symbol = 'none'; // 线图上的点的形状
-                if (isInArray(ser.name, defaultMeasures)) {
+                else if (ser.type === 'column') {
+                    ser.type = 'bar';
+                    series.push(ser);
+                }
+                else if (ser.type === 'pie') {
+                    series.push(ser);
+                }
+                else if (ser.type === 'line') {
                     tempData.push(ser);
                 }
-            }
-            else if (ser.type === 'map') {
-                ser.mapType = 'china';
-                ser.roam = false;
-                ser.itemStyle = {
-                    normal:{ label:{ show:true } },
-                    emphasis:{ label:{ show:true } }
-                };
-                var serData = [];
-                for (var x = 0; x < ser.data.length; x ++) {
-                    serData.push({
-                        name: xAxis.data[x],
-                        value: ser.data[x]
-                    });
+                else if (ser.type === 'map') {
+                    ser.mapType = 'china';
+                    ser.roam = false;
+                    ser.itemStyle = {
+                        normal:{ label:{ show:true } },
+                        emphasis:{ label:{ show:true } }
+                    };
+                    var serData = [];
+                    for (var x = 0; x < ser.data.length; x ++) {
+                        serData.push({
+                            name: xAxis.data[x],
+                            value: ser.data[x]
+                        });
+                    }
+                    ser.data = serData;
+                    series.push(ser);
                 }
-                ser.data = serData;
-                series.push(ser);
             }
+
         }
         series = series.concat(tempData);
         if (seryKind.line >= 1 && seryKind.bar >= 1) {
@@ -447,9 +492,15 @@
         else {
             if (this._aSeries && this._aSeries.length > 0) {
                 for (var i = 0; i < this._aSeries.length; i++) {
-                    if (isInArray(this._aSeries[i].name, defaultMeasures)) {
+                    if (defaultMeasures) {
+                        if (isInArray(this._aSeries[i].name, defaultMeasures)) {
+                            data.push(this._aSeries[i].name);
+                        }
+                    }
+                    else {
                         data.push(this._aSeries[i].name);
                     }
+
                 }
             }
         }
