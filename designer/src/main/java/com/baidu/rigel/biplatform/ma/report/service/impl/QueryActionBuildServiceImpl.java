@@ -279,7 +279,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             		params.put("range", true);
             		timeDimItem.setParams(params);
             }
-            if (!CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
+            if (cpModel != null && !CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
             		cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
             }
            return generateQueryAction(model.getSchema(),
@@ -344,6 +344,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         action.setQueryPath(queryPath);
         
         final Cube cube = schema.getCubes().get(cubeId);
+        if (cube == null) {
+        		return null;
+        }
 		Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
         QueryAction.MeasuerOrderDesc orderDesc = null;
