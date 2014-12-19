@@ -35,6 +35,7 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
@@ -1107,7 +1108,7 @@ public class ReportDesignModelResource extends BaseResource {
      */
     @RequestMapping(value = "/{id}/extend_area/{areaId}/topn",
             method = { RequestMethod.POST })
-    public ResponseResult updateMesaureTopSettiong(@PathVariable("id") String reportId,
+    public ResponseResult updateMesaureTopSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
     		ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
@@ -1124,7 +1125,7 @@ public class ReportDesignModelResource extends BaseResource {
             return result;
         }
         result.setStatus(0);
-        String topSetting = request.getParameter("top");
+        String topSetting = request.getParameter(Constants.TOP);
         ExtendArea area = model.getExtendById(areaId);
         reportDesignModelService.updateAreaWithTopSetting(area, topSetting);
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
@@ -1148,9 +1149,7 @@ public class ReportDesignModelResource extends BaseResource {
 	    	long begin = System.currentTimeMillis();
     		ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
-        String topSetting = request.getParameter("top");
         ExtendArea area = model.getExtendById(areaId);
-        reportDesignModelService.updateAreaWithTopSetting(area, topSetting);
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
         result.setData(area.getLogicModel().getTopSetting());
         result.setStatus(0);
@@ -1179,7 +1178,7 @@ public class ReportDesignModelResource extends BaseResource {
         ExtendArea area = model.getExtendById(areaId);
         reportDesignModelService.updateAreaWithOtherSetting(area, otherSetting);
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
-        result.setData(area.getLogicModel().getTopSetting());
+        result.setData(area.getOtherSetting());
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 

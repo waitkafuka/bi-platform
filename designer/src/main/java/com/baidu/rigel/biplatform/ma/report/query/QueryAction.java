@@ -18,7 +18,6 @@ package com.baidu.rigel.biplatform.ma.report.query;
 import java.io.Serializable;
 import java.util.Base64;
 import java.util.LinkedHashMap;
-
 import java.util.Map;
 
 import com.baidu.rigel.biplatform.ma.report.model.Item;
@@ -78,6 +77,9 @@ public class QueryAction implements Serializable {
      * 是否是图查询
      */
     private boolean chartQuery;
+    
+    private MeasuerOrderDesc measureOrderDesc;
+    
     
     /**
      * 构造函数
@@ -215,5 +217,72 @@ public class QueryAction implements Serializable {
 
     public void setChartQuery(boolean chartQuery) {
         this.chartQuery = chartQuery;
+    }
+    
+    /**
+	 * @return the measureOrderDesc
+	 */
+	public MeasuerOrderDesc getMeasureOrderDesc() {
+		return measureOrderDesc;
+	}
+
+	/**
+	 * @param measureOrderDesc the measureOrderDesc to set
+	 */
+	public void setMeasureOrderDesc(MeasuerOrderDesc measureOrderDesc) {
+		this.measureOrderDesc = measureOrderDesc;
+	}
+
+
+	/**
+     * 
+     * @author david.wang
+     *
+     */
+    public static class MeasuerOrderDesc implements Serializable {
+    	
+    		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1589055019481416885L;
+			
+		private final String name;
+    		private final String orderType;
+    		private final int recordSize;
+    		
+    		/**
+    		 * 
+    		 * @param name
+    		 * @param orderType
+    		 * @param recordSize
+    		 */
+		public MeasuerOrderDesc(String name, String orderType, int recordSize) {
+			super();
+			this.name = name;
+			this.orderType = orderType;
+			this.recordSize = recordSize;
+		}
+
+		/**
+		 * @return the name
+		 */
+		public String getName() {
+			return name;
+		}
+
+		/**
+		 * @return the orderType
+		 */
+		public String getOrderType() {
+			return orderType;
+		}
+
+		/**
+		 * @return the recordSize
+		 */
+		public int getRecordSize() {
+			return recordSize;
+		}
+    		
     }
 }

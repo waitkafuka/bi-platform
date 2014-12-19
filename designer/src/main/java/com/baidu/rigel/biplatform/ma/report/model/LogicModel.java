@@ -69,6 +69,9 @@ public class LogicModel implements Serializable {
      */
     private Map<String, Item> selectionMeasures = Maps.newLinkedHashMap();
     
+    /**
+     * topN设置
+     */
     private MeasureTopSetting topSetting;
     
     public Item[] getColumns() {

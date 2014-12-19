@@ -471,10 +471,10 @@ define([
                     // 如果是饼图的话，比较麻烦，不能同时选择两个饼图
                     var $chartTypes = $target.parent().siblings('div');
                     if (selectedChartType === 'pie') {
-                        if ($chartTypes.length >= 1) {
-                            alert('饼图只能选择一个指标');
-                            return;
-                        }
+//                        if ($chartTypes.length >= 1) {
+//                            alert('饼图只能选择一个指标');
+//                            return;
+//                        }
                     }
 //                    if (selectedChartType === 'bar') {
 //                        var isAllBar = true;
