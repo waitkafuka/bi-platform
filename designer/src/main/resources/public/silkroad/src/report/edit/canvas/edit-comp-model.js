@@ -240,30 +240,27 @@ define(['url', 'constant'], function (Url, Constant) {
                     var sourceData = data.data;
                     var targetData;
                     var indList;
-
                     if (sourceData) {
                         // 组合数据格式列表项
                         targetData = {
                             dataFormat: {}
                         };
-                        /**
-                         * 后端返回的数据格式，name:format
-                         * 需要组合成的数据格式：name: { format: '', caption: ''}
-                         * 获取左侧所有指标，遍历,为了获取caption
-                         *
-                         */
-                        indList = dataInsight.main.model.get('indList').data;
-                        for(var i = 0, iLen = indList.length; i < iLen; i ++) {
-                            var name = indList[i].name;
-                            if (sourceData.hasOwnProperty(name)) {
-                                var formatObj = {
-                                    format: sourceData[name],
-                                    caption: indList[i].caption
-                                };
-                                targetData.dataFormat[name] = formatObj;
-                            }
+                        var length = 0;
+                        for (name in sourceData) {
+                            length ++;
+                        }
+                        if (length == 0) {
+                            targetData.dataFormat['value'] = 'false';
+                        }
+                        else {
+                            targetData.dataFormat['value'] = sourceData['filterBlank'];
                         }
                     }
+                    /**
+                     * dataFormat = {
+                     *      value:  xxxxx
+                     * }
+                    **/
                     success(targetData);
                 }
             });
@@ -323,7 +320,7 @@ define(['url', 'constant'], function (Url, Constant) {
                 others: JSON.stringify(data)
             };
             $.ajax({
-                url: Url.getFliterBlankLine(this.reportId, compId),
+                url: Url.getFilterBlankLine(this.reportId, compId),
                 type: 'POST',
                 data: formData,
                 success: function () {
