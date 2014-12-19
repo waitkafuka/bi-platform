@@ -820,7 +820,9 @@
         for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
             this._chartType = ser.type;
         }
-        this.$renderCheckBoxs();
+        if (this._allMeasures) {
+            this.$renderCheckBoxs();
+        }
     };
     /**
      * 销毁图表
