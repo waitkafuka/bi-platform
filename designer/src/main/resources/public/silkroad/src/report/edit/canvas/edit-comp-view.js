@@ -49,7 +49,7 @@ define([
                 'click .j-set-data-format': 'getDataFormatList',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
-                'click .j-others-operate': 'filterBlankLine'
+                'click .j-others-operate': 'getFilterBlankLine'
             },
 
             /**
@@ -859,7 +859,6 @@ define([
                         dialog.alert('没有指标');
                         return;
                     }
-
                     html = dataFormatSettingTemplate.render(
                         data
                     );
@@ -977,7 +976,7 @@ define([
              * @param {event} event 点击事件
              * @public
              */
-            filterBlankLine: function (event) { //TODO:实现业务逻辑
+            getFilterBlankLine: function (event) { //TODO:实现业务逻辑
                 var that = this;
                 var compId = that.getActiveCompId();
                 that.model.getFilterBlankLine(compId, openDataFormatDialog);
@@ -1024,10 +1023,10 @@ define([
                     var $check = $('.data-format-black').find('input').eq(0);
                     var data = {};
                     if ($check.is(':checked')) {
-                        data['filterBlank'] = 'true';
+                        data.filterBlank = "true";
                     }
                     else {
-                        data['filterBlank'] = 'false';
+                        data.filterBlank = "false";
                     }
                     that.model.saveFilterBlankLine(compId, data, function () {
                         $dialog.dialog('close');
