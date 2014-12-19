@@ -212,6 +212,15 @@
             tmpEl && tmpEl.removeChild(el);
         }
     }
+    /**
+     * 获取上一个元素
+     *
+     * @public
+     * @param {HTMLElement} el Element 对象
+     */
+    DOM.getPreviousSibling = function(el) {
+        return el.previousElementSibling || el.previousSibling;
+    }
 
 })();
 

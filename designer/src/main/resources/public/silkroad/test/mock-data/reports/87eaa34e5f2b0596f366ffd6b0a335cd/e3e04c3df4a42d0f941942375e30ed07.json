@@ -1,41 +1,38 @@
 {"statusInfo": "Success", "status": 0, "data": {
     "reportChart": {
-        "title": "趋势图",
-        "subTitle": "",
+        "title": null,
+        "subTitle": null,
         "xAxisType": "category",
-        "xAxisCategories": ["包装", "印刷", "工艺品", "广告", "广告及包装其他", "广播电视服务"],
+        "xAxisCategories": ["广告及包装", "广播通信", "房地产", "服装鞋帽", "礼品饰品"],
         "yAxises": [
             {
                 "name": "纵轴",
                 "unitName": "单位"
             }
         ],
-        "allMeasure": ["展现", "自增ID", "点击消费"],
-        "defaultMeasure": ["展现"],
-        "allDim": [],
-        "defaultDim": [],
         "seriesData": [
             {
-                "data": [210, 222, 234, 245, 356, 212],
+                "data": [6061131.8920000000, 2279024.0250000000, 760393.1970000000, 2459949.2540000000, 3727627.2100000000],
                 "format": null,
-                "name": "展现",
-                "type": "bar",
-                "yAxisName": "test_axis"
+                "name": "m2",
+                "type": "column",
+                "yAxisName": "COLUMN",
+                "properties": null
             },
             {
-                "data": [1023, 1122, 987, 879, 789, 777],
+                "data": [3698458.1080000000, 1418227.3550000000, 450721.2900000000, 1511476.8720000000, 2221692.2550000000],
                 "format": null,
-                "name": "自增ID",
-                "type": "bar",
-                "yAxisName": "test_axis"
-            },
-            {
-                "data": [567, 678, 789, 606, 555, 450],
-                "format": null,
-                "name": "点击消费",
-                "type": "bar",
-                "yAxisName": "test_axis"
+                "name": "m3",
+                "type": "pie",
+                "yAxisName": "PIE",
+                "properties": null
             }
-        ]
+        ],
+        "allMeasures": ["m2", "m3"],
+        "defaultMeasures": ["m2"],
+        "allDims": ["trade_l1"],
+        "defaultDims": ["trade_l1"],
+        "maxValue": 6061131.8920000000,
+        "minValue": 450721.2900000000
     }
 }, "properties": {}}
