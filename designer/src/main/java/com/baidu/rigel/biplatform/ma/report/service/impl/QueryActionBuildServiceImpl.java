@@ -349,7 +349,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         }
 		Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
-        QueryAction.MeasuerOrderDesc orderDesc = null;
+        QueryAction.MeasureOrderDesc orderDesc = null;
         if (!action.getColumns().isEmpty()) {
 	        	if (topSet == null) {
 	        		Measure[] tmp = action.getColumns().keySet().stream().filter(item -> {
@@ -358,12 +358,12 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
 	        			return cube.getMeasures().get(item.getOlapElementId());
 	        		}).toArray(Measure[] :: new);
 	        		if (tmp != null && tmp.length > 0) {
-	        			orderDesc = new QueryAction.MeasuerOrderDesc(
+	        			orderDesc = new QueryAction.MeasureOrderDesc(
 	        					tmp[0].getName(), 
 	        					"DESC", 500);
 	        		}
 	        } else {
-	        		orderDesc = new QueryAction.MeasuerOrderDesc(
+	        		orderDesc = new QueryAction.MeasureOrderDesc(
 		        			measures.get(topSet.getMeasureId()).getName(), 
 		        			topSet.getTopType().name(), topSet.getRecordSize());
 	        }
