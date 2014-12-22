@@ -30,9 +30,9 @@ define([
                 'click .j-con-edit-btns .j-delete': 'deleteComp',
                 'click .j-button-save-report': 'saveReport',
                 'click .j-button-publish-report': 'publishReport',
-                'click #comp-div': 'focusText',
-                'blur #comp-text': 'blurText',
-                'keydown #comp-text': 'keyDownText'
+                'click .j-comp-div': 'focusText',
+                'blur .j-comp-text': 'blurText',
+                'keydown .j-comp-text': 'keyDownText'
             },
 
             /**
@@ -68,7 +68,6 @@ define([
 
                 // 初始化报表公共功能模块
                 that.reportView = new ReportView({id: that.id});
-
                 // 初始化json与vm文件
                 that.model.initJson(function () {
                     that.model.initVm(function () {
@@ -140,16 +139,18 @@ define([
                     }
                 });
             },
+
             /**
              * 文本框组件点击切换
              *
              * @public
              */
-            focusText: function () {
+            focusText: function (event) {
                 var divTitle = '点击进行输入';
-                var $divTextBox = $('#comp-div');
-                var $divText = $('#comp-report');
-                var $inpText = $('#comp-text');
+                var $now = $(event.target);
+                var $divTextBox = $now.parent();
+                var $divText = $now;
+                var $inpText = $divTextBox.next();
                 var divHtml = $divText.html();
                 $divTextBox.hide();
                 $inpText.show().focus();
@@ -169,27 +170,29 @@ define([
             blurText: function (event) {
                 var divtext = $(event.target).val();
                 var that = this;
-                that.saveBtnsText(divtext);
+                that.saveBtnsText(event, divtext);
             },
 
             keyDownText: function (event) {
                 var divtext = $(event.target).val();
                 var that = this;
                 if (event.keyCode == 13) {
-                    that.saveBtnsText(divtext);
+                    that.saveBtnsText(event, divtext);
                 }
             },
+
             /**
              * 文本框组件失去焦点切换
              *
              * @public
              */
-            saveBtnsText: function (content) {
+            saveBtnsText: function (event, content) {
                 var divTitle = '点击进行输入';
-                var $divTextBox = $('#comp-div');
-                var $divText = $('#comp-report');
-                var $inpText = $('#comp-text');
-                $inpText.hide();
+                var $now = $(event.target);
+                var $divTextBox = $now.prev();
+                var $divText = $divTextBox.find('div');
+                var textId = $divText.attr('id');
+                $now.hide();
                 $divTextBox.show();
                 if (content != '') {
                     $divText.html(content);
@@ -197,8 +200,9 @@ define([
                 else {
                     $divText.html(divTitle);
                 }
-                this.model.dateCompPositing(content);
+                this.model.dateCompPositing(textId, content);
             },
+
             /**
              * 添加一个组件(提交后台获取id，并在vm与json中添加相关数据)
              *
@@ -227,7 +231,9 @@ define([
                             'width': 'auto',
                             'height': 'auto'
                         }).find('.j-fold').html('－');
-                        that.editCompView.hideEditBar();
+                        if ($realComp.attr('data-component-type') == 'TEXT') {
+                            that.showReport(true);
+                        }
                     }
                 );
             },
@@ -292,7 +298,6 @@ define([
                     stop: function (event, resizeObj) {
                         var paramObj = resizeObj.size;
                         paramObj.compId = $(this).attr('data-comp-id');
-
                         that.model.resizeComp(paramObj);
                         that.showReport(true);
                     }
@@ -302,13 +307,26 @@ define([
                 // 对表格组件设置拖拽的最小高度
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
-                // 固定单选和多选下拉框的高度
-                var dataCompType = $component.attr('data-component-type');
-                if (dataCompType == 'SELECT' || dataCompType == 'MULTISELECT') {
-                    $component.resizable({minHeight: '27', maxHeight: '27'});
-                    $component.resizable("option", "maxHeight", 27);
-                    $component.resizable("option", "minHeight", 27);
-                }
+                // 固定单选下拉框的高度
+                that.dragWidthHeight($component, 'SELECT', 27, 27);
+                // 固定多选下拉框的高度
+                that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
+                // 固定文本框的高度
+                that.dragWidthHeight($component, 'TEXT', 34, 34);
+            },
+
+            /**
+             * 设置组件最大最小高度
+             *
+             * @param {$HTMLElement} $ele 组件外壳
+             * @param {string} type 组件类型
+             * @param {number} minHeight 组件拖拽最小高度
+             * @param {number} maxHeight 组件拖拽最大高度
+             * @public
+             */
+            dragWidthHeight: function ($ele, type, minHeight, maxHeight) {
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minHeight", minHeight);
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "maxHeight", maxHeight);
             },
 
             /**
@@ -353,8 +371,11 @@ define([
              */
             addEditBtns: function ($component) {
                 $component.append(editBtnsTemplate.render());
-                if($component.attr('data-component-type') == 'TEXT') {
-                    $component.find('.j-setting').hide();
+                // 文本框编辑数据及关联隐藏
+                for (var i = 0; i < $component.length; i ++) {
+                    if ($($component[i]).attr('data-component-type') == 'TEXT') {
+                        $($component[i]).find('.j-setting').remove();
+                    }
                 }
                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();

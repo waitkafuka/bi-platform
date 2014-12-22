@@ -34,5 +34,10 @@ public enum DimensionType {
     /**
      * 维度组 一般普通维度只有一个level 维度组有多个level
      */
-    GROUP_DIMENSION
+    GROUP_DIMENSION, 
+    
+    /**
+     * 回调维度
+     */
+    CALLBACK
 }

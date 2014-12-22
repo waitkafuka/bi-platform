@@ -30,6 +30,22 @@ define(function () {
         'column': false,
         'map': false
     };
+    /**
+     * 单个图类型
+     * 只能是单种图，不能是组合
+     *
+     * @const
+     * @type {string}
+     */
+    var SINGLE_CHART = ['bar', 'map', 'pie'];
+
+    /**
+     * 组合图类型
+     *
+     * @const
+     * @type {string}
+     */
+    var COMBINATION_CHART = ['column', 'line'];
 
     /**
      * 组件id后缀

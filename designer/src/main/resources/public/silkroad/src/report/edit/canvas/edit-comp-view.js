@@ -14,11 +14,14 @@ define([
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
         'report/edit/canvas/comp-setting-liteolap-template',
+        'report/edit/canvas/comp-setting-chart-template',
         'report/edit/canvas/vui-setting-select-template',
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'common/float-window',
-        'report/edit/canvas/chart-icon-list-template'
+        'report/edit/canvas/chart-icon-list-template',
+        'report/edit/canvas/norm-info-depict-template',
+        'report/edit/canvas/filter-blank-line-template'
     ],
     function (
         template,
@@ -28,11 +31,14 @@ define([
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
         compSettingLITEOLAPTemplate,
+        compSettingChartTemplate,
         vuiSettingSelectTemplate,
         defaultSelectedTimeSettingTemplate,
         dataFormatSettingTemplate,
         FloatWindow,
-        indMenuTemplate
+        indMenuTemplate,
+        normInfoDepictTemplate,
+        filterBlankLineTemplate
     ) {
 
         return Backbone.View.extend({
@@ -41,7 +47,9 @@ define([
                 'click .j-report': 'removeCompEditBar',
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
-                'click .item .j-icon-chart': 'showChartList'
+                'click .j-norm-info-depict': 'getNormInfoDepict',
+                'click .item .j-icon-chart': 'showChartList',
+                'click .j-others-operate': 'getFilterBlankLine'
             },
 
             /**
@@ -117,6 +125,9 @@ define([
                     case 'LITEOLAP' :
                         template = compSettingLITEOLAPTemplate;
                         break ;
+                    case 'CHART' :
+                        template = compSettingChartTemplate;
+                        break ;
                     case 'SELECT' :
                         template = vuiSettingSelectTemplate;
                         break;
@@ -167,7 +178,7 @@ define([
                     over: function (event, ui) {
                         $(this).addClass('active');
                     },
-                    helper: "clone"
+                    helper: 'clone'
                 });
             },
 
@@ -328,6 +339,9 @@ define([
             afterDeleteChartCompAxis: function (option) {
 
             },
+            afterDeleteTableCompAxis: function (option) {
+
+            },
             afterDeleteSelectCompAxis: function (option) {
 
             },
@@ -372,20 +386,8 @@ define([
                 selector = '.j-data-sources-setting-con-ind';
                 oLapElemenType = ui.draggable.parents(selector);
                 oLapElemenType = oLapElemenType.length ? 'ind' : 'dim';
-
-                // 维度与指标项的样式不一样，分别添加
-                var str;
-                // 指标
-                if (oLapElemenType === 'ind') {
-                    if (compType === 'CHART') {
-                        str = '<span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>';
-                        $item.prepend(str);
-                    }
-
-                }
-                str = '<span class="icon hide j-delete" title="删除">×</span>';
-                $item.append(str);
-                $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
+                // 添加指标（维度）项到XY
+                that._addDimOrIndDomToXY($item, oLapElemenType, compType);
 
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
@@ -413,6 +415,22 @@ define([
                     // 调整画布大小
                     that.canvasView.parentView.ueView.setSize();
                 });
+            },
+            _addDimOrIndDomToXY: function ($item, oLapElemenType, compType) {
+                // 在轴上添加指标与维度项的dom
+                var str;
+                // 指标
+                if (oLapElemenType === 'ind') {
+                    if (compType === 'CHART') {
+                        str = '<span class="icon-chart column j-icon-chart" chart-type="column" ></span>';
+                        $item.prepend(str);
+                    }
+
+                }
+                str = '<span class="icon hide j-delete" title="删除">×</span>';
+                $item.append(str);
+                $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
+                // TODO:判断其他图形的类型
             },
             /**
              * 显示图形列表
@@ -451,25 +469,19 @@ define([
                     var $this =  $(this);
                     var selectedChartType = $this.attr('chart-type');
                     // 如果是饼图的话，比较麻烦，不能同时选择两个饼图
+                    var $chartTypes = $target.parent().siblings('div');
                     if (selectedChartType === 'pie') {
-                        var $chartTypes = $target.parent().siblings('div');
-                        if ($chartTypes.length >= 1) {
-                            alert('饼图只能选择一个指标');
-                            return;
-                        }
-//                        var flag = false;
-//                        $chartTypes.each(function () {
-//                            var $chartType = $($(this).find('span')[0]);
-//                            if ($chartType.attr('chart-type') === 'pie') {
-//                                alert('不能选择两个饼图');
-//                                flag = true;
-//                            }
-//                        });
-//                        if (flag) {
+//                        if ($chartTypes.length >= 1) {
+//                            alert('饼图只能选择一个指标');
 //                            return;
 //                        }
                     }
-
+//                    if (selectedChartType === 'bar') {
+//                        var isAllBar = true;
+//                        $chartTypes.each(function () {
+//                            alert();
+//                        });
+//                    }
                     that.model.changeCompItemChartType(
                         compId,
                         olapId,
@@ -522,36 +534,7 @@ define([
 
                 // 如果拖到轴区
                 if (isXYS) {
-                    processCand();
-                }
-
-                // 处理候选区
-                function processCand () {
-                    var oLapElementId = option.oLapElementId;
-                    var selector = '[data-id=' + oLapElementId + ']';
-                    // 数据项
-                    var $items = $compSetting.find(selector);
-
-                    // 备选区没有当前拖进来的数据项
-                    if ($items.length == 1) {
-                        if (option.oLapElemenType == 'ind') {
-                            selector = '.j-line-cand-ind';
-                        }
-                        else {
-                            selector = '.j-line-cand-dim';
-                        }
-                        var $itemClone = option.$item.clone();
-                        $itemClone.find('.j-delete').remove();
-                        $compSetting.find(selector).append($itemClone);
-                    }
-                    // 备选区已有当前拖进来的数据项
-                    else if ($items.length == 2) {
-                        // 移除删除图标
-                        var $delete = $items.eq(1).find('.j-delete');
-                        if ($delete.length == 1 ) {
-                            $delete.remove();
-                        }
-                    }
+                    processCand(option, $compSetting);
                 }
             },
             /**
@@ -566,8 +549,14 @@ define([
              * @public
              */
             afterAddChartCompAxis: function (option){
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
+                var that = this;
+                var $compSetting = that.$el.find('.j-comp-setting');
+                var isXYS = 'xys'.indexOf(option.axisType) > -1;
+
+                // 如果拖到轴区
+                if (isXYS) {
+                    processCand(option, $compSetting);
+                }
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-下拉框
@@ -587,8 +576,29 @@ define([
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
 
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
+                this.model.canvasModel.saveJsonVm();
+                this.model.canvasModel.saveReport();
+            },
+            /**
+             * 添加完成数据项之后要做的特殊dom处理-多选下拉框
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddMultiSelectCompAxis: function (option){
+                var compId = this.getActiveCompId();
+                var editCompModel = this.canvasView.editCompView.model;
+                var json = editCompModel.getCompDataById(compId)[0];
+                var id = option.$item.attr('data-id');
+                json.dimId = id;
+
+                this.model.canvasModel.saveJsonVm();
+                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
@@ -660,6 +670,9 @@ define([
                         break;
                     case 'SELECT':
                         newType = 'Select';
+                        break;
+                    case 'MULTISELECT':
+                        newType = 'MultiSelect';
                         break;
                     case 'TABLE':
                         newType = 'Table';
@@ -846,7 +859,6 @@ define([
                         dialog.alert('没有指标');
                         return;
                     }
-
                     html = dataFormatSettingTemplate.render(
                         data
                     );
@@ -894,6 +906,136 @@ define([
             },
 
             /**
+             * 获取指标描述信息，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getNormInfoDepict: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+                that.model.getNormInfoDepict(compId, openDataFormatDialog);
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+                    html = normInfoDepictTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '指标信息描述',
+                        content: html,
+                        dialog: {
+                            width: 340,
+                            height: 400,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveNormInfoDepict($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveNormInfoDepict($dialog) {
+                    var texts = $('.data-format').find('input');
+                    var data = {};
+
+                    texts.each(function () {
+                        var $this = $(this);
+                        var name = $this.attr('name');
+                        data[name] = $this.val();
+                    });
+                    that.model.saveNormInfoDepict(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
+            },
+
+            /**
+             * 获取过滤空白行，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getFilterBlankLine: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+                that.model.getFilterBlankLine(compId, openDataFormatDialog);
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+                    html = filterBlankLineTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '其他操作',
+                        content: html,
+                        dialog: {
+                            width: 320,
+                            height: 170,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveFilterBlankLine($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveFilterBlankLine($dialog) {
+                    var $check = $('.data-format-black').find('input').eq(0);
+                    var data = {};
+                    if ($check.is(':checked')) {
+                        data.filterBlank = "true";
+                    }
+                    else {
+                        data.filterBlank = "false";
+                    }
+                    that.model.saveFilterBlankLine(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
+            },
+
+            /**
              * 获取活动状态的组件的id
              *
              * @public
@@ -904,5 +1046,43 @@ define([
                 return $compSetting.attr('data-comp-id');
             }
         });
+
+        /**
+         * 处理候选区域
+         * 当指标（维度）拖入纵（横）轴后，候选指标（维度）区域添加指标（维度）的逻辑
+         * 当备选区域没有拖入项时，那么把拖入项的删除按钮干掉，然后放入备选区域，意指：首选区域有的，备选区域不能删除
+         * 当备选区域已有拖入项时，那么把备选区域中已有项的删除按钮干掉（因为之前当前项在首选区域没有，本身是需要删除按钮的）
+         * @param {Object} option 点击事件（报表组件上的编辑按钮）
+         * @param {$Htmlelement} $compSetting 点击事件（报表组件上的编辑按钮）
+         * @private
+         */
+        function processCand (option, $compSetting) {
+            var oLapElementId = option.oLapElementId;
+            var selector = '[data-id=' + oLapElementId + ']';
+            // 数据项
+            var $items = $compSetting.find(selector);
+
+            // 备选区没有当前拖进来的数据项
+            if ($items.length == 1) {
+                if (option.oLapElemenType == 'ind') {
+                    selector = '.j-line-cand-ind';
+                }
+                else {
+                    selector = '.j-line-cand-dim';
+                }
+                var $itemClone = option.$item.clone();
+                $itemClone.find('.j-delete').remove();
+                $compSetting.find(selector).append($itemClone);
+            }
+            // 备选区已有当前拖进来的数据
+            else if ($items.length == 2) {
+                // 移除删除图标
+                var $delete = $items.eq(1).find('.j-delete');
+                if ($delete.length == 1 ) {
+                    $delete.remove();
+                }
+            }
+        }
     }
+
 );

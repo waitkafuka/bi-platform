@@ -235,10 +235,18 @@ public class ReportRuntimeModel implements Serializable {
                     logicModel.removeSlice(item.getOlapElementId());
                     break;
                 case CAND_DIM:
-                    ((LiteOlapExtendArea) area).removeCandDim(item.getOlapElementId());
+                		if (area instanceof LiteOlapExtendArea) {
+                			((LiteOlapExtendArea) area).removeCandDim(item.getOlapElementId());
+                		} else {
+                			area.removeSelectDimItem(item.getOlapElementId());
+                		}
                     break;
                 case CAND_IND:
-                    ((LiteOlapExtendArea) area).removeCandInd(item.getOlapElementId());
+                		if (area instanceof LiteOlapExtendArea) {
+                			((LiteOlapExtendArea) area).removeCandInd(item.getOlapElementId());
+                		} else {
+                			area.removeSelectMeasureItem(item.getOlapElementId());
+                		}
                     break;
             }
         }
@@ -319,12 +327,22 @@ public class ReportRuntimeModel implements Serializable {
         }
     }
     
+    /**
+     * 
+     * @param logicModel
+     * @param schema
+     * @param cubeId
+     * @return Map<String, Item>
+     */
     private Map<String, Item> getItemStoreWithDimNameKey(LogicModel logicModel, Schema schema,
             String cubeId) {
         Map<String, Item> store = Maps.newHashMap();
         for (Item item : logicModel.getItems()) {
             OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId,
                     item.getOlapElementId());
+            if (element == null) {
+            		continue;
+            }
             if (ItemUtils.isTimeDim(item, schema, cubeId)) {
                 timeDimItemIds.add(item.getOlapElementId());
             }

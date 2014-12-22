@@ -56,6 +56,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -69,8 +70,11 @@ import com.google.common.collect.Sets;
  * @version 1.0.0.1
  */
 public class QueryUtils {
-    
+  
+
+	
     /**
+     * 
      * 将查询动作转化成问题模型
      * @param dsDefine 
      * 
@@ -108,36 +112,36 @@ public class QueryUtils {
         Set<Item> tmp = Sets.newHashSet();
         tmp.addAll(queryAction.getSlices().keySet());
         tmp.addAll(queryAction.getRows().keySet());
-        updateLogicCubeWithSlices(cube, tmp,
-                reportModel.getSchema().getCubes().get(area.getCubeId()));
+//        updateLogicCubeWithSlices(cube, tmp,
+//                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
         return questionModel;
     }
     
-    /**
-     * 
-     * @param cube
-     * @param keySet
-     * @param defineCube
-     */
-    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
-        if (keySet == null || keySet.isEmpty()) {
-            return;
-        }
-        
-        keySet.forEach(item -> {
-            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
-            if (dim != null) {
-                Dimension tmp = DeepcopyUtils.deepCopy(dim);
-                tmp.getLevels().clear();
-                dim.getLevels().values().forEach(level -> {
-                    tmp.getLevels().put(level.getName(), level);
-                });
-                cube.getDimensions().put(tmp.getName(), tmp);
-            }
-        });
-    }
+//    /**
+//     * 
+//     * @param cube
+//     * @param keySet
+//     * @param defineCube
+//     */
+//    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
+//        if (keySet == null || keySet.isEmpty()) {
+//            return;
+//        }
+//        
+//        keySet.forEach(item -> {
+//            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
+//            if (dim != null) {
+//                Dimension tmp = DeepcopyUtils.deepCopy(dim);
+//                tmp.getLevels().clear();
+//                dim.getLevels().values().forEach(level -> {
+//                    tmp.getLevels().put(level.getName(), level);
+//                });
+//                cube.getDimensions().put(tmp.getName(), tmp);
+//            }
+//        });
+//    }
 
     /**
      * 
@@ -223,17 +227,25 @@ public class QueryUtils {
                         }
                         if (drillValue != null && tmpValue.equals(drillValue)) {
                             data.setExpand(true);
-                        } else if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                        } else if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                        		&& queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
                         }
+                        datas.add(data);
+                    } 
+                    if (values.isEmpty() && queryAction.isChartQuery()) {
+                    		QueryData data = new QueryData(rootUniqueName);
+                        data.setExpand(true);
+                        data.setShow(false);
                         datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 } else {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
-                    if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                    if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                    		&& queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);
@@ -402,7 +414,9 @@ public class QueryUtils {
         if (filterDims != null && filterDims.get(area.getCubeId()) != null) {
         		List<Dimension> dims = filterDims.get(area.getCubeId());
         		for(Dimension dim : dims) {
-        			dimensions.put(dim.getName(), dim);
+        			if (dim != null) {
+        				dimensions.put(dim.getName(), dim);
+        			}
         		}
         }
         cube.setDimensions(dimensions);
@@ -455,6 +469,10 @@ public class QueryUtils {
 						dims.add(cube.getDimensions().get(key.getId()));
 					});
 					rs.put(area.getCubeId(), dims);
+				} else {
+					area.listAllItems().values().forEach(key -> {
+						rs.get(area.getCubeId()).add(cube.getDimensions().get(key.getId()));
+					});
 				}
 	    		} 
 		}
@@ -497,6 +515,71 @@ public class QueryUtils {
 		});
 		newCube.setDimensions(dimensions);
 		return newCube;
+	}
+
+	/**
+	 * decorate chart with extend area
+	 * @param chart
+	 * @param area
+	 */
+	public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
+		if (area.getType() == ExtendAreaType.CHART || area.getType() == ExtendAreaType.TABLE) {
+			String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
+				return getOlapElementName(area, schema, item);
+			}).filter(x -> x != null).toArray(String[] :: new);
+			chart.setAllDims(allDims);
+			String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
+				return getOlapElementName(area, schema, item);
+			}).filter(x -> x != null).toArray(String[] :: new);
+			chart.setAllMeasures(allMeasures);
+			
+			List<String> tmp = getOlapElementNames(
+					area.getLogicModel().getColumns(), area.getCubeId(), schema);
+			if (tmp.size() > 0) {
+				chart.setDefaultMeasures(tmp.toArray(new String[0]));
+			}
+			List<String>  defaultDims = getOlapElementNames(
+					area.getLogicModel().getRows(), area.getCubeId(), schema);
+			if (defaultDims.size() > 0) {
+				chart.setDefaultDims(defaultDims.toArray(new String[0]));
+			}
+		}
+	}
+
+	/**
+	 * @param area
+	 * @param schema
+	 * @return
+	 */
+	private static List<String> getOlapElementNames(Item[] items, String cubeId, Schema schema) {
+		List<String> tmp = Lists.newArrayList();
+		if (items == null || items.length == 0) {
+			return tmp;
+		}
+		for (Item item : items) {
+			OlapElement olapElement = 
+					ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, item.getOlapElementId());
+			tmp.add(olapElement.getCaption());
+		}
+		return tmp;
+	}
+
+	/**
+	 * 
+	 * @param area
+	 * @param schema
+	 * @param item
+	 * @return String
+	 * 
+	 */
+	private static String getOlapElementName(ExtendArea area, Schema schema,
+			Item item) {
+		OlapElement olapElement = 
+				ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
+		if (olapElement != null) {
+			return olapElement.getCaption();
+		}
+		return null;
 	}
     
 

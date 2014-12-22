@@ -105,4 +105,25 @@ public interface ReportDesignModelService {
      */
 	void updateAreaWithDataFormat(ExtendArea area, String dataFormat);
 
+	/**
+	 * 
+	 * @param area
+	 * @param toolTips
+	 */
+	void updateAreaWithToolTips(ExtendArea area, String toolTips);
+
+	/**
+	 * 
+	 * @param area
+	 * @param topSetting
+	 */
+	void updateAreaWithTopSetting(ExtendArea area, String topSetting);
+
+	/**
+	 * 
+	 * @param area
+	 * @param otherSetting
+	 */
+	void updateAreaWithOtherSetting(ExtendArea area, String otherSetting);
+
 }

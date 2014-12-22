@@ -20,6 +20,8 @@ $namespace('di.shared.ui');
 
     var UTIL = di.helper.Util;
     var URL = di.config.URL;
+    var utilString = xutil.string;
+    var utilUrl = xutil.url;
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
     var assign = xutil.object.assign;
@@ -429,10 +431,16 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_TABLE_CLASS.$handleDownload = function (wrap) {
+        // 先把url处理成字符串，获取到reportId
         var commonParamGetter = this.$di('getCommonParamGetter');
-
-        var url = URL('OLAP_TABLE_DOWNLOAD') 
-            + '?' + commonParamGetter();
+        var urlParam = commonParamGetter({
+            componentId : this.$di('getId').split('.')[1]
+        });
+        // 再把url转回成对象
+        var paramObj = utilUrl.parseParam(urlParam);
+        // 再转成url字符串
+        var url = URL('OLAP_TABLE_DOWNLOAD');
+        url = utilString.template(url, paramObj);
         download(url, null, true);
 
         // 对于下载，不进行reportTemplateId控制，直接打开

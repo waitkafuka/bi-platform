@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.report.query.chart;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -31,16 +32,65 @@ public class DIReportChart implements Serializable {
      */
     private static final long serialVersionUID = 3417297142845383674L;
     
+    /**
+     * 
+     */
     private String title;
+    
+    /**
+     * 
+     */
     private String subTitle;
     
+    /**
+     * 
+     */
     private String xAxisType; // catagory: 'asdf', datatime 2012-12-12, month
-                              // 2012-12 ， quarter: 2012-Q1
+    
+    /**
+     * 
+     */
     private String[] xAxisCategories;
     
+    /**
+     * 
+     */
     private List<YAxis> yAxises;
     
+    /**
+     * 
+     */
     private List<SeriesDataUnit> seriesData;
+    
+    /**
+     * 
+     */
+    private String[] allMeasures;
+    
+    /**
+     * 
+     */
+    private String[] defaultMeasures;
+    
+    /**
+     * 
+     */
+    private String[] allDims;
+    
+    /**
+     * 
+     */
+    private String[] defaultDims;
+    
+    /**
+     * 分析指标中的最大值
+     */
+    private BigDecimal maxValue = BigDecimal.valueOf(10000000000D);
+    
+    /**
+     * 分析指标中的最小值
+     */
+    private BigDecimal minValue = BigDecimal.ZERO;
     
     public String getTitle() {
         return title;
@@ -89,4 +139,90 @@ public class DIReportChart implements Serializable {
     public void setyAxises(List<YAxis> yAxises) {
         this.yAxises = yAxises;
     }
+
+	/**
+	 * @return the allMeasures
+	 */
+	public String[] getAllMeasures() {
+		return allMeasures;
+	}
+
+	/**
+	 * @param allMeasures the allMeasures to set
+	 */
+	public void setAllMeasures(String[] allMeasures) {
+		this.allMeasures = allMeasures;
+	}
+
+	/**
+	 * @return the defaultMeasuers
+	 */
+	public String[] getDefaultMeasures() {
+		return defaultMeasures;
+	}
+
+	/**
+	 * @param defaultMeasuers the defaultMeasuers to set
+	 */
+	public void setDefaultMeasures(String[] defaultMeasuers) {
+		this.defaultMeasures = defaultMeasuers;
+	}
+
+	/**
+	 * @return the allDims
+	 */
+	public String[] getAllDims() {
+		return allDims;
+	}
+
+	/**
+	 * @param allDims the allDims to set
+	 */
+	public void setAllDims(String[] allDims) {
+		this.allDims = allDims;
+	}
+
+	/**
+	 * @return the defaultDims
+	 */
+	public String[] getDefaultDims() {
+		return defaultDims;
+	}
+
+	/**
+	 * @param defaultDims the defaultDims to set
+	 */
+	public void setDefaultDims(String[] defaultDims) {
+		this.defaultDims = defaultDims;
+	}
+
+	/**
+	 * @return the maxValue
+	 */
+	public BigDecimal getMaxValue() {
+		return maxValue;
+	}
+
+	/**
+	 * @param maxValue the maxValue to set
+	 */
+	public void setMaxValue(BigDecimal maxValue) {
+		this.maxValue = maxValue;
+	}
+
+	/**
+	 * @return the minValue
+	 */
+	public BigDecimal getMinValue() {
+		return minValue;
+	}
+
+	/**
+	 * @param minValue the minValue to set
+	 */
+	public void setMinValue(BigDecimal minValue) {
+		this.minValue = minValue;
+	}
+    
+    
 }

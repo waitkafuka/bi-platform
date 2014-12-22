@@ -150,13 +150,15 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 		if (area instanceof LiteOlapExtendArea) {
                 			((LiteOlapExtendArea) area).addCandDim(item);
                 		} else {
-                			 area.addSelectionDimItem(item);
+                		    item.setPositionType(PositionType.CAND_DIM);
+                			area.addSelectionDimItem(item);
                 		}
                 } else if (position == PositionType.CAND_IND) {
                     if (area instanceof LiteOlapExtendArea) {
                     		((LiteOlapExtendArea) area).addCandInd(item);
 	            		} else {
-	            			 area.addSelectionMeasureItem(item);
+	            			item.setPositionType(PositionType.CAND_IND);
+	            			area.addSelectionMeasureItem(item);
 	            		}
                 }
             } else {
@@ -235,6 +237,7 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 break;
             case CAND_DIM:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
+                		item.setPositionType(PositionType.CAND_DIM);
                 		area.addSelectionDimItem(item);
                 } else {
                 		((LiteOlapExtendArea) area).addCandDim(item);
@@ -242,6 +245,7 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 break;
             case CAND_IND:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
+                		item.setPositionType(PositionType.CAND_IND);
                 		area.addSelectionMeasureItem(item);
                 } else {
                 		((LiteOlapExtendArea) area).addCandInd(item);

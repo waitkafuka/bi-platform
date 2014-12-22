@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,12 +46,14 @@ import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
@@ -407,6 +410,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             		if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
             				|| area.getType() == ExtendAreaType.SELECTION_AREA 
             				|| area.getType() == ExtendAreaType.LITEOLAP_CHART
+            				|| area.getType() == ExtendAreaType.SELECT
+            				|| area.getType() == ExtendAreaType.MULTISELECT
+            				|| area.getType() == ExtendAreaType.TEXT
             				|| QueryUtils.isFilterArea(area.getType())) {
             			continue;
             		}  
@@ -448,6 +454,37 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("数据格式必须为Json格式， dataFormat = " + dataFormat);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
+		logger.info("[INFO] update tooltips define with : " + toolTips);
+		FormatModel model = area.getFormatModel();
+		model.getToolTips().putAll(convertStr2Map(toolTips));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithTopSetting(ExtendArea area, String topSetting) {
+		logger.info("[INFO] receive user top N setting define : " + topSetting);
+		MeasureTopSetting setting = GsonUtils.fromJson(topSetting, MeasureTopSetting.class);
+		setting.setAreaId(area.getId());
+		area.getLogicModel().setTopSetting(setting);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithOtherSetting(ExtendArea area, String otherSetting) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> setting = GsonUtils.fromJson(otherSetting, HashMap.class);
+		area.setOtherSetting(setting);
 	}
     
 }

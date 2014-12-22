@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -40,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
@@ -160,12 +162,12 @@ public class DirectorImpl implements Director {
      */
     private Cube modifyCubeWithModel(CubeBuilder builder, Schema oriSchema, StarModel starModel) {
         MiniCube oriCube = (MiniCube) oriSchema.getCubes().get(starModel.getCubeId());
-        StarModelBuilder modelBuilder = new StarModelBuilder();
-        StarModel oriModel = modelBuilder.buildModel((MiniCube) oriCube);
+//        StarModelBuilder modelBuilder = new StarModelBuilder();
+//        StarModel oriModel = modelBuilder.buildModel((MiniCube) oriCube);
         // if true the star model not changed
-        if (oriModel.equals(starModel)) {
-            return oriCube;
-        }
+//        if (oriModel.equals(starModel)) {
+//            return oriCube;
+//        }
         MiniCube cube = new MiniCube();
         cube.setCaption(oriCube.getCaption());
         cube.setId(oriCube.getId());
@@ -188,13 +190,36 @@ public class DirectorImpl implements Director {
         }
         dims = addOrReplaceDims(oriDims, newDimensions);
 
-        dims = modifyDimGroup(dims, oriDims);
+        dims = modifyDimGroup(dims, DeepcopyUtils.deepCopy(oriDims));
+        resetMeasures(dims, oriCube.getDimensions(), cube);
         cube.setDimensions(dims);
-        
         return cube;
     }
 
     /**
+     * 修正指标定义，将原来已经转换为维度的指标替换掉
+     * @param dims
+     * @param oriDims 
+     * @param cube
+     */
+    private void resetMeasures(Map<String, Dimension> dims, Map<String, Dimension> oriDims, MiniCube cube) {
+		Iterator<String> it = cube.getMeasures().keySet().iterator();
+		final Map<String, Dimension> tmp = Maps.newHashMap();
+		oriDims.values().forEach(dim -> {
+			if (dim.getTableName().equals(cube.getSource())) {
+				tmp.put(dim.getPrimaryKey(), dim);
+			}
+		});
+		while (it.hasNext()) {
+			Measure m = cube.getMeasures().get(it.next());
+			if (tmp.containsKey(m.getName())) {
+				Dimension dim = tmp.get(m.getName());
+				dims.put(dim.getId(), dim);
+			}
+		}
+	}
+
+	/**
      * 
      * modify {@link Dimension} group define
      * @param dims -- the newest dimensions which update through star model
@@ -254,13 +279,17 @@ public class DirectorImpl implements Director {
      * 
      */
     private Map<String, Dimension> addOrReplaceDims(Map<String, Dimension> oriDims, List<Dimension> buildDims) {
-        
-        Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
+	    	Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
+//        if (oriDims.isEmpty()) {
+//    		buildDims.forEach(dim -> {
+//    			oriDims.put(dim.getId(), dim);
+//    		});
+//        		return dims;
+//        }
         final Map<String, Dimension> dimIdents = new LinkedHashMap<String, Dimension>();
         oriDims.values().forEach(dim -> {
             dimIdents.put(buildDimIdent(dim), dim);
         });
-        
         buildDims.forEach(dim -> {
             String dimIdent = buildDimIdent(dim);
             if (dimIdents.containsKey(dimIdent)) {
@@ -281,11 +310,9 @@ public class DirectorImpl implements Director {
      * 
      */
     private String buildDimIdent(Dimension dim) {
-        String ident = StringUtils.substringAfter(dim.getName(), dim.getTableName());
-        if (!StringUtils.isBlank(dim.getFacttableColumn())) {
-            ident = ident + dim.getFacttableColumn();
-        }
-        return ident;
+        String ident = dim.getTableName();
+        MiniCubeLevel level = (MiniCubeLevel) dim.getLevels().values().toArray(new Level[0])[0];
+        return ident + "_" + level.getSource();
     }
 
     /**
@@ -313,7 +340,8 @@ public class DirectorImpl implements Director {
         // remove all the measures which already convert to dimension
         oriMeasures.values().stream()
                 .filter(oriMeasure -> { 
-                    return !refCol.contains(oriMeasure.getDefine()) && !StringUtils.isEmpty(oriMeasure.getName());
+                    return !refCol.contains(oriMeasure.getDefine())
+                    		&& !StringUtils.isEmpty(oriMeasure.getName());
                 }).map(oriMeasure -> {
                     return oriMeasure.getName() + "&&" + oriMeasure.getId();
                 }).distinct().forEach(str -> {

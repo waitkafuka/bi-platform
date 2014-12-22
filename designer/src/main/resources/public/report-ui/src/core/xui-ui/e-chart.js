@@ -1,5 +1,5 @@
 /**
- * xui.ui.HChart  
+ * xui.ui.HChart
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
  * @file:    基于highcharts的js图
@@ -13,6 +13,7 @@
     var removeClass = xutil.dom.removeClass;
     var q = xutil.dom.q;
     var domChildren = xutil.dom.children;
+    var getPreviousSibling = xutil.dom.getPreviousSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
 //    var extend = xutil.object.extend;
@@ -34,9 +35,9 @@
                 var type = this._sType;
                 // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                    '<div class="' + type + '-header">',
+                        '<div class="' + type + '-header">',
                     '</div>',
-                    '<div class="' + type + '-content"></div>'
+                        '<div class="' + type + '-content"></div>'
                 ].join('');
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
@@ -88,7 +89,7 @@
          *      }
          *  ];
          */
-        this._aYAxis = dataWrap.yAxis || [];   
+        this._aYAxis = dataWrap.yAxis || [];
         /**
          * 系列数据
          * 例如：
@@ -132,9 +133,129 @@
          * 数据为空时的html
          */
         this._sEmptyHTML = dataWrap.emptyHTML || '数据为空';
-             
+
+        this._allMeasures = dataWrap.allMeasures;
+        this._defaultMeasures = dataWrap.defaultMeasures;
+        this._allDims = dataWrap.allDims;
+        this._defaultDims = dataWrap.defaultDims;
+        this._mapMinValue = dataWrap.mapMinValue;
+        this._mapMaxValue = dataWrap.mapMaxValue;
         !isSilent && this.render();
     };
+
+    //------------------------------------------
+    // 图形备选区域模块
+    //------------------------------------------
+
+    /**
+     * 生成指标切换按钮
+     *
+     * @protected
+     */
+    UI_E_CHART_CLASS.$renderCheckBoxs = function () {
+        var me = this;
+        var allMeasures = me._allMeasures;
+        var defaultMeasures = me._defaultMeasures;
+        var measureHtml = [];
+
+        // 渲染图形中备选区模块
+        if (allMeasures.length > 0) {
+            if (this._chartType === 'pie') {
+                // 多选
+                for (var i = 0; i < allMeasures.length; i ++) {
+                    measureHtml.push(
+                        '<label>',
+                        allMeasures[i],
+                        '</label>',
+                        '<input type="radio" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                this._eCandidateBox.onclick = function (ev) {
+                    candidateClick.call(me, ev || window.event);
+                };
+            }
+            else {
+                // 多选
+                for (var i = 0; i < allMeasures.length; i ++) {
+                    measureHtml.push(
+                        '<label>',
+                        allMeasures[i],
+                        '</label>',
+                        '<input type="checkbox" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                // 绑定备选区按钮事件
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                this._eCandidateBox.onclick = function (ev) {
+                    candidateClick.call(me, ev || window.event);
+                };
+            }
+
+
+
+
+        }
+    };
+    // 备选区按钮点击事件
+    function candidateClick(ev) {
+        var resultName = '';
+        var oTarget = ev.target;
+
+        if (oTarget.tagName.toLowerCase() === 'input') {
+            resultName = getPreviousSibling(oTarget).innerHTML;
+            if (oTarget.type === 'radio') {
+                this._defaultMeasures = [resultName];
+            }
+            else {
+                // oTarget.checked = oTarget.checked ? false : true;
+                this._defaultMeasures = getCurrentCandidate(resultName, this._defaultMeasures);
+            }
+
+            //this.$disposeHeader();
+            this.$disposeChart();
+            this.$createChart(this.$initOptions());
+        }
+    }
+    // 在数组中是否存在
+    function isInArray(item, array) {
+        var flag = false;
+        for (var i = 0; i < array.length; i ++) {
+            if (item === array[i]) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+    // 获取备选区中当前显示的内容
+    function getCurrentCandidate(name, currentSelects) {
+        var isHave = false;
+        var result = [];
+
+        for (var i = 0; i < currentSelects.length; i ++) {
+            if (currentSelects[i] === name) {
+                isHave = true;
+            }
+            else {
+                result.push(currentSelects[i]);
+            }
+        }
+        // 如果本身就没有name元素，就添加进去
+        if (!isHave) {
+            result.push(name);
+        }
+        return result;
+    }
 
     /**
      * 设置数据
@@ -146,6 +267,7 @@
         var seryKind = {};
         var tempData = [];
         var xAxis = this._aXAxis;
+        var defaultMeasures = this._defaultMeasures;
 
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
@@ -160,22 +282,84 @@
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
-            if (ser.type === 'bar' || ser.type === 'pie') {
-                series.push(ser);
+            if (defaultMeasures) {
+                if (ser.type === 'bar') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        ser.yAxisIndex = 0;
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'column') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        ser.type = 'bar';
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'pie') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'line') {
+                    ser.symbol = 'none'; // 线图上的点的形状
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        tempData.push(ser);
+                    }
+                }
+                else if (ser.type === 'map') {
+                    ser.mapType = 'china';
+                    ser.roam = false;
+                    ser.itemStyle = {
+                        normal:{ label:{ show:true } },
+                        emphasis:{ label:{ show:true } }
+                    };
+                    var serData = [];
+                    for (var x = 0; x < ser.data.length; x ++) {
+                        serData.push({
+                            name: xAxis.data[x],
+                            value: ser.data[x]
+                        });
+                    }
+                    ser.data = serData;
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        series.push(ser);
+                    }
+                }
             }
-            else if (ser.type === 'line') {
-                ser.symbol = 'none'; // 线图上的点的形状
-                tempData.push(ser);
+            else {
+                if (ser.type === 'bar') {
+                    ser.yAxisIndex = 0;
+                    series.push(ser);
+                }
+                else if (ser.type === 'column') {
+                    ser.type = 'bar';
+                    series.push(ser);
+                }
+                else if (ser.type === 'pie') {
+                    series.push(ser);
+                }
+                else if (ser.type === 'line') {
+                    tempData.push(ser);
+                }
+                else if (ser.type === 'map') {
+                    ser.mapType = 'china';
+                    ser.roam = false;
+                    ser.itemStyle = {
+                        normal:{ label:{ show:true } },
+                        emphasis:{ label:{ show:true } }
+                    };
+                    var serData = [];
+                    for (var x = 0; x < ser.data.length; x ++) {
+                        serData.push({
+                            name: xAxis.data[x],
+                            value: ser.data[x]
+                        });
+                    }
+                    ser.data = serData;
+                    series.push(ser);
+                }
             }
-            else if (ser.type === 'map') {
-                ser.mapType = 'china';
-                ser.roam = false;
-                ser.itemStyle = {
-                    normal:{ label:{ show:true } },
-                    emphasis:{ label:{ show:true } }
-                };
-                series.push(ser);
-            }
+
         }
         series = series.concat(tempData);
         if (seryKind.line >= 1 && seryKind.bar >= 1) {
@@ -188,7 +372,8 @@
                 series[0].hasOwnProperty(key) && (targetSeries[0][key] = series[0][key]);
             }
             targetSeries[0].data = [];
-            for (var k = 0, kser; kser = series[0].data[k]; k ++) {
+            for (var k = 0; k < series[0].data.length; k ++) {
+                var  kser = series[0].data[k];
                 var tarData = {
                     value: kser,
                     name: xAxis.data[k]
@@ -207,7 +392,7 @@
     UI_E_CHART_CLASS.$setupXAxis = function (options) {
         var xAxis =  {
             type: 'category',
-            boundaryGap: (this._chartType === 'bar') ? true : false,
+            boundaryGap: true,
             axisLine: {
                 onZero: false
             },
@@ -288,27 +473,39 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
-        var legend = {};
+        var legend = {
+            orient: 'vertical',
+            x: 'left',
+            y: 'top'
+//            borderColor: '#ccc',
+//            borderWidth: 0.5
+        };
         var data = [];
+        var defaultMeasures = this._defaultMeasures;
 
         if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             }
-            legend.orient = 'vertical';
+
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
                 for (var i = 0; i < this._aSeries.length; i++) {
-                    data[i] = this._aSeries[i].name;
+                    if (defaultMeasures) {
+                        if (isInArray(this._aSeries[i].name, defaultMeasures)) {
+                            data.push(this._aSeries[i].name);
+                        }
+                    }
+                    else {
+                        data.push(this._aSeries[i].name);
+                    }
+
                 }
             }
         }
 
         legend.data = data;
-        legend.x = 'left';
-        legend.padding = 5;
-        legend.itemGap = 10;
         options.legend = legend;
     };
     /**
@@ -337,8 +534,9 @@
             }
             toolbox = {
                 show: true,
-                orient : 'vertical',
-                y : 'center',
+                orient : 'horizontal',
+                x: 'right',
+                y : 'top',
                 feature : {
                     magicType : {show: true, type: ['stack', 'tiled']}
                 }
@@ -366,7 +564,7 @@
             this._chartType === 'column'
             || this._chartType === 'bar'
             || this._chartType === 'line'
-        ) {
+            ) {
             dataZoom.show = false;
             var xNums = categories.data ? categories.data.length : 0;
             var enableSelectRange = false;
@@ -523,7 +721,7 @@
         if ((start === 0 || start) && end) {
             if ((xDatas[start] === this._oldMinDate)
                 && (xDatas[end] === this._oldMaxDate)
-            ) {
+                ) {
                 return;
             }
             this._zoomStart = start;
@@ -586,12 +784,13 @@
         this.$disposeChart();
         // 如果没有数据，图形显示空
         if (!this._aSeries || this._aSeries.length == 0) {
-            this._eContent.innerHTML = '' 
-                + '<div class="' + this._sType + '-empty">' 
+            this._eContent.innerHTML = ''
+                + '<div class="' + this._sType + '-empty">'
                 +     this._sEmptyHTML
                 + '</div>';
             return;
         }
+        this.$preload();
         this.$createChart(this.$initOptions());
     };
 
@@ -631,11 +830,6 @@
             title: { text: '' }
         };
 
-        // 特殊判断：是否有饼图
-       // this._chartType = 'column';
-        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
-            this._chartType = ser.type;
-        }
         this.$setupSeries(options);
         this.$setupTooptip(options);
         if (
@@ -643,14 +837,14 @@
             || this._chartType === 'bar'
             || this._chartType === 'line'
             || this._chartType === 'pie'
-        ) {
+            ) {
             this.$setupDataRoom(options);
             this.$setupToolBox(options);
             this.$setupYAxis(options);
             this.$setupLegend(options);
             this.$setupXAxis(options);
         }
-        else if ( this._chartType === 'map') {
+        else if (this._chartType === 'map') {
             options.roamController = {
                 show: true,
                 x: 'right',
@@ -660,17 +854,28 @@
             };
             // TODO:需要后端返回最大最小值
             options.dataRange = {
-                min: 0,
-                max: 2500,
+                min: this._mapMinValue,
+                max: this._mapMaxValue,
                 x: 'left',
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable : true
             };
         }
+        if (this._chartType === 'pie') {
+            options.calculable = true;
+        }
         return options;
     };
-     /**
+    UI_E_CHART_CLASS.$preload = function () {
+        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
+            this._chartType = ser.type;
+        }
+        if (this._allMeasures) {
+            this.$renderCheckBoxs();
+        }
+    };
+    /**
      * 销毁图表
      *
      * @private
@@ -683,6 +888,13 @@
             this._oChart = null;
         }
         this._eContent && (this._eContent.innerHTML = '');
+    };
+    /**
+     * 销毁图表
+     *
+     * @private
+     */
+    UI_E_CHART_CLASS.$disposeHeader = function () {
         this._eHeader && (this._eHeader.innerHTML = '');
     };
     /**

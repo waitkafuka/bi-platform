@@ -279,6 +279,13 @@ $namespace('di.shared.model');
                     ser.yAxisIndex = yNameMap[ser.yAxisName];
                 }
             }
+            chartData.allMeasures = rawData.allMeasures;
+            chartData.defaultMeasures = rawData.defaultMeasures;
+            chartData.allDims = rawData.allDims;
+            chartData.defaultDims = rawData.defaultDims;
+            // 在地图设置颜色值范围时，需要值的最大值和最小值
+            chartData.mapMaxValue = rawData.maxValue;
+            chartData.mapMinValue = rawData.minValue;
             this._oChartData = chartData;                    
         }
         catch (e) {

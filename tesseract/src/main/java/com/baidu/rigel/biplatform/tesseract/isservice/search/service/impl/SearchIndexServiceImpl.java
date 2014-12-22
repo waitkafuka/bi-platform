@@ -47,6 +47,7 @@ import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchServi
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
@@ -274,6 +275,17 @@ public class SearchIndexServiceImpl implements SearchService {
                 } else {
                     result = true;
                 }
+            }
+            
+            if(query.getWhere()!=null && query.getWhere().getAndList()!=null){
+            	for(Expression ex:query.getWhere().getAndList()){
+            		if(!idxSelect.contains(ex.getProperties())){
+            			result=false;
+            			break;
+            		}else{
+            			result=true;
+            		}
+            	}
             }
             
         }
