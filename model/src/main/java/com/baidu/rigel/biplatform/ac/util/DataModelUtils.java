@@ -522,10 +522,11 @@ public class DataModelUtils {
 		DataModel model = new DataModel();
 		model.setColumnHeadFields(oriModel.getColumnHeadFields());
 		model.setRecordSize(getRecordSize(oriModel.getColumnBaseData()));
-		if (model.getRecordSize() <= 500) {
+		if (model.getRecordSize() <= recordSize) {
 			model.setColumnBaseData(oriModel.getColumnBaseData());
 			model.setColumnHeadFields(oriModel.getColumnHeadFields());
 			model.setOperateIndex(oriModel.getOperateIndex());
+			model.setRowHeadFields(oriModel.getRowHeadFields());
 			return model;
 		}
 		List<List<BigDecimal>> datas = Lists.newArrayList();
@@ -538,11 +539,48 @@ public class DataModelUtils {
 		});
 		model.setColumnBaseData(datas);
 		List<HeadField> rowHeadFields = Lists.newArrayList();
-		for (int i = 0; i < recordSize; ++i) {
-			rowHeadFields.add(model.getRowHeadFields().get(i));
+		for (int i = 0; i < recordSize;) {
+			HeadField field = oriModel.getRowHeadFields().get(i);
+			final int nodeCount = field.getChildren().size() + field.getNodeList().size() + 1;
+			if (nodeCount + i < recordSize) {
+				rowHeadFields.add(field);
+				i += nodeCount;
+			} else {
+				rowHeadFields.add(getHeadFields(field, recordSize - i));
+				break;
+			}
 		}
 		model.setRowHeadFields(rowHeadFields);
-		return null;
+		return model;
+	}
+
+	/**
+	 * 从原始field中取出指定数目的HeadField，构建新的HeadField
+	 * @param field
+	 * @param count
+	 * @return HeadField
+	 */
+	private static HeadField getHeadFields(HeadField field, int count) {
+		if (count == 1) {
+			field.setChildren(Lists.newArrayList());
+			field.setNodeList(Lists.newArrayList());
+		}else if (1 + field.getNodeList().size() >= count) {
+			field.setChildren(Lists.newArrayList());
+			List<HeadField> headField = Lists.newArrayList();
+			for (int i = 0; i < count - 1; ++i) {
+				headField.add(field.getNodeList().get(i));
+			}
+			field.setNodeList(headField);
+		} else {
+			List<HeadField> headField = Lists.newArrayList();
+			for (int i = 0; i < count - field.getNodeList().size(); ++i) {
+				headField.add(field.getChildren().get(i));
+			}
+			field.setChildren(headField);
+		}
+		
+		field.setNodeUniqueName(null);
+		return field;
 	}
 
 	/**
