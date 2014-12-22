@@ -23,6 +23,11 @@ package com.baidu.rigel.biplatform.ma.report.model;
 public enum TopType {
 	
 	/**
+	 * 不排序
+	 */
+	NONE,
+	
+	/**
 	 * 降序
 	 */
 	DESC,

@@ -360,7 +360,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
 	        		if (tmp != null && tmp.length > 0) {
 	        			orderDesc = new QueryAction.MeasureOrderDesc(
 	        					tmp[0].getName(), 
-	        					"DESC", 500);
+	        					"NONE", 500);
 	        		}
 	        } else {
 	        		orderDesc = new QueryAction.MeasureOrderDesc(

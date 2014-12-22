@@ -43,11 +43,17 @@ public class SortRecord implements Serializable {
     private String sortColumnUniquename;
     
     /**
+     * 查询结果最大条数，限制排序后的结果集大小，如超过限制大小，直接截取recordSize条纪录
+     */
+    private int recordSize;
+    
+    /**
      * 指标排序
      * @param sortType
      * @param sortColumnUniqueName
      */
-    public SortRecord(SortType sortType, String sortColumnUniqueName) {
+    public SortRecord(SortType sortType, String sortColumnUniqueName, int recordSize) {
+    		this.recordSize = recordSize;
     		this.sortType = sortType;
     		this.sortColumnUniquename = sortColumnUniqueName;
     }
@@ -111,5 +117,19 @@ public class SortRecord implements Serializable {
         return "SortRecord [sortType=" + sortType + ", sortColumnUniquename="
             + sortColumnUniquename + "]";
     }
+
+	/**
+	 * @return the recordSize
+	 */
+	public int getRecordSize() {
+		return recordSize;
+	}
+
+	/**
+	 * @param recordSize the recordSize to set
+	 */
+	public void setRecordSize(int recordSize) {
+		this.recordSize = recordSize;
+	}
     
 }

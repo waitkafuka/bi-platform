@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.data.HeadFieldComparator;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
+import com.google.common.collect.Lists;
 
 /**
  * DataModel操作工具类
@@ -510,5 +511,53 @@ public class DataModelUtils {
             }
         }
     }
+
+    /**
+     * 按照指定长度截取查询结果
+     * @param oriModel 原始结果
+     * @param recordSize 截取长度
+     * @return DataModel 新数据模型
+     */
+	public static DataModel truncModel(DataModel oriModel, int recordSize) {
+		DataModel model = new DataModel();
+		model.setColumnHeadFields(oriModel.getColumnHeadFields());
+		model.setRecordSize(getRecordSize(oriModel.getColumnBaseData()));
+		if (model.getRecordSize() <= 500) {
+			model.setColumnBaseData(oriModel.getColumnBaseData());
+			model.setColumnHeadFields(oriModel.getColumnHeadFields());
+			model.setOperateIndex(oriModel.getOperateIndex());
+			return model;
+		}
+		List<List<BigDecimal>> datas = Lists.newArrayList();
+		oriModel.getColumnBaseData().forEach(list -> {
+			List<BigDecimal> data = Lists.newArrayList();
+			for (int i = 0; i < recordSize; ++i) {
+				data.add(list.get(i));
+			}
+			datas.add(data);
+		});
+		model.setColumnBaseData(datas);
+		List<HeadField> rowHeadFields = Lists.newArrayList();
+		for (int i = 0; i < recordSize; ++i) {
+			rowHeadFields.add(model.getRowHeadFields().get(i));
+		}
+		model.setRowHeadFields(rowHeadFields);
+		return null;
+	}
+
+	/**
+	 * 获取结果集原始纪录数
+	 * @param columnBaseData 基于列的结果集数据
+	 * @return 纪录数
+	 */
+	private static int getRecordSize(List<List<BigDecimal>> columnBaseData) {
+		if (columnBaseData == null || columnBaseData.size() == 0) {
+			return 0;
+		}
+		if (columnBaseData.get(0) == null) {
+			return 0;
+		}
+		return columnBaseData.get(0).size();
+	}
 
 }

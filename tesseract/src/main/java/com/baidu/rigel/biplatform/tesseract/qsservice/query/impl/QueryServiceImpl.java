@@ -218,7 +218,8 @@ public class QueryServiceImpl implements QueryService {
     		if (sortRecord != null) {
     			DataModelUtils.sortDataModelBySort(result, sortRecord);
     		}
-		return null;
+    		int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
+		return DataModelUtils.truncModel(result, recordSize);
 	}
 
 	private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
