@@ -231,7 +231,7 @@ define([
                             'width': 'auto',
                             'height': 'auto'
                         }).find('.j-fold').html('－');
-                        if ($realComp.attr('data-component-type') == 'TEXT') {
+                        if ($realComp.attr('data-component-type') === 'TEXT') {
                             that.showReport(true);
                         }
                     }

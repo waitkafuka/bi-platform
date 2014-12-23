@@ -257,7 +257,12 @@ define([
                         // 如果是vui（条件组件）要删除form中的配置
                         if (
                             arr[i].clzType == 'VUI'
-                            && (arr[i].clzKey == 'X_CALENDAR' || arr[i].clzKey == 'ECUI_SELECT')
+                            &&
+                            (
+                                arr[i].clzKey == 'X_CALENDAR'
+                                || arr[i].clzKey == 'ECUI_SELECT'
+                                || arr[i].clzKey == 'ECUI_MULTI_SELECT'
+                            )
                         ) {
                             that._deleteCompFromForm(arr[i].id);
                             isDeleteVUI = true;
