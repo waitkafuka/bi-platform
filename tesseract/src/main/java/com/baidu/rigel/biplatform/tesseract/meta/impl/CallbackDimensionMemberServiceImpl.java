@@ -37,7 +37,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
-import com.baidu.rigel.biplatform.tesseract.model.PosTreeNode;
+import com.baidu.rigel.biplatform.tesseract.model.CallBackTreeNode;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -58,14 +58,14 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
     /**
      * treeCallbackService TODO 这个后续修改，会变成从工厂获取
      */
-    private static DIPosTreeCallbackServiceImpl treeCallbackService = new DIPosTreeCallbackServiceImpl();
+    private static CallbackServiceImpl treeCallbackService = new CallbackServiceImpl();
 
     @Override
     public List<MiniCubeMember> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, Member parentMember,
             Map<String, String> params) throws MiniCubeQueryException, MetaException {
         MetaDataService.checkCube(cube);
         MetaDataService.checkDataSourceInfo(dataSourceInfo);
-        List<PosTreeNode> posTree = fetchCallBack(level, params);
+        List<CallBackTreeNode> posTree = fetchCallBack(level, params);
         List<MiniCubeMember> result = createMembersByPosTreeNode(posTree, level, null);
         if (parentMember == null) {
             return result;
@@ -81,11 +81,11 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @param parent
      * @return
      */
-    private List<MiniCubeMember> createMembersByPosTreeNode(List<PosTreeNode> posTree, Level level,
+    private List<MiniCubeMember> createMembersByPosTreeNode(List<CallBackTreeNode> posTree, Level level,
             MiniCubeMember parent) {
         List<MiniCubeMember> members = new ArrayList<MiniCubeMember>();
         if (CollectionUtils.isNotEmpty(posTree)) {
-            for (PosTreeNode node : posTree) {
+            for (CallBackTreeNode node : posTree) {
                 MiniCubeMember member = createMemberByPosTreeNode(node, level, parent);
                 member.setChildren(createMembersByPosTreeNode(node.getChildren(), level, member));
                 members.add(member);
@@ -102,7 +102,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @return Callback返回结果
      * @throws IOException Http请求异常
      */
-    private List<PosTreeNode> fetchCallBack(Level level, Map<String, String> params) throws MiniCubeQueryException {
+    private List<CallBackTreeNode> fetchCallBack(Level level, Map<String, String> params) throws MiniCubeQueryException {
         if (level == null || !level.getType().equals(LevelType.CALL_BACK)) {
             throw new IllegalArgumentException("level type must be call back:" + level);
         }
@@ -116,7 +116,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         }
 
         // 默认设置只取本身和本身的孩子节点
-        List<PosTreeNode> result;
+        List<CallBackTreeNode> result;
         try {
             result = treeCallbackService.fetchCallback(callbackLevel.getCallbackUrl(), callbackParams);
             return result;
@@ -131,7 +131,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
             MiniCubeMember parent, Map<String, String> params) throws MiniCubeQueryException, MetaException {
         MetaDataService.checkCube(cube);
         MetaDataService.checkDataSourceInfo(dataSourceInfo);
-        List<PosTreeNode> posTree = fetchCallBack(level, params);
+        List<CallBackTreeNode> posTree = fetchCallBack(level, params);
         if (posTree.size() != 1) {
             throw new MiniCubeQueryException("pos tree return over 1 node:" + posTree);
         }
@@ -144,12 +144,12 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @param level
      * @return
      */
-    private MiniCubeMember createMemberByPosTreeNode(PosTreeNode node, Level level, Member parentMember) {
-        MiniCubeMember result = new MiniCubeMember(node.getPosId());
+    private MiniCubeMember createMemberByPosTreeNode(CallBackTreeNode node, Level level, Member parentMember) {
+        MiniCubeMember result = new MiniCubeMember(node.getId());
         result.setLevel(level);
         result.setCaption(node.getName());
-        if (CollectionUtils.isNotEmpty(node.getCsPosIds())) {
-            result.setQueryNodes(Sets.newHashSet(node.getCsPosIds()));
+        if (CollectionUtils.isNotEmpty(node.getCsIds())) {
+            result.setQueryNodes(Sets.newHashSet(node.getCsIds()));
         }
         // 先生成一下uniqueName，避免后续生成带上了父节点的UniqueName
         result.generateUniqueName(null);

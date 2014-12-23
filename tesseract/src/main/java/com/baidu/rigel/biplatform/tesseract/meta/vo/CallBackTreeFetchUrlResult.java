@@ -17,7 +17,7 @@ package com.baidu.rigel.biplatform.tesseract.meta.vo;
 
 import java.util.List;
 
-import com.baidu.rigel.biplatform.tesseract.model.PosTreeNode;
+import com.baidu.rigel.biplatform.tesseract.model.CallBackTreeNode;
 
 /**
  * 新的岗位树结果
@@ -25,7 +25,7 @@ import com.baidu.rigel.biplatform.tesseract.model.PosTreeNode;
  * @author xiaoming.chen
  *
  */
-public class PosTreeFetchUrlResult extends FetchUrlResult {
+public class CallBackTreeFetchUrlResult extends FetchUrlResult {
 
     /**
      * serialVersionUID
@@ -34,14 +34,14 @@ public class PosTreeFetchUrlResult extends FetchUrlResult {
     /**
      * 岗位数据
      */
-    private List<PosTreeNode> data;
+    private List<CallBackTreeNode> data;
 
     /**
      * get the data
      * 
      * @return the data
      */
-    public List<PosTreeNode> getData() {
+    public List<CallBackTreeNode> getData() {
         return data;
     }
 
@@ -50,7 +50,7 @@ public class PosTreeFetchUrlResult extends FetchUrlResult {
      * 
      * @param data the data to set
      */
-    public void setData(List<PosTreeNode> data) {
+    public void setData(List<CallBackTreeNode> data) {
         this.data = data;
     }
 }
