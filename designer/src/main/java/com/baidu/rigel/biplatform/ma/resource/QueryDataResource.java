@@ -1258,7 +1258,7 @@ public class QueryDataResource extends BaseResource {
             String caption = "第" + i.getAndAdd(1) + "级";
             viewObject.setCaption(caption);
             String name = "[" + newDim.getName() + "]";
-            name += ".[All_" + newDim.getName() + "]";
+            name += ".[All_" + newDim.getName() + "s]";
             viewObject.setName(name);
             viewObject.setNeedLimit(false);
             viewObject.setSelected(i.get() == 2);

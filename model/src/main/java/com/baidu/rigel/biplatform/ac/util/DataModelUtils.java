@@ -518,10 +518,11 @@ public class DataModelUtils {
      * @param recordSize 截取长度
      * @return DataModel 新数据模型
      */
-	public static DataModel truncModel(DataModel oriModel, int recordSize) {
+	public static DataModel truncModel(DataModel oriModel,  int recordSize) {
 		DataModel model = new DataModel();
 		model.setColumnHeadFields(oriModel.getColumnHeadFields());
 		model.setRecordSize(getRecordSize(oriModel.getColumnBaseData()));
+		// 纪录数小于或等于指定行数
 		if (model.getRecordSize() <= recordSize) {
 			model.setColumnBaseData(oriModel.getColumnBaseData());
 			model.setColumnHeadFields(oriModel.getColumnHeadFields());
@@ -529,25 +530,50 @@ public class DataModelUtils {
 			model.setRowHeadFields(oriModel.getRowHeadFields());
 			return model;
 		}
+		// 截取指定行数数据
+		int tmp = recordSize;
 		List<List<BigDecimal>> datas = Lists.newArrayList();
 		oriModel.getColumnBaseData().forEach(list -> {
 			List<BigDecimal> data = Lists.newArrayList();
-			for (int i = 0; i < recordSize; ++i) {
+			for (int i = 0; i < tmp; ++i) {
 				data.add(list.get(i));
 			}
 			datas.add(data);
 		});
 		model.setColumnBaseData(datas);
+		// 封装行头数据
 		List<HeadField> rowHeadFields = Lists.newArrayList();
-		for (int i = 0; i < recordSize;) {
+		for (int i = 0; i < oriModel.getRowHeadFields().size() ; ++i) {
+			// 处理第i个节点
 			HeadField field = oriModel.getRowHeadFields().get(i);
-			final int nodeCount = field.getChildren().size() + field.getNodeList().size() + 1;
-			if (nodeCount + i < recordSize) {
-				rowHeadFields.add(field);
-				i += nodeCount;
-			} else {
-				rowHeadFields.add(getHeadFields(field, recordSize - i));
-				break;
+			// 添加处理后的第一个节点到行头
+			rowHeadFields.add(field);
+			boolean hasNodeList = false;
+			// 如果当前行的NodeList不等于空，先处理NodeList
+			if (field.getNodeList() != null && field.getNodeList().size() > 0) {
+				hasNodeList = true;
+				HeadFieldDetailRecord record = truncFieldHeads(field.getNodeList(), recordSize);
+				field.setNodeList(record.headFields);
+				if (record.count >= recordSize) {
+					field.setChildren(Lists.newArrayList());
+					break;
+				} else {
+					recordSize = recordSize - record.count;
+				}
+			}
+			
+			// 处理孩子节点
+			if (field.getChildren() != null && field.getChildren().size() > 0) { // 处理孩子节点
+				if (!hasNodeList) {
+					recordSize -= 1;
+				}
+				HeadFieldDetailRecord record = truncFieldHeads(field.getChildren(), recordSize);
+				field.setChildren(record.headFields);
+				if (record.count >= recordSize) {
+					break;
+				} else {
+					recordSize = recordSize - record.count;
+				}
 			}
 		}
 		model.setRowHeadFields(rowHeadFields);
@@ -555,32 +581,48 @@ public class DataModelUtils {
 	}
 
 	/**
-	 * 从原始field中取出指定数目的HeadField，构建新的HeadField
-	 * @param field
-	 * @param count
-	 * @return HeadField
+	 * 
+	 * @param nodeList
+	 * @param recordSize
+	 * @return HeadFieldDetailRecord
 	 */
-	private static HeadField getHeadFields(HeadField field, int count) {
-		if (count == 1) {
-			field.setChildren(Lists.newArrayList());
-			field.setNodeList(Lists.newArrayList());
-		}else if (1 + field.getNodeList().size() >= count) {
-			field.setChildren(Lists.newArrayList());
-			List<HeadField> headField = Lists.newArrayList();
-			for (int i = 0; i < count - 1; ++i) {
-				headField.add(field.getNodeList().get(i));
+	private static HeadFieldDetailRecord truncFieldHeads(List<HeadField> nodeList, int recordSize) {
+		int oriRecordSize = recordSize;
+		List<HeadField> tmp = Lists.newArrayList();
+		for (int i = 0; i < nodeList.size(); ++i) {
+			if (recordSize <= 0) {
+				break;
 			}
-			field.setNodeList(headField);
-		} else {
-			List<HeadField> headField = Lists.newArrayList();
-			for (int i = 0; i < count - field.getNodeList().size(); ++i) {
-				headField.add(field.getChildren().get(i));
+			HeadField field = nodeList.get(i);
+			// 没有NodeList，只有children
+			if (field.getNodeList() == null || field.getNodeList().size() == 0) {
+				// 没有孩子节点，直接返回
+				if (field.getChildren() == null || field.getChildren().size() == 0) {
+					tmp.add(field);
+					recordSize -= 1;
+				} else { // 没有NodeList，只有children
+					HeadFieldDetailRecord record = truncFieldHeads(field.getChildren(), recordSize - 1);
+					field.setChildren(record.headFields);
+					recordSize -= record.count;
+					tmp.add(field);
+					if (recordSize <= 0) {
+						recordSize = 0;
+						break;
+					}
+				}
+			} else {
+				HeadFieldDetailRecord record = truncFieldHeads(field.getNodeList(), recordSize);
+				field.setNodeList(record.headFields);
+				recordSize -= record.count;
+				tmp.add(field);
+				if (recordSize <= 0) {
+					recordSize = 0;
+					field.setChildren(Lists.newArrayList());
+					break;
+				}
 			}
-			field.setChildren(headField);
 		}
-		
-		field.setNodeUniqueName(null);
-		return field;
+		return new HeadFieldDetailRecord(oriRecordSize - recordSize, tmp);
 	}
 
 	/**
@@ -596,6 +638,36 @@ public class DataModelUtils {
 			return 0;
 		}
 		return columnBaseData.get(0).size();
+	}
+	
+	/**
+	 * 
+	 * @author david.wang
+	 *
+	 */
+	private static class HeadFieldDetailRecord {
+		
+		/**
+		 * 
+		 */
+		public final int count;
+		
+		/**
+		 * 
+		 */
+		public final List<HeadField> headFields;
+		
+		/**
+		 * 
+		 * @param count
+		 * @param headFields
+		 */
+		public HeadFieldDetailRecord(int count, List<HeadField> headFields) {
+			super();
+			this.count = count;
+			this.headFields = headFields;
+		}
+		
 	}
 
 }

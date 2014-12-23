@@ -100,7 +100,7 @@ public class QueryContext implements Serializable {
         if (this.params == null) {
             this.params = new ConcurrentHashMap<String, Object>();
         }
-        if (StringUtils.isNotEmpty(id) && value != null && StringUtils.isNotEmpty(value.toString())) {
+        if (StringUtils.isNotEmpty(id) && value != null) {
         		this.params.put(id, value);
         }
     }

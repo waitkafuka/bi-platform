@@ -219,7 +219,7 @@ public class QueryUtils {
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
-                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "]";
+                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "s]";
                     // TODO QeuryData value如何处理
                     for (String value : values) {
                         if (!queryAction.isChartQuery() && value.equals(rootUniqueName)) {
