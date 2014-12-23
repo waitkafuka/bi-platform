@@ -47,6 +47,8 @@ import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
+import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
@@ -200,10 +202,27 @@ public class QueryServiceImpl implements QueryService {
             throw new MiniCubeQueryException(e);
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to execute query.");
+        if (result != null) {
+        		result = sortAndTrunc(result, questionModel.getSortRecord());
+        }
         return result;
     }
 
-    private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
+    /**
+     * 排序并截断结果集，默认显示500条纪录
+     * @param result
+     * @param sortRecord
+     * @return DataModel
+     */
+    private DataModel sortAndTrunc(DataModel result, SortRecord sortRecord) {
+    		if (sortRecord != null) {
+    			DataModelUtils.sortDataModelBySort(result, sortRecord);
+    		}
+    		int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
+		return DataModelUtils.truncModel(result, recordSize); 
+	}
+
+	private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
         if (context == null) {
             throw new IllegalArgumentException("querycontext is null.");
         }

@@ -24,8 +24,8 @@ import org.springframework.stereotype.Service;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.tesseract.meta.DICallBackServiceFetch;
 import com.baidu.rigel.biplatform.tesseract.meta.vo.FetchUrlResult;
-import com.baidu.rigel.biplatform.tesseract.meta.vo.PosTreeFetchUrlResult;
-import com.baidu.rigel.biplatform.tesseract.model.PosTreeNode;
+import com.baidu.rigel.biplatform.tesseract.meta.vo.CallBackTreeFetchUrlResult;
+import com.baidu.rigel.biplatform.tesseract.model.CallBackTreeNode;
 
 /**
  * 类DIPosTreeCallbackServiceImpl.java的实现描述：TODO 类实现描述
@@ -33,7 +33,7 @@ import com.baidu.rigel.biplatform.tesseract.model.PosTreeNode;
  * @author xiaoming.chen 2013-12-19 下午10:11:56
  */
 @Service
-public class DIPosTreeCallbackServiceImpl extends DICallBackServiceFetch<List<PosTreeNode>> implements Serializable {
+public class CallbackServiceImpl extends DICallBackServiceFetch<List<CallBackTreeNode>> implements Serializable {
 
     /**
      * default generate serialVersionUID
@@ -41,12 +41,12 @@ public class DIPosTreeCallbackServiceImpl extends DICallBackServiceFetch<List<Po
     private static final long serialVersionUID = -2641019846513992875L;
 
     @Override
-    public List<PosTreeNode> parseFromJson(String jsonStr) {
+    public List<CallBackTreeNode> parseFromJson(String jsonStr) {
         FetchUrlResult fetchUrlResult = AnswerCoreConstant.GSON.fromJson(jsonStr, FetchUrlResult.class);
-        List<PosTreeNode> result = null;
+        List<CallBackTreeNode> result = null;
         if (StringUtils.equals(CALLBACK_VERSION_1, fetchUrlResult.getVersion())) {
-            PosTreeFetchUrlResult posTreeFetchResult =
-                    AnswerCoreConstant.GSON.fromJson(jsonStr, PosTreeFetchUrlResult.class);
+            CallBackTreeFetchUrlResult posTreeFetchResult =
+                    AnswerCoreConstant.GSON.fromJson(jsonStr, CallBackTreeFetchUrlResult.class);
             result = posTreeFetchResult.getData();
         } else {
             // 其他版本的待定

@@ -988,11 +988,11 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
             return result;
         }
-        String dataFormat = request.getParameter("toolTips");
+        String toolTips = request.getParameter("toolTips");
         ExtendArea area = model.getExtendById(areaId);
-        reportDesignModelService.updateAreaWithToolTips(area, dataFormat);
+        reportDesignModelService.updateAreaWithToolTips(area, toolTips);
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
-        result.setData(area.getFormatModel().getDataFormat());
+        result.setData(area.getFormatModel().getToolTips());
         result.setStatusInfo(SUCCESS);
         result.setStatus(0);
         return result;

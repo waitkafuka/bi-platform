@@ -57,6 +57,11 @@ public class DataModel implements Serializable {
      * operateIndex 排序的列
      */
     private int operateIndex;
+    
+    /**
+     * 结果集原始大小
+     */
+    private int recordSize;
 
     /**
      * default generate get rowHeadFields
@@ -136,7 +141,22 @@ public class DataModel implements Serializable {
         this.operateIndex = operateIndex;
     }
 
-    /*
+    
+    /**
+	 * @return the recordSize
+	 */
+	public int getRecordSize() {
+		return recordSize;
+	}
+
+	/**
+	 * @param recordSize the recordSize to set
+	 */
+	public void setRecordSize(int recordSize) {
+		this.recordSize = recordSize;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#toString()

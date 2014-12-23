@@ -78,7 +78,7 @@ public class QueryAction implements Serializable {
      */
     private boolean chartQuery;
     
-    private MeasuerOrderDesc measureOrderDesc;
+    private MeasureOrderDesc measureOrderDesc;
     
     
     /**
@@ -222,14 +222,14 @@ public class QueryAction implements Serializable {
     /**
 	 * @return the measureOrderDesc
 	 */
-	public MeasuerOrderDesc getMeasureOrderDesc() {
+	public MeasureOrderDesc getMeasureOrderDesc() {
 		return measureOrderDesc;
 	}
 
 	/**
 	 * @param measureOrderDesc the measureOrderDesc to set
 	 */
-	public void setMeasureOrderDesc(MeasuerOrderDesc measureOrderDesc) {
+	public void setMeasureOrderDesc(MeasureOrderDesc measureOrderDesc) {
 		this.measureOrderDesc = measureOrderDesc;
 	}
 
@@ -239,7 +239,7 @@ public class QueryAction implements Serializable {
      * @author david.wang
      *
      */
-    public static class MeasuerOrderDesc implements Serializable {
+    public static class MeasureOrderDesc implements Serializable {
     	
     		/**
 		 * 
@@ -256,7 +256,7 @@ public class QueryAction implements Serializable {
     		 * @param orderType
     		 * @param recordSize
     		 */
-		public MeasuerOrderDesc(String name, String orderType, int recordSize) {
+		public MeasureOrderDesc(String name, String orderType, int recordSize) {
 			super();
 			this.name = name;
 			this.orderType = orderType;

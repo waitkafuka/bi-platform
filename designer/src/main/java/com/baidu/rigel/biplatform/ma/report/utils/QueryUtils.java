@@ -44,6 +44,8 @@ import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
@@ -56,6 +58,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -116,6 +119,12 @@ public class QueryUtils {
 //                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
+        MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
+        SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+        // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
+        String uniqueName = "{[Measures].[" +orderDesc.getName()+ "]}";
+        SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
+        questionModel.setSortRecord(sortRecord);
         return questionModel;
     }
     
@@ -210,7 +219,7 @@ public class QueryUtils {
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
-                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "]";
+                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "s]";
                     // TODO QeuryData value如何处理
                     for (String value : values) {
                         if (!queryAction.isChartQuery() && value.equals(rootUniqueName)) {
@@ -523,7 +532,7 @@ public class QueryUtils {
 	 * @param area
 	 */
 	public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
-		if (area.getType() == ExtendAreaType.CHART || area.getType() == ExtendAreaType.TABLE) {
+		if (area.getType() == ExtendAreaType.CHART) {
 			String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
 				return getOlapElementName(area, schema, item);
 			}).filter(x -> x != null).toArray(String[] :: new);
@@ -543,7 +552,18 @@ public class QueryUtils {
 			if (defaultDims.size() > 0) {
 				chart.setDefaultDims(defaultDims.toArray(new String[0]));
 			}
-		}
+		} 
+//		else if (area.getType() == ExtendAreaType.LITEOLAP) { // 表格暂时不处理
+//			if (area instanceof LiteOlapExtendArea) {
+//				LiteOlapExtendArea tmp = (LiteOlapExtendArea) area;
+//				if (tmp.getCandInds().size() > 0) {
+//					chart.setAllMeasures(getOlapElementNames(tmp.getCandInds().values().toArray(new Item[0]), 
+//							area.getCubeId(), schema).toArray(new String[0]));
+//				}
+//			}
+//			chart.setDefaultMeasures(getOlapElementNames(area.getLogicModel().getRows(), 
+//					area.getCubeId(), schema).toArray(new String[0]));
+//		}
 	}
 
 	/**

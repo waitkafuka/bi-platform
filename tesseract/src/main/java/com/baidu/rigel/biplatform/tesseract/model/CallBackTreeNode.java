@@ -17,13 +17,16 @@ package com.baidu.rigel.biplatform.tesseract.model;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
+
 /**
  * 
  * 类PosTreeNode.java的实现描述
  * 
  * @author xiaoming.chen 2013-12-15 下午8:49:10
  */
-public class PosTreeNode implements TreeModel {
+public class CallBackTreeNode implements TreeModel {
 
     /**
      * default generate serialVersionUID
@@ -33,7 +36,14 @@ public class PosTreeNode implements TreeModel {
     /**
      * 岗位ID
      */
+    @Deprecated
     private String posId;
+    
+    
+    /** 
+     * id 查询ID
+     */
+    private String id;
 
     /**
      * 岗位名字
@@ -48,18 +58,27 @@ public class PosTreeNode implements TreeModel {
     /**
      * 当前节点管辖的一线节点ID列表
      */
+    @Deprecated
     private List<String> csPosIds;
+    
+    
+    /** 
+     * csIds 叶子节点ID列表
+     */
+    
+    private List<String> csIds;
 
     /**
      * 当前岗位的子岗位
      */
-    private List<PosTreeNode> children;
+    private List<CallBackTreeNode> children;
 
     /**
      * default generate get posId
      * 
      * @return the posId
      */
+    @Deprecated
     public String getPosId() {
         return posId;
     }
@@ -69,6 +88,7 @@ public class PosTreeNode implements TreeModel {
      * 
      * @param posId the posId to set
      */
+    @Deprecated
     public void setPosId(String posId) {
         this.posId = posId;
     }
@@ -114,7 +134,7 @@ public class PosTreeNode implements TreeModel {
      * 
      * @return the children
      */
-    public List<PosTreeNode> getChildren() {
+    public List<CallBackTreeNode> getChildren() {
         return children;
     }
 
@@ -123,19 +143,19 @@ public class PosTreeNode implements TreeModel {
      * 
      * @param children the children to set
      */
-    public void setChildren(List<PosTreeNode> children) {
+    public void setChildren(List<CallBackTreeNode> children) {
         this.children = children;
     }
 
+    
     /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
+     * (non-Javadoc) 
+     * @see java.lang.Object#toString() 
      */
     @Override
     public String toString() {
-        return "PosTreeNode [posId=" + posId + ", name=" + name + ", hasChildren=" + hasChildren + ", leafPosids="
-                + csPosIds + ", children size=" + (children == null ? 0 : children.size()) + "]";
+        return "CallBackTreeNode [posId=" + posId + ", id=" + id + ", name=" + name + ", hasChildren=" + hasChildren
+                + ", csPosIds=" + csPosIds + ", csIds=" + csIds + ", children=" + children + "]";
     }
 
     /**
@@ -143,6 +163,7 @@ public class PosTreeNode implements TreeModel {
      * 
      * @return the csPosIds
      */
+    @Deprecated
     public List<String> getCsPosIds() {
         return csPosIds;
     }
@@ -152,8 +173,48 @@ public class PosTreeNode implements TreeModel {
      * 
      * @param csPosIds the csPosIds to set
      */
+    @Deprecated
     public void setCsPosIds(List<String> csPosIds) {
         this.csPosIds = csPosIds;
+    }
+
+    /** 
+     * 获取 id 
+     * @return the id 
+     */
+    public String getId() {
+        if(StringUtils.isBlank(this.id)) {
+            return this.posId;
+        }
+        return id;
+    }
+
+    /** 
+     * 设置 id 
+     * @param id the id to set 
+     */
+    public void setId(String id) {
+    
+        this.id = id;
+    }
+
+    /** 
+     * 获取 csIds 
+     * @return the csIds 
+     */
+    public List<String> getCsIds() {
+        if(CollectionUtils.isEmpty(csIds)) {
+            return this.csPosIds;
+        }
+        return csIds;
+    }
+
+    /** 
+     * 设置 csIds 
+     * @param csIds the csIds to set 
+     */
+    public void setCsIds(List<String> csIds) {
+        this.csIds = csIds;
     }
 
 }
