@@ -168,11 +168,16 @@
 
 /* 报表的实时展示区*/
 .canvas .report {
-    margin: 5px 5px 0 1px;
+    margin: 0px 5px 0 1px;
     overflow: auto;
     min-height: 200px;
-    position: relative;
-    border: 2px solid #cccccc;
+    position: absolute;
+    /*top: 30px;*/
+    border-left: 2px solid #cccccc;
+    border-right: 2px solid #cccccc;
+    border-bottom: 2px solid #cccccc;
+    border-top: 2px solid #cccccc;
+    width: 85%;
 }
 .canvas .report.active {
     border: 2px solid #65b0fa;
@@ -638,4 +643,19 @@
 .div-write div{
     vertical-align: middle;
     display: table-cell;
+}
+.buttons {
+    /*overflow: hidden;*/
+    margin: 0px 5px 0 1px;
+    position: absolute;
+    background: #e4e4e4;
+    border-radius: 5px;
+    height: 0;
+    width: 85%;
+    border: 2px solid #cccccc;
+    display: none;
+    overflow: hidden;
+}
+.menus {
+    display: none;
 }

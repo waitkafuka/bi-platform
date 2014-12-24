@@ -17,6 +17,8 @@ package com.baidu.rigel.biplatform.tesseract.isservice.netty.service;
 
 import io.netty.channel.ChannelHandlerContext;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +53,7 @@ public class IndexClientHandler extends AbstractChannelInboundHandler {
     /**
      * 用于接收server处理的结果
      */
-    private AbstractMessage message;
+    private volatile AbstractMessage message;
     
     /**
      * 
@@ -62,11 +64,7 @@ public class IndexClientHandler extends AbstractChannelInboundHandler {
         
     }
     
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.info("Exception occured in IndexClientHandler");
-        
-    }
+   
     
     /*
      * (non-Javadoc)
@@ -80,24 +78,41 @@ public class IndexClientHandler extends AbstractChannelInboundHandler {
     public void messageReceived(ChannelHandlerContext ctx, Object msg) throws Exception {
         logger.info(String.format(LogInfoConstants.INFO_PATTERN_MESSAGE_RECEIVED_BEGIN,
             "IndexClientHandler"));
+        System.out.println("hahaahha~~~~~~in reading ");
+        System.out.println("hahaahha~~~~~~in reading msg is :"+msg);
         if (msg instanceof IndexMessage) {
-            message = (IndexMessage) msg;
+            message = (AbstractMessage)msg ;
         } else {
-            message = (ServerExceptionMessage) msg;
+            message = (ServerExceptionMessage)msg; 
         }
-        ctx.channel().close();
+        
         logger.info(String.format(LogInfoConstants.INFO_PATTERN_MESSAGE_RECEIVED_END,
             "IndexClientHandler"));
-        
+        ctx.channel().close();
     }
     
-    /**
+    
+    
+    /* (non-Javadoc)
+	 * @see io.netty.channel.ChannelInboundHandlerAdapter#channelReadComplete(io.netty.channel.ChannelHandlerContext)
+	 */
+	@Override
+	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+		
+		super.channelReadComplete(ctx);
+		System.out.println("hahaahha~~~~~~in read complete");
+		System.out.println("hahaahha~~~~~~message is :"+this.message);
+		
+	}
+
+	/**
      * getter method for property message
      * 
      * @return the message
      */
     @SuppressWarnings("unchecked")
     public AbstractMessage getMessage() {
+    	
         return message;
     }
     
@@ -106,7 +121,7 @@ public class IndexClientHandler extends AbstractChannelInboundHandler {
 	 */
 	@Override
 	public <T extends AbstractMessage> void setMessage(T t) {
-		this.message=t;
+		this.message=(AbstractMessage)t ;
 		
 	}
     
