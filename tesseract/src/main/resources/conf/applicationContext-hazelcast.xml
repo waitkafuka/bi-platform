@@ -18,14 +18,12 @@
 
 	<hz:hazelcast id="hazelcastServer">
 		<hz:config>
-			<hz:group password="${hazelcastServer.groupPassword}" name="${hazelcastServer.groupUserName}" />
-			<hz:management-center enabled="${hazelcastServer.mancenter.enable}"
-				url="${hazelcastServer.mancenter.url}" />
-			<hz:network port="5701" port-auto-increment="${hazelcastServer.portAutoIncrement}">
+			<hz:group password="tesseract" name="tesseract-cluster" />
+			<hz:network port="5701" port-auto-increment="true">
 				<hz:join>
 					<hz:multicast enabled="false" />
 					<hz:tcp-ip enabled="true">
-						<hz:members>${hazelcastServer.members}</hz:members>
+						<hz:members>127.0.0.1</hz:members>
 					</hz:tcp-ip>
 				</hz:join>
 			</hz:network>
@@ -33,12 +31,10 @@
 			</hz:queue>
 			
 			<hz:topic name="topics">
-<!-- 				<hz:message-listeners> -->
-<!-- 					<hz:message-listener implementation="hazelcastNoticePort" /> -->
-<!-- 				</hz:message-listeners> -->
 			</hz:topic>			
 			
 		</hz:config>
+		
 
 	</hz:hazelcast>
 	

@@ -15,15 +15,19 @@
  */
 package com.baidu.rigel.biplatform.tesseract.store.service.impl;
 
+import java.io.IOException;
 import java.util.EventObject;
+import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.tesseract.store.service.HazelcastNoticePort;
@@ -31,6 +35,8 @@ import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
+import com.hazelcast.config.JoinConfig;
+import com.hazelcast.config.TcpIpConfig;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
@@ -47,6 +53,13 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 // TODO 需要通过factory返回StoryManager的实例，不要直接用Spring的注解 --Add by xiaoming.chen
 @Service("hazelcastStoreManager")
 public class HazelcastStoreManager implements StoreManager {
+    
+    private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
+
+    private static final String HAZELCAST_SERVER_GROUP_USER_NAME = "hazelcastServer.groupUserName";
+
+    private static final String HAZELCAST_SERVER_MEMBERS = "hazelcastServer.members";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastStoreManager.class);
     
     /**
@@ -70,8 +83,38 @@ public class HazelcastStoreManager implements StoreManager {
      */
     public HazelcastStoreManager(String configPath) {
         Config cfg = new ClasspathXmlConfig(configPath);
+        
+        Properties prop = new Properties();
+        try {
+            prop = loadConf(null);
+        } catch (IOException e) {
+            LOGGER.warn("load conf error,use default config");
+        }
+        cfg.getGroupConfig().setName(prop.getProperty(HAZELCAST_SERVER_GROUP_USER_NAME, "tesseract-cluster"));
+        cfg.getGroupConfig().setPassword(prop.getProperty(HAZELCAST_SERVER_GROUP_PASSWORD, "tesseract"));
+        
+        
+        JoinConfig join = cfg.getNetworkConfig().getJoin();
+        join.getMulticastConfig().setEnabled(true);
+        TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
+        
+        tcpIpConfig.addMember(prop.getProperty(HAZELCAST_SERVER_MEMBERS,"127.0.0.1"));
+        tcpIpConfig.setEnabled(true);
+        
         this.hazelcast = Hazelcast.newHazelcastInstance(cfg);
         this.cacheManager = new HazelcastCacheManager(this.hazelcast);
+    }
+    
+    private Properties loadConf(String location) throws IOException {
+        if(StringUtils.isBlank(location)) {
+            location = "config/tesseract.properties";
+        }
+        
+        Properties properties = PropertiesLoaderUtils.loadAllProperties(location);
+        if (properties.isEmpty()) {
+            properties = PropertiesLoaderUtils.loadAllProperties("conf/tesseract.properties");
+        }
+        return properties;
     }
     
     /**
