@@ -49,9 +49,43 @@ define([
                 'click .j-set-data-format': 'getDataFormatList',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
-                'click .j-others-operate': 'getFilterBlankLine'
+                'click .j-others-operate': 'getFilterBlankLine',
+                'change .select-type': 'selectTypeChange'
             },
+            /**
+             * 下拉框类型改变
+             *
+             * @param {event} event 点击事件（报表组件上的编辑按钮）
+             * @public
+             */
+            selectTypeChange: function (event) {
+                // 下拉框类型
+                var selType = $(event.target).val();
+                var entityDefs = this.model.canvasModel.reportJson.entityDefs;
 
+                // 先析构组件
+                this.canvasView._component.dispose();
+
+                // 修改entity中下拉框类型
+                for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
+                    if (
+                        entityDefs[i].clzKey === 'ECUI_SELECT'
+                        || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                    ) {
+                        entityDefs[i].clzKey = selType;
+                    }
+                }
+
+                // 修改reportVm中对应组件div的data-mold属性
+                this.canvasView.model.$reportVm
+                    .find('[data-component-type=SELECT]')
+                    .attr('data-mold', selType);
+
+                // 保存vm与json，保存成功后展示报表
+                this.model.canvasModel.saveJsonVm(
+                    this.canvasView.showReport.call(this.canvasView)
+                );
+            },
             /**
              * 报表组件的编辑模块 初始化函数
              *
@@ -79,11 +113,10 @@ define([
             initCompConfigBar: function (event) {
                 var that = this;
                 var $target = $(event.target);
-
                 var $shell = $target.parents('.j-component-item');
                 var compId = $shell.attr('data-comp-id');
                 var compType = $shell.attr('data-component-type');
-
+                var compMold = $shell.attr('data-mold');
                 that.model.compId = compId;
                 that.model.compType = compType;
 
@@ -95,9 +128,8 @@ define([
                     data.compId = compId;
                     var template = that._adapterEditCompTemplate(compType);
                     data.compType = compType;
+                    compMold && (data.compMold = compMold);
                     var html = template.render(data);
-
-                    data.compId = compId;
                     that.$el.find('.j-con-comp-setting').html(html);
                     that.initLineAccept(compType);
                     $shell.addClass('active').mouseout();
@@ -129,9 +161,6 @@ define([
                         template = compSettingChartTemplate;
                         break ;
                     case 'SELECT' :
-                        template = vuiSettingSelectTemplate;
-                        break;
-                    case 'MULTISELECT' :
                         template = vuiSettingSelectTemplate;
                         break;
                     default :
@@ -280,7 +309,6 @@ define([
                 if (option.compType === undefined) {
                     return ;
                 }
-
                 var compType = this._switchCompTypeWord(option.compType);
                 this['afterDelete' + compType + 'CompAxis'](option);
             },

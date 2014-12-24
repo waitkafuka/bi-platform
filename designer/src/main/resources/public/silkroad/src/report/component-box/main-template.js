@@ -20,6 +20,8 @@ define(['template'], function (template) {
         $out+=$escape(item.iconClass);
         $out+=' j-component-item" data-component-type="';
         $out+=$escape(item.type);
+        $out+='" data-mold="';
+        $out+=$escape(item.mold);
         $out+='">\r\n            ';
         $out+=$escape(item.caption);
         $out+='\r\n        </div>\r\n        ';
