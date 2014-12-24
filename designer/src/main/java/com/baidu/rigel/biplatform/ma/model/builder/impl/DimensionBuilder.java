@@ -291,10 +291,14 @@ class DimensionBuilder {
         logger.info("create dimension with id : " + id);
         String caption = StringUtils.isEmpty(column.getCaption()) ? column.getName() : column
                 .getCaption();
-        String name = this.generateDimName(table, column);
+        String name = column.getName();//this.generateDimName(table, column);
         StandardDimension dimension = initDimension(table, id, caption, name);
         dimension.setFacttableColumn(table.getReference().getMajorColumn());
-        dimension.setTableName(name);
+        if (StringUtils.isEmpty(table.getName())) {
+	        	dimension.setTableName(name);
+        } else {
+        		dimension.setTableName(table.getName());
+        }
         dimension.setType(DimensionType.CALLBACK);
         ColumnMetaDefine columnMetaDefine = factTable.getColumnMetaDefineByColumnName(
                 table.getReference().getMajorColumn());

@@ -30,6 +30,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
@@ -198,6 +199,7 @@ public class QueryUtils {
         items.putAll(queryAction.getColumns());
         items.putAll(queryAction.getRows());
         items.putAll(queryAction.getSlices());
+        int i = 0;
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
@@ -205,7 +207,6 @@ public class QueryUtils {
             if (olapElement == null) {
                 continue;
             }
-            
             if (olapElement instanceof Dimension) {
                 DimensionCondition condition = new DimensionCondition(olapElement.getName());
                 Object valueObj = entry.getValue();
@@ -259,9 +260,15 @@ public class QueryUtils {
                         data.setExpand(true);
                         data.setShow(false);
                         datas.add(data);
+                    } else if (dim.getType() == DimensionType.CALLBACK) {
+                    		QueryData data = new QueryData(dim.getAllMember().getUniqueName());
+                        data.setExpand(i == 0);
+                        data.setShow(i != 0);
+                        datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
+                ++i;
                 rs.put(condition.getMetaName(), condition);
                 
             }
