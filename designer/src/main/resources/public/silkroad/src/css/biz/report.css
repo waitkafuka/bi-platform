@@ -650,10 +650,11 @@
     position: absolute;
     background: #e4e4e4;
     border-radius: 5px;
-    height: 30px;
+    height: 0;
     width: 85%;
     border: 2px solid #cccccc;
     display: none;
+    overflow: hidden;
 }
 .menus {
     display: none;
