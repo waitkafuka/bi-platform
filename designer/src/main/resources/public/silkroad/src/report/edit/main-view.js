@@ -12,7 +12,8 @@ define([
         'report/edit/dim-template',
         'report/edit/drag-ind-dim/main-view',
         'report/edit/ue-view',
-        'report/global-setting-btns/btns-view'
+        'report/global-setting-btns/btns-view',
+        'report/global-menu-btns/menu-view'
     ],
     function (
         template,
@@ -23,13 +24,14 @@ define([
         dimTemplate,
         DragView,
         UEView,
-        BtnsView
+        BtnsView,
+        MenuView
         ) {
         return Backbone.View.extend({
             // view事件绑定
             events: {
                 'change .j-cube-select': 'changeCube',
-                'click #global-set-Dimension': 'setglobalbtn'
+                'click .j-global-para': 'setglobalbtn'
             },
 
             /**
@@ -47,6 +49,7 @@ define([
                 this.model.loadCubeList();
                 this.btnsView = new BtnsView();
                 this.initListening();
+                this.menuBtns = new MenuView();
             },
 
             /**
@@ -151,7 +154,7 @@ define([
                     });
                 });
                 // 参数维度按钮区域添加
-                this.$el.find('.j-globalbtn').html((new BtnsView).createBtns());
+                this.$el.find('.j-global-btn').html((new BtnsView).createBtns());
             },
 
             /**

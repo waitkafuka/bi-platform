@@ -171,8 +171,13 @@
     margin: 0px 5px 0 1px;
     overflow: auto;
     min-height: 200px;
-    position: relative;
-    border: 2px solid #cccccc;
+    position: absolute;
+    /*top: 30px;*/
+    border-left: 2px solid #cccccc;
+    border-right: 2px solid #cccccc;
+    border-bottom: 2px solid #cccccc;
+    border-top: 2px solid #cccccc;
+    width: 85%;
 }
 .canvas .report.active {
     border: 2px solid #65b0fa;
@@ -642,8 +647,14 @@
 .buttons {
     /*overflow: hidden;*/
     margin: 0px 5px 0 1px;
-    position: relative;
+    position: absolute;
     background: #e4e4e4;
     border-radius: 5px;
-    height: 34px;
+    height: 30px;
+    width: 85%;
+    border: 2px solid #cccccc;
+    display: none;
+}
+.menus {
+    display: none;
 }
