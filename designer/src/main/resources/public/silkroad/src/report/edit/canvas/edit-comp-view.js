@@ -603,9 +603,7 @@ define([
                 var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
-
                 this.model.canvasModel.saveJsonVm();
-                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-多选下拉框
@@ -624,9 +622,7 @@ define([
                 var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
-
                 this.model.canvasModel.saveJsonVm();
-                this.model.canvasModel.saveReport();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
