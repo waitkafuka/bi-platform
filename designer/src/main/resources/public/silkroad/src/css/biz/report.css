@@ -168,7 +168,7 @@
 
 /* 报表的实时展示区*/
 .canvas .report {
-    margin: 5px 5px 0 1px;
+    margin: 0px 5px 0 1px;
     overflow: auto;
     min-height: 200px;
     position: relative;
@@ -638,4 +638,12 @@
 .div-write div{
     vertical-align: middle;
     display: table-cell;
+}
+.buttons {
+    /*overflow: hidden;*/
+    margin: 0px 5px 0 1px;
+    position: relative;
+    background: #e4e4e4;
+    border-radius: 5px;
+    height: 34px;
 }
