@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.tesseract.node.service;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -25,6 +24,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
@@ -36,7 +37,6 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -51,7 +51,6 @@ import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.FileClientHa
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.IndexClientHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.SearchClientHandler;
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
-import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistException;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.netty.message.NettyAction;
@@ -113,9 +112,11 @@ public class IndexAndSearchClient {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
                 pipeline.addLast("encode", new ObjectEncoder());
                 pipeline.addLast("decode",
-                    new ObjectDecoder(ClassResolvers.weakCachingConcurrentResolver(null)));
+                    new ObjectDecoder(Integer.MAX_VALUE,ClassResolvers.weakCachingConcurrentResolver(null)));
 //                pipeline.addLast("frameencoder",new LengthFieldPrepender(4,false));
 //                pipeline.addLast("framedecoder",new LengthFieldBasedFrameDecoder(1024*1024*1024, 0, 4,0,4));
             }
@@ -359,7 +360,7 @@ public class IndexAndSearchClient {
         } catch (Exception e) {
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                 IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                IndexAndSearchExceptionType.INDEX_EXCEPTION), e.getCause(),
+                IndexAndSearchExceptionType.INDEX_EXCEPTION), e,
                 IndexAndSearchExceptionType.INDEX_EXCEPTION);
         }
         logger.info("index:[data=" + data + "][isUpdate=" + isUpdate + "][idxShard=" + idxShard
@@ -530,6 +531,10 @@ public class IndexAndSearchClient {
         
         channel.writeAndFlush(message);
         channel.closeFuture().sync();
+        
+        System.out.println("hahahaha---------------done:"+channel.closeFuture().isDone()+"    succ:"+channel.closeFuture().isSuccess());
+        
+        
         returnMessage = handler.getMessage();
         
         handler.setMessage(null);
