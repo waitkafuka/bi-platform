@@ -1258,7 +1258,7 @@ public class QueryDataResource extends BaseResource {
             String caption = "第" + i.getAndAdd(1) + "级";
             viewObject.setCaption(caption);
             String name = "[" + newDim.getName() + "]";
-            name += ".[All_" + newDim.getName() + "]";
+            name += ".[All_" + newDim.getName() + "s]";
             viewObject.setName(name);
             viewObject.setNeedLimit(false);
             viewObject.setSelected(i.get() == 2);
@@ -1299,7 +1299,7 @@ public class QueryDataResource extends BaseResource {
     		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
     		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
     		DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
-    		SortRecord type = new SortRecord(sortType, uniqueName);
+    		SortRecord type = new SortRecord(sortType, uniqueName, 500);
     		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
     		ResultSet rs = new ResultSet();
     		model.getColumnHeadFields().forEach(headField -> {

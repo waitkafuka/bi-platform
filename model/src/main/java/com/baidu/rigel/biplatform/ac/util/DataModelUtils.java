@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.data.HeadFieldComparator;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
+import com.google.common.collect.Lists;
 
 /**
  * DataModel操作工具类
@@ -510,5 +511,163 @@ public class DataModelUtils {
             }
         }
     }
+
+    /**
+     * 按照指定长度截取查询结果
+     * @param oriModel 原始结果
+     * @param recordSize 截取长度
+     * @return DataModel 新数据模型
+     */
+	public static DataModel truncModel(DataModel oriModel,  int recordSize) {
+		DataModel model = new DataModel();
+		model.setColumnHeadFields(oriModel.getColumnHeadFields());
+		model.setRecordSize(getRecordSize(oriModel.getColumnBaseData()));
+		// 纪录数小于或等于指定行数
+		if (model.getRecordSize() <= recordSize) {
+			model.setColumnBaseData(oriModel.getColumnBaseData());
+			model.setColumnHeadFields(oriModel.getColumnHeadFields());
+			model.setOperateIndex(oriModel.getOperateIndex());
+			model.setRowHeadFields(oriModel.getRowHeadFields());
+			return model;
+		}
+		// 截取指定行数数据
+		int tmp = recordSize;
+		List<List<BigDecimal>> datas = Lists.newArrayList();
+		oriModel.getColumnBaseData().forEach(list -> {
+			List<BigDecimal> data = Lists.newArrayList();
+			for (int i = 0; i < tmp; ++i) {
+				data.add(list.get(i));
+			}
+			datas.add(data);
+		});
+		model.setColumnBaseData(datas);
+		// 封装行头数据
+		List<HeadField> rowHeadFields = Lists.newArrayList();
+		for (int i = 0; i < oriModel.getRowHeadFields().size() ; ++i) {
+			// 处理第i个节点
+			HeadField field = oriModel.getRowHeadFields().get(i);
+			// 添加处理后的第一个节点到行头
+			rowHeadFields.add(field);
+			boolean hasNodeList = false;
+			// 如果当前行的NodeList不等于空，先处理NodeList
+			if (field.getNodeList() != null && field.getNodeList().size() > 0) {
+				hasNodeList = true;
+				HeadFieldDetailRecord record = truncFieldHeads(field.getNodeList(), recordSize);
+				field.setNodeList(record.headFields);
+				if (record.count >= recordSize) {
+					field.setChildren(Lists.newArrayList());
+					break;
+				} else {
+					recordSize = recordSize - record.count;
+				}
+			}
+			
+			// 处理孩子节点
+			if (field.getChildren() != null && field.getChildren().size() > 0) { // 处理孩子节点
+				if (!hasNodeList) {
+					recordSize -= 1;
+				}
+				HeadFieldDetailRecord record = truncFieldHeads(field.getChildren(), recordSize);
+				field.setChildren(record.headFields);
+				if (record.count >= recordSize) {
+					break;
+				} else {
+					recordSize = recordSize - record.count;
+				}
+			}
+		}
+		model.setRowHeadFields(rowHeadFields);
+		return model;
+	}
+
+	/**
+	 * 
+	 * @param nodeList
+	 * @param recordSize
+	 * @return HeadFieldDetailRecord
+	 */
+	private static HeadFieldDetailRecord truncFieldHeads(List<HeadField> nodeList, int recordSize) {
+		int oriRecordSize = recordSize;
+		List<HeadField> tmp = Lists.newArrayList();
+		for (int i = 0; i < nodeList.size(); ++i) {
+			if (recordSize <= 0) {
+				break;
+			}
+			HeadField field = nodeList.get(i);
+			// 没有NodeList，只有children
+			if (field.getNodeList() == null || field.getNodeList().size() == 0) {
+				// 没有孩子节点，直接返回
+				if (field.getChildren() == null || field.getChildren().size() == 0) {
+					tmp.add(field);
+					recordSize -= 1;
+				} else { // 没有NodeList，只有children
+					HeadFieldDetailRecord record = truncFieldHeads(field.getChildren(), recordSize - 1);
+					field.setChildren(record.headFields);
+					recordSize -= record.count;
+					tmp.add(field);
+					if (recordSize <= 0) {
+						recordSize = 0;
+						break;
+					}
+				}
+			} else {
+				HeadFieldDetailRecord record = truncFieldHeads(field.getNodeList(), recordSize);
+				field.setNodeList(record.headFields);
+				recordSize -= record.count;
+				tmp.add(field);
+				if (recordSize <= 0) {
+					recordSize = 0;
+					field.setChildren(Lists.newArrayList());
+					break;
+				}
+			}
+		}
+		return new HeadFieldDetailRecord(oriRecordSize - recordSize, tmp);
+	}
+
+	/**
+	 * 获取结果集原始纪录数
+	 * @param columnBaseData 基于列的结果集数据
+	 * @return 纪录数
+	 */
+	private static int getRecordSize(List<List<BigDecimal>> columnBaseData) {
+		if (columnBaseData == null || columnBaseData.size() == 0) {
+			return 0;
+		}
+		if (columnBaseData.get(0) == null) {
+			return 0;
+		}
+		return columnBaseData.get(0).size();
+	}
+	
+	/**
+	 * 
+	 * @author david.wang
+	 *
+	 */
+	private static class HeadFieldDetailRecord {
+		
+		/**
+		 * 
+		 */
+		public final int count;
+		
+		/**
+		 * 
+		 */
+		public final List<HeadField> headFields;
+		
+		/**
+		 * 
+		 * @param count
+		 * @param headFields
+		 */
+		public HeadFieldDetailRecord(int count, List<HeadField> headFields) {
+			super();
+			this.count = count;
+			this.headFields = headFields;
+		}
+		
+	}
 
 }

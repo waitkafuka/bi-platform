@@ -6,12 +6,12 @@
 define([
         'template',
         'dialog',
-        'report/global-setting-btns/btns-template'
+        'report/global-setting-btns/para-btn-template'
     ],
     function (
         template,
         dialog,
-        BtnsTemplate
+        ParaBtnTemplate
     ) {
         var btnAttr = {
             ID: 'global-set-'
@@ -34,7 +34,7 @@ define([
              */
             setGlobal: function () {
                 dialog.showDialog({
-                    content: BtnsTemplate.render(),
+                    content: ParaBtnTemplate.render(),
                     title: '参数维度设置',
                     dialog: {
                         height: 400,
@@ -64,11 +64,19 @@ define([
             },
             // 参数区域按钮属性
             btnBox: [
-            // 暂时去掉此功能
-//                {
-//                    id: btnAttr.ID + 'Dimension',
-//                    btnsHTML: '参数维度设置'
-//                }
+                {
+                    id: 'para',
+                    picName: 'para',
+                    title: '参数维度设置',
+                    className: 'para'
+                },
+                {
+                    id: 'component',
+                    picName: 'component',
+                    title: '组件工具箱',
+                    className: 'component',
+                    ownClassName: 'own-component'
+                }
             ],
 
             /**
@@ -82,7 +90,14 @@ define([
                 }
                 else {
                     for(var i = 0; i < btnBox.length; i ++) {
-                        div += "<div id='" + btnBox[i].id + "'>" + btnBox[i].btnsHTML + "</div>"
+                        div += (
+                        "<div class='global-setting-btns j-global-" +
+                        btnBox[i].className + " " +
+                        (btnBox[i].ownClassName || "") + "'" +
+                        "title='" + btnBox[i].title + "'" + "id='" +
+                        btnBox[i].id + "'>" +
+                        "<img src='../silkroad/src/css/img/global-btns/btn_" + btnBox[i].picName +".png' />" +
+                        "</div>" );
                     }
                 }
                 return div;

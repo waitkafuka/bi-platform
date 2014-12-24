@@ -1,4 +1,4 @@
-<div class="con-comp-setting-type1 j-comp-setting" data-comp-id="{{compId}}" data-comp-type="SELECT">
+<div class="con-comp-setting-type1 j-comp-setting j-comp-select"  data-comp-id="{{compId}}" data-comp-type="SELECT">
     <div class="data-axis-line data-axis-line-48 j-comp-setting-line j-line-x" data-axis-type="x">
         <span class="letter">维度:</span>
         {{each xAxis as item}}
@@ -9,5 +9,17 @@
             <span class="icon hide j-delete" title="删除">×</span>
         </div>
         {{/each}}
+    </div>
+    <div class="data-axis-line data-axis-line-48 data-btn-line">
+        <span class="letter">设置:</span>
+        <span>下拉框类型：</span>
+        <select class="select-type">
+            <option value="ECUI_SELECT" {{if $data.compMold && $data.compMold==="ECUI_SELECT"}} selected="selected"{{/if}}>
+                单选
+            </option>
+            <option value="ECUI_MULTI_SELECT" {{if $data.compMold && $data.compMold==="ECUI_MULTI_SELECT"}} selected="selected"{{/if}}>
+                多选
+            </option>
+        </select>
     </div>
 </div>

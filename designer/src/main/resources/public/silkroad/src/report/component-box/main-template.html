@@ -11,7 +11,7 @@
     {{each componentList as group}}
     <div class="con-component hide j-con-component" data-group-id="{{group.id}}">
         {{each group.items as item}}
-        <div class="component-item {{item.iconClass}} j-component-item" data-component-type="{{item.type}}">
+        <div class="component-item {{item.iconClass}} j-component-item" data-component-type="{{item.type}}" data-mold="{{item.mold}}">
             {{item.caption}}
         </div>
         {{/each}}

@@ -30,7 +30,6 @@ define([
              * @constructor
              */
             initialize: function (option) {
-                var that = this;
                 this.model = new MainModel({
                     id: this.id
                 });
