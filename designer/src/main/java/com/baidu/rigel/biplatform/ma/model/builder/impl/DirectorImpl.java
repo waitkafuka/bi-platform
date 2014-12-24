@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
@@ -206,7 +207,7 @@ public class DirectorImpl implements Director {
 		Iterator<String> it = cube.getMeasures().keySet().iterator();
 		final Map<String, Dimension> tmp = Maps.newHashMap();
 		oriDims.values().forEach(dim -> {
-			if (dim.getTableName().equals(cube.getSource())) {
+			if (dim.getType() != DimensionType.GROUP_DIMENSION && dim.getTableName().equals(cube.getSource())) {
 				tmp.put(dim.getPrimaryKey(), dim);
 			}
 		});
@@ -311,8 +312,11 @@ public class DirectorImpl implements Director {
      */
     private String buildDimIdent(Dimension dim) {
         String ident = dim.getTableName();
-        MiniCubeLevel level = (MiniCubeLevel) dim.getLevels().values().toArray(new Level[0])[0];
-        return ident + "_" + level.getSource();
+        Level level = dim.getLevels().values().toArray(new Level[0])[0];
+        if (level instanceof MiniCubeLevel) {
+        		return ident + "_" + ((MiniCubeLevel) level).getSource();
+        }
+        return ident + "_" + ((CallbackLevel) level).getCallbackUrl();
     }
 
     /**
