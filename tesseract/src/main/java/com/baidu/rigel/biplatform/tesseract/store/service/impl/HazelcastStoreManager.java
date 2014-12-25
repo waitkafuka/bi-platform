@@ -61,6 +61,8 @@ public class HazelcastStoreManager implements StoreManager {
     private static final String HAZELCAST_SERVER_MEMBERS = "hazelcastServer.members";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastStoreManager.class);
+
+    private static final String HAZELCAST_SERVER_NAME = "hazelcastServer.instance";
     
     /**
      * cacheManager
@@ -92,10 +94,9 @@ public class HazelcastStoreManager implements StoreManager {
         }
         cfg.getGroupConfig().setName(prop.getProperty(HAZELCAST_SERVER_GROUP_USER_NAME, "tesseract-cluster"));
         cfg.getGroupConfig().setPassword(prop.getProperty(HAZELCAST_SERVER_GROUP_PASSWORD, "tesseract"));
-        
+        cfg.setInstanceName(prop.getProperty(HAZELCAST_SERVER_NAME, "TesseractHZ_Cluster"));
         
         JoinConfig join = cfg.getNetworkConfig().getJoin();
-        join.getMulticastConfig().setEnabled(true);
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
         
         tcpIpConfig.addMember(prop.getProperty(HAZELCAST_SERVER_MEMBERS,"127.0.0.1"));
