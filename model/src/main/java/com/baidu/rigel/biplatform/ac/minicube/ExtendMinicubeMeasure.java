@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.ac.minicube;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
+
 /**
  * 
  * 衍生指标（计算成员）定义：衍生指标（计算成员）是指在原有基础指标基础之上通过一定的计算表达式完成的计算指标
@@ -85,6 +87,13 @@ public class ExtendMinicubeMeasure extends MiniCubeMeasure {
      */
     public void setRefIndNames(Set<String> refIndNames) {
         this.refIndNames = refIndNames;
+    }
+
+    
+    @Override
+    public Aggregator getAggregator() {
+        return Aggregator.CALCULATED;
+        
     }
 
     
