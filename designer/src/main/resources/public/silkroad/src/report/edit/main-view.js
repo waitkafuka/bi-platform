@@ -31,7 +31,8 @@ define([
             // view事件绑定
             events: {
                 'change .j-cube-select': 'changeCube',
-                'click .j-global-para': 'setglobalbtn'
+                'click .j-global-para': 'setglobalbtn',
+                'click .j-global-component': 'shiftMenu'
             },
 
             /**
@@ -48,8 +49,8 @@ define([
                 });
                 this.model.loadCubeList();
                 this.btnsView = new BtnsView();
+                this.menuView = new MenuView();
                 this.initListening();
-                this.menuBtns = new MenuView();
             },
 
             /**
@@ -153,8 +154,10 @@ define([
                         parentView: that
                     });
                 });
-                // 参数维度按钮区域添加
+                // 工具条按钮区域按钮添加
                 this.$el.find('.j-global-btn').html((new BtnsView).createBtns());
+                // 工具条菜单区域菜单添加
+                this.$el.find('.j-global-menu').html((new MenuView).componentMenu());
             },
 
             /**
@@ -171,7 +174,17 @@ define([
                 $(this.el).unbind().empty();
                 this.canvas.destroy();
                 $('.j-foot').show();
+            },
+
+            /**
+             * 功能区域切换菜单
+             *
+             * @public
+             */
+            shiftMenu : function (event) {
+                this.menuView.shiftMenu(event);
             }
+
         });
     }
 );

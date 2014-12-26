@@ -1,19 +1,19 @@
 /*-------------------------------------------------*/
 /* 业务逻辑 -- 工具栏菜单                          */
 /*-------------------------------------------------*/
-.comp-menu {
+.component-menutwo {
     position: absolute;
-    width: 85%;
-    height: 10px;
-    background-color: yellowgreen;
-    top: 30px;
+    left: 50px;
+    width: 100px;
+    height: 200px;
+    background: green;
 }
-
 /* 组件菜单 */
 .component-menu {
     position: absolute;
     left: 30px;
-    width: 100px;
-    height: 200px;
-    background: yellow;
+}
+/* 菜单公共样式 */
+.global-menus {
+    display: none;
 }
