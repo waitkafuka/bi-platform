@@ -75,6 +75,7 @@
 		<module>model</module>
 		<module>designer</module>
 		<module>tesseract</module>
+		<module>parser</module>
 	</modules>
 
 	<dependencyManagement>
