@@ -30,6 +30,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
@@ -56,6 +57,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
@@ -198,6 +200,7 @@ public class QueryUtils {
         items.putAll(queryAction.getColumns());
         items.putAll(queryAction.getRows());
         items.putAll(queryAction.getSlices());
+        int i = 0;
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
@@ -205,7 +208,6 @@ public class QueryUtils {
             if (olapElement == null) {
                 continue;
             }
-            
             if (olapElement instanceof Dimension) {
                 DimensionCondition condition = new DimensionCondition(olapElement.getName());
                 Object valueObj = entry.getValue();
@@ -259,9 +261,15 @@ public class QueryUtils {
                         data.setExpand(true);
                         data.setShow(false);
                         datas.add(data);
+                    } else if (dim.getType() == DimensionType.CALLBACK) {
+                    		QueryData data = new QueryData(dim.getAllMember().getUniqueName());
+                        data.setExpand(i == 0);
+                        data.setShow(i != 0);
+                        datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
+                ++i;
                 rs.put(condition.getMetaName(), condition);
                 
             }
@@ -533,19 +541,42 @@ public class QueryUtils {
 	 */
 	public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
 		if (area.getType() == ExtendAreaType.CHART) {
+			// 设置topN默认设置
+			if (area.getLogicModel().getTopSetting() != null) {
+				MeasureTopSetting topSetting = area.getLogicModel().getTopSetting();
+				chart.setRecordSize(topSetting.getRecordSize());
+				chart.setTopedMeasureId(topSetting.getMeasureId());
+				chart.setTopType(topSetting.getTopType().name());
+				chart.setAreaId(area.getId());
+			}
 			String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
-				return getOlapElementName(area, schema, item);
+				OlapElement tmp = getOlapElement(area, schema, item);
+				if (tmp != null) {
+					return tmp.getCaption();
+				} else {
+					return null;
+				}
 			}).filter(x -> x != null).toArray(String[] :: new);
 			chart.setAllDims(allDims);
 			String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
-				return getOlapElementName(area, schema, item);
+				OlapElement tmp = getOlapElement(area, schema, item);
+				if (tmp != null) {
+					chart.getMeasureMap().put(tmp.getId(), tmp.getCaption());
+					return tmp.getCaption();
+				} else {
+					return null;
+				}
 			}).filter(x -> x != null).toArray(String[] :: new);
 			chart.setAllMeasures(allMeasures);
 			
+			final Item[] columns = area.getLogicModel().getColumns();
 			List<String> tmp = getOlapElementNames(
-					area.getLogicModel().getColumns(), area.getCubeId(), schema);
+					columns, area.getCubeId(), schema);
 			if (tmp.size() > 0) {
 				chart.setDefaultMeasures(tmp.toArray(new String[0]));
+			}
+			for (int i = 0; i < columns.length; ++i) {
+				chart.getMeasureMap().put(columns[i].getOlapElementId(), tmp.get(i));
 			}
 			List<String>  defaultDims = getOlapElementNames(
 					area.getLogicModel().getRows(), area.getCubeId(), schema);
@@ -553,17 +584,6 @@ public class QueryUtils {
 				chart.setDefaultDims(defaultDims.toArray(new String[0]));
 			}
 		} 
-//		else if (area.getType() == ExtendAreaType.LITEOLAP) { // 表格暂时不处理
-//			if (area instanceof LiteOlapExtendArea) {
-//				LiteOlapExtendArea tmp = (LiteOlapExtendArea) area;
-//				if (tmp.getCandInds().size() > 0) {
-//					chart.setAllMeasures(getOlapElementNames(tmp.getCandInds().values().toArray(new Item[0]), 
-//							area.getCubeId(), schema).toArray(new String[0]));
-//				}
-//			}
-//			chart.setDefaultMeasures(getOlapElementNames(area.getLogicModel().getRows(), 
-//					area.getCubeId(), schema).toArray(new String[0]));
-//		}
 	}
 
 	/**
@@ -592,12 +612,12 @@ public class QueryUtils {
 	 * @return String
 	 * 
 	 */
-	private static String getOlapElementName(ExtendArea area, Schema schema,
+	private static OlapElement getOlapElement(ExtendArea area, Schema schema,
 			Item item) {
 		OlapElement olapElement = 
 				ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
 		if (olapElement != null) {
-			return olapElement.getCaption();
+			return olapElement;
 		}
 		return null;
 	}

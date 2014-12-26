@@ -355,7 +355,7 @@ public class DataModelUtils {
     /**
      * 转换数据
      * @param columnBasedData
-     * @return
+     * @return List<List<CellData>>
      */
     private static List<List<CellData>> transColumnBasedData2RowBasedData(
         List<List<CellData>> columnBasedData) {
@@ -935,21 +935,31 @@ public class DataModelUtils {
 	 */
 	public static String convertDataModel2CsvString(DataModel dataModel) {
 		StringBuilder rs = new StringBuilder();
-		// 将二维表数据打平
-		List<String> tmp = dataModel2StrBaseCol(dataModel);
-		// 获取维度数目
-		int depth = getMaxDepth4Dim(dataModel.getRowHeadFields());
-		// 获取横向单元格数据
-		int width = depth + dataModel.getColumnHeadFields().size();
-		// 获取纵向单元格数目
-		int height = dataModel.getColumnBaseData().get(0).size() + 1;
-		// 组织数据
-		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) {
-				rs.append(tmp.get(j * height + i));
-				if (j != width - 1) {
+		
+		List<List<BigDecimal>> rowDatas = convertToRowData(dataModel.getColumnBaseData());
+		int maxDepth = getMaxDepth4Dim(dataModel.getRowHeadFields());
+		for (int i = 0; i < maxDepth; ++i) {
+			rs.append(" ,");
+		}
+		final int colSize = dataModel.getColumnHeadFields().size();
+		for (int i = 0; i < colSize; ++i) {
+			rs.append(dataModel.getColumnHeadFields().get(i).getCaption());
+			if (i < colSize - 1) {
+				rs.append(",");
+			} else {
+				rs.append("\r\n");
+			}
+		}
+		List<List<String>> rowCaptions = genRowCaptions(dataModel.getRowHeadFields());       
+		for (int i = 0; i < rowCaptions.size(); ++i) {
+			rowCaptions.get(i).forEach(str -> {
+				rs.append(str + ",");
+			});
+			for (int j = 0; j < rowDatas.get(i).size(); ++j) {
+				rs.append(rowDatas.get(i).get(j));
+				if (j < rowDatas.get(i).size() - 1) {
 					rs.append(",");
-				} else{
+				} else {
 					rs.append("\r\n");
 				}
 			}
@@ -957,48 +967,51 @@ public class DataModelUtils {
 		return rs.toString();
 	}
 
-	/**
-	 * 
-	 * @param dataModel
-	 * @return List<String>
-	 */
-	private static List<String> dataModel2StrBaseCol(DataModel dataModel) {
-		List<String> rs = getRowCaptions(dataModel.getRowHeadFields());
-		List<HeadField> colFields = dataModel.getColumnHeadFields();
-		for (int i = 0; i < dataModel.getColumnBaseData().size(); ++i) {
-			rs.add(colFields.get(i).getCaption());
-			String[] tmp = dataModel.getColumnBaseData()
-					.get(i).stream().map(data -> {
-						return data.toString();
-					}).toArray(String[] :: new);
-			Collections.addAll(rs, tmp);
-		}
-		return rs;
-	}
-	
-	/**
-	 * 
-	 * @param headFields
-	 * @return List<String>
-	 */
-	private static List<String> getRowCaptions(List<HeadField> headFields) {
-		List<String> rs = Lists.newArrayList();
-		if (headFields == null || headFields.size() == 0) {
-			return rs;
-		}
-		headFields.forEach(field -> {
-			rs.add(" ");
-			rs.add(field.getCaption());
-			if (field.getChildren() != null) {
-				field.getChildren().forEach(f -> {
-					rs.add(f.getCaption());
+	private static List<List<BigDecimal>> convertToRowData(List<List<BigDecimal>> columnBaseData) {
+		List<List<BigDecimal>> rowBasedData = new ArrayList<List<BigDecimal>>();
+        
+        for (List<BigDecimal> currColumnData : columnBaseData) {
+            for (int i = 0; i < currColumnData.size(); i++) {
+                // 当前列的第i行
+                List<BigDecimal> currRowData = new ArrayList<BigDecimal>();
+                if (rowBasedData.size() >= i + 1) {
+                    currRowData = rowBasedData.get(i);
+                } else {
+                    rowBasedData.add(currRowData);
+                }
+                currRowData.add(currColumnData.get(i));
+            }
+        }
+        
+        return rowBasedData;	}
+
+	private static List<List<String>> genRowCaptions(List<HeadField> rowHeadFields) {
+		List<List<String>> rs = Lists.newArrayList();
+		for (int i = 0; i < rowHeadFields.size(); ++i) {
+			final HeadField headField = rowHeadFields.get(i);
+			final List<HeadField> nodeList = headField.getNodeList();
+			List<String> tmp = Lists.newArrayList();
+			if (nodeList == null || nodeList.size() == 0) {
+				tmp.add(rowHeadFields.get(i).getCaption());
+			} else {
+				List<List<String>> nodeListCaption = genRowCaptions(headField.getNodeList());
+				nodeListCaption.forEach(list -> {
+					list.add(0, headField.getCaption());
 				});
+				rs.addAll(nodeListCaption);
 			}
-			if (field.getNodeList() != null) {
-				rs.addAll(getRowCaptions(field.getNodeList()));
+			rs.add(tmp);
+			if (headField.getChildren() != null && headField.getChildren().size() > 0) {
+				rs.addAll(genRowCaptions(headField.getChildren()));
+			}
+		}
+		List<List<String>> tmp = Lists.newArrayList();
+		rs.stream().forEach(list -> {
+			if (list != null && list.size() > 0) {
+				tmp.add(list);
 			}
 		});
-		return rs;
+		return tmp;
 	}
 
 	/**

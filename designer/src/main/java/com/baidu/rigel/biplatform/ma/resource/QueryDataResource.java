@@ -57,6 +57,7 @@ import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
@@ -65,6 +66,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
@@ -579,6 +581,11 @@ public class QueryDataResource extends BaseResource {
                 indNames = request.getParameter("indNames").split(",");
             }
             try {
+            		String topSetting = request.getParameter(Constants.TOP);
+            		if (!StringUtils.isEmpty(topSetting)) {
+            			model.getExtendById(areaId).getLogicModel().
+            				setTopSetting(GsonUtils.fromJson(topSetting, MeasureTopSetting.class));
+            		}
                 action = queryBuildService.generateChartQueryAction(model, areaId, 
                 			areaContext.getParams(), indNames, runTimeModel);
                 if (action != null) {

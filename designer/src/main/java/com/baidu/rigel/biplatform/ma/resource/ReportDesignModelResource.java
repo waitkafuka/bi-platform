@@ -1150,7 +1150,6 @@ public class ReportDesignModelResource extends BaseResource {
     		ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = model.getExtendById(areaId);
-        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
         result.setData(area.getLogicModel().getTopSetting());
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
