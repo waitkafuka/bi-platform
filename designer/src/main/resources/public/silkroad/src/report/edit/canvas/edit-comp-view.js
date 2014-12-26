@@ -63,17 +63,22 @@ define([
              */
             selectTypeChange: function (event) {
                 // 下拉框类型
-                var selType = $(event.target).val();
+                var $target = $(event.target);
+                var selType = $target.val();
                 var entityDefs = this.model.canvasModel.reportJson.entityDefs;
-
+                var compId =  $target.attr('data-comp-id');
                 // 先析构组件
                 this.canvasView._component.dispose();
 
                 // 修改entity中下拉框类型
                 for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
                     if (
-                        entityDefs[i].clzKey === 'ECUI_SELECT'
-                        || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                        compId === entityDefs[i].compId
+                        &&
+                        (
+                            entityDefs[i].clzKey === 'ECUI_SELECT'
+                            || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                        )
                     ) {
                         entityDefs[i].clzKey = selType;
                     }

@@ -20,7 +20,9 @@ define(['template'], function (template) {
         $out+=$escape(item.name);
         $out+='）\r\n            </span>\r\n            <span class="icon hide j-delete" title="删除">×</span>\r\n        </div>\r\n        ';
         });
-        $out+='\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\r\n        <span class="letter">设置:</span>\r\n        <span>下拉框类型：</span>\r\n        <select class="select-type">\r\n            <option value="ECUI_SELECT" ';
+        $out+='\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\r\n        <span class="letter">设置:</span>\r\n        <span>下拉框类型：</span>\r\n        <select class="select-type" data-comp-id="';
+        $out+=$escape(compId);
+        $out+='">\r\n            <option value="ECUI_SELECT" ';
         if($data.compMold && $data.compMold==="ECUI_SELECT"){
         $out+=' selected="selected"';
         }
