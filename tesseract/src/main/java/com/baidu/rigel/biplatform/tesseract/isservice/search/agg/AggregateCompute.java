@@ -33,7 +33,6 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.Aggregate;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
-import com.google.common.base.Splitter;
 
 /**
  * 
@@ -92,6 +91,9 @@ public class AggregateCompute {
                     ResultRecord var = new ResultRecord(new Serializable[meta.getFieldNameArray().length], meta);
                     var.setGroupBy(y.getGroupBy());
                     try {
+                        for(int i = 0; i < dimSize; i++) {
+                            var.setField(i, y.getField(i));
+                        }
                         for(int i = 0; i < queryMeasures.size(); i++){
                             QueryMeasure measure = queryMeasures.get(i);
                             int index = i + dimSize;
@@ -110,16 +112,16 @@ public class AggregateCompute {
 //           LOGGER.info("group count cost:" + (System.currentTimeMillis() - current) + "ms!");
 //        }
         
-        for(String key : groupResult.keySet()) {
-            int i = 0 ;
-            for(String value : Splitter.on(',').omitEmptyStrings().split(key)) {
-                groupResult.get(key).setField(i, value);
-                i++;
-            }
-//            for (int index : countIndex) {
-//                groupResult.get(key).setField(index, countRes.get(key));
+//        for(String key : groupResult.keySet()) {
+//            int i = 0 ;
+//            for(String value : Splitter.on(',').omitEmptyStrings().split(key)) {
+//                groupResult.get(key).setField(i, value);
+//                i++;
 //            }
-        }
+////            for (int index : countIndex) {
+////                groupResult.get(key).setField(index, countRes.get(key));
+////            }
+//        }
         result.addAll(groupResult.values());
         
         return result;
