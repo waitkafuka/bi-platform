@@ -92,12 +92,11 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_ECHART_CLASS.$createView = function (options) {
-        var el = this.$di('getEl');
 
         this._uChart = this.$di('vuiCreate', 'mainChart');
 
         // 下载按钮
-        this._uDownloadBtn = this.$di('vuiCreate', 'download');
+        this._uDownloadBtn = this.$di('vuiCreate', 'topn');
 
         // 离线下载
         this._uOfflineDownloadBtn = this.$di('vuiCreate', 'offlineDownload');
@@ -129,19 +128,11 @@ $namespace('di.shared.ui');
             ['sync.error.' + key, this.$handleOfflineDownloadError, this],
             ['sync.complete.' + key, this.$syncEnable, this, key]
         );
-        this._uDownloadBtn && (
-            this._uDownloadBtn.onclick = bind(this.$handleDownload, this)
-        );
-        this._uOfflineDownloadBtn && (
-            this._uOfflineDownloadBtn.attach('confirm', this.$handleOfflineDownload, this)
-        );
 
         foreachDo(
             [
                 this.getModel(),
-                this._uChart, 
-                this._uDownloadBtn,
-                this._uOfflineDownloadBtn
+                this._uChart
             ], 
             'init'
         );

@@ -623,6 +623,44 @@
     text-align: center;
     margin: 0 auto;
 }
+/*@end*/
+
+/**
+ * @name                      :topn设置
+ * @author                    :lizhantong
+ * @email                     :lztlovely@126.com
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :暂无
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.topn-indlist {
+    width: 300px;
+}
+.topn-indlist-item {
+    float:  left;
+    width : 100%;
+    padding: 10px
+}
+.topn-indlist-item span {
+    float: left;
+    height: 20px;
+    line-height: 20px;
+    width: 80px;
+}
+.topn-indlist-item select {
+    float:  left;
+    width : 100px;
+    height: 20px;
+}
+.topn-indlist-item input {
+    float:  left;
+    width : 100px;
+    height: 15px;
+}
+/*@end*/
+
 /* 文本框组件样式 */
 .text-div {
     width: 100%;

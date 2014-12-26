@@ -37,9 +37,9 @@
                 var type = this._sType;
 
                 el.innerHTML = [
-                        '<div class="' + type + '-header">',
-                        '</div>',
-                        '<div class="' + type + '-content"></div>'
+                    '<div class="', type , '-header">',
+                    '</div>',
+                    '<div class="', type, '-content"></div>'
                 ].join('');
 
                 this._eHeader = el.childNodes[0];
@@ -495,8 +495,8 @@
                 + '</div>';
             return;
         }
-        this._eContent.style.width = this._nWidth + 'px';
-        this._eContent.style.height = this._nHeight + 'px';
+//        this._eContent.style.width = this._nWidth + 'px';
+//        this._eContent.style.height = this._nHeight + 'px';
         this.$createChart(this.$initOptions());
     };
 
@@ -546,7 +546,7 @@
                 this._bHasBar = true;
             }
         }
-
+        this.$setupTopn();
         this.$setupDataRoom(options);
         this.$setupSeries(options);
         this.$setupXAxis(options);
@@ -556,6 +556,7 @@
         
         return options;
     };
+
 
      /**
      * 销毁图表
