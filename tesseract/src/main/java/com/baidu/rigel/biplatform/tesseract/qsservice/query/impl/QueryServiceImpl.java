@@ -452,7 +452,7 @@ public class QueryServiceImpl implements QueryService {
                         MemberNodeTree childNode = new MemberNodeTree(nodeTree);
                         buildMemberNodeByMember(childNode, child);
                         childNodes.add(childNode);
-                        member.getQueryNodes().addAll(child.getQueryNodes());
+//                        member.getQueryNodes().addAll(child.getQueryNodes());
                     });
                 }
             }
