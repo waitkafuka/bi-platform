@@ -285,11 +285,11 @@ public class IndexAndSearchClient {
         // NodeAddress nodeAddr = new NodeAddress(address, port);
         String address = ipAddress;
         try {
-            InetAddress currAddress = InetAddress.getLocalHost();
-            
-            if (ipAddress.equals(currAddress.getHostAddress())) {
-                address = LOCAL_HOST_ADDRESS;
-            }
+//            InetAddress currAddress = InetAddress.getLocalHost();
+//            
+//            if (ipAddress.equals(currAddress.getHostAddress())) {
+//                address = LOCAL_HOST_ADDRESS;
+//            }
             if (b != null) {
                 channel = b.connect(address, port).sync().channel();
                 // this.channelMaps.put(nodeAddr, channel);

@@ -350,7 +350,8 @@ public class QueryRequestUtil {
                 for(ResultRecord record : transList){
                     ResultRecord vRecord = DeepcopyUtils.deepCopy(record);
                     vRecord.setField(properties, allDimVal.get(properties));
-                    generateGroupBy(vRecord, groupList);
+//                    generateGroupBy(vRecord, groupList);
+                    vRecord.setGroupBy(allDimVal.get(properties));
                     summaryCalcList.add(vRecord);
                 }
                 transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));

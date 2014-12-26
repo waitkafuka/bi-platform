@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.tesseract.node.service;
 
+import java.net.InetAddress;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -49,10 +51,7 @@ public class IndexAndSearchServer {
      * LOGGER
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexAndSearchServer.class);
-    /**
-     * IP
-     */
-    public static final String IP = "localhost";
+   
     
     /**
      * BIZGROUPSIZE
@@ -176,8 +175,8 @@ public class IndexAndSearchServer {
             // f.channel().closeFuture().sync();
             
             int currPort = NetworkUtils.getAvailablePort(this.node.getPort());
-            
-            ChannelFuture f = b.bind(IP, currPort).sync();
+            String hostIp=InetAddress.getLocalHost().getHostAddress();
+            ChannelFuture f = b.bind(hostIp, currPort).sync();
             
             if (currPort != this.node.getPort()) {
                 this.node.setPort(currPort);
