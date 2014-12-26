@@ -19,8 +19,8 @@ define([
         return Backbone.View.extend({
             // 事件
             events: {
-                'change #component-group-selector': 'showCompByGroup',
-                'click .j-component-box-fold': 'fold'
+                'change #component-group-selector': 'showCompByGroup'
+                //'click .j-component-box-fold': 'fold'
             },
 
             /**
@@ -35,7 +35,7 @@ define([
                 });
                 this.canvasView = option.canvasView;
 
-                this.$el.append(mainTemplate.render(this.model.config));
+                this.$el.find('.component-menu').append(mainTemplate.render(this.model.config));
                 this.showCompByGroup();
                 this.initDrag();
             },
@@ -47,8 +47,6 @@ define([
              */
             showCompByGroup: function () {
                 var $cbox = this.$el.find('.j-con-component-box');
-                $cbox.find('.j-con-component').hide();
-
                 var selectedComponentGroupId = ''
                     + $cbox.find('#component-group-selector').val();
                 var compConSelector = ''
@@ -96,7 +94,7 @@ define([
                         var compType = ui.helper.attr('data-component-type');
                         var compData = that.model.getComponentData(compType);
                         startScrollTop = $report.scrollTop();
-
+                        $('.j-all-menus').hide();
                         ui.helper.html('临时展示').css({
                             'width': '100px',
                             'height': '100px',
@@ -114,28 +112,28 @@ define([
                 });
             },
 
-            /**
-             * 折叠/展开组件工具箱
-             * @param {event} event 点击事件
-             *
-             * @public
-             */
-            fold: function (event) {
-                var $target = $(event.target);
-                var $box = $target.parents('.j-con-component-box');
-                var boxSize = 25;
-
-                if ($box.width() > boxSize) {
-                    $box.width(boxSize).height(boxSize);
-                    $target.html('+');
-                    $box.find('select').hide();
-                }
-                else {
-                    $box.width(160).height('auto');
-                    $target.html('-');
-                    $box.find('select').show();
-                }
-            },
+//            /**
+//             * 折叠/展开组件工具箱
+//             * @param {event} event 点击事件
+//             *
+//             * @public
+//             */
+//            fold: function (event) {
+//                var $target = $(event.target);
+//                var $box = $target.parents('.j-con-component-box');
+//                var boxSize = 25;
+//
+//                if ($box.width() > boxSize) {
+//                    $box.width(boxSize).height(boxSize);
+//                    $target.html('+');
+//                    $box.find('select').hide();
+//                }
+//                else {
+//                    $box.width(160).height('auto');
+//                    $target.html('-');
+//                    $box.find('select').show();
+//                }
+//            },
 
             /**
              * 销毁view

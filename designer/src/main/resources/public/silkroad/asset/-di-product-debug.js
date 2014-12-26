@@ -91,6 +91,7 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.helper/snippet-parser.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.helper/util.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.arg/arg-handler-factory.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/echart-topn.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/hidden-input.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/multi-checkbox.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/offline-download.js" type="text/javascript"><\/script>' );

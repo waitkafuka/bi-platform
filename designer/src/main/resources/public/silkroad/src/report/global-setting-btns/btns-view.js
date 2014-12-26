@@ -33,34 +33,34 @@ define([
              * @public
              */
             setGlobal: function () {
-//                dialog.showDialog({
-//                    content: ParaBtnTemplate.render(),
-//                    title: '参数维度设置',
-//                    dialog: {
-//                        height: 400,
-//                        width: 400,
-//                        open: function () {
-//                            var $this = $(this);
-//                            // 删除维度事件绑定
-//                            $this.on('click', '.j-global-close', function () {
-//                                $(this).parent().remove();
-//                            });
-//                            // 创建维度事件绑定
-//                            $this.find('.j-global-add').click(function () {
-//                                var $clone = $('.j-con-global-attr').find('.j-global-attr').clone(true);
-//                                $('.j-global-box').append($clone);
-//                            });
-//                        },
-//                        buttons: {
-//                            '确认': function () {
-//                                $(this).dialog('close');
-//                            },
-//                            '取消': function () {
-//                                $(this).dialog('close');
-//                            }
-//                        }
-//                    }
-//                });
+                dialog.showDialog({
+                    content: ParaBtnTemplate.render(),
+                    title: '参数维度设置',
+                    dialog: {
+                        height: 400,
+                        width: 400,
+                        open: function () {
+                            var $this = $(this);
+                            // 删除维度事件绑定
+                            $this.on('click', '.j-global-close', function () {
+                                $(this).parent().remove();
+                            });
+                            // 创建维度事件绑定
+                            $this.find('.j-global-add').click(function () {
+                                var $clone = $('.j-con-global-attr').find('.j-global-attr').clone(true);
+                                $('.j-global-box').append($clone);
+                            });
+                        },
+                        buttons: {
+                            '确认': function () {
+                                $(this).dialog('close');
+                            },
+                            '取消': function () {
+                                $(this).dialog('close');
+                            }
+                        }
+                    }
+                });
             },
             // 参数区域按钮属性
             btnBox: [

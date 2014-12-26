@@ -18,6 +18,7 @@ define([
         'report/edit/canvas/vui-setting-select-template',
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
+        'report/edit/canvas/topn-setting-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
         'report/edit/canvas/norm-info-depict-template',
@@ -35,6 +36,7 @@ define([
         vuiSettingSelectTemplate,
         defaultSelectedTimeSettingTemplate,
         dataFormatSettingTemplate,
+        topnSettingTemplate,
         FloatWindow,
         indMenuTemplate,
         normInfoDepictTemplate,
@@ -47,6 +49,7 @@ define([
                 'click .j-report': 'removeCompEditBar',
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
+                'click .j-set-topn': 'getTopnList',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
                 'click .j-others-operate': 'getFilterBlankLine',
@@ -891,7 +894,7 @@ define([
                         content: html,
                         dialog: {
                             width: 340,
-                            height: 400,
+                            height: 300,
                             resizable: false,
                             buttons: [
                                 {
@@ -923,6 +926,70 @@ define([
                         data[name] = $this.val();
                     });
                     that.model.saveDataFormatInfo(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
+            },
+            /**
+             * 获取topn数据信息
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getTopnList: function (event) {
+                var that = this;
+                var compId = that.getActiveCompId();
+
+                that.model.getTopnList(compId, openTopnDialog);
+                function openTopnDialog(data) {
+                    var html;
+                    if (!data.indList) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+                    html = topnSettingTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: 'topn设置',
+                        content: html,
+                        dialog: {
+                            width: 340,
+                            height: 400,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveTopnFormInfo($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveTopnFormInfo($dialog) {
+                    var selects = $('.topn-indlist').find('select');
+                    var $input = $('.topn-indlist').find('input');
+                    var data = {};
+
+                    selects.each(function () {
+                        var $this = $(this);
+                        var name = $this.attr('name');
+                        data[name] = $this.val();
+                    });
+                    data[$input.attr('name')] = $input.val();
+                    that.model.saveTopnInfo(compId, data, function () {
                         $dialog.dialog('close');
                         that.canvasView.showReport();
                     });
@@ -1000,7 +1067,7 @@ define([
              * @param {event} event 点击事件
              * @public
              */
-            getFilterBlankLine: function (event) { //TODO:实现业务逻辑
+            getFilterBlankLine: function (event) { // TODO:实现业务逻辑
                 var that = this;
                 var compId = that.getActiveCompId();
                 that.model.getFilterBlankLine(compId, openDataFormatDialog);

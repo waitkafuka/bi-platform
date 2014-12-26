@@ -131,7 +131,6 @@ define(['url', 'constant'], function (Url, Constant) {
                 }
             });
         },
-
         /**
          * 获取数据格式数据
          *
@@ -139,8 +138,6 @@ define(['url', 'constant'], function (Url, Constant) {
          * @public
          */
         getDataFormatList: function (compId, success) {
-            var that = this;
-
             $.ajax({
                 url: Url.getDataFormatList(this.reportId, compId),
                 type: 'get',
@@ -178,7 +175,36 @@ define(['url', 'constant'], function (Url, Constant) {
                 }
             });
         },
+        /**
+         * 获取topn设置信息
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        getTopnList: function (compId, success) {
+            var that = this;
+            that.getCompAxis(compId, getTopnAjax);
+            var xyList;
+            function getTopnAjax(xyData) {
+                xyList = xyData;
+                $.ajax({
+                    url: Url.getTopnList(that.reportId, compId),
+                    type: 'get',
+                    success: function (data) {
+                        var sourceData = data.data ? data.data: {};
+                        // 缺少选中指标的数据
+                        sourceData.indList = xyList.yAxis;
+                        sourceData.topTypeList = {
+                            NONE: 'none',
+                            DESC: 'bottom',
+                            ASC: 'top'
+                        };
+                        success(sourceData);
+                    }
+                });
+            }
 
+        },
         /**
          * 获取数据格式数据
          *
@@ -186,8 +212,6 @@ define(['url', 'constant'], function (Url, Constant) {
          * @public
          */
         getNormInfoDepict: function (compId, success) {
-            var that = this;
-
             $.ajax({
                 url: Url.getNormInfoDepict(this.reportId, compId),
                 type: 'get',
@@ -286,7 +310,25 @@ define(['url', 'constant'], function (Url, Constant) {
                 }
             });
         },
-
+        /**
+         * 提交topn数据
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        saveTopnInfo: function (compId, data, success) {
+            var formData = {
+                top: JSON.stringify(data)
+            };
+            $.ajax({
+                url: Url.getTopnList(this.reportId, compId),
+                type: 'POST',
+                data: formData,
+                success: function () {
+                    success();
+                }
+            });
+        },
         /**
          * 提交指标描述信息
          *

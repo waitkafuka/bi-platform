@@ -14,11 +14,46 @@ define([
             /**
              * 构造函数
              *
-             * @constructor
              */
             initialize: function () {
                 var that = this;
-                this.$el.find('.j-global-menu').append(ComponentMenuTemplate);
+            },
+
+            /**
+             * 组件区域下拉框
+             *
+             */
+            componentMenu: function () {
+                return ComponentMenuTemplate.render();
+            },
+
+            /**
+             * 功能区域切换菜单
+             *
+             * @public
+             */
+            shiftMenu : function (event) {
+                var nowid = $(event.target).parent().attr('id');
+                var $menu = $('.global-menus').not('#' + nowid);
+                $menu.hide();
+                var $nowmenu = $('.comp-menu').find('#' + nowid);
+                if ($nowmenu.css('display') == 'none') {
+                    $nowmenu.show();
+                }
+                else {
+                    $nowmenu.hide();
+                }
+
+//                for (var i = 0; i<$menu.length; i ++) {
+//                    if ($($menu[i]).attr('id') == id) {
+//                        if ($($menu[i]).css('display') == 'none') {
+//                            $($menu[i]).show();
+//                        }
+//                        else {
+//                            $($menu[i]).hide();
+//                        }
+//                    }
+//                }
             }
 
         });
