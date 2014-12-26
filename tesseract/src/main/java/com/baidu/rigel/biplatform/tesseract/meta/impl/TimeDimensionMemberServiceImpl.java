@@ -714,7 +714,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         }
         List<MiniCubeMember> members = getMembers(cube, name, level, dataSourceInfo, parent, params);
         for (MiniCubeMember m : members) {
-            if (name.equals(m.getName())) {
+            if (name.equals(m.getName()) || m.getQueryNodes().contains(name)) {
                 return m;
             }
         }
