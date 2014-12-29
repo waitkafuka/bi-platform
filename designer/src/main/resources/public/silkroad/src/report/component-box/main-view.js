@@ -100,7 +100,7 @@ define([
                             'height': '100px',
                             'cursor': 'move',
                             'background': '#ffffff'
-                        }).addClass('active shell-component');
+                        }).addClass('active shell-component j-component-border');
                         ui.helper.attr('data-default-width', compData.defaultWidth);
                         ui.helper.attr('data-default-height', compData.defaultHeight);
                         ui.helper.attr('data-sort-startScrrolTop', ui.helper.parent().scrollTop());
@@ -112,28 +112,30 @@ define([
                 });
             },
 
-//            /**
-//             * 折叠/展开组件工具箱
-//             * @param {event} event 点击事件
-//             *
-//             * @public
-//             */
-//            fold: function (event) {
-//                var $target = $(event.target);
-//                var $box = $target.parents('.j-con-component-box');
-//                var boxSize = 25;
-//
-//                if ($box.width() > boxSize) {
-//                    $box.width(boxSize).height(boxSize);
-//                    $target.html('+');
-//                    $box.find('select').hide();
-//                }
-//                else {
-//                    $box.width(160).height('auto');
-//                    $target.html('-');
-//                    $box.find('select').show();
-//                }
-//            },
+            /**
+             * 折叠/展开组件工具箱
+             * @param {event} event 点击事件
+             *
+             * @public
+             */
+            /**
+            fold: function (event) {
+                var $target = $(event.target);
+                var $box = $target.parents('.j-con-component-box');
+                var boxSize = 25;
+
+                if ($box.width() > boxSize) {
+                    $box.width(boxSize).height(boxSize);
+                    $target.html('+');
+                    $box.find('select').hide();
+                }
+                else {
+                    $box.width(160).height('auto');
+                    $target.html('-');
+                    $box.find('select').show();
+                }
+            },
+            **/
 
             /**
              * 销毁view
