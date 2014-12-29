@@ -16,7 +16,6 @@
 package com.baidu.rigel.biplatform.ma.rt.resource;
 
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
