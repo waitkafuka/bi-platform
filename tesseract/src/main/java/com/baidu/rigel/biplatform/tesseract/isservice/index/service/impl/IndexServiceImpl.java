@@ -681,7 +681,7 @@ public class IndexServiceImpl implements IndexService {
             
             for (Node node : idxShard.getReplicaNodeList()) {
                 int retryTimes = 0;
-                String targetFilePath = idxShard.getAbsoluteFilePath(node);
+                String targetFilePath = idxShard.getAbsoluteIdxFilePath(node);
                 ServerFeedbackMessage backMessage = null;
                 while (retryTimes < TesseractConstant.RETRY_TIMES) {
                     backMessage = isClient.copyIndexDataToRemoteNode(absoluteIdxFilePath,

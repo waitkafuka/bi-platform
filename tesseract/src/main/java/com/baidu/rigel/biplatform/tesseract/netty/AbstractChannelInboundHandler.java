@@ -103,7 +103,7 @@ public abstract class AbstractChannelInboundHandler extends ChannelInboundHandle
     public final void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         System.out.println("mamaammamamamama-------"+this.getClass());
         AbstractMessage message = (AbstractMessage) msg;
-//        System.out.println("kkkkkkkkkkkkkkkk-------"+message);
+        System.out.println("kkkkkkkkkkkkkkkk-------"+message);
 //        System.out.println("current support is : "+this.supportedAction);
         if (message.getMessageHeader() == null) {
         	System.out.println("messageHeader is null");
