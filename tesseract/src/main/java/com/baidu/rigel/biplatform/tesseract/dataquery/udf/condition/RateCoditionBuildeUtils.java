@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 
 /**
@@ -44,7 +45,7 @@ public final class RateCoditionBuildeUtils {
 	 * @return QueryContext
 	 */
 	public static QueryContext decorateQueryContext(QueryContext queryContext, 
-			QuestionModel questionModel, Cube cube, DataSourceInfo dataSourceInfo) {
-		return new QueryContextAdapter(queryContext, questionModel, cube, dataSourceInfo);
+			QuestionModel questionModel, Cube cube, DataSourceInfo dataSourceInfo, QueryContextBuilder builder) {
+		return new QueryContextAdapter(queryContext, questionModel, cube, dataSourceInfo, builder);
 	}
 }

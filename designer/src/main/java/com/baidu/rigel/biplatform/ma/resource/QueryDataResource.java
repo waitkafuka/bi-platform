@@ -1310,7 +1310,11 @@ public class QueryDataResource extends BaseResource {
     		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
     		ResultSet rs = new ResultSet();
     		model.getColumnHeadFields().forEach(headField -> {
-    			headField.getExtInfos().put("sortType", sortType.name());
+    			if (headField.getValue().equals(uniqueName)) {
+    				headField.getExtInfos().put("sortType", sortType.name());
+    			} else {
+    				headField.getExtInfos().put("sortType", "NONE");
+    			}
     		});
     		rs.setDataModel(model);
     		context.getQueryStatus().add(rs);

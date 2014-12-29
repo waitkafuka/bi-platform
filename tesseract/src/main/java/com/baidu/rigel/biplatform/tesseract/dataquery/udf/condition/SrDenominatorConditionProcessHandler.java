@@ -48,10 +48,18 @@ class SrDenominatorConditionProcessHandler extends RateConditionProcessHandler {
 		 * 如果时间粒度是月，则同期时间为去年的当月 如果时间粒度是季度，则统计周期为去年的当季度 如果时间粒度是年，则同期时间为去年
 		 * 需要QueryContext提供：时间维度定义，当前时间维度过滤条件，此处修改时间范围后，重新设置到查询上下文
 		 */
-		// TODO 确认一下如何获取时间维度并获取当前时间粒度第一天
-		TimeDimension dimension = null;
+		QueryContextAdapter adapter = (QueryContextAdapter) context;
+		TimeDimension dimension = getTimeDimension(adapter);
+		if (dimension == null) {
+			throw new IllegalStateException("计算同环比必须包含时间维度，请确认查询结果");
+		}
 		TimeType timeType = dimension.getDataTimeType();
 		Date firstDayOfTimeRange = null;
+		try {
+			firstDayOfTimeRange = getFirstDayOfTimeDim(dimension, adapter);
+		} catch (Exception e1) {
+			throw new RuntimeException(e1);
+		}
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(firstDayOfTimeRange);
 		// 将时间调整为上年的同天
@@ -90,10 +98,9 @@ class SrDenominatorConditionProcessHandler extends RateConditionProcessHandler {
 		if (timeRange == null) {
 			throw new RuntimeException("未知的时间维度类型：" + timeType.name());
 		}
-		// TODO 确认当前统计周期的成员数量，从前一统计周期获取相同数量成员
 		String[] days = timeRange.getDays();
-		// TODO 确认一下如何修改条件并返回context
-		return null;
+		QueryContext rs = createOrModifyNewContext(days, dimension, adapter);
+		return rs;
 	}
 
 }
