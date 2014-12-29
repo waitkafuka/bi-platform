@@ -13,26 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.report.service;
-
-import java.util.Map;
-
-import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
-import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 
 /**
- * 
- * 图形构建服务
- * @author zhongyi
+ * Description: 同环比计算方式策略，目前共分为四种：同比分子计算，同比分母计算，环比分子计算，环比分母计算
+ * @author davie.wang
  *
- *         2014-8-14
  */
-public interface ChartBuildService {
-    
-    /**
-     * 
-     * @param tableResult
-     * @return
-     */
-    DIReportChart parseToChart(PivotTable tableResult, Map<String, String> chartType, boolean isTimeChart);
+public enum RateCalStrategy {
+	
+	/**
+	 * 同比分子
+	 */
+	SR_NUMERATOR,
+	
+	/**
+	 * 环比分子
+	 */
+	RR_NUMERATOR,
+	
+	/**
+	 * 同比分母
+	 */
+	SR_DENOMINATOR,
+	
+	/**
+	 * 环比分母
+	 */
+	RR_DENOMINATOR;
 }

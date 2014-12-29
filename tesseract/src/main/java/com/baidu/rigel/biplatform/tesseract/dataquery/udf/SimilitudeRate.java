@@ -18,12 +18,8 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf;
 import java.util.Map;
 import java.util.Set;
 
-import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
-import com.baidu.rigel.biplatform.parser.node.Node;
-import com.baidu.rigel.biplatform.parser.node.impl.RateFunNode;
-import com.baidu.rigel.biplatform.parser.node.impl.VariableNode;
-import com.google.common.collect.Sets;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateCondition.RateType;
 
 /**
  * 
@@ -31,7 +27,7 @@ import com.google.common.collect.Sets;
  * @author david.wang
  *
  */
-public class SimilitudeRate extends RateFunNode {
+public class SimilitudeRate extends TesseractRateFunction {
 
 	/**
 	 * serialVersionUID
@@ -49,29 +45,11 @@ public class SimilitudeRate extends RateFunNode {
 
 	/* 
 	 * (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.parser.node.FunctionNode#preSetNodeResult(com.baidu.rigel.biplatform.parser.context.CompileContext)
-	 */
-	@Override
-	protected void preSetNodeResult(CompileContext context) {
-		// TODO Auto-generated method stub
-		super.preSetNodeResult(context);
-	}
-
-	/* 
-	 * (non-Javadoc)
 	 * @see com.baidu.rigel.biplatform.parser.node.AbstractNode#collectVariableCondition()
 	 */
 	@Override
 	public Map<Condition, Set<String>> collectVariableCondition() {
-		Set<String> variables = Sets.newHashSet();
-		Node node = this.getArgs().get(0);
-		if (node == null || !(node instanceof VariableNode)) {
-			throw new IllegalArgumentException("错误的参数类型，");
-		}
-		VariableNode variable = (VariableNode) this.getArgs().get(0);
-		variables.add(variable.getVariableExp());
-		
-		return super.collectVariableCondition();
+		return this.collectVariableCondition(RateType.SR);
 	}
 
 	

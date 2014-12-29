@@ -13,26 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.report.service;
+package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 
-import java.util.Map;
-
-import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
-import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 
 /**
- * 
- * 图形构建服务
- * @author zhongyi
+ * Description: SrNumeratorConditionProcessHandler
+ * @author david.wang
  *
- *         2014-8-14
  */
-public interface ChartBuildService {
-    
-    /**
-     * 
-     * @param tableResult
-     * @return
-     */
-    DIReportChart parseToChart(PivotTable tableResult, Map<String, String> chartType, boolean isTimeChart);
+class SrNumeratorConditionProcessHandler extends RateConditionProcessHandler {
+
+	/* 
+	 * (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.AbsRateConditionProcessHandler#processCondition(com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext)
+	 */
+	@Override
+	public QueryContext processCondition(QueryContext context) {
+		return super.processCondition(context);
+	}
+
 }

@@ -543,11 +543,15 @@ public class DataModelUtils {
 		model.setColumnBaseData(datas);
 		// 封装行头数据
 		List<HeadField> rowHeadFields = Lists.newArrayList();
+		int originRecord = recordSize;
 		for (int i = 0; i < oriModel.getRowHeadFields().size() ; ++i) {
 			// 处理第i个节点
 			HeadField field = oriModel.getRowHeadFields().get(i);
 			// 添加处理后的第一个节点到行头
 			rowHeadFields.add(field);
+			if (i == originRecord - 1) {
+				break;
+			}
 			boolean hasNodeList = false;
 			// 如果当前行的NodeList不等于空，先处理NodeList
 			if (field.getNodeList() != null && field.getNodeList().size() > 0) {

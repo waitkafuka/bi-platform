@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -58,7 +59,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * (com.baidu.rigel.biplatform.ma.report.query.pivotTable.PivotTable)
      */
     @Override
-    public DIReportChart parseToChart(PivotTable tableResult, String[] chartType, boolean isTimeChart) {
+    public DIReportChart parseToChart(PivotTable tableResult, Map<String, String> chartType, boolean isTimeChart) {
 
         DIReportChart reportChart = new DIReportChart();
 //        reportChart.setTitle("趋势图");
@@ -70,18 +71,20 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         // continue;
         // }
         List<SeriesInputInfo> seriesInputs = Lists.newArrayList();
-        for(String type : chartType) {
+        for (int i = 0; i < chartType.size(); ++i) {
 	        	SeriesInputInfo seriesInput = new SeriesInputInfo();
-        		if (isTimeChart) {
-        			seriesInput.setType(SeriesUnitType.LINE);
-        		} else {
-        			seriesInput.setType(SeriesUnitType.valueOf(type));
-        		}
-	        	seriesInput.setyAxisName(type);
 	        	seriesInputs.add(seriesInput);
-        	
         }
-        List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInputs, tableResult);
+//        for(String type : chartType) {
+//        		if (isTimeChart) {
+//        			seriesInput.setType(SeriesUnitType.LINE);
+//        		} else {
+//        			seriesInput.setType(SeriesUnitType.valueOf(type));
+//        		}
+//	        	seriesInput.setyAxisName(type);
+//        	
+//        }
+        List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInputs, tableResult, chartType, isTimeChart);
         reportChart.getSeriesData().addAll(seriesUnits);
         // }
         // ChartMetaData chartMeta = new ChartMetaData();
@@ -176,9 +179,12 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * 
      * @param seriesInput
      * @param pTable
+     * @param isTimeChart 
+     * @param chartType 
      * @return
      */
-    private List<SeriesDataUnit> getSeriesUnitsByInputUnit(List<SeriesInputInfo> seriesInput, PivotTable pTable) {
+    private List<SeriesDataUnit> getSeriesUnitsByInputUnit(List<SeriesInputInfo> seriesInput, 
+    			PivotTable pTable, Map<String, String> chartType, boolean isTimeChart) {
 
         List<SeriesDataUnit> units = Lists.newArrayList();
 
@@ -189,6 +195,16 @@ public class ChartBuildServiceImpl implements ChartBuildService {
             // TODO the showName should be put in generateSeriesBranch method as
             // third parameter.
             SeriesInputInfo info = seriesInput.get(i);
+            if (isTimeChart) {
+            		info.setType(SeriesUnitType.LINE);
+            } else {
+            		String tmp = chartType.get(col.getUniqueName());
+            		if (tmp == null) {
+            			info.setType(SeriesUnitType.COLUMN);
+            		} else {
+            			info.setType(SeriesUnitType.valueOf(tmp.toUpperCase()));
+            		}
+            }
             SeriesDataUnit branchData = null;
             if (info.getType() == SeriesUnitType.MAP) {
             		List<RowHeadField> rowHeadFields = pTable.getRowHeadFields().get(0);

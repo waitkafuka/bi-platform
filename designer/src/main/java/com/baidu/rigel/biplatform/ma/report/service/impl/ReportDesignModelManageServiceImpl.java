@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -160,6 +161,8 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
 	            			item.setPositionType(PositionType.CAND_IND);
 	            			area.addSelectionMeasureItem(item);
 	            		}
+                } else {
+                		changeSelItemChartType(item, area);
                 }
             } else {
                 addNewInfoIntoArea(ori, areaId, item, position, area);
@@ -169,6 +172,38 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
             return null;
         }
     }
+
+	/**
+	 * @param item
+	 * @param area
+	 */
+	private void changeSelItemChartType(Item item, ExtendArea area) {
+		final Object chartType = item.getParams().get("chartType");
+		if (chartType == null) {
+			return;
+		}
+		
+		if (area.getLogicModel() == null || area.getLogicModel().getSelectionMeasures() == null) {
+			return;
+		}
+		Map<String, Item> tmpMap = DeepcopyUtils.deepCopy(area.getLogicModel().getSelectionMeasures());
+		tmpMap.forEach((k, v) -> {
+			Object tmp = v.getParams().get("chartType");
+			final String chartTypeKey = "chartType";
+			if (tmp != null) {
+				if ("column".equalsIgnoreCase(chartType.toString()) || "line".equalsIgnoreCase(chartType.toString())) {
+					if (!"column".equalsIgnoreCase(tmp.toString()) && !"line".equalsIgnoreCase(tmp.toString())) {
+						v.getParams().put(chartTypeKey, chartType);
+					}
+				} else {
+					v.getParams().put(chartTypeKey, chartType);
+				}
+			} else {
+				v.getParams().put(chartTypeKey, chartType);;
+			}
+			area.getLogicModel().getSelectionMeasures().put(k, v);
+		}); 
+	}
     
     /**
      * 

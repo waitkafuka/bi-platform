@@ -18,9 +18,8 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf;
 import java.util.Map;
 import java.util.Set;
 
-import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
-import com.baidu.rigel.biplatform.parser.node.impl.RateFunNode;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateCondition.RateType;
 
 /**
  * 
@@ -28,20 +27,20 @@ import com.baidu.rigel.biplatform.parser.node.impl.RateFunNode;
  * @author david.wang
  *
  */
-public class RelativeRate extends RateFunNode {
+public class RelativeRate extends TesseractRateFunction {
 
 	/**
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = 1995442354532812165L;
-	
+
 	/* 
 	 * (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.parser.node.FunctionNode#preSetNodeResult(com.baidu.rigel.biplatform.parser.context.CompileContext)
+	 * @see com.baidu.rigel.biplatform.parser.node.impl.RateFunNode#getName()
 	 */
 	@Override
-	protected void preSetNodeResult(CompileContext context) {
-		super.preSetNodeResult(context);
+	public String getName() {
+		return "rRate";
 	}
 
 	/* 
@@ -50,7 +49,7 @@ public class RelativeRate extends RateFunNode {
 	 */
 	@Override
 	public Map<Condition, Set<String>> collectVariableCondition() {
-		return super.collectVariableCondition();
+		return this.collectVariableCondition(RateType.RR);
 	}
 
 }

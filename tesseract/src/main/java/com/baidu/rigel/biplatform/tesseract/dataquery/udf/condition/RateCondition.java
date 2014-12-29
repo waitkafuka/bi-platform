@@ -16,13 +16,42 @@
 package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 
 import com.baidu.rigel.biplatform.parser.context.Condition;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 
 /**
- * 
+ * 同环比计算条件定义
  * @author david.wang
  *
  */
 public class RateCondition implements Condition {
+ 
+	/**
+	 * isNumberator
+	 */
+	public final boolean isNumerator;
+	
+	/**
+	 * rateType
+	 */
+	public final RateType rateType;
+	
+	/**
+	 * variableName
+	 */
+	public final String variableName;
+	
+	/**
+	 * 构造函数
+	 * @param isNumerator
+	 * @param rateType
+	 * @param variableName
+	 */
+	public RateCondition(boolean isNumerator, RateType rateType, String variableName) {
+		super();
+		this.variableName = variableName;
+		this.isNumerator = isNumerator;
+		this.rateType = rateType;
+	}
 
 	/**
 	 * serialVersionUID
@@ -34,15 +63,59 @@ public class RateCondition implements Condition {
 	 */
 	@Override
 	public ConditionType getConditionType() {
-		return null;
+		return ConditionType.Other;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T processCondition(T source) {
-		return null;
+		if (!(source instanceof QueryContext)) {
+			throw new IllegalArgumentException("请求参数必须为QueryContext");
+		}
+		QueryContext context = (QueryContext) source;
+		RateCalStrategy strategy = genRateCalStrategy();
+		return (T) RateConditionProcessHandlerFactory.getInstance(strategy).processCondition(context);
+	}
+	
+	/**
+	 * 
+	 * @param numerator
+	 * @param rateType
+	 * @return RateCalStrategy
+	 */
+	private RateCalStrategy genRateCalStrategy() {
+		if (this.rateType == null) {
+			throw new IllegalStateException("计算类型为空");
+		}
+		switch (this.rateType) {
+			case RR:
+				return isNumerator ? RateCalStrategy.RR_NUMERATOR : RateCalStrategy.RR_DENOMINATOR;
+			case SR:
+				return isNumerator ? RateCalStrategy.SR_NUMERATOR : RateCalStrategy.SR_DENOMINATOR;
+		}
+		throw new IllegalStateException("未知计算请求");
+	}
+
+
+	/**
+	 * 
+	 * 同比/环比类型定义
+	 * @author david.wang
+	 *
+	 */
+	public static enum RateType {
+		/**
+		 * 同比
+		 */
+		SR,
+		
+		/**
+		 * 环比
+		 */
+		RR;
 	}
 
 }

@@ -430,6 +430,7 @@ public class IndexAndSearchClient {
                         + File.separator + fin.getName());
                 if (isFirst) {
                     sfm.setFirst(isFirst);
+                    isFirst=false;
                 } else {
                     sfm.setFirst(false);
                 }

@@ -677,7 +677,7 @@ public class QueryDataResource extends BaseResource {
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
-            String[] chartType = getChartTypeWithExtendArea(targetArea);
+            Map<String, String> chartType = getChartTypeWithExtendArea(model, targetArea);
             if (action.getRows().size() == 1) {
                 Item item = action.getRows().keySet().toArray(new Item[0])[0];
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
@@ -725,24 +725,35 @@ public class QueryDataResource extends BaseResource {
      * @param targetArea ExtendArea
      * @return SeriesUnitType
      */
-    private String[] getChartTypeWithExtendArea(ExtendArea targetArea) {
+    private Map<String, String> getChartTypeWithExtendArea(ReportDesignModel model, ExtendArea targetArea) {
+    		Map<String, String> chartTypes = Maps.newHashMap();
     		if (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
-    			return new String[]{SeriesUnitType.LINE.name()};
+    			chartTypes.put("null", SeriesUnitType.LINE.name());
+    			return chartTypes;
+//    			return new String[]{SeriesUnitType.LINE.name()};
     		}
-    		List<String> types = Lists.newArrayList();
+//    		List<String> types = Lists.newArrayList();
     		targetArea.listAllItems().values().stream().filter(item -> {
     			return item.getPositionType() == PositionType.Y 
     					|| item.getPositionType() == PositionType.CAND_IND;
-    		}).map(item -> {
-    			return item.getParams().get("chartType");
-    		}).forEach(str -> {
-    			if (StringUtils.isEmpty(str)) {
-    				types.add(SeriesUnitType.COLUMN.name());
+    		}).forEach(item -> {
+    			OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
+                        targetArea.getCubeId(), item.getOlapElementId());
+    			Object chartType = item.getParams().get("chartType");
+    			if (chartType == null) {
+    				chartTypes.put(element.getUniqueName(), SeriesUnitType.COLUMN.name());
     			} else {
-    				types.add(str.toString().toUpperCase());
+    				chartTypes.put(element.getUniqueName(), chartType.toString());
     			}
     		});
-		return types.toArray(new String[0]);
+//    		.forEach(str -> {
+//    			if (StringUtils.isEmpty(str)) {
+//    				types.add(SeriesUnitType.COLUMN.name());
+//    			} else {
+//    				types.add(str.toString().toUpperCase());
+//    			}
+//    		});
+		return chartTypes;
 	}
 
 	/**
@@ -1310,7 +1321,11 @@ public class QueryDataResource extends BaseResource {
     		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
     		ResultSet rs = new ResultSet();
     		model.getColumnHeadFields().forEach(headField -> {
-    			headField.getExtInfos().put("sortType", sortType.name());
+    			if (headField.getValue().equals(uniqueName)) {
+    				headField.getExtInfos().put("sortType", sortType.name());
+    			} else {
+    				headField.getExtInfos().put("sortType", "NONE");
+    			}
     		});
     		rs.setDataModel(model);
     		context.getQueryStatus().add(rs);
