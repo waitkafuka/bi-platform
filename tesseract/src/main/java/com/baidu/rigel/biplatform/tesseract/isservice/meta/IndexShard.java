@@ -40,7 +40,7 @@ public class IndexShard implements Serializable {
     /**
      * 默认复本数
      */
-    private static final int DEFAULT_SHARD_REPLICA_NUM = 1;
+    private static final int DEFAULT_SHARD_REPLICA_NUM = 2;
     
     /**
      * 分区名称：productLine_facttable_shard_shardId
