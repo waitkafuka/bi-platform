@@ -296,8 +296,9 @@ public class LogicModel implements Serializable {
     }
     
     public Item getItemByOlapElementId(String olapElementId) {
-        Map<String, Item> allItems = collectItems();
-        return allItems.get(olapElementId);
+//        Map<String, Item> allItems = collectItems();
+//        return allItems.get(olapElementId);
+    		return this.getItem(olapElementId);
     }
     
     public boolean containsOlapElement(String olapElementId) {
