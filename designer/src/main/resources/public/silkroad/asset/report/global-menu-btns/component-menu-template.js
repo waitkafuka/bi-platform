@@ -1,1 +1,1 @@
-define(["template"],function(a){function b(b){"use strict";b=b||{};var c=a.utils,d=(c.$helpers,"");return d+='<div class="component-menu">\r\n11111111111111111111\r\n</div>'}return{render:b}});
+define(["template"],function(a){function b(b){"use strict";b=b||{};var c=a.utils,d=(c.$helpers,"");return d+='<div class="global-menus component-menu j-all-menus" id="component">\r\n</div>'}return{render:b}});
