@@ -231,7 +231,7 @@ public class DataSourceResource extends BaseResource {
             } else {
                 String productLine = ContextManager.getProductLine();
                 assignNewValue(productLine, request, define);
-                define.setDbPwd(AesUtil.getInstance().decodeAnddecrypt(define.getDbPwd()));
+                define.setDbPwd(define.getDbPwd());
                 dsService.saveOrUpdateDataSource(define);
                 logger.info("successfully update datasource with id " + id);
                 rs.setStatus(0);
