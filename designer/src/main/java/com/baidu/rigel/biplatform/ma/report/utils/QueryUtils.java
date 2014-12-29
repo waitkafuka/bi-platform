@@ -124,7 +124,7 @@ public class QueryUtils {
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
         SortType sortType = SortType.valueOf(orderDesc.getOrderType());
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
-        String uniqueName = "{[Measures].[" +orderDesc.getName()+ "]}";
+        String uniqueName = "[Measure][" +orderDesc.getName()+ "]";
         SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
         questionModel.setSortRecord(sortRecord);
         return questionModel;
@@ -221,10 +221,11 @@ public class QueryUtils {
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
-                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "s]";
+                    // TODO 需要排查为何多处根节点UniqueName不一致
+                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName();
                     // TODO QeuryData value如何处理
                     for (String value : values) {
-                        if (!queryAction.isChartQuery() && value.equals(rootUniqueName)) {
+                        if (!queryAction.isChartQuery() && value.indexOf(rootUniqueName) != -1) {
                             datas.clear();
                             break;
                         }

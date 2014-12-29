@@ -1,2 +1,2 @@
-biplatform.fileserver.rootdir=/tmp
+biplatform.fileserver.rootdir=d:/report
 biplatform.fileserver.port=9090
