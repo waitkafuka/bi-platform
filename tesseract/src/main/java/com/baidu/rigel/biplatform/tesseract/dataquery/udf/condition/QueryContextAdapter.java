@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 
 /**
@@ -51,6 +52,8 @@ public class QueryContextAdapter extends QueryContext {
 	 * dataSoruceInfo
 	 */
 	private final DataSourceInfo dataSoruceInfo;
+	
+	private final QueryContextBuilder builder;
 
 	/**
 	 * 构造函数
@@ -61,12 +64,13 @@ public class QueryContextAdapter extends QueryContext {
 	 */
 	public QueryContextAdapter(QueryContext queryContext,
 			QuestionModel questionModel, Cube cube,
-			DataSourceInfo dataSoruceInfo) {
+			DataSourceInfo dataSoruceInfo, QueryContextBuilder builder) {
 		super();
 		this.queryContext = queryContext;
 		this.questionModel = questionModel;
 		this.cube = cube;
 		this.dataSoruceInfo = dataSoruceInfo;
+		this.builder = builder;
 	}
 
 	/**
@@ -95,6 +99,13 @@ public class QueryContextAdapter extends QueryContext {
 	 */
 	public DataSourceInfo getDataSoruceInfo() {
 		return dataSoruceInfo;
+	}
+
+	/**
+	 * @return the builder
+	 */
+	public QueryContextBuilder getBuilder() {
+		return builder;
 	}
 	
 }

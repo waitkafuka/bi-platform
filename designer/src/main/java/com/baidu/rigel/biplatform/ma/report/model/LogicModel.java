@@ -274,14 +274,20 @@ public class LogicModel implements Serializable {
 	 * @return Item
 	 */
     public Item getItem(String itemId) {
+    		// TODO 优先查找非选择轴上的，此处需要优化
         Map<String, Item> allItems = collectItems();
-//        allItems.putAll(this.columns);
-//        allItems.putAll(this.rows);
-//        allItems.putAll(this.slices);
-//        allItems.putAll(this.getSelectionDims());
-//        allItems.putAll(this.getSelectionMeasures());
+        allItems.putAll(this.columns);
+        allItems.putAll(this.rows);
+        allItems.putAll(this.slices);
         for (Item item : allItems.values()) {
-            // TODO 需要确认这里没有问题
+            if (item.getOlapElementId().equals(itemId)) {
+                return item;
+            }
+        }
+        allItems.clear();
+        allItems.putAll(this.getSelectionDims());
+        allItems.putAll(this.getSelectionMeasures());
+        for (Item item : allItems.values()) {
             if (item.getOlapElementId().equals(itemId)) {
                 return item;
             }
@@ -290,8 +296,9 @@ public class LogicModel implements Serializable {
     }
     
     public Item getItemByOlapElementId(String olapElementId) {
-        Map<String, Item> allItems = collectItems();
-        return allItems.get(olapElementId);
+//        Map<String, Item> allItems = collectItems();
+//        return allItems.get(olapElementId);
+    		return this.getItem(olapElementId);
     }
     
     public boolean containsOlapElement(String olapElementId) {

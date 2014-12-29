@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
@@ -172,7 +173,13 @@ public class DataSourceServiceImpl implements DataSourceService {
             DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(), DBUrlGeneratorUtils.getConnUrl(ds));
             return true;
         } catch (Exception e) {
-            logger.debug(e.getMessage(), e);
+        	 	try {
+					DBInfoReader.build(ds.getType(), ds.getDbUser(), 
+							AesUtil.getInstance().decodeAnddecrypt(ds.getDbPwd()), DBUrlGeneratorUtils.getConnUrl(ds));
+					return true;
+				} catch (Exception e1) {
+					logger.error(e1.getMessage());
+				}
         } finally {
             // 关闭数据库连接
             dBInfoReader.closeConn();

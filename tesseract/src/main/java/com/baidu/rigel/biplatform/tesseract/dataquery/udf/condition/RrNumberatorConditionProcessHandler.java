@@ -30,8 +30,7 @@ class RrNumberatorConditionProcessHandler extends RateConditionProcessHandler {
 	 */
 	@Override
 	public QueryContext processCondition(QueryContext context) {
-		// 环比分子查询条件处理，此处不需要做任何处理
-		return context;
+		return super.processCondition(context);
 	}
 
 }

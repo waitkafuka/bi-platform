@@ -150,9 +150,15 @@ public class ExtendArea implements Serializable {
             allItems.put(item.getOlapElementId(), item);
         }
         logicModel.getSelectionMeasures().values().forEach(item -> {
-        		allItems.put(item.getOlapElementId(), item);
+        		if (!allItems.containsKey(item.getOlapElementId())) {
+        			allItems.put(item.getOlapElementId(), item);
+        		}
         });
-        logicModel.getSelectionDims().values().forEach(item -> allItems.put(item.getOlapElementId(), item));
+        logicModel.getSelectionDims().values().forEach(item -> {
+	        	if (!allItems.containsKey(item.getOlapElementId())) {
+	    			allItems.put(item.getOlapElementId(), item);
+	    		}
+        	});
         return allItems;
     }
     

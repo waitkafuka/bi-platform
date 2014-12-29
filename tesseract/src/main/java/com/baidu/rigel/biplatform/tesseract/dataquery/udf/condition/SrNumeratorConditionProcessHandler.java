@@ -30,8 +30,7 @@ class SrNumeratorConditionProcessHandler extends RateConditionProcessHandler {
 	 */
 	@Override
 	public QueryContext processCondition(QueryContext context) {
-		// 同比分子计算条件，此处默认不需要做任何处理
-		return context;
+		return super.processCondition(context);
 	}
 
 }

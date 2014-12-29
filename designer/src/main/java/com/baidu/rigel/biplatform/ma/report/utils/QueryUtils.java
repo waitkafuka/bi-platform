@@ -221,10 +221,11 @@ public class QueryUtils {
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
-                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName() + "s]";
+                    // TODO 需要排查为何多处根节点UniqueName不一致
+                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName();
                     // TODO QeuryData value如何处理
                     for (String value : values) {
-                        if (!queryAction.isChartQuery() && value.equals(rootUniqueName)) {
+                        if (!queryAction.isChartQuery() && value.indexOf(rootUniqueName) != -1) {
                             datas.clear();
                             break;
                         }
