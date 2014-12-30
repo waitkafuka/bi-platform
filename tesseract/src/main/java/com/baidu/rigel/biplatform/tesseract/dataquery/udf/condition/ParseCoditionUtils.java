@@ -27,12 +27,12 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
  * @author david.wang
  *
  */
-public final class RateCoditionBuildeUtils {
+public final class ParseCoditionUtils {
 
 	/**
 	 * RateCoditionBuildeUtils
 	 */
-	private RateCoditionBuildeUtils() {
+	private ParseCoditionUtils() {
 		
 	}
 	

@@ -15,10 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.qsservice.query.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -31,25 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
-import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
-import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
-import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
-import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
-import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
-import com.baidu.rigel.biplatform.ac.query.model.QueryData;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
-import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
@@ -58,6 +45,7 @@ import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchEx
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitService.QueryContextSplitStrategy;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryRequestBuilder;
@@ -67,8 +55,6 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContextSplit
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 /**
  * 查询接口实现
@@ -107,6 +93,9 @@ public class QueryServiceImpl implements QueryService {
      */
     @Resource
     private QueryContextSplitService queryContextSplitService;
+    
+    @Resource
+    private QueryContextBuilder queryContextBuilder;
 
     @Override
     public DataModel query(QuestionModel questionModel, QueryContext queryContext,
@@ -135,14 +124,12 @@ public class QueryServiceImpl implements QueryService {
         current = System.currentTimeMillis();
         try {
             queryContext =
-                    buildQueryContext(questionModel, dataSourceInfo, cube, queryContext,
-                            questionModel.getRequestParams());
+                    queryContextBuilder.buildQueryContext(questionModel, dataSourceInfo, cube, queryContext);
         } catch (MetaException e1) {
             e1.printStackTrace();
             throw new MiniCubeQueryException(e1);
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query context.");
-        current = System.currentTimeMillis();
         // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
         int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
         logger.info("query condition descarte:" + conditionDescartes);
@@ -156,36 +143,34 @@ public class QueryServiceImpl implements QueryService {
             throw new OverflowQueryConditionException(sb.toString());
         }
         // 调用拆解自动进行拆解
-        QueryContextSplitResult splitResult = queryContextSplitService.split(cube, queryContext, preSplitStrategy);
+        QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel, dataSourceInfo, cube, queryContext, preSplitStrategy);
 
         // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
-        if (splitResult != null && CollectionUtils.isNotEmpty(splitResult.getSplitQueryContexts())
-                && splitResult.getSplitQueryContexts().size() > 1) {
-            // 说明已经拆解出子问题了
-            if (splitResult.getSplitQueryContexts().size() > 1) {
-                // for (QueryContext childQueryContext : splitResult.getSplitQueryContexts()) {
-                // // TODO 调用Tesseract节点集群的查询问题模型接口
-                // // 这里会返回一堆的DataModel，每个QueryContext对应一个DataModel
-                // }
-                // TODO 需要将查询出来的结果集按照拆分策略进行合并，合并成最终的一个整体Datamodel
+        if (splitResult != null) {
+            DataSourceInfo dsInfo = dataSourceInfo;
+            Cube finalCube = cube;
+            // TODO 抛出到其它节点去,后续需要修改成调用其它节点的方法
+            splitResult.getConditionQueryContext().forEach((con, context) -> {
+                        splitResult.getDataModels().put(
+                                con,
+                                executeQuery(dsInfo, finalCube, context, questionModel.isUseIndex(),
+                                        questionModel.getPageInfo(), questionModel.getSortRecord()));
+            });
 
-                return null;
-            } else {
-                return executeQuery(questionModel, dataSourceInfo, cube, splitResult.getSplitQueryContexts().get(0));
-            }
+            return queryContextSplitService.mergeDataModel(splitResult);
         } else {
-            return executeQuery(questionModel, dataSourceInfo, cube, queryContext);
+            
+            return executeQuery(dataSourceInfo, cube, queryContext,questionModel.isUseIndex(), questionModel.getPageInfo(), questionModel.getSortRecord());
         }
 
     }
 
-    private DataModel executeQuery(QuestionModel questionModel, DataSourceInfo dataSourceInfo, Cube cube,
-            QueryContext queryContext) throws MiniCubeQueryException {
+    private DataModel executeQuery(DataSourceInfo dataSourceInfo, Cube cube,
+            QueryContext queryContext,boolean useIndex, PageInfo pageInfo, SortRecord sortRecord) throws MiniCubeQueryException {
         long current = System.currentTimeMillis();
         QueryRequest queryRequest =
-                QueryRequestBuilder.buildQueryRequest(questionModel, dataSourceInfo, cube, queryContext);
-        logger.info("queryContext:" + queryContext + " queryRequest:" + queryRequest);
-
+                QueryRequestBuilder.buildQueryRequest(dataSourceInfo, cube, queryContext, useIndex,pageInfo);
+        logger.info("transfer queryContext:{} to queryRequest:{} cost:{} ", queryContext, queryRequest, System.currentTimeMillis() - current);
         if (statDimensionNode(queryContext.getRowMemberTrees(), false, false) == 0
                 || (statDimensionNode(queryContext.getColumnMemberTrees(), false, false) == 0 && CollectionUtils
                         .isEmpty(queryContext.getQueryMeasures()))) {
@@ -203,7 +188,7 @@ public class QueryServiceImpl implements QueryService {
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to execute query.");
         if (result != null) {
-        		result = sortAndTrunc(result, questionModel.getSortRecord());
+        		result = sortAndTrunc(result, sortRecord);
         }
         return result;
     }
@@ -285,231 +270,8 @@ public class QueryServiceImpl implements QueryService {
         return rowConditionCount;
     }
 
-    /**
-     * 构建查询上下文
-     * 
-     * @param questionModel 问题模型
-     * @param dsInfo 数据源信息
-     * @param cube cube模型
-     * @param queryContext 查询上下文
-     * @return 根据问题模型构建的查询上下文
-     * @throws MiniCubeQueryException 查询维值异常
-     * @throws MetaException
-     */
-    private QueryContext buildQueryContext(QuestionModel questionModel, DataSourceInfo dsInfo, Cube cube,
-            QueryContext queryContext, Map<String, String> params) throws MiniCubeQueryException, MetaException {
-        if (queryContext == null) {
-            queryContext = new QueryContext();
-            QuestionModel cloneQuestionModel = DeepcopyUtils.deepCopy(questionModel);
-            long current = System.currentTimeMillis();
-            AxisMeta axisMeta = null;
-            AxisType axisType = AxisType.COLUMN;
-            while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
-                if (CollectionUtils.isNotEmpty(axisMeta.getCrossjoinDims())) {
-                    int i = 0;
-                    for (String dimName : axisMeta.getCrossjoinDims()) {
-                        DimensionCondition dimCondition =
-                                (DimensionCondition) cloneQuestionModel.getQueryConditions().remove(dimName);
-                        if (dimCondition == null) {
-                            dimCondition = new DimensionCondition(dimName);
-                        }
-                        queryContext.addMemberNodeTreeByAxisType(axisType,
-                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, params));
-                        i++;
-                    }
-                }
-                logger.info("0...cost:{}ms in build axisTye:{},axisMeta:{}",System.currentTimeMillis() - current,axisType,axisMeta);
-                current = System.currentTimeMillis();
-                if (CollectionUtils.isNotEmpty(axisMeta.getQueryMeasures())) {
-                    for (String measureName : axisMeta.getQueryMeasures()) {
-                        if (cube.getMeasures().containsKey(measureName)) {
-                            queryContext.getQueryMeasures().add((MiniCubeMeasure) cube.getMeasures().get(measureName));
-                        }
-                        // 需要判断，如果cube里面不包含的话，那么这个名称可能是个计算公式，需要进行构造一个虚拟的名称扔进去
-                    }
-                }
-                logger.info("1..cost:{}ms in build axisTye:{},axisMeta:{}",System.currentTimeMillis() - current,axisType,axisMeta);
-                current = System.currentTimeMillis();
-                if (axisType.equals(AxisType.ROW)) {
-                    axisType = null;
-                } else {
-                    axisType = AxisType.ROW;
-                }
-            }
-            
-            if (!cloneQuestionModel.getQueryConditions().isEmpty()) {
-                for (MetaCondition condition : cloneQuestionModel.getQueryConditions().values()) {
-                    if (condition == null) {
-                        logger.warn("meta condition is null,skip.");
-                        continue;
-                    }
-                    if (condition instanceof DimensionCondition) {
-                        DimensionCondition dimCondition = (DimensionCondition) condition;
-                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, params);
-                        if (MapUtils.isNotEmpty(filterCondition)) {
-                            queryContext.getFilterMemberValues().putAll(filterCondition);
-                        }
-                    } else {
-                        MeasureCondition measureCon = (MeasureCondition) condition;
-                        // 暂时这个还不会生效
-                        queryContext.getFilterExpression().put(measureCon.getMetaName(),
-                                measureCon.getMeasureConditions());
-                    }
-                    logger.info("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
-                    current = System.currentTimeMillis();
-                }
-            }
-        }
-        return queryContext;
-    }
     
-    /**
-     * 构造过滤条件
-     * 
-     * @param dataSourceInfo 数据源信息
-     * @param cube cube信息
-     * @param dimCondition 维度信息
-     * @param params 查询条件
-     * @return 过滤条件
-     * @throws MiniCubeQueryException 查询异常
-     * @throws MetaException 元数据异常信息
-     */
-    public Map<String, Set<String>> buildFilterCondition(DataSourceInfo dataSourceInfo, Cube cube,
-            DimensionCondition dimCondition, Map<String, String> params) throws MiniCubeQueryException, MetaException {
-        if (dimCondition == null) {
-            throw new IllegalArgumentException("dimension condition is null");
-        }
-        if (dimCondition.getQueryDataNodes().isEmpty()) {
-            logger.info("filter axises ignore all member filter");
-            return null;
-        }
-        Map<String, Set<String>> filterValues = new HashMap<>();
-        for (QueryData queryData : dimCondition.getQueryDataNodes()) {
-            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())) {
-                logger.info("filter axises ignore all member filter");
-                return null;
-            }
-            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-            if (member != null) {
-                String querySource = member.getLevel().getFactTableColumn();
-                Set<String> nodes =
-                        CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
-                                .getQueryNodes();
-                if (filterValues.containsKey(querySource)) {
-                    filterValues.get(querySource).addAll(nodes);
-                } else {
-                    filterValues.put(querySource, nodes);
-                }
-            } else {
-                logger.warn("can not found member by query data:" + queryData);
-            }
-        }
 
-        return filterValues;
-    }
-
-    /**
-     * 根据维值选中条件构造维值查询的树
-     * 
-     * @param dataSourceInfo 数据源信息
-     * @param cube cube模型
-     * @param dimCondition 维值查询条件
-     * @param isFirstInRow 是否是行上的第一个维度
-     * @return 维值树
-     * @throws MiniCubeQueryException 查询维值异常
-     * @throws MetaException
-     */
-    private MemberNodeTree buildQueryMemberTree(DataSourceInfo dataSourceInfo, Cube cube,
-            DimensionCondition dimCondition, boolean isFirstInRow, Map<String, String> params)
-            throws MiniCubeQueryException, MetaException {
-        if (dimCondition == null) {
-            throw new IllegalArgumentException("dimension condition is null");
-        }
-        long current = System.currentTimeMillis();
-        MemberNodeTree nodeTree = new MemberNodeTree(null);
-        if (dimCondition.getQueryDataNodes().isEmpty()) {
-            String allMemberUniqueName =
-                    cube.getDimensions().get(dimCondition.getMetaName()).getAllMember().getUniqueName();
-            QueryData queryData = new QueryData(allMemberUniqueName);
-            queryData.setExpand(isFirstInRow);
-            queryData.setShow(true);
-            dimCondition.getQueryDataNodes().add(queryData);
-            logger.info("cost:{}ms,in build default member:{}",System.currentTimeMillis() - current, dimCondition);
-            current = System.currentTimeMillis();
-        }
-        for (QueryData queryData : dimCondition.getQueryDataNodes()) {
-            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-
-            MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
-            List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
-            boolean isCallBack = member.getLevel().getType().equals(LevelType.CALL_BACK);
-            // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点
-            if (queryData.isExpand() || isCallBack) {
-                List<MiniCubeMember> children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
-                if (CollectionUtils.isNotEmpty(children)) {
-                    memberNode.setSummary(true);
-                    children.forEach((child) -> {
-                        MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                        buildMemberNodeByMember(childNode, child);
-                        childNodes.add(childNode);
-//                        member.getQueryNodes().addAll(child.getQueryNodes());
-                    });
-                }
-            }
-            // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
-            if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                buildMemberNodeByMember(memberNode, member);
-                memberNode.setChildren(childNodes);
-                nodeTree.getChildren().add(memberNode);
-//                return memberNode;
-            } else {
-                nodeTree.getChildren().addAll(childNodes);
-            }
-            logger.info("cost:{}ms,in build query data:{}",System.currentTimeMillis() - current, queryData);
-            current = System.currentTimeMillis();
-        }
-
-        return nodeTree;
-    }
-
-    /**
-     * 根据维值创建查询树的节点
-     * @param node 查询节点
-     * @param member 维值
-     */
-    private void buildMemberNodeByMember(MemberNodeTree node, MiniCubeMember member) {
-        node.setCaption(member.getCaption());
-        if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
-            node.setLeafIds(member.getQueryNodes());
-        } else {
-            node.getLeafIds().add(member.getName());
-        }
-        node.setName(member.getName());
-        node.setUniqueName(member.getUniqueName());
-        node.setOrdinal(member.getName());
-        // 设置查询的来源，如事实表的字段
-        node.setQuerySource(member.getLevel().getFactTableColumn());
-
-        // 后续需要对孩子节点进行下查询，本次对是否有孩子的判断只是按照是否有下一个层级
-        if (member.isAll()) {
-            node.setHasChildren(true);
-        } else if (member.getLevel() instanceof CallbackLevel) {
-            if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
-                node.setHasChildren(true);
-            }
-        } else {
-            Dimension dim = member.getLevel().getDimension();
-            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
-            for (int i = 0; i < levelNames.size(); i++) {
-                if (member.getLevel().getName().equals(levelNames.get(i))) {
-                    if (i < levelNames.size() - 1) {
-                        node.setHasChildren(true);
-                    }
-                    break;
-                }
-            }
-        }
-
-    }
+    
 
 }

@@ -15,9 +15,16 @@
  */
 package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 
@@ -107,5 +114,126 @@ public class QueryContextAdapter extends QueryContext {
 	public QueryContextBuilder getBuilder() {
 		return builder;
 	}
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#getColumnMemberTrees() 
+     */
+    @Override
+    public List<MemberNodeTree> getColumnMemberTrees() {
+        return queryContext.getColumnMemberTrees();
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#setColumnMemberTrees(java.util.List) 
+     */
+    @Override
+    public void setColumnMemberTrees(List<MemberNodeTree> columnMemberTrees) {
+        queryContext.setColumnMemberTrees(columnMemberTrees);
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#getQueryMeasures() 
+     */
+    @Override
+    public List<MiniCubeMeasure> getQueryMeasures() {
+        return queryContext.getQueryMeasures();
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#setQueryMeasures(java.util.List) 
+     */
+    @Override
+    public void setQueryMeasures(List<MiniCubeMeasure> queryMeasures) {
+        queryContext.setQueryMeasures(queryMeasures);
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#getRowMemberTrees() 
+     */
+    @Override
+    public List<MemberNodeTree> getRowMemberTrees() {
+        return queryContext.getRowMemberTrees();
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#setRowMemberTrees(java.util.List) 
+     */
+    @Override
+    public void setRowMemberTrees(List<MemberNodeTree> rowMemberTrees) {
+        queryContext.setRowMemberTrees(rowMemberTrees);
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#getFilterMemberValues() 
+     */
+    @Override
+    public Map<String, Set<String>> getFilterMemberValues() {
+        return queryContext.getFilterMemberValues();
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#setFilterMemberValues(java.util.Map) 
+     */
+    @Override
+    public void setFilterMemberValues(Map<String, Set<String>> filterMemberValues) {
+        queryContext.setFilterMemberValues(filterMemberValues);
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#getFilterExpression() 
+     */
+    @Override
+    public Map<String, List<String>> getFilterExpression() {
+        return queryContext.getFilterExpression();
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#setFilterExpression(java.util.Map) 
+     */
+    @Override
+    public void setFilterExpression(Map<String, List<String>> filterExpression) {
+        queryContext.setFilterExpression(filterExpression);
+        
+    }
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext#addMemberNodeTreeByAxisType(com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType, com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree) 
+     */
+    @Override
+    public void addMemberNodeTreeByAxisType(AxisType axisType, MemberNodeTree nodeTree) {
+        queryContext.addMemberNodeTreeByAxisType(axisType, nodeTree);
+        
+    }
 	
 }

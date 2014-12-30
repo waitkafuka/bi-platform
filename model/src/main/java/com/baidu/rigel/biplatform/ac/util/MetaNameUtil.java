@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 
@@ -78,6 +79,17 @@ public class MetaNameUtil {
             buf.append(makeUniqueName(name));
             return buf.toString();
         }
+    }
+    
+    
+    
+    /** 
+     * generateMeasureUniqueName
+     * @param name
+     * @return
+     */
+    public static String generateMeasureUniqueName(String name) {
+        return MetaNameUtil.makeUniqueName(Measure.MEASURE_DIMENSION_NAME) + "." + MetaNameUtil.makeUniqueName(name);
     }
 
     /**

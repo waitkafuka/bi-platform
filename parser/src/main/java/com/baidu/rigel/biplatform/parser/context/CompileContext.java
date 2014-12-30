@@ -17,6 +17,7 @@
 package com.baidu.rigel.biplatform.parser.context;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +44,7 @@ public class CompileContext implements Serializable {
     
     private Map<Condition, Map<String, ComputeResult>> variablesResult;
     
+    private String expression;
     /** 
      * 构造函数
      */
@@ -93,6 +95,9 @@ public class CompileContext implements Serializable {
      * @return the variablesResult 
      */
     public Map<Condition, Map<String, ComputeResult>> getVariablesResult() {
+        if(this.variablesResult == null) {
+            this.variablesResult = new HashMap<Condition, Map<String,ComputeResult>>(1);
+        }
         return variablesResult;
     }
 
@@ -113,6 +118,24 @@ public class CompileContext implements Serializable {
     public String toString() {
         return "CompileContext [node=" + node + ", conditionVariables=" + conditionVariables + ", variablesResult="
                 + variablesResult + "]";
+    }
+
+    /** 
+     * 获取 expresion 
+     * @return the expresion 
+     */
+    public String getExpression() {
+    
+        return expression;
+    }
+
+    /** 
+     * 设置 expresion 
+     * @param expresion the expresion to set 
+     */
+    public void setExpression(String expresion) {
+    
+        this.expression = expresion;
     }
     
     
