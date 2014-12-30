@@ -185,7 +185,7 @@ public class DataSourceServiceTest {
      */
     @Test
     public void testIsValidateConnWithNull() {
-        Assert.assertFalse(dataSourceService.isValidateConn(null));
+        Assert.assertFalse(dataSourceService.isValidateConn(null, null));
     }
     
     /**
@@ -193,7 +193,7 @@ public class DataSourceServiceTest {
      */
     @Test
     public void testIsValidateConnWithInvalidDs() {
-        Assert.assertFalse(dataSourceService.isValidateConn(new DataSourceDefine()));
+        Assert.assertFalse(dataSourceService.isValidateConn(new DataSourceDefine(), null));
     }
     
     /**
@@ -265,7 +265,7 @@ public class DataSourceServiceTest {
     @Test
     public void testSaveOrUpdateDsWithNullDs() {
         try {
-            dataSourceService.saveOrUpdateDataSource(null);
+            dataSourceService.saveOrUpdateDataSource(null, null);
             Assert.fail();
         } catch (DataSourceOperationException e) {
             Assert.assertNotNull(e);
@@ -278,7 +278,7 @@ public class DataSourceServiceTest {
     @Test
     public void testSaveOrUpdateDsWithInvalidDs() {
         try {
-            dataSourceService.saveOrUpdateDataSource(new DataSourceDefine());
+            dataSourceService.saveOrUpdateDataSource(new DataSourceDefine(), null);
             Assert.fail();
         } catch (DataSourceOperationException e) {
             Assert.assertNotNull(e);
@@ -296,7 +296,7 @@ public class DataSourceServiceTest {
             ds.setProductLine("test");
             ds.setName("test");
             ds.setId("abc");
-            dataSourceService.saveOrUpdateDataSource(ds);
+            dataSourceService.saveOrUpdateDataSource(ds, null);
             Assert.fail();
         } catch (DataSourceOperationException e) {
             Assert.assertNotNull(e);
@@ -314,7 +314,7 @@ public class DataSourceServiceTest {
             ds.setProductLine("test");
             ds.setName("test");
             ds.setId("test");
-            dataSourceService.saveOrUpdateDataSource(ds);
+            dataSourceService.saveOrUpdateDataSource(ds, null);
             Assert.fail();
         } catch (DataSourceOperationException e) {
             Assert.assertNotNull(e);
@@ -335,11 +335,11 @@ public class DataSourceServiceTest {
         PowerMockito.mockStatic(DBInfoReader.class);
         BDDMockito.given(
                 DBInfoReader.build(Mockito.any(DatasourceType.class), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).willReturn(null);
+                        Mockito.anyString(), Mockito.anyString(), null)).willReturn(null);
         Mockito.doReturn(true).when(fileService)
             .write("null/test_test", SerializationUtils.serialize(ds));
         try {
-            Assert.assertNotNull(dataSourceService.saveOrUpdateDataSource(ds));
+            Assert.assertNotNull(dataSourceService.saveOrUpdateDataSource(ds, null));
         } catch (DataSourceOperationException e) {
             Assert.assertNotNull(e);
         }
@@ -359,11 +359,11 @@ public class DataSourceServiceTest {
         PowerMockito.mockStatic(DBInfoReader.class);
         BDDMockito.given(
                 DBInfoReader.build(Mockito.any(DatasourceType.class), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).willReturn(null);
+                        Mockito.anyString(), Mockito.anyString(), null)).willReturn(null);
         Mockito.doThrow(Exception.class).when(fileService)
             .write("null/test_test", SerializationUtils.serialize(ds));
         try {
-            dataSourceService.saveOrUpdateDataSource(ds);
+            dataSourceService.saveOrUpdateDataSource(ds, null);
 //            Assert.fail();
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -389,11 +389,11 @@ public class DataSourceServiceTest {
         PowerMockito.mockStatic(DBInfoReader.class);
         BDDMockito.given(
                 DBInfoReader.build(Mockito.any(DatasourceType.class), Mockito.anyString(),
-                        Mockito.anyString(), Mockito.anyString())).willReturn(null);
+                        Mockito.anyString(), Mockito.anyString(), null)).willReturn(null);
         Mockito.doThrow(Exception.class).when(fileService)
                 .write("null/test_test", SerializationUtils.serialize(ds));
         try {
-            dataSourceService.saveOrUpdateDataSource(ds);
+            dataSourceService.saveOrUpdateDataSource(ds, null);
 //            Assert.fail();
         } catch (Exception e) {
             Assert.assertNotNull(e);

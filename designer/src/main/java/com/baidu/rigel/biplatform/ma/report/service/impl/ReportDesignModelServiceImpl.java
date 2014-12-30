@@ -271,6 +271,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             model.setId(UuidGeneratorUtils.generate());
         }
         try {
+        		ReportDesignModel oldReport = getModelByIdOrName(model.getId(), false);
+        		if (oldReport != null) {
+        			fileService.rm(generateDevReportLocation(oldReport));
+        		}
             boolean rs = fileService.write(generateDevReportLocation(model),
                     SerializationUtils.serialize(model));
             if (rs) {

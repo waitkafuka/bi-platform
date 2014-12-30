@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.exception.DBInfoReadException;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
@@ -67,21 +68,22 @@ public class DBInfoReader {
      *            密码
      * @param url
      *            数据库地址
+     * @param securityKey 
      * @return reader对象
      */
-    public static DBInfoReader build(DatasourceType type, String user, String password, String url) {
+    public static DBInfoReader build(DatasourceType type, String user, String password, String url, String securityKey) {
         DBInfoReader reader = new DBInfoReader();
         DatabaseMetaData dbMetaData = null;
         Connection con = null;
         try {
             Class.forName(type.getDriver());
-            con = DriverManager.getConnection(url, user, password);
+            String pwd = AesUtil.getInstance().decodeAnddecrypt(password, securityKey);
+            con = DriverManager.getConnection(url, user, pwd);
             dbMetaData = con.getMetaData();
         } catch (ClassNotFoundException e) {
             throw new DBInfoReadException("ClassNotFoundException when build DBInfoReader! ", e);
-        } catch (SQLException e) {
-            // modified by jiangyichao 抛出SQL异常 2014-08-12
-            throw new DBInfoReadException("SQLException when build DBInfoReader! ", e);
+        } catch (Exception e) {
+			throw new DBInfoReadException("SQLException when build DBInfoReader! ", e);
         }
         reader.setCon(con);
         reader.setDbMetaData(dbMetaData);

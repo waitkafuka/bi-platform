@@ -82,7 +82,7 @@ import com.google.gson.reflect.TypeToken;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
-public class DimConfigResource {
+public class DimConfigResource extends BaseResource {
     
     /**
      * logger
@@ -160,7 +160,7 @@ public class DimConfigResource {
         DimBindConfigView view = new DimBindConfigView();
         List<RelationTableView> relationsTables = null;
         try {
-            relationsTables = starModelBuildService.getAllTablesAndCols(reportModel.getDsId());
+            relationsTables = starModelBuildService.getAllTablesAndCols(reportModel.getDsId(), securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in get table info from ds. Ds Id: " + reportModel.getDsId(), e);
             return ResourceUtils.getErrorResult("获取数据源中的表格、列信息失败！请检查数据源配置。", 1);
@@ -226,7 +226,7 @@ public class DimConfigResource {
                 return ResourceUtils.getErrorResult(msg, 1);
             }
             DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds));
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             String tableName = cubeTable.getName();
             if (cubeTable.isMutilple() && CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
                 tableName = cubeTable.getRegExpTables().get(0);
@@ -328,7 +328,7 @@ public class DimConfigResource {
             
             try {
                 newDimTables.addAll(starModelBuildService.generateMetaDefine(reportModel.getDsId(),
-                    normal, oldName));
+                    normal, oldName, securityKey));
             } catch (DataSourceOperationException e) {
                 logger.error("添加普通维度失败！", e);
                 return ResourceUtils.getErrorResult("添加普通维度失败！", 1);

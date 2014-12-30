@@ -47,6 +47,7 @@ import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
@@ -90,7 +91,7 @@ public class QueryUtils {
      *             构建失败异常
      */
     public static QuestionModel convert2QuestionModel(DataSourceDefine dsDefine, ReportDesignModel reportModel,
-        QueryAction queryAction) throws QueryModelBuildException {
+        QueryAction queryAction, String securityKey) throws QueryModelBuildException {
         if (queryAction == null) {
             throw new QueryModelBuildException("query action is null");
         }
@@ -120,7 +121,7 @@ public class QueryUtils {
 //        updateLogicCubeWithSlices(cube, tmp,
 //                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
-        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
+        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
         SortType sortType = SortType.valueOf(orderDesc.getOrderType());
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
@@ -159,11 +160,11 @@ public class QueryUtils {
      * @param dsDefine
      * @return DataSourceInfo
      */
-    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine) {
+    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
         SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getName());
         ds.setDBProxy(true);
         try {
-            ds.setPassword(dsDefine.getDbPwd());
+            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
         } catch (Exception e) {
             e.printStackTrace();
         }

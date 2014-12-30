@@ -35,10 +35,11 @@ public interface CubeBuildService {
      * 
      * @param dsId
      *            数据源id
+     * @param securityKey 
      * @return 所有的表
      * @throws DataSourceOperationException 
      */
-    List<TableInfo> getAllTable(String dsId) throws DataSourceOperationException;
+    List<TableInfo> getAllTable(String dsId, String securityKey) throws DataSourceOperationException;
     
     /**
      * 初始化cubetable
@@ -51,5 +52,5 @@ public interface CubeBuildService {
      * @throws DataSourceOperationException 
      */
     List<FactTableMetaDefine> initCubeTables(String dsId,
-            List<String> tableIds, List<String> regxs) throws DataSourceOperationException;
+            List<String> tableIds, List<String> regxs, String securityKey) throws DataSourceOperationException;
 }
