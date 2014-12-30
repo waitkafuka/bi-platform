@@ -18,7 +18,7 @@
     overflow: auto;
 }
 .hide {
-    display: hide;
+    display: none;
 }
 
 /* 文本框组件样式 */

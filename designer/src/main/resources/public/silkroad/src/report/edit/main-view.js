@@ -158,6 +158,26 @@ define([
                 this.$el.find('.j-global-btn').html((new BtnsView).createBtns());
                 // 工具条菜单区域菜单添加
                 this.$el.find('.j-global-menu').html((new MenuView).componentMenu());
+                // FIXME:临时使用，重构时，逻辑干掉
+                $(document).mousedown(function (e) {
+                    // 如果触发元素，不属于组件添加按钮区域
+                    if (
+                        !$.contains($('.j-global-component')[0], e.target)
+                    ) {
+                        // 如果触发元素，不属于组件区域
+                        if (
+                            $('.j-all-menus') && (!$.contains($('.j-all-menus')[0], e.target))
+                        ) {
+                            // 上面两个条件都满足，组件区域如果显示，那么就该隐藏掉
+                            if ($('.j-con-component') && (!$('.j-con-component').is(':hidden'))) {
+                                $('.j-all-menus').hide();
+                            }
+
+                        }
+
+                    }
+
+                });
             },
 
             /**

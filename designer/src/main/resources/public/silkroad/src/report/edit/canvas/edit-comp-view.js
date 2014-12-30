@@ -173,9 +173,9 @@ define([
                     case 'SELECT' :
                         template = vuiSettingSelectTemplate;
                         break;
-                    case 'MULTISELECT' :
-                        template = vuiSettingSelectTemplate;
-                        break;
+//                    case 'MULTISELECT' :
+//                        template = vuiSettingSelectTemplate;
+//                        break;
                     default :
                         template = compSettingDefaultTemplate;
                         break;
@@ -420,16 +420,16 @@ define([
                 else {
                     $spans.eq(1).remove();
                 }
-
                 // 使维度指标不能互换 - 因为维度或指标被使用了
                 ui.draggable.removeClass('j-can-to-dim j-can-to-ind');
-
                 // 采用非维度 即 指标 的策略
                 selector = '.j-data-sources-setting-con-ind';
                 oLapElemenType = ui.draggable.parents(selector);
                 oLapElemenType = oLapElemenType.length ? 'ind' : 'dim';
                 // 添加指标（维度）项到XY
-                that._addDimOrIndDomToXY($item, oLapElemenType, compType);
+                if (!that._addDimOrIndDomToXY($item, oLapElemenType, compType)){
+                    return;
+                }
 
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
@@ -460,18 +460,18 @@ define([
             },
             _addDimOrIndDomToXY: function ($item, oLapElemenType, compType) {
                 // 在轴上添加指标与维度项的dom
+                var alert = dialog.alert;
                 var str;
                 // 指标
                 if (oLapElemenType === 'ind') {
                     // TODO:如果是单图
                     if (compType === 'CHART') {
                         var indItems = $('.j-line-y').find('div');
-                        var chartType;
-                        indItems.each(function () {
-                            var $this = $(this);
-                            var $chartSpan = $this.find('.icon-chart');
-                            chartType = $chartSpan.attr('chart-type');
-                        });
+//                        if (indItems.length >= 1) {
+//                            alert('单图指标不能继续拖拽');
+//                            return false;
+//                        }
+                        var chartType = $(indItems[0]).find('.icon-chart').attr('chart-type');
                         var typeSubsidiary = chartTypeSubsidiary(chartType);
                         if (typeSubsidiary !== 0) {
                             chartType = 'column';
@@ -484,6 +484,7 @@ define([
                 $item.append(str);
                 $($item.find('.j-item-text')).removeClass('ellipsis').addClass('icon-font');
                 // TODO:判断其他图形的类型
+                return true;
             },
             /**
              * 显示图形列表
@@ -500,7 +501,6 @@ define([
                 var compId = $compSetting.attr('data-comp-id');
                 var olapId = $target.parent().attr('data-id');
                 var oldChartType = $target.attr('chart-type');
-
                 var chartTypes = Constant.CHART_TYPES;
 
                 for (var key in chartTypes) {
@@ -547,14 +547,12 @@ define([
                             // 判断当前chartType归属，如果是单选图，y轴与候选指标区域中的类型更换成一致的
                             // 如果是0，说明是单图
                             var typeSubsidiary = chartTypeSubsidiary(selectedChartType);
-                            if (typeSubsidiary === 0) {
-                                dimItems.each(function () {
-                                    changeIconType($(this), selectedChartType);
-                                });
-                                candSiblings.each(function () {
-                                    changeIconType($(this), selectedChartType);
-                                });
-                            }
+                            dimItems.each(function () {
+                                changeIconType($(this), selectedChartType, typeSubsidiary);
+                            });
+                            candSiblings.each(function () {
+                                changeIconType($(this), selectedChartType, typeSubsidiary);
+                            });
                             // TODO:如果是
                             $target.removeClass(oldChartType).addClass(selectedChartType);
                             $target.attr('chart-type', selectedChartType);
@@ -564,13 +562,21 @@ define([
                     );
                 });
                 that.chartList.show($(event.target).parent());
-
                 // 修改候选指标里面的图形图标
-                function changeIconType($this, chartType) {
+                function changeIconType($this, chartType, isCombine) {
                     var $chartSpan = $this.find('.icon-chart');
                     var temOldType = $chartSpan.attr('chart-type');
-                    $chartSpan.removeClass(temOldType).addClass(chartType);
-                    $chartSpan.attr('chart-type', chartType);
+
+                    if (isCombine) {
+                        if (chartTypeSubsidiary(temOldType) === 0) {
+                            $chartSpan.removeClass(temOldType).addClass(chartType);
+                            $chartSpan.attr('chart-type', chartType);
+                        }
+                    }
+                    else {
+                        $chartSpan.removeClass(temOldType).addClass(chartType);
+                        $chartSpan.attr('chart-type', chartType);
+                    }
                 }
             },
             /**
