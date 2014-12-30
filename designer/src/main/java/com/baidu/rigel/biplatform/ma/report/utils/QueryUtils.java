@@ -134,6 +134,7 @@ public class QueryUtils {
         String uniqueName = "[Measure][" +orderDesc.getName()+ "]";
         SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
         questionModel.setSortRecord(sortRecord);
+        questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
         return questionModel;
     }
     
