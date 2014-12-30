@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -465,12 +467,13 @@ public class QueryUtils {
 			if (m.getType() == MeasureType.CAL) {
 				refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
 			} else {
-				refMeasuers.add(m.getName().substring(0, m.getName().length() - 3));
-			}
-			if (m.getType() == MeasureType.RR) {
-				tmp.setFormula("rRate");
-			} else if (m.getType() == MeasureType.SR) {
-				tmp.setFormula("tRate");
+				final String refName = m.getName().substring(0, m.getName().length() - 3);
+				refMeasuers.add(refName);
+				if (m.getType() == MeasureType.RR) {
+					tmp.setFormula("rRate(${" + refName + "})");
+				} else if (m.getType() == MeasureType.SR) {
+					tmp.setFormula("tRate(${" + refName + "})");
+				}
 			}
 			tmp.setAggregator(Aggregator.CALCULATED);
 		});
