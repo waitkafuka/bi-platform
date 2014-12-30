@@ -52,4 +52,9 @@ public class RelativeRate extends TesseractRateFunction {
 		return this.collectVariableCondition(RateType.RR);
 	}
 
+	@Override
+	RateType getType() {
+		return RateType.RR;
+	}
+
 }

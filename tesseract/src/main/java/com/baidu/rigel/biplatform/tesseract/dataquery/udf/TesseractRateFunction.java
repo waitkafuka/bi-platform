@@ -18,11 +18,14 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf;
 import java.util.Map;
 import java.util.Set;
 
+import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
+import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
 import com.baidu.rigel.biplatform.parser.node.Node;
 import com.baidu.rigel.biplatform.parser.node.impl.RateFunNode;
 import com.baidu.rigel.biplatform.parser.node.impl.VariableNode;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateCondition;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateCondition.RateType;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -52,12 +55,25 @@ abstract class TesseractRateFunction extends RateFunNode {
 		VariableNode variable = (VariableNode) this.getArgs().get(0);
 		variables.add(variable.getVariableExp());
 		Map<Condition, Set<String>> rs = Maps.newHashMap();
-		Condition numeratorCondition = new RateCondition(true, type, variable.getVariableExp());
+		Condition numeratorCondition = EmptyCondition.getInstance();//new RateCondition(true, type, variable.getVariableExp());
 		rs.put(numeratorCondition, variables);
 		Condition denominatorCondition = new RateCondition(false, type, variable.getVariableExp());
 		rs.put(denominatorCondition, variables);
-		return super.collectVariableCondition();
+		return rs;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.parser.node.FunctionNode#preSetNodeResult(com.baidu.rigel.biplatform.parser.context.CompileContext)
+	 */
+	@Override
+	protected void preSetNodeResult(CompileContext context) {
+		VariableNode variable = (VariableNode) this.getArgs().get(0);
+		Condition condition = new RateCondition(false, getType(), variable.getVariableExp());
+		variable.setResult(context.getVariablesResult().get(condition).get(variable.getVariableExp()));
+//		super.preSetNodeResult(context);
+	}
+	
+	abstract RateType getType();
 
 	/* 
 	 * (non-Javadoc)

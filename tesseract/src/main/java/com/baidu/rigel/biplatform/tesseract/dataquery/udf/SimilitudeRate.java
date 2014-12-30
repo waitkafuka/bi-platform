@@ -52,5 +52,10 @@ public class SimilitudeRate extends TesseractRateFunction {
 		return this.collectVariableCondition(RateType.SR);
 	}
 
+	@Override
+	RateType getType() {
+		return RateType.SR;
+	}
+
 	
 }

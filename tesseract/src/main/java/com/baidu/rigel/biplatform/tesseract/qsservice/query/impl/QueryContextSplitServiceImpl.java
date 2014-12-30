@@ -217,13 +217,13 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         // TODO 优化循环策略
         splitResult.getCompileContexts().forEach((measureName,compileContext) -> {
            Map<String, List<BigDecimal>> calCulateDatas = new HashMap<>();
+           Map<String, Map<String, ComputeResult>> categoryVariableVal = new HashMap<>();
            for(Entry<Condition,Set<String>> entry : compileContext.getConditionVariables().entrySet()) {
                Map<String, Map<String, List<BigDecimal>>> dataModelData = dataModelDatas.get(entry.getKey());
                if(dataModelData == null) {
                    throw new IllegalSplitResultException(splitResult, "dataModel is null by condition" + entry.getKey(), "MERGE_MODEL");
                }
                // parentNode uniqueName, varName, data
-               Map<String, Map<String, ComputeResult>> categoryVariableVal = new HashMap<>();
                for(String var : entry.getValue()) {
                    String name = MetaNameUtil.generateMeasureUniqueName(PlaceHolderUtils.getKeyFromPlaceHolder(var));
                    if (!dataModelData.containsKey(name)) {

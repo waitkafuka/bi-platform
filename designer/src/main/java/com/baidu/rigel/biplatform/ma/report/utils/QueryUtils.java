@@ -472,7 +472,7 @@ public class QueryUtils {
 				if (m.getType() == MeasureType.RR) {
 					tmp.setFormula("rRate(${" + refName + "})");
 				} else if (m.getType() == MeasureType.SR) {
-					tmp.setFormula("tRate(${" + refName + "})");
+					tmp.setFormula("sRate(${" + refName + "})");
 				}
 			}
 			tmp.setAggregator(Aggregator.CALCULATED);
@@ -533,12 +533,24 @@ public class QueryUtils {
 				if (rs.get(area.getCubeId()) == null) {
 					List<Dimension> dims = Lists.newArrayList();
 					area.listAllItems().values().forEach(key -> {
-						dims.add(cube.getDimensions().get(key.getId()));
+						MiniCubeDimension dim = (MiniCubeDimension) 
+								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+		                dim.setLevels(Maps.newLinkedHashMap());;
+		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+		                    dim.getLevels().put(level.getName(), level);
+		                });
+		                dims.add(dim);
 					});
 					rs.put(area.getCubeId(), dims);
 				} else {
 					area.listAllItems().values().forEach(key -> {
-						rs.get(area.getCubeId()).add(cube.getDimensions().get(key.getId()));
+						MiniCubeDimension dim = (MiniCubeDimension) 
+								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+		                dim.setLevels(Maps.newLinkedHashMap());;
+		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+		                    dim.getLevels().put(level.getName(), level);
+		                });
+						rs.get(area.getCubeId()).add(dim);
 					});
 				}
 	    		} 
