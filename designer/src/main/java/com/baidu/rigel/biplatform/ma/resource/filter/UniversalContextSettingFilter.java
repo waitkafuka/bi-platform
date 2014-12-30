@@ -102,6 +102,9 @@ public class UniversalContextSettingFilter implements Filter {
 	        	 	productLine = decryptProductLIne(httpRequest, httpResponse);
      	        sessionId = generateSessionId(httpResponse);
 	        }
+	        if (httpRequest.getRequestURI().endsWith("index.html") && StringUtils.isEmpty(productLine)) {
+	        		httpResponse.sendRedirect("home.html");
+	        }
 	        setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
         } catch(Exception e) {
 	        	throw new RuntimeException("productline encrypt happened exception," 
