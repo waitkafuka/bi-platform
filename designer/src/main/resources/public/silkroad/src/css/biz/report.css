@@ -703,3 +703,9 @@
     height: 0;
     top: 32px;
 }
+
+/* 表格下载按钮样式 */
+.table-download {
+    float: left;
+    padding-top: 4px;
+}
