@@ -163,14 +163,17 @@
 }
 .ui-download-btn .ui-button-left {
     background: url(img/download.png) no-repeat;
-    width: 15px;
-    height: 20px;
+    width: 20px;
+    height: 15px;
     overflow: hidden;
     display: inline-block;
     *display: inline;
     *zoom: 1;
     vertical-align: middle;
     margin-right: 3px;
+}
+.ui-download-btn .ui-button-left:hover{
+    background: url(img/downloadblue.png) no-repeat;
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;

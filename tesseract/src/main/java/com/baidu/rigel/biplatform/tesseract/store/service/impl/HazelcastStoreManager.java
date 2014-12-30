@@ -31,6 +31,7 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.tesseract.store.service.HazelcastNoticePort;
+import com.baidu.rigel.biplatform.tesseract.store.service.HazelcastQueueItemListener;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.hazelcast.config.ClasspathXmlConfig;
@@ -54,7 +55,9 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 @Service("hazelcastStoreManager")
 public class HazelcastStoreManager implements StoreManager {
     
-    private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
+    public static final String EVENT_QUEUE = "eventQueue";
+
+	private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
 
     private static final String HAZELCAST_SERVER_GROUP_USER_NAME = "hazelcastServer.groupUserName";
 
@@ -64,6 +67,8 @@ public class HazelcastStoreManager implements StoreManager {
 
     private static final String HAZELCAST_SERVER_NAME = "hazelcastServer.instance";
     
+    
+    
     /**
      * cacheManager
      */
@@ -71,6 +76,9 @@ public class HazelcastStoreManager implements StoreManager {
     
     @Resource
     private HazelcastNoticePort hazelcastNoticePort;
+    
+    @Resource
+    private HazelcastQueueItemListener hazelcastQueueItemListener;
     
     /**
      * hazelcast
@@ -95,6 +103,8 @@ public class HazelcastStoreManager implements StoreManager {
         cfg.getGroupConfig().setName(prop.getProperty(HAZELCAST_SERVER_GROUP_USER_NAME, "tesseract-cluster"));
         cfg.getGroupConfig().setPassword(prop.getProperty(HAZELCAST_SERVER_GROUP_PASSWORD, "tesseract"));
         cfg.setInstanceName(prop.getProperty(HAZELCAST_SERVER_NAME, "TesseractHZ_Cluster"));
+        
+       // cfg.getQueueConfig(EVENT_QUEUE).addItemListenerConfig(new ItemListenerConfig(this.hazelcastQueueItemListener,true));
         
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
@@ -148,7 +158,8 @@ public class HazelcastStoreManager implements StoreManager {
                 "[event:" + event + "]"));
             throw new IllegalArgumentException();
         }
-        IQueue<EventObject> queue = this.hazelcast.getQueue("eventQueue");
+        IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
+        queue.addItemListener(hazelcastQueueItemListener,true);
         try {
             queue.put(event);
         } catch (InterruptedException e) {
@@ -170,7 +181,7 @@ public class HazelcastStoreManager implements StoreManager {
      */
     @Override
     public EventObject getNextEvent() throws Exception {
-        IQueue<EventObject> queue = this.hazelcast.getQueue("eventQueue");
+        IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
         return queue.take();
     }
     
