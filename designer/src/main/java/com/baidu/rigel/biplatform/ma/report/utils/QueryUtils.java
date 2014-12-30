@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
@@ -33,6 +34,7 @@ import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -439,6 +441,7 @@ public class QueryUtils {
         		}
         }
         cube.setDimensions(dimensions);
+        modifyMeasures(measures, oriCube);
         cube.setMeasures(measures);
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
@@ -447,6 +450,21 @@ public class QueryUtils {
     }
 
     /**
+     * 修正measure，将measure引用的measure放到cube中
+     * @param measures
+     * @param oriCube
+     */
+    private static void modifyMeasures(Map<String, Measure> measures,
+			Cube oriCube) {
+		measures.values().stream().filter(m -> {
+			return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
+		}).forEach(m -> {
+			ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
+			Set<String> refMeasuerNames = null;
+		});
+	}
+
+	/**
      * 
      * @param dim -- Dimension
      * @return Dimension
