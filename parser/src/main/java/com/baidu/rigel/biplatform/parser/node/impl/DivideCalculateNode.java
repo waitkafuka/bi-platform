@@ -49,6 +49,9 @@ public class DivideCalculateNode extends CalculateNode {
 
     @Override
     protected BigDecimal compute(BigDecimal arg1, BigDecimal arg2) {
+        if(BigDecimal.ZERO.equals(arg2)) {
+            return null;
+        }
         // divede 0 exception no check
         return arg1.divide(arg2, ParserConstant.COMPUTE_SCALE, BigDecimal.ROUND_HALF_UP);
     }
