@@ -31,7 +31,7 @@ define(['template'], function (template) {
         if($data.compType === "CHART"){
         $out+='\r\n                ';
         if(item.chartType === null){
-        $out+='\r\n                    <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>\r\n                ';
+        $out+='\r\n                    <span class="icon-chart column j-icon-chart" chart-type="column" ></span>\r\n                ';
         }else{
         $out+='\r\n                    <span class="icon-chart ';
         $out+=$escape(item.chartType);

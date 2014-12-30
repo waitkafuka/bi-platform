@@ -210,8 +210,8 @@
 }
 /* 下载按钮 */
 .ui-download-btn {
-    border: 1px solid #CCC;
-    background-color: #F7F7F7;
+    border: 1px solid #FFF;
+    background-color: #FFF;
     color: #3C78A2;
     padding: 0;
 }
@@ -222,16 +222,13 @@
     background-color: #BBB;
 }
 .ui-download-btn .ui-button-inner {
-    padding: 0 10px 3px 10px;
-    line-height: 16px;
-    background-color: #F7F7F7;
-    border-top: 1px solid #F7F7F7;
-    margin-top: 1px;
+    padding: 2px 0px 4px 3px;
+    line-height: 8px;
     -webkit-border-radius: 1px;
     -o-border-radius: 1px;
     -moz-border-radius: 1px;
     -ms-border-radius: 1px;
-    border-radius: 1px;    
+    border-radius: 1px;
 }
 .ui-download-btn-hover .ui-button-inner {
     background-color: #FCFCFC;
@@ -242,15 +239,18 @@
     background-color: #EEE;
 }
 .ui-download-btn .ui-button-left {
-    background: url(img/icon2.png) -75px -65px no-repeat;
-    width: 9px;
-    height: 12px;
+    background: url(img/download.png) no-repeat;
+    width: 20px;
+    height: 15px;
     overflow: hidden;
     display: inline-block;
     *display: inline;
     *zoom: 1;
     vertical-align: middle;
     margin-right: 3px;
+}
+.ui-download-btn .ui-button-left:hover{
+    background: url(img/downloadblue.png) no-repeat;
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
@@ -3436,7 +3436,7 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 6px 15px 10px 10px;            
+    padding: 6px 0px 10px 10px;
     overflow: hidden;
     line-height: 18px;
 }
@@ -3444,7 +3444,7 @@ div.di-dim-level-find-msg span{
     float: left;
     line-height: 18px;            
     vertical-align: middle;
-    width: 600px;
+    width: 180px;
 }
 .di-table-count-num {
     font-size: 14px;
@@ -3477,7 +3477,7 @@ div.di-dim-level-find-msg span{
     overflow: auto;
 }
 .hide {
-    display: hide;
+    display: none;
 }
 
 /* 文本框组件样式 */
@@ -3488,7 +3488,7 @@ div.di-dim-level-find-msg span{
     cursor: pointer;
     color: #000;
     overflow: hidden;
-    font-size: 24px;
+    font-size: 13px;
     font-weight: bold;
     text-align: center;
     vertical-align: middle;

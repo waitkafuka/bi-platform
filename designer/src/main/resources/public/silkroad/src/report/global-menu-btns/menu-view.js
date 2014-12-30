@@ -16,7 +16,6 @@ define([
              *
              */
             initialize: function () {
-                var that = this;
             },
 
             /**

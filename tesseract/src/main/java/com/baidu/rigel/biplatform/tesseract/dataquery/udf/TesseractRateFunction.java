@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf;
 import java.util.Map;
 import java.util.Set;
 
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
 import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
@@ -70,6 +71,12 @@ abstract class TesseractRateFunction extends RateFunNode {
 		VariableNode variable = (VariableNode) this.getArgs().get(0);
 		Condition condition = new RateCondition(false, getType(), variable.getVariableExp());
 		variable.setResult(context.getVariablesResult().get(condition).get(variable.getVariableExp()));
+		
+		VariableNode numeratorNodeVar = DeepcopyUtils.deepCopy(variable);
+		numeratorNodeVar.setResult(context.getVariablesResult().get(EmptyCondition.getInstance()).get(variable.getVariableExp()));
+		this.getArgs().set(0, numeratorNodeVar);
+		this.getArgs().add(variable);
+		
 //		super.preSetNodeResult(context);
 	}
 	

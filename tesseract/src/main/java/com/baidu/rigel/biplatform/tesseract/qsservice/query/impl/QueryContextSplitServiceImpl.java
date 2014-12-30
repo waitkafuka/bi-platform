@@ -126,6 +126,9 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                     context.getQueryMeasures().clear();
                     for(String var : vars) {
                         MiniCubeMeasure measure = (MiniCubeMeasure) cube.getMeasures().get(PlaceHolderUtils.getKeyFromPlaceHolder(var));
+                        if(measure == null) {
+                            throw new IllegalSplitResultException(result, "can not get measure:" + var + " from cube", "SPILT_QUESTION");
+                        }
                         if(!context.getQueryMeasures().contains(measure)) {
                             context.getQueryMeasures().add(measure);
                         }
@@ -217,7 +220,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         // TODO 优化循环策略
         splitResult.getCompileContexts().forEach((measureName,compileContext) -> {
            Map<String, List<BigDecimal>> calCulateDatas = new HashMap<>();
-           Map<String, Map<String, ComputeResult>> categoryVariableVal = new HashMap<>();
+           Map<String, Map<Condition, Map<String, ComputeResult>>> categoryVariableVal = new HashMap<>();
            for(Entry<Condition,Set<String>> entry : compileContext.getConditionVariables().entrySet()) {
                Map<String, Map<String, List<BigDecimal>>> dataModelData = dataModelDatas.get(entry.getKey());
                if(dataModelData == null) {
@@ -233,16 +236,20 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                        if(!categoryVariableVal.containsKey(parentNodeUniqueName)) {
                            categoryVariableVal.put(parentNodeUniqueName, new HashMap<>());
                        }
-                       categoryVariableVal.get(parentNodeUniqueName).put(var, new ListComputeResult(dataModelData.get(name).get(parentNodeUniqueName)));
+                       if (!categoryVariableVal.get(parentNodeUniqueName).containsKey(entry.getKey())) {
+                           categoryVariableVal.get(parentNodeUniqueName).put(entry.getKey(), new HashMap<>());
+                       }
+                       categoryVariableVal.get(parentNodeUniqueName).get(entry.getKey()).put(var, new ListComputeResult(dataModelData.get(name).get(parentNodeUniqueName)));
                    }
                }
                
-               for(String parentName : categoryVariableVal.keySet()) {
-                   // 清理一下，避免对后续造成影响
-                   compileContext.getVariablesResult().clear();
-                   compileContext.getVariablesResult().put(entry.getKey(), categoryVariableVal.get(parentName));
-                   calCulateDatas.put(parentName, ((ListComputeResult)compileContext.getNode().getResult(compileContext)).getData());
-               }
+           }
+           for(String parentName : categoryVariableVal.keySet()) {
+               // 清理一下，避免对后续造成影响
+               compileContext.getVariablesResult().clear();
+               compileContext.setVariablesResult(categoryVariableVal.get(parentName));
+//                   compileContext.getVariablesResult().put(entry.getKey(), categoryVariableVal.get(parentName));
+               calCulateDatas.put(parentName, ((ListComputeResult)compileContext.getNode().getResult(compileContext)).getData());
            }
            dataModelDatas.get(EmptyCondition.getInstance()).put(measureName, calCulateDatas);
         });
