@@ -19,8 +19,8 @@ import java.lang.reflect.Type;
 
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Measure;
-import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -41,8 +41,8 @@ public class MeasureDeserialize implements JsonDeserializer<Measure> {
         if (json.isJsonObject()) {
             JsonObject jsObj = json.getAsJsonObject();
             
-            String type = jsObj.get("type").getAsString();
-            if(type.equals(MeasureType.CAL.name()) || type.equals(MeasureType.RR.name()) || type.equals(MeasureType.SR.name())) {
+            String type = jsObj.get("aggregator").getAsString();
+            if(type.equals(Aggregator.CALCULATED.name())) {
                 return context.deserialize(jsObj, ExtendMinicubeMeasure.class);
             }
             return context.deserialize(jsObj, MiniCubeMeasure.class);
