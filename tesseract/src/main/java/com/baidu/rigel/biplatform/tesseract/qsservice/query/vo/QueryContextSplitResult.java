@@ -203,7 +203,7 @@ public class QueryContextSplitResult {
     public String toString() {
         return "QueryContextSplitResult [measureCaculateExpression=" + measureCaculateExpression + ", splitStrategy="
                 + splitStrategy + ", conditionQueryContext=" + conditionQueryContext + ", compileContexts="
-                + compileContexts + ", oriQueryContext=" + oriQueryContext + ", dataModels=" + dataModels.size() + "]";
+                + compileContexts + ", oriQueryContext=" + oriQueryContext + ", dataModels=" + getDataModels().size() + "]";
     }
 
 }
