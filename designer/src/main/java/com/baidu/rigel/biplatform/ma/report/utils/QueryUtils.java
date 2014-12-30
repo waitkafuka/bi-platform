@@ -29,6 +29,7 @@ import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
@@ -51,6 +52,7 @@ import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
@@ -454,13 +456,38 @@ public class QueryUtils {
      * @param measures
      * @param oriCube
      */
-    private static void modifyMeasures(Map<String, Measure> measures,
-			Cube oriCube) {
+    private static void modifyMeasures(Map<String, Measure> measures, Cube oriCube) {
+    		Set<String> refMeasuers = Sets.newHashSet();
 		measures.values().stream().filter(m -> {
 			return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
 		}).forEach(m -> {
 			ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
-			Set<String> refMeasuerNames = null;
+			if (m.getType() == MeasureType.CAL) {
+				refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
+			} else {
+				refMeasuers.add(m.getName().substring(0, m.getName().length() - 3));
+			}
+			if (m.getType() == MeasureType.RR) {
+				tmp.setFormula("rRate");
+			} else if (m.getType() == MeasureType.SR) {
+				tmp.setFormula("tRate");
+			}
+			tmp.setAggregator(Aggregator.CALCULATED);
+		});
+		refMeasuers.stream().filter(str -> {
+			return measures.containsKey(str);
+		}).map(str -> {
+			Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
+			for (Map.Entry<String, Measure> tmp : entry) {
+				if (str.equals(tmp.getValue().getName())) {
+					return tmp.getValue();
+				}
+			}
+			return null;
+		}).forEach(m -> {
+			if (m != null) {
+				measures.put(m.getName(), m);
+			}
 		});
 	}
 
