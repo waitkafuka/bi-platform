@@ -913,7 +913,7 @@ public class DataModelUtils {
 			ColDefine define = table.getColDefine().get(i);
 			String uniqueName = define.getUniqueName();
 			String formatStr = dataFormat.get("defaultFormat");
-			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","");
+			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","").replace(".", "");
 			if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
 				formatStr = dataFormat.get(uniqueName);
 			}
