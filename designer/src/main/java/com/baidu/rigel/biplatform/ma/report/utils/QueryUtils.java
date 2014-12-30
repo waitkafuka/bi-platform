@@ -478,7 +478,7 @@ public class QueryUtils {
 			tmp.setAggregator(Aggregator.CALCULATED);
 		});
 		refMeasuers.stream().filter(str -> {
-			return measures.containsKey(str);
+			return !measures.containsKey(str);
 		}).map(str -> {
 			Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
 			for (Map.Entry<String, Measure> tmp : entry) {
