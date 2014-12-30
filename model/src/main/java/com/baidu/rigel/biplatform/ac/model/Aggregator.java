@@ -41,10 +41,6 @@ public enum Aggregator {
      */
     CALCULATED, // 计算类型指标
     
-    /**
-     * DISTINCT
-     */
-    DISTINCT; 
     
 //    /**
 //     * 平均值

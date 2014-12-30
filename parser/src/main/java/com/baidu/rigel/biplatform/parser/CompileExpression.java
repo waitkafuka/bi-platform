@@ -90,13 +90,14 @@ public class CompileExpression {
         LOG.info("compile sections into node map {}",resultNodes);
         Node resultNode = resultNodes.get(COMPILE_RESULT_KEY);
         resultNode.check();
-        
         return new CompileContext(resultNode);
     }
     
     
     public static CompileContext compile(String expression) {
-        return resolveSections(compileExpressionByPattern(expression, ParserConstant.MIX_PATTERN));
+        CompileContext context = resolveSections(compileExpressionByPattern(expression, ParserConstant.MIX_PATTERN));
+        context.setExpression(expression);
+        return context;
     }
     
     

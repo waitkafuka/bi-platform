@@ -32,6 +32,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
@@ -77,10 +78,10 @@ public class DataSourceServiceImpl implements DataSourceService {
      * {@inheritDoc}
      */
     @Override
-    public synchronized DataSourceDefine saveOrUpdateDataSource(DataSourceDefine ds)
+    public synchronized DataSourceDefine saveOrUpdateDataSource(DataSourceDefine ds, String securityKey)
             throws DataSourceOperationException {
         
-        checkDataSourceDefine(ds);
+        checkDataSourceDefine(ds, securityKey);
         try {
             // 如果修改了数据源的名称，则先写新的数据源，然后删除原来的数据源文件
             DataSourceDefine oldDs = getDsDefine(ds.getId());
@@ -114,7 +115,7 @@ public class DataSourceServiceImpl implements DataSourceService {
      * @param ds
      * @throws DataSourceOperationException
      */
-    private void checkDataSourceDefine(DataSourceDefine ds) throws DataSourceOperationException {
+    private void checkDataSourceDefine(DataSourceDefine ds, String securityKey) throws DataSourceOperationException {
         if (ds == null) {
             logger.error("datasource can not be null");
             throw new DataSourceOperationException("datasource can not be null");
@@ -131,7 +132,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         /*
          * modified by jiangyichao 验证数据库连接字符串有效性 2014-08-12
          */
-        if (!isValidateConn(ds)) {
+        if (!isValidateConn(ds, securityKey)) {
             logger.debug("db connection info not correct");
             throw new DataSourceOperationException("db connection info not correct");
         }
@@ -165,14 +166,26 @@ public class DataSourceServiceImpl implements DataSourceService {
      * {@inheritDoc}
      */
     @Override
-    public boolean isValidateConn(DataSourceDefine ds) {
+    public boolean isValidateConn(DataSourceDefine ds, String securityKey) {
         DBInfoReader dBInfoReader = new DBInfoReader();
         try {
-            // 创建数据库连接，如果不抛出异常，说明连接字符串正确，返回true
-            DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(), DBUrlGeneratorUtils.getConnUrl(ds));
-            return true;
+	        	// 创建数据库连接，如果不抛出异常，说明连接字符串正确，返回true
+	        	DBInfoReader.build(ds.getType(), ds.getDbUser(), 
+						ds.getDbPwd(),
+						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+			return true;
+           	
         } catch (Exception e) {
-            logger.debug(e.getMessage(), e);
+			try {
+				String pwd = AesUtil.getInstance().encrypt(ds.getDbPwd(), securityKey);
+				DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
+						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+				// dirty solution 兼容原有数据源定义 
+				ds.setDbPwd(AesUtil.getInstance().encrypt(ds.getDbPwd(), securityKey));
+				return true;
+			} catch (Exception e1) {
+				logger.error(e1.getMessage());
+			}
         } finally {
             // 关闭数据库连接
             dBInfoReader.closeConn();

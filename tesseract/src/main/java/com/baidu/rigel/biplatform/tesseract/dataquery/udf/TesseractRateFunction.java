@@ -18,11 +18,15 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf;
 import java.util.Map;
 import java.util.Set;
 
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
+import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
 import com.baidu.rigel.biplatform.parser.node.Node;
 import com.baidu.rigel.biplatform.parser.node.impl.RateFunNode;
 import com.baidu.rigel.biplatform.parser.node.impl.VariableNode;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateCondition;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateCondition.RateType;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -38,6 +42,10 @@ abstract class TesseractRateFunction extends RateFunNode {
 	 */
 	private static final long serialVersionUID = -4597180338628840464L;
 	
+	public TesseractRateFunction() {
+	    this.setArgsLength(1);
+	}
+	
 	/**
 	 * 
 	 * @param type
@@ -48,12 +56,31 @@ abstract class TesseractRateFunction extends RateFunNode {
 		VariableNode variable = (VariableNode) this.getArgs().get(0);
 		variables.add(variable.getVariableExp());
 		Map<Condition, Set<String>> rs = Maps.newHashMap();
-		Condition numeratorCondition = new RateCondition(true, type, variable.getVariableExp());
+		Condition numeratorCondition = EmptyCondition.getInstance();//new RateCondition(true, type, variable.getVariableExp());
 		rs.put(numeratorCondition, variables);
 		Condition denominatorCondition = new RateCondition(false, type, variable.getVariableExp());
 		rs.put(denominatorCondition, variables);
-		return super.collectVariableCondition();
+		return rs;
 	}
+
+	/* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.parser.node.FunctionNode#preSetNodeResult(com.baidu.rigel.biplatform.parser.context.CompileContext)
+	 */
+	@Override
+	protected void preSetNodeResult(CompileContext context) {
+		VariableNode variable = (VariableNode) this.getArgs().get(0);
+		Condition condition = new RateCondition(false, getType(), variable.getVariableExp());
+		variable.setResult(context.getVariablesResult().get(condition).get(variable.getVariableExp()));
+		
+		VariableNode numeratorNodeVar = DeepcopyUtils.deepCopy(variable);
+		numeratorNodeVar.setResult(context.getVariablesResult().get(EmptyCondition.getInstance()).get(variable.getVariableExp()));
+		this.getArgs().set(0, numeratorNodeVar);
+		this.getArgs().add(variable);
+		
+//		super.preSetNodeResult(context);
+	}
+	
+	abstract RateType getType();
 
 	/* 
 	 * (non-Javadoc)
@@ -61,8 +88,8 @@ abstract class TesseractRateFunction extends RateFunNode {
 	 */
 	@Override
 	public void check() {
-		super.check();
-		if (this.getArgs() != null && this.getArgs().size() == 1) {
+//		super.check();
+		if (this.getArgs() != null && this.getArgs().size() != 1) {
 			throw new IllegalStateException("该函数必须包含并且只能包含一个参数");
 		}
 		Node node = this.getArgs().get(0);

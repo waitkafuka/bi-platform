@@ -144,16 +144,14 @@
     background-color: #BBB;
 }
 .ui-download-btn .ui-button-inner {
-    padding: 0 10px 3px 10px;
-    line-height: 16px;
-    background-color: #F7F7F7;
-    border-top: 1px solid #F7F7F7;
+    padding: 2px 0px 4px 3px;
+    line-height: 8px;
     margin-top: 1px;
     -webkit-border-radius: 1px;
     -o-border-radius: 1px;
     -moz-border-radius: 1px;
     -ms-border-radius: 1px;
-    border-radius: 1px;    
+    border-radius: 1px;
 }
 .ui-download-btn-hover .ui-button-inner {
     background-color: #FCFCFC;
@@ -164,15 +162,18 @@
     background-color: #EEE;
 }
 .ui-download-btn .ui-button-left {
-    background: url(img/icon2.png) -75px -65px no-repeat;
-    width: 9px;
-    height: 12px;
+    background: url(img/download.png) no-repeat;
+    width: 20px;
+    height: 15px;
     overflow: hidden;
     display: inline-block;
     *display: inline;
     *zoom: 1;
     vertical-align: middle;
     margin-right: 3px;
+}
+.ui-download-btn .ui-button-left:hover{
+    background: url(img/downloadblue.png) no-repeat;
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;

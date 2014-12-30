@@ -118,7 +118,7 @@ define([
                         if (leftPosition/1 + defaultWidth/1 > reportWidth) {
                             $realComp.css('left', (reportWidth - defaultWidth - 3) + 'px');
                         }
-                        if ( parseInt($realComp.css('left')) < 2) {
+                        if (parseInt($realComp.css('left')) < 2) {
                             $realComp.css('left', '3px');
                         }
                         if (parseInt($realComp.css('top')) < 2) {
@@ -312,7 +312,7 @@ define([
                 // 固定多选下拉框的高度
                 that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 34, 34);
+                that.dragWidthHeight($component, 'TEXT', 30, 30);
             },
 
             /**

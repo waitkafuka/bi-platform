@@ -190,8 +190,11 @@
 }
 .report .shell-component {
     position: absolute;
-    border: 1px solid rgba(0, 119, 119, 0.17);
-    /*overflow: hidden;*/
+    overflow: hidden;
+    border: 1px solid #ffffff;
+}
+.report .shell-component:hover {
+    border: 1px solid rgba(0, 119, 119, 0.168627);
 }
 .report .shell-component.active {
     z-index: 10;
@@ -699,4 +702,10 @@
     width: 85%;
     height: 0;
     top: 32px;
+}
+
+/* 表格下载按钮样式 */
+.table-download {
+    float: left;
+    padding-top: 4px;
 }

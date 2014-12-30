@@ -611,7 +611,7 @@ public class QueryDataResource extends BaseResource {
             if (action == null || CollectionUtils.isEmpty(action.getRows()) || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
-            result = reportModelQueryService.queryDatas(model, action, true, true, areaContext.getParams());
+            result = reportModelQueryService.queryDatas(model, action, true, true, areaContext.getParams(), securityKey);
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
@@ -930,7 +930,7 @@ public class QueryDataResource extends BaseResource {
         }
         ResultSet result;
         try {
-            result = reportModelQueryService.queryDatas(model, action, true, true);
+            result = reportModelQueryService.queryDatas(model, action, true, true, securityKey);
         } catch (DataSourceOperationException e1) {
             logger.info("[INFO]--- ---can't get datasource！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
@@ -1111,7 +1111,7 @@ public class QueryDataResource extends BaseResource {
         
         ResultSet result;
         try {
-            result = reportModelQueryService.queryDatas(model, action, true, false);
+            result = reportModelQueryService.queryDatas(model, action, true, false, securityKey);
         } catch (DataSourceOperationException | QueryModelBuildException | MiniCubeQueryException e1) {
             logger.error(e1.getMessage(), e1);
             return ResourceUtils.getErrorResult(e1.getMessage(), 1);
@@ -1472,7 +1472,7 @@ public class QueryDataResource extends BaseResource {
         if (action != null) {
             action.setChartQuery(false);
         }
-        ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true, areaContext.getParams());
+        ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true, areaContext.getParams(), securityKey);
     		DataModel dataModel = queryRs.getDataModel();
     		logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
     		begin = System.currentTimeMillis();
