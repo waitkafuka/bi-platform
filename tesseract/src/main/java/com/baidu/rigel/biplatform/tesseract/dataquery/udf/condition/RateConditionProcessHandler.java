@@ -38,6 +38,7 @@ import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
@@ -100,10 +101,19 @@ abstract class RateConditionProcessHandler {
 	 */
 	Date getFirstDayOfTimeDim(TimeDimension dimension, QueryContextAdapter adapter) 
 			throws MiniCubeQueryException, ParseException {
-		List<Member> members = getMembers(dimension, adapter);
-		// TODO 这里需要考虑一下，先排序，后处理
-		String value = members.get(0).getName();
 		SimpleDateFormat format = new SimpleDateFormat(TimeRangeDetail.FORMAT_STRING);
+		List<Member> members = getMembers(dimension, adapter);
+		MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
+		String value = null;
+		if (condition != null) {
+			DimensionCondition dimCondition = (DimensionCondition) condition;
+			String uniqueName = dimCondition.getQueryDataNodes().get(0).getUniqueName();
+			String[] tmp = MetaNameUtil.parseUnique2NameArray(uniqueName);
+			value = tmp[tmp.length - 1];
+		} else {
+			// TODO 这里需要考虑一下，先排序，后处理
+			value = members.get(0).getName();
+		}
 		return format.parse(value);
 	}
 
