@@ -56,12 +56,15 @@ define(function () {
     var COMPONENT_ID_SUFFIX = {
         SELECT: '-vu-form-select',
         CALENDAR: '-vu-form-calendar',
-        TEXT: '-vu-form-text'
+        TEXT: '-vu-form-text',
+        MULTISELECT: '-vu-form-multiselect'
     };
 
     return {
         DATA_FORMAT_OPTIONS: DATA_FORMAT_OPTIONS,
         CHART_TYPES: CHART_TYPES,
-        COMPONENT_ID_SUFFIX: COMPONENT_ID_SUFFIX
+        COMPONENT_ID_SUFFIX: COMPONENT_ID_SUFFIX,
+        SINGLE_CHART: SINGLE_CHART,
+        COMBINATION_CHART: COMBINATION_CHART
     };
 });
