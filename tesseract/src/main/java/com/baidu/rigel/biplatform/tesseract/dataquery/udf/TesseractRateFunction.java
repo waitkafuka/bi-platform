@@ -38,6 +38,10 @@ abstract class TesseractRateFunction extends RateFunNode {
 	 */
 	private static final long serialVersionUID = -4597180338628840464L;
 	
+	public TesseractRateFunction() {
+	    this.setArgsLength(1);
+	}
+	
 	/**
 	 * 
 	 * @param type
@@ -61,8 +65,8 @@ abstract class TesseractRateFunction extends RateFunNode {
 	 */
 	@Override
 	public void check() {
-		super.check();
-		if (this.getArgs() != null && this.getArgs().size() == 1) {
+//		super.check();
+		if (this.getArgs() != null && this.getArgs().size() != 1) {
 			throw new IllegalStateException("该函数必须包含并且只能包含一个参数");
 		}
 		Node node = this.getArgs().get(0);
