@@ -22,6 +22,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
+import com.baidu.rigel.biplatform.parser.RegisterFunction;
+import com.baidu.rigel.biplatform.parser.exception.RegisterFunctionException;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.RelativeRate;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.SimilitudeRate;
+
 /**
  * Tesseract项目启动入口
  * 
@@ -38,9 +43,13 @@ public class TesseractApplication {
      * 启动Tesseract
      * 
      * @param args 启动参数
+     * @throws RegisterFunctionException 
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws RegisterFunctionException {
 
         SpringApplication.run(TesseractApplication.class);
+        
+        RegisterFunction.register("rRate", RelativeRate.class);
+        RegisterFunction.register("sRate", SimilitudeRate.class);
     }
 }

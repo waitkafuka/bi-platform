@@ -15,10 +15,15 @@
  */
 package com.baidu.rigel.biplatform.tesseract.qsservice.query.vo;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
+
+import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.parser.context.CompileContext;
+import com.baidu.rigel.biplatform.parser.context.Condition;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitService.QueryContextSplitStrategy;
 
 /**
@@ -30,11 +35,6 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitSer
 public class QueryContextSplitResult {
 
     /**
-     * splitQueryContexts 拆分后的查询上下文
-     */
-    private List<QueryContext> splitQueryContexts;
-
-    /**
      * measureCaculateExpression 指标的计算公式， 后续的Value应该会变成计算公式解析后的对象
      */
     private Map<String, String> measureCaculateExpression;
@@ -43,36 +43,36 @@ public class QueryContextSplitResult {
      * splitStrategy 拆分策略，根据不同策略最后做数据合并的时候需要进行不同处理
      */
     private QueryContextSplitStrategy splitStrategy;
+    
 
+    private Map<Condition,QueryContext> conditionQueryContext;
+    
+    
+    /** 
+     * compileContexts 计算列的上下文
+     */
+    private Map<String, CompileContext> compileContexts;
+    
+    
+    
+    /** 
+     * oriQueryContext 基础的上下文，最终结果集根据这个上下文拼接
+     */
+    private QueryContext oriQueryContext;
+    
+    
+    private Map<Condition,DataModel> dataModels;
     /**
      * constructor
      * 
      * @param splitStrategy
      */
-    public QueryContextSplitResult(QueryContextSplitStrategy splitStrategy) {
+    public QueryContextSplitResult(QueryContextSplitStrategy splitStrategy, QueryContext oriContext) {
         this.splitStrategy = splitStrategy;
+        // 深拷贝，避免外面的被改变
+        this.oriQueryContext = DeepcopyUtils.deepCopy(oriContext);
     }
 
-    /**
-     * get splitQueryContexts
-     * 
-     * @return the splitQueryContexts
-     */
-    public List<QueryContext> getSplitQueryContexts() {
-        if (this.splitQueryContexts == null) {
-            this.splitQueryContexts = new ArrayList<QueryContext>(1);
-        }
-        return splitQueryContexts;
-    }
-
-    /**
-     * set splitQueryContexts with splitQueryContexts
-     * 
-     * @param splitQueryContexts the splitQueryContexts to set
-     */
-    public void setSplitQueryContexts(List<QueryContext> splitQueryContexts) {
-        this.splitQueryContexts = splitQueryContexts;
-    }
 
     /**
      * get measureCaculateExpression
@@ -108,6 +108,102 @@ public class QueryContextSplitResult {
      */
     public void setSplitStrategy(QueryContextSplitStrategy splitStrategy) {
         this.splitStrategy = splitStrategy;
+    }
+
+    /** 
+     * 获取 conditionQueryContext 
+     * @return the conditionQueryContext 
+     */
+    public Map<Condition, QueryContext> getConditionQueryContext() {
+        if(MapUtils.isEmpty(conditionQueryContext)) {
+            this.conditionQueryContext = new HashMap<Condition, QueryContext>();
+        }
+        return conditionQueryContext;
+    }
+
+    /** 
+     * 设置 conditionQueryContext 
+     * @param conditionQueryContext the conditionQueryContext to set 
+     */
+    public void setConditionQueryContext(Map<Condition, QueryContext> conditionQueryContext) {
+    
+        this.conditionQueryContext = conditionQueryContext;
+    }
+
+
+    /** 
+     * 获取 oriQueryContext 
+     * @return the oriQueryContext 
+     */
+    public QueryContext getOriQueryContext() {
+    
+        return oriQueryContext;
+    }
+
+
+    /** 
+     * 设置 oriQueryContext 
+     * @param oriQueryContext the oriQueryContext to set 
+     */
+    public void setOriQueryContext(QueryContext oriQueryContext) {
+    
+        this.oriQueryContext = oriQueryContext;
+    }
+
+
+    /** 
+     * 获取 compileContexts 
+     * @return the compileContexts 
+     */
+    public Map<String, CompileContext> getCompileContexts() {
+        if(this.compileContexts == null) {
+            this.compileContexts = new HashMap<>();
+        }
+        return compileContexts;
+    }
+
+
+    /** 
+     * 设置 compileContexts 
+     * @param compileContexts the compileContexts to set 
+     */
+    public void setCompileContexts(Map<String, CompileContext> compileContexts) {
+        this.compileContexts = compileContexts;
+    }
+
+
+    /** 
+     * 获取 dataModels 
+     * @return the dataModels 
+     */
+    public Map<Condition, DataModel> getDataModels() {
+        if(dataModels == null) {
+            this.dataModels = new HashMap<Condition, DataModel>();
+        }
+        return dataModels;
+    }
+
+
+    /** 
+     * 设置 dataModels 
+     * @param dataModels the dataModels to set 
+     */
+    public void setDataModels(Map<Condition, DataModel> dataModels) {
+    
+        this.dataModels = dataModels;
+    }
+
+
+    
+    /*
+     * (non-Javadoc) 
+     * @see java.lang.Object#toString() 
+     */
+    @Override
+    public String toString() {
+        return "QueryContextSplitResult [measureCaculateExpression=" + measureCaculateExpression + ", splitStrategy="
+                + splitStrategy + ", conditionQueryContext=" + conditionQueryContext + ", compileContexts="
+                + compileContexts + ", oriQueryContext=" + oriQueryContext + ", dataModels=" + dataModels.size() + "]";
     }
 
 }

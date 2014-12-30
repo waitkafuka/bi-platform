@@ -16,10 +16,13 @@
 package com.baidu.rigel.biplatform.ac.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -67,7 +70,24 @@ public class PlaceHolderUtils {
         } else {
             return placeHolder.substring(2, placeHolder.length() - 1);
         }
-
+    }
+    
+    
+    /** 
+     * 从一个源字符串中解析所有占位符信息 如 abc/${1}/${2}/${1}/abc.action,解析出来的就是1,2
+     * getPlaceHolderKeys
+     * @param source
+     * @return
+     */
+    public static Set<String> getPlaceHolderKeys(String source) {
+        List<String> placeHolders = getPlaceHolders(source);
+        Set<String> result = new HashSet<String>();
+        if(CollectionUtils.isNotEmpty(placeHolders)) {
+            for(String placeHolder : placeHolders) {
+                result.add(getKeyFromPlaceHolder(placeHolder));
+            }
+        }
+        return result;
     }
 
     /**

@@ -118,7 +118,7 @@ define([
                         if (leftPosition/1 + defaultWidth/1 > reportWidth) {
                             $realComp.css('left', (reportWidth - defaultWidth - 3) + 'px');
                         }
-                        if ( parseInt($realComp.css('left')) < 2) {
+                        if (parseInt($realComp.css('left')) < 2) {
                             $realComp.css('left', '3px');
                         }
                         if (parseInt($realComp.css('top')) < 2) {

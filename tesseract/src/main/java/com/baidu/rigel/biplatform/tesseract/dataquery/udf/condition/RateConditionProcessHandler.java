@@ -133,7 +133,7 @@ abstract class RateConditionProcessHandler {
 		QueryContext context = DeepcopyUtils.deepCopy(adapter.getQueryContext());
 		QuestionModel questionModel = DeepcopyUtils.deepCopy(adapter.getQuestionModel());
 		Cube cube = adapter.getCube();
-		Map<String, String> params = DeepcopyUtils.deepCopy(questionModel.getRequestParams());
+//		Map<String, String> params = DeepcopyUtils.deepCopy(questionModel.getRequestParams());
 		MetaCondition condition = questionModel.getQueryConditions().get(dimension.getName());
 		if (condition == null || !(condition instanceof DimensionCondition)) {
 			throw new IllegalStateException("未查到与时间维度相关的条件信息");
@@ -160,7 +160,7 @@ abstract class RateConditionProcessHandler {
 		questionModel.getQueryConditions().put(dimension.getName(), tmp);
 		QueryContextBuilder builder = adapter.getBuilder();
 		try {
-			return builder.buildQueryContext(questionModel, adapter.getDataSoruceInfo(), cube, context, params);
+			return builder.buildQueryContext(questionModel, adapter.getDataSoruceInfo(), cube, context);
 		} catch (MiniCubeQueryException | MetaException e) {
 			LOG.error(e.getMessage(), e);
 		}

@@ -82,7 +82,7 @@ public class QueryContextBuilder {
      * @throws MetaException
      */
     public QueryContext buildQueryContext(QuestionModel questionModel, DataSourceInfo dsInfo, Cube cube,
-            QueryContext queryContext, Map<String, String> params) throws MiniCubeQueryException, MetaException {
+            QueryContext queryContext) throws MiniCubeQueryException, MetaException {
         if (queryContext == null) {
             queryContext = new QueryContext();
             QuestionModel cloneQuestionModel = DeepcopyUtils.deepCopy(questionModel);
@@ -99,7 +99,7 @@ public class QueryContextBuilder {
                             dimCondition = new DimensionCondition(dimName);
                         }
                         queryContext.addMemberNodeTreeByAxisType(axisType,
-                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, params));
+                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, questionModel.getRequestParams()));
                         i++;
                     }
                 }
@@ -130,7 +130,7 @@ public class QueryContextBuilder {
                     }
                     if (condition instanceof DimensionCondition) {
                         DimensionCondition dimCondition = (DimensionCondition) condition;
-                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, params);
+                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, questionModel.getRequestParams());
                         if (MapUtils.isNotEmpty(filterCondition)) {
                             queryContext.getFilterMemberValues().putAll(filterCondition);
                         }
