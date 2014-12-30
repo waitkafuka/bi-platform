@@ -8,9 +8,9 @@ define(['template'], function (template) {
         $out+=$escape(id);
         $out+='-vu-table-breadcrumb"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="vu-table" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table" style="height: 160px;"></div>\r\n    </div>\r\n    <div class="di-o_o-line" style="float: left">\r\n        <div class="di-table-prompt">\r\n            <div class="di-table-count" data-o_o-di="';
+        $out+='-vu-table" style="height: 160px;"></div>\r\n    </div>\r\n    <div class="di-o_o-line" style="float: left; width: ">\r\n        <div class="di-table-prompt">\r\n            <div class="di-table-count" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table-count">\r\n                符合查询条件的数据只显示\r\n                <span class="di-table-count-num">#{currRecordCount}</span>条。\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <div class="di-o_o-line table-download">\r\n        <div class="di-o_o-item" data-o_o-di="';
+        $out+='-vu-table-count">\r\n                符合查询条件的数据只显示\r\n                <span class="di-table-count-num">#{currRecordCount}</span>条。查看全部数据，请点击下载\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <div class="di-o_o-line table-download" title="下载全量数据">\r\n        <div class="di-o_o-item" data-o_o-di="';
         $out+=$escape(id);
         $out+='-vu-table-download"></div>\r\n    </div>\r\n</div>';
         return $out;
