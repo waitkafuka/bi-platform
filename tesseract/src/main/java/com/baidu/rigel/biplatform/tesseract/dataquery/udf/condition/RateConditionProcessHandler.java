@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -31,6 +32,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
@@ -38,6 +40,7 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
+import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.google.common.collect.Lists;
@@ -160,7 +163,18 @@ abstract class RateConditionProcessHandler {
 		questionModel.getQueryConditions().put(dimension.getName(), tmp);
 		QueryContextBuilder builder = adapter.getBuilder();
 		try {
-			return builder.buildQueryContext(questionModel, adapter.getDataSoruceInfo(), cube, context);
+			if (questionModel.getAxisMetas().get(AxisType.ROW).getCrossjoinDims().contains(dimension.getName())) {
+				int index = questionModel.getAxisMetas()
+						.get(AxisType.ROW).getCrossjoinDims().indexOf(dimension.getName());
+				MemberNodeTree tree = builder.buildQueryMemberTree(
+						adapter.getDataSoruceInfo(), cube, tmp, false, questionModel.getRequestParams());
+				context.getRowMemberTrees().set(index, tree);
+			} else {
+				Map<String, Set<String>> fiters = builder.buildFilterCondition(
+						adapter.getDataSoruceInfo(), cube, tmp, questionModel.getRequestParams());
+				context.getFilterMemberValues().putAll(fiters);
+			}
+			return context;
 		} catch (MiniCubeQueryException | MetaException e) {
 			LOG.error(e.getMessage(), e);
 		}
