@@ -98,6 +98,57 @@ public class RateCondition implements Condition {
 		}
 		throw new IllegalStateException("未知计算请求");
 	}
+	
+	
+
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (isNumerator ? 1231 : 1237);
+		result = prime * result
+				+ ((rateType == null) ? 0 : rateType.hashCode());
+		result = prime * result
+				+ ((variableName == null) ? 0 : variableName.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		RateCondition other = (RateCondition) obj;
+		if (isNumerator != other.isNumerator) {
+			return false;
+		}
+		if (rateType != other.rateType) {
+			return false;
+		}
+		if (variableName == null) {
+			if (other.variableName != null) {
+				return false;
+			}
+		} else if (!variableName.equals(other.variableName)) {
+			return false;
+		}
+		return true;
+	}
+
+
 
 
 	/**
