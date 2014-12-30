@@ -178,9 +178,10 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      * {@inheritDoc}
      */
     @Override
-    public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache, boolean needSumary)
+    public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache,
+    			boolean needSumary, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
-        return this.queryDatas(model, action, usingCache, needSumary, null);
+        return this.queryDatas(model, action, usingCache, needSumary, null, securityKey);
     }
     
     /**
@@ -192,7 +193,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      */
     @Override
     public ResultSet queryDatas(ReportDesignModel model, QueryAction action,
-            boolean usingCache, boolean needSumary, Map<String, Object> requestParams)
+            boolean usingCache, boolean needSumary, Map<String, Object> requestParams, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
         ResultSet rs = new ResultSet();
         // For Mock
@@ -208,7 +209,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
         try {
-            questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action);
+            questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
 //            PageInfo pageInfo = new PageInfo();
 //            pageInfo.setPageNo(0);
 //            pageInfo.setPageSize(100);

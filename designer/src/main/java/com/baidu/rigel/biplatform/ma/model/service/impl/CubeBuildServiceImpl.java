@@ -66,21 +66,22 @@ public class CubeBuildServiceImpl implements CubeBuildService {
      * (java.lang.String)
      */
     @Override
-    public List<TableInfo> getAllTable(String dsId) throws DataSourceOperationException {
+    public List<TableInfo> getAllTable(String dsId, String securityKey) throws DataSourceOperationException {
         DataSourceDefine ds = null;
+        DBInfoReader reader = null;
         try {
             ds = dsService.getDsDefine(dsId);
-        } catch (DataSourceOperationException e) {
-            logger.error("Fail in get ds by id: " + dsId, e);
-            throw e;
-        }
-        DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                DBUrlGeneratorUtils.getConnUrl(ds));
-        try {
+            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+            		DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             List<TableInfo> tables = reader.getAllTableInfos();
             return tables;
+        } catch (Exception e) {
+            logger.error("Fail in get ds by id: " + dsId, e);
+            throw new DataSourceOperationException(e);
         } finally {
-            reader.closeConn();
+        		if (reader != null) {
+        			reader.closeConn();
+        		}
         }
     }
     
@@ -93,7 +94,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
      */
     @Override
     public List<FactTableMetaDefine> initCubeTables(String dsId, List<String> tableIds,
-            List<String> regxs) throws DataSourceOperationException {
+            List<String> regxs, String securityKey) throws DataSourceOperationException {
         
         List<FactTableMetaDefine> tableMetas = Lists.newArrayList();
         Map<String, String[]> tableMap = RegExUtils.regExTableName(tableIds, regxs);
@@ -106,7 +107,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
             throw e;
         }
         DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds));
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
         try {
             for (String key : tableMap.keySet()) {
                 String[] tables = tableMap.get(key);

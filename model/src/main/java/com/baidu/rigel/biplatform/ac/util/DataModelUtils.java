@@ -167,7 +167,7 @@ public class DataModelUtils {
      * @param dataModel 整个DataModel
      * @param type 获取数据的行头类型，行还是列
      */
-    private static void fillColumnData(DataModel dataModel, FillDataType type) {
+    public static void fillColumnData(DataModel dataModel, FillDataType type) {
 
         List<HeadField> columnLeafs = getLeafNodeList(dataModel.getColumnHeadFields());
         List<HeadField> rowLeafs = getLeafNodeList(dataModel.getRowHeadFields());

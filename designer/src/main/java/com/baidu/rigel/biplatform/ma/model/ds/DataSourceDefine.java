@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.ma.model.ds;
 
 import java.io.Serializable;
 
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 
@@ -121,19 +120,11 @@ public class DataSourceDefine implements Serializable {
     }
     
     public String getDbPwd() {
-        try {
-			return AesUtil.getInstance().decodeAnddecrypt(dbPwd);
-		} catch (Exception e) {
-			return dbPwd;
-		}
+		return this.dbPwd;
     }
     
     public void setDbPwd(String dbPwd) {
-        try {
-			this.dbPwd = AesUtil.getInstance().encrypt(dbPwd);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+        this.dbPwd = dbPwd;
     }
     
     public String getDbInstance() {

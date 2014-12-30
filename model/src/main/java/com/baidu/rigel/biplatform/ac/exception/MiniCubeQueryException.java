@@ -24,7 +24,7 @@ package com.baidu.rigel.biplatform.ac.exception;
  * @author xiaoming.chen
  *
  */
-public class MiniCubeQueryException extends Exception {
+public class MiniCubeQueryException extends RuntimeException {
 
     /**
      * serialVersionUID

@@ -16,8 +16,8 @@
  */
 package com.baidu.rigel.biplatform.parser.util;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class ConditionUtil {
      * @param contexs
      * @return
      */
-    public static Map<Condition, Set<String>> simpleMergeContexsCondition(List<CompileContext> contexs) {
+    public static Map<Condition, Set<String>> simpleMergeContexsCondition(Collection<CompileContext> contexs) {
         
         Map<Condition, Set<String>> result = new HashMap<Condition, Set<String>>();
         if(CollectionUtils.isNotEmpty(contexs)) {

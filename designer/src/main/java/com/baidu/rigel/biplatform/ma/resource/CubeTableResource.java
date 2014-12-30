@@ -55,7 +55,7 @@ import com.google.common.collect.Maps;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
-public class CubeTableResource {
+public class CubeTableResource extends BaseResource {
     
     /**
      * logger
@@ -127,7 +127,7 @@ public class CubeTableResource {
         List<FactTableMetaDefine> cubeTables = null;
         try {
             cubeTables = cubeBuildService.initCubeTables(dsId, selectedList,
-                regexList);
+                regexList, securityKey);
         } catch (DataSourceOperationException e1) {
             logger.error("Fail in getting table info from datasource. ", e1);
             return ResourceUtils.getErrorResult("未能从数据库中查到相关表定义信息，原因 " + e1.getLocalizedMessage(), 1);
