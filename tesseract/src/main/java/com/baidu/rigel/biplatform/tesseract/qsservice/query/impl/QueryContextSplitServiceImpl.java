@@ -141,19 +141,6 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                     
                 });
             }
-            
-            
-            // MeasureParseResult parseResult = null;
-            // 查询指标分类，KEY为指标条件，主要有 distinct-count, 普通, 偏移（偏移对象）
-            // Map<Object, Set<String>> queryMeasureCategory = new HashMap<Object, Set<String>>(1);
-            // for(String measureName : queryContext.getQueryMeasures()){
-            // // 判断是否是同环比的指标名称，比如 自定义的关键字
-            // parseResult = measureParseService.parseMeasure(cube, measureName);
-            // // TODO 按照指标类型进行分类,对于distinct-count和计算列的需要分组
-            //
-            // }
-
-            // TODO 应该判断指标分组，按照分组进行拆分，先简单实现
         }
 
         return result;

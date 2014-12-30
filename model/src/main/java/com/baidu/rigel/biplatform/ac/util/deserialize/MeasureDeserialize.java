@@ -41,7 +41,8 @@ public class MeasureDeserialize implements JsonDeserializer<Measure> {
         if (json.isJsonObject()) {
             JsonObject jsObj = json.getAsJsonObject();
             
-            if(jsObj.get("type").getAsString().equals(MeasureType.CAL.name())) {
+            String type = jsObj.get("type").getAsString();
+            if(type.equals(MeasureType.CAL.name()) || type.equals(MeasureType.RR.name()) || type.equals(MeasureType.SR.name())) {
                 return context.deserialize(jsObj, ExtendMinicubeMeasure.class);
             }
             return context.deserialize(jsObj, MiniCubeMeasure.class);
