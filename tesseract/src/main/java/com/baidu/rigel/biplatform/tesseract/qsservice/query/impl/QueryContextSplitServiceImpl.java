@@ -27,6 +27,8 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
@@ -68,6 +70,8 @@ import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
  */
 @Service
 public class QueryContextSplitServiceImpl implements QueryContextSplitService {
+    
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     private static final String NONE = "NONE";
     
@@ -121,10 +125,17 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                     // 是否需要清理，到时候在讨论
                     context.getQueryMeasures().clear();
                     for(String var : vars) {
-                        context.getQueryMeasures().add((MiniCubeMeasure) cube.getMeasures().get(PlaceHolderUtils.getKeyFromPlaceHolder(var)));
+                        MiniCubeMeasure measure = (MiniCubeMeasure) cube.getMeasures().get(PlaceHolderUtils.getKeyFromPlaceHolder(var));
+                        if(!context.getQueryMeasures().contains(measure)) {
+                            context.getQueryMeasures().add(measure);
+                        }
                     }
                     if(con.getConditionType().equals(ConditionType.None) && CollectionUtils.isNotEmpty(queryContext.getQueryMeasures())) {
-                        context.getQueryMeasures().addAll(queryContext.getQueryMeasures());
+                        for(MiniCubeMeasure m : queryContext.getQueryMeasures()) {
+                            if(!context.getQueryMeasures().contains(m)) {
+                                context.getQueryMeasures().add(m);
+                            }
+                        }
                     }
                     result.getConditionQueryContext().put(con, context);
                     
@@ -180,6 +191,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
 
     @Override
     public DataModel mergeDataModel(QueryContextSplitResult splitResult) {
+        long current = System.currentTimeMillis();
         if(splitResult == null || splitResult.getConditionQueryContext().size() != splitResult.getDataModels().size()) {
             throw new IllegalSplitResultException(splitResult, "splitResult is null or condition size not equal", "MERGE_MODEL");
         }
@@ -248,6 +260,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
            dataModelDatas.get(EmptyCondition.getInstance()).put(measureName, calCulateDatas);
         });
         mergeDataModelDatas(dataModel, dataModelDatas.get(EmptyCondition.getInstance()));
+        log.info("merge datamodel cost:{}ms",System.currentTimeMillis() - current);
         return dataModel;
     }
     
