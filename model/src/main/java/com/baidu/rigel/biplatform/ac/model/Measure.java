@@ -61,7 +61,7 @@ public interface Measure extends OlapElement {
     @JsonIgnore
     @Override
     public default String getUniqueName() {
-        return MetaNameUtil.makeUniqueName(MEASURE_DIMENSION_NAME) + MetaNameUtil.makeUniqueName(getName());
+        return MetaNameUtil.generateMeasureUniqueName(getName());
     }
 
 }

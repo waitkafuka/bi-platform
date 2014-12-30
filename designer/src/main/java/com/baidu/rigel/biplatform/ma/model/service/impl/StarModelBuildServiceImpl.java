@@ -106,7 +106,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
      * getAllTablesAndCols(java.lang.String)
      */
     @Override
-    public List<RelationTableView> getAllTablesAndCols(String dsId) throws DataSourceOperationException {
+    public List<RelationTableView> getAllTablesAndCols(String dsId, String securityKey) throws DataSourceOperationException {
         DataSourceDefine ds = null;
         try {
             ds = dsService.getDsDefine(dsId);
@@ -118,8 +118,9 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         if (ds == null) {
             return Lists.newArrayList();
         }
-        DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                DBUrlGeneratorUtils.getConnUrl(ds));
+        String pwd = ds.getDbPwd();
+        DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
+                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
         try {
             List<TableInfo> tables = reader.getAllTableInfos();
             List<RelationTableView> relationTables = Lists.newArrayList();
@@ -344,7 +345,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
      */
     @Override
     public List<StandardDimTableMetaDefine> generateMetaDefine(String dsId,
-            NormalDimBindView normal, Map<String, String> names) throws DataSourceOperationException {
+            NormalDimBindView normal, Map<String, String> names, String securityKey) throws DataSourceOperationException {
         List<StandardDimTableMetaDefine> standMetaDefines = Lists.newArrayList();
         
         DataSourceDefine ds = null;
@@ -360,7 +361,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         }
         
         DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                DBUrlGeneratorUtils.getConnUrl(ds));
+                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
         try {
             for (NormalDimDetail detail : normal.getChildren()) {
                 StandardDimTableMetaDefine stand = new StandardDimTableMetaDefine();

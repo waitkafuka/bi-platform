@@ -16,6 +16,9 @@
 package com.baidu.rigel.biplatform.tesseract.qsservice.query;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContextSplitResult;
 
@@ -64,6 +67,15 @@ public interface QueryContextSplitService {
      * @param preSplitStrategy 上次的拆分类型
      * @return 拆分后的结果
      */
-    QueryContextSplitResult split(Cube cube, QueryContext queryContext, QueryContextSplitStrategy preSplitStrategy);
+    QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, Cube cube, QueryContext queryContext, QueryContextSplitStrategy preSplitStrategy);
+    
+    
+    /** 
+     * mergeDataModel
+     * @param splitResult
+     * @param cube
+     * @return
+     */
+    DataModel mergeDataModel(QueryContextSplitResult splitResult);
 
 }

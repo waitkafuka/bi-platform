@@ -37,7 +37,7 @@ public interface DataSourceService {
      * @throws DataSourceOperationException
      *             数据源保存或者更新失败抛出异常
      */
-    public DataSourceDefine saveOrUpdateDataSource(DataSourceDefine ds)
+    public DataSourceDefine saveOrUpdateDataSource(DataSourceDefine ds, String securityKey)
             throws DataSourceOperationException;
     
     /**
@@ -67,7 +67,7 @@ public interface DataSourceService {
      *            数据源定义
      * @return 成功连接返回true 失败返回false
      */
-    public boolean isValidateConn(DataSourceDefine ds);
+    public boolean isValidateConn(DataSourceDefine ds, String securityKey);
     
     /**
      * 检测产品线下定义的所有数据源

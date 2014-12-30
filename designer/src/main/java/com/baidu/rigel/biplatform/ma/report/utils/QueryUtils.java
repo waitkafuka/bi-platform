@@ -22,17 +22,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -47,7 +52,9 @@ import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
@@ -90,7 +97,7 @@ public class QueryUtils {
      *             构建失败异常
      */
     public static QuestionModel convert2QuestionModel(DataSourceDefine dsDefine, ReportDesignModel reportModel,
-        QueryAction queryAction) throws QueryModelBuildException {
+        QueryAction queryAction, String securityKey) throws QueryModelBuildException {
         if (queryAction == null) {
             throw new QueryModelBuildException("query action is null");
         }
@@ -120,7 +127,7 @@ public class QueryUtils {
 //        updateLogicCubeWithSlices(cube, tmp,
 //                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
-        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
+        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
         SortType sortType = SortType.valueOf(orderDesc.getOrderType());
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
@@ -159,11 +166,11 @@ public class QueryUtils {
      * @param dsDefine
      * @return DataSourceInfo
      */
-    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine) {
+    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
         SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getName());
         ds.setDBProxy(true);
         try {
-            ds.setPassword(dsDefine.getDbPwd());
+            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -438,6 +445,7 @@ public class QueryUtils {
         		}
         }
         cube.setDimensions(dimensions);
+        modifyMeasures(measures, oriCube);
         cube.setMeasures(measures);
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
@@ -446,6 +454,47 @@ public class QueryUtils {
     }
 
     /**
+     * 修正measure，将measure引用的measure放到cube中
+     * @param measures
+     * @param oriCube
+     */
+    private static void modifyMeasures(Map<String, Measure> measures, Cube oriCube) {
+    		Set<String> refMeasuers = Sets.newHashSet();
+		measures.values().stream().filter(m -> {
+			return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
+		}).forEach(m -> {
+			ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
+			if (m.getType() == MeasureType.CAL) {
+				refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
+			} else {
+				final String refName = m.getName().substring(0, m.getName().length() - 3);
+				refMeasuers.add(refName);
+				if (m.getType() == MeasureType.RR) {
+					tmp.setFormula("rRate(${" + refName + "})");
+				} else if (m.getType() == MeasureType.SR) {
+					tmp.setFormula("tRate(${" + refName + "})");
+				}
+			}
+			tmp.setAggregator(Aggregator.CALCULATED);
+		});
+		refMeasuers.stream().filter(str -> {
+			return measures.containsKey(str);
+		}).map(str -> {
+			Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
+			for (Map.Entry<String, Measure> tmp : entry) {
+				if (str.equals(tmp.getValue().getName())) {
+					return tmp.getValue();
+				}
+			}
+			return null;
+		}).forEach(m -> {
+			if (m != null) {
+				measures.put(m.getName(), m);
+			}
+		});
+	}
+
+	/**
      * 
      * @param dim -- Dimension
      * @return Dimension

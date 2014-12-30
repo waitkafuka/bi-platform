@@ -55,10 +55,11 @@ public interface StarModelBuildService {
     /**
      * 
      * @param dsId
+     * @param securityKey 
      * @return 
      * @throws DataSourceOperationException 
      */
-    List<RelationTableView> getAllTablesAndCols(String dsId) throws DataSourceOperationException;
+    List<RelationTableView> getAllTablesAndCols(String dsId, String securityKey) throws DataSourceOperationException;
     
     /**
      * 
@@ -95,7 +96,7 @@ public interface StarModelBuildService {
      * @throws DataSourceOperationException 
      */
     List<StandardDimTableMetaDefine> generateMetaDefine(String dsId, NormalDimBindView normal,
-        Map<String, String> names) throws DataSourceOperationException;
+        Map<String, String> names, String securityKey) throws DataSourceOperationException;
     
     /**
      * 

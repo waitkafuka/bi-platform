@@ -312,7 +312,7 @@ define([
                 // 固定多选下拉框的高度
                 that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 34, 34);
+                that.dragWidthHeight($component, 'TEXT', 30, 30);
             },
 
             /**

@@ -28,7 +28,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
@@ -55,8 +55,8 @@ public class QueryRequestBuilder {
      * @param queryContext
      * @return
      */
-    public static QueryRequest buildQueryRequest(QuestionModel questionModel, DataSourceInfo dsInfo, Cube cube,
-            QueryContext queryContext) {
+    public static QueryRequest buildQueryRequest(DataSourceInfo dsInfo, Cube cube,
+            QueryContext queryContext, boolean useIndex, PageInfo pageInfo) {
         MiniCube miniCube = (MiniCube) cube;
         QueryRequest request = new QueryRequest();
         request.setCubeId(cube.getId());
@@ -64,7 +64,7 @@ public class QueryRequestBuilder {
         // 好像cubeName没有用了吧。
         request.setCubeName(cube.getName());
         request.setFrom(new From(miniCube.getSource()));
-        request.setUseIndex(questionModel.isUseIndex());
+        request.setUseIndex(useIndex);
 
         // 先构建查询中的指标
         request.setSelect(buildSelectMeasure(queryContext.getQueryMeasures()));
@@ -85,9 +85,9 @@ public class QueryRequestBuilder {
 
         int start = 0;
         int size = -1;
-        if (questionModel.getPageInfo() != null) {
-            start = questionModel.getPageInfo().getPageNo() * questionModel.getPageInfo().getPageSize();
-            size = questionModel.getPageInfo().getPageSize();
+        if (pageInfo != null) {
+            start = pageInfo.getPageNo() * pageInfo.getPageSize();
+            size = pageInfo.getPageSize();
         }
         request.setLimit(new Limit(start, size));
         return request;
