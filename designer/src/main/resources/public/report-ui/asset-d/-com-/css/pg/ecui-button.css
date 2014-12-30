@@ -143,7 +143,6 @@
 .ui-download-btn .ui-button-inner {
     padding: 2px 0px 4px 3px;
     line-height: 8px;
-    margin-top: 1px;
     -webkit-border-radius: 1px;
     -o-border-radius: 1px;
     -moz-border-radius: 1px;
@@ -168,6 +167,9 @@
     *zoom: 1;
     vertical-align: middle;
     margin-right: 3px;
+}
+.ui-download-btn .ui-button-left:hover{
+    background: url(img/downloadblue.png) no-repeat;
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
