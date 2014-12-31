@@ -1,4 +1,7 @@
 <div class="con-comp-setting-type1 j-comp-setting" data-comp-id="{{compId}}" data-comp-type="{{compType}}">
+    <div>
+        <div class="norm-empty-prompt table-norm-empty">纵轴指标信息不能为空</div>
+    </div>
     <div class="data-axis-line data-axis-line-34 j-comp-setting-line j-line-x" data-axis-type="x">
         <span class="letter">横轴:</span>
         {{each xAxis as item}}
@@ -39,13 +42,10 @@
         </div>
         {{/each}}
     </div>
-    <div class="data-axis-line data-axis-line-48 data-btn-line">
+    <div class="data-axis-line data-axis-line-48 data-btn-line" style="margin: 5px 0 2px 35px;">
         <span class="letter">设置:</span>
         <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>
         <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>
         <span class="icon-letter icon-letter-btn j-others-operate">其他操作</span>
-    </div>
-    <div>
-        <div class="norm-empty-prompt">纵轴指标信息不能为空</div>
     </div>
 </div>

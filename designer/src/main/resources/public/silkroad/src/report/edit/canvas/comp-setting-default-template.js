@@ -6,7 +6,7 @@ define(['template'], function (template) {
         $out+=$escape(compId);
         $out+='" data-comp-type="';
         $out+=$escape(compType);
-        $out+='">\r\n    <div class="data-axis-line data-axis-line-34 j-comp-setting-line j-line-x" data-axis-type="x">\r\n        <span class="letter">横轴:</span>\r\n        ';
+        $out+='">\r\n    <div>\r\n        <div class="norm-empty-prompt table-norm-empty">纵轴指标信息不能为空</div>\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-34 j-comp-setting-line j-line-x" data-axis-type="x">\r\n        <span class="letter">横轴:</span>\r\n        ';
         $each(xAxis,function(item,$index){
         $out+='\r\n        <div class="item hover-bg j-root-line c-m" data-id="';
         $out+=$escape(item.id);
@@ -71,7 +71,7 @@ define(['template'], function (template) {
         }
         $out+='\r\n            </span>\r\n            <span class="icon-letter j-delete" title="删除">×</span>\r\n        </div>\r\n        ';
         });
-        $out+='\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\r\n        <span class="letter">设置:</span>\r\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\r\n        <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>\r\n        <span class="icon-letter icon-letter-btn j-others-operate">其他操作</span>\r\n    </div>\r\n    <div>\r\n        <div class="norm-empty-prompt">纵轴指标信息不能为空</div>\r\n    </div>\r\n</div>';
+        $out+='\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line" style="margin: 5px 0 2px 35px;">\r\n        <span class="letter">设置:</span>\r\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\r\n        <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>\r\n        <span class="icon-letter icon-letter-btn j-others-operate">其他操作</span>\r\n    </div>\r\n</div>';
         return $out;
     }
     return { render: anonymous };
