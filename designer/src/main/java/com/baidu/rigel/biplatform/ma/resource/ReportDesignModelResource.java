@@ -832,7 +832,10 @@ public class ReportDesignModelResource extends BaseResource {
             model = reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.error("There are no such model in cache. Report Id: " + reportId, e);
-            return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+            model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
+            if (model == null) {
+            		return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+            }
         }
         try {
             this.reportDesignModelService.publishReport(model);
