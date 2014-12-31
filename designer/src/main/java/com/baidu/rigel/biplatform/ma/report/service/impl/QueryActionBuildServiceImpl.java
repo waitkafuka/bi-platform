@@ -65,6 +65,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 import com.baidu.rigel.biplatform.ma.report.service.AnalysisChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
 import com.baidu.rigel.biplatform.ma.report.utils.ItemUtils;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
 import com.google.common.collect.Lists;
@@ -107,7 +108,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         LogicModel targetLogicModel = targetArea.getLogicModel();
         String cubeId = targetArea.getCubeId();
         return generateQueryAction(model.getSchema(),
-                cubeId, targetLogicModel, context, areaId, false);
+                cubeId, targetLogicModel, context, areaId, false, model);
     }
 
     /* (non-Javadoc)
@@ -133,7 +134,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             target--;
         }
         QueryAction action = generateQueryAction(drillModel.getSchema(),
-                cubeId, targetLogicModel, contextParams, areaId, false);
+                cubeId, targetLogicModel, contextParams, areaId, false, model);
         /**
          * 把下钻的值存下来
          */
@@ -262,7 +263,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             targetLogicModel = analysisChartBuildService.generateTrendChartModel(targetLogicModel,
                     model.getSchema(), liteOlapArea.getCubeId(), rows, cols, timeDimItem);
             return generateQueryAction(model.getSchema(),
-                    cubeId, targetLogicModel, context, logicModelAreaId, true);
+                    cubeId, targetLogicModel, context, logicModelAreaId, true, model);
         } else {
             targetLogicModel = targetArea.getLogicModel();
             LogicModel cpModel = DeepcopyUtils.deepCopy(targetArea.getLogicModel());
@@ -283,7 +284,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             		cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
             }
            return generateQueryAction(model.getSchema(),
-        		       cubeId, cpModel, context, logicModelAreaId, false);
+        		       cubeId, cpModel, context, logicModelAreaId, false, model);
         }
         
     }
@@ -297,11 +298,14 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      */
     private QueryAction generateQueryAction(Schema schema, String cubeId,
             LogicModel targetLogicModel, Map<String, Object> context,
-            String areaId, boolean needTimeRange) {
+            String areaId, boolean needTimeRange, ReportDesignModel reportModel) {
         QueryAction action = new QueryAction();
-        
+        Cube oriCube = null;
         action.setExtendAreaId(areaId);
-        
+        try {
+			oriCube = QueryUtils.getCubeWithExtendArea(reportModel, reportModel.getExtendById(areaId));
+		} catch (QueryModelBuildException e) {
+		}
         for (String key : context.keySet()) {
             OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, key);
             if (element != null && !targetLogicModel.containsOlapElement(element.getId())) {
@@ -314,21 +318,37 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 item.setSchemaId(schema.getId());
                 targetLogicModel.addSlice(item);
             }
+            
+            // TODO 修正过滤条件
+            if (oriCube != null) {
+            		oriCube.getDimensions().values().forEach(dim -> {
+            			if (dim.getId().equals(key)) {
+            				Item item = new Item();
+                        item.setAreaId(areaId);
+                        item.setCubeId(cubeId);
+                        item.setId(dim.getId());
+                        item.setOlapElementId(dim.getId());
+                        item.setPositionType(PositionType.S);
+                        item.setSchemaId(schema.getId());
+                        targetLogicModel.addSlice(item);
+            			}
+            		});
+            }
         }
         
         if (targetLogicModel == null) {
             return null;
         }
         Map<Item, Object> columns = genereateItemValues(schema,
-                cubeId, targetLogicModel.getColumns(), context, needTimeRange);
+                cubeId, targetLogicModel.getColumns(), context, needTimeRange, oriCube);
         action.setColumns(columns);
         
         Map<Item, Object> rows = genereateItemValues(schema,
-                cubeId, targetLogicModel.getRows(), context, needTimeRange);
+                cubeId, targetLogicModel.getRows(), context, needTimeRange, oriCube);
         action.setRows(rows);
         
         Map<Item, Object> slices = genereateItemValues(schema,
-                cubeId, targetLogicModel.getSlices(), context, needTimeRange);
+                cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube);
         action.setSlices(slices);
         
         /**
@@ -376,11 +396,12 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * 
      * @param items
      * @param values
+     * @param oriCube 修正后的cube
      * @return
      */
     private Map<Item, Object> genereateItemValues(Schema schema,
             String cubeId, Item[] items, Map<String, Object> values,
-            boolean timeRange) {
+            boolean timeRange, Cube oriCube) {
         /**
          * item必须保证顺序
          */
@@ -395,6 +416,14 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 continue;
             }
             OlapElement element = ItemUtils.getOlapElementByItem(item, schema, cubeId);
+            if (element == null) {
+            		for (Dimension dim : oriCube.getDimensions().values()) {
+            			if (dim.getId().equals(item.getOlapElementId())) {
+            				element = dim;
+            				break;
+            			}
+            		}
+            }
             Object value = null;
             // TODO 支持url传参数，需后续修改,dirty solution
             // 第一个条件判断是否包含url规定的参数

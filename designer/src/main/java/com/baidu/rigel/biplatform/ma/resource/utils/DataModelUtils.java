@@ -956,7 +956,7 @@ public class DataModelUtils {
 				rs.append(str + ",");
 			});
 			for (int j = 0; j < rowDatas.get(i).size(); ++j) {
-				rs.append(rowDatas.get(i).get(j));
+				rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j));
 				if (j < rowDatas.get(i).size() - 1) {
 					rs.append(",");
 				} else {

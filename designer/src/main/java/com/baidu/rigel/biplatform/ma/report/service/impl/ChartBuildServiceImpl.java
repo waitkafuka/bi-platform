@@ -73,6 +73,9 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         List<SeriesInputInfo> seriesInputs = Lists.newArrayList();
         for (int i = 0; i < chartType.size(); ++i) {
 	        	SeriesInputInfo seriesInput = new SeriesInputInfo();
+//	        	ColDefine define = tableResult.getColDefine().get(i);
+//	        	seriesInput.setName(define.getShowAxis());
+//	        	seriesInput.setyAxisName(define.getShowAxis());
 	        	seriesInputs.add(seriesInput);
         }
 //        for(String type : chartType) {
@@ -89,10 +92,10 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         // }
         // ChartMetaData chartMeta = new ChartMetaData();
         reportChart.setyAxises(Lists.<YAxis> newArrayList());
-        YAxis yAxis = new YAxis(); // chartMeta.getYAxises().get("test_axis");
-        yAxis.setName("纵轴");
-        yAxis.setUnitName("单位");
-        reportChart.getyAxises().add(yAxis);
+        	YAxis yAxis = new YAxis(); // chartMeta.getYAxises().get("test_axis");
+        	yAxis.setName("纵轴");
+        	yAxis.setUnitName("单位");
+        	reportChart.getyAxises().add(yAxis);
 
         /**
          * use the x axis from query result from first series.
