@@ -122,7 +122,7 @@ public class HazelcastStoreManager implements StoreManager {
     
     private Properties loadConf(String location) throws IOException {
         if(StringUtils.isBlank(location)) {
-            location = "config/tesseract.properties";
+            location = "config/application.properties";
         }
         
         Properties properties = PropertiesLoaderUtils.loadAllProperties(location);
