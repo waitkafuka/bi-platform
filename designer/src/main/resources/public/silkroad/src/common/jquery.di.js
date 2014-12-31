@@ -102,3 +102,18 @@ $.isInArray = function (item, array) {
     }
     return flag;
 };
+
+/**
+ * 对象是否为空属性的对象
+ *
+ * @param {Object} obj 对象
+ */
+$.isObjectEmpty = function (obj) {
+    var flag = true;
+    for (var key in obj) {
+       if (obj.hasOwnProperty(key)) {
+           flag = false;
+       }
+    }
+    return flag;
+};
