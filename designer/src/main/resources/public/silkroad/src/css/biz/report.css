@@ -275,7 +275,7 @@
 }
 .comp-setting > div {
     background: #ffffff;
-    padding: 10px;
+    padding: 10px 10px 5px 10px;
     z-index: 2;
 }
 /* 组件相关设置配置区 */
@@ -294,7 +294,7 @@
     margin: 5px 0 5px 48px;
 }
 .comp-setting .data-btn-line {
-    margin: 5px 0 5px 49px;
+    margin: 5px 0 2px 49px;
     border: none;
 }
 .comp-setting .data-axis-line .letter {
@@ -708,4 +708,11 @@
 .table-download {
     float: left;
     padding-top: 4px;
+}
+
+/* 指标为空错误提示信息 */
+.norm-empty-prompt {
+    color: red;
+    margin-left: 57px;
+    display: none;
 }

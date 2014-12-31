@@ -213,6 +213,9 @@ define([
                         var $this = $(this);
                         that.addCompAxis(ui, $this, type);
                         $this.removeClass('active');
+                        if ($this.attr('data-axis-type') == 'y') {
+                            $('.norm-empty-prompt').hide();
+                        }
                     },
                     out: function (event, ui) {
                         $(this).removeClass('active');
@@ -922,29 +925,34 @@ define([
                     html = dataFormatSettingTemplate.render(
                         data
                     );
-                    dialog.showDialog({
-                        title: '数据格式',
-                        content: html,
-                        dialog: {
-                            width: 340,
-                            height: 400,
-                            resizable: false,
-                            buttons: [
-                                {
-                                    text: '提交',
-                                    click: function() {
-                                        saveDataFormInfo($(this));
+                    if ($('.j-line-y').find('div').length != 0) {
+                        dialog.showDialog({
+                            title: '数据格式',
+                            content: html,
+                            dialog: {
+                                width: 340,
+                                height: 400,
+                                resizable: false,
+                                buttons: [
+                                    {
+                                        text: '提交',
+                                        click: function () {
+                                            saveDataFormInfo($(this));
+                                        }
+                                    },
+                                    {
+                                        text: '取消',
+                                        click: function () {
+                                            $(this).dialog('close');
+                                        }
                                     }
-                                },
-                                {
-                                    text: '取消',
-                                    click: function () {
-                                        $(this).dialog('close');
-                                    }
-                                }
-                            ]
-                        }
-                    });
+                                ]
+                            }
+                        });
+                    }
+                    else {
+                        $('.norm-empty-prompt').show();
+                    }
                 }
                 /**
                  * 保存数据格式
@@ -1029,6 +1037,7 @@ define([
                     });
                 }
             },
+
             /**
              * 获取指标描述信息，并弹框展现
              *
@@ -1051,29 +1060,34 @@ define([
                     html = normInfoDepictTemplate.render(
                         data
                     );
-                    dialog.showDialog({
-                        title: '指标信息描述',
-                        content: html,
-                        dialog: {
-                            width: 340,
-                            height: 400,
-                            resizable: false,
-                            buttons: [
-                                {
-                                    text: '提交',
-                                    click: function() {
-                                        saveNormInfoDepict($(this));
+                    if ($('.j-line-y').find('div').length != 0) {
+                        dialog.showDialog({
+                            title: '指标信息描述',
+                            content: html,
+                            dialog: {
+                                width: 340,
+                                height: 400,
+                                resizable: false,
+                                buttons: [
+                                    {
+                                        text: '提交',
+                                        click: function() {
+                                            saveNormInfoDepict($(this));
+                                        }
+                                    },
+                                    {
+                                        text: '取消',
+                                        click: function () {
+                                            $(this).dialog('close');
+                                        }
                                     }
-                                },
-                                {
-                                    text: '取消',
-                                    click: function () {
-                                        $(this).dialog('close');
-                                    }
-                                }
-                            ]
-                        }
-                    });
+                                ]
+                            }
+                        });
+                    }
+                    else {
+                        $('.norm-empty-prompt').show();
+                    }
                 }
                 /**
                  * 保存数据格式

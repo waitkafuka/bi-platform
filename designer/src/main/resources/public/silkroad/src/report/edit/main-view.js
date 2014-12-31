@@ -31,7 +31,7 @@ define([
             // view事件绑定
             events: {
                 'change .j-cube-select': 'changeCube',
-                'click .j-global-para': 'setglobalbtn',
+                //'click .j-global-para': 'setglobalbtn',
                 'click .j-global-component': 'shiftMenu'
             },
 
