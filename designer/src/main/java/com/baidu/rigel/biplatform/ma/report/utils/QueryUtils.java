@@ -263,7 +263,7 @@ public class QueryUtils {
                         datas.add(data);
                     } 
                     if (values.isEmpty() && queryAction.isChartQuery()) {
-                    		QueryData data = new QueryData(rootUniqueName);
+                    		QueryData data = new QueryData(rootUniqueName + "s]");
                         data.setExpand(true);
                         data.setShow(false);
                         datas.add(data);
