@@ -124,7 +124,7 @@
         /**
          * 用户自定义legend的模式（外观+行为）
          * 例如：
-         *  legend: { 
+         *  legend: {
          *      xMode: 'pl' // PL模式的legend。缺省则使用默认模式。
          *  }
          */
@@ -474,9 +474,9 @@
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
         var legend = {
-            orient: 'vertical',
-            x: 'left',
-            y: 'top'
+            // orient: 'vertical',
+            x: 'center',
+            y: 'bottom'
 //            borderColor: '#ccc',
 //            borderWidth: 0.5
         };
