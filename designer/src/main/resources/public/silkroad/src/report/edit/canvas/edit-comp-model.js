@@ -196,8 +196,8 @@ define(['url', 'constant'], function (Url, Constant) {
                         sourceData.indList = xyList.yAxis;
                         sourceData.topTypeList = {
                             NONE: 'none',
-                            DESC: 'bottom',
-                            ASC: 'top'
+                            DESC: 'top',
+                            ASC: 'bottom'
                         };
                         success(sourceData);
                     }

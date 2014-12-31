@@ -990,7 +990,7 @@ define([
                         content: html,
                         dialog: {
                             width: 340,
-                            height: 400,
+                            height: 300,
                             resizable: false,
                             buttons: [
                                 {
