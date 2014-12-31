@@ -11,7 +11,7 @@
 
 	<groupId>com.baidu.rigel</groupId>
 	<artifactId>biplatform</artifactId>
-	<version>1.1.0-RELEASE</version>
+	<version>1.2.0-RELEASE</version>
 	<packaging>pom</packaging>
 
 	<name>bi-platform</name>
@@ -81,12 +81,12 @@
 			<dependency>
 				<groupId>com.baidu.rigel.biplatform</groupId>
 				<artifactId>model</artifactId>
-				<version>1.1.0-RELEASE</version>
+				<version>1.2.0-RELEASE</version>
 			</dependency>
 			<dependency>
                 <groupId>com.baidu.rigel.biplatform</groupId>
                 <artifactId>fileserver</artifactId>
-                <version>1.1.0-RELEASE</version>
+                <version>1.2.0-RELEASE</version>
             </dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
