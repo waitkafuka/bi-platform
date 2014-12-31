@@ -22,15 +22,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
-
 
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -213,6 +212,15 @@ public class QueryUtils {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
                     area.getCubeId(), item.getOlapElementId());
+            if (olapElement == null) {
+            		Cube cube = com.baidu.rigel.biplatform.ma.report.utils.QueryUtils.getCubeWithExtendArea(reportModel, area);
+            		for (Dimension dim : cube.getDimensions().values()) {
+            			if (dim.getId().equals(item.getOlapElementId())) {
+            				olapElement = dim;
+            				break;
+            			}
+            		}
+            }
             if (olapElement == null) {
                 continue;
             }
@@ -437,13 +445,34 @@ public class QueryUtils {
                 measures.put(element.getName(), (Measure) element);
             }
         }
-        if (filterDims != null && filterDims.get(area.getCubeId()) != null) {
+        if (filterDims != null ) { //&& filterDims.get(area.getCubeId()) != null) {
         		List<Dimension> dims = filterDims.get(area.getCubeId());
-        		for(Dimension dim : dims) {
-        			if (dim != null) {
-        				dimensions.put(dim.getName(), dim);
-        			}
+        		if (dims != null) {
+        			for(Dimension dim : dims) {
+            			if (dim != null) {
+            				dimensions.put(dim.getName(), dim);
+            			}
+            		}
         		}
+        		
+        		// TODO 处理不同cube共用同一查询条件情况
+        		filterDims.forEach((key, dimArray) -> {
+        			if (!key.equals(area.getCubeId())) {
+        				dimArray.stream().filter(dim -> {
+        					return dim instanceof TimeDimension;
+        				}).forEach(dim -> {
+        					for (Dimension tmp : oriCube.getDimensions().values()) {
+        						if (dim.getName().equals(tmp.getName())) {
+        							MiniCubeDimension tmpDim = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
+        							tmpDim.setLevels((LinkedHashMap<String, Level>) tmp.getLevels());
+        							tmpDim.setFacttableColumn(tmp.getFacttableColumn());
+        							tmpDim.setFacttableCaption(tmp.getFacttableCaption());
+        							dimensions.put(tmpDim.getName(), tmpDim);
+        						}
+        					}
+        				});
+        			}
+        		});
         }
         cube.setDimensions(dimensions);
         modifyMeasures(measures, oriCube);
