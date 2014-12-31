@@ -490,5 +490,28 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		Map<String, Object> setting = GsonUtils.fromJson(otherSetting, HashMap.class);
 		area.setOtherSetting(setting);
 	}
+
+	@Override
+	public List<String> lsReportWithDsId(String id) {
+		String[] modelFileList = null;
+        try {
+            modelFileList = fileService.ls(getDevReportDir());
+        } catch (FileServiceException e) {
+            logger.debug(e.getMessage(), e);
+            return Lists.newArrayList();
+        }
+        if (modelFileList == null || modelFileList.length == 0) {
+            return Lists.newArrayList();
+        }
+        List<String> rs = Lists.newArrayList();
+        for (String str : modelFileList) {
+        		if (str.contains(id)) {
+        			rs.add(str.substring(str.indexOf(Constants.FILE_NAME_SEPERATOR),
+        					str.lastIndexOf(Constants.FILE_NAME_SEPERATOR))
+        					.replace(Constants.FILE_NAME_SEPERATOR, ""));
+        		}
+        }
+        return rs;
+	}
     
 }
