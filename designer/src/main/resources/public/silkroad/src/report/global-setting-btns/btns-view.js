@@ -64,12 +64,12 @@ define([
             },
             // 参数区域按钮属性
             btnBox: [
-                {
-                    id: 'para',
-                    picName: 'para',
-                    title: '参数维度设置',
-                    className: 'para'
-                },
+//                {
+//                    id: 'para',
+//                    picName: 'para',
+//                    title: '参数维度设置',
+//                    className: 'para'
+//                },
                 {
                     id: 'component',
                     picName: 'component',

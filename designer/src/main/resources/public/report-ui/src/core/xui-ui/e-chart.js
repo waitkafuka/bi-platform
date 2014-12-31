@@ -487,7 +487,6 @@
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             }
-
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
