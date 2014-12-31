@@ -66,6 +66,8 @@ public class HazelcastStoreManager implements StoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastStoreManager.class);
 
     private static final String HAZELCAST_SERVER_NAME = "hazelcastServer.instance";
+
+    private static final String HAZELCAST_MANCERTER_URL = "hazelcastServer.mancenter.url";
     
     
     
@@ -106,6 +108,8 @@ public class HazelcastStoreManager implements StoreManager {
         
        // cfg.getQueueConfig(EVENT_QUEUE).addItemListenerConfig(new ItemListenerConfig(this.hazelcastQueueItemListener,true));
         
+        cfg.getManagementCenterConfig().setEnabled(true);
+        cfg.getManagementCenterConfig().setUrl(prop.getProperty(HAZELCAST_MANCERTER_URL, "mancenterUrl"));
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
         
