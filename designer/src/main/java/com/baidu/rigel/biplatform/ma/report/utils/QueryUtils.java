@@ -25,13 +25,18 @@ import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -44,7 +49,11 @@ import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
@@ -54,8 +63,11 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -69,8 +81,11 @@ import com.google.common.collect.Sets;
  * @version 1.0.0.1
  */
 public class QueryUtils {
-    
+  
+
+	
     /**
+     * 
      * 将查询动作转化成问题模型
      * @param dsDefine 
      * 
@@ -81,7 +96,7 @@ public class QueryUtils {
      *             构建失败异常
      */
     public static QuestionModel convert2QuestionModel(DataSourceDefine dsDefine, ReportDesignModel reportModel,
-        QueryAction queryAction) throws QueryModelBuildException {
+        QueryAction queryAction, String securityKey) throws QueryModelBuildException {
         if (queryAction == null) {
             throw new QueryModelBuildException("query action is null");
         }
@@ -108,47 +123,54 @@ public class QueryUtils {
         Set<Item> tmp = Sets.newHashSet();
         tmp.addAll(queryAction.getSlices().keySet());
         tmp.addAll(queryAction.getRows().keySet());
-        updateLogicCubeWithSlices(cube, tmp,
-                reportModel.getSchema().getCubes().get(area.getCubeId()));
+//        updateLogicCubeWithSlices(cube, tmp,
+//                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
-        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine));
+        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
+        MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
+        SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+        // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
+        String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
+        SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
+        questionModel.setSortRecord(sortRecord);
+        questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
         return questionModel;
     }
     
-    /**
-     * 
-     * @param cube
-     * @param keySet
-     * @param defineCube
-     */
-    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
-        if (keySet == null || keySet.isEmpty()) {
-            return;
-        }
-        
-        keySet.forEach(item -> {
-            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
-            if (dim != null) {
-                Dimension tmp = DeepcopyUtils.deepCopy(dim);
-                tmp.getLevels().clear();
-                dim.getLevels().values().forEach(level -> {
-                    tmp.getLevels().put(level.getName(), level);
-                });
-                cube.getDimensions().put(tmp.getName(), tmp);
-            }
-        });
-    }
+//    /**
+//     * 
+//     * @param cube
+//     * @param keySet
+//     * @param defineCube
+//     */
+//    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
+//        if (keySet == null || keySet.isEmpty()) {
+//            return;
+//        }
+//        
+//        keySet.forEach(item -> {
+//            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
+//            if (dim != null) {
+//                Dimension tmp = DeepcopyUtils.deepCopy(dim);
+//                tmp.getLevels().clear();
+//                dim.getLevels().values().forEach(level -> {
+//                    tmp.getLevels().put(level.getName(), level);
+//                });
+//                cube.getDimensions().put(tmp.getName(), tmp);
+//            }
+//        });
+//    }
 
     /**
      * 
      * @param dsDefine
      * @return DataSourceInfo
      */
-    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine) {
+    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
         SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getName());
         ds.setDBProxy(true);
         try {
-            ds.setPassword(dsDefine.getDbPwd());
+            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -185,14 +207,23 @@ public class QueryUtils {
         items.putAll(queryAction.getColumns());
         items.putAll(queryAction.getRows());
         items.putAll(queryAction.getSlices());
+        int i = 0;
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
                     area.getCubeId(), item.getOlapElementId());
             if (olapElement == null) {
+            		Cube cube = com.baidu.rigel.biplatform.ma.report.utils.QueryUtils.getCubeWithExtendArea(reportModel, area);
+            		for (Dimension dim : cube.getDimensions().values()) {
+            			if (dim.getId().equals(item.getOlapElementId())) {
+            				olapElement = dim;
+            				break;
+            			}
+            		}
+            }
+            if (olapElement == null) {
                 continue;
             }
-            
             if (olapElement instanceof Dimension) {
                 DimensionCondition condition = new DimensionCondition(olapElement.getName());
                 Object valueObj = entry.getValue();
@@ -206,34 +237,56 @@ public class QueryUtils {
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
+                    // TODO 需要排查为何多处根节点UniqueName不一致
+                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName();
                     // TODO QeuryData value如何处理
                     for (String value : values) {
-                        if (!queryAction.isChartQuery() && value.toLowerCase().contains("all")) {
+                        if (!queryAction.isChartQuery() && value.indexOf(rootUniqueName) != -1) {
                             datas.clear();
                             break;
                         }
                         QueryData data = new QueryData(value);
                         Object drillValue = queryAction.getDrillDimValues().get(item);
-                        if (drillValue != null && valueObj.equals(drillValue)) {
+                        String tmpValue = null;
+                        if (valueObj instanceof String[]) {
+                        		tmpValue = ((String[]) valueObj)[0];
+                        } else {
+                        		tmpValue = valueObj.toString();
+                        }
+                        if (drillValue != null && tmpValue.equals(drillValue)) {
                             data.setExpand(true);
-                        } else if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                        } else if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                        		&& queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
                         }
+                        datas.add(data);
+                    } 
+                    if (values.isEmpty() && queryAction.isChartQuery()) {
+                    		QueryData data = new QueryData(rootUniqueName + "s]");
+                        data.setExpand(true);
+                        data.setShow(false);
                         datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 } else {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
-                    if (item.getPositionType() == PositionType.X && queryAction.isChartQuery()) {
+                    if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
+                    		&& queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);
                         datas.add(data);
+                    } else if (dim.getType() == DimensionType.CALLBACK) {
+                    		QueryData data = new QueryData(dim.getAllMember().getUniqueName());
+                        data.setExpand(i == 0);
+                        data.setShow(i != 0);
+                        datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
+                ++i;
                 rs.put(condition.getMetaName(), condition);
                 
             }
@@ -392,13 +445,37 @@ public class QueryUtils {
                 measures.put(element.getName(), (Measure) element);
             }
         }
-        if (filterDims != null && filterDims.get(area.getCubeId()) != null) {
+        if (filterDims != null ) { //&& filterDims.get(area.getCubeId()) != null) {
         		List<Dimension> dims = filterDims.get(area.getCubeId());
-        		for(Dimension dim : dims) {
-        			dimensions.put(dim.getName(), dim);
+        		if (dims != null) {
+        			for(Dimension dim : dims) {
+            			if (dim != null) {
+            				dimensions.put(dim.getName(), dim);
+            			}
+            		}
         		}
+        		
+        		// TODO 处理不同cube共用同一查询条件情况
+        		filterDims.forEach((key, dimArray) -> {
+        			if (!key.equals(area.getCubeId())) {
+        				dimArray.stream().filter(dim -> {
+        					return dim instanceof TimeDimension;
+        				}).forEach(dim -> {
+        					for (Dimension tmp : oriCube.getDimensions().values()) {
+        						if (dim.getName().equals(tmp.getName())) {
+        							MiniCubeDimension tmpDim = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
+        							tmpDim.setLevels((LinkedHashMap<String, Level>) tmp.getLevels());
+        							tmpDim.setFacttableColumn(tmp.getFacttableColumn());
+        							tmpDim.setFacttableCaption(tmp.getFacttableCaption());
+        							dimensions.put(tmpDim.getName(), tmpDim);
+        						}
+        					}
+        				});
+        			}
+        		});
         }
         cube.setDimensions(dimensions);
+        modifyMeasures(measures, oriCube);
         cube.setMeasures(measures);
         cube.setSource(((MiniCube) oriCube).getSource());
         cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
@@ -407,6 +484,47 @@ public class QueryUtils {
     }
 
     /**
+     * 修正measure，将measure引用的measure放到cube中
+     * @param measures
+     * @param oriCube
+     */
+    private static void modifyMeasures(Map<String, Measure> measures, Cube oriCube) {
+    		Set<String> refMeasuers = Sets.newHashSet();
+		measures.values().stream().filter(m -> {
+			return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
+		}).forEach(m -> {
+			ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
+			if (m.getType() == MeasureType.CAL) {
+				refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
+			} else {
+				final String refName = m.getName().substring(0, m.getName().length() - 3);
+				refMeasuers.add(refName);
+				if (m.getType() == MeasureType.RR) {
+					tmp.setFormula("rRate(${" + refName + "})");
+				} else if (m.getType() == MeasureType.SR) {
+					tmp.setFormula("sRate(${" + refName + "})");
+				}
+			}
+			tmp.setAggregator(Aggregator.CALCULATED);
+		});
+		refMeasuers.stream().filter(str -> {
+			return !measures.containsKey(str);
+		}).map(str -> {
+			Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
+			for (Map.Entry<String, Measure> tmp : entry) {
+				if (str.equals(tmp.getValue().getName())) {
+					return tmp.getValue();
+				}
+			}
+			return null;
+		}).forEach(m -> {
+			if (m != null) {
+				measures.put(m.getName(), m);
+			}
+		});
+	}
+
+	/**
      * 
      * @param dim -- Dimension
      * @return Dimension
@@ -440,18 +558,46 @@ public class QueryUtils {
     private static Map<String, List<Dimension>> collectFilterDim(ReportDesignModel model) {
 		Map<String, List<Dimension>> rs = Maps.newHashMap();
 		for (ExtendArea area : model.getExtendAreaList()) {
-			if (area.getType() == ExtendAreaType.TIME_COMP || area.getType() == ExtendAreaType.SELECT) {
+			if (isFilterArea(area.getType())) {
 				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
 				if (rs.get(area.getCubeId()) == null) {
 					List<Dimension> dims = Lists.newArrayList();
-					area.getAllItems().values().forEach(key -> {
-						dims.add(cube.getDimensions().get(key.getId()));
+					area.listAllItems().values().forEach(key -> {
+						MiniCubeDimension dim = (MiniCubeDimension) 
+								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+		                dim.setLevels(Maps.newLinkedHashMap());;
+		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+		                    dim.getLevels().put(level.getName(), level);
+		                });
+		                dims.add(dim);
 					});
 					rs.put(area.getCubeId(), dims);
+				} else {
+					area.listAllItems().values().forEach(key -> {
+						MiniCubeDimension dim = (MiniCubeDimension) 
+								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+		                dim.setLevels(Maps.newLinkedHashMap());;
+		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+		                    dim.getLevels().put(level.getName(), level);
+		                });
+						rs.get(area.getCubeId()).add(dim);
+					});
 				}
 	    		} 
 		}
 		return rs;
+	}
+
+	/**
+	 * 
+	 * @param type
+	 * @return boolean
+	 * 
+	 */
+	public static boolean isFilterArea(ExtendAreaType type) {
+		return type == ExtendAreaType.TIME_COMP 
+				|| type == ExtendAreaType.SELECT 
+				|| type == ExtendAreaType.MULTISELECT;
 	}
 
     /**
@@ -478,6 +624,94 @@ public class QueryUtils {
 		});
 		newCube.setDimensions(dimensions);
 		return newCube;
+	}
+
+	/**
+	 * decorate chart with extend area
+	 * @param chart
+	 * @param area
+	 */
+	public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
+		if (area.getType() == ExtendAreaType.CHART) {
+			// 设置topN默认设置
+			if (area.getLogicModel().getTopSetting() != null) {
+				MeasureTopSetting topSetting = area.getLogicModel().getTopSetting();
+				chart.setRecordSize(topSetting.getRecordSize());
+				chart.setTopedMeasureId(topSetting.getMeasureId());
+				chart.setTopType(topSetting.getTopType().name());
+				chart.setAreaId(area.getId());
+			}
+			String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
+				OlapElement tmp = getOlapElement(area, schema, item);
+				if (tmp != null) {
+					return tmp.getCaption();
+				} else {
+					return null;
+				}
+			}).filter(x -> x != null).toArray(String[] :: new);
+			chart.setAllDims(allDims);
+			String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
+				OlapElement tmp = getOlapElement(area, schema, item);
+				if (tmp != null) {
+					chart.getMeasureMap().put(tmp.getId(), tmp.getCaption());
+					return tmp.getCaption();
+				} else {
+					return null;
+				}
+			}).filter(x -> x != null).toArray(String[] :: new);
+			chart.setAllMeasures(allMeasures);
+			
+			final Item[] columns = area.getLogicModel().getColumns();
+			List<String> tmp = getOlapElementNames(
+					columns, area.getCubeId(), schema);
+			if (tmp.size() > 0) {
+				chart.setDefaultMeasures(tmp.toArray(new String[0]));
+			}
+			for (int i = 0; i < columns.length; ++i) {
+				chart.getMeasureMap().put(columns[i].getOlapElementId(), tmp.get(i));
+			}
+			List<String>  defaultDims = getOlapElementNames(
+					area.getLogicModel().getRows(), area.getCubeId(), schema);
+			if (defaultDims.size() > 0) {
+				chart.setDefaultDims(defaultDims.toArray(new String[0]));
+			}
+		} 
+	}
+
+	/**
+	 * @param area
+	 * @param schema
+	 * @return
+	 */
+	private static List<String> getOlapElementNames(Item[] items, String cubeId, Schema schema) {
+		List<String> tmp = Lists.newArrayList();
+		if (items == null || items.length == 0) {
+			return tmp;
+		}
+		for (Item item : items) {
+			OlapElement olapElement = 
+					ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, item.getOlapElementId());
+			tmp.add(olapElement.getCaption());
+		}
+		return tmp;
+	}
+
+	/**
+	 * 
+	 * @param area
+	 * @param schema
+	 * @param item
+	 * @return String
+	 * 
+	 */
+	private static OlapElement getOlapElement(ExtendArea area, Schema schema,
+			Item item) {
+		OlapElement olapElement = 
+				ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
+		if (olapElement != null) {
+			return olapElement;
+		}
+		return null;
 	}
     
 

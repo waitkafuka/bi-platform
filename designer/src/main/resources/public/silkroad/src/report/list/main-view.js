@@ -118,7 +118,7 @@ define([
                     ['report/edit/main-view'],
                     function (EditReportView) {
                         that.destroy();
-                        new EditReportView({
+                        window.dataInsight.main = new EditReportView({
                             el: $('.j-main'),
                             id: reportId,
                             isEdit: true

@@ -95,9 +95,14 @@ class StarModelBuilder {
         }
         Map<String, DimTableMetaDefine> dimTableCache = new HashMap<String, DimTableMetaDefine>();
         List<DimTableMetaDefine> rs = new ArrayList<DimTableMetaDefine>();
+        String factTableName = cube.getSource();
         for (Dimension dimension : dimensions) {
             if (dimension.getLevels().size() > 1) { // 组合维度 不处理
                 continue;
+            }
+            String dimTableName = dimension.getTableName();
+            if (dimTableName.equals(factTableName)) {
+            		continue;
             }
             // 同一个维度表中的列，只需要加入维度表中就可以了
             if (dimTableCache.containsKey(dimension.getTableName())) {

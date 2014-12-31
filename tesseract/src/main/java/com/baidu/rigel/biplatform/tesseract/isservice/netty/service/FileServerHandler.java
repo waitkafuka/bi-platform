@@ -164,7 +164,8 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
             ByteBuffer buffer = ByteBuffer.allocate(TesseractConstant.FILE_BLOCK_SIZE*2);
             buffer.put(sendFileMessage.getContent());
             buffer.flip();
-            fcout.write(buffer);            
+            fcout.write(buffer);
+            
             fos.flush();
             buffer.clear();
             
@@ -202,20 +203,11 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
         ServerFeedbackMessage backMessage=new ServerFeedbackMessage(mh,result,message);
         
         ctx.writeAndFlush(backMessage);
-        ctx.channel().closeFuture();
-        
         
         
     }
     
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error(cause.getMessage(), cause);
-        ctx.close();
-    }
+   
     
     /*
      * (non-Javadoc)
@@ -229,5 +221,14 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
         // TODO Auto-generated method stub
         return null;
     }
+    
+    /* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
+	 */
+	@Override
+	public <T extends AbstractMessage> void setMessage(T t) {
+		return ; 
+		
+	}
     
 }

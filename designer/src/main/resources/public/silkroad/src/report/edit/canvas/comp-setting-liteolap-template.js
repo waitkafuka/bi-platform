@@ -4,7 +4,7 @@ define(['template'], function (template) {
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,compId=$data.compId,$each=$utils.$each,xAxis=$data.xAxis,item=$data.item,$index=$data.$index,yAxis=$data.yAxis,sAxis=$data.sAxis,candInds=$data.candInds,candDims=$data.candDims,$out='';$out+='<div class="con-comp-setting-type1 j-comp-setting" data-comp-id="';
         $out+=$escape(compId);
-        $out+='" data-comp-type="LITEOLAP">\r\n    <div class="data-axis-line data-axis-line-48 j-comp-setting-line j-line-x" data-axis-type="x">\r\n        <span class="letter">横轴:</span>\r\n        ';
+        $out+='" data-comp-type="LITEOLAP">\r\n    <div>\r\n        <div class="norm-empty-prompt">纵轴指标信息不能为空</div>\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 j-comp-setting-line j-line-x" data-axis-type="x">\r\n        <span class="letter">横轴:</span>\r\n        ';
         $each(xAxis,function(item,$index){
         $out+='\r\n        <div class="item hover-bg j-root-line c-m" data-id="';
         $out+=$escape(item.id);

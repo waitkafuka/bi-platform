@@ -99,7 +99,7 @@ public class DataSourceResource extends BaseResource {
     public ResponseResult getAllTables(@PathVariable("id") String dsId) {
         List<TableInfo> tables = null;
         try {
-            tables = cubeBuildService.getAllTable(dsId);
+            tables = cubeBuildService.getAllTable(dsId, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("fail in get all table from ds. ds id: " + dsId, e);
             return ResourceUtils.getErrorResult("未能查到相关数据库表信息，由于 " + e.getMessage(), 1);
@@ -154,7 +154,7 @@ public class DataSourceResource extends BaseResource {
                 rs.setStatus(1);
                 rs.setStatusInfo("未能找到对于数据源定义，id : " + id);
             } else {
-                define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
+                define.setDbPwd(define.getDbPwd());//AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
                 rs.setData(define);
@@ -175,7 +175,6 @@ public class DataSourceResource extends BaseResource {
      */
     @RequestMapping(method = { RequestMethod.POST })
     public ResponseResult saveDataSource(HttpServletRequest request) {
-        
         String name = request.getParameter("name");
         ResponseResult rs = new ResponseResult();
         if (StringUtils.isEmpty(name) || name.length() > 255) {
@@ -189,12 +188,13 @@ public class DataSourceResource extends BaseResource {
         String productLine = ContextManager.getProductLine();
         assignNewValue(productLine, request, define);
         try {
-            define = dsService.saveOrUpdateDataSource(define);
+	        	define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
+            define = dsService.saveOrUpdateDataSource(define, securityKey);
             rs.setStatus(0);
             rs.setStatusInfo("successfully");
             rs.setData(define);
             logger.info("save data source successfully!");
-        } catch (DataSourceOperationException e) {
+        } catch (Exception e) {
             logger.debug(e.getMessage(), e);
             rs.setStatus(1);
             rs.setStatusInfo("未能正确存储数据源定义信息，原因: " + e.getMessage());
@@ -231,11 +231,12 @@ public class DataSourceResource extends BaseResource {
             } else {
                 String productLine = ContextManager.getProductLine();
                 assignNewValue(productLine, request, define);
-                dsService.saveOrUpdateDataSource(define);
+                define.setDbPwd(define.getDbPwd());
+                dsService.saveOrUpdateDataSource(define, securityKey);
                 logger.info("successfully update datasource with id " + id);
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
-                define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
+                define.setDbPwd(define.getDbPwd());
                 rs.setData(define);
             }
         } catch (Exception e) {
@@ -286,14 +287,21 @@ public class DataSourceResource extends BaseResource {
             // 报表设计模型服务对象
             
             // 如果cache中存在此数据源的id，或者报表目录中存在使用此数据源的报表，则不允许删除数据源
-            if (nameCheckCacheManager.existsDSName(id) || reportDesignModelService.isNameExist(id)) {
+            if (nameCheckCacheManager.existsDSName(id)) {
                 rs.setStatus(1);
                 rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表 " + id);
                 logger.warn("the database with id " + id + " is using");
             } else {
-                boolean result = dsService.removeDataSource(id);
-                rs.setStatus(0);
-                rs.setStatusInfo(String.valueOf(result));
+            		List<String> refReport = reportDesignModelService.lsReportWithDsId(id);
+            		if (refReport != null && refReport.size() > 0) {
+            			 rs.setStatus(1);
+                     rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表: " + makeString(refReport));
+                     return rs;
+            		} else {
+            			boolean result = dsService.removeDataSource(id);
+            			rs.setStatus(0);
+            			rs.setStatusInfo(String.valueOf(result));
+            		}
             }
         } catch (DataSourceOperationException e) {
             rs.setStatus(1);
@@ -302,4 +310,10 @@ public class DataSourceResource extends BaseResource {
         }
         return rs;
     }
+
+	private String makeString(List<String> refReport) {
+		StringBuilder rs = new StringBuilder();
+		refReport.forEach(str -> rs.append(str + " "));
+		return rs.toString();
+	}
 }

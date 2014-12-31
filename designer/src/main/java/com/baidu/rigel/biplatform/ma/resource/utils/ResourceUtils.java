@@ -123,13 +123,19 @@ public class ResourceUtils {
             rs.setxAxis(buildItemViewObject(model.getSchema(), cubeId,
                     timeItem.keySet().toArray(new Item[0]), null));
         }
+        final Schema schema = model.getSchema();
         if (area.getType() == ExtendAreaType.LITEOLAP) {
             LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) area;
-            Set<String> usedItemOlapIdSet = area.getAllItems().keySet();
+            Set<String> usedItemOlapIdSet = area.listAllItems().keySet();
             Item[] candDims = liteOlapArea.getCandDims().values().toArray(new Item[0]);
-            rs.setCandDims(buildItemViewObject(model.getSchema(), cubeId, candDims, usedItemOlapIdSet));
+			rs.setCandDims(buildItemViewObject(schema, cubeId, candDims, usedItemOlapIdSet));
             Item[] candInds = liteOlapArea.getCandInds().values().toArray(new Item[0]);
-            rs.setCandInds(buildItemViewObject(model.getSchema(), cubeId, candInds, usedItemOlapIdSet));
+            rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, usedItemOlapIdSet));
+        } else {
+        		final Item[] canDims = area.getLogicModel().getSelectionDims().values().toArray(new Item[0]);
+			rs.setCandDims(buildItemViewObject(schema, cubeId,canDims, null));
+			Item[] candInds = area.getLogicModel().getSelectionMeasures().values().toArray(new Item[0]);
+			rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, null));
         }
         return rs;
     }

@@ -273,7 +273,7 @@ public class DataModelBuilder {
      * @param treeNodes 维度交叉信息
      * @return
      */
-    public List<HeadField> buildAxisHeadFields(List<MemberNodeTree> treeNodes, List<MiniCubeMeasure> measures) {
+    public static List<HeadField> buildAxisHeadFields(List<MemberNodeTree> treeNodes, List<MiniCubeMeasure> measures) {
         List<HeadField> result = Lists.newArrayList();
         for (MemberNodeTree nodeTree : treeNodes) {
             List<HeadField> curHeadFields = buildFieldsByMemberNodeTree(nodeTree, result.isEmpty());

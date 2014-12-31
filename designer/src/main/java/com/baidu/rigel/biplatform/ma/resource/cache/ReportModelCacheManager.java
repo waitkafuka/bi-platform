@@ -60,9 +60,7 @@ public class ReportModelCacheManager {
      * @throws Exception
      */
     public ReportDesignModel getReportModel(String reportId) throws CacheOperationException {
-        String sessionId = ContextManager.getSessionId();
-        String productLine = ContextManager.getProductLine();
-        String key = CacheKeyGenerator.generateSessionReportKey(sessionId, reportId, productLine);
+        String key = genReportKey(reportId);
         // ReportDesignModel model = (ReportDesignModel)
         // cacheManagerForReource.getFromCache(key);
         byte[] modelBytes = (byte[]) cacheManagerForReource.getFromCache(key);
@@ -113,9 +111,7 @@ public class ReportModelCacheManager {
      * @throws Exception
      */
     public void deleteReportModel(String reportId) throws CacheOperationException {
-        String sessionId = ContextManager.getSessionId();
-        String productLine = ContextManager.getProductLine();
-        String key = CacheKeyGenerator.generateSessionReportKey(sessionId, reportId, productLine);
+        String key = genReportKey(reportId);
         cacheManagerForReource.deleteFromCache(key);
     }
     
@@ -128,10 +124,7 @@ public class ReportModelCacheManager {
      */
     public void updateReportModelToCache(String reportId, ReportDesignModel reportModel)
             throws CacheOperationException {
-        String sessionId = ContextManager.getSessionId();
-        String productLine = ContextManager.getProductLine();
-        String sessionReportKey = CacheKeyGenerator.generateSessionReportKey(sessionId, reportId,
-            productLine);
+        String sessionReportKey = genReportKey(reportId);
         try {
             byte[] modelBytes = SerializationUtils.serialize(reportModel);
             cacheManagerForReource.setToCache(sessionReportKey, modelBytes);
@@ -139,6 +132,18 @@ public class ReportModelCacheManager {
             throw e;
         }
     }
+
+	/**
+	 * @param reportId
+	 * @return String
+	 */
+	private String genReportKey(String reportId) {
+		String sessionId = ContextManager.getSessionId();
+        String productLine = ContextManager.getProductLine();
+        String sessionReportKey = CacheKeyGenerator.generateSessionReportKey(sessionId, reportId,
+            productLine);
+		return sessionReportKey;
+	}
     
     /**
      * 从缓存中获取运行时模型
@@ -291,7 +296,7 @@ public class ReportModelCacheManager {
             int key = genContextKey(reportId);
         if (cacheManagerForReource.getFromCache(String.valueOf(key)) == null) {
             ReportDesignModel designModel = this.getReportModel(reportId);
-            return RuntimeEvnUtil.initRuntimeEvn(designModel, null).getContext();
+            return RuntimeEvnUtil.initRuntimeEvn(designModel, null, null);
         }
         return (Context) cacheManagerForReource.getFromCache(String.valueOf(key));
     }

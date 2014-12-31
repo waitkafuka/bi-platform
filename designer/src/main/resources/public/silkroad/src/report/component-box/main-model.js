@@ -1,6 +1,6 @@
 /**
  * @file
- * @author 赵晓强(v_zhaoxiaoqiang@163.com)
+ * @author 赵晓强(longze_xq@163.com)
  * @date 2014-8-4
  */
 define([
@@ -41,6 +41,12 @@ define([
                         },
                         {
                             "clzKey": "ECUI_SELECT",
+                            "dataOpt": {
+                                "optionSize": 10
+                            }
+                        },
+                        {
+                            "clzKey": "ECUI_MULTI_SELECT",
                             "dataOpt": {
                                 "optionSize": 10
                             }

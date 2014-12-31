@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.netty.service;
 
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -76,7 +77,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
     /**
      * Constructor by 
      */
-    public IndexServerHandler() {
+    private IndexServerHandler() {
         super(ACTION_FEEDBACK);
     }
 
@@ -276,13 +277,19 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         indexFeedbackMsg.setIdxPath(feedBackIndexFilePath);
         indexFeedbackMsg.setIdName(indexMsg.getIdName());
         indexFeedbackMsg.setMaxId(currMaxId);
-        ctx.writeAndFlush(indexFeedbackMsg);
-        ctx.channel().close();
-        logger.info(String.format(LogInfoConstants.INFO_PATTERN_MESSAGE_RECEIVED_END,
-            "IndexServerHandler"));
+        
+        ChannelFuture sendBack=ctx.writeAndFlush(indexFeedbackMsg);
+        System.out.println("Sending msg back: "+indexFeedbackMsg);
+        
+        
+        
     }
     
-    /*
+    
+    
+   
+
+	/*
      * (non-Javadoc)
      * 
      * @see
@@ -294,5 +301,14 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         // Server do not need getMessage
         return null;
     }
+    
+    /* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
+	 */
+	@Override
+	public <T extends AbstractMessage> void setMessage(T t) {
+		return ; 
+		
+	}
     
 }

@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.tesseract.node.service;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -25,6 +24,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
@@ -36,7 +37,6 @@ import java.io.RandomAccessFile;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -51,7 +51,6 @@ import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.FileClientHa
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.IndexClientHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.SearchClientHandler;
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
-import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistException;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.netty.message.NettyAction;
@@ -95,7 +94,7 @@ public class IndexAndSearchClient {
     private static final String LOCAL_HOST_ADDRESS = "127.0.0.1";
     
     // private ConcurrentHashMap<NodeAddress, Channel> channelMaps;
-    private ConcurrentHashMap<String, ChannelHandler> actionHandlerMaps;
+    //private ConcurrentHashMap<String, ChannelHandler> actionHandlerMaps;
     private Bootstrap b;
     private EventLoopGroup group;
     
@@ -103,7 +102,7 @@ public class IndexAndSearchClient {
     
     public IndexAndSearchClient() {
         // channelMaps = new ConcurrentHashMap<NodeAddress, Channel>();
-        actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
+        //actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
         b = new Bootstrap();
         group = new NioEventLoopGroup();
         b.group(group);
@@ -113,9 +112,11 @@ public class IndexAndSearchClient {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 ChannelPipeline pipeline = ch.pipeline();
+                pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
                 pipeline.addLast("encode", new ObjectEncoder());
                 pipeline.addLast("decode",
-                    new ObjectDecoder(ClassResolvers.weakCachingConcurrentResolver(null)));
+                    new ObjectDecoder(Integer.MAX_VALUE,ClassResolvers.weakCachingConcurrentResolver(null)));
 //                pipeline.addLast("frameencoder",new LengthFieldPrepender(4,false));
 //                pipeline.addLast("framedecoder",new LengthFieldBasedFrameDecoder(1024*1024*1024, 0, 4,0,4));
             }
@@ -247,28 +248,28 @@ public class IndexAndSearchClient {
         
     }
     
-    public ChannelHandler getActionHandler(String actionMove) {
-        logger.info("getActionHandler:[actionMove=" + actionMove + "]");
-        if (!StringUtils.isEmpty(actionMove) && this.actionHandlerMaps.containsKey(actionMove)) {
-            return this.actionHandlerMaps.get(actionMove);
-        }
-        logger.info("getActionHandler:[actionMove=" + actionMove + "] has no handler");
-        return null;
-    }
+//    public ChannelHandler getActionHandler(String actionMove) {
+//        logger.info("getActionHandler:[actionMove=" + actionMove + "]");
+//        if (!StringUtils.isEmpty(actionMove) && this.actionHandlerMaps.containsKey(actionMove)) {
+//            return this.actionHandlerMaps.get(actionMove);
+//        }
+//        logger.info("getActionHandler:[actionMove=" + actionMove + "] has no handler");
+//        return null;
+//    }
     
-    private boolean registerActionHandler(NettyAction nettyAction,
-        AbstractChannelInboundHandler handler) throws InstantiationException,
-        IllegalAccessException {
-        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
-            + "] start");
-        if (nettyAction == null || handler == null) {
-            return false;
-        }
-        this.actionHandlerMaps.put(nettyAction.getActionName(), handler);
-        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
-            + "] success");
-        return true;
-    }
+//    private boolean registerActionHandler(NettyAction nettyAction,
+//        AbstractChannelInboundHandler handler) throws InstantiationException,
+//        IllegalAccessException {
+//        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
+//            + "] start");
+//        if (nettyAction == null || handler == null) {
+//            return false;
+//        }
+//        this.actionHandlerMaps.put(nettyAction.getActionName(), handler);
+//        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
+//            + "] success");
+//        return true;
+//    }
     
     public Channel getChannelByAddressAndPort(String ipAddress, int port)
         throws IndexAndSearchException {
@@ -284,11 +285,11 @@ public class IndexAndSearchClient {
         // NodeAddress nodeAddr = new NodeAddress(address, port);
         String address = ipAddress;
         try {
-            InetAddress currAddress = InetAddress.getLocalHost();
-            
-            if (ipAddress.equals(currAddress.getHostAddress())) {
-                address = LOCAL_HOST_ADDRESS;
-            }
+//            InetAddress currAddress = InetAddress.getLocalHost();
+//            
+//            if (ipAddress.equals(currAddress.getHostAddress())) {
+//                address = LOCAL_HOST_ADDRESS;
+//            }
             if (b != null) {
                 channel = b.connect(address, port).sync().channel();
                 // this.channelMaps.put(nodeAddr, channel);
@@ -359,7 +360,7 @@ public class IndexAndSearchClient {
         } catch (Exception e) {
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                 IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                IndexAndSearchExceptionType.INDEX_EXCEPTION), e.getCause(),
+                IndexAndSearchExceptionType.INDEX_EXCEPTION), e,
                 IndexAndSearchExceptionType.INDEX_EXCEPTION);
         }
         logger.info("index:[data=" + data + "][isUpdate=" + isUpdate + "][idxShard=" + idxShard
@@ -429,6 +430,7 @@ public class IndexAndSearchClient {
                         + File.separator + fin.getName());
                 if (isFirst) {
                     sfm.setFirst(isFirst);
+                    isFirst=false;
                 } else {
                     sfm.setFirst(false);
                 }
@@ -520,17 +522,24 @@ public class IndexAndSearchClient {
                 + "][Handler=" + handler + "]-Exception:IllegalArgumentException");
             throw new IllegalArgumentException();
         }
-        if (!registerActionHandler(action, handler)) {
-            logger.info("executeAction-Exception:HandlerRegistException");
-            throw new HandlerRegistException();
-        }
+//        if (!registerActionHandler(action, handler)) {
+//            logger.info("executeAction-Exception:HandlerRegistException");
+//            throw new HandlerRegistException();
+//        }
         Channel channel = null;
         channel = this.getChannelByAddressAndPort(node.getAddress(), node.getPort());
         channel.pipeline().addLast(handler);
         
         channel.writeAndFlush(message);
         channel.closeFuture().sync();
+        
+        System.out.println("hahahaha---------------done:"+channel.closeFuture().isDone()+"    succ:"+channel.closeFuture().isSuccess());
+        
+        
         returnMessage = handler.getMessage();
+        
+        handler.setMessage(null);
+        
         logger.info("executeAction:[NettyAction=" + action + "][Message=" + message + "][Handler="
             + handler + "] success");
         
@@ -540,17 +549,17 @@ public class IndexAndSearchClient {
     
     public void shutDown() {
         
-        if (this.actionHandlerMaps != null && !this.actionHandlerMaps.isEmpty()) {
-            this.actionHandlerMaps.clear();
-        }
+//        if (this.actionHandlerMaps != null && !this.actionHandlerMaps.isEmpty()) {
+//            this.actionHandlerMaps.clear();
+//        }
         this.b.group().shutdownGracefully();
     }
     
-    public ConcurrentHashMap<String, ChannelHandler> getActionHandlerMaps() {
-        if (this.actionHandlerMaps == null) {
-            this.actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
-        }
-        return actionHandlerMaps;
-    }
-    
+//    public ConcurrentHashMap<String, ChannelHandler> getActionHandlerMaps() {
+//        if (this.actionHandlerMaps == null) {
+//            this.actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
+//        }
+//        return actionHandlerMaps;
+//    }
+//    
 }

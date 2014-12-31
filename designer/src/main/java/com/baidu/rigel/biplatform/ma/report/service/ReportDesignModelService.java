@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.ma.report.service;
 
+import java.util.List;
+
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -104,5 +106,33 @@ public interface ReportDesignModelService {
      * @param dataFormat 数据格式
      */
 	void updateAreaWithDataFormat(ExtendArea area, String dataFormat);
+
+	/**
+	 * 
+	 * @param area
+	 * @param toolTips
+	 */
+	void updateAreaWithToolTips(ExtendArea area, String toolTips);
+
+	/**
+	 * 
+	 * @param area
+	 * @param topSetting
+	 */
+	void updateAreaWithTopSetting(ExtendArea area, String topSetting);
+
+	/**
+	 * 
+	 * @param area
+	 * @param otherSetting
+	 */
+	void updateAreaWithOtherSetting(ExtendArea area, String otherSetting);
+
+	/**
+	 * 
+	 * @param id
+	 * @return List<String>
+	 */
+	List<String> lsReportWithDsId(String id);
 
 }

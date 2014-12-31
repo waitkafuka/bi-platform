@@ -19,8 +19,6 @@
 package com.baidu.rigel.biplatform.tesseract.store.service;
 
 import java.util.EventObject;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Resource;
 
@@ -41,69 +39,56 @@ import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
  *
  */
 @Service("localEventListenerThread")
-public class LocalEventListenerThread implements Runnable, ApplicationContextAware {
-    /**
-     * LOGGER
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(LocalEventListenerThread.class);
-    
-    private ApplicationContext context;
-    
-    /**
-     * storeManager
-     */
-    @Resource
-    private StoreManager storeManager;
-    
-    
-    /**
-     * Constructor by no param
-     */
-    public LocalEventListenerThread() {
-        super();
+public class LocalEventListenerThread implements ApplicationContextAware {
+	/**
+	 * LOGGER
+	 */
+	private static final Logger LOGGER = LoggerFactory
+			                                        .getLogger(LocalEventListenerThread.class);
 
-    }
-    
-    public void start(){
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> run());
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Runnable#run()
-     */
-    @Override
-    public void run() {
-        // TODO Auto-generated method stub
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "run","no param"));
-        while (true) {
-            try {
-                EventObject item = this.storeManager.getNextEvent();
-                context.publishEvent((ApplicationEvent) item);
-                LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_PUBLISH_EVENT_SUCC, "run", item));
-                
-            } catch (Exception e) {
-                LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "run","no param"), e);
-                //LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_PUBLISH_EVENT_FAIL, "run"));
-                
-            }
-            
-        }
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.springframework.context.ApplicationContextAware#setApplicationContext
-     * (org.springframework.context.ApplicationContext)
-     */
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.context = applicationContext;
-        
-    }
-    
+	/**
+	 * context
+	 */
+	private ApplicationContext context;
+
+	/**
+	 * storeManager
+	 */
+	@Resource
+	private StoreManager storeManager;
+
+	/**
+	 * 从集群中拿出事件发布为本地事件
+	 */
+	public void getClusterEventAndPublish() {
+
+		try {
+			EventObject item = this.storeManager.getNextEvent();
+			context.publishEvent((ApplicationEvent) item);
+			LOGGER.info(String.format(
+					LogInfoConstants.INFO_PATTERN_PUBLISH_EVENT_SUCC, "run",
+					item));
+
+		} catch (Exception e) {
+			LOGGER.error(String.format(
+					LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "run",
+					"no param"), e);
+
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.springframework.context.ApplicationContextAware#setApplicationContext
+	 * (org.springframework.context.ApplicationContext)
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		this.context = applicationContext;
+
+	}
+
 }

@@ -40,7 +40,6 @@ import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.meta.NodeState;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchServer;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
-import com.baidu.rigel.biplatform.tesseract.store.service.LocalEventListenerThread;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
 /**
@@ -132,10 +131,10 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
                 .getBean(ClusterNodeCheckThread.class);
             clusterNodeCheckThread.start();
             
-            // 启动hz中的queue事件监听
-            LocalEventListenerThread localListenerThread = this.context
-                .getBean(LocalEventListenerThread.class);
-            localListenerThread.start();
+//            // 启动hz中的queue事件监听
+//            LocalEventListenerThread localListenerThread = this.context
+//                .getBean(LocalEventListenerThread.class);
+//            localListenerThread.start();
         } else {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_ERROR,
                 "IndexAndSearchStartupListener.onApplicationEvent-Server is not running ", event));

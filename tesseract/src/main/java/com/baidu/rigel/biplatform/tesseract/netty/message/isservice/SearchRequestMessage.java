@@ -20,8 +20,11 @@ package com.baidu.rigel.biplatform.tesseract.netty.message.isservice;
 
 import java.io.Serializable;
 
+import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 
 /**
@@ -91,11 +94,40 @@ public class SearchRequestMessage extends AbstractMessage {
      */
     @Override
     public String getMessageBodyMd5sum() {
-        String result = null;
-        if (this.queryRequest != null) {
-            result = Integer.toString(this.queryRequest.hashCode());
-        }
-        return result;
+		String result = null;
+		if (this.queryRequest != null) {
+			StringBuffer sb = new StringBuffer();
+			sb.append(this.queryRequest.getCubeId());
+			sb.append(this.queryRequest.getCubeName());
+			sb.append(this.queryRequest.getDataSourceInfo().getDataSourceKey());
+			sb.append(this.queryRequest.getFrom() == null ? ""
+					: this.queryRequest.getFrom().getFrom());
+			if (this.queryRequest.getSelect() != null) {
+				if (this.queryRequest.getSelect().getQueryMeasures() != null) {
+					for (QueryMeasure qm : this.queryRequest.getSelect()
+							.getQueryMeasures()) {
+						sb.append(qm.getProperties());
+					}
+				}
+				if (this.queryRequest.getSelect().getQueryProperties() != null) {
+					for (String qp : this.queryRequest.getSelect()
+							.getQueryProperties()) {
+						sb.append(qp);
+					}
+				}
+			} else {
+				sb.append("");
+			}
+			if (this.queryRequest.getWhere() != null
+					&& this.queryRequest.getWhere().getAndList() != null) {
+				for (Expression ex : this.queryRequest.getWhere().getAndList()) {
+					sb.append(ex.getProperties());
+				}
+			}
+			result = Md5Util.encode(sb.toString());
+		}
+
+		return result;
         
     }
     

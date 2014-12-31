@@ -1,35 +1,22 @@
 /*-------------------------------------------------*/
-/* 业务逻辑 -- 参数维度                                  */
+/* 业务逻辑 -- 功能区按你样式 */
 /*-------------------------------------------------*/
-.j-globalbtn {
-    width: 100%;
-    padding: 5px;
+.global-setting-btns {
+    float: left;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
 }
-.j-globalbtn div {
-    width: 100px;
-    height: 29px;
-    background: -moz-linear-gradient(#4698e9, #0167cc);
-    background: -webkit-linear-gradient(#4698e9, #0167cc);
-    background: -o-linear-gradient(#4698e9, #0167cc);
-    background: -ms-linear-gradient(#4698e9, #0167cc);
-    background: linear-gradient(#4698e9, #0167cc);
-    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#4698E9', endColorstr = '#0167CC', GradientType = 0);
-    background-color: #4698e9;
-    cursor: pointer;
-    color: #FFF;
-    text-align: center;
-    font-size: 13px;
-    line-height: 28px;
+.global-setting-btns:hover{
+    background: #c7c2c2;
 }
-.j-globalbtn div:hover {
-    background-color: #0167cc;
-    background: -moz-linear-gradient(#1e5ca6, #0167cc);
-    background: -webkit-linear-gradient(#1e5ca6, #0167cc);
-    background: -o-linear-gradient(#1e5ca6, #0167cc);
-    background: -ms-linear-gradient(#1e5ca6, #0167cc);
-    background: linear-gradient(#1e5ca6, #0167cc);
-    background: progid: DXImageTransform . Microsoft . gradient(startColorstr = '#1e5ca6', endColorstr = '#0167CC', GradientType = 0)
+.global-setting-btns:visited{
+    background: #c7c2c2;
 }
+/* 组件区域按钮 */
+/*.own-component {*/
+    /*height: 200px;*/
+/*}*/
 /* 参数维度列表 */
 .j-global-box {
     margin: 0 auto;

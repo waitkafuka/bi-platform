@@ -210,8 +210,8 @@
 }
 /* 下载按钮 */
 .ui-download-btn {
-    border: 1px solid #CCC;
-    background-color: #F7F7F7;
+    border: 1px solid #FFF;
+    background-color: #FFF;
     color: #3C78A2;
     padding: 0;
 }
@@ -222,16 +222,13 @@
     background-color: #BBB;
 }
 .ui-download-btn .ui-button-inner {
-    padding: 0 10px 3px 10px;
-    line-height: 16px;
-    background-color: #F7F7F7;
-    border-top: 1px solid #F7F7F7;
-    margin-top: 1px;
+    padding: 2px 0px 4px 3px;
+    line-height: 8px;
     -webkit-border-radius: 1px;
     -o-border-radius: 1px;
     -moz-border-radius: 1px;
     -ms-border-radius: 1px;
-    border-radius: 1px;    
+    border-radius: 1px;
 }
 .ui-download-btn-hover .ui-button-inner {
     background-color: #FCFCFC;
@@ -242,15 +239,18 @@
     background-color: #EEE;
 }
 .ui-download-btn .ui-button-left {
-    background: url(img/icon2.png) -75px -65px no-repeat;
-    width: 9px;
-    height: 12px;
+    background: url(img/download.png) no-repeat;
+    width: 20px;
+    height: 15px;
     overflow: hidden;
     display: inline-block;
     *display: inline;
     *zoom: 1;
     vertical-align: middle;
     margin-right: 3px;
+}
+.ui-download-btn .ui-button-left:hover{
+    background: url(img/downloadblue.png) no-repeat;
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
@@ -2962,6 +2962,7 @@ li {
     font-size: 12px;
 }
 
+
 .xui-e-chart {
     width: 100%;
     height: 100%;
@@ -2972,6 +2973,7 @@ li {
 }
 .xui-e-chart-header {
     width:100%;
+    height: 20%;
 }
 .xui-e-chart-title {
     font-weight:bold;
@@ -3008,7 +3010,7 @@ li {
     background-position:-42px -385px;
 }
 .xui-e-chart-content {
-    height:100%;
+    height:80%;
 }
 .xui-e-chart-empty {
     width: 99%;
@@ -3045,6 +3047,77 @@ li {
 }
 .zoom-dateRange input {
     width: 80px; height: 16px; border: 1px solid silver; margin-left: 5px; margin-right: 5px; text-align: center; color: #3784B7; font-weight: bold;
+}
+.echarts-candidate {
+    float: left;
+    margin-left: 5px;
+}
+.echarts-candidate label {
+    float: left;
+    margin-top: 5px;
+    padding-left: 5px;
+    padding-bottom: 10px;
+    height: 15px;
+    line-height: 15px;
+}
+.echarts-candidate input {
+    float: left;
+    margin-top: 5px;
+    padding-left: 5px;
+    padding-bottom: 10px;
+    height: 15px;
+    line-height: 15px;
+    width: 20px;
+}
+
+/**
+ * @name                      :topn设置
+ * @author                    :lizhantong
+ * @email                     :lztlovely@126.com
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :暂无
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.echart-topn {
+    position: absolute;
+    width: 200px;
+    height: 30px;
+    background-color: green;
+    top: 0px;
+    right: 0px;
+}
+.echart-topn-item {
+    float:  left;
+    width : 100%;
+    padding: 2px
+}
+.echart-topn-item span {
+    float: left;
+    height: 20px;
+    line-height: 20px;
+    width: 40px;
+}
+.echart-topn-item select {
+    float: left;
+    width: 90px;
+    height: 20px;
+}
+.echart-topn-item input {
+    float: left;
+    width: 90px;
+    heigh: 15px;
+}
+.echart-topn-item-btn {
+    float: left;
+    width: 100%;
+    padding-left: 20px;
+}
+.echart-topn-item-btn input {
+    float: left;
+    width: 90px;
+    height: 20px;
 }
 /**
  * di.css
@@ -3363,7 +3436,7 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 6px 15px 10px 10px;            
+    padding: 6px 0px 10px 10px;
     overflow: hidden;
     line-height: 18px;
 }
@@ -3371,7 +3444,7 @@ div.di-dim-level-find-msg span{
     float: left;
     line-height: 18px;            
     vertical-align: middle;
-    width: 600px;
+    width: 330px;
 }
 .di-table-count-num {
     font-size: 14px;
@@ -3402,6 +3475,31 @@ div.di-dim-level-find-msg span{
 }
 .component-item {
     overflow: auto;
+}
+.hide {
+    display: none;
+}
+
+/* 文本框组件样式 */
+.text-div {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    cursor: pointer;
+    color: #000;
+    overflow: hidden;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+    font-family: "微软雅黑";
+}
+.div-write {
+    display: table;
+}
+.div-write div{
+    vertical-align: middle;
+    display: table-cell;
 }
 /*@end*/
 /**

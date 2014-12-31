@@ -76,7 +76,8 @@ public interface ReportModelQueryService {
      * @throws QueryModelBuildException
      * @throws MiniCubeQueryException
      */
-    public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache, boolean needSumary)
+    public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache,
+    			boolean needSumary, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException;
     
     
@@ -94,7 +95,7 @@ public interface ReportModelQueryService {
      * @throws MiniCubeQueryException
      */
     public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache, boolean needSumary, 
-            Map<String, Object> requestParams)
+            Map<String, Object> requestParams, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException;
     
 }

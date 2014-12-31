@@ -19,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,12 +46,14 @@ import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
@@ -115,10 +118,12 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                     if (firstStr.startsWith(".") || secondStr.startsWith(".")) {
                         return -1;
                     }
-                    String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
+                    firstStr = firstStr.replaceAll("[?]", "-");
+					String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
                             + Constants.FILE_NAME_SEPERATOR.length(), 
                             firstStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR));
-                    String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
+                    secondStr = secondStr.replace("[?]", "-");
+					String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
                             + Constants.FILE_NAME_SEPERATOR.length(), 
                             secondStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR) );
                     return tmp.compareTo(tmp2);
@@ -268,6 +273,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             model.setId(UuidGeneratorUtils.generate());
         }
         try {
+        		ReportDesignModel oldReport = getModelByIdOrName(model.getId(), false);
+        		if (oldReport != null) {
+        			fileService.rm(generateDevReportLocation(oldReport));
+        		}
             boolean rs = fileService.write(generateDevReportLocation(model),
                     SerializationUtils.serialize(model));
             if (rs) {
@@ -404,11 +413,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         for (ExtendArea area : model.getExtendAreaList()) {
             try {
             		// 忽略此类区域
-            		if (area.getType() == ExtendAreaType.TIME_COMP 
-            				|| area.getType() == ExtendAreaType.LITEOLAP_TABLE
+            		if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
             				|| area.getType() == ExtendAreaType.SELECTION_AREA 
             				|| area.getType() == ExtendAreaType.LITEOLAP_CHART
-            				|| area.getType() == ExtendAreaType.SELECT) {
+            				|| area.getType() == ExtendAreaType.SELECT
+            				|| area.getType() == ExtendAreaType.MULTISELECT
+            				|| area.getType() == ExtendAreaType.TEXT
+            				|| QueryUtils.isFilterArea(area.getType())) {
             			continue;
             		}  
         			Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
@@ -449,6 +460,60 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		} catch (JSONException e) {
 			throw new IllegalArgumentException("数据格式必须为Json格式， dataFormat = " + dataFormat);
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
+		logger.info("[INFO] update tooltips define with : " + toolTips);
+		FormatModel model = area.getFormatModel();
+		model.getToolTips().putAll(convertStr2Map(toolTips));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithTopSetting(ExtendArea area, String topSetting) {
+		logger.info("[INFO] receive user top N setting define : " + topSetting);
+		MeasureTopSetting setting = GsonUtils.fromJson(topSetting, MeasureTopSetting.class);
+		setting.setAreaId(area.getId());
+		area.getLogicModel().setTopSetting(setting);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updateAreaWithOtherSetting(ExtendArea area, String otherSetting) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> setting = GsonUtils.fromJson(otherSetting, HashMap.class);
+		area.setOtherSetting(setting);
+	}
+
+	@Override
+	public List<String> lsReportWithDsId(String id) {
+		String[] modelFileList = null;
+        try {
+            modelFileList = fileService.ls(getDevReportDir());
+        } catch (FileServiceException e) {
+            logger.debug(e.getMessage(), e);
+            return Lists.newArrayList();
+        }
+        if (modelFileList == null || modelFileList.length == 0) {
+            return Lists.newArrayList();
+        }
+        List<String> rs = Lists.newArrayList();
+        for (String str : modelFileList) {
+        		if (str.contains(id)) {
+        			rs.add(str.substring(str.indexOf(Constants.FILE_NAME_SEPERATOR),
+        					str.lastIndexOf(Constants.FILE_NAME_SEPERATOR))
+        					.replace(Constants.FILE_NAME_SEPERATOR, ""));
+        		}
+        }
+        return rs;
 	}
     
 }

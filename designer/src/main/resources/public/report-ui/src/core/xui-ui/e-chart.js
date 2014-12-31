@@ -1,5 +1,5 @@
 /**
- * xui.ui.HChart  
+ * xui.ui.HChart
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
  * @file:    基于highcharts的js图
@@ -9,20 +9,18 @@
  */
 
 (function () {
-
-    var ieVersion = xutil.dom.ieVersion;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
     var q = xutil.dom.q;
     var domChildren = xutil.dom.children;
+    var getPreviousSibling = xutil.dom.getPreviousSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
-    var extend = xutil.object.extend;
+//    var extend = xutil.object.extend;
     var XOBJECT = xui.XObject;
-
-    var DI_ATTR_PREFIX = '\x06diA^_^';
+//    var DI_ATTR_PREFIX = '\x06diA^_^';
     /**
-     * 基于highcharts的JS图
+     * 基于e-chart的JS图
      *
      * @class
      * @extends {xui.ui.Control}
@@ -35,13 +33,12 @@
                 this._sType = 'xui-e-chart';
                 addClass(el, this._sType);
                 var type = this._sType;
-
+                // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                        '<div class="' + type + '-header">',
-                        '</div>',
-                        '<div class="' + type + '-content"></div>'
+                    '<div class="' + type + '-header">',
+                    '</div>',
+                    '<div class="' + type + '-content"></div>'
                 ].join('');
-
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
             }
@@ -64,8 +61,6 @@
     UI_E_CHART_CLASS.setData = function (dataWrap, isSilent) {
         this._zoomSelectedButton = 0;
         dataWrap = dataWrap || {};
-
-        // this._sChartType = fixChartType(dataWrap.chartType, 'line');
         this._bSeriesHasValue = null;
         this._nWidth = dataWrap.width;
         this._nHeight = dataWrap.height;
@@ -94,7 +89,7 @@
          *      }
          *  ];
          */
-        this._aYAxis = dataWrap.yAxis || [];   
+        this._aYAxis = dataWrap.yAxis || [];
         /**
          * 系列数据
          * 例如：
@@ -129,7 +124,7 @@
         /**
          * 用户自定义legend的模式（外观+行为）
          * 例如：
-         *  legend: { 
+         *  legend: {
          *      xMode: 'pl' // PL模式的legend。缺省则使用默认模式。
          *  }
          */
@@ -138,9 +133,129 @@
          * 数据为空时的html
          */
         this._sEmptyHTML = dataWrap.emptyHTML || '数据为空';
-             
+
+        this._allMeasures = dataWrap.allMeasures;
+        this._defaultMeasures = dataWrap.defaultMeasures;
+        this._allDims = dataWrap.allDims;
+        this._defaultDims = dataWrap.defaultDims;
+        this._mapMinValue = dataWrap.mapMinValue;
+        this._mapMaxValue = dataWrap.mapMaxValue;
         !isSilent && this.render();
     };
+
+    //------------------------------------------
+    // 图形备选区域模块
+    //------------------------------------------
+
+    /**
+     * 生成指标切换按钮
+     *
+     * @protected
+     */
+    UI_E_CHART_CLASS.$renderCheckBoxs = function () {
+        var me = this;
+        var allMeasures = me._allMeasures;
+        var defaultMeasures = me._defaultMeasures;
+        var measureHtml = [];
+
+        // 渲染图形中备选区模块
+        if (allMeasures.length > 0) {
+            if (this._chartType === 'pie') {
+                // 多选
+                for (var i = 0; i < allMeasures.length; i ++) {
+                    measureHtml.push(
+                        '<label>',
+                        allMeasures[i],
+                        '</label>',
+                        '<input type="radio" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                this._eCandidateBox.onclick = function (ev) {
+                    candidateClick.call(me, ev || window.event);
+                };
+            }
+            else {
+                // 多选
+                for (var i = 0; i < allMeasures.length; i ++) {
+                    measureHtml.push(
+                        '<label>',
+                        allMeasures[i],
+                        '</label>',
+                        '<input type="checkbox" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                // 绑定备选区按钮事件
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                this._eCandidateBox.onclick = function (ev) {
+                    candidateClick.call(me, ev || window.event);
+                };
+            }
+
+
+
+
+        }
+    };
+    // 备选区按钮点击事件
+    function candidateClick(ev) {
+        var resultName = '';
+        var oTarget = ev.target;
+
+        if (oTarget.tagName.toLowerCase() === 'input') {
+            resultName = getPreviousSibling(oTarget).innerHTML;
+            if (oTarget.type === 'radio') {
+                this._defaultMeasures = [resultName];
+            }
+            else {
+                // oTarget.checked = oTarget.checked ? false : true;
+                this._defaultMeasures = getCurrentCandidate(resultName, this._defaultMeasures);
+            }
+
+            //this.$disposeHeader();
+            this.$disposeChart();
+            this.$createChart(this.$initOptions());
+        }
+    }
+    // 在数组中是否存在
+    function isInArray(item, array) {
+        var flag = false;
+        for (var i = 0; i < array.length; i ++) {
+            if (item === array[i]) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+    // 获取备选区中当前显示的内容
+    function getCurrentCandidate(name, currentSelects) {
+        var isHave = false;
+        var result = [];
+
+        for (var i = 0; i < currentSelects.length; i ++) {
+            if (currentSelects[i] === name) {
+                isHave = true;
+            }
+            else {
+                result.push(currentSelects[i]);
+            }
+        }
+        // 如果本身就没有name元素，就添加进去
+        if (!isHave) {
+            result.push(name);
+        }
+        return result;
+    }
 
     /**
      * 设置数据
@@ -149,11 +264,13 @@
      */
     UI_E_CHART_CLASS.$setupSeries = function (options) {
         var series = [];
-        var xAxis = this._aXAxis;
         var seryKind = {};
         var tempData = [];
+        var xAxis = this._aXAxis;
+        var defaultMeasures = this._defaultMeasures;
+
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
-            seryKind[serDef.type] =  seryKind[serDef.type]
+            seryKind[serDef.type] = seryKind[serDef.type]
                 ? seryKind[serDef.type] + 1
                 : 1;
             ser = { data: [] };
@@ -161,29 +278,102 @@
             ser.yAxisIndex = serDef.yAxisIndex || 0;
             ser.color = serDef.color || void 0;
             ser.format = serDef.format || void 0;
-            ser.type = fixChartType(serDef.type);
-            ser.symbol = 'none'; // 线图上的点的形状
+            ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
             (serDef.id !== null) && (ser.id = serDef.id);
+            // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
-            if (serDef.type === 'line') {
-                tempData.push(ser);
+            if (defaultMeasures) {
+                if (ser.type === 'bar') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        ser.yAxisIndex = 0;
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'column') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        ser.type = 'bar';
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'pie') {
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        series.push(ser);
+                    }
+                }
+                else if (ser.type === 'line') {
+                    ser.symbol = 'none'; // 线图上的点的形状
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        tempData.push(ser);
+                    }
+                }
+                else if (ser.type === 'map') {
+                    ser.mapType = 'china';
+                    ser.roam = false;
+                    ser.itemStyle = {
+                        normal:{ label:{ show:true } },
+                        emphasis:{ label:{ show:true } }
+                    };
+                    var serData = [];
+                    for (var x = 0; x < ser.data.length; x ++) {
+                        serData.push({
+                            name: xAxis.data[x],
+                            value: ser.data[x]
+                        });
+                    }
+                    ser.data = serData;
+                    if (isInArray(ser.name, defaultMeasures)) {
+                        series.push(ser);
+                    }
+                }
             }
             else {
-                series.push(ser);
+                if (ser.type === 'bar') {
+                    ser.yAxisIndex = 0;
+                    series.push(ser);
+                }
+                else if (ser.type === 'column') {
+                    ser.type = 'bar';
+                    series.push(ser);
+                }
+                else if (ser.type === 'pie') {
+                    series.push(ser);
+                }
+                else if (ser.type === 'line') {
+                    tempData.push(ser);
+                }
+                else if (ser.type === 'map') {
+                    ser.mapType = 'china';
+                    ser.roam = false;
+                    ser.itemStyle = {
+                        normal:{ label:{ show:true } },
+                        emphasis:{ label:{ show:true } }
+                    };
+                    var serData = [];
+                    for (var x = 0; x < ser.data.length; x ++) {
+                        serData.push({
+                            name: xAxis.data[x],
+                            value: ser.data[x]
+                        });
+                    }
+                    ser.data = serData;
+                    series.push(ser);
+                }
             }
+
         }
         series = series.concat(tempData);
         if (seryKind.line >= 1 && seryKind.bar >= 1) {
             this._isAddYxis = true;
         }
         // series中只允许有一个饼图。
-        if (this._bHasPie) {
+        if (this._chartType === 'pie') {
             var targetSeries = [{}];
             for(var key in series[0]) {
                 series[0].hasOwnProperty(key) && (targetSeries[0][key] = series[0][key]);
             }
             targetSeries[0].data = [];
-            for (var k = 0, kser; kser = series[0].data[k]; k ++) {
+            for (var k = 0; k < series[0].data.length; k ++) {
+                var  kser = series[0].data[k];
                 var tarData = {
                     value: kser,
                     name: xAxis.data[k]
@@ -200,20 +390,26 @@
      * @private
      */
     UI_E_CHART_CLASS.$setupXAxis = function (options) {
-        var me = this;
-
         var xAxis =  {
             type: 'category',
-            boundaryGap: me._bHasBar ? true : false,
+            boundaryGap: true,
             axisLine: {
                 onZero: false
             },
             data: this._aXAxis.data
         };
-        if (!this._bHasPie) {
+        // 如果是正常图形（柱形图与线图），那么x轴在下面显示
+        if (this._chartType === 'column' || this._chartType === 'line') {
             options.xAxis = xAxis;
         }
-    }
+        else if (this._chartType === 'pie') {
+
+        }
+        else {
+            options.yAxis = xAxis;
+        }
+        return options;
+    };
     /**
      * 设置y轴
      * 支持多轴
@@ -221,11 +417,11 @@
      * @private
      */
     UI_E_CHART_CLASS.$setupYAxis = function (options) {
-        if (!this._bHasPie) {
+        if (this._chartType !== 'pie') {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
                 var yAxisOption;
-                for (var i = 0, option; option = this._aYAxis[i]; i++) {
+                for (var i = 0, option; option = this._aYAxis[i]; i ++) {
                     yAxisOption = {};
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
@@ -238,7 +434,7 @@
 //                        }
 //                    }
                     yAxis.push(yAxisOption);
-                };
+                }
             }
             else {
                 yAxisOption = {};
@@ -252,6 +448,9 @@
                 yAxis.push(yAxisOption);
                 for (var i = 0, iLen = options.series.length; i < iLen; i ++) {
                     var o = options.series[i];
+                    if (o.type === 'bar') {
+                        delete o.yAxisIndex;
+                    }
                     if (o.type === 'line') {
                         o.yAxisIndex = 1;
                     }
@@ -261,7 +460,12 @@
                 }
             }
         }
-        options.yAxis = yAxis;
+        if (this._chartType === 'bar') {
+            options.xAxis = yAxis;
+        }
+        if (this._chartType === 'column' || this._chartType === 'line') {
+            options.yAxis = yAxis;
+        }
     };
     /**
      * 设置图例
@@ -269,27 +473,36 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
-        var legend = {};
+        var legend = {
+            // orient: 'vertical',
+            x: 'center',
+            y: 'bottom'
+//            borderColor: '#ccc',
+//            borderWidth: 0.5
+        };
         var data = [];
+        var defaultMeasures = this._defaultMeasures;
 
-        if (this._bHasPie) {
+        if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
-            };
-            legend.orient = 'vertical';
+            }
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
                 for (var i = 0; i < this._aSeries.length; i++) {
-                    data[i] = this._aSeries[i].name;
+                    if (defaultMeasures) {
+                        if (isInArray(this._aSeries[i].name, defaultMeasures)) {
+                            data.push(this._aSeries[i].name);
+                        }
+                    }
+                    else {
+                        data.push(this._aSeries[i].name);
+                    }
                 }
             }
         }
-
         legend.data = data;
-        legend.x = 'left';
-        legend.padding = 5;
-        legend.itemGap = 10;
         options.legend = legend;
     };
     /**
@@ -298,15 +511,36 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupToolBox = function (options) {
-        var toolbox = {
-            show: true,
-            orient : 'vertical',
-            y : 'center',
-            feature : {
-                magicType : {show: true, type: ['stack', 'tiled']}
+        var toolbox;
+        var series;
+        var itemChartType = {};
+        var chartTypeLen = 0;
+        // 如果是柱状图或者条形图，series中数据大与一个，且每一个的图形一致；才显示图形种类
+        if (this._chartType === 'bar' || this._chartType === 'column') {
+            series = this._aSeries;
+            for (var i = 0; i < series.length; i++ ) {
+                itemChartType[series[i].type] = 1;
             }
-        };
-        options.toolbox = toolbox;
+            for (var key in itemChartType) {
+                if (itemChartType.hasOwnProperty(key)) {
+                    chartTypeLen ++;
+                }
+            }
+            if (series.length === 1 || chartTypeLen >= 2) {
+                return;
+            }
+            toolbox = {
+                show: true,
+                orient : 'horizontal',
+                x: 'right',
+                y : 'top',
+                feature : {
+                    magicType : {show: true, type: ['stack', 'tiled']}
+                }
+            };
+            options.toolbox = toolbox;
+        }
+
 
     };
     /**
@@ -323,7 +557,11 @@
             categories = this._aXAxis;
         }
 
-        if(!this._bHasPie){
+        if (
+            this._chartType === 'column'
+            || this._chartType === 'bar'
+            || this._chartType === 'line'
+            ) {
             dataZoom.show = false;
             var xNums = categories.data ? categories.data.length : 0;
             var enableSelectRange = false;
@@ -480,7 +718,7 @@
         if ((start === 0 || start) && end) {
             if ((xDatas[start] === this._oldMinDate)
                 && (xDatas[end] === this._oldMaxDate)
-            ) {
+                ) {
                 return;
             }
             this._zoomStart = start;
@@ -494,7 +732,7 @@
             oMinDate.value = this._oldMinDate;
             oMaxDate.value = this._oldMaxDate;
         }
-    };
+    }
     /**
      * 设置提示浮层
      *
@@ -503,7 +741,7 @@
     UI_E_CHART_CLASS.$setupTooptip = function (options) {
         var toolTip = {};
 
-        if (this._bHasPie) {
+        if (this._chartType === 'pie') {
             toolTip.formatter = "{a} <br/>{b} : {c} ({d}%)";
             toolTip.trigger = 'item';
         }
@@ -533,9 +771,7 @@
         }
         options.tooltip = toolTip;
     };
-    function fixChartType(rawType, defaultType) {
-        return rawType || defaultType || 'line';
-    }
+
     /**
      * 重新渲染图表
      *
@@ -545,12 +781,13 @@
         this.$disposeChart();
         // 如果没有数据，图形显示空
         if (!this._aSeries || this._aSeries.length == 0) {
-            this._eContent.innerHTML = '' 
-                + '<div class="' + this._sType + '-empty">' 
+            this._eContent.innerHTML = ''
+                + '<div class="' + this._sType + '-empty">'
                 +     this._sEmptyHTML
                 + '</div>';
             return;
         }
+        this.$preload();
         this.$createChart(this.$initOptions());
     };
 
@@ -565,22 +802,21 @@
         var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
-//        if (!this._bHasPie) {
-//            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
-//        }
-//        function zoomChage(param) {
-//            start = param.zoom.xStart;
-//            end = param.zoom.xEnd;
-//            changeDateRange();
-//        }
-//        function changeDateRange() {
-//            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
-//            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
-//            oMinDate.value = xDatas[start];
-//            oMaxDate.value = xDatas[end - 1];
-//        }
+        if (!this._chartType === 'pie') {
+            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
+        }
+        function zoomChage(param) {
+            start = param.zoom.xStart;
+            end = param.zoom.xEnd;
+            changeDateRange();
+        }
+        function changeDateRange() {
+            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
+            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
+            oMinDate.value = xDatas[start];
+            oMaxDate.value = xDatas[end - 1];
+        }
     };
-
     /**
      * 构建图表参数
      *
@@ -591,28 +827,52 @@
             title: { text: '' }
         };
 
-        // 特殊判断：是否有饼图
-        this._bHasPie = false;
-        this._bHasBar = false;
-        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
-            if (fixChartType(ser.type) == 'pie') {
-                this._bHasPie = true;
-            }
-            if (fixChartType(ser.type) == 'bar') {
-                this._bHasBar = true;
-            }
-        }
-        this.$setupToolBox(options);
-        this.$setupDataRoom(options);
         this.$setupSeries(options);
-        this.$setupXAxis(options);
-        this.$setupYAxis(options);
         this.$setupTooptip(options);
-        this.$setupLegend(options);
+        if (
+            this._chartType === 'column'
+            || this._chartType === 'bar'
+            || this._chartType === 'line'
+            || this._chartType === 'pie'
+            ) {
+            this.$setupDataRoom(options);
+            this.$setupToolBox(options);
+            this.$setupYAxis(options);
+            this.$setupLegend(options);
+            this.$setupXAxis(options);
+        }
+        else if (this._chartType === 'map') {
+            options.roamController = {
+                show: true,
+                x: 'right',
+                mapTypeControl: {
+                    'china': true
+                }
+            };
+            // TODO:需要后端返回最大最小值
+            options.dataRange = {
+                min: this._mapMinValue,
+                max: this._mapMaxValue,
+                x: 'left',
+                y: 'bottom',
+                text:['高','低'],           // 文本，默认为数值文本
+                calculable : true
+            };
+        }
+        if (this._chartType === 'pie') {
+            options.calculable = true;
+        }
         return options;
     };
-
-     /**
+    UI_E_CHART_CLASS.$preload = function () {
+        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
+            this._chartType = ser.type;
+        }
+        if (this._allMeasures) {
+            this.$renderCheckBoxs();
+        }
+    };
+    /**
      * 销毁图表
      *
      * @private
@@ -625,9 +885,15 @@
             this._oChart = null;
         }
         this._eContent && (this._eContent.innerHTML = '');
+    };
+    /**
+     * 销毁图表
+     *
+     * @private
+     */
+    UI_E_CHART_CLASS.$disposeHeader = function () {
         this._eHeader && (this._eHeader.innerHTML = '');
     };
-
     /**
      * @override
      */

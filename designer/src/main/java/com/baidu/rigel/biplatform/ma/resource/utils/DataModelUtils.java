@@ -195,7 +195,8 @@ public class DataModelUtils {
             // membershowname,当前member的caption
             colDefine.setShowAxis(transStrList2Str(getAllCaptionofHeadField(headField),
                 DIV_DIM_NODE, true));
-            colDefine.setCurrentSort("NONE");
+            colDefine.setCurrentSort(headField.getExtInfos().get("sortType") == null 
+            			? "NONE" : headField.getExtInfos().get("sortType").toString());
             colDefineList.add(colDefine);
             
         }
@@ -354,7 +355,7 @@ public class DataModelUtils {
     /**
      * 转换数据
      * @param columnBasedData
-     * @return
+     * @return List<List<CellData>>
      */
     private static List<List<CellData>> transColumnBasedData2RowBasedData(
         List<List<CellData>> columnBasedData) {
@@ -912,18 +913,119 @@ public class DataModelUtils {
 			ColDefine define = table.getColDefine().get(i);
 			String uniqueName = define.getUniqueName();
 			String formatStr = dataFormat.get("defaultFormat");
-			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","");
+			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","").replace(".", "");
 			if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
 				formatStr = dataFormat.get(uniqueName);
 			}
 			if (!StringUtils.isEmpty(formatStr)) {
-//				DecimalFormat format = new DecimalFormat(formatStr);
 				define.setFormat(formatStr);
-//				for (CellData data : colDatas.get(i)) {
-//					data.setFormattedValue(format.format(data.getV()));
-//				}
+			}
+			String toolTip = formatModel.getToolTips().get(uniqueName);
+			if (StringUtils.isEmpty(toolTip)) {
+				toolTip = uniqueName;
+			}
+			define.setToolTip(toolTip);
+		}
+	}
+
+	/**
+	 * 将dataModel转化为csv文件
+	 * @param dataModel
+	 * @return 转换后的文件
+	 */
+	public static String convertDataModel2CsvString(DataModel dataModel) {
+		StringBuilder rs = new StringBuilder();
+		
+		List<List<BigDecimal>> rowDatas = convertToRowData(dataModel.getColumnBaseData());
+		int maxDepth = getMaxDepth4Dim(dataModel.getRowHeadFields());
+		for (int i = 0; i < maxDepth; ++i) {
+			rs.append(" ,");
+		}
+		final int colSize = dataModel.getColumnHeadFields().size();
+		for (int i = 0; i < colSize; ++i) {
+			rs.append(dataModel.getColumnHeadFields().get(i).getCaption());
+			if (i < colSize - 1) {
+				rs.append(",");
+			} else {
+				rs.append("\r\n");
 			}
 		}
+		List<List<String>> rowCaptions = genRowCaptions(dataModel.getRowHeadFields());       
+		for (int i = 0; i < rowCaptions.size(); ++i) {
+			rowCaptions.get(i).forEach(str -> {
+				rs.append(str + ",");
+			});
+			for (int j = 0; j < rowDatas.get(i).size(); ++j) {
+				rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j));
+				if (j < rowDatas.get(i).size() - 1) {
+					rs.append(",");
+				} else {
+					rs.append("\r\n");
+				}
+			}
+		}
+		return rs.toString();
+	}
+
+	private static List<List<BigDecimal>> convertToRowData(List<List<BigDecimal>> columnBaseData) {
+		List<List<BigDecimal>> rowBasedData = new ArrayList<List<BigDecimal>>();
+        
+        for (List<BigDecimal> currColumnData : columnBaseData) {
+            for (int i = 0; i < currColumnData.size(); i++) {
+                // 当前列的第i行
+                List<BigDecimal> currRowData = new ArrayList<BigDecimal>();
+                if (rowBasedData.size() >= i + 1) {
+                    currRowData = rowBasedData.get(i);
+                } else {
+                    rowBasedData.add(currRowData);
+                }
+                currRowData.add(currColumnData.get(i));
+            }
+        }
+        
+        return rowBasedData;	}
+
+	private static List<List<String>> genRowCaptions(List<HeadField> rowHeadFields) {
+		List<List<String>> rs = Lists.newArrayList();
+		for (int i = 0; i < rowHeadFields.size(); ++i) {
+			final HeadField headField = rowHeadFields.get(i);
+			final List<HeadField> nodeList = headField.getNodeList();
+			List<String> tmp = Lists.newArrayList();
+			if (nodeList == null || nodeList.size() == 0) {
+				tmp.add(rowHeadFields.get(i).getCaption());
+			} else {
+				List<List<String>> nodeListCaption = genRowCaptions(headField.getNodeList());
+				nodeListCaption.forEach(list -> {
+					list.add(0, headField.getCaption());
+				});
+				rs.addAll(nodeListCaption);
+			}
+			rs.add(tmp);
+			if (headField.getChildren() != null && headField.getChildren().size() > 0) {
+				rs.addAll(genRowCaptions(headField.getChildren()));
+			}
+		}
+		List<List<String>> tmp = Lists.newArrayList();
+		rs.stream().forEach(list -> {
+			if (list != null && list.size() > 0) {
+				tmp.add(list);
+			}
+		});
+		return tmp;
+	}
+
+	/**
+	 * 获取表格中不同维度的最大数目
+	 * @param dataModel
+	 * @return int
+	 */
+	private static int getMaxDepth4Dim(List<HeadField> headFields) {
+		int rs = 0;
+		if (headFields == null || headFields.size() == 0) {
+			return rs;
+		}
+		rs += getMaxDepth4Dim(headFields.get(0).getNodeList());
+		return rs + 1;
 	}
     
 }

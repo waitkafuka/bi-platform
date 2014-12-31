@@ -16,12 +16,13 @@
 package com.baidu.rigel.biplatform.ma.report.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.utils.LinkedHashMapUtils;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -57,6 +58,21 @@ public class LogicModel implements Serializable {
      * 切片轴
      */
     private Map<String, Item> slices = new LinkedHashMap<String, Item>();
+    
+    /**
+     * 备选维度
+     */
+    private Map<String, Item> selectionDims = Maps.newLinkedHashMap();
+    
+    /**
+     * 备选指标
+     */
+    private Map<String, Item> selectionMeasures = Maps.newLinkedHashMap();
+    
+    /**
+     * topN设置
+     */
+    private MeasureTopSetting topSetting;
     
     public Item[] getColumns() {
         return this.columns.values().toArray(new Item[0]);
@@ -235,20 +251,43 @@ public class LogicModel implements Serializable {
         /**
          * 这里一定要使用linkedHashMap，保留顺序
          */
-        Map<String, Item> allItems = new LinkedHashMap<String, Item>();
+        Map<String, Item> allItems = collectItems();
+        return allItems.values().toArray(new Item[0]);
+    }
+
+	/**
+	 * @return
+	 */
+	private Map<String, Item> collectItems() {
+		Map<String, Item> allItems = new LinkedHashMap<String, Item>();
         allItems.putAll(this.columns);
         allItems.putAll(this.rows);
         allItems.putAll(this.slices);
-        return allItems.values().toArray(new Item[0]);
-    }
+        allItems.putAll(this.getSelectionDims());
+        allItems.putAll(this.getSelectionMeasures());
+		return allItems;
+	}
     
+	/**
+	 * 
+	 * @param itemId
+	 * @return Item
+	 */
     public Item getItem(String itemId) {
-        Map<String, Item> allItems = new HashMap<String, Item>();
+    		// TODO 优先查找非选择轴上的，此处需要优化
+        Map<String, Item> allItems = collectItems();
         allItems.putAll(this.columns);
         allItems.putAll(this.rows);
         allItems.putAll(this.slices);
         for (Item item : allItems.values()) {
-            // TODO 需要确认这里没有问题
+            if (item.getOlapElementId().equals(itemId)) {
+                return item;
+            }
+        }
+        allItems.clear();
+        allItems.putAll(this.getSelectionDims());
+        allItems.putAll(this.getSelectionMeasures());
+        for (Item item : allItems.values()) {
             if (item.getOlapElementId().equals(itemId)) {
                 return item;
             }
@@ -257,17 +296,13 @@ public class LogicModel implements Serializable {
     }
     
     public Item getItemByOlapElementId(String olapElementId) {
-        Map<String, Item> allItems = new HashMap<String, Item>();
-        allItems.putAll(this.columns);
-        allItems.putAll(this.rows);
-        allItems.putAll(this.slices);
-        return allItems.get(olapElementId);
+//        Map<String, Item> allItems = collectItems();
+//        return allItems.get(olapElementId);
+    		return this.getItem(olapElementId);
     }
     
     public boolean containsOlapElement(String olapElementId) {
-        return this.columns.containsKey(olapElementId)
-                || this.rows.containsKey(olapElementId)
-                || this.slices.containsKey(olapElementId);
+        return collectItems().containsKey(olapElementId);
     }
 
     /**
@@ -291,4 +326,67 @@ public class LogicModel implements Serializable {
             this.columns.put(item.getOlapElementId(), item);
         }
     }
+
+	/**
+	 * @return the selectionDims
+	 */
+	public Map<String, Item> getSelectionDims() {
+		if (this.selectionDims == null) {
+			this.selectionDims = Maps.newLinkedHashMap();
+		}
+		return selectionDims;
+	}
+
+	/**
+	 * @param selectionDims the selectionDims to set
+	 */
+	public void setSelectionDims(Map<String, Item> selectionDims) {
+		this.selectionDims = selectionDims;
+	}
+
+	/**
+	 * @return the selectionMeasures
+	 */
+	public Map<String, Item> getSelectionMeasures() {
+		if (this.selectionMeasures == null) {
+			this.selectionMeasures = Maps.newLinkedHashMap();
+		}
+		return selectionMeasures;
+	}
+
+	/**
+	 * @param selectionMeasures the selectionMeasures to set
+	 */
+	public void setSelectionMeasures(Map<String, Item> selectionMeasures) {
+		this.selectionMeasures = selectionMeasures;
+	}
+
+	/**
+	 * 
+	 * @param oLapElementId
+	 * @param axisType
+	 * @return boolean
+	 */
+	public boolean containsOlapElement(String olapElementId, String axisType) {
+		final Item item = this.getItemByOlapElementId(olapElementId);
+		if (item != null && item.getPositionType() == PositionType.valueOf(axisType)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * @return the topSetting
+	 */
+	public MeasureTopSetting getTopSetting() {
+		return topSetting;
+	}
+
+	/**
+	 * @param topSetting the topSetting to set
+	 */
+	public void setTopSetting(MeasureTopSetting topSetting) {
+		this.topSetting = topSetting;
+	}
+    
 }

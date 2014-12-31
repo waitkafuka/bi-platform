@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -143,16 +144,25 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     logger.debug("can not get item with item id : " + item.getOlapElementId());
                     return null;
                 }
-//                if (item.getFormatModel() != null) {
-//                    oldItem.setFormatModel(item.getFormatModel());
-//                }
                 if (item.getParams() != null) {
                     oldItem.setParams(item.getParams());
                 }
-                if (position == PositionType.CAND_DIM) {
-                    ((LiteOlapExtendArea) area).addCandDim(item);
+                if (position == PositionType.CAND_DIM ) {
+                		if (area instanceof LiteOlapExtendArea) {
+                			((LiteOlapExtendArea) area).addCandDim(item);
+                		} else {
+                		    item.setPositionType(PositionType.CAND_DIM);
+                			area.addSelectionDimItem(item);
+                		}
                 } else if (position == PositionType.CAND_IND) {
-                    ((LiteOlapExtendArea) area).addCandInd(item);
+                    if (area instanceof LiteOlapExtendArea) {
+                    		((LiteOlapExtendArea) area).addCandInd(item);
+	            		} else {
+	            			item.setPositionType(PositionType.CAND_IND);
+	            			area.addSelectionMeasureItem(item);
+	            		}
+                } else {
+                		changeSelItemChartType(item, area);
                 }
             } else {
                 addNewInfoIntoArea(ori, areaId, item, position, area);
@@ -162,6 +172,38 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
             return null;
         }
     }
+
+	/**
+	 * @param item
+	 * @param area
+	 */
+	private void changeSelItemChartType(Item item, ExtendArea area) {
+		final Object chartType = item.getParams().get("chartType");
+		if (chartType == null) {
+			return;
+		}
+		
+		if (area.getLogicModel() == null || area.getLogicModel().getSelectionMeasures() == null) {
+			return;
+		}
+		Map<String, Item> tmpMap = DeepcopyUtils.deepCopy(area.getLogicModel().getSelectionMeasures());
+		tmpMap.forEach((k, v) -> {
+			Object tmp = v.getParams().get("chartType");
+			final String chartTypeKey = "chartType";
+			if (tmp != null) {
+				if ("column".equalsIgnoreCase(chartType.toString()) || "line".equalsIgnoreCase(chartType.toString())) {
+					if (!"column".equalsIgnoreCase(tmp.toString()) && !"line".equalsIgnoreCase(tmp.toString())) {
+						v.getParams().put(chartTypeKey, chartType);
+					}
+				} else {
+					v.getParams().put(chartTypeKey, chartType);
+				}
+			} else {
+				v.getParams().put(chartTypeKey, chartType);;
+			}
+			area.getLogicModel().getSelectionMeasures().put(k, v);
+		}); 
+	}
     
     /**
      * 
@@ -170,7 +212,7 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
      * @return
      */
     private Item getItem(ExtendArea area, String id) {
-        Map<String, Item> allItems = area.getAllItems();
+        Map<String, Item> allItems = area.listAllItems();
         if (allItems != null) {
             return allItems.get(id);
         }
@@ -230,15 +272,19 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 break;
             case CAND_DIM:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
-                    throw new ReportModelOperationException("can not add candicate dim to non liteolap area!");
+                		item.setPositionType(PositionType.CAND_DIM);
+                		area.addSelectionDimItem(item);
+                } else {
+                		((LiteOlapExtendArea) area).addCandDim(item);
                 }
-                ((LiteOlapExtendArea) area).addCandDim(item);
                 break;
             case CAND_IND:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
-                    throw new ReportModelOperationException("can not add candicate dim to non liteolap area!");
+                		item.setPositionType(PositionType.CAND_IND);
+                		area.addSelectionMeasureItem(item);
+                } else {
+                		((LiteOlapExtendArea) area).addCandInd(item);
                 }
-                ((LiteOlapExtendArea) area).addCandInd(item);
                 break;
             default:
         }
@@ -280,21 +326,23 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     break;
                 case CAND_DIM:
                     if (area.getType() != ExtendAreaType.LITEOLAP) {
-                        throw new ReportModelOperationException("can not remove candicate dim from non liteolap area!");
+                    		area.removeSelectDimItem(olapElementId);
+                    } else {
+	                    	((LiteOlapExtendArea) area).removeCandDim(olapElementId);
                     }
-                    if (area.getAllItems().containsKey(olapElementId)) {
-                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
-                    }
-                    ((LiteOlapExtendArea) area).removeCandDim(olapElementId);
+//                    if (area.listAllItems().containsKey(olapElementId)) {
+//                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
+//                    }
                     break;
                 case CAND_IND:
                     if (area.getType() != ExtendAreaType.LITEOLAP) {
-                        throw new ReportModelOperationException("can not remove candicate dim from non liteolap area!");
+                        area.removeSelectMeasureItem(olapElementId);
+                    } else {
+	                    	((LiteOlapExtendArea) area).removeCandInd(olapElementId);
                     }
-                    if (area.getAllItems().containsKey(olapElementId)) {
-                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
-                    }
-                    ((LiteOlapExtendArea) area).removeCandInd(olapElementId);
+//                    if (area.listAllItems().containsKey(olapElementId)) {
+//                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
+//                    }
                     break;
                 default:
             }

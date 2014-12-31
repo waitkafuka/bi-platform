@@ -48,8 +48,9 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
                 'change:currentMenu',
                 this._currentMenuChanged
             );
-
             this.render();
+            // 暂时隐藏其他按钮
+            this.hideOther();
             // 获取当前选中菜单，并初始化其对应模块
             this._currentMenuChanged();
             window.dataInsight.navView = this;
@@ -173,6 +174,14 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
         _destroyPanel: function () {
             window.dataInsight && window.dataInsight.main
             && window.dataInsight.main.destroy();
+        },
+
+        /**
+         * 暂时隐藏其他按钮
+         * @private
+         */
+        hideOther: function () {
+            $('#other').remove();
         }
 
     });

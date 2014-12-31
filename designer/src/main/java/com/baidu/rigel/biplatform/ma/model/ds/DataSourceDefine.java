@@ -120,7 +120,7 @@ public class DataSourceDefine implements Serializable {
     }
     
     public String getDbPwd() {
-        return dbPwd;
+		return this.dbPwd;
     }
     
     public void setDbPwd(String dbPwd) {

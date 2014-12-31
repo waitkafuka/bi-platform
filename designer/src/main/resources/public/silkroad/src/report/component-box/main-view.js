@@ -19,10 +19,8 @@ define([
         return Backbone.View.extend({
             // 事件
             events: {
-                'change #component-group-selector': 'showCompByGroup',
-                'click .j-component-box-fold': 'fold',
-                'focus .text-div': 'focusText',
-                'blur .text-div': 'blurText'
+                'change #component-group-selector': 'showCompByGroup'
+                //'click .j-component-box-fold': 'fold'
             },
 
             /**
@@ -32,48 +30,14 @@ define([
              * @constructor
              */
             initialize: function (option) {
-                var that = this;
                 this.model = new MainModel({
                     id: this.id
                 });
                 this.canvasView = option.canvasView;
 
-                this.$el.append(mainTemplate.render(this.model.config));
+                this.$el.find('.component-menu').append(mainTemplate.render(this.model.config));
                 this.showCompByGroup();
                 this.initDrag();
-            },
-
-            /**
-             * 文本框组件获取焦点切换
-             *
-             * @public
-             */
-            focusText: function () {
-                var divTitle = '点击进行输入';
-                var $divText = $('#comp-div');
-                var $inpText = $('#comp-text');
-                var divHtml = $divText.html();
-                $divText.hide();
-                $inpText.show().focus();
-                if (divHtml != divTitle) {
-                    $inpText.val($divText.html());
-                }
-                else {
-                    $inpText.val('');
-                }
-            },
-
-            /**
-             * 文本框组件失去焦点切换
-             *
-             * @public
-             */
-            blurText: function () {
-                var $divText = $('#comp-div');
-                var $inpText = $('#comp-text');
-                $inpText.hide();
-                $divText.show();
-                $divText.html($inpText.val());
             },
 
             /**
@@ -83,8 +47,6 @@ define([
              */
             showCompByGroup: function () {
                 var $cbox = this.$el.find('.j-con-component-box');
-                $cbox.find('.j-con-component').hide();
-
                 var selectedComponentGroupId = ''
                     + $cbox.find('#component-group-selector').val();
                 var compConSelector = ''
@@ -116,7 +78,6 @@ define([
                     opacity: 1, // 被拖拽元素的透明度
                     // 修正由于滚动条产生的偏移
                     drag: function (event, ui) {
-
                         // 矫正值
                         //var correctVal = $report.scrollTop()/1 - startScrollTop/1;
                         //var topValue = parseInt(ui.helper.css('top')) + correctVal;
@@ -133,13 +94,13 @@ define([
                         var compType = ui.helper.attr('data-component-type');
                         var compData = that.model.getComponentData(compType);
                         startScrollTop = $report.scrollTop();
-
+                        $('.j-all-menus').hide();
                         ui.helper.html('临时展示').css({
                             'width': '100px',
                             'height': '100px',
                             'cursor': 'move',
                             'background': '#ffffff'
-                        }).addClass('active shell-component');
+                        }).addClass('active shell-component j-component-border');
                         ui.helper.attr('data-default-width', compData.defaultWidth);
                         ui.helper.attr('data-default-height', compData.defaultHeight);
                         ui.helper.attr('data-sort-startScrrolTop', ui.helper.parent().scrollTop());
@@ -157,6 +118,7 @@ define([
              *
              * @public
              */
+            /**
             fold: function (event) {
                 var $target = $(event.target);
                 var $box = $target.parents('.j-con-component-box');
@@ -173,6 +135,7 @@ define([
                     $box.find('select').show();
                 }
             },
+            **/
 
             /**
              * 销毁view

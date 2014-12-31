@@ -335,7 +335,7 @@ public class IndexServiceImpl implements IndexService {
             throw new IllegalArgumentException();
         }
         // s1. transfer indexMeta to SQLQuery
-        Map<String, SqlQuery> sqlQueryMap = transIndexMeta2SQLQuery(idxMeta);
+        Map<String, SqlQuery> sqlQueryMap = transIndexMeta2SQLQuery(idxMeta,false);
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
             "doIndex", "transIndexMeta2SQLQuery success"));
         
@@ -362,49 +362,8 @@ public class IndexServiceImpl implements IndexService {
             if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                     "doIndex", "process merge"));
-                // Map<String, Measure> measureAllMap = new HashMap<String,
-                // Measure>();
-                // measureAllMap.putAll(idxMeta.getMeasureInfoMap());
-                // measureAllMap.putAll(idxMeta.getMeasureInfoMergeMap());
-                idxMeta.getMeasureInfoMap().putAll(idxMeta.getMeasureInfoMergeMap());
-                // Map<String, Dimension> dimAllMap = new HashMap<String,
-                // Dimension>();
-                // dimAllMap.putAll(idxMeta.getDimInfoMap());
-                // dimAllMap.putAll(idxMeta.getDimInfoMergeMap());
-                idxMeta.getDimInfoMap().putAll(idxMeta.getDimInfoMergeMap());
-                sqlQueryMap = transIndexMeta2SQLQuery(idxMeta);
-                //
-                // List<String> selectMergeList = new ArrayList<String>();
-                // for (String measureKey : measureAllMap.keySet()) {
-                // Measure measure = measureAllMap.get(measureKey);
-                // if (measure.getType().equals(MeasureType.COMMON)) {
-                // // 普通指标，直接加入到select表列中
-                // selectMergeList.add(measure.getDefine());
-                // }
-                // }
-                
-                // 需要合并列的更新
-                // for (String tableName : sqlQueryMap.keySet()) {
-                // List<String> selectList =
-                // sqlQueryMap.get(tableName).getSelectList();
-                // if (selectList == null) {
-                // selectList = new ArrayList<String>();
-                // }
-                // selectList.clear();
-                // selectList.addAll(selectMergeList);
-                // sqlQueryMap.get(tableName).setSelectList(selectList);
-                // }
-                /*
-                 * for (String tableName :
-                 * idxMeta.getDataDescInfo().getTableNameList()) { List<String>
-                 * whereList = sqlQueryMap.get(tableName).getWhereList(); if
-                 * (whereList == null) { whereList = new ArrayList<String>(); }
-                 * BigDecimal maxId =
-                 * idxMeta.getDataDescInfo().getMaxDataId(tableName); if
-                 * (!maxId.equals(BigDecimal.ZERO)) { String where = "id > " +
-                 * maxId.longValue(); whereList.add(where); }
-                 * sqlQueryMap.get(tableName).setWhereList(whereList); }
-                 */
+                boolean needMerge=true;
+                sqlQueryMap = transIndexMeta2SQLQuery(idxMeta,needMerge);
                 
             } else if (!idxMeta.getIdxState().equals(IndexState.INDEX_UNAVAILABLE)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
@@ -455,6 +414,8 @@ public class IndexServiceImpl implements IndexService {
         long totalOtherTime=0;
         long totalSqlTime=0;
         IndexShard currIdxShard = getFreeIndexShardForIndex(idxMeta);
+        
+        boolean finishIndex=false;
         for (String tableName : sqlQueryMap.keySet()) {
             SqlQuery sqlQuery = sqlQueryMap.get(tableName);
             long total = 0;
@@ -468,8 +429,12 @@ public class IndexServiceImpl implements IndexService {
             boolean isLastPiece = false;
             boolean isInit = true;
             
-            BigDecimal currMaxId = BigDecimal.ZERO;
+            //初始化finishIndex
+            if(!isLastPiece){
+            	finishIndex=false;
+            }
             
+            BigDecimal currMaxId = BigDecimal.ZERO;            
             //初始化maxId
             if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null){
             	currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
@@ -531,6 +496,9 @@ public class IndexServiceImpl implements IndexService {
                         idxMeta.setIdxState(IndexState.INDEX_UNAVAILABLE);
                         idxMeta = saveIndexShardIntoIndexMeta(currIdxShard, idxMeta);
 						currIdxShard = null;
+						if(isLastPiece){
+							finishIndex=true;
+						}
                     }
                     
                     if (isInit) {
@@ -561,14 +529,17 @@ public class IndexServiceImpl implements IndexService {
         if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
             idxMeta.getCubeIdSet().addAll(idxMeta.getCubeIdMergeSet());
             idxMeta.getCubeIdMergeSet().clear();
-            idxMeta.getDimInfoMap().putAll(idxMeta.getDimInfoMergeMap());
-            idxMeta.getMeasureInfoMap().putAll(idxMeta.getMeasureInfoMergeMap());
-            idxMeta.getDimInfoMergeMap().clear();
-            idxMeta.getMeasureInfoMergeMap().clear();
+            
+            idxMeta.getDimSet().addAll(idxMeta.getDimInfoMergeSet());
+            idxMeta.getMeasureSet().addAll(idxMeta.getMeasureInfoMergeSet());
+            idxMeta.getDimInfoMergeSet().clear();
+            idxMeta.getMeasureInfoMergeSet().clear();
+        }
+        if(finishIndex){
+        	idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
+            this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
         }
         
-        idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
-        this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "doIndex",
             "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"));
@@ -710,7 +681,7 @@ public class IndexServiceImpl implements IndexService {
             
             for (Node node : idxShard.getReplicaNodeList()) {
                 int retryTimes = 0;
-                String targetFilePath = idxShard.getAbsoluteFilePath(node);
+                String targetFilePath = idxShard.getAbsoluteIdxFilePath(node);
                 ServerFeedbackMessage backMessage = null;
                 while (retryTimes < TesseractConstant.RETRY_TIMES) {
                     backMessage = isClient.copyIndexDataToRemoteNode(absoluteIdxFilePath,
@@ -752,18 +723,20 @@ public class IndexServiceImpl implements IndexService {
      * 
      * @param idxMeta
      *            当前的idxMeta
+     * @param needMerge
+     *            idxMeta是否需要合并
      * @return List<SQLQuery> 返回sqlquery对像
      * @throws IndexMetaIsNullException
      *             当idxMeta为空时会抛出异常
      */
-    private Map<String, SqlQuery> transIndexMeta2SQLQuery(IndexMeta idxMeta)
+    private Map<String, SqlQuery> transIndexMeta2SQLQuery(IndexMeta idxMeta,boolean needMerge)
             throws IndexMetaIsNullException {
         Map<String, SqlQuery> result = new HashMap<String, SqlQuery>();
         if (idxMeta == null || idxMeta.getDataDescInfo() == null) {
             throw generateIndexMetaIsNullException(idxMeta);
         }
         
-        Set<String> selectList = idxMeta.getSelectList();
+        Set<String> selectList = idxMeta.getSelectList(needMerge);
         if (selectList == null) {
             selectList = new HashSet<String>();
         }

@@ -1,7 +1,7 @@
 /**
  * @file:   文本框的配置信息
  * @author: weiboxue(wbx_901118@sina.com)
- * @date:   2014/11/26
+ * @date:   2014/12/1
  */
 define(
     [
@@ -17,7 +17,8 @@ define(
 
         // 文本框 实例 描述信息（从report-ui里面获取）
         var entityDescription = {};
-
+        // 格式化文本框组件添加唯一ID
+        var textAll = '';
         /**
          * 处理渲染数据（json的数据）
          *
@@ -38,10 +39,15 @@ define(
             iconClass: 'text',
             caption: '文本框',
             defaultWidth: 300,
-            defaultHeight: 27,
+            defaultHeight: 30,
             vm: {
                 render: function (data) {
-                    return TextVmTemplate.render();
+                    // 为文本框组件设定唯一ID
+                    var time = String(new Date().getTime());
+                    var textOne = TextVmTemplate.render().split('id="')[0];
+                    var textTwo = TextVmTemplate.render().split('id="')[1];
+                    textAll = textOne + 'id="' + 'TEXT' +time + textTwo;
+                    return textAll;
                 }
             },
             processRenderData: processRenderData,

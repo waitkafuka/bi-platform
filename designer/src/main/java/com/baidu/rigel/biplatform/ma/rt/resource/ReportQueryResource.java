@@ -16,37 +16,29 @@
 package com.baidu.rigel.biplatform.ma.rt.resource;
 
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
-import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
-import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
-import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.AnalysisChartBuildService;
@@ -54,7 +46,6 @@ import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportModelQueryService;
-import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.resource.QueryDataResource;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -68,7 +59,6 @@ import com.baidu.rigel.biplatform.ma.rt.query.service.QueryException;
 import com.baidu.rigel.biplatform.ma.rt.query.service.ReportQueryService;
 import com.baidu.rigel.biplatform.ma.rt.request.build.QueryRequestBuilder;
 import com.baidu.rigel.biplatform.ma.rt.utils.RuntimeEvnUtil;
-import com.baidu.rigel.biplatform.ma.rt.utils.RuntimeEvnUtil.ContextEntity;
 import com.google.common.collect.Maps;
 
 /**
@@ -222,66 +212,29 @@ public class ReportQueryResource {
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
-        // ServletContext
-        ServletContext servletContext = request.getSession().getServletContext();
-        // Spring的ApplicationContext
-        ApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        // 获取产品线名称和产生sessionId
-        String productLine = request.getParameter(Constants.TOKEN);
-        // 添加产品线到cookie中
-        if (StringUtils.hasText(productLine)) {
-            try {
-                Cookie productLineCookie = new Cookie(Constants.BIPLATFORM_PRODUCTLINE, productLine);
-                productLineCookie.setPath(Constants.COOKIE_PATH);
-                ((HttpServletResponse) response).addCookie(productLineCookie);
-                // 对productLine进行重新解密，以便放到ContextManager中
-                productLine = AesUtil.getInstance().decrypt(productLine);
-            } catch (Exception e) {
-                logger.error("productline encrypt happened exception," + "message:" + e);
-                throw new RuntimeException("productline encrypt happened exception," + "message:" + e);
-            }
-        }
-        // 添加SessionId到cookie中
-        String sessionId = UuidGeneratorUtils.generate();
-        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
-        sessionIdCookie.setPath(Constants.COOKIE_PATH);
-        response.addCookie(sessionIdCookie);
-
-        ContextManager.cleanSessionId();
-        ContextManager.cleanProductLine();
-        ContextManager.setSessionId(sessionId);
-        ContextManager.setProductLine(productLine);
-
         ReportDesignModel model = null;
         try {
             model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
         } catch (CacheOperationException e1) {
             logger.error("Fail in loading release report model into cache. ", e1);
-            e1.printStackTrace();
+            throw new IllegalStateException("未找到要查询的报表，请确认是否发布报表");
         }
-        // 初始化上下文实体
-        ContextEntity contextEntity = RuntimeEvnUtil.initRuntimeEvn(model, applicationContext);
-        // 获取全局上下文
-        Context context = contextEntity.getContext();
-        ConcurrentHashMap<String, Object> globalParams = context.getGlobalParams();
-        // 将url参数添加到全局上下文中
-        Enumeration<String> params = request.getParameterNames();
-        while (params.hasMoreElements()) {
-            String paramName = params.nextElement();
-            globalParams.put(paramName, request.getParameter(paramName));
-        }
-        // 添加cookie内容
-        globalParams.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
-        context.setGlobalParams(globalParams);
-        // 将全局上下文放入cache中
-        reportModelCacheManager.updateContext(reportId, context);
         if (model == null) {
-            return "";
+        		throw new IllegalStateException("未找到要查询的报表，请确认是否发布报表");
         }
-        // 
+        ConcurrentHashMap<String, Object> globalParams = HttpServletRequestHelper.collectRequestParam(request);
+        // ServletContext
+        ServletContext servletContext = request.getSession().getServletContext();
+        // Spring的ApplicationContext
+        ApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        // 将全局上下文放入cache中
+        Context context = RuntimeEvnUtil.initRuntimeEvn(model, applicationContext, globalParams);
+        reportModelCacheManager.updateContext(reportId, context);
         StringBuilder builder = this.genVm(model);
         return builder.toString();
     }
+
+	
 
     @RequestMapping(value = "/{reportId}/report_json/1", method = { RequestMethod.GET },
             produces = "text/plain;charset=utf-8")
@@ -294,7 +247,7 @@ public class ReportQueryResource {
             logger.debug("There are no such model in cache. Report Id: " + reportId, e);
         }
         if (model == null) {
-            return "";
+            throw new IllegalStateException("");
         }
         String json = model.getJsonContent();
         response.setCharacterEncoding("utf-8");
@@ -309,53 +262,53 @@ public class ReportQueryResource {
      */
     @RequestMapping(value = "/{reportId}/runtime_model/1", method = { RequestMethod.POST })
     public ResponseResult initRunTimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request) {
-        // ServletContext
-        ServletContext servletContext = request.getSession().getServletContext();
-        // Spring的ApplicationContext
-        ApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
-        boolean edit = Boolean.valueOf(request.getParameter("isEdit"));
-        ReportDesignModel model = null;
-        if (edit) {
-            /**
-             * 编辑报表
-             */
-            model = reportModelCacheManager.loadReportModelToCache(reportId);
-        } else {
-            /**
-             * 如果是新建的报表，从缓存中找
-             */
-            try {
-                model = reportModelCacheManager.getReportModel(reportId);
-            } catch (CacheOperationException e) {
-                logger.debug("There are no such model in cache. Report Id: " + reportId, e);
-                return ResourceUtils.getErrorResult("缓存中不存在的报表！id: " + reportId, 1);
-            }
-        }
-
-        // 初始化上下文
-        ContextEntity contextEntity = RuntimeEvnUtil.initRuntimeEvn(model, applicationContext);
-        Context context = contextEntity.getContext();
-        // 全局参数
-        ConcurrentHashMap<String, Object> globalParams = context.getGlobalParams();
-        // 添加request请求参数
-        for (String key : request.getParameterMap().keySet()) {
-            String value = request.getParameter(key);
-            if (value != null) {
-                /**
-                 * value 不能是null，但可以为空字符串，空字符串可能有含义
-                 */
-                globalParams.put(key, value);
-            }
-        }
-        context.setGlobalParams(globalParams);
-        
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
-        reportModelCacheManager.updateContext(reportId, context);
-        // 获取区域上下文列表，并发如cache中
-        List<ExtendAreaContext> extendAreaContextLists = contextEntity.getExtendAreaContextLists();
-        for (ExtendAreaContext extendAreaContext : extendAreaContextLists) {
-            reportModelCacheManager.updateAreaContext(extendAreaContext.getAreaId(), extendAreaContext);
-        }
+//        // ServletContext
+//        ServletContext servletContext = request.getSession().getServletContext();
+//        // Spring的ApplicationContext
+//        ApplicationContext applicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+//        boolean edit = Boolean.valueOf(request.getParameter("isEdit"));
+//        ReportDesignModel model = null;
+//        if (edit) {
+//            /**
+//             * 编辑报表
+//             */
+//            model = reportModelCacheManager.loadReportModelToCache(reportId);
+//        } else {
+//            /**
+//             * 如果是新建的报表，从缓存中找
+//             */
+//            try {
+//                model = reportModelCacheManager.getReportModel(reportId);
+//            } catch (CacheOperationException e) {
+//                logger.debug("There are no such model in cache. Report Id: " + reportId, e);
+//                return ResourceUtils.getErrorResult("缓存中不存在的报表！id: " + reportId, 1);
+//            }
+//        }
+//
+//        // 初始化上下文
+//        ContextEntity contextEntity = RuntimeEvnUtil.initRuntimeEvn(model, applicationContext);
+//        Context context = contextEntity.getContext();
+//        // 全局参数
+//        ConcurrentHashMap<String, Object> globalParams = context.getGlobalParams();
+//        // 添加request请求参数
+//        for (String key : request.getParameterMap().keySet()) {
+//            String value = request.getParameter(key);
+//            if (value != null) {
+//                /**
+//                 * value 不能是null，但可以为空字符串，空字符串可能有含义
+//                 */
+//                globalParams.put(key, value);
+//            }
+//        }
+//        context.setGlobalParams(globalParams);
+//        
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateContext(reportId, context);
+//        // 获取区域上下文列表，并发如cache中
+//        List<ExtendAreaContext> extendAreaContextLists = contextEntity.getExtendAreaContextLists();
+//        for (ExtendAreaContext extendAreaContext : extendAreaContextLists) {
+//            reportModelCacheManager.updateAreaContext(extendAreaContext.getAreaId(), extendAreaContext);
+//        }
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
         return rs;
     }
@@ -389,6 +342,10 @@ public class ReportQueryResource {
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
                 newParams.put(key, value[0]);
+            } else if (newParams.contains(key)){
+            		newParams.remove(key);
+            } else { // 设置为null，避免由于脏数据导致查询条件异常
+            		newParams.put(key, null);
             }
         }       
         context.setGlobalParams(newParams);

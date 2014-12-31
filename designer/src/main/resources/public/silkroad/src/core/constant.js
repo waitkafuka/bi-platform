@@ -30,6 +30,22 @@ define(function () {
         'column': false,
         'map': false
     };
+    /**
+     * 单个图类型
+     * 只能是单种图，不能是组合
+     *
+     * @const
+     * @type {string}
+     */
+    var SINGLE_CHART = ['bar', 'map', 'pie'];
+
+    /**
+     * 组合图类型
+     *
+     * @const
+     * @type {string}
+     */
+    var COMBINATION_CHART = ['column', 'line'];
 
     /**
      * 组件id后缀
@@ -38,14 +54,17 @@ define(function () {
      * @type {string}
      */
     var COMPONENT_ID_SUFFIX = {
-       SELECT: '-vu-form-select',
-       CALENDAR: '-vu-form-calendar',
-       TEXT: '-vu-form-text'
+        SELECT: '-vu-form-select',
+        CALENDAR: '-vu-form-calendar',
+        TEXT: '-vu-form-text',
+        MULTISELECT: '-vu-form-multiselect'
     };
 
     return {
         DATA_FORMAT_OPTIONS: DATA_FORMAT_OPTIONS,
         CHART_TYPES: CHART_TYPES,
-        COMPONENT_ID_SUFFIX: COMPONENT_ID_SUFFIX
+        COMPONENT_ID_SUFFIX: COMPONENT_ID_SUFFIX,
+        SINGLE_CHART: SINGLE_CHART,
+        COMBINATION_CHART: COMBINATION_CHART
     };
 });

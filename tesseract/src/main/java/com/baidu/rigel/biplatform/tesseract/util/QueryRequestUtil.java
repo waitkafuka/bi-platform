@@ -181,7 +181,10 @@ public class QueryRequestUtil {
         
         SqlQuery result = new SqlQuery();
         // 处理from
-        result.setGroupBy(query.getGroupBy().getGroups());
+        if(query.getGroupBy()!=null){
+        	result.setGroupBy(query.getGroupBy().getGroups());
+        }
+        
         LinkedList<String> fromList = new LinkedList<String>();
         fromList.add(query.getFrom().getFrom());
         result.setFromList(fromList);
@@ -347,7 +350,8 @@ public class QueryRequestUtil {
                 for(ResultRecord record : transList){
                     ResultRecord vRecord = DeepcopyUtils.deepCopy(record);
                     vRecord.setField(properties, allDimVal.get(properties));
-                    generateGroupBy(vRecord, groupList);
+//                    generateGroupBy(vRecord, groupList);
+                    vRecord.setGroupBy(allDimVal.get(properties));
                     summaryCalcList.add(vRecord);
                 }
                 transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));

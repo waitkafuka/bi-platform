@@ -5,9 +5,9 @@
 	<parent>
         <groupId>com.baidu.rigel</groupId>
         <artifactId>biplatform</artifactId>
-        <version>1.1.0-RELEASE</version>
+        <version>1.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
-    </parent> 
+    </parent>
    
     <groupId>com.baidu.rigel.biplatform</groupId>
     <artifactId>fileserver</artifactId>

@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.tesseract.node.service;
 
+import java.net.InetAddress;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -24,6 +26,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
@@ -47,10 +51,7 @@ public class IndexAndSearchServer {
      * LOGGER
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(IndexAndSearchServer.class);
-    /**
-     * IP
-     */
-    public static final String IP = "localhost";
+   
     
     /**
      * BIZGROUPSIZE
@@ -144,6 +145,7 @@ public class IndexAndSearchServer {
             b.group(bossGroup, workerGroup);
             b.channel(NioServerSocketChannel.class);
             b.option(ChannelOption.SO_BACKLOG, 1000000);
+          
             b.childHandler(new ChannelInitializer<SocketChannel>() {
                 
                 /*
@@ -156,12 +158,15 @@ public class IndexAndSearchServer {
                 @Override
                 protected void initChannel(SocketChannel ch) throws Exception {
                     ChannelPipeline pipeline = ch.pipeline();
+                    pipeline.addLast("frameDecoder", new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4));
+                    pipeline.addLast("frameEncoder", new LengthFieldPrepender(4));
                     pipeline.addLast("encode", new ObjectEncoder());
                     pipeline.addLast("decode",
-                        new ObjectDecoder(ClassResolvers.weakCachingConcurrentResolver(null)));
+                        new ObjectDecoder(Integer.MAX_VALUE,ClassResolvers.weakCachingConcurrentResolver(null)));
                     pipeline.addLast(IndexServerHandler.getChannelHandler());
                     pipeline.addLast(SearchServerHandler.getChannelHandler());
                     pipeline.addLast(FileServerHandler.getChannelHandler());
+                    
                 }
                 
             });
@@ -170,8 +175,8 @@ public class IndexAndSearchServer {
             // f.channel().closeFuture().sync();
             
             int currPort = NetworkUtils.getAvailablePort(this.node.getPort());
-            
-            ChannelFuture f = b.bind(IP, currPort).sync();
+            String hostIp=InetAddress.getLocalHost().getHostAddress();
+            ChannelFuture f = b.bind(hostIp, currPort).sync();
             
             if (currPort != this.node.getPort()) {
                 this.node.setPort(currPort);

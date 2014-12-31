@@ -159,24 +159,24 @@ define(
          * return {Object} 转换后的数据，包括两部分：timeTypeList 与 timeTypeOpt
          */
         function switchConfig(data) {
-            var timeTypeList = [];
-            var timeTypeOpt = {};
+            var resTimeType = [];
+            var resTimeTypeOpt = {};
             var timeTypeList = timeTypeConfig.timeTypeList;
             var timeTypeOpt = timeTypeConfig.timeTypeOpt;
 
             for (var i = 0, len = data.length; i < len; i++) {
                 var type = data[i].type;
                 // 匹配timeTypeList
-                timeTypeList.push(timeTypeList[type]);
+                resTimeType.push(timeTypeList[type]);
                 // 匹配timeTypeOpt
                 var opt = timeTypeOpt[type];
                 opt.date = data[i].date;
-                timeTypeOpt[type] = $.extend(true, {}, opt);
+                resTimeTypeOpt[type] = $.extend(true, {}, opt);
             }
 
             return {
-                timeTypeList: timeTypeList,
-                timeTypeOpt: timeTypeOpt
+                timeTypeList: resTimeType,
+                timeTypeOpt: resTimeTypeOpt
             }
         }
 

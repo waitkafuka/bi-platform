@@ -38,10 +38,11 @@ define(
 
         return {
             type: 'SELECT',
+            mold: 'ECUI_SELECT', // 单选ECUI_SELECT，多选ECUI_MULTI_SELECT
             iconClass: 'select',
-            caption: '单选下拉框',
+            caption: '下拉框',
             defaultWidth: 300,
-            defaultHeight: 45,
+            defaultHeight: 27,
             vm: {
                 render: function (data) {
                     return SelectVmTemplate.render({

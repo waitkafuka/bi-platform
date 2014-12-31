@@ -1,0 +1,19 @@
+/*-------------------------------------------------*/
+/* 业务逻辑 -- 工具栏菜单                          */
+/*-------------------------------------------------*/
+.component-menutwo {
+    position: absolute;
+    left: 50px;
+    width: 100px;
+    height: 200px;
+    background: green;
+}
+/* 组件菜单 */
+.component-menu {
+    position: absolute;
+    left: 30px;
+}
+/* 菜单公共样式 */
+.global-menus {
+    display: none;
+}

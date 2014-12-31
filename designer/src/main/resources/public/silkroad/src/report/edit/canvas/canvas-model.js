@@ -257,7 +257,12 @@ define([
                         // 如果是vui（条件组件）要删除form中的配置
                         if (
                             arr[i].clzType == 'VUI'
-                            && (arr[i].clzKey == 'X_CALENDAR' || arr[i].clzKey == 'ECUI_SELECT')
+                            &&
+                            (
+                                arr[i].clzKey == 'X_CALENDAR'
+                                || arr[i].clzKey == 'ECUI_SELECT'
+                                || arr[i].clzKey == 'ECUI_MULTI_SELECT'
+                            )
                         ) {
                             that._deleteCompFromForm(arr[i].id);
                             isDeleteVUI = true;
@@ -319,6 +324,22 @@ define([
                     left: left,
                     top: top
                 });
+                this.saveJsonVm();
+            },
+
+
+            /**
+             * 失去焦点后，更新vm中组件的内容信息
+             *
+             * @param {string} textid 焦点元素
+             * @param {element} object 焦点元素
+             * @public
+             */
+            dateCompPositing: function (textid, object) {
+                var $text = this.$reportVm.find('[id=' + textid + ']');
+                if ($text.attr('id') == textid) {
+                    $text.html(object);
+                }
                 this.saveJsonVm();
             },
 

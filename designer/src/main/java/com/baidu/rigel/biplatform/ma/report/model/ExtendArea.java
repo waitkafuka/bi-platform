@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 /**
  * 扩展区域定义： 扩展区域指报表中的一片数据区域。数据区域中可能是 报表、图、部件等，
  * 我们可以认为一张报表由扩展区域组成。每一扩展区域包含区域的定义信息（逻辑模型） 参数信息（参数定义）格式样式信息（格式模型）以及扩展区域类型。
@@ -68,7 +70,12 @@ public class ExtendArea implements Serializable {
     /**
      * 数据格式定义
      */
-    private FormatModel formatModel = new FormatModel();;
+    private FormatModel formatModel = new FormatModel();
+    
+    /**
+     * 表格的其他个性化配置，如是否过滤空白行等
+     */
+    private Map<String, Object> otherSetting = Maps.newHashMap();
     
     
     public String getId() {
@@ -116,7 +123,7 @@ public class ExtendArea implements Serializable {
      * 
      * @return 所有条目定义
      */
-    public Map<String, Item> getAllItems() {
+    public Map<String, Item> listAllItems() {
         Map<String, Item> allItems = new HashMap<String, Item>();
         
         
@@ -142,6 +149,16 @@ public class ExtendArea implements Serializable {
         for (Item item : logicModel.getSlices()) {
             allItems.put(item.getOlapElementId(), item);
         }
+        logicModel.getSelectionMeasures().values().forEach(item -> {
+        		if (!allItems.containsKey(item.getOlapElementId())) {
+        			allItems.put(item.getOlapElementId(), item);
+        		}
+        });
+        logicModel.getSelectionDims().values().forEach(item -> {
+	        	if (!allItems.containsKey(item.getOlapElementId())) {
+	    			allItems.put(item.getOlapElementId(), item);
+	    		}
+        	});
         return allItems;
     }
     
@@ -191,5 +208,58 @@ public class ExtendArea implements Serializable {
 	    }
 		return formatModel;
 	}
+
+	/**
+	 * 
+	 * @param item
+	 */
+	public void addSelectionMeasureItem(Item item) {
+		if (this.logicModel == null) {
+			this.logicModel = new LogicModel();
+		}
+		this.logicModel.getSelectionMeasures().put(item.getOlapElementId(), item);
+	}
+
+	/**
+	 * 
+	 * @param item
+	 */
+	public void addSelectionDimItem(Item item) {
+		if (this.logicModel == null) {
+			this.logicModel = new LogicModel();
+		}
+		this.logicModel.getSelectionDims().put(item.getOlapElementId(), item);		
+	}
+
+	/**
+	 * 
+	 * @param olapElementId
+	 */
+	public void removeSelectDimItem(String olapElementId) {
+		this.logicModel.getSelectionDims().remove(olapElementId);
+	}
+
+	public void removeSelectMeasureItem(String olapElementId) {
+		this.logicModel.getSelectionMeasures().remove(olapElementId);
+	}
+
+	/**
+	 * @return the otherSetting
+	 */
+	public Map<String, Object> getOtherSetting() {
+		if (this.otherSetting == null) {
+			this.otherSetting = Maps.newHashMap();
+		}
+		return otherSetting;
+	}
+
+	/**
+	 * @param otherSetting the otherSetting to set
+	 */
+	public void setOtherSetting(Map<String, Object> otherSetting) {
+		this.otherSetting = otherSetting;
+	}
+	
+	
 
 }

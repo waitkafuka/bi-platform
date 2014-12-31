@@ -7,6 +7,7 @@
 }
 .xui-e-chart-header {
     width:100%;
+    height: 20%;
 }
 .xui-e-chart-title {
     font-weight:bold;
@@ -43,7 +44,7 @@
     background-position:-42px -385px;
 }
 .xui-e-chart-content {
-    height:100%;
+    height:80%;
 }
 .xui-e-chart-empty {
     width: 99%;

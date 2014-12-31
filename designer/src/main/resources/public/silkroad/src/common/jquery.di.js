@@ -86,4 +86,34 @@ $.getCursorPosition = function (el) {
         curIndex = range.text.length;
     }
     return curIndex;
-}
+};
+
+/**
+ * 当前元素是否在数组中
+ *
+ * @param {HTMLElement} el dom对象
+ */
+$.isInArray = function (item, array) {
+    var flag = false;
+    for (var i = 0; i < array.length; i ++) {
+        if (item === array[i]) {
+            flag = true;
+        }
+    }
+    return flag;
+};
+
+/**
+ * 对象是否为空属性的对象
+ *
+ * @param {Object} obj 对象
+ */
+$.isObjectEmpty = function (obj) {
+    var flag = true;
+    for (var key in obj) {
+       if (obj.hasOwnProperty(key)) {
+           flag = false;
+       }
+    }
+    return flag;
+};
