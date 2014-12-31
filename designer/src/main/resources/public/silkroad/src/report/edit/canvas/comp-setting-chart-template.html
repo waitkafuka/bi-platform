@@ -15,7 +15,7 @@
         {{each yAxis as item}}
         <div class="item hover-bg j-root-line c-m" data-id="{{item.id}}">
             {{if item.chartType === null}}
-                <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>
+                <span class="icon-chart column j-icon-chart" chart-type="column" ></span>
             {{else}}
                 <span class="icon-chart {{item.chartType}} j-icon-chart" chart-type="{{item.chartType}}" ></span>
             {{/if}}
@@ -42,7 +42,7 @@
         {{each candInds as item}}
         <div class="item hover-bg j-root-line" data-id="{{item.id}}">
             {{if item.chartType === null}}
-            <span class="icon-chart bar j-icon-chart" chart-type="bar" ></span>
+            <span class="icon-chart column j-icon-chart" chart-type="column" ></span>
             {{else}}
             <span class="icon-chart {{item.chartType}} j-icon-chart" chart-type="{{item.chartType}}" ></span>
             {{/if}}

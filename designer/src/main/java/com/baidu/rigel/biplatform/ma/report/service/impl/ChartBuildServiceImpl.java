@@ -194,10 +194,12 @@ public class ChartBuildServiceImpl implements ChartBuildService {
             ColDefine col = columnDefs.get(i);
             // TODO the showName should be put in generateSeriesBranch method as
             // third parameter.
-            SeriesInputInfo info = seriesInput.get(i);
+        		SeriesInputInfo info = null;
             if (isTimeChart) {
+            		info = seriesInput.get(0);
             		info.setType(SeriesUnitType.LINE);
             } else {
+            		info = seriesInput.get(i);
             		String tmp = chartType.get(col.getUniqueName());
             		if (tmp == null) {
             			info.setType(SeriesUnitType.COLUMN);

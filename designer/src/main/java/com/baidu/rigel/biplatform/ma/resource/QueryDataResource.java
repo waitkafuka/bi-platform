@@ -1105,7 +1105,6 @@ public class QueryDataResource extends BaseResource {
         }
         Item row = store.get(dimName);
         queryParams.put(row.getOlapElementId(), drillTargetUniqueName);
-        
         QueryAction action = queryBuildService.generateTableQueryActionForDrill(model,
                 areaId, queryParams, targetIndex);
         

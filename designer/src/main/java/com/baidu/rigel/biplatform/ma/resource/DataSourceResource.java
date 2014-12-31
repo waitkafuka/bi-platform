@@ -287,14 +287,21 @@ public class DataSourceResource extends BaseResource {
             // 报表设计模型服务对象
             
             // 如果cache中存在此数据源的id，或者报表目录中存在使用此数据源的报表，则不允许删除数据源
-            if (nameCheckCacheManager.existsDSName(id) || reportDesignModelService.isNameExist(id)) {
+            if (nameCheckCacheManager.existsDSName(id)) {
                 rs.setStatus(1);
                 rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表 " + id);
                 logger.warn("the database with id " + id + " is using");
             } else {
-                boolean result = dsService.removeDataSource(id);
-                rs.setStatus(0);
-                rs.setStatusInfo(String.valueOf(result));
+            		List<String> refReport = reportDesignModelService.lsReportWithDsId(id);
+            		if (refReport != null && refReport.size() > 0) {
+            			 rs.setStatus(1);
+                     rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表: " + makeString(refReport));
+                     return rs;
+            		} else {
+            			boolean result = dsService.removeDataSource(id);
+            			rs.setStatus(0);
+            			rs.setStatusInfo(String.valueOf(result));
+            		}
             }
         } catch (DataSourceOperationException e) {
             rs.setStatus(1);
@@ -303,4 +310,10 @@ public class DataSourceResource extends BaseResource {
         }
         return rs;
     }
+
+	private String makeString(List<String> refReport) {
+		StringBuilder rs = new StringBuilder();
+		refReport.forEach(str -> rs.append(str + " "));
+		return rs.toString();
+	}
 }

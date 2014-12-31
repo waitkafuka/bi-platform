@@ -144,7 +144,7 @@ public class QueryServiceImpl implements QueryService {
         }
         // 调用拆解自动进行拆解
         QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel, dataSourceInfo, cube, queryContext, preSplitStrategy);
-
+        DataModel result = null;
         // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
         if (splitResult != null && !splitResult.getCompileContexts().isEmpty()) {
             DataSourceInfo dsInfo = dataSourceInfo;
@@ -154,19 +154,23 @@ public class QueryServiceImpl implements QueryService {
                         splitResult.getDataModels().put(
                                 con,
                                 executeQuery(dsInfo, finalCube, context, questionModel.isUseIndex(),
-                                        questionModel.getPageInfo(), questionModel.getSortRecord()));
+                                        questionModel.getPageInfo()));
             });
-
-            return queryContextSplitService.mergeDataModel(splitResult);
+            
+            result = queryContextSplitService.mergeDataModel(splitResult);
         } else {
             
-            return executeQuery(dataSourceInfo, cube, queryContext,questionModel.isUseIndex(), questionModel.getPageInfo(), questionModel.getSortRecord());
+            result = executeQuery(dataSourceInfo, cube, queryContext,questionModel.isUseIndex(), questionModel.getPageInfo());
         }
+        if (result != null) {
+            result = sortAndTrunc(result, questionModel.getSortRecord());
+        }
+        return result;
 
     }
 
     private DataModel executeQuery(DataSourceInfo dataSourceInfo, Cube cube,
-            QueryContext queryContext,boolean useIndex, PageInfo pageInfo, SortRecord sortRecord) throws MiniCubeQueryException {
+            QueryContext queryContext,boolean useIndex, PageInfo pageInfo) throws MiniCubeQueryException {
         long current = System.currentTimeMillis();
         QueryRequest queryRequest =
                 QueryRequestBuilder.buildQueryRequest(dataSourceInfo, cube, queryContext, useIndex,pageInfo);
@@ -187,9 +191,6 @@ public class QueryServiceImpl implements QueryService {
             throw new MiniCubeQueryException(e);
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to execute query.");
-        if (result != null) {
-        		result = sortAndTrunc(result, sortRecord);
-        }
         return result;
     }
 
