@@ -98,7 +98,8 @@ public interface ReportDesignModelService {
      * @throws ReportModelOperationException
      * @throws DataSourceOperationException 
      */
-    boolean publishReport(ReportDesignModel model) throws ReportModelOperationException, DataSourceOperationException;
+    boolean publishReport(ReportDesignModel model, String securityKey) 
+    			throws ReportModelOperationException, DataSourceOperationException;
 
     /**
      * 根据区域数据格式信息更新区域定义

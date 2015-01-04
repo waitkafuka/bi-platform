@@ -382,7 +382,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      * @throws DataSourceOperationException 
      */
     @Override
-    public boolean publishReport(ReportDesignModel model)
+    public boolean publishReport(ReportDesignModel model, String securityKey)
             throws ReportModelOperationException, DataSourceOperationException {
         
         boolean result = false;
@@ -408,7 +408,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         List<Cube> cubes = Lists.newArrayList();
         for (ExtendArea area : model.getExtendAreaList()) {
             try {

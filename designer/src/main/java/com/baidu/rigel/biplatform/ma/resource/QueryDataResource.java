@@ -207,7 +207,7 @@ public class QueryDataResource extends BaseResource {
 						List<Member> members = reportModelQueryService
 								.getMembers(tmpCube, 
 										tmpCube.getDimensions().get(dim.getName()),
-										Maps.newHashMap()).get(0);
+										Maps.newHashMap(), securityKey).get(0);
 						values = Lists.newArrayList();
 						members.forEach(m -> {
 							Map<String, String> tmp = Maps
@@ -1319,7 +1319,7 @@ public class QueryDataResource extends BaseResource {
             rs.setStatusInfo("OK");
             return rs;
         }
-        List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params);
+        List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
         QueryContext context = runTimeModel.getLocalContextByAreaId(area.getId());
         List<DimensionMemberViewObject> datas = Lists.newArrayList();
         final AtomicInteger i = new AtomicInteger(1);

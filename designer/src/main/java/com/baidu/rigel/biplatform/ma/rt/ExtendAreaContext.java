@@ -104,6 +104,16 @@ public class ExtendAreaContext implements Serializable {
 	private Set<Item> canInd = Sets.newLinkedHashSet();
 	
 	/**
+	 * 
+	 */
+	private Map<String, Item> selectDims = Maps.newHashMap();
+	
+	/**
+	 * 
+	 */
+	private Map<String, Item> selectMeasures = Maps.newHashMap();
+	
+	/**
 	 * 查询请求历史纪录
 	 */
 	private LinkedList<ResultSet> queryStatus = Lists.newLinkedList();
@@ -346,5 +356,34 @@ public class ExtendAreaContext implements Serializable {
 	public void setCubeDefine(Cube cubeDefine) {
 		this.cubeDefine = cubeDefine;
 	}
+
+	/**
+	 * @return the selectDims
+	 */
+	public Map<String, Item> getSelectDims() {
+		return selectDims;
+	}
+
+	/**
+	 * @param selectDims the selectDims to set
+	 */
+	public void setSelectDims(Map<String, Item> selectDims) {
+		this.selectDims = selectDims;
+	}
+
+	/**
+	 * @return the selectMeasures
+	 */
+	public Map<String, Item> getSelectMeasures() {
+		return selectMeasures;
+	}
+
+	/**
+	 * @param selectMeasures the selectMeasures to set
+	 */
+	public void setSelectMeasures(Map<String, Item> selectMeasures) {
+		this.selectMeasures = selectMeasures;
+	}
+
 	
 }
