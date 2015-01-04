@@ -38,7 +38,7 @@ import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
  */
 @RestController
 @RequestMapping("/silkroad/reports/dataupdate")
-public class UpdateDataResource {
+public class UpdateDataResource extends BaseResource{
 
 	/**
      * dsService
@@ -67,7 +67,7 @@ public class UpdateDataResource {
 		String[] factTableArray = factTables.split(",");
 		ResponseResult rs = new ResponseResult();
 		DataSourceDefine ds = dsService.getDsDefine(dsName);
-		DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds);
+		DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds, securityKey);
 		MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray);
 		rs.setStatus(0);
 		rs.setStatusInfo("successfully");

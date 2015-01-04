@@ -838,7 +838,7 @@ public class ReportDesignModelResource extends BaseResource {
             }
         }
         try {
-            this.reportDesignModelService.publishReport(model);
+            this.reportDesignModelService.publishReport(model, securityKey);
         } catch (ReportModelOperationException | DataSourceOperationException e) {
             logger.error("报表发布失败。 Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("报表发布失败。ID " + reportId, 1);

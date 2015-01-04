@@ -15,16 +15,28 @@
  */
 package com.baidu.rigel.biplatform.ma.rt.utils;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
+import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.rt.Context;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * 工具类：用于提供运行时环境初始化、运行时上下文操作等
@@ -36,7 +48,8 @@ public final class RuntimeEvnUtil {
     /**
      * 日期
      */
-//    private static Logger logger = Logger.getLogger(RuntimeEvnUtil.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RuntimeEvnUtil.class);
+    
 	/**
 	 * 构造函数
 	 */
@@ -130,64 +143,80 @@ public final class RuntimeEvnUtil {
 	 * @param dsDefine
 	 * @param areaId
 	 */
-	public static void initExtendAreaContext(ExtendAreaContext extendAreaContext, 
+	public static void initExtendAreaContext(ExtendAreaContext context, 
 				ReportDesignModel model, DataSourceDefine dsDefine, String areaId) {
-		
+		LOG.info("[INFO] ... ... begin init localcontext with report model {} and area id {}", model, areaId);
+		ExtendArea extendArea = model.getExtendById(areaId);
+		if (extendArea == null) {
+			throw new IllegalStateException("未知区域");
+		}
+	    context.setAreaId(extendArea.getId());
+	    context.setAreaType(extendArea.getType());
+	    context.setReportId(model.getId());
+	    // 设置数据格式模型
+	    context.setFormatModel(extendArea.getFormatModel());
+	    // 设置cube定义
+        try {
+            Cube cubeDefine = QueryUtils.getCubeWithExtendArea(model, extendArea);
+            context.setCubeDefine(cubeDefine);
+        } catch (QueryModelBuildException e) {
+            LOG.error("fail to get cube define", e);     
+            throw new RuntimeException(e);
+        }
+	    collectAxisDefine(context, extendArea);
+        
+	    
+	    // TODO 这里会有错误，需要特殊处理, 考虑和普通区域合并
+	    switch (extendArea.getType()) {
+	        case LITEOLAP:
+	            LiteOlapExtendArea liteOlapExtendArea = (LiteOlapExtendArea) extendArea;
+	            // 获取候选维度，候选指标
+	            Map<String, Item> canDims = liteOlapExtendArea.getCandDims();
+	            Map<String, Item> canInds = liteOlapExtendArea.getCandInds();
+	            context.setCanDim((Set<Item>) canDims.values());
+	            context.setCanInd((Set<Item>) canInds.values());
+	        default:
+	    }
+	    
+	}
+
+	/**
+	 * @param context
+	 * @param extendArea
+	 */
+	private static void collectAxisDefine(ExtendAreaContext context,
+			ExtendArea extendArea) {
+		// 获取区域逻辑模型
+	    LogicModel logicModel = extendArea.getLogicModel();
+	    // 利用逻辑模型获取行轴，列轴，以及切片轴信息
+	    Item[] columns = logicModel.getColumns();
+	    Item[] rows = logicModel.getRows();
+	    Item[] slices = logicModel.getSlices();
+	    LinkedHashMap<Item, Object> x = Maps.newLinkedHashMap();
+	    for (Item item : rows) {
+	        x.put(item, null);
+	    }
+	    LinkedHashMap<Item, Object> y = Maps.newLinkedHashMap();
+        for (Item item : columns) {
+            y.put(item, null);
+        }
+	    LinkedHashMap<Item, Object> s = Maps.newLinkedHashMap();
+        for (Item item : slices) {
+            s.put(item, null);
+        } 
+        
+        // 将行轴，列轴，切片轴信息添加到上下文中
+        context.setX(x);
+        context.setY(y);
+        context.setS(s);
+        
+        if (logicModel.getSelectionDims() != null) {
+        		context.setSelectDims(logicModel.getSelectionDims());
+        }
+        
+        if (logicModel.getSelectionMeasures() != null) {
+        		context.setSelectMeasures(logicModel.getSelectionMeasures());
+        }
 	}
 	
-//	/**
-//	 * 获取扩展区域上下文
-//	 * getLocalContextOfExtendArea
-//	 * @param extendArea
-//	 * @return context 局部上下文
-//	 */
-//	private static ExtendAreaContext getLocalContextOfExtendArea (ExtendArea extendArea, ReportDesignModel designModel) {
-//	    ExtendAreaContext context = new ExtendAreaContext();
-//	    context.setAreaId(extendArea.getId());
-//	    context.setAreaType(extendArea.getType());
-//	    context.setReportId(designModel.getId());
-//	    // 设置数据格式模型
-//	    context.setFormatModel(extendArea.getFormatModel());
-//	    // 设置cube定义
-//        try {
-//            Cube cubeDefine = QueryUtils.getCubeWithExtendArea(designModel, extendArea);
-//            context.setCubeDefine(cubeDefine);
-//        } catch (QueryModelBuildException e) {
-//            logger.error("fail to get cube define", e);            
-//        }
-//	    // 获取区域逻辑模型
-//	    LogicModel logicModel = extendArea.getLogicModel();
-//	    // 利用逻辑模型获取行轴，列轴，以及切片轴信息
-//	    Item[] columns = logicModel.getColumns();
-//	    Item[] rows = logicModel.getRows();
-//	    Item[] slices = logicModel.getSlices();
-//	    LinkedHashMap<Item, Object> x = Maps.newLinkedHashMap();
-//	    for (Item item : rows) {
-//	        x.put(item, null);
-//	    }
-//	    LinkedHashMap<Item, Object> y = Maps.newLinkedHashMap();
-//        for (Item item : columns) {
-//            y.put(item, null);
-//        }
-//	    LinkedHashMap<Item, Object> s = Maps.newLinkedHashMap();
-//        for (Item item : slices) {
-//            s.put(item, null);
-//        } 
-//        // 将行轴，列轴，切片轴信息添加到上下文中
-//        context.setX(x);
-//        context.setY(y);
-//        context.setS(s);
-//        
-//	    switch (extendArea.getType()) {
-//	        case LITEOLAP:
-//	            LiteOlapExtendArea liteOlapExtendArea = (LiteOlapExtendArea) extendArea;
-//	            // 获取候选维度，候选指标
-//	            Map<String, Item> canDims = liteOlapExtendArea.getCandDims();
-//	            Map<String, Item> canInds = liteOlapExtendArea.getCandInds();
-//	            context.setCanDim((Set<Item>) canDims.values());
-//	            context.setCanInd((Set<Item>) canInds.values());
-//	        default:
-//	    }
-//	    return context;
-//	}
 }

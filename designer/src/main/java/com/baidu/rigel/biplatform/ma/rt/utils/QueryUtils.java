@@ -18,15 +18,26 @@ package com.baidu.rigel.biplatform.ma.rt.utils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
@@ -34,13 +45,22 @@ import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
+import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -285,4 +305,231 @@ public final class QueryUtils {
     				return QueryStrategy.UNKNOW;
     		}
     }
+    
+    /**
+     * 获取扩展区域包含的立方体定义
+     * 
+     * @param reportModel
+     *            报表模型
+     * @param area
+     *            扩展区域
+     * @return 立方体定义
+     * @throws QueryModelBuildException
+     */
+    public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area)
+            throws QueryModelBuildException {
+        Cube oriCube = getCubeFromReportModel(reportModel, area);
+        Map<String, List<Dimension>> filterDims = collectFilterDim(reportModel);
+        MiniCube cube = new MiniCube(area.getCubeId());
+        String areaId = area.getId();
+        LogicModel logicModel = area.getLogicModel();
+        if (area.getType() == ExtendAreaType.SELECTION_AREA
+                || area.getType() == ExtendAreaType.LITEOLAP_CHART 
+                || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) reportModel.getExtendById(area.getReferenceAreaId());
+            logicModel = liteOlapArea.getLogicModel();
+            areaId = area.getReferenceAreaId();
+        }
+        if (logicModel == null) {
+            throw new QueryModelBuildException("logic model is empty");
+        }
+        Item[] items = logicModel.getItems();
+        Map<String, Dimension> dimensions = new HashMap<String, Dimension>();
+        Map<String, Measure> measures = new HashMap<String, Measure>();
+        
+        for (Item item : items) {
+            OlapElement olapElement = oriCube.getDimensions().get(item.getOlapElementId());
+            if (olapElement == null) { // 维度不存在或者可能是指标信息
+                olapElement = oriCube.getMeasures().get(item.getOlapElementId());
+                if (olapElement != null) {
+                    Measure measure = (Measure) olapElement;
+                    measures.put(measure.getName(), measure);
+                } 
+            } else {
+                MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(olapElement);
+                dim.setLevels(Maps.newLinkedHashMap());;
+                ((Dimension) olapElement).getLevels().values().forEach(level ->{
+                    dim.getLevels().put(level.getName(), level);
+                });
+                dimensions.put(dim.getName(), dim);
+            }
+        }
+        if (area.getType() == ExtendAreaType.LITEOLAP) {
+            /**
+             * TODO 把liteOlap中候选的维度和指标加入到items里面
+             */
+            Map<String, Item> candDims = ((LiteOlapExtendArea) area).getCandDims();
+            for (String elementId : candDims.keySet()) {
+                OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
+                        area.getCubeId(), elementId);
+                MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
+                dim.setLevels(Maps.newLinkedHashMap());
+                ((Dimension) element).getLevels().values().forEach(level ->{
+                    dim.getLevels().put(level.getName(), level);
+                });
+                dimensions.put(element.getName(), (Dimension) element);
+            }
+            Map<String, Item> candInds = ((LiteOlapExtendArea) area).getCandInds();
+            for (String elementId : candInds.keySet()) {
+                OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
+                        area.getCubeId(), elementId);
+                measures.put(element.getName(), (Measure) element);
+            }
+        }
+        if (filterDims != null ) { //&& filterDims.get(area.getCubeId()) != null) {
+        		List<Dimension> dims = filterDims.get(area.getCubeId());
+        		if (dims != null) {
+        			for(Dimension dim : dims) {
+            			if (dim != null) {
+            				dimensions.put(dim.getName(), dim);
+            			}
+            		}
+        		}
+        		
+        		// TODO 处理不同cube共用同一查询条件情况
+        		filterDims.forEach((key, dimArray) -> {
+        			if (!key.equals(area.getCubeId())) {
+        				dimArray.stream().filter(dim -> {
+        					return dim instanceof TimeDimension;
+        				}).forEach(dim -> {
+        					for (Dimension tmp : oriCube.getDimensions().values()) {
+        						if (dim.getName().equals(tmp.getName())) {
+        							MiniCubeDimension tmpDim = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
+        							tmpDim.setLevels((LinkedHashMap<String, Level>) tmp.getLevels());
+        							tmpDim.setFacttableColumn(tmp.getFacttableColumn());
+        							tmpDim.setFacttableCaption(tmp.getFacttableCaption());
+        							dimensions.put(tmpDim.getName(), tmpDim);
+        						}
+        					}
+        				});
+        			}
+        		});
+        }
+        cube.setDimensions(dimensions);
+        modifyMeasures(measures, oriCube);
+        cube.setMeasures(measures);
+        cube.setSource(((MiniCube) oriCube).getSource());
+        cube.setPrimaryKey(((MiniCube) oriCube).getPrimaryKey());
+        cube.setId(oriCube.getId() + "_" + areaId);
+        return cube;
+    }
+    
+    /**
+     * 
+     * @param reportModel
+     * @param area
+     * @return
+     * @throws QueryModelBuildException
+     */
+    private static Cube getCubeFromReportModel(ReportDesignModel reportModel, ExtendArea area)
+            throws QueryModelBuildException {
+        String cubeId = area.getCubeId();
+        if (StringUtils.isEmpty(cubeId)) {
+            throw new QueryModelBuildException("cube id is empty");
+        }
+        Schema schema = reportModel.getSchema();
+        if (schema == null) {
+            throw new QueryModelBuildException("schema is not define");
+        }
+        Map<String, ? extends Cube> cubes = schema.getCubes();
+        if (cubes == null) {
+            throw new QueryModelBuildException("can not get cube define from schema : " + schema.getId());
+        }
+        Cube oriCube = cubes.get(area.getCubeId());
+        if (oriCube == null) {
+            throw new QueryModelBuildException("can not get cube define from schema : " + area.getCubeId());
+        }
+        return oriCube;
+    }
+    
+    /**
+     * 修正measure，将measure引用的measure放到cube中
+     * @param measures
+     * @param oriCube
+     */
+    private static void modifyMeasures(Map<String, Measure> measures, Cube oriCube) {
+    		Set<String> refMeasuers = Sets.newHashSet();
+		measures.values().stream().filter(m -> {
+			return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
+		}).forEach(m -> {
+			ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
+			if (m.getType() == MeasureType.CAL) {
+				refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
+			} else {
+				final String refName = m.getName().substring(0, m.getName().length() - 3);
+				refMeasuers.add(refName);
+				if (m.getType() == MeasureType.RR) {
+					tmp.setFormula("rRate(${" + refName + "})");
+				} else if (m.getType() == MeasureType.SR) {
+					tmp.setFormula("sRate(${" + refName + "})");
+				}
+			}
+			tmp.setAggregator(Aggregator.CALCULATED);
+		});
+		refMeasuers.stream().filter(str -> {
+			return !measures.containsKey(str);
+		}).map(str -> {
+			Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
+			for (Map.Entry<String, Measure> tmp : entry) {
+				if (str.equals(tmp.getValue().getName())) {
+					return tmp.getValue();
+				}
+			}
+			return null;
+		}).forEach(m -> {
+			if (m != null) {
+				measures.put(m.getName(), m);
+			}
+		});
+	}
+    
+    /**
+     * 
+     * @param model
+     * @return Map<String, List<Dimension>>
+     */
+    private static Map<String, List<Dimension>> collectFilterDim(ReportDesignModel model) {
+		Map<String, List<Dimension>> rs = Maps.newHashMap();
+		for (ExtendArea area : model.getExtendAreaList()) {
+			if (isFilterArea(area.getType())) {
+				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
+				if (rs.get(area.getCubeId()) == null) {
+					List<Dimension> dims = Lists.newArrayList();
+					area.listAllItems().values().forEach(key -> {
+						MiniCubeDimension dim = (MiniCubeDimension) 
+								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+		                dim.setLevels(Maps.newLinkedHashMap());;
+		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+		                    dim.getLevels().put(level.getName(), level);
+		                });
+		                dims.add(dim);
+					});
+					rs.put(area.getCubeId(), dims);
+				} else {
+					area.listAllItems().values().forEach(key -> {
+						MiniCubeDimension dim = (MiniCubeDimension) 
+								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+		                dim.setLevels(Maps.newLinkedHashMap());;
+		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+		                    dim.getLevels().put(level.getName(), level);
+		                });
+						rs.get(area.getCubeId()).add(dim);
+					});
+				}
+	    		} 
+		}
+		return rs;
+	}
+    
+    /**
+	 * 
+	 * @param type
+	 * @return boolean
+	 * 
+	 */
+	public static boolean isFilterArea(ExtendAreaType type) {
+		return type == ExtendAreaType.TIME_COMP 
+				|| type == ExtendAreaType.SELECT 
+				|| type == ExtendAreaType.MULTISELECT;
+	}
 }

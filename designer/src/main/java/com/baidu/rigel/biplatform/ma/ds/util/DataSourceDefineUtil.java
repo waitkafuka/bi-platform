@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.comm.util.ConfigUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -73,12 +74,12 @@ public class DataSourceDefineUtil {
      * @param dsDefine 数据源定义
      * @return SqlDataSourceInfo
      */
-    public static SqlDataSourceInfo parseToDataSourceInfo(DataSourceDefine dsDefine) {
+    public static SqlDataSourceInfo parseToDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
         SqlDataSourceInfo dsInfo = new SqlDataSourceInfo(dsDefine.getId());
         dsInfo.setDataBase(parseToDataBase(dsDefine.getType()));
         dsInfo.setDBProxy(true);
         try {
-            dsInfo.setPassword(dsDefine.getDbPwd());
+            dsInfo.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
         } catch (Exception e) {
             logger.error("Encrypt password Fail !!", e);
             throw new RuntimeException(e);
