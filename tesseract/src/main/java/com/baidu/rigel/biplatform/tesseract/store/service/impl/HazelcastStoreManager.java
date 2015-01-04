@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.tesseract.store.service.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.EventObject;
 import java.util.Properties;
@@ -22,6 +24,7 @@ import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,6 +58,8 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 @Service("hazelcastStoreManager")
 public class HazelcastStoreManager implements StoreManager {
     
+    public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
+
     public static final String EVENT_QUEUE = "eventQueue";
 
 	private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
@@ -123,11 +128,25 @@ public class HazelcastStoreManager implements StoreManager {
     private Properties loadConf(String location) throws IOException {
         if(StringUtils.isBlank(location)) {
             location = "config/application.properties";
+            LOGGER.info("default load config from {}", location);
         }
-        
-        Properties properties = PropertiesLoaderUtils.loadAllProperties(location);
-        if (properties.isEmpty()) {
-            properties = PropertiesLoaderUtils.loadAllProperties("conf/tesseract.properties");
+        File propertiesFile = new File(System.getProperty("user.dir"), location);
+        Properties properties =null; 
+        if(propertiesFile.exists()) {
+            properties = new Properties();
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(propertiesFile);
+                properties.load(fis);
+            } catch (IOException e) {
+                LOGGER.warn("load config properties catch error",e);
+            } finally {
+                IOUtils.closeQuietly(fis);
+            }
+        }
+        if (properties == null || properties.isEmpty()) {
+            LOGGER.info("can not get default config from {} load config from {}", location,DEFAULT_TESSERACT_CONFIG);
+            properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_TESSERACT_CONFIG);
         }
         return properties;
     }
