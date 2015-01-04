@@ -581,7 +581,7 @@ public class ReportDesignModelResource extends BaseResource {
         try {
             model = reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
-            logger.error("no such report model in cache for report id: " + reportId);
+            logger.error("no such report model in cache for report id: " + reportId, e);
             return ResourceUtils.getErrorResult("no such report model in cache for report id: " + reportId, 1);
         }
         /**
