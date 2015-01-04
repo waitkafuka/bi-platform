@@ -246,7 +246,7 @@ public class QueryDataResource extends BaseResource {
      * 
      * @param reportId
      * @param request
-     * @return
+     * @return ResponseResult
      */
     @RequestMapping(value = "/{reportId}/report_id", method = { RequestMethod.GET })
     public ResponseResult getReport(@PathVariable("reportId") String reportId,
@@ -266,6 +266,47 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
+    @RequestMapping(value = "/{reportId}/preview", method = { RequestMethod.GET, RequestMethod.POST },
+            produces = "text/html;charset=utf-8")
+    public String preview(@PathVariable("reportId") String reportId, HttpServletRequest request,
+            HttpServletResponse response) {
+    		long begin = System.currentTimeMillis();
+        ReportDesignModel model = null;
+        try {
+            model = reportModelCacheManager.getReportModel(reportId);
+        } catch (CacheOperationException e1) {
+            logger.info("[INFO]--- --- can not find report mode from cache. ", e1);
+            throw new IllegalStateException();
+        }
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
+        // modify by jiangyichao at 2014-10-10 
+        // 将url参数添加到全局上下文中
+        Enumeration<String> params = request.getParameterNames();
+        while (params.hasMoreElements()) {
+            String paramName = params.nextElement();
+            runtimeModel.getContext().put(paramName, request.getParameter(paramName));
+        }
+        // 添加cookie内容
+        runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
+        
+        if (model == null) {
+        		logger.info("[INFO]--- --- can't get model form cache, please check it!");
+            return "";
+        }
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
+        StringBuilder builder = buildVMString(reportId, response, model);
+        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
+        return builder.toString();
+    }
+
+    /**
+     * 
+     * @param reportId
+     * @param request
+     * @param response
+     * @return String
+     */
     @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
@@ -295,7 +336,20 @@ public class QueryDataResource extends BaseResource {
         }
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
-        // TODO 临时方案，以后前端做
+        StringBuilder builder = buildVMString(reportId, response, model);
+        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
+        return builder.toString();
+    }
+
+	/**
+	 * @param reportId
+	 * @param response
+	 * @param model
+	 * @return StringBuilder
+	 */
+	private StringBuilder buildVMString(String reportId,
+			HttpServletResponse response, ReportDesignModel model) {
+		// TODO 临时方案，以后前端做
         String vm = model.getVmContent();
         String js = "<script type='text/javascript'>" + "\r\n" + "        (function(NS) {" + "\r\n"
                 + "            NS.xui.XView.start(" + "\r\n"
@@ -345,9 +399,8 @@ public class QueryDataResource extends BaseResource {
         builder.append("</body>");
         builder.append("</html>");
         response.setCharacterEncoding("utf-8");
-        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
-        return builder.toString();
-    }
+		return builder;
+	}
     
     @RequestMapping(value = "/{reportId}/report_json", method = { RequestMethod.GET },
             produces = "text/plain;charset=utf-8")

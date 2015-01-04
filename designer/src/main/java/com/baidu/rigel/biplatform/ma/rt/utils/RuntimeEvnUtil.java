@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.ApplicationContext;
 
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.rt.Context;
 import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
@@ -120,6 +121,18 @@ public final class RuntimeEvnUtil {
 //	    }
 //	    contextEntity.setExtendAreaContextLists(extendAreaContextLists);
 		return context;
+	}
+	
+	/**
+	 * 初始化扩展区域上下文
+	 * @param extendAreaContext
+	 * @param model
+	 * @param dsDefine
+	 * @param areaId
+	 */
+	public static void initExtendAreaContext(ExtendAreaContext extendAreaContext, 
+				ReportDesignModel model, DataSourceDefine dsDefine, String areaId) {
+		
 	}
 	
 //	/**

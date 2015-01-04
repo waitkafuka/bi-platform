@@ -74,7 +74,7 @@ public class ReportQueryResource {
     /**
      * logger
      */
-    private Logger logger = LoggerFactory.getLogger(QueryDataResource.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QueryDataResource.class);
 
     /**
      * reportModelCacheManager
@@ -212,11 +212,13 @@ public class ReportQueryResource {
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
+    		long begin = System.currentTimeMillis();
+    		LOG.info("[INFO]--- --- begin invoke query report_vm request... ...");
         ReportDesignModel model = null;
         try {
             model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
         } catch (CacheOperationException e1) {
-            logger.error("Fail in loading release report model into cache. ", e1);
+            LOG.error("Fail in loading release report model into cache. ", e1);
             throw new IllegalStateException("未找到要查询的报表，请确认是否发布报表");
         }
         if (model == null) {
@@ -231,6 +233,8 @@ public class ReportQueryResource {
         Context context = RuntimeEvnUtil.initRuntimeEvn(model, applicationContext, globalParams);
         reportModelCacheManager.updateContext(reportId, context);
         StringBuilder builder = this.genVm(model);
+        LOG.info("[INFO] --- --- Successfully invoke query report vm request, cost : {} ms", 
+        		(System.currentTimeMillis() - begin));
         return builder.toString();
     }
 
@@ -244,7 +248,7 @@ public class ReportQueryResource {
         try {
             model = reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
-            logger.debug("There are no such model in cache. Report Id: " + reportId, e);
+            LOG.debug("There are no such model in cache. Report Id: " + reportId, e);
         }
         if (model == null) {
             throw new IllegalStateException("");
@@ -258,7 +262,7 @@ public class ReportQueryResource {
      * 
      * @param reportId
      * @param request
-     * @return
+     * @return ResponseResult
      */
     @RequestMapping(value = "/{reportId}/runtime_model/1", method = { RequestMethod.POST })
     public ResponseResult initRunTimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request) {
@@ -323,12 +327,14 @@ public class ReportQueryResource {
      */
     @RequestMapping(value = "/{reportId}/runtime/context/1", method = { RequestMethod.POST })
     public ResponseResult updateContext(@PathVariable("reportId") String reportId, HttpServletRequest request) {
-        
+    		long begin = System.currentTimeMillis();
+		LOG.info("[INFO]--- --- begin invoke update global context request... ...");
         Map<String, String[]> contextParams = request.getParameterMap();
         Context context = reportModelCacheManager.getContext(reportId);
         
         // 原全局上下文参数
         ConcurrentHashMap<String, Object> oldParams = context.getGlobalParams();
+        LOG.info("[INFO]--- --- old params = {}", oldParams);
         ConcurrentHashMap<String, Object> newParams = new ConcurrentHashMap<String, Object>();
         // TODO 更新时间参数
         for (String key : oldParams.keySet()) {
@@ -347,11 +353,15 @@ public class ReportQueryResource {
             } else { // 设置为null，避免由于脏数据导致查询条件异常
             		newParams.put(key, null);
             }
-        }       
+        }  
+        LOG.info("[INFO]--- --- new params = {}", newParams);
         context.setGlobalParams(newParams);
         // 更新上下文请求
         reportModelCacheManager.updateContext(reportId, context);
-        ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", "");
+        ResponseResult rs = ResourceUtils.getResult("Success Update Global Context", 
+        		"Failed Update Global Context", "");
+        LOG.info("[INFO]--- --- update global context successfully , cost {} ms",
+        		(System.currentTimeMillis() - begin));
         return rs;
     }
 
@@ -365,17 +375,6 @@ public class ReportQueryResource {
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/1", method = { RequestMethod.POST })
     public ResponseResult queryArea(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
-        /**
-         * 1. 获取缓存DesignModel对象
-         */
-        ReportDesignModel model;
-        try {
-            model = reportModelCacheManager.getReportModel(reportId);
-        } catch (CacheOperationException e) {
-            logger.error("Report model is not in cache! ", e);
-            ResponseResult rs = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
-            return rs;
-        }
         
         /**
          * 2. 获取全局上下文
@@ -388,30 +387,24 @@ public class ReportQueryResource {
          */
         
         ExtendAreaContext extendAreaContext = reportModelCacheManager.getAreaContext(areaId);
+        // 没有初始化过扩展区域上下文，此处需要初始化
         if (extendAreaContext.getDefaultDsInfo() == null) {
-            // 对数据源信息进行处理
-            DataSourceDefine dsDefine = new DataSourceDefine();
-            try {
-                dsDefine = dsService.getDsDefine(model.getDsId());
-                extendAreaContext.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine));
-                reportModelCacheManager.updateAreaContext(areaId, extendAreaContext);
-            } catch (Exception e) {
-                logger.error("fail to get datasource define ", e);
-            }
+	        	initExtendAreaContext(reportId, areaId, extendAreaContext);
         }
         /**
          * 4. 合并全局上下文信息与request请求信息,作为总的请求信息queryParams
          */
         Map<String, String[]> contextParams = request.getParameterMap();
         Map<String, Object> queryParams = Maps.newHashMap();
+        // 合并全局参数
+        queryParams.putAll(globalParams); 
+        
         for (String key : contextParams.keySet()) {
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
                 queryParams.put(key, value[0]);
             }
         }
-        // 合并全局参数
-        queryParams.putAll(globalParams); 
         
         /**
          * 5. 构建QueryRequest
@@ -427,7 +420,7 @@ public class ReportQueryResource {
         try {
             queryResult = reportQueryService.query(queryRequest);
         } catch (QueryException e) {
-            logger.error("can't get query result", e);
+            LOG.error("can't get query result", e);
         }
         /**
          * 7. 将结果返回
@@ -435,4 +428,23 @@ public class ReportQueryResource {
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", queryResult.getMapDatas());
         return rs;       
     }
+
+	/**
+	 * @param reportId
+	 * @param areaId
+	 * @param extendAreaContext
+	 */
+	private void initExtendAreaContext(String reportId, String areaId,
+			ExtendAreaContext extendAreaContext) {
+		try {
+			ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+			DataSourceDefine dsDefine = dsService.getDsDefine(model.getDsId());
+			RuntimeEvnUtil.initExtendAreaContext(extendAreaContext, model, dsDefine, areaId);
+			extendAreaContext.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine));
+			reportModelCacheManager.updateAreaContext(areaId, extendAreaContext);
+		} catch (Exception e) {
+			LOG.error("Report model is not in cache! ", e);
+			throw new RuntimeException(e);
+		}
+	}
 }

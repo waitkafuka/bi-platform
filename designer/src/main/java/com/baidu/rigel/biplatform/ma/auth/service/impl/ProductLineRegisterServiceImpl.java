@@ -26,10 +26,9 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
-import com.baidu.rigel.biplatform.ma.auth.mail.RegisterMailConfig;
 import com.baidu.rigel.biplatform.ma.auth.mail.SendMail;
-import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
+import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.resource.BaseResource;
@@ -68,6 +67,22 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      */
     @Value("${biplatform.ma.ds.location}")
     public String ds;
+    
+    @Value("${biplatform.ma.auth.register.mail.administrator}")
+    private String mailReceiver;
+    
+    @Value("${biplatform.ma.auth.register.mail.subjectForRegister}")
+    private String mailSubject;
+    
+    @Value("${biplatform.ma.auth.register.mail.mailServerHost}")
+    private String mailServer;
+    
+    @Value("${biplatform.ma.auth.register.mail.senderMail}")
+    private String mailSender;
+    
+    @Value("${biplatform.ma.auth.register.mail.subjectForOpenService}")
+    private String openServiceSubject;
+    
  
     /**
      * 编码方式
@@ -99,18 +114,17 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         SendMail sendMail = new SendMail();
         try {
             // 发送方
-            sendMail.setFromAddress(RegisterMailConfig.getSenderMail());
+            sendMail.setFromAddress(mailSender);
             // 接收方，平台管理员
-            sendMail.setToAddress(RegisterMailConfig.getAdministrator());
+            sendMail.setToAddress(mailReceiver);
             // 邮件主题
-            sendMail.setSubject(RegisterMailConfig.getSubjectForRegister() 
-                    + user.getDepartment());
+            sendMail.setSubject(mailSubject + user.getDepartment());
             // 邮件服务器地址
-            sendMail.setMailServerHost(RegisterMailConfig.getMailServerHost());
+            sendMail.setMailServerHost(mailServer);
             // 设置是否需要验证
             sendMail.setNeedAuth(false);
             // 设置发送方名字
-            sendMail.setUserName(RegisterMailConfig.getSenderMail());
+            sendMail.setUserName(mailSender);
             // 设置发送内容和格式
             sendMail.setBody(makeUpRegisterMailContent(user, hostAddress), SendMail.HTML);
             // 发送
@@ -224,18 +238,17 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         SendMail sendMail = new SendMail();
         try {
             // 发送方
-            sendMail.setFromAddress(RegisterMailConfig.getSenderMail());
+            sendMail.setFromAddress(mailSender);
             // 接收方
             sendMail.setToAddress(user.getEmail());
             // 邮件主题
-            sendMail.setSubject(RegisterMailConfig.getSubjectForOpenService()
-                    + user.getDepartment());
+            sendMail.setSubject(openServiceSubject + user.getDepartment());
             // 邮件服务器地址
-            sendMail.setMailServerHost(RegisterMailConfig.getMailServerHost());
+            sendMail.setMailServerHost(mailServer);
             // 设置是否需要验证
             sendMail.setNeedAuth(false);
             // 设置发送方名字
-            sendMail.setUserName(RegisterMailConfig.getSenderMail());
+            sendMail.setUserName(mailSender);
             // 设置发送内容和格式
             sendMail.setBody(makeUpOpenServiceMailContent(user, serviceType), SendMail.HTML);
             // 发送
