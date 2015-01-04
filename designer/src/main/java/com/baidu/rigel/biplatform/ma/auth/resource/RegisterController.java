@@ -29,7 +29,6 @@ import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
-import com.baidu.rigel.biplatform.ma.resource.BaseResource;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 
 /**
@@ -39,7 +38,7 @@ import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
  */
 @RestController
 @RequestMapping("/silkroad/register")
-public class RegisterController extends BaseResource {
+public class RegisterController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
@@ -66,7 +65,11 @@ public class RegisterController extends BaseResource {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult register(HttpServletRequest request, HttpServletResponse response) {        
-        ResponseResult rs = new ResponseResult();
+        ResponseResult rs = super.checkValidateCode(request);
+        if (rs.getStatus() == ResponseResult.FAILED) {
+        		return rs;
+        }
+        
         try {
             // 服务器请求地址
             String hostAddress = request.getRequestURL().toString();

@@ -31,7 +31,6 @@ import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
-import com.baidu.rigel.biplatform.ma.resource.BaseResource;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 
 /**
@@ -43,7 +42,7 @@ import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
  */
 @RestController
 @RequestMapping("/silkroad/login")
-public class LoginController extends BaseResource {
+public class LoginController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
@@ -64,7 +63,10 @@ public class LoginController extends BaseResource {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult login(HttpServletRequest request, HttpServletResponse response) {
-        ResponseResult rs = new ResponseResult();
+    		ResponseResult rs = super.checkValidateCode(request);
+        if (rs.getStatus() == ResponseResult.FAILED) {
+        		return rs;
+        }
         // 获取用户登录信息
         String productLine = request.getParameter("name");
         String pwd = request.getParameter("pwd");
