@@ -66,7 +66,7 @@ public class RandomValidateCodeController extends BaseResource{
 		}
 		for (Cookie tmp : request.getCookies()) {
 			if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
-				key = tmp.getName();
+				key = tmp.getValue();
 				break;
 			}
 		}
@@ -76,6 +76,7 @@ public class RandomValidateCodeController extends BaseResource{
 			rs.setStatusInfo("请输入验证码");
 		} else if (valicateCode.equals(this.cacheManagerForResource.getFromCache(key))) {
 			rs.setStatus(ResponseResult.SUCCESS);
+			this.cacheManagerForResource.deleteFromCache(key);
 		} else {
 			rs.setStatus(ResponseResult.FAILED);
 			rs.setStatusInfo("验证码错误");

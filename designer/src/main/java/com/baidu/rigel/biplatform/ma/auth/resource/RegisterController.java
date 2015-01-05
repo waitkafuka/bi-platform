@@ -66,10 +66,10 @@ public class RegisterController extends RandomValidateCodeController {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult register(HttpServletRequest request, HttpServletResponse response) {        
-        ResponseResult rs = new ResponseResult(); //super.checkValidateCode(request);
-//        if (rs.getStatus() == ResponseResult.FAILED) {
-//        		return rs;
-//        }
+        ResponseResult rs = super.checkValidateCode(request);
+        if (rs.getStatus() == ResponseResult.FAILED) {
+        		return rs;
+        }
         
         try {
             // 服务器请求地址

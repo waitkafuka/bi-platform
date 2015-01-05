@@ -185,6 +185,7 @@ public class DataSourceServiceImpl implements DataSourceService {
 				return true;
 			} catch (Exception e1) {
 				logger.error(e1.getMessage());
+				throw new RuntimeException(e1);
 			}
         } finally {
             // 关闭数据库连接
@@ -192,7 +193,6 @@ public class DataSourceServiceImpl implements DataSourceService {
                 dBInfoReader.closeConn();
             }
         }
-        return false;
     }
     
     /**
