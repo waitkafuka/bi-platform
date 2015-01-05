@@ -116,11 +116,13 @@ public class RandomValidateCode {
 			randomString = drowString(g, randomString, i);
 		}
 		String key = null;
-		for (Cookie tmp : request.getCookies()) {
-			if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
-				key = tmp.getName();
-				cacheManagerForResource.removeFromCache(key);
-				break;
+		if (request.getCookies() != null) {
+			for (Cookie tmp : request.getCookies()) {
+				if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
+					key = tmp.getName();
+					cacheManagerForResource.removeFromCache(key);
+					break;
+				}
 			}
 		}
 		if (StringUtils.isEmpty(key)) {
