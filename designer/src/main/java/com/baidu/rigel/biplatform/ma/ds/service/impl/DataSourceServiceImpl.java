@@ -167,10 +167,10 @@ public class DataSourceServiceImpl implements DataSourceService {
      */
     @Override
     public boolean isValidateConn(DataSourceDefine ds, String securityKey) {
-        DBInfoReader dBInfoReader = new DBInfoReader();
+        DBInfoReader dBInfoReader = null;//new DBInfoReader();
         try {
 	        	// 创建数据库连接，如果不抛出异常，说明连接字符串正确，返回true
-	        	DBInfoReader.build(ds.getType(), ds.getDbUser(), 
+            dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), 
 						ds.getDbPwd(),
 						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
 			return true;
@@ -178,7 +178,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         } catch (Exception e) {
 			try {
 				String pwd = AesUtil.getInstance().encrypt(ds.getDbPwd(), securityKey);
-				DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
+				dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
 						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
 				// dirty solution 兼容原有数据源定义 
 				ds.setDbPwd(AesUtil.getInstance().encrypt(ds.getDbPwd(), securityKey));
@@ -188,7 +188,9 @@ public class DataSourceServiceImpl implements DataSourceService {
 			}
         } finally {
             // 关闭数据库连接
-            dBInfoReader.closeConn();
+            if(dBInfoReader != null) {
+                dBInfoReader.closeConn();
+            }
         }
         return false;
     }
