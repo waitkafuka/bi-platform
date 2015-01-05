@@ -1,1 +1,329 @@
-!function(){function a(){p(),o(),n(),l(),j()}var b,c="请填写所在部门名称",d="请填写您的邮箱",e="请确认密码",f="请输入密码",g="请输入用户名",h="两次密码输入不一致，请重新输入",i="用户名或密码输入错误";$(function(){b={register_sign:$("#home-button"),register_top:$(".register-top"),sign_top:$(".sign-top"),register_infor:$(".register-infor"),register_title:$(".register-title"),register:$("#register"),sign:$("#sign"),sign_usename:$("#sign-usename"),sign_pass:$("#sign-pass"),register_usename:$("#register-usename"),register_pass:$("#register-pass"),register_repass:$("#register-repass"),register_company:$("#register-company"),register_email:$("#register-email"),home_title:$(".home-title"),home_content:$(".home-content"),home_pic:$(".home-pic"),home_register_title:$(".home-register-title"),home_register_line:$(".home-register-line"),home_sign_title:$(".home-sign-title"),home_sign_line:$(".home-sign-line"),servicetype:$("#servicetype"),sign_enter:$("#sign-enter"),register_enter:$("#register-enter"),prompt:$(".prompt"),body:$("body")},a()});var j=function(){b.register.click(function(){k()}),b.register_enter.keydown(function(a){13==a.keyCode&&k()})},k=function(){var a=b.register_company,i=b.register_email,j=b.register_repass,k=b.register_pass,l=b.register_usename,m=b.servicetype;""==a.val()&&a.next("div").html(c),""==i.val()&&i.next("div").html(d),""==j.val()&&j.next("div").html(e),""==k.val()&&k.next("div").html(f),""==l.val()&&l.next("div").html(g),""!=k.val()&&""!=j.val()&&""!=l.val()&&""!=i.val()&&""!=a.val()&&(k.val()==j.val()?$.ajax({type:"post",cache:!1,dataType:"Json",url:"/silkroad/register",data:{name:l.val(),pwd:k.val(),department:a.val(),email:i.val(),serviceType:m.val()},success:function(){alert("注册成功,请注意查收邮件")}}):(k.val(""),j.val(""),k.attr("placeholder",h),j.attr("placeholder",h)))},l=function(){b.sign.click(function(){m()}),b.sign_enter.keydown(function(a){13==a.keyCode&&m()})},m=function(){var a=b.sign_pass,c=b.sign_usename;""==c.val()&&c.next("div").html(g),""==a.val()&&a.next("div").html(f),""!=c.val()&&""!=a.val()&&$.ajax({type:"post",cache:!1,dataType:"Json",url:"/silkroad/login",data:{name:c.val(),pwd:a.val()},success:function(b){var d=b.status;1!=d?window.location="/silkroad/index.html":(a.next("div").html(i),c.next("div").html(i))}})},n=function(){b.register_title.find("div").click(function(){q()}),b.body.keydown(function(a){27==a.keyCode&&q()})},o=function(){b.register_infor.focus(function(){$(this).next("div").html("")})},p=function(){b.register_sign.find("div").click(function(){var d=b.home_register_title,e=b.home_sign_title,f=b.home_register_line,g=b.home_sign_line,h=b.register_top,i=b.sign_top;h.hide(),i.hide(),"registration"==$(this).attr("class")?(a("0px","575px","260px",300),c("200px","407px",d,f,h)):"experience"==$(this).attr("class")&&(a("500px","375px","460px",300),c("-50px","365px",e,g,i))});var a=function(a,c,d,e){var f=b.home_title,g=b.home_content,h=b.register_sign;f.animate({left:a,opacity:"0"},e,function(){f.hide()}),g.animate({left:c,opacity:"0"},e,function(){g.hide()}),h.animate({left:d,opacity:"0"},e,function(){h.hide()})},c=function(a,c,d,e,f){var g=b.home_pic;g.animate({left:a,opacity:"0"},300,function(){g.hide(),d.fadeIn(200),e.animate({width:c},300),f.show()})}},q=function(){var a=b.home_title,c=b.home_content,d=b.register_sign,e=b.home_register_title,f=b.home_pic,g=b.home_register_line,h=b.register_top,i=b.sign_top,j=b.home_sign_title,k=b.home_sign_line;a.show(),c.show(),d.show(),f.show(),h.hide(),i.hide(),e.fadeOut(200),g.animate({width:"0px"},300),j.fadeOut(200),k.animate({width:"0px"},300,function(){a.animate({left:"300px",opacity:"1"},300),c.animate({left:"475px",opacity:"1"},300),d.animate({left:"360px",opacity:"1"},300),f.animate({left:"100px",opacity:"1"},200)}),b.register_infor.val(""),b.prompt.html("")}}();
+/**
+ * @file: 报表首页
+ * @author: weiboxue(wbx_901118@sina.com)
+ * @date: 2014-11-20
+ */
+(function () {
+    // dom元素容器
+    var dom;
+    // 提示信息
+    var textcompany = '请填写所在部门名称';
+    var textemail = '请填写您的邮箱';
+    var textrepass = '请确认密码';
+    var textpass = '请输入密码';
+    var textusename = '请输入用户名';
+    var textdoublepass = '两次密码输入不一致，请重新输入';
+    var errorsign = '用户名或密码输入错误';
+    // 入口
+    $(function () {
+        dom = {
+            register_sign: $('#home-button'),
+            register_top: $('.register-top'),
+            sign_top: $('.sign-top'),
+            register_infor: $('.register-infor'),
+            register_title: $('.register-title'),
+            register: $('#register'),
+            sign: $('#sign'),
+            sign_usename: $('#sign-usename'),
+            sign_pass: $('#sign-pass'),
+            register_usename: $('#register-usename'),
+            register_pass: $('#register-pass'),
+            register_repass: $('#register-repass'),
+            register_company: $('#register-company'),
+            register_email: $('#register-email'),
+            register_validateCode: $('#register-validateCode'),
+            home_title: $('.home-title'),
+            home_content: $('.home-content'),
+            home_pic: $('.home-pic'),
+            home_register_title: $('.home-register-title'),
+            home_register_line: $('.home-register-line'),
+            home_sign_title: $('.home-sign-title'),
+            home_sign_line: $('.home-sign-line'),
+            servicetype: $('#servicetype'),
+            sign_enter: $('#sign-enter'),
+            register_enter: $('#register-enter'),
+            prompt: $('.prompt'),
+            body: $('body')
+        };
+        bindEvents();
+    });
+    /**
+     * 页面事件绑定
+     */
+    function bindEvents() {
+        // 登录注册的事件
+        fnRegisterSign();
+        // 输入框内容清空恢复事件
+        inputText();
+        // 关闭登录和注册框
+        closeSignReg();
+        // 登录事件
+        signIn();
+        // 注册事件
+        registerIn();
+    }
+    /**
+     * 注册按钮以及回车触发事件函数
+     */
+    var registerIn = function () {
+        dom.register.click(function () {
+            reisterJudge();
+        });
+        dom.register_enter.keydown(function (event) {
+            if (event.keyCode == 13) {
+                reisterJudge();
+            }
+        })
+    };
+    /**
+     * 注册判定函数
+     */
+    var reisterJudge = function () {
+
+        var $company = dom.register_company;
+        var $email = dom.register_email;
+        var $repass = dom.register_repass;
+        var $pass = dom.register_pass;
+        var $usename = dom.register_usename;
+        var $servicetype = dom.servicetype;
+        var $validateCode = dom.register_validateCode;
+        if ($company.val() == '') {
+            $company.next('div').html(textcompany);
+        }
+        if ($email.val() == '') {
+            $email.next('div').html(textemail);
+        }
+        if ($repass.val() == '') {
+            $repass.next('div').html(textrepass);
+        }
+        if ($pass.val() == '') {
+            $pass.next('div').html(textpass);
+        }
+        if ($usename.val() == '') {
+            $usename.next('div').html(textusename);
+        }
+        if ($validateCode.val() == '') {
+            $validateCode.next('div').html('请输入验证码');
+        }
+        if (
+            $pass.val() != ''
+            && $repass.val() != ''
+            && $usename.val() != ''
+            && $email.val() != ''
+            && $company.val() != ''
+            && $validateCode.val() != ''
+            ) {
+            if ($pass.val() == $repass.val()) {
+                $.ajax({
+                    //客户端向服务器发送请求时采取的方式
+                    type : "post",
+                    cache : false,
+                    //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
+                    dataType : 'Json',
+                    //指明客户端要向哪个页面里面的哪个方法发送请求
+                    url : "/silkroad/register",
+                    data : {
+                        name : $usename.val(),
+                        pwd : $pass.val(),
+                        department: $company.val(),
+                        email: $email.val(),
+                        serviceType: $servicetype.val(),
+                        validateCode: $validateCode.val()
+                    },
+                    //客户端调用服务器端方法成功后执行的回调函数
+                    success : function(msg) {
+                        alert('注册成功,请注意查收邮件');
+                        //$.get('www.baidu.com');
+                        //$("#resText").html(msg);
+                        /*
+                         if (result.d=="success") {
+                         alert("登陆成功");
+                         } else {
+                         alert("登录失败");
+                         }*/
+                    }
+                });
+            }
+            else {
+                $pass.val('');
+                $repass.val('');
+                $pass.attr('placeholder', textdoublepass);
+                $repass.attr('placeholder', textdoublepass);
+            }
+        }
+    };
+    /**
+     * 登录按钮以及回车触发事件函数
+     */
+    var signIn = function () {
+        dom.sign.click(function () {
+            signJudge();
+        });
+        dom.sign_enter.keydown(function (event) {
+            if (event.keyCode == 13) {
+                signJudge();
+            }
+        })
+    };
+    /**
+     * 登录判定函数
+     */
+    var signJudge  = function () {
+
+        var $pass = dom.sign_pass;
+        var $usename = dom.sign_usename;
+        if ($usename.val() == '') {
+            $usename.next('div').html(textusename);
+        }
+        if ($pass.val() == '') {
+            $pass.next('div').html(textpass);
+        }
+        if ($usename.val() != '' && $pass.val() != '') {
+            $.ajax({
+                //客户端向服务器发送请求时采取的方式
+                type : "post",
+                cache : false,
+                //服务器返回的数据类型，可选 XML, Json, jsonp, script, html, text。
+                dataType : 'Json',
+                //指明客户端要向哪个页面里面的哪个方法发送请求
+                url : "/silkroad/login",
+                data : {
+                    name : $usename.val(),
+                    pwd : $pass.val()
+                },
+                //客户端调用服务器端方法成功后执行的回调函数
+                success : function(msg) {
+                    var sign = msg.status;
+                    if (sign != 1) {
+                        window.location="/silkroad/index.html";
+                    }
+                    else {
+                        $pass.next('div').html(errorsign);
+                        $usename.next('div').html(errorsign);
+                    }
+                }
+            });
+        }
+    };
+    /**
+     * 关闭登录和注册框
+     */
+    var closeSignReg = function () {
+        dom.register_title.find('div').click(function () {
+            fnAnimateReturn();
+        });
+        dom.body.keydown(function (event) {
+            if(event.keyCode == 27) {
+                fnAnimateReturn();
+            }
+        })
+    };
+
+    /**
+     * 输入框获取焦点清空
+     */
+    var inputText = function () {
+        dom.register_infor.focus(function () {
+            $(this).next('div').html('');
+        });
+    };
+    /**
+     * 登录，注册按钮事件
+     */
+    var fnRegisterSign = function () {
+        // 登录，注册弹出框
+        dom.register_sign.find('div').click(function () {
+            var $retitle = dom.home_register_title;
+            var $sititle = dom.home_sign_title;
+            var $reline = dom.home_register_line;
+            var $siline = dom.home_sign_line;
+            var $retop = dom.register_top;
+            var $sitop = dom.sign_top;
+            $retop.hide();
+            $sitop.hide();
+            if ($(this).attr('class') == 'registration') {
+                fnAnimateHide('0px', '575px', '260px', 300);
+                fnAnimateShow('200px', '407px', $retitle, $reline, $retop);
+            }
+            else if ($(this).attr('class') == 'experience') {
+                fnAnimateHide('500px', '375px', '460px', 300);
+                fnAnimateShow('-50px', '365px', $sititle, $siline, $sitop)
+            }
+        });
+        /**
+         * 切换动画函数(主页元素)
+         *
+         * @param {string} letit 主页题目左定位距离
+         * @param {string} lecon 下方文字条左定位距离
+         * @param {string} lesig 登录注册按钮左定位距离
+         * @param {number} time 下划线对象
+         * @public
+         */
+        var fnAnimateHide = function (letit, lecon, lesig, time) {
+            var $hotitle = dom.home_title;
+            var $hocontent = dom.home_content;
+            var $hosign = dom.register_sign;
+            $hotitle.animate({'left': letit, 'opacity': '0'}, time, function () {
+                $hotitle.hide();
+            });
+            $hocontent.animate({'left': lecon, 'opacity': '0'}, time, function () {
+                $hocontent.hide();
+            });
+            $hosign.animate({'left': lesig, 'opacity': '0'}, time, function () {
+                $hosign.hide();
+            });
+        };
+        /**
+         * 切换动画函数(登录注册框元素)
+         *
+         * @param {string} lepic 报表图片左定距离
+         * @param {string} widthline 下划线长度
+         * @param {object} title 登录注册标题
+         * @param {object} line 下划线对象
+         * @param {object} box 登录注册框体
+         * @public
+         */
+        var fnAnimateShow = function (lepic, widthline, title, line, box) {
+            var $hopic = dom.home_pic;
+            $hopic.animate({'left': lepic, 'opacity': '0'}, 300, function () {
+                $hopic.hide();
+                title.fadeIn(200);
+                line.animate({'width': widthline}, 300);
+                box.show();
+            });
+        };
+    };
+    /**
+     * 切换会主页面动画函数
+     */
+    var fnAnimateReturn = function () {
+        var $hotitle = dom.home_title;
+        var $hocontent = dom.home_content;
+        var $resign = dom.register_sign;
+        var $retitle = dom.home_register_title;
+        var $hopic = dom.home_pic;
+        var $reline = dom.home_register_line;
+        var $retop = dom.register_top;
+        var $sitop = dom.sign_top;
+        var $sititle = dom.home_sign_title;
+        var $siline = dom.home_sign_line;
+        $hotitle.show();
+        $hocontent.show();
+        $resign.show();
+        $hopic.show();
+        $retop.hide();
+        $sitop.hide();
+        $retitle.fadeOut(200);
+        $reline.animate({'width': '0px'},300);
+        $sititle.fadeOut(200);
+        $siline.animate({'width': '0px'},300, function () {
+            $hotitle.animate({'left': '300px', 'opacity': '1'}, 300);
+            $hocontent.animate({'left': '475px', 'opacity': '1'}, 300);
+            $resign.animate({'left': '360px', 'opacity': '1'}, 300);
+            $hopic.animate({'left': '100px', 'opacity': '1'}, 200);
+        });
+        // 关闭登录注册框时清空信息
+        dom.register_infor.val('');
+        dom.prompt.html('');
+    };
+})();
