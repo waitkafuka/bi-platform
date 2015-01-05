@@ -83,14 +83,14 @@ public class LoginController extends RandomValidateCodeController {
             // 加密过程发生异常
             LOG.warn(e.getMessage(), e);
             rs.setStatus(1);
-            rs.setStatusInfo("user's message encrypt happen exception ");
+            rs.setStatusInfo("认证密钥错误 ");
             return rs;
         }
         // 使用未加密的用户名和加密后的密码查询用户
         ProductlineInfo user = userManageService.queryUser(productLine, pwdEncrypt);
         if (user == null) {
             rs.setStatus(1);
-            rs.setStatusInfo("user's name or password is wrong, please check");
+            rs.setStatusInfo("用户名或密码错误");
             return rs;
         }
         response.addHeader("Access-Control-Allow-Origin", "*");      
