@@ -225,17 +225,20 @@ public class DimConfigResource extends BaseResource {
                 logger.error(msg, e);
                 return ResourceUtils.getErrorResult(msg, 1);
             }
-            DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            DBInfoReader reader = null;
             String tableName = cubeTable.getName();
             if (cubeTable.isMutilple() && CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
                 tableName = cubeTable.getRegExpTables().get(0);
             }
             List<ColumnInfo> cols = null;
             try {
+	            	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+	            			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
                 cols = reader.getColumnInfos(tableName);
             } finally {
-                reader.closeConn(); 
+            		if (reader != null) {
+            			reader.closeConn(); 
+            		}
             }
             if (CollectionUtils.isEmpty(cols)) {
                 String msg = String.format("不能从表%s中获取字段！", tableName);
