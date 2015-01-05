@@ -27,11 +27,25 @@ public enum IndexAction {
      */
     INDEX_INIT,
     /**
+     * INDEX_NORMAL
+     */
+    INDEX_NORMAL,
+    /**
      * INDEX_INIT_LIMITED
      */
     INDEX_INIT_LIMITED,
     /**
+     * INDEX_MERGE
+     */
+    INDEX_MERGE,
+    /**
      * INDEX_UPDATE
      */
-    INDEX_UPDATE
+    INDEX_UPDATE,
+    
+    /**
+     * INDEX_MOD
+     */
+    INDEX_MOD
+    
 }
