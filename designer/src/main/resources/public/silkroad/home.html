@@ -3,6 +3,7 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
+    <link type="text/css" rel="stylesheet" href="src/css/base.css">
     <link type="text/css" rel="stylesheet" href="src/css/home.css">
     <script type="text/javascript" src="dep/jquery-1.11.1.js"></script>
     <script type="text/javascript" src="src/home.js"></script>
@@ -53,8 +54,11 @@
                     </select>
                 </span>
             <div class="prompt"></div>
-            <input type="text" name="validateCode" id="register-validateCode"/>
-            <img src="auth"/>
+            <div class="c-f">
+                <input type="text" class="register-infor" style="width: 220px; float: left" id="register-validateCode" placeholder="请输入验证码" />
+                <img src="auth" class="validate-code"/>
+            </div>
+            <div class="prompt"></div>
         </div>
         <div class="register-btn" id="register">免&nbsp;费&nbsp;注&nbsp;册</div>
     </div>
@@ -70,8 +74,13 @@
             <div class="prompt"></div>
             <input type="password" class="register-infor" id="sign-pass" placeholder="密码" />
             <div class="prompt"></div>
+            <div class="c-f">
+                <input type="text" class="register-infor" style="width: 220px; float: left" id="sign-validateCode" placeholder="请输入验证码" />
+                <img src="auth" class="validate-code"/>
+            </div>
+            <div class="prompt"></div>
         </div>
-        <div class="sign-next"><input type="checkbox"/><a href="javascript:;">下次自动登录</a>&nbsp;|&nbsp;<a href="javascript:;">忘记密码</a></div>
+        <!--<div class="sign-next"><input type="checkbox"/><a href="javascript:;">下次自动登录</a>&nbsp;|&nbsp;<a href="javascript:;">忘记密码</a></div>-->
         <div class="register-btn" id="sign">登&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;录</div>
     </div>
 </div>
