@@ -917,7 +917,7 @@ define([
                  */
                 function openDataFormatDialog(data) {
                     var html;
-                    if (!data) {
+                    if ($.isObjectEmpty(data.dataFormat)) {
                         dialog.alert('没有指标');
                         return;
                     }

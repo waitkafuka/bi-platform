@@ -35,9 +35,9 @@
                 var type = this._sType;
                 // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                        '<div class="' + type + '-header">',
+                    '<div class="' + type + '-header">',
                     '</div>',
-                        '<div class="' + type + '-content"></div>'
+                    '<div class="' + type + '-content"></div>'
                 ].join('');
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
@@ -499,11 +499,9 @@
                     else {
                         data.push(this._aSeries[i].name);
                     }
-
                 }
             }
         }
-
         legend.data = data;
         options.legend = legend;
     };

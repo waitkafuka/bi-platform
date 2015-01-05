@@ -118,10 +118,12 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                     if (firstStr.startsWith(".") || secondStr.startsWith(".")) {
                         return -1;
                     }
-                    String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
+                    firstStr = firstStr.replaceAll("[?]", "-");
+					String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
                             + Constants.FILE_NAME_SEPERATOR.length(), 
                             firstStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR));
-                    String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
+                    secondStr = secondStr.replace("[?]", "-");
+					String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
                             + Constants.FILE_NAME_SEPERATOR.length(), 
                             secondStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR) );
                     return tmp.compareTo(tmp2);
