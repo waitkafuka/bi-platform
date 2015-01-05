@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
@@ -46,6 +45,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.FileClientHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.IndexClientHandler;
@@ -87,11 +87,6 @@ public class IndexAndSearchClient {
      */
     @Resource(name = "isNodeService")
     private IsNodeService isNodeService;
-    
-    /**
-     * LOCAL_HOST_ADDRESS
-     */
-    private static final String LOCAL_HOST_ADDRESS = "127.0.0.1";
     
     // private ConcurrentHashMap<NodeAddress, Channel> channelMaps;
     //private ConcurrentHashMap<String, ChannelHandler> actionHandlerMaps;
@@ -312,9 +307,9 @@ public class IndexAndSearchClient {
         
     }
     
-    public IndexMessage index(TesseractResultSet data, boolean isInit, boolean isUpdate, IndexShard idxShard,
+    public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,
         String idName, boolean lastPiece) throws IndexAndSearchException {
-        logger.info("index:[data=" + data + "][isUpdate=" + isUpdate + "][idxShard=" + idxShard
+        logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "][idName:" + idName + "] start");
         if (data == null || idxShard == null || StringUtils.isEmpty(idxShard.getFilePath())
                 || StringUtils.isEmpty(idxShard.getIdxFilePath())) {
@@ -325,9 +320,9 @@ public class IndexAndSearchClient {
         }
         
         NettyAction action = null;
-        if (isUpdate) {
+        if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
             action = NettyAction.NETTY_ACTION_UPDATE;
-        } else if (isInit) {
+        } else if (idxAction.equals(IndexAction.INDEX_MERGE)||idxAction.equals(IndexAction.INDEX_INIT) || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
             action = NettyAction.NETTY_ACTION_INITINDEX;
         } else {
             action = NettyAction.NETTY_ACTION_INDEX;
@@ -363,7 +358,7 @@ public class IndexAndSearchClient {
                 IndexAndSearchExceptionType.INDEX_EXCEPTION), e,
                 IndexAndSearchExceptionType.INDEX_EXCEPTION);
         }
-        logger.info("index:[data=" + data + "][isUpdate=" + isUpdate + "][idxShard=" + idxShard
+        logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "] finished index ");
         return result;
     }

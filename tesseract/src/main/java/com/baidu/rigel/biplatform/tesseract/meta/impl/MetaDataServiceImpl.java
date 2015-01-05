@@ -18,6 +18,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,8 @@ import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 元数据实际查询操作实现
@@ -247,8 +250,15 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
             dataSetStr = "";
         }
         LOG.info("refresh datasource:{} dataSet:{}",dataSourceInfo,dataSetStr);
-        UpdateIndexByDatasourceEvent updateEvent = new UpdateIndexByDatasourceEvent(dataSourceInfo.getDataSourceKey(), StringUtils.split(dataSetStr, ','));
-        storeManager.putEvent(updateEvent);
+        
+        final Gson gson = new Gson();
+        
+        Map<String,Map<String,BigDecimal>> dataSetMap=gson.fromJson(dataSetStr, new TypeToken<Map<String, Map<String,BigDecimal>>>() {}.getType());
+        if(dataSetMap!=null){
+        	UpdateIndexByDatasourceEvent updateEvent = new UpdateIndexByDatasourceEvent(dataSourceInfo.getDataSourceKey(), dataSetMap.keySet().toArray(new String[0]),dataSetMap);
+            storeManager.putEvent(updateEvent);
+        }
+        
     }
 
 }

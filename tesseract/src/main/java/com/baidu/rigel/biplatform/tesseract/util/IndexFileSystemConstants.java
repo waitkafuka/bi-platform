@@ -43,4 +43,13 @@ public class IndexFileSystemConstants {
      */
     public static final String FACTTABLE_KEY = "id";
     
+	/**
+	 * MOD_KEY_START
+	 */
+	public static final String MOD_KEY_START = "BEGIN";
+	/**
+	 * MOD_KEY_END
+	 */
+	public static final String MOD_KEY_END = "END";
+    
 }
