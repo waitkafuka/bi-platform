@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -65,10 +66,10 @@ public class RegisterController extends RandomValidateCodeController {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult register(HttpServletRequest request, HttpServletResponse response) {        
-        ResponseResult rs = super.checkValidateCode(request);
-        if (rs.getStatus() == ResponseResult.FAILED) {
-        		return rs;
-        }
+        ResponseResult rs = new ResponseResult(); //super.checkValidateCode(request);
+//        if (rs.getStatus() == ResponseResult.FAILED) {
+//        		return rs;
+//        }
         
         try {
             // 服务器请求地址
@@ -79,9 +80,11 @@ public class RegisterController extends RandomValidateCodeController {
                 throw new Exception("the name " + user.getName() 
                         + " is already exist, please change");
             }
+            String magicStr = String.valueOf(System.nanoTime());
+            cacheManagerForResource.setToCache(magicStr, 1);
             // 向管理员发送注册信息，返回0代表发送成功，返回-1代表发送失败
             int status = productLineRegisterService
-                    .sendRegisterMsgToAdministrator(user, hostAddress);
+                    .sendRegisterMsgToAdministrator(user, hostAddress, magicStr);
             if (status == -1) {
                 throw new Exception("send register message to "
                         + "Administrator happens exception");
@@ -110,6 +113,14 @@ public class RegisterController extends RandomValidateCodeController {
     public ResponseResult openOnlineService(HttpServletRequest request, HttpServletResponse response) {
         ResponseResult rs = new ResponseResult();
         try {
+        		String magicStr = request.getParameter("magicStr"); 
+        		if (StringUtils.isEmpty(cacheManagerForResource.getFromCache(magicStr))) {
+        			rs.setStatus(1);
+                rs.setStatusInfo("已经开通，不能重复开通");
+                return rs;
+        		} else{
+        			cacheManagerForResource.deleteFromCache(magicStr);
+        		}
             // 获取用户信息        
             ProductlineInfo user = this.getUserFromUrl(request, false);
             LOG.info("begin open online service for user [" + user.getName() + "]");

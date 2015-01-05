@@ -22,8 +22,11 @@ import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang.StringUtils;
 
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.resource.cache.CacheManagerForResource;
@@ -112,9 +115,21 @@ public class RandomValidateCode {
 		for (int i = 1; i <= stringNum; i++) {
 			randomString = drowString(g, randomString, i);
 		}
-		
-		cacheManagerForResource.removeFromCache(Constants.RANDOMCODEKEY);
-		cacheManagerForResource.setToCache(Constants.RANDOMCODEKEY, randomString);
+		String key = null;
+		for (Cookie tmp : request.getCookies()) {
+			if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
+				key = tmp.getName();
+				cacheManagerForResource.removeFromCache(key);
+				break;
+			}
+		}
+		if (StringUtils.isEmpty(key)) {
+			key = String.valueOf(System.nanoTime());
+		}
+		cacheManagerForResource.setToCache(key, randomString);
+		final Cookie cookie = new Cookie(Constants.RANDOMCODEKEY, key);
+		cookie.setPath(Constants.COOKIE_PATH);
+		response.addCookie(cookie);
 		g.dispose();
 		try {
 			ImageIO.write(image, "JPEG", response.getOutputStream());// 将内存中的图片通过流动形式输出到客户端

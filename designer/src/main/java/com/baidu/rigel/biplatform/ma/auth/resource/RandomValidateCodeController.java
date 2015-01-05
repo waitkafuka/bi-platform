@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.auth.resource;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,18 +37,17 @@ import com.baidu.rigel.biplatform.ma.resource.cache.CacheManagerForResource;
  *
  */
 @RestController
-@RequestMapping("/silkroad/auth")
 public class RandomValidateCodeController extends BaseResource{
 
 	@Resource
-	private CacheManagerForResource cacheManagerForResource;
+	CacheManagerForResource cacheManagerForResource;
 	
 	/**
 	 * 
 	 * @param request
 	 * @param response
 	 */
-	@RequestMapping(method = { RequestMethod.POST })
+	@RequestMapping(value = "/silkroad/auth", method = { RequestMethod.POST, RequestMethod.GET })
 	public void genRandomValidateCode(HttpServletRequest request, HttpServletResponse response) {
 		RandomValidateCode.getRandcode(request, response, cacheManagerForResource);
 	}
@@ -57,12 +57,24 @@ public class RandomValidateCodeController extends BaseResource{
 	 * @return ResponseResult
 	 */
 	ResponseResult checkValidateCode(HttpServletRequest request) {
-		String valicateCode = request.getParameter("validateCode");
+		String key = null;
 		ResponseResult rs = new ResponseResult();
-		if (StringUtils.isEmpty(valicateCode)) {
+		if (request.getCookies() == null) {
 			rs.setStatus(ResponseResult.FAILED);
 			rs.setStatusInfo("请输入验证码");
-		} else if (valicateCode.equals(this.cacheManagerForResource.getFromCache(Constants.RANDOMCODEKEY))) {
+			return rs;
+		}
+		for (Cookie tmp : request.getCookies()) {
+			if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
+				key = tmp.getName();
+				break;
+			}
+		}
+		String valicateCode = request.getParameter("validateCode");
+		if (StringUtils.isEmpty(valicateCode) || StringUtils.isEmpty(key)) {
+			rs.setStatus(ResponseResult.FAILED);
+			rs.setStatusInfo("请输入验证码");
+		} else if (valicateCode.equals(this.cacheManagerForResource.getFromCache(key))) {
 			rs.setStatus(ResponseResult.SUCCESS);
 		} else {
 			rs.setStatus(ResponseResult.FAILED);
