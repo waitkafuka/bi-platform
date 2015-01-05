@@ -31,6 +31,7 @@
             register_repass: $('#register-repass'),
             register_company: $('#register-company'),
             register_email: $('#register-email'),
+            register_validateCode: $('#register-validateCode'),
             home_title: $('.home-title'),
             home_content: $('.home-content'),
             home_pic: $('.home-pic'),
@@ -85,6 +86,7 @@
         var $pass = dom.register_pass;
         var $usename = dom.register_usename;
         var $servicetype = dom.servicetype;
+        var $validateCode = dom.register_validateCode;
         if ($company.val() == '') {
             $company.next('div').html(textcompany);
         }
@@ -100,12 +102,16 @@
         if ($usename.val() == '') {
             $usename.next('div').html(textusename);
         }
+        if ($validateCode.val() == '') {
+            $validateCode.next('div').html('请输入验证码');
+        }
         if (
             $pass.val() != ''
             && $repass.val() != ''
             && $usename.val() != ''
             && $email.val() != ''
             && $company.val() != ''
+            && $validateCode.val() != ''
             ) {
             if ($pass.val() == $repass.val()) {
                 $.ajax({
@@ -121,7 +127,8 @@
                         pwd : $pass.val(),
                         department: $company.val(),
                         email: $email.val(),
-                        serviceType: $servicetype.val()
+                        serviceType: $servicetype.val(),
+                        validateCode: $validateCode.val()
                     },
                     //客户端调用服务器端方法成功后执行的回调函数
                     success : function(msg) {
