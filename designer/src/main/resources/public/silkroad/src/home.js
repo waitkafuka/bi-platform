@@ -138,7 +138,7 @@
                     },
                     //客户端调用服务器端方法成功后执行的回调函数
                     success : function(msg) {
-                        if (msg.status === '0') {
+                        if (msg.status === 0) {
                             alert('注册成功,请注意查收邮件');
                         }
                         else {
