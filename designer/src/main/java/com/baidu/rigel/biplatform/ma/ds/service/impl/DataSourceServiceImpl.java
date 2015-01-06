@@ -177,11 +177,11 @@ public class DataSourceServiceImpl implements DataSourceService {
            	
         } catch (Exception e) {
 			try {
-				String pwd = AesUtil.getInstance().encrypt(ds.getDbPwd(), securityKey);
+				String pwd = AesUtil.getInstance().encryptAndUrlEncoding(ds.getDbPwd(), securityKey);
 				dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
 						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
 				// dirty solution 兼容原有数据源定义 
-				ds.setDbPwd(AesUtil.getInstance().encrypt(ds.getDbPwd(), securityKey));
+				ds.setDbPwd(pwd);
 				return true;
 			} catch (Exception e1) {
 				logger.error(e1.getMessage());
