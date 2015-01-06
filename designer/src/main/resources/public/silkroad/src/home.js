@@ -8,6 +8,8 @@
     var dom;
     // 提示信息
     var textcompany = '请填写所在部门名称';
+    var textuserlimit = '用户名只能为英文字母及数字，请重新输入';
+    var emaillimit = '邮箱格式不对请重新输入';
     var textemail = '请填写您的邮箱';
     var textrepass = '请确认密码';
     var textpass = '请输入密码';
@@ -99,6 +101,9 @@
         if ($email.val() == '') {
             $email.next('div').html(textemail);
         }
+        else if (!(/^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/).test($email.val())) {
+            $email.next('div').html(emaillimit);
+        }
         if ($repass.val() == '') {
             $repass.next('div').html(textrepass);
         }
@@ -107,6 +112,12 @@
         }
         if ($usename.val() == '') {
             $usename.next('div').html(textusename);
+        }
+        else if ((/[\u4e00-\u9fa5]+/).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
+        else if ((/[^0-9a-zA-Z]/g).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
         }
         if ($validateCode.val() == '') {
             $validateCode.parent().next('div').html(textValidateCode);
@@ -118,6 +129,10 @@
             && $email.val() != ''
             && $company.val() != ''
             && $validateCode.val() != ''
+            && !((/[\u4e00-\u9fa5]+/).test($usename.val()))
+            && !((/[\u4e00-\u9fa5]+/).test($email.val()))
+            && !((/[^0-9a-zA-Z]/g).test($usename.val()))
+            && (/^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/).test($email.val())
             ) {
             if ($pass.val() == $repass.val()) {
                 $.ajax({
@@ -188,6 +203,12 @@
         if ($usename.val() == '') {
             $usename.next('div').html(textusename);
         }
+        else if ((/[\u4e00-\u9fa5]+/).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
+        else if ((/[^0-9a-zA-Z]/g).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
         if ($pass.val() == '') {
             $pass.next('div').html(textpass);
             return;
@@ -200,7 +221,13 @@
             $signvalidateCode.parent().next('div').html(textValidateCode);
             return;
         }
-        $.ajax({
+        if (
+            $pass.val() != ''
+            && $usename.val() != ''
+            && !((/[\u4e00-\u9fa5]+/).test($usename.val()))
+            && !((/[^0-9a-zA-Z]/g).test($usename.val()))
+        ) {
+            $.ajax({
                 //客户端向服务器发送请求时采取的方式
                 type : "post",
                 cache : false,
@@ -226,6 +253,8 @@
                     }
                 }
             });
+        }
+
     };
     /**
      * 关闭登录和注册框
