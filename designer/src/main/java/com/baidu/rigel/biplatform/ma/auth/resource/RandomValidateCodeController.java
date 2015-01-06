@@ -74,7 +74,8 @@ public class RandomValidateCodeController extends BaseResource{
 		if (StringUtils.isEmpty(valicateCode) || StringUtils.isEmpty(key)) {
 			rs.setStatus(ResponseResult.FAILED);
 			rs.setStatusInfo("请输入验证码");
-		} else if (valicateCode.equals(this.cacheManagerForResource.getFromCache(key))) {
+		} else if (this.cacheManagerForResource.getFromCache(key) != null && 
+				valicateCode.equalsIgnoreCase(cacheManagerForResource.getFromCache(key).toString())) {
 			rs.setStatus(ResponseResult.SUCCESS);
 			this.cacheManagerForResource.deleteFromCache(key);
 		} else {
