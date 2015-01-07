@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.CallbackDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
+import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StandardDimTableMetaDefine;
@@ -309,6 +310,12 @@ public class DimConfigResource extends BaseResource {
         }
         
         ReportDesignModel reportModel = getReportModel(reportId);
+        DataSourceDefine ds = null;
+		try {
+			ds = dsService.getDsDefine(reportModel.getDsId());
+		} catch (DataSourceOperationException e1) {
+			logger.error("[ERROR] --- --- 获取数据源信息失败", e1);
+		}
         Schema schema = reportModel.getSchema();
         StarModel[] starModels = director.getStarModel(schema);
         for (StarModel starModel : starModels) {
@@ -342,6 +349,8 @@ public class DimConfigResource extends BaseResource {
             
             // 重置starModel的
             starModel.setDimTables(newDimTables);
+            // 修正事实表定义
+            modifyFactTable(starModel, ds);
         }
         schema = director.modifySchemaWithNewModel(schema, starModels);
         ResponseResult rs = null;
@@ -361,6 +370,38 @@ public class DimConfigResource extends BaseResource {
     }
     
     /**
+     * 
+     * @param starModel
+     */
+	private void modifyFactTable(StarModel starModel, DataSourceDefine ds) {
+		if (ds == null) {
+			return;
+		}
+		List<ColumnInfo> cols = null;
+		DBInfoReader reader = null;
+        try {
+            	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+            			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            cols = reader.getColumnInfos(starModel.getFactTable().getName());
+        } finally {
+        		if (reader != null) {
+        			reader.closeConn(); 
+        		}
+        }
+        if (cols == null || cols.isEmpty()) {
+        		return;
+        }
+        starModel.getFactTable().clearColumns();
+        ColumnMetaDefine column = null;
+        for (ColumnInfo col : cols) {
+        		column = new ColumnMetaDefine();
+        		column.setName(col.getId());
+        		column.setCaption(col.getName());
+	        	starModel.getFactTable().addColumn(column);
+        }
+	}
+
+	/**
      * 
      * @param reportId
      * @return
