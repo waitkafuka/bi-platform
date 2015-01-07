@@ -1234,6 +1234,20 @@ public class ReportDesignModelResource extends BaseResource {
         return publishInfoBuilder.toString();
     }
     
-    
+    @RequestMapping(value = "/{reportId}/preview", method = { RequestMethod.GET, RequestMethod.POST },
+            produces = "text/html;charset=utf-8")
+    public ResponseResult preview(@PathVariable("reportId") String reportId, HttpServletRequest request,
+            HttpServletResponse response) {
+    		long begin = System.currentTimeMillis();
+        String requestUri = request.getRequestURL().toString();
+        requestUri = requestUri.replace("/preview", "");
+        String token = ContextManager.getProductLine();
+        String uri = this.getPublishInfo(requestUri, token);
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setStatusInfo(uri + "&reportPreview=true");
+        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
     
 }
