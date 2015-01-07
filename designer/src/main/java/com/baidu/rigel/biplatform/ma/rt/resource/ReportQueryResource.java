@@ -37,7 +37,6 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Member;
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
@@ -346,12 +345,14 @@ public class ReportQueryResource extends BaseResource {
 //        ConcurrentHashMap<String, Object> oldParams = context.getGlobalParams();
 //        LOG.info("[INFO]--- --- old params = {}", oldParams);
 //        ConcurrentHashMap<String, Object> newParams = new ConcurrentHashMap<String, Object>();
-//        // TODO 更新时间参数
-//        for (String key : oldParams.keySet()) {
-//            String value = oldParams.get(key).toString();
-//            if (!(value.contains("start") && value.contains("end"))) {
-//                newParams.put(key, value);
-//            }
+//        if (oldParams != null) {
+//	        	// TODO 更新时间参数
+//	        	for (String key : oldParams.keySet()) {
+//	        		String value = oldParams.get(key).toString();
+//	        		if (!(value.contains("start") && value.contains("end"))) {
+//	        			newParams.put(key, value);
+//	        		}
+//	        	}
 //        }
 //        // 更新请求参数
 //        for (String key : contextParams.keySet()) {
@@ -449,9 +450,8 @@ public class ReportQueryResource extends BaseResource {
 //		try {
 //			ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
 //			DataSourceDefine dsDefine = dsService.getDsDefine(model.getDsId());
-//			dsDefine.setDbPwd(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
 //			RuntimeEvnUtil.initExtendAreaContext(extendAreaContext, model, dsDefine, areaId);
-//			extendAreaContext.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine));
+//			extendAreaContext.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey));
 //			reportModelCacheManager.updateAreaContext(areaId, extendAreaContext);
 //		} catch (Exception e) {
 //			LOG.error("Report model is not in cache! ", e);
@@ -492,7 +492,7 @@ public class ReportQueryResource extends BaseResource {
 //					try {
 //						List<Member> members = reportModelQueryService.getMembers(tmpCube, 
 //										tmpCube.getDimensions().get(dim.getName()),
-//										Maps.newHashMap()).get(0);
+//										Maps.newHashMap(), securityKey).get(0);
 //						values = Lists.newArrayList();
 //						members.forEach(m -> {
 //							Map<String, String> tmp = Maps.newHashMap();

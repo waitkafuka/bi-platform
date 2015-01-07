@@ -266,39 +266,7 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
-    @RequestMapping(value = "/{reportId}/preview", method = { RequestMethod.GET, RequestMethod.POST },
-            produces = "text/html;charset=utf-8")
-    public String preview(@PathVariable("reportId") String reportId, HttpServletRequest request,
-            HttpServletResponse response) {
-    		long begin = System.currentTimeMillis();
-        ReportDesignModel model = null;
-        try {
-            model = reportModelCacheManager.getReportModel(reportId);
-        } catch (CacheOperationException e1) {
-            logger.info("[INFO]--- --- can not find report mode from cache. ", e1);
-            throw new IllegalStateException();
-        }
-        ReportRuntimeModel runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
-        // modify by jiangyichao at 2014-10-10 
-        // 将url参数添加到全局上下文中
-        Enumeration<String> params = request.getParameterNames();
-        while (params.hasMoreElements()) {
-            String paramName = params.nextElement();
-            runtimeModel.getContext().put(paramName, request.getParameter(paramName));
-        }
-        // 添加cookie内容
-        runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
-        
-        if (model == null) {
-        		logger.info("[INFO]--- --- can't get model form cache, please check it!");
-            return "";
-        }
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
-        reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
-        StringBuilder builder = buildVMString(reportId, response, model);
-        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
-        return builder.toString();
-    }
+    
 
     /**
      * 
@@ -313,13 +281,21 @@ public class QueryDataResource extends BaseResource {
             HttpServletResponse response) {
     		long begin = System.currentTimeMillis();
         ReportDesignModel model = null;
+        String reportPreview = request.getParameter("reportPreview");
+        ReportRuntimeModel runtimeModel = null;
         try {
-            model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
+        		if (StringUtils.isEmpty(reportPreview) || Boolean.valueOf(reportPreview)) {
+        			model = reportModelCacheManager.getReportModel(reportId);
+        			runtimeModel = new ReportRuntimeModel(reportId);
+        			runtimeModel.init(model, true);
+        		} else {
+        			model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
+        			runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
+        		}
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
             throw new IllegalStateException();
         }
-        ReportRuntimeModel runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         // modify by jiangyichao at 2014-10-10 
         // 将url参数添加到全局上下文中
         Enumeration<String> params = request.getParameterNames();

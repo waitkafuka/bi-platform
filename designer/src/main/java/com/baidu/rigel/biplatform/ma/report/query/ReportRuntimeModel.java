@@ -104,7 +104,7 @@ public class ReportRuntimeModel implements Serializable {
     /**
      * 是否已经初始化
      */
-    private volatile boolean isInited = false;
+    private boolean isInited = false;
     
     /**
      * 

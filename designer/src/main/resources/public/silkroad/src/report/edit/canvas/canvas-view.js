@@ -29,12 +29,15 @@ define([
                 'click .j-con-edit-btns .j-setting': 'initCompConfigBar',
                 'click .j-con-edit-btns .j-delete': 'deleteComp',
                 'click .j-button-save-report': 'saveReport',
+                'click .j-button-close-report': 'closeReport',
                 'click .j-button-publish-report': 'publishReport',
+                'click .j-button-preview-report': 'previewReport',
                 'click .j-comp-div': 'focusText',
                 'blur .j-comp-text': 'blurText',
                 'keydown .j-comp-text': 'keyDownText'
             },
-
+            /* 判断是否保存的变量 */
+            savestate: 0,
             /**
              * 构造函数
              *
@@ -401,6 +404,33 @@ define([
                 this.model.saveReport(function () {
                     dialog.success('报表保存成功。');
                 });
+                this.savestate = 1;
+            },
+
+            /**
+             * 关闭报表
+             *
+             * @public
+             */
+            closeReport: function () {
+                if (this.savestate == 0) {
+                    dialog.warning('您未进行保存，请保存后关闭。');
+                }
+                else {
+                    this._destroyPanel();
+                    require(['report/list/main-view'], function (ReportListView) {
+                        new ReportListView({el: $('.j-main')});
+                    });
+                }
+            },
+
+            /**
+             * 调用面板模块销毁方法
+             * @private
+             */
+            _destroyPanel: function () {
+                window.dataInsight && window.dataInsight.main
+                && window.dataInsight.main.destroy();
             },
 
             /**
@@ -410,6 +440,15 @@ define([
              */
             publishReport: function () {
                 this.reportView.publishReport('POST');
+            },
+
+            /**
+             * 预览报表
+             *
+             * @public
+             */
+            previewReport: function () {
+                this.reportView.previewReport('POST');
             },
 
             /**

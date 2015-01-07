@@ -119,9 +119,10 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             return Lists.newArrayList();
         }
         String pwd = ds.getDbPwd();
-        DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
-                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+        DBInfoReader reader = null;
         try {
+	        	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
+	        			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             List<TableInfo> tables = reader.getAllTableInfos();
             List<RelationTableView> relationTables = Lists.newArrayList();
             for (TableInfo table : tables) {
@@ -134,7 +135,9 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             }
             return relationTables;
         } finally {
-            reader.closeConn(); 
+        		if (reader != null) {
+        			reader.closeConn(); 
+        		}
         }
         
     }
@@ -360,9 +363,10 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             return Lists.newArrayList();
         }
         
-        DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+        DBInfoReader reader = null;
         try {
+	        	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+	        			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             for (NormalDimDetail detail : normal.getChildren()) {
                 StandardDimTableMetaDefine stand = new StandardDimTableMetaDefine();
                 ReferenceDefine reference = new ReferenceDefine();
@@ -376,9 +380,10 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
                 standMetaDefines.add(stand);
             }
         } finally {
-            reader.closeConn();
+        		if (reader != null) {
+        			reader.closeConn();
+        		}
         }
-        reader.closeConn();
         return standMetaDefines;
     }
     

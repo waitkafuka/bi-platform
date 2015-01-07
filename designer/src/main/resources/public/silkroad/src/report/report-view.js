@@ -95,6 +95,20 @@ define([
             },
 
             /**
+             * 预览报表
+             *
+             * @public
+             */
+            previewReport: function (type, reportId) {
+                var that = this;
+                // 列表调用需要动态传递id
+                reportId = reportId || this.id;
+                this.model.previewReport(type, reportId, function (data) {
+                    window.open(data);
+                });
+            },
+
+            /**
              * 初始化复制功能
              *
              * @public
