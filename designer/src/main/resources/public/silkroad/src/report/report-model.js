@@ -24,6 +24,23 @@ define(['url'], function (Url) {
                     success(data.data);
                 }
             });
+        },
+
+
+        /**
+         * 预览报表
+         *
+         * @param {Function} success 回调函数
+         * @public
+         */
+        previewReport: function (type, reportId, success) {
+            $.ajax({
+                url: Url.previewReport(reportId),
+                type: type,
+                success: function (data) {
+                    success(data.data);
+                }
+            });
         }
     });
 
