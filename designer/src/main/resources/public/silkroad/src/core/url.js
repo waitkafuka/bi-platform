@@ -461,6 +461,16 @@ define(function () {
         return getReportsBaseUrl(reportId) + '/publish';
     };
 
+    /**
+     * 报表新建（编辑）-edit-canvas
+     * 预览报表
+     *
+     * @param {string} reportId 报表id
+     */
+    Url.previewReport = function (reportId) {
+        return getReportsBaseUrl(reportId) + '/preview';
+    };
+
 
     Url.getPublishInfo = function (reportId) {
         return getReportsBaseUrl(reportId) + '/publish_info';
