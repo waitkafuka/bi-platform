@@ -39,7 +39,7 @@ define(
             iconClass: 'text',
             caption: '文本框',
             defaultWidth: 300,
-            defaultHeight: 30,
+            defaultHeight: 55,
             vm: {
                 render: function (data) {
                     // 为文本框组件设定唯一ID
