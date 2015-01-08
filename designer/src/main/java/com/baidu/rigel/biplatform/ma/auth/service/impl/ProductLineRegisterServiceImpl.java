@@ -110,7 +110,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      * @{inheritDoc}
      */
     @Override
-    public int sendRegisterMsgToAdministrator(ProductlineInfo user, String hostAddress) {
+    public int sendRegisterMsgToAdministrator(ProductlineInfo user, String hostAddress, String magicStr) {
         SendMail sendMail = new SendMail();
         try {
             // 发送方
@@ -126,7 +126,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             // 设置发送方名字
             sendMail.setUserName(mailSender);
             // 设置发送内容和格式
-            sendMail.setBody(makeUpRegisterMailContent(user, hostAddress), SendMail.HTML);
+            sendMail.setBody(makeUpRegisterMailContent(user, hostAddress, magicStr), SendMail.HTML);
             // 发送
             sendMail.send();
             return 0;
@@ -140,9 +140,10 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      * 构建注册邮件内容
      * @param user
      * @param hostAddress 
+     * @param magicStr 
      * @return
      */
-    private String makeUpRegisterMailContent(ProductlineInfo user, String hostAddress) {
+    private String makeUpRegisterMailContent(ProductlineInfo user, String hostAddress, String magicStr) {
         StringBuilder stringBuilder = new StringBuilder();
         // TODO 修改为加载模板文件
         // 构建邮件html形式内容
@@ -182,13 +183,13 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         
         // 添加开通线上服务url
         stringBuilder.append("<td align=center><a href=" 
-                 + makeUpOpenServiceUrl(user, 1, hostAddress) + ">线上服务</a></td>");
+        			+ makeUpOpenServiceUrl(user, 1, hostAddress, magicStr) + ">线上服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("<tr>");     
         // 添加开通线下服务url
         stringBuilder.append("<td align=center><a href="
-                 + makeUpOpenServiceUrl(user, 0, hostAddress) + ">线下服务</a></td>");
+                + makeUpOpenServiceUrl(user, 0, hostAddress, magicStr) + ">线下服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("</table>");
@@ -200,10 +201,11 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      * 构建开通服务url
      * @param user 用户对象
      * @param serviceType 服务类型，1代表线上服务，0代表线下服务
+     * @param magicStr 
      * @param hsotAddress 服务器请求处理地址
      * @return url
      */
-    private String makeUpOpenServiceUrl(ProductlineInfo user, int serviceType, String hostAddress) {
+    private String makeUpOpenServiceUrl(ProductlineInfo user, int serviceType, String hostAddress, String magicStr) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(hostAddress);
         stringBuilder.append("/");
@@ -224,7 +226,9 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             stringBuilder.append(URLEncoder.encode(user.getDepartment(), DEFAULT_CODE));
             stringBuilder.append(URL_PARAM_SEPERATOR);
             stringBuilder.append("serviceType=" 
-                     + URLEncoder.encode(String.valueOf(user.getServiceType()), DEFAULT_CODE));       
+                     + URLEncoder.encode(String.valueOf(user.getServiceType()), DEFAULT_CODE));   
+            stringBuilder.append(URL_PARAM_SEPERATOR);
+            stringBuilder.append("magicStr=" + magicStr);
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
         }

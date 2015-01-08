@@ -74,8 +74,25 @@ define([
                     id: 'component',
                     picName: 'component',
                     title: '组件工具箱',
-                    className: 'component',
-                    ownClassName: 'own-component'
+                    className: 'global-component'
+                },
+                {
+                    id: 'save-report',
+                    picName: 'save',
+                    title: '保存',
+                    className: 'button-save-report'
+                },
+                {
+                    id: 'close-report',
+                    picName: 'close',
+                    title: '关闭',
+                    className: 'button-close-report button-right'
+                },
+                {
+                    id: 'preview-report',
+                    picName: 'preview',
+                    title: '预览',
+                    className: 'button-preview-report'
                 }
             ],
 
@@ -91,9 +108,8 @@ define([
                 else {
                     for(var i = 0; i < btnBox.length; i ++) {
                         div += (
-                        "<div class='global-setting-btns j-global-" +
-                        btnBox[i].className + " " +
-                        (btnBox[i].ownClassName || "") + "'" +
+                        "<div class='global-setting-btns j-" +
+                        btnBox[i].className +  "'" +
                         "title='" + btnBox[i].title + "'" + "id='" +
                         btnBox[i].id + "'>" +
                         "<img src='../silkroad/src/css/img/global-btns/btn_" + btnBox[i].picName +".png' />" +

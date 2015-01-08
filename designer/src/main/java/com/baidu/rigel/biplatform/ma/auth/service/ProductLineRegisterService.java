@@ -27,9 +27,10 @@ public interface ProductLineRegisterService {
      * 发送用户注册信息到管理员
      * @param user 用户对象
      * @param hostAddress 开通服务的服务器处理地址
+     * @param magicStr 
      * @return 成功返回0，失败返回-1
      */
-    public int sendRegisterMsgToAdministrator(ProductlineInfo user, String hostAddress);
+    public int sendRegisterMsgToAdministrator(ProductlineInfo user, String hostAddress, String magicStr);
     
     /**
      * 发送开通服务信息到用户

@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
@@ -188,7 +187,6 @@ public class DataSourceResource extends BaseResource {
         String productLine = ContextManager.getProductLine();
         assignNewValue(productLine, request, define);
         try {
-	        	define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
             define = dsService.saveOrUpdateDataSource(define, securityKey);
             rs.setStatus(0);
             rs.setStatusInfo("successfully");

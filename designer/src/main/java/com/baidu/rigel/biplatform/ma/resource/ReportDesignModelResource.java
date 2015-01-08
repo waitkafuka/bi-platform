@@ -581,7 +581,7 @@ public class ReportDesignModelResource extends BaseResource {
         try {
             model = reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
-            logger.error("no such report model in cache for report id: " + reportId);
+            logger.error("no such report model in cache for report id: " + reportId, e);
             return ResourceUtils.getErrorResult("no such report model in cache for report id: " + reportId, 1);
         }
         /**
@@ -1234,6 +1234,20 @@ public class ReportDesignModelResource extends BaseResource {
         return publishInfoBuilder.toString();
     }
     
-    
+    @RequestMapping(value = "/{reportId}/preview", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult preview(@PathVariable("reportId") String reportId, HttpServletRequest request,
+            HttpServletResponse response) {
+    		long begin = System.currentTimeMillis();
+        String requestUri = request.getRequestURL().toString();
+        requestUri = requestUri.replace("/preview", "");
+        String token = ContextManager.getProductLine();
+        String uri = this.getPublishInfo(requestUri, token);
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setStatusInfo("successfully");
+        rs.setData(uri + "&reportPreview=true");
+        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
     
 }

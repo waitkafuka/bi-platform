@@ -172,7 +172,7 @@ public class ReportModelCacheManager {
      * @param reportId
      * @throws Exception
      */
-    public synchronized ReportRuntimeModel loadRunTimeModelToCache(String reportId) throws CacheOperationException {
+    public ReportRuntimeModel loadRunTimeModelToCache(String reportId) throws CacheOperationException {
         
         ReportDesignModel reportModel = getReportModel(reportId);
         if (reportModel == null) {
@@ -196,7 +196,7 @@ public class ReportModelCacheManager {
      * @param newRunTimeModel
      * @throws Exception
      */
-    public synchronized void updateRunTimeModelToCache(String reportId, ReportRuntimeModel newRunTimeModel)
+    public void updateRunTimeModelToCache(String reportId, ReportRuntimeModel newRunTimeModel)
             throws CacheOperationException {
         String sessionId = ContextManager.getSessionId();
         String productLine = ContextManager.getProductLine();

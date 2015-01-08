@@ -45,4 +45,6 @@ public interface Constants {
     String FILTER_BLANK = "filterBlank";
     
     String TOP = "top";
+    
+    String RANDOMCODEKEY = "RANDOMVALIDATECODEKEY";
 }

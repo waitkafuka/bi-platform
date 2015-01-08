@@ -30,5 +30,4 @@ public class BaseResource {
 	@Value("${biplatform.ma.ser_key}")
 	protected String securityKey;
 	
-	
 }

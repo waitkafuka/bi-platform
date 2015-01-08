@@ -13,10 +13,12 @@
 .global-setting-btns:visited{
     background: #c7c2c2;
 }
-/* 组件区域按钮 */
-/*.own-component {*/
-    /*height: 200px;*/
-/*}*/
+.global-setting-btns img {
+    padding: 5px;
+}
+.button-right {
+    float: right;
+}
 /* 参数维度列表 */
 .j-global-box {
     margin: 0 auto;

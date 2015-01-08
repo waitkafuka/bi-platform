@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,7 +30,6 @@ import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
-import com.baidu.rigel.biplatform.ma.resource.BaseResource;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 
 /**
@@ -39,7 +39,7 @@ import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
  */
 @RestController
 @RequestMapping("/silkroad/register")
-public class RegisterController extends BaseResource {
+public class RegisterController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
@@ -66,7 +66,11 @@ public class RegisterController extends BaseResource {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult register(HttpServletRequest request, HttpServletResponse response) {        
-        ResponseResult rs = new ResponseResult();
+        ResponseResult rs = super.checkValidateCode(request);
+        if (rs.getStatus() == ResponseResult.FAILED) {
+        		return rs;
+        }
+        
         try {
             // 服务器请求地址
             String hostAddress = request.getRequestURL().toString();
@@ -76,9 +80,11 @@ public class RegisterController extends BaseResource {
                 throw new Exception("the name " + user.getName() 
                         + " is already exist, please change");
             }
+            String magicStr = String.valueOf(System.nanoTime());
+            cacheManagerForResource.setToCache(magicStr, 1);
             // 向管理员发送注册信息，返回0代表发送成功，返回-1代表发送失败
             int status = productLineRegisterService
-                    .sendRegisterMsgToAdministrator(user, hostAddress);
+                    .sendRegisterMsgToAdministrator(user, hostAddress, magicStr);
             if (status == -1) {
                 throw new Exception("send register message to "
                         + "Administrator happens exception");
@@ -107,6 +113,14 @@ public class RegisterController extends BaseResource {
     public ResponseResult openOnlineService(HttpServletRequest request, HttpServletResponse response) {
         ResponseResult rs = new ResponseResult();
         try {
+        		String magicStr = request.getParameter("magicStr"); 
+        		if (StringUtils.isEmpty(cacheManagerForResource.getFromCache(magicStr))) {
+        			rs.setStatus(1);
+                rs.setStatusInfo("已经开通，不能重复开通");
+                return rs;
+        		} else{
+        			cacheManagerForResource.deleteFromCache(magicStr);
+        		}
             // 获取用户信息        
             ProductlineInfo user = this.getUserFromUrl(request, false);
             LOG.info("begin open online service for user [" + user.getName() + "]");

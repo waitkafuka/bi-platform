@@ -116,4 +116,12 @@ public class CacheManagerForResource {
     protected void setCacheManager(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
+
+    /**
+     * 
+     * @param key
+     */
+	public void removeFromCache(String key) {
+		this.getCache().evict(key);
+	}
 }

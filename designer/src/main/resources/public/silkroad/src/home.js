@@ -8,12 +8,15 @@
     var dom;
     // 提示信息
     var textcompany = '请填写所在部门名称';
+    var textuserlimit = '用户名只能为英文字母及数字，请重新输入';
+    var emaillimit = '邮箱格式不对请重新输入';
     var textemail = '请填写您的邮箱';
     var textrepass = '请确认密码';
     var textpass = '请输入密码';
     var textusename = '请输入用户名';
     var textdoublepass = '两次密码输入不一致，请重新输入';
     var errorsign = '用户名或密码输入错误';
+    var textValidateCode = '请输入验证码';
     // 入口
     $(function () {
         dom = {
@@ -26,11 +29,13 @@
             sign: $('#sign'),
             sign_usename: $('#sign-usename'),
             sign_pass: $('#sign-pass'),
+            sign_validateCode: $('#sign-validateCode'),
             register_usename: $('#register-usename'),
             register_pass: $('#register-pass'),
             register_repass: $('#register-repass'),
             register_company: $('#register-company'),
             register_email: $('#register-email'),
+            register_validateCode: $('#register-validateCode'),
             home_title: $('.home-title'),
             home_content: $('.home-content'),
             home_pic: $('.home-pic'),
@@ -60,6 +65,10 @@
         signIn();
         // 注册事件
         registerIn();
+        $('.validate-code').click(function () {
+            var src = $(this).attr('src');
+            $(this).attr('src', src + '?' + Math.random());
+        });
     }
     /**
      * 注册按钮以及回车触发事件函数
@@ -85,11 +94,15 @@
         var $pass = dom.register_pass;
         var $usename = dom.register_usename;
         var $servicetype = dom.servicetype;
+        var $validateCode = dom.register_validateCode;
         if ($company.val() == '') {
             $company.next('div').html(textcompany);
         }
         if ($email.val() == '') {
             $email.next('div').html(textemail);
+        }
+        else if (!(/^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/).test($email.val())) {
+            $email.next('div').html(emaillimit);
         }
         if ($repass.val() == '') {
             $repass.next('div').html(textrepass);
@@ -100,12 +113,26 @@
         if ($usename.val() == '') {
             $usename.next('div').html(textusename);
         }
+        else if ((/[\u4e00-\u9fa5]+/).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
+        else if ((/[^0-9a-zA-Z]/g).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
+        if ($validateCode.val() == '') {
+            $validateCode.parent().next('div').html(textValidateCode);
+        }
         if (
             $pass.val() != ''
             && $repass.val() != ''
             && $usename.val() != ''
             && $email.val() != ''
             && $company.val() != ''
+            && $validateCode.val() != ''
+            && !((/[\u4e00-\u9fa5]+/).test($usename.val()))
+            && !((/[\u4e00-\u9fa5]+/).test($email.val()))
+            && !((/[^0-9a-zA-Z]/g).test($usename.val()))
+            && (/^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/).test($email.val())
             ) {
             if ($pass.val() == $repass.val()) {
                 $.ajax({
@@ -121,11 +148,17 @@
                         pwd : $pass.val(),
                         department: $company.val(),
                         email: $email.val(),
-                        serviceType: $servicetype.val()
+                        serviceType: $servicetype.val(),
+                        validateCode: $validateCode.val()
                     },
                     //客户端调用服务器端方法成功后执行的回调函数
                     success : function(msg) {
-                        alert('注册成功,请注意查收邮件');
+                        if (msg.status === 0) {
+                            alert('注册成功,请注意查收邮件');
+                        }
+                        else {
+                            alert('注册失败：' + msg.statusInfo);
+                        }
                         //$.get('www.baidu.com');
                         //$("#resText").html(msg);
                         /*
@@ -165,13 +198,35 @@
 
         var $pass = dom.sign_pass;
         var $usename = dom.sign_usename;
+        var $signvalidateCode = dom.sign_validateCode;
+
         if ($usename.val() == '') {
             $usename.next('div').html(textusename);
         }
+        else if ((/[\u4e00-\u9fa5]+/).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
+        else if ((/[^0-9a-zA-Z]/g).test($usename.val())){
+            $usename.next('div').html(textuserlimit);
+        }
         if ($pass.val() == '') {
             $pass.next('div').html(textpass);
+            return;
         }
-        if ($usename.val() != '' && $pass.val() != '') {
+        if ($pass.val() == '') {
+            $pass.next('div').html(textpass);
+            return;
+        }
+        if ($signvalidateCode.val() == '') {
+            $signvalidateCode.parent().next('div').html(textValidateCode);
+            return;
+        }
+        if (
+            $pass.val() != ''
+            && $usename.val() != ''
+            && !((/[\u4e00-\u9fa5]+/).test($usename.val()))
+            && !((/[^0-9a-zA-Z]/g).test($usename.val()))
+        ) {
             $.ajax({
                 //客户端向服务器发送请求时采取的方式
                 type : "post",
@@ -182,21 +237,24 @@
                 url : "/silkroad/login",
                 data : {
                     name : $usename.val(),
-                    pwd : $pass.val()
+                    pwd : $pass.val(),
+                    validateCode: $signvalidateCode.val()
                 },
                 //客户端调用服务器端方法成功后执行的回调函数
                 success : function(msg) {
                     var sign = msg.status;
                     if (sign != 1) {
-                        window.location="/silkroad/index.html";
+                        window.location = "/silkroad/index.html";
                     }
                     else {
-                        $pass.next('div').html(errorsign);
-                        $usename.next('div').html(errorsign);
+//                        $pass.next('div').html(errorsign);
+//                        $usename.next('div').html(errorsign);
+                        $signvalidateCode.parent().next('div').html(msg.statusInfo);
                     }
                 }
             });
         }
+
     };
     /**
      * 关闭登录和注册框

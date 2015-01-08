@@ -313,4 +313,7 @@ public class FactTableMetaDefine implements Serializable {
         this.regExpTables = regExpTables;
     }
     
+    public void clearColumns() {
+    		columns.clear();
+    }
 }

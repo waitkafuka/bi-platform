@@ -168,7 +168,7 @@
 
 /* 报表的实时展示区*/
 .canvas .report {
-    margin: 0px 5px 0 1px;
+    margin: -2px 5px 0 1px;
     overflow: auto;
     min-height: 200px;
     position: relative;
@@ -686,16 +686,15 @@
 }
 .buttons {
     /*overflow: hidden;*/
-    margin: 0px 5px 0 1px;
+    margin: 2px 5px 0 1px;
     position: relative;
     background: #e4e4e4;
-    border-radius: 5px 5px 0px 0px;
     height: 30px;
     width: 99.5%;
     border-top: 2px solid #cccccc;
     border-left: 2px solid #cccccc;
     border-right: 2px solid #cccccc;
-    border-bottom: 1px solid #cccccc;
+    border-bottom: 2px solid #cccccc;
 }
 .comp-menu {
     position: absolute;

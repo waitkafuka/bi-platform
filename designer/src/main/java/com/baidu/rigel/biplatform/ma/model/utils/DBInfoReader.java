@@ -55,7 +55,7 @@ public class DBInfoReader {
     /**
      * logger
      */
-    private Logger logger = LoggerFactory.getLogger(DBInfoReader.class);
+    private static Logger logger = LoggerFactory.getLogger(DBInfoReader.class);
     
     /**
      * 获得数据库元数据对象
@@ -78,11 +78,21 @@ public class DBInfoReader {
         try {
             Class.forName(type.getDriver());
             String pwd = AesUtil.getInstance().decodeAnddecrypt(password, securityKey);
+            logger.info("[INFO]--- --- --- --- connect to database with user : {}", user);
+            StringBuilder pwdStr = new StringBuilder();
+            for (char c : pwd.toCharArray()) {
+            		pwdStr.append(c >> 1);
+            }
+            logger.info("[INFO]--- --- --- --- connect to database with pwd : {}", pwdStr.toString());
             con = DriverManager.getConnection(url, user, pwd);
             dbMetaData = con.getMetaData();
         } catch (ClassNotFoundException e) {
+        		logger.error("[ERROR] --- --- --- --- connection to db error : {}", e.getMessage());
+        		logger.error("[ERROR] --- --- --- --- stackTrace :", e);
             throw new DBInfoReadException("ClassNotFoundException when build DBInfoReader! ", e);
         } catch (Exception e) {
+	        	logger.error("[ERROR] --- --- --- --- connection to db error : {}", e.getMessage());
+	    		logger.error("[ERROR] --- --- --- --- stackTrace :", e);
 			throw new DBInfoReadException("SQLException when build DBInfoReader! ", e);
         }
         reader.setCon(con);
