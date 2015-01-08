@@ -21,23 +21,38 @@ import io.netty.channel.ChannelHandlerContext;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexWriterFactory;
+import com.baidu.rigel.biplatform.tesseract.isservice.search.service.IndexSearcherFactory;
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.netty.message.NettyAction;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -65,12 +80,14 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
     
     /**
      * init ACTION_SUPPORT_SET
+     * IndexServerHandler支持：索引、更新、初始化索引、修订索引等操作
      */
-    static {
-        ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_INDEX);
-        ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_UPDATE);
-        ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_INITINDEX);
-    }
+	static {
+		ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_INDEX);
+		ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_UPDATE);
+		ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_INITINDEX);
+		ACTION_SUPPORT_SET.add(NettyAction.NETTY_ACTION_MOD);
+	}
     
     
     
@@ -137,21 +154,56 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         File idxServiceFile = new File(indexMsg.getIdxServicePath());
         
         if (indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_UPDATE)
-                || indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_INITINDEX)) {
-            // 如果是索引更新、初始化过程
+                || indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_INITINDEX) 
+                || indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_MOD)) {
+            // 如果是索引更新、初始化、修订过程
             // 清理写索引路径
             FileUtils.deleteFile(idxFile);
-            if (indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_UPDATE)
-                    && idxServiceFile.exists()) {
-                // 索引更新，复制索引目录
-                FileUtils.copyFolder(indexMsg.getIdxServicePath(), indexMsg.getIdxPath());
-            }
-        }     
-        
+			if ((indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_UPDATE) 
+			     || indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_MOD))
+				&& idxServiceFile.exists()) {
+				// 索引更新\修订，复制索引目录
+				FileUtils.copyFolder(indexMsg.getIdxServicePath(),
+						indexMsg.getIdxPath());
+			}
+        }
         
         IndexWriter idxWriter = IndexWriterFactory.getIndexWriter(indexMsg.getIdxPath());
+        TesseractResultSet data=null;
         
-        TesseractResultSet data = indexMsg.getDataBody();
+        if(indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_MOD)){
+        	//索引修订
+        	//S1:查找索引中存在的数据
+            Queue<ResultRecord> dataQ=((SearchResultSet)indexMsg.getDataBody()).getResultQ();
+            Iterator<ResultRecord> it=dataQ.iterator();
+            
+            LinkedList<ResultRecord> dataProcess=new LinkedList<ResultRecord>();
+            List<Query> deleteQueryList=new ArrayList<Query>();
+            while(it.hasNext()){
+            	ResultRecord currRecord=it.next();
+            	//查询
+            	Query query=existInIndex(currRecord,indexMsg.getIdxPath(),indexMsg.getIdName());
+            	if(query!=null){
+            		//如果存在，则从队列中删除
+            		dataProcess.add(currRecord);
+            		it.remove();
+            		deleteQueryList.add(query);
+            	}
+            }
+        	//S2:删除旧数据
+            if(CollectionUtils.isEmpty(deleteQueryList)){
+            	idxWriter.deleteDocuments((Query[])deleteQueryList.toArray());
+            	idxWriter.commit();
+            }
+            //S3:设置需要重建索引的数据
+            data=new SearchResultSet(dataProcess);
+        }
+        
+        
+        if(data==null){
+        	data = indexMsg.getDataBody();
+        }
+        
         long currDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
         BigDecimal currMaxId = null;
         // 读取数据建索引
@@ -205,13 +257,32 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         indexFeedbackMsg.setMaxId(currMaxId);
         
         ChannelFuture sendBack=ctx.writeAndFlush(indexFeedbackMsg);
-        System.out.println("Sending msg back: "+indexFeedbackMsg);
         
+        if(indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_MOD)){
+        	IndexSearcherFactory.getInstance().refreshSearchManager(indexMsg.getIdxPath());
+        	logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+                    "IndexServerHandler","refresh searchManager["+indexMsg.getIdxPath()+"]"));
+        }
         
-        
+        logger.info(String.format(LogInfoConstants.INFO_PATTERN_MESSAGE_RECEIVED_END,
+                "IndexServerHandler"));
     }
     
     
+    
+    private Query existInIndex(ResultRecord currRecord,String idxPath,String queryField) throws Exception{    	
+    	Query result=null;
+		SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath);
+	    IndexSearcher is = null;
+	    is = searcherManager.acquire();
+	    Query query=new TermQuery(new Term(queryField,currRecord.getField(queryField).toString()));
+	    TopDocs sresult=is.search(query, 1);
+	    if(sresult.totalHits>0){
+	    	result=query;
+	    }
+	    searcherManager.release(is);
+	    return result;
+    }
     
    
 

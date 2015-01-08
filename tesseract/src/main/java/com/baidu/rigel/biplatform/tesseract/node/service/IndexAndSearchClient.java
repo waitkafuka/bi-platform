@@ -307,26 +307,60 @@ public class IndexAndSearchClient {
         
     }
     
+//    public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,String idName,MessageStatus ms){
+//		logger.info("index:[data=" + data + "][idxAction=" + idxAction
+//				+ "][idxShard=" + idxShard + "][idName:" + idName + "] start");
+//		if (data == null || idxShard == null
+//				|| StringUtils.isEmpty(idxShard.getFilePath())
+//				|| StringUtils.isEmpty(idxShard.getIdxFilePath())) {
+//			throw new IllegalArgumentException();
+//		}
+//		NettyAction action = null;
+//		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
+//			action = NettyAction.NETTY_ACTION_UPDATE;
+//		} else if(idxAction.equals(IndexAction.INDEX_MOD)){
+//			action = NettyAction.NETTY_ACTION_MOD; 
+//		}else if (idxAction.equals(IndexAction.INDEX_MERGE)
+//				|| idxAction.equals(IndexAction.INDEX_INIT)
+//				|| idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+//			action = NettyAction.NETTY_ACTION_INITINDEX;
+//		} else {
+//			action = NettyAction.NETTY_ACTION_INDEX;
+//		}
+//		
+//		MessageHeader messageHeader = new MessageHeader(action, data.toString());
+//		IndexMessage message = new IndexMessage(messageHeader, data);
+//		message.setIdxPath(idxShard.getAbsoluteFilePath());
+//		message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath());
+//		message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
+//		message.setIdName(idName);
+//		if(ms.equals(MessageStatus.MESSAGE_STATUS_FIN)){
+//			message.setLastPiece(lastPiece);
+//		}
+//		
+//    }
+    
     public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,
         String idName, boolean lastPiece) throws IndexAndSearchException {
         logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "][idName:" + idName + "] start");
         if (data == null || idxShard == null || StringUtils.isEmpty(idxShard.getFilePath())
                 || StringUtils.isEmpty(idxShard.getIdxFilePath())) {
-            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
-                IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
+            throw new IllegalArgumentException();
         }
         
-        NettyAction action = null;
-        if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
-            action = NettyAction.NETTY_ACTION_UPDATE;
-        } else if (idxAction.equals(IndexAction.INDEX_MERGE)||idxAction.equals(IndexAction.INDEX_INIT) || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
-            action = NettyAction.NETTY_ACTION_INITINDEX;
-        } else {
-            action = NettyAction.NETTY_ACTION_INDEX;
-        }
+		NettyAction action = null;
+		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
+			action = NettyAction.NETTY_ACTION_UPDATE;
+		} else if (idxAction.equals(IndexAction.INDEX_MOD)) {
+			action = NettyAction.NETTY_ACTION_MOD;
+		} else if (idxAction.equals(IndexAction.INDEX_MERGE)
+				    || idxAction.equals(IndexAction.INDEX_INIT)
+				    || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+			action = NettyAction.NETTY_ACTION_INITINDEX;
+		} else {
+			action = NettyAction.NETTY_ACTION_INDEX;
+		}
         MessageHeader messageHeader = new MessageHeader(action, data.toString());
         IndexMessage message = new IndexMessage(messageHeader, data);
         message.setIdxPath(idxShard.getAbsoluteFilePath());
@@ -334,9 +368,7 @@ public class IndexAndSearchClient {
         message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
         message.setIdName(idName);
         message.setLastPiece(lastPiece);
-//        List<String> measureInfoList = new ArrayList<String>();
-//        measureInfoList.addAll(idxShard.getIndexMeta().getMeasureInfoMap().keySet());
-//        message.setMeasureInfo(measureInfoList);
+
         logger.info("ready to send index message:" + message.toString());
         AbstractMessage ret = null;
         IndexMessage result = null;

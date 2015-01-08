@@ -43,6 +43,11 @@ public class IndexShard implements Serializable {
     private static final int DEFAULT_SHARD_REPLICA_NUM = 2;
     
     /**
+     * 当前分片数据是否有变动
+     */
+    private transient boolean isUpdate=false;
+    
+    /**
      * 分区名称：productLine_facttable_shard_shardId
      */
     private String shardName;
@@ -428,7 +433,25 @@ public class IndexShard implements Serializable {
         return result;
     }
     
-    /*
+    
+    
+    /**
+	 * @param isUpdate the isUpdate to set
+	 */
+	public void setUpdate(boolean isUpdate) {
+		this.isUpdate = isUpdate;
+	}
+	
+	
+
+	/**
+	 * @return the isUpdate
+	 */
+	public boolean isUpdate() {
+		return isUpdate;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#hashCode()
