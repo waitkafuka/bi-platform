@@ -188,7 +188,7 @@ public class QueryDataResource extends BaseResource {
     			logger.info("[INFO]--- --- not needed init global params");
     	        return rs;
     		}
-    		final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+    		final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
     		Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
     		for (final String areaId : areaIds) {
 			ExtendArea area = model.getExtendById(areaId);
@@ -232,6 +232,14 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO]--- --- successfully init params, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
     }
+
+	/**
+	 * @param reportId
+	 * @return ReportDesignModel
+	 */
+	ReportDesignModel getDesignModelFromRuntimeModel(String reportId) {
+		return reportModelCacheManager.getRuntimeModel(reportId).getModel();
+	}
     
     /**
      * 
@@ -255,12 +263,12 @@ public class QueryDataResource extends BaseResource {
     		logger.info("[INFO] --- --- begin query report model");
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId); // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e1) {
         		logger.info("[INFO]--- --- can't not get report form cache", e1.getMessage());
             return ResourceUtils.getErrorResult(e1.getMessage(), ResponseResult.FAILED);
         }
-        reportModelCacheManager.loadReportModelToCache(reportId);
+//        reportModelCacheManager.loadReportModelToCache(reportId);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", model);
         logger.info("[INFO] --- --- query report model successuffly, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
@@ -284,14 +292,22 @@ public class QueryDataResource extends BaseResource {
         String reportPreview = request.getParameter("reportPreview");
         ReportRuntimeModel runtimeModel = null;
         try {
-        		if (StringUtils.isEmpty(reportPreview) || Boolean.valueOf(reportPreview)) {
-        			model = reportModelCacheManager.getReportModel(reportId);
-        			runtimeModel = new ReportRuntimeModel(reportId);
-        			runtimeModel.init(model, true);
+        		if (!StringUtils.isEmpty(reportPreview) && Boolean.valueOf(reportPreview)) {
+        			model = DeepcopyUtils.deepCopy(reportModelCacheManager.getReportModel(reportId));
+        			// 这里需要重新生成session id 并且放到cookie中
+        			// 这里需要将此处逻辑抽象到工具类中
+//        			String sessionId = UuidGeneratorUtils.generate();
+//        			ContextManager.cleanSessionId();
+//        			ContextManager.setSessionId(sessionId);
+//        			Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID,sessionId);
+//        			sessionIdCookie.setPath(Constants.COOKIE_PATH);
+//        			response.addCookie(sessionIdCookie);
         		} else {
-        			model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
-        			runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
+        			model = reportDesignModelService.getModelByIdOrName(reportId, true);
+//        			runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         		}
+        		runtimeModel = new ReportRuntimeModel(reportId);
+        		runtimeModel.init(model, true);
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
             throw new IllegalStateException();
@@ -310,7 +326,7 @@ public class QueryDataResource extends BaseResource {
         		logger.info("[INFO]--- --- can't get model form cache, please check it!");
             return "";
         }
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
         StringBuilder builder = buildVMString(reportId, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
@@ -385,7 +401,7 @@ public class QueryDataResource extends BaseResource {
     		long begin = System.currentTimeMillis();
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]--- ---There are no such model in cache. Report Id: " + reportId, e);
             throw new IllegalStateException();
@@ -442,7 +458,7 @@ public class QueryDataResource extends BaseResource {
             
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
         logger.info("[INFO] successfully init runtime evn, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
@@ -474,7 +490,8 @@ public class QueryDataResource extends BaseResource {
         }
         runTimeModel.getContext().reset();
         runTimeModel.getContext().setParams(newParams);
-        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ReportDesignModel model = runTimeModel.getModel(); 
+        //reportModelCacheManager.getReportModel(reportId);
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
@@ -578,7 +595,8 @@ public class QueryDataResource extends BaseResource {
          */
         ReportDesignModel model;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = getDesignModelFromRuntimeModel(reportId);
+            		// reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             ResponseResult rs = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -883,7 +901,8 @@ public class QueryDataResource extends BaseResource {
         String uniqueName = request.getParameter("uniqueName");
         ReportDesignModel model;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId);
+            // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]------Can not find such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -1062,7 +1081,8 @@ public class QueryDataResource extends BaseResource {
 //        String uniqueName = request.getParameter("uniqueName");
         ReportDesignModel model;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId); 
+            		// reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO] Can not find such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -1252,7 +1272,8 @@ public class QueryDataResource extends BaseResource {
         }
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId);
+            // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.error(e.getMessage(), e);
             ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -1341,7 +1362,8 @@ public class QueryDataResource extends BaseResource {
     		} else if (sort.equalsIgnoreCase("DESC")) {
     			sort = "ASC";
     		} 
-    		ReportDesignModel reportModel = reportModelCacheManager.getReportModel(reportId);
+    		ReportDesignModel reportModel = this.getDesignModelFromRuntimeModel(reportId);
+    				// reportModelCacheManager.getReportModel(reportId);
     		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
     		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
     		DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
@@ -1407,7 +1429,7 @@ public class QueryDataResource extends BaseResource {
         all.setCaption("全部");
         all.setNeedLimit(false);
         String name = "[" + dim.getName() + "]";
-        name += ".[All_" + dim.getName() + "]";
+        name += ".[All_" + dim.getName() + "s]";
         all.setName(name);
         all.setSelected(tmpKey.contains(name));
         rs.add(all);
@@ -1445,7 +1467,8 @@ public class QueryDataResource extends BaseResource {
             ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
             return rs;
         }
-        ReportDesignModel designModel = reportModelCacheManager.getReportModel(reportId);
+        ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
+        		// reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = designModel.getExtendById(areaId);
         
         String[] selectedDims = request.getParameterValues("selectedNodes");
@@ -1488,7 +1511,8 @@ public class QueryDataResource extends BaseResource {
     public ResponseResult download(@PathVariable("reportId") String reportId, @PathVariable("areaId")String areaId,
     		HttpServletRequest request, HttpServletResponse response) throws Exception {
     		long begin = System.currentTimeMillis();
-    		ReportDesignModel report  = reportModelCacheManager.getReportModel(reportId);
+    		ReportDesignModel report  = this.getDesignModelFromRuntimeModel(reportId);
+    				// reportModelCacheManager.getReportModel(reportId);
     		if (report == null) {
     			throw new IllegalStateException("未知报表定义，请确认下载信息");
     		}

@@ -133,7 +133,7 @@ public class LiteOlapResource {
      * 
      * @param reportId
      * @param request
-     * @return
+     * @return ResponseResult
      */
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/item", method = { RequestMethod.POST })
     public ResponseResult dragAndDrop(@PathVariable("reportId") String reportId,
@@ -150,7 +150,8 @@ public class LiteOlapResource {
         }
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = reportModelCacheManager.getRuntimeModel(reportId).getModel();
+            // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.error("There are no such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);
@@ -230,7 +231,7 @@ public class LiteOlapResource {
                     return ResourceUtils.getErrorResult("不认识的位置！To: " + to, 1);
             }
         }
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         runTimeModel.updateDimStores(model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -251,7 +252,7 @@ public class LiteOlapResource {
         
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = reportModelCacheManager.getRuntimeModel(reportId).getModel();
         } catch (CacheOperationException e) {
             logger.error("There are no such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);
@@ -291,7 +292,8 @@ public class LiteOlapResource {
         
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = reportModelCacheManager.getRuntimeModel(reportId).getModel();
+            // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.error("There are no such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);

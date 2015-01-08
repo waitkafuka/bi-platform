@@ -153,8 +153,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     public QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
             Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
                     throws QueryModelBuildException {
-        
-        ExtendArea targetArea = model.getExtendById(areaId);
+        ExtendArea targetArea = DeepcopyUtils.deepCopy(model).getExtendById(areaId);
         LogicModel targetLogicModel = null;
         String cubeId = targetArea.getCubeId();
         /**
@@ -260,10 +259,11 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             for (String indName : indNames) {
                 cols.add(liteOlapArea.listAllItems().get(indName));
             }
-            targetLogicModel = analysisChartBuildService.generateTrendChartModel(targetLogicModel,
-                    model.getSchema(), liteOlapArea.getCubeId(), rows, cols, timeDimItem);
+            LogicModel tmp = analysisChartBuildService.generateTrendChartModel(targetLogicModel,
+                    model.getSchema(), liteOlapArea.getCubeId(),
+                    DeepcopyUtils.deepCopy(rows), DeepcopyUtils.deepCopy(cols), timeDimItem);
             return generateQueryAction(model.getSchema(),
-                    cubeId, targetLogicModel, context, logicModelAreaId, true, model);
+                    cubeId, tmp, context, logicModelAreaId, true, model);
         } else {
             targetLogicModel = targetArea.getLogicModel();
             LogicModel cpModel = DeepcopyUtils.deepCopy(targetArea.getLogicModel());

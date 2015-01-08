@@ -92,8 +92,7 @@ public class UniversalContextSettingFilter implements Filter {
 	        response.setCharacterEncoding("utf-8");
 	        String sessionId = null;
 	        String productLine = null;
-	        if (httpRequest.getCookies() != null && httpRequest.getCookies().length > 0
-	        		&& httpRequest.getParameter("reportPreview") != null) {
+	        if (httpRequest.getCookies() != null && httpRequest.getCookies().length > 0) {
 	            List<Cookie> cookies = Lists.newArrayList();
 	            Collections.addAll(cookies, httpRequest.getCookies());
 				productLine = getProductLine(cookies);
