@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
+import javax.management.RuntimeErrorException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -307,6 +308,9 @@ public class QueryDataResource extends BaseResource {
 //        			runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         		}
         		runtimeModel = new ReportRuntimeModel(reportId);
+        		if (model == null) {
+        			throw new RuntimeException("未加载到必须的报表模型");
+        		}
         		runtimeModel.init(model, true);
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
@@ -958,6 +962,9 @@ public class QueryDataResource extends BaseResource {
                 throw new RuntimeException(msg);
             }
             Item row = store.get(dimName);
+            if (row == null) {
+            		throw new IllegalStateException("未找到下钻节点 -" + dimName);
+            }
             oriQueryParams.putAll(request.getParameterMap());
             String[] drillName = new String[]{drillTargetUniqueName};
             oriQueryParams.put(row.getOlapElementId(), drillName);
@@ -1520,6 +1527,7 @@ public class QueryDataResource extends BaseResource {
     		ReportRuntimeModel model = reportModelCacheManager.getRuntimeModel(reportId);
     		
     		ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
+    		areaContext.getParams().put(Constants.NEED_LIMITED, false);
     		QueryAction action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
         if (action != null) {
             action.setChartQuery(false);
