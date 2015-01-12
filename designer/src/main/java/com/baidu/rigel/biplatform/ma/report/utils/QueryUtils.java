@@ -405,7 +405,7 @@ public class QueryUtils {
         if (logicModel == null) {
             throw new QueryModelBuildException("logic model is empty");
         }
-        Item[] items = logicModel.getItems();
+        Item[] items = logicModel.getItems(area.getType() != ExtendAreaType.TABLE);
         Map<String, Dimension> dimensions = new HashMap<String, Dimension>();
         Map<String, Measure> measures = new HashMap<String, Measure>();
         
