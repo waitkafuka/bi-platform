@@ -186,7 +186,7 @@ public class QueryContextBuilder {
                     filterValues.put(querySource, nodes);
                 }
             } else {
-                logger.warn("can not found member by query data:" + queryData);
+                logger.warn("can not found member by query data:{}", queryData);
             }
         }
 
@@ -254,7 +254,8 @@ public class QueryContextBuilder {
             logger.info("cost:{}ms,in build query data:{}",System.currentTimeMillis() - current, queryData);
             current = System.currentTimeMillis();
         }
-
+        // 非DESC的都按ASC排序。
+        nodeTree.sort(dimCondition.getMemberSortType());
         return nodeTree;
     }
 
