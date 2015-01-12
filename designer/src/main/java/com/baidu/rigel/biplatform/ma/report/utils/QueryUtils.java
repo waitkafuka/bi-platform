@@ -128,11 +128,13 @@ public class QueryUtils {
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
-        SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+        if (orderDesc != null) {
+        		SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+	        	String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
+	        	SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
+	        	questionModel.setSortRecord(sortRecord);
+        }
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
-        String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
-        SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
-        questionModel.setSortRecord(sortRecord);
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
         return questionModel;
     }
