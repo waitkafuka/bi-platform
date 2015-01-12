@@ -54,4 +54,12 @@ public interface DataSourceManager {
      * @throws IllegalArgumentException key is null
      */
     void removeDataSource(String key);
+    
+    
+    /** 
+     * updateDataSource
+     * @param dataSourceInfo
+     * @throws DataSourceException
+     */
+    void updateDataSource(DataSourceInfo dataSourceInfo) throws DataSourceException;
 }
