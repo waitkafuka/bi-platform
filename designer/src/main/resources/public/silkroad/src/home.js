@@ -47,7 +47,8 @@
             sign_enter: $('#sign-enter'),
             register_enter: $('#register-enter'),
             prompt: $('.prompt'),
-            body: $('body')
+            body: $('body'),
+            validate_code: $('.validate-code')
         };
         bindEvents();
     });
@@ -65,11 +66,29 @@
         signIn();
         // 注册事件
         registerIn();
-        $('.validate-code').click(function () {
+        // 验证码点击刷新
+        clickRefreshValidateCode();
+    }
+    /**
+     * 验证码点击刷新
+     */
+    var clickRefreshValidateCode = function () {
+        var $validate = dom.validate_code;
+        $validate.click(function () {
             var src = $(this).attr('src');
             $(this).attr('src', src + '?' + Math.random());
         });
-    }
+    };
+    /**
+     * 验证码刷新
+     */
+    var refreshValidateCode = function () {
+        var $validate = dom.validate_code;
+        $validate.each(function () {
+            var src = $(this).attr('src');
+            $(this).attr('src', src + '?' + Math.random());
+        });
+    };
     /**
      * 注册按钮以及回车触发事件函数
      */
@@ -158,6 +177,8 @@
                         }
                         else {
                             alert('注册失败：' + msg.statusInfo);
+                            // 注册失败验证码刷新
+                            refreshValidateCode();
                         }
                         //$.get('www.baidu.com');
                         //$("#resText").html(msg);
@@ -250,6 +271,8 @@
 //                        $pass.next('div').html(errorsign);
 //                        $usename.next('div').html(errorsign);
                         $signvalidateCode.parent().next('div').html(msg.statusInfo);
+                        // 登录失败验证码刷新
+                        refreshValidateCode();
                     }
                 }
             });
