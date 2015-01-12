@@ -33,11 +33,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.sql.DataSource;
-
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
 import com.google.common.collect.Lists;
@@ -55,7 +54,7 @@ public class DynamicSqlDataSource {
     /**
      * LOGGER
      */
-    private static final Logger LOGGER = Logger.getLogger(DynamicSqlDataSource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DynamicSqlDataSource.class);
 
     /**
      * TEST_SQL 测试数据库连接的SQL
@@ -65,7 +64,7 @@ public class DynamicSqlDataSource {
     /**
      * validInterval 检测频率
      */
-    private long validInterval = 1000L;
+    private long validInterval = 10000L;
 
     /**
      * dataSources 数据源
@@ -155,6 +154,21 @@ public class DynamicSqlDataSource {
         accessValidDataSourceKeys.remove(dataSourceKey);
         failedMap.remove(dataSourceKey);
         return dataSources.remove(dataSourceKey);
+    }
+    
+    
+    /** 
+     * clearDataSourceFailCount
+     */
+    public void clearDataSourceFailCount() {
+        if(MapUtils.isNotEmpty(failedMap)) {
+            final long current = System.currentTimeMillis();
+            failedMap.forEach((key, ds) -> {
+                if(ds.getFailCount() >= 5 && (ds.getFailTime() - current) / (36 * 2 * 1e5) > 1){
+                    ds.resetFailCount();
+                }
+            });
+        }
     }
 
     /**
@@ -300,7 +314,7 @@ public class DynamicSqlDataSource {
         /**
          * Logger for this class
          */
-        private static final Logger LOGGER = Logger.getLogger(DataSourceRecoverHeartBeat.class);
+        private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceRecoverHeartBeat.class);
 
         /**
          * dynamicDataSource
@@ -346,23 +360,29 @@ public class DynamicSqlDataSource {
             while (!dynamicDataSource.failedMap.isEmpty() && !close) {
 
                 // copy data
-                Map<String, DataSource> dataSourceMapCopy;
-                dataSourceMapCopy = new HashMap<String, DataSource>(dynamicDataSource.failedMap);
+                Map<String, SqlDataSourceWrap> dataSourceMapCopy;
+                dataSourceMapCopy = new HashMap<String, SqlDataSourceWrap>(dynamicDataSource.failedMap);
 
-                Iterator<Entry<String, DataSource>> iter;
+                Iterator<Entry<String, SqlDataSourceWrap>> iter;
                 iter = dataSourceMapCopy.entrySet().iterator();
                 while (iter.hasNext()) {
-                    Entry<String, DataSource> next = iter.next();
-                    DataSource ds = next.getValue();
-                    Connection con = null;
+                    Entry<String, SqlDataSourceWrap> next = iter.next();
+                    SqlDataSourceWrap ds = next.getValue();
                     String key = next.getKey();
+                    if(ds.getFailCount() >= 10) {
+                        LOGGER.warn("Datasource key {} has fail more than 5 time,skip.", key );
+                        continue;
+                    }
+                    Connection con = null;
                     try {
                         con = ds.getConnection();
                         dynamicDataSource.validateConnection(con);
                         LOGGER.debug("Datasource key='" + key + "' valid ok.");
                         dynamicDataSource.failedMap.remove(key);
+                        ds.resetFailCount();
                     } catch (SQLException e) {
                         LOGGER.warn("Datasource key='" + key + "' valid failed.");
+                        ds.increaseFailCount();
                     } finally {
                         if (con != null) {
                             try {
@@ -439,5 +459,14 @@ public class DynamicSqlDataSource {
      */
     public void setLastSuccessGetDataSourcTime(long lastSuccessGetDataSourcTime) {
         this.lastSuccessGetDataSourcTime = lastSuccessGetDataSourcTime;
+    }
+
+    /** 
+     * 获取 dataSources 
+     * @return the dataSources 
+     */
+    public Map<String, SqlDataSourceWrap> getDataSources() {
+    
+        return dataSources;
     }
 }

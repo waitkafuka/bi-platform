@@ -244,7 +244,7 @@ define(
             caption: '日历',
             iconClass: 'calendar',
             defaultWidth: 500,
-            defaultHeight: 27,
+            defaultHeight: 47,
             vm: {
                 render: function (data) {
                     return CalendarVmTemplate.render({

@@ -50,8 +50,11 @@ define([
                 'click .j-set-topn': 'getTopnList',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
-                'change .select-type': 'selectTypeChange'
+                'change .select-type': 'selectTypeChange',
+                'change .select-skin': 'selectSkinChange'
             },
+            // 下拉框样式类型ID
+            selected: 0,
             /**
              * 下拉框类型改变
              *
@@ -94,6 +97,46 @@ define([
                 this.model.canvasModel.saveJsonVm(
                     this.canvasView.showReport.call(this.canvasView)
                 );
+                //this.selectSkinChange();
+            },
+
+            /**
+             * 下拉框皮肤改变
+             *
+             * @param {event} event 点击事件（报表组件上的编辑按钮）
+             * @public
+             */
+            selectSkinChange: function () {
+                var $ele = this.$el.find(("[data-component-type='SELECT']"));
+                var $selects = $ele.find("[class *='comp-box']");
+                var skintype = $('.select-skin').val();
+                var $selectoption = $("[class *='ui-multi-select-options ui-panel']");
+                if (skintype == 'lightblue') {
+                    this.selected = 'lightblue';
+                    $selects.each(function () {
+                        var  $this = $(this).children().eq(0);
+                        $this.addClass('lightblue-border');
+                        $this.find('span').eq(1).addClass('lightblue-background-sele');
+                    });
+                    $selectoption.each(function () {
+                        var  $this = $(this);
+                        $this.addClass('lightblue-border');
+                        $this.find('[class *= "ui-multi-select-item-icon"]').addClass('lightblue-checkbox');
+                    });
+                }
+                else if (skintype == 'classics') {
+                    this.selected = 'classics';
+                    $selects.each(function () {
+                        var  $this = $(this).children().eq(0);
+                        $this.removeClass('lightblue-border');
+                        $this.find('span').eq(1).removeClass('lightblue-background-sele');
+                    });
+                    $selectoption.each(function () {
+                        var  $this = $(this);
+                        $this.removeClass('lightblue-border');
+                        $this.find('[class *= "ui-multi-select-item-icon"]').removeClass('lightblue-checkbox');
+                    });
+                }
             },
 
             /**
@@ -129,7 +172,6 @@ define([
                 var compMold = $shell.attr('data-mold');
                 that.model.compId = compId;
                 that.model.compType = compType;
-
                 // 需要先处理一下之前可能存在的编辑条与active状态
                 that.hideEditBar();
 
@@ -145,7 +187,17 @@ define([
                     $shell.addClass('active').mouseout();
                     // 初始化横轴和纵轴数据项的顺序调整
                     that.initSortingItem();
-
+                    // 设置样式下拉菜单默认值
+                    var $selectparent = $target.parent().parent();
+                    var $skin = that.$el.find('.select-skin');
+                    if($selectparent.attr('data-component-type') == 'SELECT') {
+                        if (that.selected == 'lightblue') {
+                            $skin.val('lightblue');
+                        }
+                        else if (that.selected == 'classics') {
+                            $skin.val('classics');
+                        }
+                    }
                     // 调整画布大小
                     that.canvasView.parentView.ueView.setSize();
                 });

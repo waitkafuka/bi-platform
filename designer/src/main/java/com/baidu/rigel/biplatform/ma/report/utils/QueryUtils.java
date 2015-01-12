@@ -128,11 +128,13 @@ public class QueryUtils {
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
-        SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+        if (orderDesc != null) {
+        		SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+	        	String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
+	        	SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
+	        	questionModel.setSortRecord(sortRecord);
+        }
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
-        String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
-        SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
-        questionModel.setSortRecord(sortRecord);
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
         return questionModel;
     }
@@ -207,7 +209,7 @@ public class QueryUtils {
         items.putAll(queryAction.getColumns());
         items.putAll(queryAction.getRows());
         items.putAll(queryAction.getSlices());
-        int i = 0;
+        int firstIndex = 0;
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
@@ -280,15 +282,18 @@ public class QueryUtils {
                         datas.add(data);
                     } else if (dim.getType() == DimensionType.CALLBACK) {
                     		QueryData data = new QueryData(dim.getAllMember().getUniqueName());
-                        data.setExpand(i == 0);
-                        data.setShow(i != 0);
+                        data.setExpand(firstIndex == 0);
+                        data.setShow(firstIndex != 0);
                         datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
-                ++i;
+                // 时间维度，并且在第一列位置，后续改成可配置方式
+                if (olapElement instanceof TimeDimension && firstIndex == 0) {
+                		condition.setMemberSortType(SortType.DESC);
+                }
+                ++firstIndex;
                 rs.put(condition.getMetaName(), condition);
-                
             }
         }
         return rs;
@@ -402,7 +407,7 @@ public class QueryUtils {
         if (logicModel == null) {
             throw new QueryModelBuildException("logic model is empty");
         }
-        Item[] items = logicModel.getItems();
+        Item[] items = logicModel.getItems(area.getType() != ExtendAreaType.TABLE);
         Map<String, Dimension> dimensions = new HashMap<String, Dimension>();
         Map<String, Measure> measures = new HashMap<String, Measure>();
         

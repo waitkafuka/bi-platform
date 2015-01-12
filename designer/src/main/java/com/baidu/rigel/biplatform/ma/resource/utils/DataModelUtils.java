@@ -480,7 +480,11 @@ public class DataModelUtils {
                 if (!headField.isHasChildren()) {
                     rowField.setExpand(null);
                 } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
-                    rowField.setExpand(false);
+                		if (headField.getLeafSize() == 0 && headField.getParent() == null) {
+                			rowField.setExpand(null);
+                		} else{
+                			rowField.setExpand(false);
+                		}
                 } else {
                     rowField.setExpand(true);
                 }

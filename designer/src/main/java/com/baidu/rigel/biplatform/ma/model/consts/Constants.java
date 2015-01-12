@@ -47,4 +47,6 @@ public interface Constants {
     String TOP = "top";
     
     String RANDOMCODEKEY = "RANDOMVALIDATECODEKEY";
+    
+    String NEED_LIMITED = "needLimited";
 }

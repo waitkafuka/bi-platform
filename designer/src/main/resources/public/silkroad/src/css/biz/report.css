@@ -205,15 +205,12 @@
     box-shadow: 0px 0px 5px 3px #FA5C10;
 }
 .shell-component .con-edit-btns {
-    background: #ffffff;
-    border: 1px solid rgba(0, 119, 119, 0.17);
+    /*border: 1px solid rgba(0, 119, 119, 0.17);*/
     position: absolute;
     top: -1px;
-    left: -1px;
-    padding: 5px;
+    right: 0;
     white-space: nowrap;
-    width: 1px;
-    height: 1px;
+    height: 20px;
     overflow: hidden;
 }
 .con-edit-btns .fold {
@@ -248,6 +245,9 @@
 .shell-component .guide-line {
     position: absolute;
     overflow: hidden;
+}
+.hide {
+    display: none;
 }
 .guide-top {
     top: -1px;
@@ -666,7 +666,7 @@
 /* 文本框组件样式 */
 .text-div {
     width: 100%;
-    height: 100%;
+    height: 30px;
     border: 0;
     cursor: pointer;
     color: #000;
@@ -719,4 +719,9 @@
 /* 表格空指标提示样式 */
 .table-norm-empty {
     margin-left: 35px;
+}
+
+/* 下拉框皮肤样式 */
+.select-skin option{
+    height: 20px;
 }

@@ -251,20 +251,35 @@ public class LogicModel implements Serializable {
         /**
          * 这里一定要使用linkedHashMap，保留顺序
          */
-        Map<String, Item> allItems = collectItems();
+        Map<String, Item> allItems = collectItems(true);
+        return allItems.values().toArray(new Item[0]);
+    }
+    
+    /**
+     * 获取当前模型引用的所有维度、指标信息
+     * 
+     * @return
+     */
+    public Item[] getItems(boolean needSelDimMeasures) {
+        /**
+         * 这里一定要使用linkedHashMap，保留顺序
+         */
+        Map<String, Item> allItems = collectItems(needSelDimMeasures);
         return allItems.values().toArray(new Item[0]);
     }
 
 	/**
 	 * @return
 	 */
-	private Map<String, Item> collectItems() {
+	private Map<String, Item> collectItems(boolean needSelDimMeasures) {
 		Map<String, Item> allItems = new LinkedHashMap<String, Item>();
         allItems.putAll(this.columns);
         allItems.putAll(this.rows);
         allItems.putAll(this.slices);
-        allItems.putAll(this.getSelectionDims());
-        allItems.putAll(this.getSelectionMeasures());
+        if (needSelDimMeasures) {
+	        	allItems.putAll(this.getSelectionDims());
+	        	allItems.putAll(this.getSelectionMeasures());
+        }
 		return allItems;
 	}
     
@@ -275,7 +290,7 @@ public class LogicModel implements Serializable {
 	 */
     public Item getItem(String itemId) {
     		// TODO 优先查找非选择轴上的，此处需要优化
-        Map<String, Item> allItems = collectItems();
+        Map<String, Item> allItems = Maps.newHashMap();//collectItems(true);
         allItems.putAll(this.columns);
         allItems.putAll(this.rows);
         allItems.putAll(this.slices);
@@ -302,7 +317,7 @@ public class LogicModel implements Serializable {
     }
     
     public boolean containsOlapElement(String olapElementId) {
-        return collectItems().containsKey(olapElementId);
+        return collectItems(true).containsKey(olapElementId);
     }
 
     /**

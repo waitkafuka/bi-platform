@@ -95,6 +95,11 @@ public class ReportRuntimeModel implements Serializable {
     private Map<String, Map<String, Item>> universalItemStore = Maps.newHashMap();
     
     /**
+     * 报表静态模型，要求在查询过程中，静态模型不变
+     */
+    private ReportDesignModel model;
+    
+    /**
      * @return the universalItemStore
      */
     public Map<String, Map<String, Item>> getUniversalItemStore() {
@@ -193,6 +198,7 @@ public class ReportRuntimeModel implements Serializable {
 //        }
         context = new QueryContext();
         isInited = true;
+        this.model = model;
         updateLogicModels(model);
         updateDimStores(model);
     }
@@ -295,6 +301,7 @@ public class ReportRuntimeModel implements Serializable {
     }
     
     public void updateDimStores(ReportDesignModel model) {
+    		this.model = model;
         ExtendArea[] areas = model.getExtendAreaList();
         if (areas == null || areas.length == 0) {
             return;
@@ -532,4 +539,20 @@ public class ReportRuntimeModel implements Serializable {
     public Map<String, QueryContext> getLocalContext() {
         return this.localContext;
     }
+
+	/**
+	 * @return the model
+	 */
+	public ReportDesignModel getModel() {
+		return model;
+	}
+
+	/**
+	 * @param model the model to set
+	 */
+	public void setModel(ReportDesignModel model) {
+		this.model = model;
+	}
+    
+    
 }

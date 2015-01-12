@@ -19,7 +19,9 @@ define([
         return Backbone.View.extend({
             // 事件
             events: {
-                'change #component-group-selector': 'showCompByGroup'
+                'change #component-group-selector': 'showCompByGroup',
+                'mouseover .j-component-border': 'showEditor',
+                'mouseout .j-component-border': 'hideEditor'
                 //'click .j-component-box-fold': 'fold'
             },
 
@@ -136,6 +138,30 @@ define([
                 }
             },
             **/
+
+            /**
+             * 组件编辑区域移入出现
+             *
+             * @public
+             */
+            showEditor: function () {
+                var $compElement = this.$el.find($('.j-component-border'));
+                $compElement.mouseover(function () {
+                    $(this).find('.con-edit-btns').show();
+                });
+            },
+
+            /**
+             * 组件编辑区域移出隐藏
+             *
+             * @public
+             */
+            hideEditor: function () {
+                var $compElement = this.$el.find($('.j-component-border'));
+                $compElement.mouseout(function () {
+                    $(this).find('.con-edit-btns').hide();
+                });
+            },
 
             /**
              * 销毁view

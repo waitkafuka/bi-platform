@@ -311,11 +311,11 @@ define([
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
                 // 固定单选下拉框的高度
-                that.dragWidthHeight($component, 'SELECT', 27, 27);
+                that.dragWidthHeight($component, 'SELECT', 47, 47);
                 // 固定多选下拉框的高度
-                that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
+                that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 30, 30);
+                that.dragWidthHeight($component, 'TEXT', 50, 50);
             },
 
             /**
@@ -380,6 +380,7 @@ define([
                         $($component[i]).find('.j-setting').remove();
                     }
                 }
+                /**
                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
                     if ($conBtn.width() < 20) {
@@ -393,6 +394,7 @@ define([
                         $(this).html('+');
                     }
                 });
+                **/
             },
 
             /**

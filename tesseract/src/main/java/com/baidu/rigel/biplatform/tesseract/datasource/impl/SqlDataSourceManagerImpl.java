@@ -19,8 +19,10 @@
 package com.baidu.rigel.biplatform.tesseract.datasource.impl;
 
 import java.beans.PropertyVetoException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -33,6 +35,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourceManager;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourceWrap;
 import com.baidu.rigel.biplatform.tesseract.datasource.DynamicSqlDataSource;
@@ -143,6 +146,9 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
                         log.warn("destroy datasource error:" + entry.getKey());
                         e.printStackTrace();
                     }
+                } else {
+                    entry.getValue().clearDataSourceFailCount();
+                    
                 }
             }
         }
@@ -209,7 +215,7 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
 
             String dataSourceKey =
                     generateDataSourceKey(dataSourceInfo.getProductLine(), dataSourceInfo.getHosts().get(i),
-                            dataSourceInfo.getInstanceName(), dataSourceInfo.getUsername()).replace(":", DATASOURCEKEY_SEPRATE);
+                            dataSourceInfo.getInstanceName(), dataSourceInfo.getUsername(), Md5Util.encode(dataSourceInfo.toString())).replace(":", DATASOURCEKEY_SEPRATE);
             if (dataSourceInfo.isDBProxy()) {
                 // dbproxy需要直连
                 DriverManagerDataSource dataSource = new DriverManagerDataSource();
@@ -267,19 +273,26 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
         return new DynamicSqlDataSource(dataSources);
     }
 
-    /**
+    
+    /** 
      * 生成动态数据源内部管理数据源的KEY
-     * 
+     * generateDataSourceKey
+     * @param productLine
      * @param address 数据库地址
      * @param instance 数据库名
      * @param user 用户名
+     * @param md5
      * @return 返回数据源的KEY
      */
-    private String generateDataSourceKey(String productLine, String address, String instance, String user) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(productLine).append(DATASOURCEKEY_SEPRATE);
-        sb.append(address).append(DATASOURCEKEY_SEPRATE).append(instance).append(DATASOURCEKEY_SEPRATE).append(user);
-        return sb.toString();
+    private String generateDataSourceKey(String productLine, String address, String instance, String user, String md5) {
+        List<String> params = new ArrayList<>();
+        params.add(productLine);
+        params.add(address);
+        params.add(instance);
+        params.add(user);
+        params.add(md5);
+        
+        return StringUtils.join(params, DATASOURCEKEY_SEPRATE);
     }
 
     @Override
@@ -317,6 +330,12 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
      */
     public void setExpireDataSource(long expireDataSource) {
         this.expireDataSource = expireDataSource;
+    }
+
+    @Override
+    public void updateDataSource(DataSourceInfo dataSourceInfo) throws DataSourceException {
+        // TODO Auto-generated method stub
+        
     }
 
 }
