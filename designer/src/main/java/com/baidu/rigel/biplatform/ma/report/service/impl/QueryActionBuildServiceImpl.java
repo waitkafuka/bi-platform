@@ -153,8 +153,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     public QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
             Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
                     throws QueryModelBuildException {
-        
-        ExtendArea targetArea = model.getExtendById(areaId);
+        ExtendArea targetArea = DeepcopyUtils.deepCopy(model).getExtendById(areaId);
         LogicModel targetLogicModel = null;
         String cubeId = targetArea.getCubeId();
         /**
@@ -260,10 +259,11 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             for (String indName : indNames) {
                 cols.add(liteOlapArea.listAllItems().get(indName));
             }
-            targetLogicModel = analysisChartBuildService.generateTrendChartModel(targetLogicModel,
-                    model.getSchema(), liteOlapArea.getCubeId(), rows, cols, timeDimItem);
+            LogicModel tmp = analysisChartBuildService.generateTrendChartModel(targetLogicModel,
+                    model.getSchema(), liteOlapArea.getCubeId(),
+                    DeepcopyUtils.deepCopy(rows), DeepcopyUtils.deepCopy(cols), timeDimItem);
             return generateQueryAction(model.getSchema(),
-                    cubeId, targetLogicModel, context, logicModelAreaId, true, model);
+                    cubeId, tmp, context, logicModelAreaId, true, model);
         } else {
             targetLogicModel = targetArea.getLogicModel();
             LogicModel cpModel = DeepcopyUtils.deepCopy(targetArea.getLogicModel());
@@ -377,10 +377,12 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
 	        		}).map(item -> {
 	        			return cube.getMeasures().get(item.getOlapElementId());
 	        		}).toArray(Measure[] :: new);
-	        		if (tmp != null && tmp.length > 0) {
+	        		if (tmp != null && tmp.length > 0 && context.get(Constants.NEED_LIMITED) == null) {
 	        			orderDesc = new QueryAction.MeasureOrderDesc(
 	        					tmp[0].getName(), 
 	        					"NONE", 500);
+	        		} else {
+	        			context.remove(Constants.NEED_LIMITED);
 	        		}
 	        } else {
 	        		orderDesc = new QueryAction.MeasureOrderDesc(
@@ -527,12 +529,14 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                  *  仅处理单选
                  */
                 String[] days = new String[range.getDays().length];
+                StringBuilder message = new StringBuilder();
                 for (int i = 0; i < days.length; i++) {
                     days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
+                    message.append(" " + days[i]);
                 }
                 value = days;
                 itemValues.put(item, value);
-                logger.debug(value.toString());
+                logger.debug("[DEBUG] --- ---" + message);
             } else if (value instanceof String && !StringUtils.isEmpty(value)) {
             		itemValues.put(item, value.toString().split(","));
             } else {

@@ -284,11 +284,16 @@ public class SqlDataSourceInfo implements DataSourceInfo {
         return dataSourceType;
     }
 
+    
+    /*
+     * (non-Javadoc) 
+     * @see java.lang.Object#toString() 
+     */
     @Override
     public String toString() {
-        return "SqlDataSourceInfo [dataSourceKey=" + dataSourceKey + ", hosts=" + hosts + ", username=" + username
-                + instanceName + ", isDBProxy=" + isDBProxy + ", description=" + description + ", dataBase=" + dataBase
-                + ", jdbcUrls=" + jdbcUrls + "]";
+        return "SqlDataSourceInfo [dataSourceKey=" + dataSourceKey + ", hosts=" + hosts + ", jdbcUrls=" + jdbcUrls
+                + ", username=" + username + ", instanceName=" + instanceName + ", isDBProxy=" + isDBProxy
+                + ", dbPoolInfo=" + dbPoolInfo + ", dataBase=" + dataBase + "]";
     }
 
     /**
@@ -545,6 +550,12 @@ public class SqlDataSourceInfo implements DataSourceInfo {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String getDataSourceKey() {
+        return this.dataSourceKey;
+        
     }
 
 }

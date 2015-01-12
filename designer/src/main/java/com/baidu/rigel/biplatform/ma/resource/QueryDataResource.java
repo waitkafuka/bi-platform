@@ -188,7 +188,7 @@ public class QueryDataResource extends BaseResource {
     			logger.info("[INFO]--- --- not needed init global params");
     	        return rs;
     		}
-    		final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+    		final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
     		Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
     		for (final String areaId : areaIds) {
 			ExtendArea area = model.getExtendById(areaId);
@@ -232,6 +232,14 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO]--- --- successfully init params, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
     }
+
+	/**
+	 * @param reportId
+	 * @return ReportDesignModel
+	 */
+	ReportDesignModel getDesignModelFromRuntimeModel(String reportId) {
+		return reportModelCacheManager.getRuntimeModel(reportId).getModel();
+	}
     
     /**
      * 
@@ -255,12 +263,12 @@ public class QueryDataResource extends BaseResource {
     		logger.info("[INFO] --- --- begin query report model");
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId); // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e1) {
         		logger.info("[INFO]--- --- can't not get report form cache", e1.getMessage());
             return ResourceUtils.getErrorResult(e1.getMessage(), ResponseResult.FAILED);
         }
-        reportModelCacheManager.loadReportModelToCache(reportId);
+//        reportModelCacheManager.loadReportModelToCache(reportId);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", model);
         logger.info("[INFO] --- --- query report model successuffly, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
@@ -284,14 +292,25 @@ public class QueryDataResource extends BaseResource {
         String reportPreview = request.getParameter("reportPreview");
         ReportRuntimeModel runtimeModel = null;
         try {
-        		if (StringUtils.isEmpty(reportPreview) || Boolean.valueOf(reportPreview)) {
-        			model = reportModelCacheManager.getReportModel(reportId);
-        			runtimeModel = new ReportRuntimeModel(reportId);
-        			runtimeModel.init(model, true);
+        		if (!StringUtils.isEmpty(reportPreview) && Boolean.valueOf(reportPreview)) {
+        			model = DeepcopyUtils.deepCopy(reportModelCacheManager.getReportModel(reportId));
+        			// 这里需要重新生成session id 并且放到cookie中
+        			// 这里需要将此处逻辑抽象到工具类中
+//        			String sessionId = UuidGeneratorUtils.generate();
+//        			ContextManager.cleanSessionId();
+//        			ContextManager.setSessionId(sessionId);
+//        			Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID,sessionId);
+//        			sessionIdCookie.setPath(Constants.COOKIE_PATH);
+//        			response.addCookie(sessionIdCookie);
         		} else {
-        			model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
-        			runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
+        			model = reportDesignModelService.getModelByIdOrName(reportId, true);
+//        			runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
         		}
+        		runtimeModel = new ReportRuntimeModel(reportId);
+        		if (model == null) {
+        			throw new RuntimeException("未加载到必须的报表模型");
+        		}
+        		runtimeModel.init(model, true);
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
             throw new IllegalStateException();
@@ -306,11 +325,11 @@ public class QueryDataResource extends BaseResource {
         // 添加cookie内容
         runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
         
-        if (model == null) {
-        		logger.info("[INFO]--- --- can't get model form cache, please check it!");
-            return "";
-        }
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        if (model == null) {
+//        		logger.info("[INFO]--- --- can't get model form cache, please check it!");
+//            return "";
+//        }
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
         StringBuilder builder = buildVMString(reportId, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
@@ -385,7 +404,7 @@ public class QueryDataResource extends BaseResource {
     		long begin = System.currentTimeMillis();
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]--- ---There are no such model in cache. Report Id: " + reportId, e);
             throw new IllegalStateException();
@@ -442,7 +461,7 @@ public class QueryDataResource extends BaseResource {
             
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
         logger.info("[INFO] successfully init runtime evn, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
@@ -474,7 +493,8 @@ public class QueryDataResource extends BaseResource {
         }
         runTimeModel.getContext().reset();
         runTimeModel.getContext().setParams(newParams);
-        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ReportDesignModel model = runTimeModel.getModel(); 
+        //reportModelCacheManager.getReportModel(reportId);
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
@@ -578,7 +598,8 @@ public class QueryDataResource extends BaseResource {
          */
         ReportDesignModel model;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = getDesignModelFromRuntimeModel(reportId);
+            		// reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             ResponseResult rs = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -670,7 +691,7 @@ public class QueryDataResource extends BaseResource {
                     runTimeModel.getSelectedRowIds().add(rowDefine.getUniqueName());
                 }
             }
-            String[] dims = new String[0];
+//            String[] dims = new String[0];
             if (table.getDataSourceColumnBased().size() == 0) {
             		ResponseResult rs = new ResponseResult();
             		rs.setStatus(1);
@@ -681,28 +702,26 @@ public class QueryDataResource extends BaseResource {
             }
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
-            resultMap.put("mainDimNodes", dims);
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getDataRows());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
             List<Map<String, String>> mainDims = Lists.newArrayList();
-            Map<String, String> root = areaContext.getCurBreadCrumPath();
-            if (root == null) {
-            		root = genRootDimCaption(table);
-            		areaContext.setCurBreadCrumPath(root);
+            Map<String, String> root =  genRootDimCaption(table);
+            	areaContext.setCurBreadCrumPath(root);
+            if (action.getRows().size() >= 2) {
+//            		resultMap.put("mainDimNodes", dims);
+	            	// 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
+	            	if (!root.get("uniqName").toLowerCase().contains("all")) {
+	            		root.put("uniqName", root.get("uniqName"));
+	            		root.put("showName", "全部");
+//	            		runTimeModel.getContext().put(vertualDimKey, action);
+	            	}
+	            	mainDims.add(root);
+	            	Collections.reverse(mainDims);
+	            	areaContext.setCurBreadCrumPath(root);
+	            	resultMap.put("mainDimNodes", mainDims);
             }
-            // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
-            if (!root.get("uniqName").toLowerCase().contains("all")) {
-                String vertualDimKey = "[vertual_all]";
-                root.put("uniqName", vertualDimKey);
-                root.put("showName", "全部");
-                runTimeModel.getContext().put(vertualDimKey, action);
-            }
-            mainDims.add(root);
-            resultMap.put("mainDimNodes", mainDims);
 //            runTimeModel.getContext().put(areaId, root);
-            Collections.reverse(mainDims);
-            areaContext.setCurBreadCrumPath(root);
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
@@ -883,7 +902,8 @@ public class QueryDataResource extends BaseResource {
         String uniqueName = request.getParameter("uniqueName");
         ReportDesignModel model;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId);
+            // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]------Can not find such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -924,7 +944,7 @@ public class QueryDataResource extends BaseResource {
             logger.error(msg);
             return ResourceUtils.getErrorResult(msg, 1);
         }
-        QueryAction action = (QueryAction) runTimeModel.getContext().get(uniqueName);
+        QueryAction action = null; //(QueryAction) runTimeModel.getContext().get(uniqueName);
         String drillTargetUniqueName = uniqNames[uniqNames.length - 1];
         logger.info("[INFO] drillTargetUniqueName : {}", drillTargetUniqueName);
         boolean isRoot = drillTargetUniqueName.toLowerCase().contains("all");
@@ -939,6 +959,9 @@ public class QueryDataResource extends BaseResource {
                 throw new RuntimeException(msg);
             }
             Item row = store.get(dimName);
+            if (row == null) {
+            		throw new IllegalStateException("未找到下钻节点 -" + dimName);
+            }
             oriQueryParams.putAll(request.getParameterMap());
             String[] drillName = new String[]{drillTargetUniqueName};
             oriQueryParams.put(row.getOlapElementId(), drillName);
@@ -946,6 +969,8 @@ public class QueryDataResource extends BaseResource {
              * update context
              */
             Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
+            // TODO 仔细思考一下逻辑
+            reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
             runTimeModel.getContext().put(uniqueName, action);
             /**
@@ -1007,6 +1032,7 @@ public class QueryDataResource extends BaseResource {
             runTimeModel.getContext().put("bread_key", mainDims);
         } 
         areaContext.getQueryStatus().add(result);
+        // 更新局部区域参数，避免漏掉当前请求查询的
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
@@ -1062,7 +1088,8 @@ public class QueryDataResource extends BaseResource {
 //        String uniqueName = request.getParameter("uniqueName");
         ReportDesignModel model;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId); 
+            		// reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO] Can not find such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -1191,7 +1218,23 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("pivottable", table);
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
-            resultMap.put("mainDimNodes", runTimeModel.getContext().get("bread_key"));
+            Object breadCrum = runTimeModel.getContext().get("bread_key");
+            if (breadCrum == null) {
+            		List<Map<String, String>> mainDims = Lists.newArrayList();
+                do {
+                    Map<String, String> dims3 = Maps.newHashMap();
+                    dims3.put("uniqName", drillTargetUniqueName);
+                    String showName = genShowName(drillTargetUniqueName);
+                    showName = areaContext.getCurBreadCrumPath().get("showName");
+                    dims3.put("showName", showName);
+                    mainDims.add(dims3);
+                    drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
+                } while (drillTargetUniqueName != null && 
+                        !drillTargetUniqueName.toLowerCase().contains("all"));
+                Collections.reverse(mainDims);
+                breadCrum = mainDims;
+            }
+            resultMap.put("mainDimNodes", breadCrum);
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getActualSize());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
@@ -1252,7 +1295,8 @@ public class QueryDataResource extends BaseResource {
         }
         ReportDesignModel model = null;
         try {
-            model = reportModelCacheManager.getReportModel(reportId);
+            model = this.getDesignModelFromRuntimeModel(reportId);
+            // reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.error(e.getMessage(), e);
             ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -1341,7 +1385,8 @@ public class QueryDataResource extends BaseResource {
     		} else if (sort.equalsIgnoreCase("DESC")) {
     			sort = "ASC";
     		} 
-    		ReportDesignModel reportModel = reportModelCacheManager.getReportModel(reportId);
+    		ReportDesignModel reportModel = this.getDesignModelFromRuntimeModel(reportId);
+    				// reportModelCacheManager.getReportModel(reportId);
     		SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
     		ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
     		DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
@@ -1407,7 +1452,7 @@ public class QueryDataResource extends BaseResource {
         all.setCaption("全部");
         all.setNeedLimit(false);
         String name = "[" + dim.getName() + "]";
-        name += ".[All_" + dim.getName() + "]";
+        name += ".[All_" + dim.getName() + "s]";
         all.setName(name);
         all.setSelected(tmpKey.contains(name));
         rs.add(all);
@@ -1445,7 +1490,8 @@ public class QueryDataResource extends BaseResource {
             ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
             return rs;
         }
-        ReportDesignModel designModel = reportModelCacheManager.getReportModel(reportId);
+        ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
+        		// reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = designModel.getExtendById(areaId);
         
         String[] selectedDims = request.getParameterValues("selectedNodes");
@@ -1488,7 +1534,8 @@ public class QueryDataResource extends BaseResource {
     public ResponseResult download(@PathVariable("reportId") String reportId, @PathVariable("areaId")String areaId,
     		HttpServletRequest request, HttpServletResponse response) throws Exception {
     		long begin = System.currentTimeMillis();
-    		ReportDesignModel report  = reportModelCacheManager.getReportModel(reportId);
+    		ReportDesignModel report  = this.getDesignModelFromRuntimeModel(reportId);
+    				// reportModelCacheManager.getReportModel(reportId);
     		if (report == null) {
     			throw new IllegalStateException("未知报表定义，请确认下载信息");
     		}
@@ -1496,6 +1543,7 @@ public class QueryDataResource extends BaseResource {
     		ReportRuntimeModel model = reportModelCacheManager.getRuntimeModel(reportId);
     		
     		ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
+    		areaContext.getParams().put(Constants.NEED_LIMITED, false);
     		QueryAction action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
         if (action != null) {
             action.setChartQuery(false);

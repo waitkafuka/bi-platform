@@ -88,7 +88,7 @@ public class DIReportChart implements Serializable {
     /**
      * 分析指标中的最大值
      */
-    private BigDecimal maxValue = BigDecimal.valueOf(10000000000D);
+    private BigDecimal maxValue = BigDecimal.valueOf(100000);
     
     /**
      * 分析指标中的最小值

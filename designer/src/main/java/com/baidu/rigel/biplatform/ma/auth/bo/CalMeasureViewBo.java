@@ -122,7 +122,6 @@ public class CalMeasureViewBo implements Serializable {
         if (StringUtils.isNotEmpty(formula)) {
             String[] reference = this.formula.split("}");
             for (String tmp : reference) {
-                tmp.substring(tmp.indexOf("{") + 1);
                 this.referenceNames.add(tmp.substring(tmp.indexOf("{") + 1));
             }
         } else if (StringUtils.isNotEmpty(name)) {
