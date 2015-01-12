@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.yaml.snakeyaml.util.UriEncoder;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -1561,9 +1562,10 @@ public class QueryDataResource extends BaseResource {
     		String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
     		logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
     		response.setCharacterEncoding("utf-8");
-    		response.setContentType("application/vnd.ms-excel;charset=utf-8");
-    		response.setContentType("application/x-msdownload;charset=utf-8");
-    		response.setHeader("Content-Disposition", "attachment;filename=" + report.getName() + ".csv"); 
+    		response.setContentType("application/vnd.ms-excel;charset=GBK");
+    		response.setContentType("application/x-msdownload;charset=GBK");
+    		response.setHeader("Content-Disposition", "attachment;filename=" 
+    				+ UriEncoder.encode(report.getName()) + ".csv"); 
     		byte[] content = csvString.getBytes("GBK");
     		response.setContentLength(content.length);
     		OutputStream os = response.getOutputStream();
