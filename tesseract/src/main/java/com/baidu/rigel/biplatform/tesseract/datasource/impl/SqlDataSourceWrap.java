@@ -41,7 +41,11 @@ public class SqlDataSourceWrap implements DataSourceWrap, DataSource {
      * dataSource 实际的SQL操作的DataSource
      */
     private DataSource dataSource;
-
+    
+    private int failCount;
+    
+    private long failTime;
+    
     /**
      * construct with
      * 
@@ -108,6 +112,29 @@ public class SqlDataSourceWrap implements DataSourceWrap, DataSource {
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         return dataSource.getParentLogger();
+    }
+
+    @Override
+    public int getFailCount() {
+        return this.failCount;
+        
+    }
+
+    @Override
+    public void increaseFailCount() {
+        this.failCount++;
+        this.failTime = System.currentTimeMillis();
+    }
+
+    @Override
+    public void resetFailCount() {
+        this.failCount = 0;
+    }
+
+    @Override
+    public long getFailTime() {
+        return this.failTime;
+        
     }
 
 }
