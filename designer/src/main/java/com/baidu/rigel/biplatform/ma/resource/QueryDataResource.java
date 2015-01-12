@@ -25,7 +25,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
-import javax.management.RuntimeErrorException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -326,10 +325,10 @@ public class QueryDataResource extends BaseResource {
         // 添加cookie内容
         runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
         
-        if (model == null) {
-        		logger.info("[INFO]--- --- can't get model form cache, please check it!");
-            return "";
-        }
+//        if (model == null) {
+//        		logger.info("[INFO]--- --- can't get model form cache, please check it!");
+//            return "";
+//        }
 //        reportModelCacheManager.updateReportModelToCache(reportId, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);;
         StringBuilder builder = buildVMString(reportId, response, model);
@@ -1218,7 +1217,23 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("pivottable", table);
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
-            resultMap.put("mainDimNodes", runTimeModel.getContext().get("bread_key"));
+            Object breadCrum = runTimeModel.getContext().get("bread_key");
+            if (breadCrum == null) {
+            		List<Map<String, String>> mainDims = Lists.newArrayList();
+                do {
+                    Map<String, String> dims3 = Maps.newHashMap();
+                    dims3.put("uniqName", drillTargetUniqueName);
+                    String showName = genShowName(drillTargetUniqueName);
+                    showName = areaContext.getCurBreadCrumPath().get("showName");
+                    dims3.put("showName", showName);
+                    mainDims.add(dims3);
+                    drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
+                } while (drillTargetUniqueName != null && 
+                        !drillTargetUniqueName.toLowerCase().contains("all"));
+                Collections.reverse(mainDims);
+                breadCrum = mainDims;
+            }
+            resultMap.put("mainDimNodes", breadCrum);
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getActualSize());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
