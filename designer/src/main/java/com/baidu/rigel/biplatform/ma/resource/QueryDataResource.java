@@ -712,10 +712,9 @@ public class QueryDataResource extends BaseResource {
 //            		resultMap.put("mainDimNodes", dims);
 	            	// 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
 	            	if (!root.get("uniqName").toLowerCase().contains("all")) {
-	            		String vertualDimKey = "[vertual_all]";
-	            		root.put("uniqName", vertualDimKey);
+	            		root.put("uniqName", root.get("uniqName"));
 	            		root.put("showName", "全部");
-	            		runTimeModel.getContext().put(vertualDimKey, action);
+//	            		runTimeModel.getContext().put(vertualDimKey, action);
 	            	}
 	            	mainDims.add(root);
 	            	Collections.reverse(mainDims);
