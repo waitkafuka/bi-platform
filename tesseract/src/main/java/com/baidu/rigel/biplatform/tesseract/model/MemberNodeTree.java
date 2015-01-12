@@ -315,6 +315,9 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
                     return o1.getName().compareTo(o2.getName());
                 });
     	    }
+    	    this.children.forEach(o -> {
+    	       o.sort(sortType); 
+    	    });
 	    }
 	}
 }
