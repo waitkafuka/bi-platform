@@ -306,7 +306,7 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
 
 	public void sort(SortType sortType) {
 	    if(CollectionUtils.isNotEmpty(this.children)) {
-    	    if(sortType != SortType.DESC) {
+    	    if(sortType == SortType.DESC) {
 	            Collections.sort(this.children, (o1, o2) -> {
 	                return o2.getName().compareTo(o1.getName());
 	            });
