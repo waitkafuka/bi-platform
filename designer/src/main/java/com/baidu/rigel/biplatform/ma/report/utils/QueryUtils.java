@@ -207,7 +207,7 @@ public class QueryUtils {
         items.putAll(queryAction.getColumns());
         items.putAll(queryAction.getRows());
         items.putAll(queryAction.getSlices());
-        int i = 0;
+        int firstIndex = 0;
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
@@ -280,15 +280,18 @@ public class QueryUtils {
                         datas.add(data);
                     } else if (dim.getType() == DimensionType.CALLBACK) {
                     		QueryData data = new QueryData(dim.getAllMember().getUniqueName());
-                        data.setExpand(i == 0);
-                        data.setShow(i != 0);
+                        data.setExpand(firstIndex == 0);
+                        data.setShow(firstIndex != 0);
                         datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
-                ++i;
+                // 时间维度，并且在第一列位置，后续改成可配置方式
+                if (olapElement instanceof TimeDimension && firstIndex == 0) {
+                		condition.setMemberSortType(SortType.DESC);
+                }
+                ++firstIndex;
                 rs.put(condition.getMetaName(), condition);
-                
             }
         }
         return rs;
