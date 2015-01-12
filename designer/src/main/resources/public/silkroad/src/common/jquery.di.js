@@ -117,3 +117,31 @@ $.isObjectEmpty = function (obj) {
     }
     return flag;
 };
+
+// 获取到含有当前id的组件实例
+// TODO:写注释
+$.getTargetElement = function (id, entityArray) {
+    var target;
+    for (var i = 0, iLen = entityArray.length; i < iLen; i ++) {
+        if (entityArray[i].compId === id) {
+            target = entityArray[i];
+        }
+    }
+    return target;
+};
+
+// 判断当前实例中是否已有事件关联
+// TODO:写注释
+$.hasRelation = function (id, entity) {
+    var result = false;
+    if (entity.interactions) {
+        for (var i = 0, iLen = entity.interactions.length; i < iLen; i ++) {
+            if (entity.interactions[i].event.rid === id) {
+                result = true;
+            }
+        }
+    }
+    return result;
+};
+
+

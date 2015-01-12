@@ -161,7 +161,6 @@ define([
                 serverData
             ) {
                 var vm = createShell(serverData.id);
-
                 vm.html(
                     compData.vm.render({
                         rootId: rootId,

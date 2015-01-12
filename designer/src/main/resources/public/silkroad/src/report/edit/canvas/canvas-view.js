@@ -219,7 +219,8 @@ define([
                     compType,
                     // 创建组件的外壳
                     function (id) {
-                        $realComp.attr('data-comp-id', id);
+                        $realComp.attr('data-comp-id', dataCompId);
+                        $realComp.attr('report-comp-id', id);
                         return $realComp.clone();
                     },
                     function () {

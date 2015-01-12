@@ -195,7 +195,7 @@ $namespace('di.shared.ui');
                 offlineDownloadBtn
             ],
             'init'
-        )
+        );
         breadcrumb && breadcrumb.hide();
 
         this.$di('getEl').style.display = 'none';
@@ -214,7 +214,7 @@ $namespace('di.shared.ui');
                 this._uOfflineDownloadBtn
             ],
             'dispose'
-        )
+        );
         DI_TABLE.superClass.dispose.call(this);
     };
 

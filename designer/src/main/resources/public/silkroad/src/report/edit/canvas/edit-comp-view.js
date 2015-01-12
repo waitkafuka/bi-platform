@@ -19,6 +19,7 @@ define([
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'report/edit/canvas/topn-setting-template',
+        'report/edit/canvas/comp-relation-event-setting-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
         'report/edit/canvas/norm-info-depict-template'
@@ -36,6 +37,7 @@ define([
         defaultSelectedTimeSettingTemplate,
         dataFormatSettingTemplate,
         topnSettingTemplate,
+        compRelationEventSettingTemplate,
         FloatWindow,
         indMenuTemplate,
         normInfoDepictTemplate
@@ -48,9 +50,175 @@ define([
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
                 'click .j-set-topn': 'getTopnList',
+                'click .j-set-relation': 'setCompRelationEvent',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
                 'change .select-type': 'selectTypeChange'
+            },
+            //------------------------------------------
+            // 设置组件关联关系
+            //------------------------------------------
+
+            /**
+             * 设置组件关联关系
+             *
+             * @param {event} event 点击事件（报表组件上的 关联 按钮）
+             * @public
+             */
+            setCompRelationEvent: function (event) {
+                // 当前组件的compId
+                // var curCompId = this.$conCompSetting.find('.j-comp-setting').attr('data-comp-id');
+                var that = this;
+                var curCompId = that.getActiveCompId();
+//
+//                that.model.getTopnList(compId, openTopnDialog);
+                var reportJson = this.model.get('canvasModel').reportJson;
+                openTopnDialog();
+                // 渲染缩略图
+                var canvasWidth = $('.j-report').width();
+                // TODO:此高度好像是有问题的
+                var canvasHeight = $('.di-o_o-body').height();
+                var sumbnailWidth = $('.comp-realtion-box').width();
+                var sumbnailHeight = $('.comp-realtion-box').height();
+                // 获取缩略比例
+                var proportionW = sumbnailWidth / canvasWidth;
+                var proportionH = sumbnailHeight / canvasHeight;
+                // 获取到所有组件
+                var compItems = $('.j-report').find('.j-component-item');
+                compItems.each(function () {
+                    appendThumbnail($(this));
+                });
+                console.log('canvasWidth:' + canvasWidth
+                    + '; sumbnailWidth' + sumbnailWidth
+                    + ';比例：' + proportionW
+                    + ';compItems' + compItems.length
+                );
+                function openTopnDialog() {
+                    var html;
+                    html = compRelationEventSettingTemplate.render();
+                    dialog.showDialog({
+                        title: '组件关联关系设置',
+                        content: html,
+                        dialog: {
+                            width: 550,
+                            height: 550,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveCompRelation($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据关联关系
+                 */
+                function saveCompRelation($dialog) {
+                    // 获取到选中的待关联组件
+                    var entityDefs = reportJson.entityDefs;
+                    var $chks = $('input[name=comp-thumbnail]');
+                    var selCompIdArr = [];
+                    $chks.each(function () {
+                        selCompIdArr.push($(this).val());
+                    });
+                    // 循环遍历组件，往reportJson中添加关联关系
+                    for (var x = 0, xLen = selCompIdArr.length; x < xLen; x ++) {
+                        var curEntity = $.getTargetElement(selCompIdArr[x], entityDefs);
+                        var intTemp = {
+                            event: {
+                                rid: 'snpt.' + curCompId,
+                                name: 'rowselect'
+                            },
+                            action: {
+                                name: 'syncLiteOlapInds'
+                            },
+                            dataOpt: {
+                                needShowCalcInds: true,
+                                submitMode: 'IMMEDIATE',
+                                reportType: 'RTPL_OLAP_TABLE',
+                                datasourceId: {
+                                    SELECT: 'LIST_SELECT'
+                                }
+                            }
+                        };
+                        // 如果存在事件关联
+                        if (curEntity.interactions) {
+                            // 判断当前实例中是否已经有对应事件关联
+                            var hasRelation = $.hasRelation(curCompId, curEntity);
+                            if (!hasRelation) {
+                                curEntity.interactions.push(intTemp);
+                            }
+                        }
+                        else {
+                            curEntity.interactions = [];
+                            curEntity.interactions.push(intTemp);
+                        }
+                        console.dir(curEntity);
+                    }
+                    // TODO:保存json，关闭窗口
+                    // 保存vm与json，保存成功后展示报表
+//                    that.model.canvasModel.saveJsonVm(
+//                        this.canvasView.showReport.call(this.canvasView)
+//                    );
+                }
+                // 添加缩略图
+                function appendThumbnail($this) {
+                    var tW = $this.width();
+                    var tH = $this.height();
+                    var tL = parseInt($this.css('left'));
+                    var tT = parseInt($this.css('top'));
+                    var nW = tW * proportionW;
+                    var nH = tH * proportionH;
+                    var nT = tT * proportionH;
+                    var nL = tL * proportionW;
+                    var compType = $this.attr('data-component-type');
+                    var compId = $this.attr('data-comp-id');
+                    var imgName = '';
+                    switch (compType) {
+                        case 'CHART':
+                            imgName = 'pie';
+                            break;
+                        case 'TABLE':
+                            imgName = 'table';
+                            break;
+                    }
+                    var chkStr = '';
+                    if (curCompId !== compId) {
+                        chkStr = '<input type="checkbox" name="comp-thumbnail" value="' + compId + '"/>';
+                    }
+                    var $Div = $(
+                        ['<div class="comp-thumbnail">',
+                            chkStr,
+                            '<div class="comp-thumbnail-pic">',
+                                '<img src="src/css/img/thumbnail-', imgName, '.png"/>',
+                            '</div>',
+                        '</div>'].join('')
+                    );
+                    // 添加位置信息以及宽度高度
+                    $Div.css({
+                        width: nW + 'px',
+                        height: nH + 'px',
+                        left: nL + 'px',
+                        top: nT + 'px'
+                    });
+                    // 为缩略图添加对应的样式
+
+                    //  添加其他有用属性信息
+                    $Div.attr('data-component-type', compType);
+                    $Div.attr('data-mold', $this.attr('data-mold'));
+                    $Div.attr('data-comp-id', compId);
+                    $('.comp-realtion-box').append($Div);
+                }
             },
             /**
              * 下拉框类型改变
@@ -124,7 +292,10 @@ define([
                 var that = this;
                 var $target = $(event.target);
                 var $shell = $target.parents('.j-component-item');
+                // 在silkroad中额外添加的组件id
                 var compId = $shell.attr('data-comp-id');
+                // 组件本身的id
+                var reportCompId = $shell.attr('report-comp-id');
                 var compType = $shell.attr('data-component-type');
                 var compMold = $shell.attr('data-mold');
                 that.model.compId = compId;
@@ -138,6 +309,7 @@ define([
                     data.compId = compId;
                     var template = that._adapterEditCompTemplate(compType);
                     data.compType = compType;
+                    data.reportCompId = reportCompId;
                     compMold && (data.compMold = compMold);
                     var html = template.render(data);
                     that.$el.find('.j-con-comp-setting').html(html);
