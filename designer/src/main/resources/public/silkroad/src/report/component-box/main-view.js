@@ -160,7 +160,7 @@ define([
                 var $compElement = this.$el.find($('.j-component-border'));
                 $compElement.mouseout(function () {
                     $(this).find('.con-edit-btns').hide();
-                })
+                });
             },
 
             /**

@@ -720,3 +720,8 @@
 .table-norm-empty {
     margin-left: 35px;
 }
+
+/* 下拉框皮肤样式 */
+.select-skin option{
+    height: 20px;
+}

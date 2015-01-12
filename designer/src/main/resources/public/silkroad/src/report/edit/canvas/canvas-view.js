@@ -311,11 +311,11 @@ define([
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
                 // 固定单选下拉框的高度
-                that.dragWidthHeight($component, 'SELECT', 52, 52);
+                that.dragWidthHeight($component, 'SELECT', 47, 47);
                 // 固定多选下拉框的高度
-                that.dragWidthHeight($component, 'MULTISELECT', 52, 52);
+                that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 55, 55);
+                that.dragWidthHeight($component, 'TEXT', 50, 50);
             },
 
             /**
