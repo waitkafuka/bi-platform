@@ -483,15 +483,21 @@ public class QueryDataResource extends BaseResource {
         Map<String, String[]> contextParams = request.getParameterMap();
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
-        Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
         Map<String, Object> newParams = Maps.newHashMap();
-        for (String key : oldParams.keySet()) {
-	        	String value = oldParams.get(key).toString();
-	        	if (!(value.contains("start") && value.contains("end"))) {
-	        		newParams.put(key, value);
-	        	}
+        if (contextParams.get("isEdit") != null || runTimeModel.getContext().getParams().containsKey("isEdit")) {
+	        Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
+	        for (String key : oldParams.keySet()) {
+		        	String value = oldParams.get(key).toString();
+		        	if (!(value.contains("start") && value.contains("end"))) {
+		        		newParams.put(key, value);
+		        	}
+	        }
         }
         runTimeModel.getContext().reset();
+        runTimeModel.getLocalContext().forEach((key, value) -> {
+        		value.reset();
+        		value.setParams(newParams);
+        });
         runTimeModel.getContext().setParams(newParams);
         ReportDesignModel model = runTimeModel.getModel(); 
         //reportModelCacheManager.getReportModel(reportId);
