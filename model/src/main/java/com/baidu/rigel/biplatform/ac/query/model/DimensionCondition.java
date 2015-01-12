@@ -53,7 +53,7 @@ public class DimensionCondition implements MetaCondition {
      * metaType 条件对应的类型
      */
     private MetaType metaType;
-    
+
     /**
      * construct with dimUniqueName
      * 
