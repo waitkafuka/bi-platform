@@ -691,7 +691,7 @@ public class QueryDataResource extends BaseResource {
                     runTimeModel.getSelectedRowIds().add(rowDefine.getUniqueName());
                 }
             }
-            String[] dims = new String[0];
+//            String[] dims = new String[0];
             if (table.getDataSourceColumnBased().size() == 0) {
             		ResponseResult rs = new ResponseResult();
             		rs.setStatus(1);
@@ -702,28 +702,27 @@ public class QueryDataResource extends BaseResource {
             }
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
-            resultMap.put("mainDimNodes", dims);
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getDataRows());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
             List<Map<String, String>> mainDims = Lists.newArrayList();
-            Map<String, String> root = areaContext.getCurBreadCrumPath();
-            if (root == null) {
-            		root = genRootDimCaption(table);
-            		areaContext.setCurBreadCrumPath(root);
+            Map<String, String> root =  genRootDimCaption(table);
+            	areaContext.setCurBreadCrumPath(root);
+            if (action.getRows().size() >= 2) {
+//            		resultMap.put("mainDimNodes", dims);
+	            	// 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
+	            	if (!root.get("uniqName").toLowerCase().contains("all")) {
+	            		String vertualDimKey = "[vertual_all]";
+	            		root.put("uniqName", vertualDimKey);
+	            		root.put("showName", "全部");
+	            		runTimeModel.getContext().put(vertualDimKey, action);
+	            	}
+	            	mainDims.add(root);
+	            	Collections.reverse(mainDims);
+	            	areaContext.setCurBreadCrumPath(root);
+	            	resultMap.put("mainDimNodes", mainDims);
             }
-            // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
-            if (!root.get("uniqName").toLowerCase().contains("all")) {
-                String vertualDimKey = "[vertual_all]";
-                root.put("uniqName", vertualDimKey);
-                root.put("showName", "全部");
-                runTimeModel.getContext().put(vertualDimKey, action);
-            }
-            mainDims.add(root);
-            resultMap.put("mainDimNodes", mainDims);
 //            runTimeModel.getContext().put(areaId, root);
-            Collections.reverse(mainDims);
-            areaContext.setCurBreadCrumPath(root);
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
@@ -946,7 +945,7 @@ public class QueryDataResource extends BaseResource {
             logger.error(msg);
             return ResourceUtils.getErrorResult(msg, 1);
         }
-        QueryAction action = (QueryAction) runTimeModel.getContext().get(uniqueName);
+        QueryAction action = null; //(QueryAction) runTimeModel.getContext().get(uniqueName);
         String drillTargetUniqueName = uniqNames[uniqNames.length - 1];
         logger.info("[INFO] drillTargetUniqueName : {}", drillTargetUniqueName);
         boolean isRoot = drillTargetUniqueName.toLowerCase().contains("all");
@@ -971,6 +970,8 @@ public class QueryDataResource extends BaseResource {
              * update context
              */
             Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
+            // TODO 仔细思考一下逻辑
+            reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
             runTimeModel.getContext().put(uniqueName, action);
             /**
@@ -1032,6 +1033,7 @@ public class QueryDataResource extends BaseResource {
             runTimeModel.getContext().put("bread_key", mainDims);
         } 
         areaContext.getQueryStatus().add(result);
+        // 更新局部区域参数，避免漏掉当前请求查询的
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
