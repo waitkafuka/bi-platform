@@ -169,7 +169,7 @@ public class QueryUtils {
      * @return DataSourceInfo
      */
     private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
-        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getName());
+        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
         ds.setDBProxy(true);
         try {
             ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
