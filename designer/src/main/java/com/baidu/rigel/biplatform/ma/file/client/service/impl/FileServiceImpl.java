@@ -37,51 +37,50 @@ import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 @Service("fileService")
 public class FileServiceImpl implements FileService {
     
-
-    /**
-     * 请求参数不合法时的提示信息
-     */
-    private static final String PARAM_ILLEGAL_MESSAGE = "请求参数不合法";
-    
     /**
      * 请求参数：target
      */
-    protected static final String TARGET = "target";
+    public static final String TARGET = "target";
     
     /**
      * 请求参数：src
      */
-    protected static final String SRC = "src";
+    public static final String SRC = "src";
     
     /**
      * 响应状态：success
      */
-    protected static final String SUCCESS = "success";
+    public static final String SUCCESS = "success";
     
     /**
      * 响应消息：msg
      */
-    protected static final String MSG = "msg";
+    public static final String MSG = "msg";
     
     /**
      * 响应状态：fail
      */
-    protected static final String FAIL = "fail";
+    public static final String FAIL = "fail";
     
     /**
      * 响应状态key：result
      */
-    protected static final String RESULT = "result";
+    public static final String RESULT = "result";
 
     /**
      * 参数名称：replace
      */
-    protected static final String REPLACE = "replace";
+    public static final String REPLACE = "replace";
     
     /**
      * 参数名称：dir
      */
-    protected static final String DIR_KEY = "dir";
+    public static final String DIR_KEY = "dir";
+    
+    /**
+     * 请求参数不合法时的提示信息
+     */
+    private static final String PARAM_ILLEGAL_MESSAGE = "请求参数不合法";
     
     /**
      * 请求代理对象
@@ -98,10 +97,12 @@ public class FileServiceImpl implements FileService {
             throw new FileServiceException("file path is empty");
         }
         // 参数数组
-        filePath = filePath.replace("\\", "/");
+        final String srcStr = "\\";
+        final String destStr = "/";
+        filePath = filePath.replace(srcStr, destStr);
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(DIR_KEY, filePath);
-        params.put(REPLACE, new Boolean(replace));
+        params.put(REPLACE, Boolean.valueOf(replace));
         params.put("data", content);
        
         Request request = new Request();
@@ -286,7 +287,7 @@ public class FileServiceImpl implements FileService {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(SRC, oldFilePath);
         params.put(TARGET, newFilePath);
-        params.put(REPLACE, new Boolean(replace));
+        params.put(REPLACE, Boolean.valueOf(replace));
         
         Request request = new Request();
         request.setCommand(Command.MV);
@@ -326,7 +327,7 @@ public class FileServiceImpl implements FileService {
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(SRC, oldFilePath);
         params.put(TARGET, newFilePath);
-        params.put(REPLACE, new Boolean(replace));
+        params.put(REPLACE, Boolean.valueOf(replace));
         
         Request request = new Request();
         request.setCommand(Command.COPY);
@@ -379,7 +380,7 @@ public class FileServiceImpl implements FileService {
                 throw new FileServiceException(map.get(MSG).toString());
             }
             // 返回文件列表
-            return  (String[])map.get("fileList");
+            return  (String[]) map.get("fileList");
         } catch (FileServiceException e) {
             throw e;
         }

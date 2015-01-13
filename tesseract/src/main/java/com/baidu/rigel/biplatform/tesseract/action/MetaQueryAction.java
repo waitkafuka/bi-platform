@@ -224,7 +224,7 @@ public class MetaQueryAction {
     @RequestMapping(value = "/query", method = RequestMethod.POST)
     @ResponseBody
     public ResponseResult query(@RequestBody String requestJson) {
-    	long current = System.currentTimeMillis();
+        long current = System.currentTimeMillis();
         // 将请求信息全部JSON化，需要
         if (StringUtils.isBlank(requestJson)) {
             return ResponseResultUtils.getErrorResult("get members question is null", 100);

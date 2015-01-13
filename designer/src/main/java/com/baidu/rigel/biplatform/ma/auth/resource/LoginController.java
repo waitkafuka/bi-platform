@@ -62,10 +62,10 @@ public class LoginController extends RandomValidateCodeController {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult login(HttpServletRequest request, HttpServletResponse response) {
-    	    ResponseResult rs = super.checkValidateCode(request);
+        ResponseResult rs = checkValidateCode(request);
         if (rs.getStatus() == ResponseResult.FAILED) {
-			return rs;
-		}
+            return rs;
+        }
         // 获取用户登录信息
         String productLine = request.getParameter("name");
         String pwd = request.getParameter("pwd");

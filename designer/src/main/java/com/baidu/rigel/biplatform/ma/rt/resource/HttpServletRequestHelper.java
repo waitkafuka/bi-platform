@@ -29,17 +29,17 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
  */
 final class HttpServletRequestHelper {
 
-	private HttpServletRequestHelper() {
-		
-	}
-	
-	/**
-	 * 收集request请求中的所有参数，作为初始化全局参数存储
-	 * @param request HttpServletRequest
-	 * @return ConcurrentHashMap parameter's map
-	 */
-	static ConcurrentHashMap<String, Object> collectRequestParam(HttpServletRequest request) {
-		ConcurrentHashMap<String, Object> globalParams = new ConcurrentHashMap<String, Object>();
+    private HttpServletRequestHelper() {
+        
+    }
+    
+    /**
+     * 收集request请求中的所有参数，作为初始化全局参数存储
+     * @param request HttpServletRequest
+     * @return ConcurrentHashMap parameter's map
+     */
+    static ConcurrentHashMap<String, Object> collectRequestParam(HttpServletRequest request) {
+        ConcurrentHashMap<String, Object> globalParams = new ConcurrentHashMap<String, Object>();
         // 将url参数添加到全局上下文中
         Enumeration<String> params = request.getParameterNames();
         while (params.hasMoreElements()) {
@@ -48,6 +48,6 @@ final class HttpServletRequestHelper {
         }
         // 添加cookie内容
         globalParams.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
-		return globalParams;
-	}
+        return globalParams;
+    }
 }

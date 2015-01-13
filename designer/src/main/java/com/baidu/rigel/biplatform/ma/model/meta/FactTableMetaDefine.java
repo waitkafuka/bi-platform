@@ -314,6 +314,6 @@ public class FactTableMetaDefine implements Serializable {
     }
     
     public void clearColumns() {
-    		columns.clear();
+        columns.clear();
     }
 }

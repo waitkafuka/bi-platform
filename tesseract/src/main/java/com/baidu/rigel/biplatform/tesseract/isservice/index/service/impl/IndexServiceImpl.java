@@ -263,16 +263,16 @@ public class IndexServiceImpl implements IndexService {
         
         List<IndexMeta> metaList = new ArrayList<IndexMeta>();
         
-		if (!ArrayUtils.isEmpty(dataSetNames)) {
-			for (String factTableName : dataSetNames) {
-				metaList.addAll(this.indexMetaService
-						    .getIndexMetasByFactTableName(factTableName,
-								dataSourceKey));
-			}
-		} else {
-			metaList = this.indexMetaService
-					.getIndexMetasByDataSourceKey(dataSourceKey);
-		}
+        if (!ArrayUtils.isEmpty(dataSetNames)) {
+            for (String factTableName : dataSetNames) {
+                metaList.addAll(this.indexMetaService
+                            .getIndexMetasByFactTableName(factTableName,
+                                dataSourceKey));
+            }
+        } else {
+            metaList = this.indexMetaService
+                    .getIndexMetasByDataSourceKey(dataSourceKey);
+        }
         
         for (IndexMeta meta : metaList) {
             try {
@@ -431,13 +431,13 @@ public class IndexServiceImpl implements IndexService {
             
             //初始化finishIndex
             if(!isLastPiece){
-            	finishIndex=false;
+                finishIndex=false;
             }
             
             BigDecimal currMaxId = BigDecimal.ZERO;            
             //初始化maxId
             if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null){
-            	currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
+                currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
             }
             
             long pcount = IndexFileSystemConstants.FETCH_SIZE_FROM_DATASOURCE;
@@ -452,8 +452,8 @@ public class IndexServiceImpl implements IndexService {
             
             String currWhereStr="";
             for (int i = 0; i * pcount < total; i++) {
-            	long startForTime=System.nanoTime();
-            	
+                long startForTime=System.nanoTime();
+                
                 long limitStart = 0;
                 long limitEnd = pcount;
                 if ((i + 1) * pcount >= total) {
@@ -461,11 +461,11 @@ public class IndexServiceImpl implements IndexService {
                 }
                 
                 if(sqlQuery.getWhereList().contains(currWhereStr)){
-                	sqlQuery.getWhereList().remove(currWhereStr);
+                    sqlQuery.getWhereList().remove(currWhereStr);
                 }
                 
                 currWhereStr=sqlQuery.getIdName() + " > " + currMaxId.longValue();
-				sqlQuery.getWhereList().add(currWhereStr);
+                sqlQuery.getWhereList().add(currWhereStr);
                 long startSqlTime=System.nanoTime();
                 TesseractResultSet currResult = this.dataQueryService.queryForDocListWithSQLQuery(
                     sqlQuery, dataSourceWrape, limitStart, limitEnd);
@@ -475,9 +475,9 @@ public class IndexServiceImpl implements IndexService {
                 
                 while (currResult.size() != 0) {
                     // 向索引分片中写入数据
-					if (currIdxShard == null) {
-						currIdxShard = getFreeIndexShardForIndex(idxMeta);
-					}
+                    if (currIdxShard == null) {
+                        currIdxShard = getFreeIndexShardForIndex(idxMeta);
+                    }
                     long startWriteIndex=System.nanoTime();
                     Map<String, Object> result = writeIndex(currResult, isInit, isUpdate, currIdxShard,
                         isLastPiece, sqlQuery.getIdName());
@@ -495,10 +495,10 @@ public class IndexServiceImpl implements IndexService {
                         // 这时，需要设置cube数据不可用
                         idxMeta.setIdxState(IndexState.INDEX_UNAVAILABLE);
                         idxMeta = saveIndexShardIntoIndexMeta(currIdxShard, idxMeta);
-						currIdxShard = null;
-						if(isLastPiece){
-							finishIndex=true;
-						}
+                        currIdxShard = null;
+                        if(isLastPiece){
+                            finishIndex=true;
+                        }
                     }
                     
                     if (isInit) {
@@ -536,7 +536,7 @@ public class IndexServiceImpl implements IndexService {
             idxMeta.getMeasureInfoMergeSet().clear();
         }
         if(finishIndex){
-        	idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
+            idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
             this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
         }
         

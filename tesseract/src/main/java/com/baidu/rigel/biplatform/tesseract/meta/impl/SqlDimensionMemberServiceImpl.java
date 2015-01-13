@@ -284,11 +284,11 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeMember result = new MiniCubeMember(name);
         result.setLevel(queryLevel);
         try {
-        	// 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
+            // 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
             TesseractResultSet resultSet = searchService.query(queryRequest);
             if(!resultSet.next()){
-	            	log.error("no result return by query:" + queryRequest);
-	            	throw new MetaException("no result return by query:" + queryRequest);
+                    log.error("no result return by query:" + queryRequest);
+                    throw new MetaException("no result return by query:" + queryRequest);
             }
             if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
                 result.setCaption(resultSet.getString(queryLevel.getCaptionColumn()));
@@ -328,7 +328,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
                 }
             } else if (queryLevel.isParentChildLevel()){
-            	QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
+                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
                 request.selectAndGroupBy(queryLevel.getPrimaryKey());
 
                 request.setWhere(new Where());

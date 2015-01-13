@@ -29,65 +29,65 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
  *
  */
 public final class CallbackServiceInvoker {
-	
-	/**
-	 * LOG
-	 */
-	private static final Logger LOG = LoggerFactory.getLogger(CallbackServiceInvoker.class);
-	
-	/**
-	 * 构造函数
-	 */
-	private CallbackServiceInvoker() {
-	}
-	
-	/**
-	 * 
-	 * @param url callback请求url
-	 * @param params callback请求参数
-	 * @param type callback请求类型
-	 * @return CallbackResponse callback响应
-	 */
-	public static CallbackResponse invokeCallback(String url, Map<String, String> params, CallbackType type) {
-		return invokeCallback(url, params, type, Integer.MAX_VALUE);
-	}
-	
-	/**
-	 * 
-	 * @param url callback请求url
-	 * @param params callback请求参数
-	 * @param type callback请求类型
-	 * @param timeOutMillSecond 超时时间
-	 * @return CallbackResponse callback响应
-	 */
-	public static CallbackResponse invokeCallback(String url, Map<String, String> params,
-			CallbackType type, int timeOutMillSecond) {
-		long begin = System.currentTimeMillis();
-		LOG.info("[INFO] --- --- begin invoke callback service ... ...");
-		LOG.info("[INFO] --- --- params : {}", params);
-		LOG.info("[INFO] --- --- request url : {}", url);
-		LOG.info("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
-		LOG.info("[INFO] --- --- callback type : {}", type.name());
-		LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
-		LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
-		String responseStr = HttpRequest.sendPost(url, params);
-		CallbackResponse response = convertStrToResponse(responseStr, type);
-		LOG.info(response.toString());
-		LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
-		long end = System.currentTimeMillis() - begin;
-		LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
-				+ " cost on data transfer : " + (end - response.getCost()) + "ms,"
-				+ " callback execute cost : " + response.getCost() + "ms") ;
-		return response;
-	}
+    
+    /**
+     * LOG
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(CallbackServiceInvoker.class);
+    
+    /**
+     * 构造函数
+     */
+    private CallbackServiceInvoker() {
+    }
+    
+    /**
+     * 
+     * @param url callback请求url
+     * @param params callback请求参数
+     * @param type callback请求类型
+     * @return CallbackResponse callback响应
+     */
+    public static CallbackResponse invokeCallback(String url, Map<String, String> params, CallbackType type) {
+        return invokeCallback(url, params, type, Integer.MAX_VALUE);
+    }
+    
+    /**
+     * 
+     * @param url callback请求url
+     * @param params callback请求参数
+     * @param type callback请求类型
+     * @param timeOutMillSecond 超时时间
+     * @return CallbackResponse callback响应
+     */
+    public static CallbackResponse invokeCallback(String url, Map<String, String> params,
+            CallbackType type, int timeOutMillSecond) {
+        long begin = System.currentTimeMillis();
+        LOG.info("[INFO] --- --- begin invoke callback service ... ...");
+        LOG.info("[INFO] --- --- params : {}", params);
+        LOG.info("[INFO] --- --- request url : {}", url);
+        LOG.info("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
+        LOG.info("[INFO] --- --- callback type : {}", type.name());
+        LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
+        LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+        String responseStr = HttpRequest.sendPost(url, params);
+        CallbackResponse response = convertStrToResponse(responseStr, type);
+        LOG.info(response.toString());
+        LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+        long end = System.currentTimeMillis() - begin;
+        LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
+                + " cost on data transfer : " + (end - response.getCost()) + "ms,"
+                + " callback execute cost : " + response.getCost() + "ms") ;
+        return response;
+    }
 
-	/**
-	 * 
-	 * @param responseStr
-	 * @param type
-	 * @return CallbackResponse
-	 */
-	private static CallbackResponse convertStrToResponse(String responseStr, CallbackType type) {
-		return null;
-	}
+    /**
+     * 
+     * @param responseStr
+     * @param type
+     * @return CallbackResponse
+     */
+    private static CallbackResponse convertStrToResponse(String responseStr, CallbackType type) {
+        return null;
+    }
 }

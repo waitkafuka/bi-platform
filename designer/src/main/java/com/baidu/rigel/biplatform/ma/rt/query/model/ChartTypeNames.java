@@ -27,10 +27,10 @@ public interface ChartTypeNames {
     /**
      * 柱状图
      */
-    String bar = "BAR";
+    String BAR = "BAR";
     
     /**
      * 趋势图
      */
-    String trend = "TREND";
+    String TREND = "TREND";
 }

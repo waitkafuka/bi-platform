@@ -295,9 +295,9 @@ class DimensionBuilder {
         StandardDimension dimension = initDimension(table, id, caption, name);
         dimension.setFacttableColumn(table.getReference().getMajorColumn());
         if (StringUtils.isEmpty(table.getName())) {
-	        	dimension.setTableName(name);
+            dimension.setTableName(name);
         } else {
-        		dimension.setTableName(table.getName());
+            dimension.setTableName(table.getName());
         }
         dimension.setType(DimensionType.CALLBACK);
         ColumnMetaDefine columnMetaDefine = factTable.getColumnMetaDefineByColumnName(

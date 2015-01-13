@@ -26,143 +26,143 @@ import java.util.List;
  */
 public class CallbackResponse implements Serializable {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = -737085085913204438L;
-	
-	/**
-	 * 响应状态
-	 * @see ResponseStatus
-	 */
-	private ResponseStatus status;
-	
-	/**
-	 * 
-	 */
-	private String message;
-	
-	/**
-	 * 请求返回数据
-	 */
-	private List<CallbackValue> data;
-	
-	/**
-	 * 服务花费时间
-	 */
-	private int cost;
-	
-	/**
-	 * 提供服务节点名称
-	 */
-	private String provider;
-	
-	/**
-	 * 当前服务版本
-	 */
-	private String version;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -737085085913204438L;
+    
+    /**
+     * 响应状态
+     * @see ResponseStatus
+     */
+    private ResponseStatus status;
+    
+    /**
+     * 
+     */
+    private String message;
+    
+    /**
+     * 请求返回数据
+     */
+    private List<CallbackValue> data;
+    
+    /**
+     * 服务花费时间
+     */
+    private int cost;
+    
+    /**
+     * 提供服务节点名称
+     */
+    private String provider;
+    
+    /**
+     * 当前服务版本
+     */
+    private String version;
 
-	/**
-	 * @return the status
-	 */
-	public ResponseStatus getStatus() {
-		return status;
-	}
+    /**
+     * @return the status
+     */
+    public ResponseStatus getStatus() {
+        return status;
+    }
 
-	/**
-	 * @param status the status to set
-	 */
-	public void setStatus(ResponseStatus status) {
-		this.status = status;
-	}
+    /**
+     * @param status the status to set
+     */
+    public void setStatus(ResponseStatus status) {
+        this.status = status;
+    }
 
-	/**
-	 * @return the message
-	 */
-	public String getMessage() {
-		return message;
-	}
+    /**
+     * @return the message
+     */
+    public String getMessage() {
+        return message;
+    }
 
-	/**
-	 * @param message the message to set
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
+    /**
+     * @param message the message to set
+     */
+    public void setMessage(String message) {
+        this.message = message;
+    }
 
-	/**
-	 * @return the data
-	 */
-	public List<CallbackValue> getData() {
-		return data;
-	}
+    /**
+     * @return the data
+     */
+    public List<CallbackValue> getData() {
+        return data;
+    }
 
-	/**
-	 * @param data the data to set
-	 */
-	public void setData(List<CallbackValue> data) {
-		this.data = data;
-	}
+    /**
+     * @param data the data to set
+     */
+    public void setData(List<CallbackValue> data) {
+        this.data = data;
+    }
 
-	/**
-	 * @return the cost
-	 */
-	public int getCost() {
-		return cost;
-	}
+    /**
+     * @return the cost
+     */
+    public int getCost() {
+        return cost;
+    }
 
-	/**
-	 * @param cost the cost to set
-	 */
-	public void setCost(int cost) {
-		this.cost = cost;
-	}
+    /**
+     * @param cost the cost to set
+     */
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
 
-	/**
-	 * @return the provider
-	 */
-	public String getProvider() {
-		return provider;
-	}
+    /**
+     * @return the provider
+     */
+    public String getProvider() {
+        return provider;
+    }
 
-	/**
-	 * @param provider the provider to set
-	 */
-	public void setProvider(String provider) {
-		this.provider = provider;
-	}
+    /**
+     * @param provider the provider to set
+     */
+    public void setProvider(String provider) {
+        this.provider = provider;
+    }
 
-	/**
-	 * @return the version
-	 */
-	public String getVersion() {
-		return version;
-	}
+    /**
+     * @return the version
+     */
+    public String getVersion() {
+        return version;
+    }
 
-	/**
-	 * @param version the version to set
-	 */
-	public void setVersion(String version) {
-		this.version = version;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-		StringBuilder str = new StringBuilder();
-		str.append("{ status : " + status.name());
-		str.append(", message : " + message);
-		str.append(", data : [");
-		for (CallbackValue value : data) {
-			str.append(value.toString() + ",");
-		}
-		str.append("]");
-		str.append(", cost : " + cost + "ms,");
-		str.append(", provider : " + provider);
-		str.append(", version : " + version);
-		return str.toString();
-	}
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("{ status : " + status.name());
+        str.append(", message : " + message);
+        str.append(", data : [");
+        for (CallbackValue value : data) {
+            str.append(value.toString() + ",");
+        }
+        str.append("]");
+        str.append(", cost : " + cost + "ms,");
+        str.append(", provider : " + provider);
+        str.append(", version : " + version);
+        return str.toString();
+    }
 
 }

@@ -24,46 +24,46 @@ package com.baidu.rigel.biplatform.tesseract.resultset.exception;
  */
 public class QueryResultException extends RuntimeException {
 
-	/** 
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = -1108927664673555883L;
-	
-	/** 
-	 * 构造函数
-	 */
-	public QueryResultException() {
-		super();
-	}
-	
-	/** 
-	 * 构造函数
-	 */
-	public QueryResultException(String message, Throwable cause,
-			boolean enableSuppression, boolean writableStackTrace) {
-		super(message, cause, enableSuppression, writableStackTrace);
-	}
-	
-	/** 
-	 * 构造函数
-	 */
-	public QueryResultException(String message, Throwable cause) {
-		super(message, cause);
-	}
-	
-	/** 
-	 * 构造函数
-	 */
-	public QueryResultException(String message) {
-		super(message);
-	}
+    /** 
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -1108927664673555883L;
+    
+    /** 
+     * 构造函数
+     */
+    public QueryResultException() {
+        super();
+    }
+    
+    /** 
+     * 构造函数
+     */
+    public QueryResultException(String message, Throwable cause,
+            boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
+    
+    /** 
+     * 构造函数
+     */
+    public QueryResultException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
+    /** 
+     * 构造函数
+     */
+    public QueryResultException(String message) {
+        super(message);
+    }
 
-	/** 
-	 * 构造函数
-	 */
-	public QueryResultException(Throwable cause) {
-		super(cause);
-	}
-	
+    /** 
+     * 构造函数
+     */
+    public QueryResultException(Throwable cause) {
+        super(cause);
+    }
+    
 
 }

@@ -24,113 +24,113 @@ import java.util.List;
  */
 public class CallbackDimTreeNode implements CallbackValue {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = -3464184628076416403L;
-	
-	/**
-	 * id
-	 */
-	private String id;
-	
-	/**
-	 * name
-	 */
-	private String name;
-	
-	/**
-	 * 当前维度节点所有叶子节点id信息
-	 */
-	private List<String> csIds;
-	
-	/**
-	 *孩子节点
-	 */
-	private List<CallbackDimTreeNode> children;
-	
-	/**
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -3464184628076416403L;
+    
+    /**
+     * id
+     */
+    private String id;
+    
+    /**
+     * name
+     */
+    private String name;
+    
+    /**
+     * 当前维度节点所有叶子节点id信息
+     */
+    private List<String> csIds;
+    
+    /**
+     *孩子节点
+     */
+    private List<CallbackDimTreeNode> children;
+    
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
 
-	/**
-	 * @param id the id to set
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
 
-	/**
-	 * @return the name
-	 */
-	public String getName() {
-		return name;
-	}
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
 
-	/**
-	 * @param name the name to set
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	/**
-	 * @return the csIds
-	 */
-	public List<String> getCsIds() {
-		return csIds;
-	}
+    /**
+     * @return the csIds
+     */
+    public List<String> getCsIds() {
+        return csIds;
+    }
 
-	/**
-	 * @param csIds the csIds to set
-	 */
-	public void setCsIds(List<String> csIds) {
-		this.csIds = csIds;
-	}
+    /**
+     * @param csIds the csIds to set
+     */
+    public void setCsIds(List<String> csIds) {
+        this.csIds = csIds;
+    }
 
-	/**
-	 * @return the children
-	 */
-	public List<CallbackDimTreeNode> getChildren() {
-		return children;
-	}
+    /**
+     * @return the children
+     */
+    public List<CallbackDimTreeNode> getChildren() {
+        return children;
+    }
 
-	/**
-	 * @param children the children to set
-	 */
-	public void setChildren(List<CallbackDimTreeNode> children) {
-		this.children = children;
-	}
+    /**
+     * @param children the children to set
+     */
+    public void setChildren(List<CallbackDimTreeNode> children) {
+        this.children = children;
+    }
 
-	/**
-	 * @return the hasChildern
-	 */
-	public boolean isHasChildern() {
-		return this.children != null && this.children.size() > 0;
-	}
+    /**
+     * @return the hasChildern
+     */
+    public boolean isHasChildern() {
+        return this.children != null && this.children.size() > 0;
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer str = new StringBuffer();
-		str.append("{ name : " + this.name);
-		str.append(", id : " + id);
-		str.append(", csIds : [");
-		if (this.csIds != null) {
-			for (String s : this.csIds) {
-				str.append(s + ",");
-			}
-		}
-		str.append("], children : [");
-		if (this.children != null) {
-			for (CallbackDimTreeNode child : this.children) {
-				str.append(child.toString() + ", ");
-			}
-		}
-		str.append("]");
-		return super.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuffer str = new StringBuffer();
+        str.append("{ name : " + this.name);
+        str.append(", id : " + id);
+        str.append(", csIds : [");
+        if (this.csIds != null) {
+            for (String s : this.csIds) {
+                str.append(s + ",");
+            }
+        }
+        str.append("], children : [");
+        if (this.children != null) {
+            for (CallbackDimTreeNode child : this.children) {
+                str.append(child.toString() + ", ");
+            }
+        }
+        str.append("]");
+        return super.toString();
+    }
 
 }

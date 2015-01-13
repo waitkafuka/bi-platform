@@ -25,34 +25,34 @@ import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
  */
 final class QueryStrategyFactory {
 
-	/**
-	 * 构造函数
-	 */
-	private QueryStrategyFactory () {
-		
-	}
-	
-	/**
-	 * 依据区域类型，获取查询请求类型
-	 * @param type 区域类型
-	 * @return QueryStrategy
-	 */
-	public static final QueryStrategy genQueryStrategyWithExtendAreaType(ExtendAreaType type) {
-		switch (type) {
-			case CHART:
-				return QueryStrategy.CHART_QUERY;
-			case LITEOLAP_CHART:
-				return QueryStrategy.LITE_OLAP_CHART_QUERY;
-			case LITEOLAP_TABLE:
-				return QueryStrategy.LITE_OLAP_TABLE_QUERY;
-			case TABLE:
-				return QueryStrategy.TABLE_QUERY;
-			case MULTISELECT:
-				return QueryStrategy.DIM_MEMBER_QUERY;
-			case SELECT:
-				return QueryStrategy.DIM_MEMBER_QUERY;
-			default: 
-				return QueryStrategy.UNKNOW;
-		}
-	}
+    /**
+     * 构造函数
+     */
+    private QueryStrategyFactory() {
+        
+    }
+    
+    /**
+     * 依据区域类型，获取查询请求类型
+     * @param type 区域类型
+     * @return QueryStrategy
+     */
+    public static final QueryStrategy genQueryStrategyWithExtendAreaType(ExtendAreaType type) {
+        switch (type) {
+            case CHART:
+                return QueryStrategy.CHART_QUERY;
+            case LITEOLAP_CHART:
+                return QueryStrategy.LITE_OLAP_CHART_QUERY;
+            case LITEOLAP_TABLE:
+                return QueryStrategy.LITE_OLAP_TABLE_QUERY;
+            case TABLE:
+                return QueryStrategy.TABLE_QUERY;
+            case MULTISELECT:
+                return QueryStrategy.DIM_MEMBER_QUERY;
+            case SELECT:
+                return QueryStrategy.DIM_MEMBER_QUERY;
+            default: 
+                return QueryStrategy.UNKNOW;
+        }
+    }
 }

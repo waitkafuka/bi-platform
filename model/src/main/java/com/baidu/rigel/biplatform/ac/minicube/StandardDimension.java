@@ -108,9 +108,9 @@ public class StandardDimension extends MiniCubeDimension {
             rs.append("{null}");
         }
         if (this.levels != null) {
-	        	for (Level level : this.levels.values()) {
-	        		rs.append(level.toString());
-	        	}
+                for (Level level : this.levels.values()) {
+                    rs.append(level.toString());
+                }
         }
         rs.append("]}");
         return rs.toString();

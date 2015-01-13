@@ -100,13 +100,6 @@ public class ReportRuntimeModel implements Serializable {
     private ReportDesignModel model;
     
     /**
-     * @return the universalItemStore
-     */
-    public Map<String, Map<String, Item>> getUniversalItemStore() {
-        return universalItemStore;
-    }
-    
-    /**
      * 是否已经初始化
      */
     private boolean isInited = false;
@@ -119,12 +112,6 @@ public class ReportRuntimeModel implements Serializable {
      * 
      */
     private Map<String, LinkedList<QueryAction>> queryActions = null;
-    
-//    /**
-//     * 报表数据查询服务
-//     */
-//    @Resource
-//    private ReportModelQueryService reportModelQueryService;
     
     /**
      * 构造函数
@@ -139,6 +126,14 @@ public class ReportRuntimeModel implements Serializable {
         this.localContext = Maps.newConcurrentMap();
         this.context = new QueryContext();
     }
+    
+    /**
+     * @return the universalItemStore
+     */
+    public Map<String, Map<String, Item>> getUniversalItemStore() {
+        return universalItemStore;
+    }
+    
     
     public String getId() {
         return id;
@@ -241,18 +236,18 @@ public class ReportRuntimeModel implements Serializable {
                     logicModel.removeSlice(item.getOlapElementId());
                     break;
                 case CAND_DIM:
-                		if (area instanceof LiteOlapExtendArea) {
-                			((LiteOlapExtendArea) area).removeCandDim(item.getOlapElementId());
-                		} else {
-                			area.removeSelectDimItem(item.getOlapElementId());
-                		}
+                    if (area instanceof LiteOlapExtendArea) {
+                        ((LiteOlapExtendArea) area).removeCandDim(item.getOlapElementId());
+                    } else {
+                        area.removeSelectDimItem(item.getOlapElementId());
+                    }
                     break;
                 case CAND_IND:
-                		if (area instanceof LiteOlapExtendArea) {
-                			((LiteOlapExtendArea) area).removeCandInd(item.getOlapElementId());
-                		} else {
-                			area.removeSelectMeasureItem(item.getOlapElementId());
-                		}
+                    if (area instanceof LiteOlapExtendArea) {
+                        ((LiteOlapExtendArea) area).removeCandInd(item.getOlapElementId());
+                    } else {
+                        area.removeSelectMeasureItem(item.getOlapElementId());
+                    }
                     break;
             }
         }
@@ -301,7 +296,7 @@ public class ReportRuntimeModel implements Serializable {
     }
     
     public void updateDimStores(ReportDesignModel model) {
-    		this.model = model;
+        this.model = model;
         ExtendArea[] areas = model.getExtendAreaList();
         if (areas == null || areas.length == 0) {
             return;
@@ -348,7 +343,7 @@ public class ReportRuntimeModel implements Serializable {
             OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId,
                     item.getOlapElementId());
             if (element == null) {
-            		continue;
+                continue;
             }
             if (ItemUtils.isTimeDim(item, schema, cubeId)) {
                 timeDimItemIds.add(item.getOlapElementId());
@@ -416,19 +411,19 @@ public class ReportRuntimeModel implements Serializable {
      */
     public ResultSet updateDatas(QueryAction action, ResultSet rs) {
         if (this.queryActions.get(action.getExtendAreaId()) == null){
-        		LinkedList<QueryAction> actions = Lists.newLinkedList();
-        		actions.add(action);
-        		this.queryActions.put(action.getExtendAreaId(), actions);
+            LinkedList<QueryAction> actions = Lists.newLinkedList();
+            actions.add(action);
+            this.queryActions.put(action.getExtendAreaId(), actions);
         } else {
-        		this.queryActions.get(action.getExtendAreaId()).add(action);
+            this.queryActions.get(action.getExtendAreaId()).add(action);
         }
         // 缓存查询状态以及结果
         if (this.datas.get(action.getExtendAreaId()) == null) {
-        		LinkedList<ResultSet> results = Lists.newLinkedList();
-        		results.add(rs);
-        		this.datas.put(action.getExtendAreaId(), results);
+            LinkedList<ResultSet> results = Lists.newLinkedList();
+            results.add(rs);
+            this.datas.put(action.getExtendAreaId(), results);
         } else {
-        		this.datas.get(action.getExtendAreaId()).add(rs);
+            this.datas.get(action.getExtendAreaId()).add(rs);
         }
 //        this.datas.put(action.getDistinctId(), rs);
         return rs;
@@ -505,11 +500,11 @@ public class ReportRuntimeModel implements Serializable {
      */
     public ResultSet getPreviousQueryResult(QueryAction previousAction) {
         if (previousAction == null) {
-        		return null;
+                return null;
         }
         LinkedList<ResultSet> resultList = this.datas.get(previousAction.getExtendAreaId());
-		if (resultList == null) {
-        		return null;
+        if (resultList == null) {
+                return null;
         }
         
         return resultList.isEmpty() ? null : resultList.getLast();
@@ -533,26 +528,26 @@ public class ReportRuntimeModel implements Serializable {
 //        }
         
         LinkedList<QueryAction> actionList = this.getQueryActions().get(areaId);
-		return actionList.isEmpty() ? null : actionList.getLast();
+        return actionList.isEmpty() ? null : actionList.getLast();
     }
 
     public Map<String, QueryContext> getLocalContext() {
         return this.localContext;
     }
 
-	/**
-	 * @return the model
-	 */
-	public ReportDesignModel getModel() {
-		return model;
-	}
+    /**
+     * @return the model
+     */
+    public ReportDesignModel getModel() {
+        return model;
+    }
 
-	/**
-	 * @param model the model to set
-	 */
-	public void setModel(ReportDesignModel model) {
-		this.model = model;
-	}
+    /**
+     * @param model the model to set
+     */
+    public void setModel(ReportDesignModel model) {
+        this.model = model;
+    }
     
     
 }

@@ -153,7 +153,7 @@ public class DataSourceResource extends BaseResource {
                 rs.setStatus(1);
                 rs.setStatusInfo("未能找到对于数据源定义，id : " + id);
             } else {
-                define.setDbPwd(define.getDbPwd());//AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
+                define.setDbPwd(define.getDbPwd()); // AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
                 rs.setData(define);
@@ -290,16 +290,16 @@ public class DataSourceResource extends BaseResource {
                 rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表 " + id);
                 logger.warn("the database with id " + id + " is using");
             } else {
-            		List<String> refReport = reportDesignModelService.lsReportWithDsId(id);
-            		if (refReport != null && refReport.size() > 0) {
-            			 rs.setStatus(1);
-                     rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表: " + makeString(refReport));
-                     return rs;
-            		} else {
-            			boolean result = dsService.removeDataSource(id);
-            			rs.setStatus(0);
-            			rs.setStatusInfo(String.valueOf(result));
-            		}
+                List<String> refReport = reportDesignModelService.lsReportWithDsId(id);
+                if (refReport != null && refReport.size() > 0) {
+                    rs.setStatus(1);
+                    rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表: " + makeString(refReport));
+                    return rs;
+                } else {
+                    boolean result = dsService.removeDataSource(id);
+                    rs.setStatus(0);
+                    rs.setStatusInfo(String.valueOf(result));
+                }
             }
         } catch (DataSourceOperationException e) {
             rs.setStatus(1);
@@ -309,9 +309,9 @@ public class DataSourceResource extends BaseResource {
         return rs;
     }
 
-	private String makeString(List<String> refReport) {
-		StringBuilder rs = new StringBuilder();
-		refReport.forEach(str -> rs.append(str + " "));
-		return rs.toString();
-	}
+    private String makeString(List<String> refReport) {
+        StringBuilder rs = new StringBuilder();
+        refReport.forEach(str -> rs.append(str + " "));
+        return rs.toString();
+    }
 }

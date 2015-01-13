@@ -38,39 +38,39 @@ import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
  */
 @RestController
 @RequestMapping("/silkroad/reports/dataupdate")
-public class UpdateDataResource extends BaseResource{
+public class UpdateDataResource extends BaseResource {
 
-	/**
+    /**
      * dsService
      */
     @Resource
     private DataSourceService dsService;
 
-	/**
-	 * 
-	 * @param request HttpServletRequest
-	 * @param response HttpServletResponse
-	 * @return ResponseResult
-	 */
-	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
-	public ResponseResult updateData(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		String dsName = request.getParameter("dsName");
-		String factTables = request.getParameter("factTables");
-//		String productLine = request.getParameter("rbk");
-		if (StringUtils.isEmpty(dsName) || StringUtils.isEmpty("factTables")) {
-			ResponseResult rs = new ResponseResult();
-			rs.setStatus(1);
-			rs.setStatusInfo("请求中需要包含dsName, factTables信息。"
-					+ "其中dsName为数据源名称，factTables为更新的事实表列表，多张表以’,‘分割");
-			return rs;
-		}
-		String[] factTableArray = factTables.split(",");
-		ResponseResult rs = new ResponseResult();
-		DataSourceDefine ds = dsService.getDsDefine(dsName);
-		DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds, securityKey);
-		MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray);
-		rs.setStatus(0);
-		rs.setStatusInfo("successfully");
-		return rs;
-	}
+    /**
+     * 
+     * @param request HttpServletRequest
+     * @param response HttpServletResponse
+     * @return ResponseResult
+     */
+    @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult updateData(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        String dsName = request.getParameter("dsName");
+        String factTables = request.getParameter("factTables");
+//        String productLine = request.getParameter("rbk");
+        if (StringUtils.isEmpty(dsName) || StringUtils.isEmpty("factTables")) {
+            ResponseResult rs = new ResponseResult();
+            rs.setStatus(1);
+            rs.setStatusInfo("请求中需要包含dsName, factTables信息。"
+                    + "其中dsName为数据源名称，factTables为更新的事实表列表，多张表以’,‘分割");
+            return rs;
+        }
+        String[] factTableArray = factTables.split(",");
+        ResponseResult rs = new ResponseResult();
+        DataSourceDefine ds = dsService.getDsDefine(dsName);
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds, securityKey);
+        MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray);
+        rs.setStatus(0);
+        rs.setStatusInfo("successfully");
+        return rs;
+    }
 }

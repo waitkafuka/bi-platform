@@ -83,6 +83,7 @@ public class LevelObject implements Serializable {
     @Override
     public Object clone() throws CloneNotSupportedException {
         try {
+            super.clone();
             return DeepcopyUtils.deepCopy(this);
         } catch (Exception e) {
             throw new RuntimeException(e);

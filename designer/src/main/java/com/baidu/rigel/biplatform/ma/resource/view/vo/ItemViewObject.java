@@ -150,19 +150,19 @@ public class ItemViewObject implements Serializable {
         this.used = used;
     }
 
-	/**
-	 * @return the chartType
-	 */
-	public String getChartType() {
-		return chartType;
-	}
+    /**
+     * @return the chartType
+     */
+    public String getChartType() {
+        return chartType;
+    }
 
-	/**
-	 * @param chartType the chartType to set
-	 */
-	public void setChartType(String chartType) {
-		this.chartType = chartType;
-	}
+    /**
+     * @param chartType the chartType to set
+     */
+    public void setChartType(String chartType) {
+        this.chartType = chartType;
+    }
     
     
 }

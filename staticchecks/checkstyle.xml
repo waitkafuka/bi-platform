@@ -182,7 +182,7 @@
         </module>
 		<!--方法个数-->
         <module name="MethodCount">
-            <property name="maxTotal" value="30"/>
+            <property name="maxTotal" value="50"/>
         </module>
 		
 		

@@ -21,24 +21,24 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
  *
  */
 public enum RateCalStrategy {
-	
-	/**
-	 * 同比分子
-	 */
-	SR_NUMERATOR,
-	
-	/**
-	 * 环比分子
-	 */
-	RR_NUMERATOR,
-	
-	/**
-	 * 同比分母
-	 */
-	SR_DENOMINATOR,
-	
-	/**
-	 * 环比分母
-	 */
-	RR_DENOMINATOR;
+    
+    /**
+     * 同比分子
+     */
+    SR_NUMERATOR,
+    
+    /**
+     * 环比分子
+     */
+    RR_NUMERATOR,
+    
+    /**
+     * 同比分母
+     */
+    SR_DENOMINATOR,
+    
+    /**
+     * 环比分母
+     */
+    RR_DENOMINATOR;
 }

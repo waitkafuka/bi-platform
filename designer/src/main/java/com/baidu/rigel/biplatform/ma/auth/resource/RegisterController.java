@@ -68,7 +68,7 @@ public class RegisterController extends RandomValidateCodeController {
     public ResponseResult register(HttpServletRequest request, HttpServletResponse response) {        
         ResponseResult rs = super.checkValidateCode(request);
         if (rs.getStatus() == ResponseResult.FAILED) {
-        		return rs;
+            return rs;
         }
         
         try {
@@ -113,21 +113,21 @@ public class RegisterController extends RandomValidateCodeController {
     public ResponseResult openOnlineService(HttpServletRequest request, HttpServletResponse response) {
         ResponseResult rs = new ResponseResult();
         try {
-        		String magicStr = request.getParameter("magicStr"); 
-        		if (StringUtils.isEmpty(cacheManagerForResource.getFromCache(magicStr))) {
-        			rs.setStatus(1);
+            String magicStr = request.getParameter("magicStr"); 
+            if (StringUtils.isEmpty(cacheManagerForResource.getFromCache(magicStr))) {
+                rs.setStatus(1);
                 rs.setStatusInfo("已经开通，不能重复开通");
                 return rs;
-        		} else{
-        			cacheManagerForResource.deleteFromCache(magicStr);
-        		}
+            } else {
+                cacheManagerForResource.deleteFromCache(magicStr);
+            }
             // 获取用户信息        
             ProductlineInfo user = this.getUserFromUrl(request, false);
             LOG.info("begin open online service for user [" + user.getName() + "]");
             // 开通线上服务，如果发生异常，直接抛出
             if (productLineRegisterService.openOnlineService(user) != 0) {
                 throw new RuntimeException("open online service for user [" + user.getName() + "] failed");
-            };
+            }
             // 发送开通服务信息给用户
             productLineRegisterService.sendOpenServiceMsgToUser(user, 1);           
             LOG.info("open online service for user [" 
@@ -158,7 +158,7 @@ public class RegisterController extends RandomValidateCodeController {
             // 开通线下服务
             if (productLineRegisterService.openOfflineService(user) != 0) {
                 throw new RuntimeException("open offline service for user [" + user.getName() + "] failed");
-            };
+            }
             // 发送开通服务信息给用户
             productLineRegisterService.sendOpenServiceMsgToUser(user, 0);
             LOG.info("open offline service for user [" + user.getName() + "] successfully");

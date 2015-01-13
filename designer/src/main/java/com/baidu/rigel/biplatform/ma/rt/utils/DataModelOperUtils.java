@@ -48,19 +48,14 @@ import com.google.common.collect.Lists;
 public final class DataModelOperUtils {
 
     /**
-     * logger
-     */
-    private static Logger logger = Logger.getLogger(DataModelUtils.class);
-    
-    /**
      * memeber的uniqname
      */
-    public static String EXT_INFOS_MEM_UNIQNAME = "mem_uniqname";
+    public static final String EXT_INFOS_MEM_UNIQNAME = "mem_uniqname";
 
     /**
      *member的dim 
      */
-    public static String EXT_INFOS_MEM_DIMNAME = "mem_dimname";
+    public static final String EXT_INFOS_MEM_DIMNAME = "mem_dimname";
     
     /**
      * DIV_DIM
@@ -75,13 +70,18 @@ public final class DataModelOperUtils {
     /**
      * member节点是否已经展开
      */
-    public static String EXT_INFOS_MEM_EXPAND = "mem_expand";
+    public static final String EXT_INFOS_MEM_EXPAND = "mem_expand";
     
     /**
-	 * 构造函数
-	 */
-	private DataModelOperUtils() {
-	}
+     * logger
+     */
+    private static final Logger LOG = Logger.getLogger(DataModelUtils.class);
+    
+    /**
+     * 构造函数
+     */
+    private DataModelOperUtils() {
+    }
     
     /**
      * 
@@ -122,29 +122,29 @@ public final class DataModelOperUtils {
         int colHeight = getHeightOfHeadFieldList(colHeadFields);
         pTable.setColHeadHeight(colHeight);
         int rowWidth = getHeightOfHeadFieldList(rowHeadFields);
-        List<List<ColField>> colFields = buildColFields(colHeadFields,rowHeadFields, colHeight, rowWidth);
+        List<List<ColField>> colFields = buildColFields(colHeadFields, rowHeadFields, colHeight, rowWidth);
         pTable.setColFields(colFields);
         // build colDefine
         List<ColDefine> colDefineList = buildColDefine(colHeadFields);
         pTable.setColDefine(colDefineList);
         pTable.setRowHeadWidth(rowWidth);
         fillData(needLimit, limitSize, pTable, dataModel);
-        logger.info("transfer datamodel 2 pivotTable cost:" + (System.currentTimeMillis() - current) + "ms!");
+        LOG.info("transfer datamodel 2 pivotTable cost:" + (System.currentTimeMillis() - current) + "ms!");
         return pTable;
     }
 
-	/**
-	 * 
-	 * 填充数据到透视表模型
-	 * @param needLimit
-	 * @param limitSize
-	 * @param pTable 透视表模型
-	 * @param dataModel 数据模型
-	 * 
-	 */
-	private static void fillData(boolean needLimit, int limitSize,
-			PivotTable pTable, DataModel dataModel) {
-		// 按展现条数截取columnBaseData
+    /**
+     * 
+     * 填充数据到透视表模型
+     * @param needLimit
+     * @param limitSize
+     * @param pTable 透视表模型
+     * @param dataModel 数据模型
+     * 
+     */
+    private static void fillData(boolean needLimit, int limitSize,
+            PivotTable pTable, DataModel dataModel) {
+        // 按展现条数截取columnBaseData
         List<List<BigDecimal>> source = dataModel.getColumnBaseData();
         List<List<CellData>> cellDataSource = parseCellDatas(source);
         // build cellDataSetColumnBased;
@@ -156,56 +156,56 @@ public final class DataModelOperUtils {
         // build stat;
         pTable.setDataColumns(pTable.getDataSourceColumnBased().size());
         pTable.setDataRows(pTable.getDataSourceRowBased().size());
-	}
+    }
 
-	/**
-	 * 
-	 * 拷贝数据模型
-	 * @param oriDataModel
-	 * @param hideWhiteRow
-	 * @return DataModel
-	 * 
-	 */
-	private static DataModel copyDataModel(DataModel oriDataModel, boolean hideWhiteRow) {
-		DataModel dataModel = oriDataModel;
+    /**
+     * 
+     * 拷贝数据模型
+     * @param oriDataModel
+     * @param hideWhiteRow
+     * @return DataModel
+     * 
+     */
+    private static DataModel copyDataModel(DataModel oriDataModel, boolean hideWhiteRow) {
+        DataModel dataModel = oriDataModel;
         if (hideWhiteRow) {
             try {
                 dataModel = (DataModel) DeepcopyUtils.deepCopy(oriDataModel);
             } catch (Exception e) {
-                logger.error("Fail in deepCopy datamodel. ");
+                LOG.error("Fail in deepCopy datamodel. ");
                 PivotTableParseException parseEx = new PivotTableParseException(e);
                 throw parseEx;
             }
         }
-		return dataModel;
-	}
+        return dataModel;
+    }
 
-	/**
-	 * @param needLimit
-	 * @param limitSize
-	 * @param rowHeadFields
-	 * @return List<List<RowHeadField>> 
-	 */
-	private static List<List<RowHeadField>> buildRowHeadFields(
-			boolean needLimit, int limitSize, List<HeadField> rowHeadFields) {
-		List<List<RowHeadField>> rowFields = new ArrayList<List<RowHeadField>>();
+    /**
+     * @param needLimit
+     * @param limitSize
+     * @param rowHeadFields
+     * @return List<List<RowHeadField>> 
+     */
+    private static List<List<RowHeadField>> buildRowHeadFields(
+            boolean needLimit, int limitSize, List<HeadField> rowHeadFields) {
+        List<List<RowHeadField>> rowFields = new ArrayList<List<RowHeadField>>();
         rowFields = transRowHeadFields2RowFields(rowHeadFields, needLimit, limitSize);
         modify(rowFields);
-		return rowFields;
-	}
+        return rowFields;
+    }
 
-	/**
-	 * 构建行定义信息
-	 * @param needLimit
-	 * @param limitSize
-	 * @param rowLeafNodeList
-	 * @param count
-	 * @return List<RowDefine>
-	 */
-	private static List<RowDefine> buildRowDefines(boolean needLimit,
-			int limitSize, List<HeadField> rowLeafNodeList) {
-		int count = 0;
-		List<RowDefine> rowDefineList = new ArrayList<RowDefine>();
+    /**
+     * 构建行定义信息
+     * @param needLimit
+     * @param limitSize
+     * @param rowLeafNodeList
+     * @param count
+     * @return List<RowDefine>
+     */
+    private static List<RowDefine> buildRowDefines(boolean needLimit,
+            int limitSize, List<HeadField> rowLeafNodeList) {
+        int count = 0;
+        List<RowDefine> rowDefineList = new ArrayList<RowDefine>();
         for (HeadField headField : rowLeafNodeList) {
             
             RowDefine rowDefine = new RowDefine();
@@ -226,22 +226,22 @@ public final class DataModelOperUtils {
                 break;
             }
         }
-		return rowDefineList;
-	}
+        return rowDefineList;
+    }
 
-	/**
-	 * 构建行头字段信息
-	 * @param colHeadFields 列头定义
-	 * @param rowHeadFields 行头定义
-	 * @param colHeight 列高
-	 * @param rowWidth 行宽
-	 * @return List<List<ColField>>
-	 * 
-	 */
-	private static List<List<ColField>> buildColFields(
-			List<HeadField> colHeadFields, List<HeadField> rowHeadFields,
-			int colHeight, int rowWidth) {
-		List<List<ColField>> colFields = new ArrayList<List<ColField>>();
+    /**
+     * 构建行头字段信息
+     * @param colHeadFields 列头定义
+     * @param rowHeadFields 行头定义
+     * @param colHeight 列高
+     * @param rowWidth 行宽
+     * @return List<List<ColField>>
+     * 
+     */
+    private static List<List<ColField>> buildColFields(
+            List<HeadField> colHeadFields, List<HeadField> rowHeadFields,
+            int colHeight, int rowWidth) {
+        List<List<ColField>> colFields = new ArrayList<List<ColField>>();
         // s2. trans colField
         colFields = transColHeadFields2ColFields(colHeadFields);
         // s1. calc colHeight
@@ -258,21 +258,21 @@ public final class DataModelOperUtils {
                 firstColFields.add(0, firstColField);
             }
         }
-		return colFields;
-	}
+        return colFields;
+    }
 
-	/**
-	 * 
-	 * 依据行头定义信息确定行头大小
-	 * @param needLimit 是否需要限制数据大小
-	 * @param limitSize 指定限制大小
-	 * @param rowHeadFields 数据模型行头定义
-	 * @return int limitSize新的大小
-	 * 
-	 */
-	private static int changeLimitSizeValue(boolean needLimit, int limitSize,
-			List<HeadField> rowHeadFields) {
-		int maxRowSpan = getRowSpan(rowHeadFields);
+    /**
+     * 
+     * 依据行头定义信息确定行头大小
+     * @param needLimit 是否需要限制数据大小
+     * @param limitSize 指定限制大小
+     * @param rowHeadFields 数据模型行头定义
+     * @return int limitSize新的大小
+     * 
+     */
+    private static int changeLimitSizeValue(boolean needLimit, int limitSize,
+            List<HeadField> rowHeadFields) {
+        int maxRowSpan = getRowSpan(rowHeadFields);
         if (needLimit && limitSize != 0 && maxRowSpan > 1) {
             int count = 1;
             while (maxRowSpan * (count + 1) < limitSize) {
@@ -280,16 +280,16 @@ public final class DataModelOperUtils {
             }
             limitSize = maxRowSpan * count;
         }
-		return limitSize;
-	}
+        return limitSize;
+    }
 
-	/**
-	 * 构建列定义信息
-	 * @param colHeadFields 列头信息
-	 * @return List<ColDefine> 列定义信息
-	 */
-	private static List<ColDefine> buildColDefine(List<HeadField> colHeadFields) {
-		List<ColDefine> colDefineList = new ArrayList<ColDefine>(); // 长度即列数即宽度
+    /**
+     * 构建列定义信息
+     * @param colHeadFields 列头信息
+     * @return List<ColDefine> 列定义信息
+     */
+    private static List<ColDefine> buildColDefine(List<HeadField> colHeadFields) {
+        List<ColDefine> colDefineList = new ArrayList<ColDefine>(); // 长度即列数即宽度
         // 获取叶子节点
         List<HeadField> leafNodeList = getLeafNodeList(colHeadFields);
         for (HeadField headField : leafNodeList) {
@@ -303,8 +303,8 @@ public final class DataModelOperUtils {
             colDefine.setCurrentSort("NONE");
             colDefineList.add(colDefine);
         }
-		return colDefineList;
-	}
+        return colDefineList;
+    }
     
     /**
      * 
@@ -331,31 +331,31 @@ public final class DataModelOperUtils {
         }
     }
 
-	/**
-	 * @param rowHeadWith
-	 * @param rowHeads
-	 * @param index
-	 */
-	private static void setRowHeadStatus(int rowHeadWith, List<RowHeadField> rowHeads, int index) {
-		RowHeadField rowHead = rowHeads.get(index);
-		if (rowHeadWith != 1 && index == 0) {
-		    /**
-		     * 多个维度中的第一个维度，用链接下钻方式
-		     */
-		    if (rowHead.getExpand() != null && rowHead.getExpand()) {
-		        /**
-		         * 原来是加号的，要设置成链接下钻为true，否则为false
-		         */
-		        rowHead.setDrillByLink(true);
-		        rowHead.setExpand(null);
-		    } else {
-		        rowHead.setDrillByLink(false);
-		        rowHead.setExpand(null);
-		    }
-		} else {
-		    rowHead.setDrillByLink(false);
-		}
-	}
+    /**
+     * @param rowHeadWith
+     * @param rowHeads
+     * @param index
+     */
+    private static void setRowHeadStatus(int rowHeadWith, List<RowHeadField> rowHeads, int index) {
+        RowHeadField rowHead = rowHeads.get(index);
+        if (rowHeadWith != 1 && index == 0) {
+            /**
+             * 多个维度中的第一个维度，用链接下钻方式
+             */
+            if (rowHead.getExpand() != null && rowHead.getExpand()) {
+                /**
+                 * 原来是加号的，要设置成链接下钻为true，否则为false
+                 */
+                rowHead.setDrillByLink(true);
+                rowHead.setExpand(null);
+            } else {
+                rowHead.setDrillByLink(false);
+                rowHead.setExpand(null);
+            }
+        } else {
+            rowHead.setDrillByLink(false);
+        }
+    }
 
     /**
      * 
@@ -496,51 +496,51 @@ public final class DataModelOperUtils {
         
     }
 
-	/**
-	 * 
-	 * @param hasStoredMap
-	 * @param ancestorFileds
-	 * @param idxRowField
-	 * 
-	 */
-	private static void buildRowHeadField(Map<String, HeadField> hasStoredMap,
-			List<HeadField> ancestorFileds, List<RowHeadField> idxRowField) {
-		for (int i = 0; i < ancestorFileds.size(); i++) {
-		    HeadField headField = ancestorFileds.get(i);
-		    if (i == 0 && hasStoredMap.get(headField.getValue()) != null) {
-		        continue;
-		    } else {
-		        hasStoredMap.put(headField.getValue(), headField);
-		    }
-		    RowHeadField rowField = new RowHeadField();
-		    int currWidth = headField.getLeafSize();
-		    rowField.setIndent(getIndentOfHeadField(headField,0));
-		    rowField.setRowspan(currWidth == 0 ? 1 : currWidth);
-		    String lineUniqueName = headField.getNodeUniqueName();
-		    rowField.setUniqueNameAll(lineUniqueName);
-		    rowField.setUniqueName(headField.getValue());
-		    String caption = headField.getCaption();
-		    /**
-		     * 把周的开始caption换成完整的caption
-		     */
-		    rowField.setV(caption);
-		    /**
-		     * 设置原始展开状态
-		     */
-		    if (!headField.isHasChildren()) {
-		        rowField.setExpand(null);
-		    } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
-		        rowField.setExpand(false);
-		    } else {
-		        rowField.setExpand(true);
-		    }
-		    rowField.setDrillByLink(false);
-		    rowField.setDimName((String) headField.getExtInfos().get(EXT_INFOS_MEM_DIMNAME));
-		    rowField.setIndent(getIndentOfHeadField(headField, 0));
-		    rowField.setValueAll(transStrList2Str(getAllCaptionofHeadField(headField), "-", true));
-		    idxRowField.add(rowField);
-		}
-	}
+    /**
+     * 
+     * @param hasStoredMap
+     * @param ancestorFileds
+     * @param idxRowField
+     * 
+     */
+    private static void buildRowHeadField(Map<String, HeadField> hasStoredMap,
+        List<HeadField> ancestorFileds, List<RowHeadField> idxRowField) {
+        for (int i = 0; i < ancestorFileds.size(); i++) {
+            HeadField headField = ancestorFileds.get(i);
+            if (i == 0 && hasStoredMap.get(headField.getValue()) != null) {
+                continue;
+            } else {
+                hasStoredMap.put(headField.getValue(), headField);
+            }
+            RowHeadField rowField = new RowHeadField();
+            int currWidth = headField.getLeafSize();
+            rowField.setIndent(getIndentOfHeadField(headField, 0));
+            rowField.setRowspan(currWidth == 0 ? 1 : currWidth);
+            String lineUniqueName = headField.getNodeUniqueName();
+            rowField.setUniqueNameAll(lineUniqueName);
+            rowField.setUniqueName(headField.getValue());
+            String caption = headField.getCaption();
+            /**
+             * 把周的开始caption换成完整的caption
+             */
+            rowField.setV(caption);
+            /**
+             * 设置原始展开状态
+             */
+            if (!headField.isHasChildren()) {
+                rowField.setExpand(null);
+            } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
+                rowField.setExpand(false);
+            } else {
+                rowField.setExpand(true);
+            }
+            rowField.setDrillByLink(false);
+            rowField.setDimName((String) headField.getExtInfos().get(EXT_INFOS_MEM_DIMNAME));
+            rowField.setIndent(getIndentOfHeadField(headField, 0));
+            rowField.setValueAll(transStrList2Str(getAllCaptionofHeadField(headField), "-", true));
+            idxRowField.add(rowField);
+        }
+    }
     
     /**
      * 
@@ -724,35 +724,35 @@ public final class DataModelOperUtils {
         
     }
 
-	/**
-	 * @param colHeight
-	 * @param hasStoredMap
-	 * @param index
-	 * @param idxColField
-	 * @param idxHeadFieldList
-	 */
-	private static void buildColField(int colHeight,
-			Map<String, HeadField> hasStoredMap, int index,
-			List<ColField> idxColField, List<HeadField> idxHeadFieldList) {
-		for (HeadField headField : idxHeadFieldList) {
-		    if (hasStoredMap.get(headField.getValue()) != null) {
-		        continue;
-		    } else {
-		        hasStoredMap.put(headField.getValue(), headField);
-		    }
-		    ColField colField = new ColField();
-		    colField.setColSpan(headField.getLeafSize());
-		    colField.setUniqName(headField.getNodeUniqueName());
-		    colField.setV(headField.getCaption());
-		    if ((index + 1 < colHeight)
-		        && (headField.getNodeList() == null || headField.getNodeList().size() == 0)) {
-		        colField.setRowspan(colHeight - index);
-		    } else {
-		        colField.setRowspan(1);
-		    }
-		    idxColField.add(colField);
-		}
-	}
+    /**
+     * @param colHeight
+     * @param hasStoredMap
+     * @param index
+     * @param idxColField
+     * @param idxHeadFieldList
+     */
+    private static void buildColField(int colHeight,
+            Map<String, HeadField> hasStoredMap, int index,
+            List<ColField> idxColField, List<HeadField> idxHeadFieldList) {
+        for (HeadField headField : idxHeadFieldList) {
+            if (hasStoredMap.get(headField.getValue()) != null) {
+                continue;
+            } else {
+                hasStoredMap.put(headField.getValue(), headField);
+            }
+            ColField colField = new ColField();
+            colField.setColSpan(headField.getLeafSize());
+            colField.setUniqName(headField.getNodeUniqueName());
+            colField.setV(headField.getCaption());
+            if ((index + 1 < colHeight)
+                && (headField.getNodeList() == null || headField.getNodeList().size() == 0)) {
+                colField.setRowspan(colHeight - index);
+            } else {
+                colField.setRowspan(1);
+            }
+            idxColField.add(colField);
+        }
+    }
     
     /**
      * 
@@ -798,7 +798,6 @@ public final class DataModelOperUtils {
         dataModel.setOperateIndex(oriDataModel.getOperateIndex());
         List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
         // 设置缩进以及父子关系
-        System.out.println();
         HeadField realRowHead = getRealRowHeadByRowNum(rowNum, rowHeadFields);
         if (realRowHead == null) {
             throw new IllegalStateException("can not found head field with row number " + rowNum);
@@ -878,7 +877,7 @@ public final class DataModelOperUtils {
         rowHeadFields = replaceHeadFieldToCorrectLocation(rowHeadFields, headField);
         List<List<BigDecimal>> datas = transData(newDataModel.getColumnBaseData());
         List<List<BigDecimal>> newDatas = Lists.newArrayList();
-        for (int i = 0; i < datas.size() ; ++i) {
+        for (int i = 0; i < datas.size(); ++i) {
             if (i > rowNum && i <= childSize + rowNum) {
                 continue;
             }
@@ -928,42 +927,42 @@ public final class DataModelOperUtils {
      * @param formatModel 格式模型
      * @param table 透视表
      */
-	public static void decorateTable(FormatModel formatModel, PivotTable table) {
-		if (formatModel == null) {
-			return;
-		}
-		
-		Map<String, String> dataFormat = formatModel.getDataFormat();
-		if (CollectionUtils.isEmpty(dataFormat)) {
-			return;
-		}
-		
-		List<List<CellData>> colDatas = table.getDataSourceColumnBased();
-		for (int i = 0; i < colDatas.size(); ++i) {
-			ColDefine define = table.getColDefine().get(i);
-			String uniqueName = define.getUniqueName();
-			String formatStr = dataFormat.get("defaultFormat");
-			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","");
-			if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
-				formatStr = dataFormat.get(uniqueName);
-			}
-			if (!StringUtils.isEmpty(formatStr)) {
-				define.setFormat(formatStr);
-			}
-		}
-	}
-	
-	/**
-	 * 根据指定行行头数据信息返回行数
-	 * @param dataModel 数据模型
-	 * @param uniqueName 行头信息，指定行定义的维度节点的uniqueName
-	 * @return int 给定行头信息所在的行数
-	 */
-	public static int getRowNum(DataModel dataModel, String uniqueName) {
-		if (dataModel == null) {
-			throw new IllegalStateException("数据模型为null");
-		}
-		List<HeadField> headField = dataModel.getRowHeadFields();
+    public static void decorateTable(FormatModel formatModel, PivotTable table) {
+        if (formatModel == null) {
+            return;
+        }
+        
+        Map<String, String> dataFormat = formatModel.getDataFormat();
+        if (CollectionUtils.isEmpty(dataFormat)) {
+            return;
+        }
+        
+        List<List<CellData>> colDatas = table.getDataSourceColumnBased();
+        for (int i = 0; i < colDatas.size(); ++i) {
+            ColDefine define = table.getColDefine().get(i);
+            String uniqueName = define.getUniqueName();
+            String formatStr = dataFormat.get("defaultFormat");
+            uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","");
+            if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
+                formatStr = dataFormat.get(uniqueName);
+            }
+            if (!StringUtils.isEmpty(formatStr)) {
+                define.setFormat(formatStr);
+            }
+        }
+    }
+    
+    /**
+     * 根据指定行行头数据信息返回行数
+     * @param dataModel 数据模型
+     * @param uniqueName 行头信息，指定行定义的维度节点的uniqueName
+     * @return int 给定行头信息所在的行数
+     */
+    public static int getRowNum(DataModel dataModel, String uniqueName) {
+        if (dataModel == null) {
+            throw new IllegalStateException("数据模型为null");
+        }
+        List<HeadField> headField = dataModel.getRowHeadFields();
         List<HeadField> tmp = DataModelUtils.getLeafNodeList(headField);
         for (int rowNum = 0; rowNum < tmp.size(); ++rowNum) {
             String lineUniqueName = tmp.get(rowNum).getNodeUniqueName();
@@ -971,6 +970,6 @@ public final class DataModelOperUtils {
                 return rowNum;
             }
         }
-		throw new IllegalStateException("不能根据指定的行名称信息找到对应行：" + uniqueName);
-	}
+        throw new IllegalStateException("不能根据指定的行名称信息找到对应行：" + uniqueName);
+    }
 }

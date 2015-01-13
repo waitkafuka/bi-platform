@@ -40,7 +40,7 @@ public class TimerAreaLogicModel extends LogicModel {
     /**
      * 时间维度层次结构，value表示默认区域范围以及时间维度对应的时间粒度
      */
-    private LinkedHashMap<Item, TimeRange> timeDimensions ;
+    private LinkedHashMap<Item, TimeRange> timeDimensions;
     
     /**
      * 构造函数

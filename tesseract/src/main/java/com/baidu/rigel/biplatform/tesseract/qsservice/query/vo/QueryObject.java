@@ -157,18 +157,18 @@ public class QueryObject implements Serializable {
         return "QueryObject [value=" + value + ", leafValues=" + leafValues + "]";
     }
 
-	/**
-	 * @return the isSummary
-	 */
-	public boolean isSummary() {
-		return isSummary;
-	}
+    /**
+     * @return the isSummary
+     */
+    public boolean isSummary() {
+        return isSummary;
+    }
 
-	/**
-	 * @param isSummary the isSummary to set
-	 */
-	public void setSummary(boolean isSummary) {
-		this.isSummary = isSummary;
-	}
+    /**
+     * @param isSummary the isSummary to set
+     */
+    public void setSummary(boolean isSummary) {
+        this.isSummary = isSummary;
+    }
 
 }

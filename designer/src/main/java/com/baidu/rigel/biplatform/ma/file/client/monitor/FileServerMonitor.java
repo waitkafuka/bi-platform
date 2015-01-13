@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class FileServerMonitor extends ChannelHandlerAdapter {
+public final class FileServerMonitor extends ChannelHandlerAdapter {
     
     /**
      * 心跳消息channel

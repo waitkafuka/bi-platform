@@ -48,7 +48,8 @@ public class AnalysisChartBuildServiceImpl implements AnalysisChartBuildService 
      */
     @Override
     public LogicModel generateTrendChartModel(LogicModel sourceLogicModel,
-            Schema schema, String cubeId, List<Item> row, List<Item> cols, Item timeDimItem) throws QueryModelBuildException {
+                Schema schema, String cubeId, List<Item> row, 
+                List<Item> cols, Item timeDimItem) throws QueryModelBuildException {
                 
         /**
          * 表中行上的维度要放到图中的系列中

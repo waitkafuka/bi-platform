@@ -48,7 +48,9 @@ public class QuestionModelBuildServiceImpl implements QuestionModelBuildService 
     
     /* 
      * (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.rt.query.service.QuestionModelBuildService#buildQuestionModel(com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction)
+     * @see com.baidu.rigel.biplatform.ma.rt.
+     * query.service.QuestionModelBuildService#buildQuestionModel(com.
+     * baidu.rigel.biplatform.ma.rt.query.service.QueryAction)
      */
     @Override
     public QuestionModel buildQuestionModel(QueryAction action) {
@@ -67,7 +69,6 @@ public class QuestionModelBuildServiceImpl implements QuestionModelBuildService 
             }
             return questionModel;
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error(e);
             throw new RuntimeException("构建问题模型出错，请检查查询条件");
         }

@@ -37,7 +37,8 @@ class MemberQueryTransHandler extends QueryRequestTransHandler {
     }
     
     /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler#transRequest(com.baidu.rigel.biplatform.ma.runtime.QueryRequest)
+     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler
+     * #transRequest(com.baidu.rigel.biplatform.ma.runtime.QueryRequest)
      */
     @Override
     QueryAction transRequest(QueryRequest request) {
@@ -46,7 +47,8 @@ class MemberQueryTransHandler extends QueryRequestTransHandler {
     }
     
     /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler#isSupportedQueryStrategy(com.baidu.rigel.biplatform.ma.runtime.QueryStrategy)
+     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler
+     * #isSupportedQueryStrategy(com.baidu.rigel.biplatform.ma.runtime.QueryStrategy)
      */
     @Override
     boolean isSupportedQueryStrategy(QueryStrategy queryStrategy) {

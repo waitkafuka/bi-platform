@@ -44,32 +44,32 @@ import com.google.common.collect.Lists;
  * 
  * @author xiaoming.chen 2013-12-5 下午2:51:58
  */
-public class DataModelUtils {
+public final class DataModelUtils {
     
     /**
      * logger
      */
-    private static Logger logger = Logger.getLogger(DataModelUtils.class);
+    public static final Logger LOG = Logger.getLogger(DataModelUtils.class);
     
     /**
      * memeber的uniqname
      */
-    public static String EXT_INFOS_MEM_UNIQNAME = "mem_uniqname";
+    public static final String EXT_INFOS_MEM_UNIQNAME = "mem_uniqname";
 
     /**
      *member的dim 
      */
-    public static String EXT_INFOS_MEM_DIMNAME = "mem_dimname";
+    public static final String EXT_INFOS_MEM_DIMNAME = "mem_dimname";
      
     /**
      * member的leveltype
      */
-    public static String EXT_INFOS_MEM_LEVELTYPE = "mem_leveltype";
+    public static final String EXT_INFOS_MEM_LEVELTYPE = "mem_leveltype";
     
     /**
      * member的child信息
      */
-    public static String EXT_INFOS_MEM_HASCHILD = "mem_haschild";
+    public static final String EXT_INFOS_MEM_HASCHILD = "mem_haschild";
     
     /**
      * DIV_DIM
@@ -77,8 +77,8 @@ public class DataModelUtils {
     public static final String DIV_DIM = "_12345FORDIV_";
     
     /**
-	 * POS_PREFIX
-	 */
+     * POS_PREFIX
+     */
     public static final String POS_PREFIX = "[Rights]";
     
     /**
@@ -119,7 +119,14 @@ public class DataModelUtils {
     /**
      * member节点是否已经展开
      */
-    public static String EXT_INFOS_MEM_EXPAND = "mem_expand";
+    public static final String EXT_INFOS_MEM_EXPAND = "mem_expand";
+    
+    /**
+     * DataModelUtils
+     */
+    private DataModelUtils() {
+        
+    }
     
     /**
      * 将DataModel转换成前端展现需要的PivotTable
@@ -148,7 +155,7 @@ public class DataModelUtils {
             try {
                 dataModel = (DataModel) DeepcopyUtils.deepCopy(oriDataModel);
             } catch (Exception e) {
-                logger.error("Fail in deepCopy datamodel. ");
+                LOG.error("Fail in deepCopy datamodel. ");
                 PivotTableParseException parseEx = new PivotTableParseException(e);
                 throw parseEx;
             }
@@ -196,7 +203,7 @@ public class DataModelUtils {
             colDefine.setShowAxis(transStrList2Str(getAllCaptionofHeadField(headField),
                 DIV_DIM_NODE, true));
             colDefine.setCurrentSort(headField.getExtInfos().get("sortType") == null 
-            			? "NONE" : headField.getExtInfos().get("sortType").toString());
+                        ? "NONE" : headField.getExtInfos().get("sortType").toString());
             colDefineList.add(colDefine);
             
         }
@@ -282,7 +289,7 @@ public class DataModelUtils {
         pTable.setDataColumns(pTable.getDataSourceColumnBased().size());
         pTable.setDataRows(pTable.getDataSourceRowBased().size());
         
-        logger.info("transfer datamodel 2 pivotTable cost:"
+        LOG.info("transfer datamodel 2 pivotTable cost:"
             + (System.currentTimeMillis() - current) + "ms!");
         
         // PivotTableUtils.addSummaryRowHead(pTable);
@@ -480,12 +487,12 @@ public class DataModelUtils {
                 if (!headField.isHasChildren()) {
                     rowField.setExpand(null);
                 } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
-				    if (headField.getLeafSize() == 0 && headField.getParent() == null
-				    		&& headField.getParentLevelField() == null) {
-						rowField.setExpand(null);
-					} else {
-						rowField.setExpand(false);
-					}
+                    if (headField.getLeafSize() == 0 && headField.getParent() == null
+                            && headField.getParentLevelField() == null) {
+                        rowField.setExpand(null);
+                    } else {
+                        rowField.setExpand(false);
+                    }
                 } else {
                     rowField.setExpand(true);
                 }
@@ -749,7 +756,7 @@ public class DataModelUtils {
      * @return
      */
     public static DataModel merageDataModel(DataModel oriDataModel, DataModel newDataModel,
-            int rowNum) {
+        int rowNum) {
         DataModel dataModel = new DataModel();
         dataModel.setColumnBaseData(oriDataModel.getColumnBaseData());
         dataModel.setColumnHeadFields(oriDataModel.getColumnHeadFields());
@@ -757,7 +764,6 @@ public class DataModelUtils {
         dataModel.setOperateIndex(oriDataModel.getOperateIndex());
         List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
         // 设置缩进以及父子关系
-        System.out.println();
         HeadField realRowHead = getRealRowHeadByRowNum(rowNum, rowHeadFields);
         if (realRowHead == null) {
             throw new IllegalStateException("can not found head field with row number " + rowNum);
@@ -853,7 +859,7 @@ public class DataModelUtils {
         rowHeadFields = replaceHeadFieldToCorrectLocation(rowHeadFields, headField);
         List<List<BigDecimal>> datas = transData(newDataModel.getColumnBaseData());
         List<List<BigDecimal>> newDatas = Lists.newArrayList();
-        for (int i = 0; i < datas.size() ; ++i) {
+        for (int i = 0; i < datas.size(); ++i) {
             if (i > rowNum && i <= childSize + rowNum) {
                 continue;
             }
@@ -903,77 +909,77 @@ public class DataModelUtils {
      * @param formatModel 格式模型
      * @param table 透视表
      */
-	public static void decorateTable(FormatModel formatModel, PivotTable table) {
-		if (formatModel == null) {
-			return;
-		}
-		
-		Map<String, String> dataFormat = formatModel.getDataFormat();
-		if (CollectionUtils.isEmpty(dataFormat)) {
-			return;
-		}
-		
-		List<List<CellData>> colDatas = table.getDataSourceColumnBased();
-		for (int i = 0; i < colDatas.size(); ++i) {
-			ColDefine define = table.getColDefine().get(i);
-			String uniqueName = define.getUniqueName();
-			String formatStr = dataFormat.get("defaultFormat");
-			uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure","").replace(".", "");
-			if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
-				formatStr = dataFormat.get(uniqueName);
-			}
-			if (!StringUtils.isEmpty(formatStr)) {
-				define.setFormat(formatStr);
-			}
-			String toolTip = formatModel.getToolTips().get(uniqueName);
-			if (StringUtils.isEmpty(toolTip)) {
-				toolTip = uniqueName;
-			}
-			define.setToolTip(toolTip);
-		}
-	}
+    public static void decorateTable(FormatModel formatModel, PivotTable table) {
+        if (formatModel == null) {
+            return;
+        }
+        
+        Map<String, String> dataFormat = formatModel.getDataFormat();
+        if (CollectionUtils.isEmpty(dataFormat)) {
+            return;
+        }
+        
+        List<List<CellData>> colDatas = table.getDataSourceColumnBased();
+        for (int i = 0; i < colDatas.size(); ++i) {
+            ColDefine define = table.getColDefine().get(i);
+            String uniqueName = define.getUniqueName();
+            String formatStr = dataFormat.get("defaultFormat");
+            uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure", "").replace(".", "");
+            if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
+                formatStr = dataFormat.get(uniqueName);
+            }
+            if (!StringUtils.isEmpty(formatStr)) {
+                define.setFormat(formatStr);
+            }
+            String toolTip = formatModel.getToolTips().get(uniqueName);
+            if (StringUtils.isEmpty(toolTip)) {
+                toolTip = uniqueName;
+            }
+            define.setToolTip(toolTip);
+        }
+    }
 
-	/**
-	 * 将dataModel转化为csv文件
-	 * @param dataModel
-	 * @return 转换后的文件
-	 */
-	public static String convertDataModel2CsvString(DataModel dataModel) {
-		StringBuilder rs = new StringBuilder();
-		
-		List<List<BigDecimal>> rowDatas = convertToRowData(dataModel.getColumnBaseData());
-		int maxDepth = getMaxDepth4Dim(dataModel.getRowHeadFields());
-		for (int i = 0; i < maxDepth; ++i) {
-			rs.append(" ,");
-		}
-		final int colSize = dataModel.getColumnHeadFields().size();
-		for (int i = 0; i < colSize; ++i) {
-			rs.append(dataModel.getColumnHeadFields().get(i).getCaption());
-			if (i < colSize - 1) {
-				rs.append(",");
-			} else {
-				rs.append("\r\n");
-			}
-		}
-		List<List<String>> rowCaptions = genRowCaptions(dataModel.getRowHeadFields());       
-		for (int i = 0; i < rowCaptions.size(); ++i) {
-			rowCaptions.get(i).forEach(str -> {
-				rs.append(str + ",");
-			});
-			for (int j = 0; j < rowDatas.get(i).size(); ++j) {
-				rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j));
-				if (j < rowDatas.get(i).size() - 1) {
-					rs.append(",");
-				} else {
-					rs.append("\r\n");
-				}
-			}
-		}
-		return rs.toString();
-	}
+    /**
+     * 将dataModel转化为csv文件
+     * @param dataModel
+     * @return 转换后的文件
+     */
+    public static String convertDataModel2CsvString(DataModel dataModel) {
+        StringBuilder rs = new StringBuilder();
+        
+        List<List<BigDecimal>> rowDatas = convertToRowData(dataModel.getColumnBaseData());
+        int maxDepth = getMaxDepth4Dim(dataModel.getRowHeadFields());
+        for (int i = 0; i < maxDepth; ++i) {
+            rs.append(" ,");
+        }
+        final int colSize = dataModel.getColumnHeadFields().size();
+        for (int i = 0; i < colSize; ++i) {
+            rs.append(dataModel.getColumnHeadFields().get(i).getCaption());
+            if (i < colSize - 1) {
+                rs.append(",");
+            } else {
+                rs.append("\r\n");
+            }
+        }
+        List<List<String>> rowCaptions = genRowCaptions(dataModel.getRowHeadFields());       
+        for (int i = 0; i < rowCaptions.size(); ++i) {
+            rowCaptions.get(i).forEach(str -> {
+                rs.append(str + ",");
+            });
+            for (int j = 0; j < rowDatas.get(i).size(); ++j) {
+                rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j));
+                if (j < rowDatas.get(i).size() - 1) {
+                    rs.append(",");
+                } else {
+                    rs.append("\r\n");
+                }
+            }
+        }
+        return rs.toString();
+    }
 
-	private static List<List<BigDecimal>> convertToRowData(List<List<BigDecimal>> columnBaseData) {
-		List<List<BigDecimal>> rowBasedData = new ArrayList<List<BigDecimal>>();
+    private static List<List<BigDecimal>> convertToRowData(List<List<BigDecimal>> columnBaseData) {
+        List<List<BigDecimal>> rowBasedData = new ArrayList<List<BigDecimal>>();
         
         for (List<BigDecimal> currColumnData : columnBaseData) {
             for (int i = 0; i < currColumnData.size(); i++) {
@@ -988,49 +994,50 @@ public class DataModelUtils {
             }
         }
         
-        return rowBasedData;	}
+        return rowBasedData;    
+    }
 
-	private static List<List<String>> genRowCaptions(List<HeadField> rowHeadFields) {
-		List<List<String>> rs = Lists.newArrayList();
-		for (int i = 0; i < rowHeadFields.size(); ++i) {
-			final HeadField headField = rowHeadFields.get(i);
-			final List<HeadField> nodeList = headField.getNodeList();
-			List<String> tmp = Lists.newArrayList();
-			if (nodeList == null || nodeList.size() == 0) {
-				tmp.add(rowHeadFields.get(i).getCaption());
-			} else {
-				List<List<String>> nodeListCaption = genRowCaptions(headField.getNodeList());
-				nodeListCaption.forEach(list -> {
-					list.add(0, headField.getCaption());
-				});
-				rs.addAll(nodeListCaption);
-			}
-			rs.add(tmp);
-			if (headField.getChildren() != null && headField.getChildren().size() > 0) {
-				rs.addAll(genRowCaptions(headField.getChildren()));
-			}
-		}
-		List<List<String>> tmp = Lists.newArrayList();
-		rs.stream().forEach(list -> {
-			if (list != null && list.size() > 0) {
-				tmp.add(list);
-			}
-		});
-		return tmp;
-	}
+    private static List<List<String>> genRowCaptions(List<HeadField> rowHeadFields) {
+        List<List<String>> rs = Lists.newArrayList();
+        for (int i = 0; i < rowHeadFields.size(); ++i) {
+            final HeadField headField = rowHeadFields.get(i);
+            final List<HeadField> nodeList = headField.getNodeList();
+            List<String> tmp = Lists.newArrayList();
+            if (nodeList == null || nodeList.size() == 0) {
+                tmp.add(rowHeadFields.get(i).getCaption());
+            } else {
+                List<List<String>> nodeListCaption = genRowCaptions(headField.getNodeList());
+                nodeListCaption.forEach(list -> {
+                    list.add(0, headField.getCaption());
+                });
+                rs.addAll(nodeListCaption);
+            }
+            rs.add(tmp);
+            if (headField.getChildren() != null && headField.getChildren().size() > 0) {
+                rs.addAll(genRowCaptions(headField.getChildren()));
+            }
+        }
+        List<List<String>> tmp = Lists.newArrayList();
+        rs.stream().forEach(list -> {
+            if (list != null && list.size() > 0) {
+                tmp.add(list);
+            }
+        });
+        return tmp;
+    }
 
-	/**
-	 * 获取表格中不同维度的最大数目
-	 * @param dataModel
-	 * @return int
-	 */
-	private static int getMaxDepth4Dim(List<HeadField> headFields) {
-		int rs = 0;
-		if (headFields == null || headFields.size() == 0) {
-			return rs;
-		}
-		rs += getMaxDepth4Dim(headFields.get(0).getNodeList());
-		return rs + 1;
-	}
+    /**
+     * 获取表格中不同维度的最大数目
+     * @param dataModel
+     * @return int
+     */
+    private static int getMaxDepth4Dim(List<HeadField> headFields) {
+        int rs = 0;
+        if (headFields == null || headFields.size() == 0) {
+            return rs;
+        }
+        rs += getMaxDepth4Dim(headFields.get(0).getNodeList());
+        return rs + 1;
+    }
     
 }

@@ -39,12 +39,18 @@ import com.google.common.collect.Maps;
  * @author david.wang
  *
  */
-public class DataSourceDefineUtil {
+public final class DataSourceDefineUtil {
     
     /**
      * LOGGER
      */
     private static Logger logger = LoggerFactory.getLogger(DataSourceDefineUtil.class);
+    
+    /**
+     * 构造函数
+     */
+    private DataSourceDefineUtil() {
+    }
     
     /**
      * 获取数据源文件的文件名（含路径）
@@ -106,7 +112,7 @@ public class DataSourceDefineUtil {
             case ORACLE:
                 return DataBase.ORACLE;
             case H2:
-            		return DataBase.H2;
+                return DataBase.H2;
             default:
                 return DataBase.OTHER;
         }

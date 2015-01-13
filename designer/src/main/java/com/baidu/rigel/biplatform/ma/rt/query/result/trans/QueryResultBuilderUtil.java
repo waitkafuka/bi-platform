@@ -21,7 +21,7 @@ package com.baidu.rigel.biplatform.ma.rt.query.result.trans;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class QueryResultBuilderUtil {
+public final class QueryResultBuilderUtil {
     
     /**
      * 工具类

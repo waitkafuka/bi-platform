@@ -34,14 +34,19 @@ public class NameCheckCacheManager {
 //     * logger
 //     */
 //    private Logger logger = LoggerFactory.getLogger(NameCheckCacheManager.class);
-
+    /**
+     * REPORT_NAME_SIGN
+     */
+    private static final String REPORT_NAME_SIGN = "REPORT_NAME_";
+    
+    /**
+     * cacheManagerForReource
+     */
     @Resource
     private CacheManagerForResource cacheManagerForReource;
     
 //    @Resource
 //    private ReportDesignModelService reportDesignModelService;
-    
-    private static final String REPORT_NAME_SIGN = "REPORT_NAME_";
     
     /**
      * 检查报表名称是否存在

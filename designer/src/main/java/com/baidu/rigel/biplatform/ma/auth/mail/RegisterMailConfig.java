@@ -67,11 +67,11 @@ public final class RegisterMailConfig {
     }
     
     /**
-	 * 构造函数
-	 */
-	private RegisterMailConfig () {
-	}
-	
+     * 构造函数
+     */
+    private RegisterMailConfig() {
+    }
+
     /**
      * 加载静态资源
      */

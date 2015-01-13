@@ -38,17 +38,18 @@ import com.baidu.rigel.biplatform.ma.common.file.protocol.ResponseStatus;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class FileServerClient {
+public final class FileServerClient {
+    
+    /**
+     * FileServerClient
+     */
+    private static final FileServerClient INSTANCE = new FileServerClient();
     
     /**
      * 日志记录器
      */
     private Logger logger = LoggerFactory.getLogger(FileServerClient.class);
     
-    /**
-     * FileServerClient
-     */
-    private static final FileServerClient INSTANCE = new FileServerClient();
     
     /**
      * 构造函数
