@@ -87,7 +87,7 @@ public class DataSourceDefineUtil {
         dsInfo.setUsername(dsDefine.getDbUser());
         dsInfo.setProductLine(dsDefine.getProductLine());
         dsInfo.setInstanceName(dsDefine.getDbInstance());
-        dsInfo.setDataSourceKey(dsDefine.getName());
+//        dsInfo.setDataSourceKey(dsDefine.getName());
         dsInfo.setDBProxy(true);
         List<String> urls = Lists.newArrayList();
         urls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
