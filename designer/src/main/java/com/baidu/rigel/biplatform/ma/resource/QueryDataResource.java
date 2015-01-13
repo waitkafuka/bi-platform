@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -36,7 +37,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.yaml.snakeyaml.util.UriEncoder;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -1565,7 +1565,7 @@ public class QueryDataResource extends BaseResource {
     		response.setContentType("application/vnd.ms-excel;charset=GBK");
     		response.setContentType("application/x-msdownload;charset=GBK");
     		response.setHeader("Content-Disposition", "attachment;filename=" 
-    				+ UriEncoder.encode(report.getName()) + ".csv"); 
+    				+ URLEncoder.encode(report.getName(), "utf8") + ".csv"); 
     		byte[] content = csvString.getBytes("GBK");
     		response.setContentLength(content.length);
     		OutputStream os = response.getOutputStream();
