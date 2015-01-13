@@ -37,21 +37,39 @@ public class RowDefine implements Serializable {
      */
     public enum XType {
         
+        /**
+         * CATEGORY
+         */
         CATEGORY("category"), 
         
+        /**
+         * YEAR
+         */
         YEAR("year"), 
         
+        /**
+         * QUARTER
+         */
         QUARTER("quarter"), 
         
+        /**
+         * MONTH
+         */
         MONTH("month"),
         
+        /**
+         * DATE
+         */
         DATE("datetime"), 
         
+        /**
+         * WEEK
+         */
         WEEK("week");
         
         /**
-		 * 
-		 */
+         * name
+         */
         private String name;
         
         /**
@@ -72,7 +90,7 @@ public class RowDefine implements Serializable {
         
         /**
          * 
-         * @return
+         * @return String
          */
         public String getName() {
             return name;
@@ -80,23 +98,23 @@ public class RowDefine implements Serializable {
     }
     
     /**
-	 * uniqueName
-	 */
+     * uniqueName
+     */
     private String uniqueName;
     
     /**
-	 * showXAxis
-	 */
+     * showXAxis
+     */
     private String showXAxis;
     
     /**
-	 * xAxisType
-	 */
+     * xAxisType
+     */
     private String xAxisType;
     
     /**
-	 * selected
-	 */
+     * selected
+     */
     private boolean selected;
     
     /**

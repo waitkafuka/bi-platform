@@ -29,8 +29,14 @@ import com.google.common.collect.Maps;
  * @author zhongyi
  *
  */
-public class ChartDataInputFactory {
+public final class ChartDataInputFactory {
     
+     /**
+      * ChartDataInputFactory
+      */
+    private ChartDataInputFactory() {
+        
+    }
     /**
      * 生成时间趋势线图的图输入对象
      * 

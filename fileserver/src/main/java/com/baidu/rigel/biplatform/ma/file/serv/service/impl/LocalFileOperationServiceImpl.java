@@ -322,15 +322,14 @@ public class LocalFileOperationServiceImpl implements LocalFileOperationService 
                     fi.close();
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.info(e.getMessage(), e);
                 }
             }
             if (bos != null) {
                 try {
                     bos.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.info(e.getMessage(), e);
                 }
             }
         }

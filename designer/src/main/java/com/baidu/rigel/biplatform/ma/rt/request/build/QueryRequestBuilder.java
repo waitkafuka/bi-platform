@@ -30,24 +30,24 @@ import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
  * 
  */
 public final class QueryRequestBuilder {
-	
-	/**
-	 * 查询请求
-	 */
-	private QueryRequestBuilder() {
-	}
-	
-	/**
-	 * 查询请求构建对象
-	 * @param context ExtendAreaContext 扩展区域上下文
-	 * @param globalParams Map<String, Object> 请求参数
-	 * @param queryStrategy QueryStrategy 查询策略
-	 * @param callBack BiFunction 回调函数
-	 * @return QueryRequest 查询请求
-	 */
-	public static QueryRequest buildQueryRequest(ExtendAreaContext context, QueryStrategy queryStrategy, 
-			Map<String, Object> globalParams, BiFunction<Map<String, Object>, QueryRequest, QueryRequest> callBack) {
-		Map<String, Object> localParams = context.getParams();
+    
+    /**
+     * 查询请求
+     */
+    private QueryRequestBuilder() {
+    }
+    
+    /**
+     * 查询请求构建对象
+     * @param context ExtendAreaContext 扩展区域上下文
+     * @param globalParams Map<String, Object> 请求参数
+     * @param queryStrategy QueryStrategy 查询策略
+     * @param callBack BiFunction 回调函数
+     * @return QueryRequest 查询请求
+     */
+    public static QueryRequest buildQueryRequest(ExtendAreaContext context, QueryStrategy queryStrategy, 
+            Map<String, Object> globalParams, BiFunction<Map<String, Object>, QueryRequest, QueryRequest> callBack) {
+        Map<String, Object> localParams = context.getParams();
         /**
          * TODO 添加到函数处理，仅保留一个时间条件
          */
@@ -78,12 +78,12 @@ public final class QueryRequestBuilder {
            queryRequest.getFilter().put(item.getOlapElementId(), null); 
         });
         // 设置报表ID
-		queryRequest.setReportId(context.getReportId());
-		// 自定义处理函数
-		if (callBack != null) {
-		    QueryRequest queryRequestFun = callBack.apply(globalParams, queryRequest);
-		    return queryRequestFun;
-		}
+        queryRequest.setReportId(context.getReportId());
+        // 自定义处理函数
+        if (callBack != null) {
+            QueryRequest queryRequestFun = callBack.apply(globalParams, queryRequest);
+            return queryRequestFun;
+        }
         return queryRequest;
-	}
+    }
 }

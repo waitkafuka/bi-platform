@@ -37,52 +37,55 @@ import com.baidu.rigel.biplatform.ma.resource.cache.CacheManagerForResource;
  *
  */
 @RestController
-public class RandomValidateCodeController extends BaseResource{
+public class RandomValidateCodeController extends BaseResource {
 
-	@Resource
-	CacheManagerForResource cacheManagerForResource;
-	
-	/**
-	 * 
-	 * @param request
-	 * @param response
-	 */
-	@RequestMapping(value = "/silkroad/auth", method = { RequestMethod.POST, RequestMethod.GET })
-	public void genRandomValidateCode(HttpServletRequest request, HttpServletResponse response) {
-		RandomValidateCode.getRandcode(request, response, cacheManagerForResource);
-	}
-	
-	/**
-	 * 
-	 * @return ResponseResult
-	 */
-	ResponseResult checkValidateCode(HttpServletRequest request) {
-		String key = null;
-		ResponseResult rs = new ResponseResult();
-		if (request.getCookies() == null) {
-			rs.setStatus(ResponseResult.FAILED);
-			rs.setStatusInfo("请输入验证码");
-			return rs;
-		}
-		for (Cookie tmp : request.getCookies()) {
-			if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
-				key = tmp.getValue();
-				break;
-			}
-		}
-		String valicateCode = request.getParameter("validateCode");
-		if (StringUtils.isEmpty(valicateCode) || StringUtils.isEmpty(key)) {
-			rs.setStatus(ResponseResult.FAILED);
-			rs.setStatusInfo("请输入验证码");
-		} else if (this.cacheManagerForResource.getFromCache(key) != null && 
-				valicateCode.equalsIgnoreCase(cacheManagerForResource.getFromCache(key).toString())) {
-			rs.setStatus(ResponseResult.SUCCESS);
-			this.cacheManagerForResource.deleteFromCache(key);
-		} else {
-			rs.setStatus(ResponseResult.FAILED);
-			rs.setStatusInfo("验证码错误");
-		}
-		return rs;
-	}
-	
+    /**
+     * cacheManagerForResource
+     */
+    @Resource
+    CacheManagerForResource cacheManagerForResource;
+    
+    /**
+     * 
+     * @param request
+     * @param response
+     */
+    @RequestMapping(value = "/silkroad/auth", method = { RequestMethod.POST, RequestMethod.GET })
+    public void genRandomValidateCode(HttpServletRequest request, HttpServletResponse response) {
+        RandomValidateCode.getRandcode(request, response, cacheManagerForResource);
+    }
+    
+    /**
+     * 
+     * @return ResponseResult
+     */
+    ResponseResult checkValidateCode(HttpServletRequest request) {
+        String key = null;
+        ResponseResult rs = new ResponseResult();
+        if (request.getCookies() == null) {
+            rs.setStatus(ResponseResult.FAILED);
+            rs.setStatusInfo("请输入验证码");
+            return rs;
+        }
+        for (Cookie tmp : request.getCookies()) {
+            if (tmp.getName().equals(Constants.RANDOMCODEKEY)) {
+                key = tmp.getValue();
+                break;
+            }
+        }
+        String valicateCode = request.getParameter("validateCode");
+        if (StringUtils.isEmpty(valicateCode) || StringUtils.isEmpty(key)) {
+            rs.setStatus(ResponseResult.FAILED);
+            rs.setStatusInfo("请输入验证码");
+        } else if (this.cacheManagerForResource.getFromCache(key) != null 
+            && valicateCode.equalsIgnoreCase(cacheManagerForResource.getFromCache(key).toString())) {
+            rs.setStatus(ResponseResult.SUCCESS);
+            this.cacheManagerForResource.deleteFromCache(key);
+        } else {
+            rs.setStatus(ResponseResult.FAILED);
+            rs.setStatusInfo("验证码错误");
+        }
+        return rs;
+    }
+    
 }

@@ -28,20 +28,20 @@ import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 
 /**
  * 主要功能：提供从报表定义中查找报表中所使用的逻辑模型的工具方法。
- * 	方便用户直接从报表模型查找逻辑模型定义
+ *     方便用户直接从报表模型查找逻辑模型定义
  * @author david.wang
  * @version 1.0.0.1
  */
 public class SchemaManageServiceHelper {
     
-	private final ReportDesignModel reportModel;
-	
+    private final ReportDesignModel reportModel;
+    
     /**
      * 
      * SchemaManageServiceHelper
      */
     public SchemaManageServiceHelper(ReportDesignModel  reportModel) {
-    		this.reportModel = reportModel;
+        this.reportModel = reportModel;
     }
     
     /**

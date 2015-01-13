@@ -76,7 +76,7 @@ public enum XAxisType {
      *            名称
      * @return 类型
      */
-    public static XAxisType parseXAxisType(String name) {
+    public static XAxisType parseXAxisType (String name) {
         if (YEAR.getName().equals(name)) {
             return YEAR;
         } else if (QUARTER.getName().equals(name)) {

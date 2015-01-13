@@ -105,18 +105,18 @@ public class SeriesDataUnit implements Serializable {
         this.yAxisName = yAxisName;
     }
 
-	/**
-	 * @return the properties
-	 */
-	public String[][] getProperties() {
-		return properties;
-	}
+    /**
+     * @return the properties
+     */
+    public String[][] getProperties() {
+        return properties;
+    }
 
-	/**
-	 * @param properties the properties to set
-	 */
-	public void setProperties(String[][] properties) {
-		this.properties = properties;
-	}
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(String[][] properties) {
+        this.properties = properties;
+    }
     
 }

@@ -45,8 +45,8 @@ public class QueryTableResultBuilder extends AbsQueryResultBuilder {
      * (non-Javadoc)
      * 
      * @see
-     * com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder#isCanBuildResult(com.baidu.rigel.biplatform
-     * .ma.rt.query.service.QueryStrategy)
+     * com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder
+     * #isCanBuildResult(com.baidu.rigel.biplatform.ma.rt.query.service.QueryStrategy)
      */
     @Override
     boolean isCanBuildResult(QueryStrategy queryStrategy) {

@@ -31,63 +31,63 @@ import com.google.common.collect.Maps;
 public class PivotTable implements Serializable {
     
     /**
-	 * serialVersionUID
-	 */
+     * serialVersionUID
+     */
     private static final long serialVersionUID = 1L;
     
     /**
-	 * colFields
-	 */
+     * colFields
+     */
     private List<List<ColField>> colFields = new ArrayList<List<ColField>>();
     
     /**
-	 * colDefine
-	 */
+     * colDefine
+     */
     private List<ColDefine> colDefine = new ArrayList<ColDefine>();
     
     /**
-	 * rowHeadFields
-	 */
+     * rowHeadFields
+     */
     private List<List<RowHeadField>> rowHeadFields = new ArrayList<List<RowHeadField>>();
     
     /**
-	 * rowDefine
-	 */
+     * rowDefine
+     */
     private List<RowDefine> rowDefine = new ArrayList<RowDefine>();
     
     /**
-	 * dataSourceRowBased
-	 */
+     * dataSourceRowBased
+     */
     private List<List<CellData>> dataSourceRowBased = new ArrayList<List<CellData>>();
     
     /**dataSourceColumnBased
-	 * 
-	 */
+     * 
+     */
     private List<List<CellData>> dataSourceColumnBased = new ArrayList<List<CellData>>();
     
     /**
-	 * dataRows
-	 */
+     * dataRows
+     */
     private int dataRows;
     
     /**
-	 * dataColumns
-	 */
+     * dataColumns
+     */
     private int dataColumns;
     
     /**
-	 * colHeadHeight
-	 */
+     * colHeadHeight
+     */
     private int colHeadHeight;
     
     /**
-	 * rowHeadWidth
-	 */
+     * rowHeadWidth
+     */
     private int rowHeadWidth;
     
     /**
-	 * actualSize
-	 */
+     * actualSize
+     */
     private int actualSize;
     
     /**
@@ -152,9 +152,7 @@ public class PivotTable implements Serializable {
         return dataSourceColumnBased;
     }
     
-    public void setDataSourceColumnBased(
-    
-    List<List<CellData>> dataSourceColumnBased) {
+    public void setDataSourceColumnBased(List<List<CellData>> dataSourceColumnBased) {
         this.dataSourceColumnBased = dataSourceColumnBased;
     }
     

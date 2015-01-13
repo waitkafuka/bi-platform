@@ -27,7 +27,14 @@ import com.baidu.rigel.biplatform.ac.model.TimeType;
  * @author zhongyi
  *
  */
-public class TimeTypeAdaptorUtils {
+public final class TimeTypeAdaptorUtils {
+    
+    /**
+     * TimeTypeAdaptorUtils
+     */
+    private TimeTypeAdaptorUtils() {
+        
+    }
     
     /**
      * 把时间类型的字符串转换为TimeType

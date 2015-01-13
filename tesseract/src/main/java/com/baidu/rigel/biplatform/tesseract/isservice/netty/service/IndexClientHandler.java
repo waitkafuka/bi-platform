@@ -94,35 +94,35 @@ public class IndexClientHandler extends AbstractChannelInboundHandler {
     
     
     /* (non-Javadoc)
-	 * @see io.netty.channel.ChannelInboundHandlerAdapter#channelReadComplete(io.netty.channel.ChannelHandlerContext)
-	 */
-	@Override
-	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-		
-		super.channelReadComplete(ctx);
-		System.out.println("hahaahha~~~~~~in read complete");
-		System.out.println("hahaahha~~~~~~message is :"+this.message);
-		
-	}
+     * @see io.netty.channel.ChannelInboundHandlerAdapter#channelReadComplete(io.netty.channel.ChannelHandlerContext)
+     */
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        
+        super.channelReadComplete(ctx);
+        System.out.println("hahaahha~~~~~~in read complete");
+        System.out.println("hahaahha~~~~~~message is :"+this.message);
+        
+    }
 
-	/**
+    /**
      * getter method for property message
      * 
      * @return the message
      */
     @SuppressWarnings("unchecked")
     public AbstractMessage getMessage() {
-    	
+        
         return message;
     }
     
     /* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
-	 */
-	@Override
-	public <T extends AbstractMessage> void setMessage(T t) {
-		this.message=(AbstractMessage)t ;
-		
-	}
+     * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
+     */
+    @Override
+    public <T extends AbstractMessage> void setMessage(T t) {
+        this.message=(AbstractMessage)t ;
+        
+    }
     
 }

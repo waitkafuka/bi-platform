@@ -102,7 +102,7 @@ class StarModelBuilder {
             }
             String dimTableName = dimension.getTableName();
             if (dimTableName.equals(factTableName)) {
-            		continue;
+                continue;
             }
             // 同一个维度表中的列，只需要加入维度表中就可以了
             if (dimTableCache.containsKey(dimension.getTableName())) {
@@ -177,7 +177,7 @@ class StarModelBuilder {
         dimTable.setName(dimension.getTableName());
         ReferenceDefine reference = buildReference(factTable, dimension, level);
         dimTable.setReference(reference);
-        dimTable.setFormat(((TimeDimension)dimension).getTimeFormat());
+        dimTable.setFormat(((TimeDimension) dimension).getTimeFormat());
         dimTable.addColumn(this.buildColumn(level));
         return dimTable;
     }

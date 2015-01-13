@@ -29,32 +29,32 @@ import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.RateConditio
  */
 public class RelativeRate extends TesseractRateFunction {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 1995442354532812165L;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1995442354532812165L;
 
-	/* 
-	 * (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.parser.node.impl.RateFunNode#getName()
-	 */
-	@Override
-	public String getName() {
-		return "rRate";
-	}
+    /* 
+     * (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.parser.node.impl.RateFunNode#getName()
+     */
+    @Override
+    public String getName() {
+        return "rRate";
+    }
 
-	/* 
-	 * (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.parser.node.AbstractNode#collectVariableCondition()
-	 */
-	@Override
-	public Map<Condition, Set<String>> collectVariableCondition() {
-		return this.collectVariableCondition(RateType.RR);
-	}
+    /* 
+     * (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.parser.node.AbstractNode#collectVariableCondition()
+     */
+    @Override
+    public Map<Condition, Set<String>> collectVariableCondition() {
+        return this.collectVariableCondition(RateType.RR);
+    }
 
-	@Override
-	RateType getType() {
-		return RateType.RR;
-	}
+    @Override
+    RateType getType() {
+        return RateType.RR;
+    }
 
 }

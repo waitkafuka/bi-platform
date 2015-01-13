@@ -38,7 +38,7 @@ abstract class AbsQueryResultBuilder {
     /**
      * AbsQueryResultBuilder
      */
-    protected AbsQueryResultBuilder () {
+    protected AbsQueryResultBuilder() {
     }
     
     

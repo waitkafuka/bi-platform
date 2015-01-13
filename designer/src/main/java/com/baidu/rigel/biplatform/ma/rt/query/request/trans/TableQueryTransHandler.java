@@ -49,7 +49,8 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
     }
     
     /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler#transRequest(com.baidu.rigel.biplatform.ma.runtime.QueryRequest)
+     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler
+     * #transRequest(com.baidu.rigel.biplatform.ma.runtime.QueryRequest)
      */
     @Override
     QueryAction transRequest(QueryRequest request) {
@@ -65,7 +66,7 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
         LinkedHashMap<Item, Object> columns = genColumns(request);
         action.setColumns(columns);
         // 横轴
-        LinkedHashMap<Item, Object> rows = genRows(request);;
+        LinkedHashMap<Item, Object> rows = genRows(request);
         action.setRows(rows);
         // 过滤轴
         LinkedHashMap<Item, Object> slices = genSlice(request);
@@ -89,7 +90,7 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
 //        // 由于表结构是静态的，因此逻辑模型中轴的定义就是静态表的查询轴定义
 //        Item[] items = area.getLogicModel().getRows();
 //        return generateItemValues(request, model, area, items);
-    		return request.getContext().getX();
+        return request.getContext().getX();
     }
 
 //    /**
@@ -225,7 +226,7 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
      * @return LinkedHashMap<Item, Object>  过滤轴定义以及默认值
      */
     private LinkedHashMap<Item, Object> genSlice(QueryRequest request) {
-    		return request.getContext().getS();
+        return request.getContext().getS();
 //        LinkedHashMap<Item, Object> slices = Maps.newLinkedHashMap();
 //        Map<String, String[]> conditions = request.getConditions();
 //        String areaId = request.getAreaId();
@@ -248,7 +249,8 @@ class TableQueryTransHandler extends QueryRequestTransHandler {
 
     /*
      *  (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler#isSupportedQueryStrategy(com.baidu.rigel.biplatform.ma.runtime.QueryStrategy)
+     * @see com.baidu.rigel.biplatform.ma.runtime.QueryRequestTransHandler
+     * #isSupportedQueryStrategy(com.baidu.rigel.biplatform.ma.runtime.QueryStrategy)
      */
     @Override
     boolean isSupportedQueryStrategy(QueryStrategy queryStrategy) {

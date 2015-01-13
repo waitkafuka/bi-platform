@@ -28,7 +28,7 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
  * @version 1.0.0.1
  * 
  */
-public class OlapElementQueryUtils {
+public final class OlapElementQueryUtils {
     
     /**
      * OlapElementQueryUtils
@@ -43,13 +43,13 @@ public class OlapElementQueryUtils {
      * @return OlapElement is not exist return null
      */
     public static OlapElement queryElementById(Cube cube, String id) {
-    		OlapElement rs = null;
-    		if (cube.getDimensions() != null) {
-    			rs  = filterElement(id, cube.getDimensions().values());
-    		}
-    		if (rs == null && cube.getMeasures() != null) {
-    			return filterElement(id, cube.getMeasures().values());
-    		}
+        OlapElement rs = null;
+        if (cube.getDimensions() != null) {
+            rs = filterElement(id, cube.getDimensions().values());
+        }
+        if (rs == null && cube.getMeasures() != null) {
+            return filterElement(id, cube.getMeasures().values());
+        }
         return rs;
     }
 
@@ -59,18 +59,18 @@ public class OlapElementQueryUtils {
      * @param Collection<OlapElement>
      * @return OlapElement
      */
-	private static OlapElement filterElement(String id, Collection<? extends OlapElement> collection) {
-		if (collection == null || collection.isEmpty()) {
-			return null;
-		}
-		Stream<? extends OlapElement> stream = collection.parallelStream().filter(dim -> {
-		    return dim.getId().equals(id);
-		});
-		Object [] objects = stream.toArray();
-		if (objects.length == 1) {
-		    return (OlapElement) objects[0];
-		}
-		return null;
-	}
+    private static OlapElement filterElement(String id, Collection<? extends OlapElement> collection) {
+        if (collection == null || collection.isEmpty()) {
+            return null;
+        }
+        Stream<? extends OlapElement> stream = collection.parallelStream().filter(dim -> {
+            return dim.getId().equals(id);
+        });
+        Object [] objects = stream.toArray();
+        if (objects.length == 1) {
+            return (OlapElement) objects[0];
+        }
+        return null;
+    }
     
 }

@@ -28,23 +28,23 @@ import java.util.List;
  */
 public class CallbackMeasureVaue extends HashMap<String, List<String>> implements CallbackValue {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 1556216018258969488L;
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-		StringBuilder str = new StringBuilder("{");
-		this.forEach((key, value) -> {
-			str.append(key + " : [");
-			value.forEach(v -> str.append( v + ", "));
-			str.append("], ");
-		}); 
-		str.append("}");
-		return str.toString();
-	}
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 1556216018258969488L;
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        StringBuilder str = new StringBuilder("{");
+        this.forEach((key, value) -> {
+            str.append(key + " : [");
+            value.forEach(v -> str.append( v + ", "));
+            str.append("], ");
+        }); 
+        str.append("}");
+        return str.toString();
+    }
 }

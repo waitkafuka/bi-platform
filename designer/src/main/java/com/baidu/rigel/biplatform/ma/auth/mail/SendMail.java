@@ -51,6 +51,17 @@ public class SendMail {
      * html格式
      */
     public static final String HTML = "text/html;charset=GBK";
+    
+    /**
+     * 编码方式
+     */
+    public static final String DEFAULT_CODE = "utf-8";
+
+    /**
+     * 日志类
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(SendMail.class);
+    
     /**
      * 邮件服务器
      */
@@ -96,16 +107,7 @@ public class SendMail {
      */
 //    private List<Object> attaches;
     
-    /**
-     * 编码方式
-     */
-    public static final String DEFAULT_CODE = "utf-8";
-
-    /**
-     * 日志类
-     */
-    private static final Logger LOG = LoggerFactory
-            .getLogger(SendMail.class);
+    
 
     /**
      * 构造方法

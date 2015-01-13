@@ -25,7 +25,7 @@ import com.baidu.rigel.biplatform.ma.utils.ThreadLocalResourceHolder;
  *
  *         2014-8-13
  */
-public class ContextManager {
+public final class ContextManager {
     
     /**
      * SESSOIN_ID
@@ -37,6 +37,13 @@ public class ContextManager {
      */
     private static final String PRODUCT_LINE = "biplatform_productline";
     
+    /**
+     * 构造函数
+     */
+    private ContextManager() {
+        
+    }
+
     /**
      * 存入Session的key
      * 

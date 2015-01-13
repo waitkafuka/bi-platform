@@ -43,6 +43,11 @@ import com.google.common.collect.Lists;
 public class DBInfoReader {
     
     /**
+     * logger
+     */
+    private static Logger logger = LoggerFactory.getLogger(DBInfoReader.class);
+    
+    /**
      * 元数据对象
      */
     private DatabaseMetaData dbMetaData;
@@ -51,11 +56,6 @@ public class DBInfoReader {
      * 链接对象
      */
     private Connection con;
-    
-    /**
-     * logger
-     */
-    private static Logger logger = LoggerFactory.getLogger(DBInfoReader.class);
     
     /**
      * 获得数据库元数据对象
@@ -71,7 +71,8 @@ public class DBInfoReader {
      * @param securityKey 
      * @return reader对象
      */
-    public static DBInfoReader build(DatasourceType type, String user, String password, String url, String securityKey) {
+    public static DBInfoReader build(DatasourceType type, String user, String password,
+        String url, String securityKey) {
         DBInfoReader reader = new DBInfoReader();
         DatabaseMetaData dbMetaData = null;
         Connection con = null;
@@ -81,19 +82,19 @@ public class DBInfoReader {
             logger.info("[INFO]--- --- --- --- connect to database with user : {}", user);
             StringBuilder pwdStr = new StringBuilder();
             for (char c : pwd.toCharArray()) {
-            		pwdStr.append(c >> 1);
+                pwdStr.append(c >> 1);
             }
             logger.info("[INFO]--- --- --- --- connect to database with pwd : {}", pwdStr.toString());
             con = DriverManager.getConnection(url, user, pwd);
             dbMetaData = con.getMetaData();
         } catch (ClassNotFoundException e) {
-        		logger.error("[ERROR] --- --- --- --- connection to db error : {}", e.getMessage());
-        		logger.error("[ERROR] --- --- --- --- stackTrace :", e);
+            logger.error("[ERROR] --- --- --- --- connection to db error : {}", e.getMessage());
+            logger.error("[ERROR] --- --- --- --- stackTrace :", e);
             throw new DBInfoReadException("ClassNotFoundException when build DBInfoReader! ", e);
         } catch (Exception e) {
-	        	logger.error("[ERROR] --- --- --- --- connection to db error : {}", e.getMessage());
-	    		logger.error("[ERROR] --- --- --- --- stackTrace :", e);
-			throw new DBInfoReadException("SQLException when build DBInfoReader! ", e);
+            logger.error("[ERROR] --- --- --- --- connection to db error : {}", e.getMessage());
+            logger.error("[ERROR] --- --- --- --- stackTrace :", e);
+            throw new DBInfoReadException("SQLException when build DBInfoReader! ", e);
         }
         reader.setCon(con);
         reader.setDbMetaData(dbMetaData);
@@ -143,7 +144,7 @@ public class DBInfoReader {
             // table type. Typical types are "TABLE", "VIEW", "SYSTEM
             // TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS",
             // "SYNONYM".
-            String[] types = { "TABLE" };
+            String[] types = {"TABLE"};
             ResultSet rs = dbMetaData.getTables(null, null, "%", types);
             while (rs.next()) {
                 TableInfo info = new TableInfo();

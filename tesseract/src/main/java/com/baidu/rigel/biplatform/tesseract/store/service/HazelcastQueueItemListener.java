@@ -22,34 +22,34 @@ import com.hazelcast.core.ItemListener;
 @Service
 public class HazelcastQueueItemListener implements ItemListener<EventObject> {
 
-	/**
-	 * LOGGER
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastQueueItemListener.class);
-	
-	
-	@Resource
-	private LocalEventListenerThread localEventListenerThread;
-	
-	/* (non-Javadoc)
-	 * @see com.hazelcast.core.ItemListener#itemAdded(com.hazelcast.core.ItemEvent)
-	 */
-	@Override
-	public void itemAdded(ItemEvent<EventObject> item) {
-		LOGGER.info("Event add Triggr");
-		this.localEventListenerThread.getClusterEventAndPublish();
-		
-	}
+    /**
+     * LOGGER
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastQueueItemListener.class);
+    
+    
+    @Resource
+    private LocalEventListenerThread localEventListenerThread;
+    
+    /* (non-Javadoc)
+     * @see com.hazelcast.core.ItemListener#itemAdded(com.hazelcast.core.ItemEvent)
+     */
+    @Override
+    public void itemAdded(ItemEvent<EventObject> item) {
+        LOGGER.info("Event add Triggr");
+        this.localEventListenerThread.getClusterEventAndPublish();
+        
+    }
 
-	/* (non-Javadoc)
-	 * @see com.hazelcast.core.ItemListener#itemRemoved(com.hazelcast.core.ItemEvent)
-	 */
-	@Override
-	public void itemRemoved(ItemEvent<EventObject> item) {
-		// TODO Auto-generated method stub
-		
-	}
+    /* (non-Javadoc)
+     * @see com.hazelcast.core.ItemListener#itemRemoved(com.hazelcast.core.ItemEvent)
+     */
+    @Override
+    public void itemRemoved(ItemEvent<EventObject> item) {
+        // TODO Auto-generated method stub
+        
+    }
 
-	
-	
+    
+    
 }

@@ -157,7 +157,7 @@ public class LiteOlapResource {
             return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);
         }
         if (model == null) {
-        		return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);
+            return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);
         }
         ExtendArea sourceArea = model.getExtendById(areaId);
         if (sourceArea.getType() != ExtendAreaType.SELECTION_AREA) {
@@ -206,8 +206,8 @@ public class LiteOlapResource {
          * 
          */
         if (model == null || liteOlapArea == null || targetItem == null) {
-        		throw new RuntimeException("未找到指定的维度或指标信息 : model - [" + model 
-        				+ "] area - [" + liteOlapArea + "] item - [" + targetItem + "]");
+            throw new RuntimeException("未找到指定的维度或指标信息 : model - [" + model 
+                + "] area - [" + liteOlapArea + "] item - [" + targetItem + "]");
         }
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                 liteOlapArea.getCubeId(), targetItem.getOlapElementId());

@@ -25,7 +25,7 @@ import java.util.Properties;
  * @author david.wang
  *
  */
-public class ConfigUtil {
+public final class ConfigUtil {
     
     /**
      * 配置信息内存缓存对象

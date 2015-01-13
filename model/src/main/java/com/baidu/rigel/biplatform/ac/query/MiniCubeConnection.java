@@ -168,8 +168,8 @@ public interface MiniCubeConnection {
      *
      */
     public static class ConnectionUtil {
-    	
-    		/**
+        
+            /**
          * 刷新当前connection的缓存
          */
         public static boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {

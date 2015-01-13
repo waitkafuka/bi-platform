@@ -27,20 +27,24 @@ import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
  */
 public class ExpandQueryResultBuilder extends AbsQueryResultBuilder {
 
-	/* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder#isCanBuildResult(com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy)
-	 */
-	@Override
-	boolean isCanBuildResult(QueryStrategy queryStrategy) {
-		return queryStrategy == QueryStrategy.DRILL_EXPAND_QUERY;
-	}
+    /* (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.ma.rt.query
+     * .result.trans.AbsQueryResultBuilder#isCanBuildResult(
+     * com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy)
+     */
+    @Override
+    boolean isCanBuildResult(QueryStrategy queryStrategy) {
+        return queryStrategy == QueryStrategy.DRILL_EXPAND_QUERY;
+    }
 
-	/* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder#innerBuild(com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction, com.baidu.rigel.biplatform.ac.query.data.DataModel)
-	 */
-	@Override
-	QueryResult innerBuild(QueryAction queryAction, DataModel model) {
-		return null;
-	}
+    /* (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder
+     * #innerBuild(com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction, 
+     * com.baidu.rigel.biplatform.ac.query.data.DataModel)
+     */
+    @Override
+    QueryResult innerBuild(QueryAction queryAction, DataModel model) {
+        return null;
+    }
 
 }

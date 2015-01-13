@@ -42,9 +42,14 @@ import com.google.common.collect.Lists;
  *
  *         
  */
-public class ResourceUtils {
+public final class ResourceUtils {
     
-    
+    /**
+     * ResourceUtils
+     */
+    private ResourceUtils() {
+        
+    }
     /**
      * 构建返回结果
      * 
@@ -128,14 +133,14 @@ public class ResourceUtils {
             LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) area;
             Set<String> usedItemOlapIdSet = area.listAllItems().keySet();
             Item[] candDims = liteOlapArea.getCandDims().values().toArray(new Item[0]);
-			rs.setCandDims(buildItemViewObject(schema, cubeId, candDims, usedItemOlapIdSet));
+            rs.setCandDims(buildItemViewObject(schema, cubeId, candDims, usedItemOlapIdSet));
             Item[] candInds = liteOlapArea.getCandInds().values().toArray(new Item[0]);
             rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, usedItemOlapIdSet));
         } else {
-        		final Item[] canDims = area.getLogicModel().getSelectionDims().values().toArray(new Item[0]);
-			rs.setCandDims(buildItemViewObject(schema, cubeId,canDims, null));
-			Item[] candInds = area.getLogicModel().getSelectionMeasures().values().toArray(new Item[0]);
-			rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, null));
+            final Item[] canDims = area.getLogicModel().getSelectionDims().values().toArray(new Item[0]);
+            rs.setCandDims(buildItemViewObject(schema, cubeId, canDims, null));
+            Item[] candInds = area.getLogicModel().getSelectionMeasures().values().toArray(new Item[0]);
+            rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, null));
         }
         return rs;
     }
