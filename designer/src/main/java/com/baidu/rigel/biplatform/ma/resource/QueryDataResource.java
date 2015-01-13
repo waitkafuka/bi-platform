@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -561,24 +562,32 @@ public class QueryDataResource extends BaseResource {
         Map<String, Object> localParams = localContext.getParams();
         
         if ("true".equals(localParams.get("isOverride"))) {
-        		queryParams.putAll(localParams);
+        	    queryParams.putAll(localParams);
         		
-        		runTimeModel.getContext().getParams().forEach((key, value) -> {
-        			if (!queryParams.containsKey(key)) {
-        				queryParams.put(key, value);
-        			}
-        		});
-        		return queryParams;
+            runTimeModel.getContext().getParams().forEach((key, value) -> {
+        	        if (!queryParams.containsKey(key)) {
+        	            queryParams.put(key, value);
+        	        }
+        	    });
+        	    return queryParams;
         }
         /**
          * 仅保留一个时间条件
          */
-        for (String key : localParams.keySet()) {
-	        	String value = localParams.get(key).toString();
-	        	if (value.contains("start") && value.contains("end")) {
-	        		localParams.remove(key);
-	        	}
-        }
+//        Iterator<String> it = localParams.keySet().iterator();
+//        while (it.hasNext()) {
+//        		String key = it.next();
+//        		String value = localParams.get(key).toString();
+//	        	if (value.contains("start") && value.contains("end")) {
+//	        		it.remove();
+//	        	}
+//        }
+//        for (String key : localParams.keySet()) {
+//	        	String value = localParams.get(key).toString();
+//	        	if (value.contains("start") && value.contains("end")) {
+//	        		localParams.remove(key);
+//	        	}
+//        }
         queryParams.putAll(localParams);
         if (runTimeModel.getContext() != null) {
             queryParams.putAll(runTimeModel.getContext().getParams());
@@ -598,8 +607,8 @@ public class QueryDataResource extends BaseResource {
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}", method = { RequestMethod.POST })
     public ResponseResult queryArea(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-    		long begin = System.currentTimeMillis();
-    		logger.info("[INFO] begin query data");
+    	    long begin = System.currentTimeMillis();
+    	    logger.info("[INFO] begin query data");
         /**
          * 1. 获取缓存DesignModel对象
          */
@@ -638,13 +647,13 @@ public class QueryDataResource extends BaseResource {
                 indNames = request.getParameter("indNames").split(",");
             }
             try {
-            		String topSetting = request.getParameter(Constants.TOP);
-            		if (!StringUtils.isEmpty(topSetting)) {
-            			model.getExtendById(areaId).getLogicModel().
-            				setTopSetting(GsonUtils.fromJson(topSetting, MeasureTopSetting.class));
-            		}
+            	    String topSetting = request.getParameter(Constants.TOP);
+            	    if (!StringUtils.isEmpty(topSetting)) {
+            	        model.getExtendById(areaId).getLogicModel().
+            	            setTopSetting(GsonUtils.fromJson(topSetting, MeasureTopSetting.class));
+            	    }
                 action = queryBuildService.generateChartQueryAction(model, areaId, 
-                			areaContext.getParams(), indNames, runTimeModel);
+                	        areaContext.getParams(), indNames, runTimeModel);
                 if (action != null) {
                     action.setChartQuery(true);
                 }
@@ -665,10 +674,12 @@ public class QueryDataResource extends BaseResource {
          */
         ResultSet result;
         try {
-            if (action == null || CollectionUtils.isEmpty(action.getRows()) || CollectionUtils.isEmpty(action.getColumns())) {
+            if (action == null || CollectionUtils.isEmpty(action.getRows())
+            	    || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
-            result = reportModelQueryService.queryDatas(model, action, true, true, areaContext.getParams(), securityKey);
+            result = reportModelQueryService.queryDatas(model, action,
+            	    true, true, areaContext.getParams(), securityKey);
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
@@ -687,7 +698,7 @@ public class QueryDataResource extends BaseResource {
             logger.info(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
-		DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+        DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * 每次查询以后，清除选中行，设置新的
@@ -700,12 +711,12 @@ public class QueryDataResource extends BaseResource {
             }
 //            String[] dims = new String[0];
             if (table.getDataSourceColumnBased().size() == 0) {
-            		ResponseResult rs = new ResponseResult();
-            		rs.setStatus(1);
-            		rs.setStatusInfo("未查到任何数据");
-            		return rs;
+            	    ResponseResult rs = new ResponseResult();
+            	    rs.setStatus(1);
+                rs.setStatusInfo("未查到任何数据");
+            	    return rs;
             } else {
-            		resultMap.put("pivottable", table);
+            	    resultMap.put("pivottable", table);
             }
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
