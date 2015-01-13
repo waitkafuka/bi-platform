@@ -277,7 +277,7 @@ public class SearchIndexServiceImpl implements SearchService {
                 }
             }
             
-            if(query.getWhere()!=null && query.getWhere().getAndList()!=null && result){
+            if(query.getWhere()!=null && query.getWhere().getAndList()!=null){
                 for(Expression ex:query.getWhere().getAndList()){
                     if(!idxSelect.contains(ex.getProperties())){
                         result=false;

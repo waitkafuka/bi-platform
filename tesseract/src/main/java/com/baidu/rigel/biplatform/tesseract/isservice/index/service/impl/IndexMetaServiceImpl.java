@@ -166,38 +166,38 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             
             idxMeta.getCubeIdSet().add(currCube.getId());
             
-			// 处理维度
-			Set<String> dimSet = new HashSet<String>();
-			if (currCube.getDimensions() != null) {
-				for (String dimKey : currCube.getDimensions().keySet()) {
-					Dimension dim = currCube.getDimensions().get(dimKey);
-					// 处理维度不同层级
-					if (dim.getLevels() != null) {
-						for (String levelKey : dim.getLevels().keySet()) {
-							Level dimLevel = dim.getLevels().get(levelKey);
-							dimSet.add(dimLevel.getFactTableColumn());
-						}
-					}
-				}
-			}
-			idxMeta.setDimSet(dimSet);
+            // 处理维度
+            Set<String> dimSet = new HashSet<String>();
+            if (currCube.getDimensions() != null) {
+                for (String dimKey : currCube.getDimensions().keySet()) {
+                    Dimension dim = currCube.getDimensions().get(dimKey);
+                    // 处理维度不同层级
+                    if (dim.getLevels() != null) {
+                        for (String levelKey : dim.getLevels().keySet()) {
+                            Level dimLevel = dim.getLevels().get(levelKey);
+                            dimSet.add(dimLevel.getFactTableColumn());
+                        }
+                    }
+                }
+            }
+            idxMeta.setDimSet(dimSet);
 
-			// 处理指标
-			Set<String> measureSet = new HashSet<String>();
-			if (currCube.getMeasures() != null) {
-				for (String measureKey : currCube.getMeasures().keySet()) {
-					Measure measure = currCube.getMeasures().get(measureKey);
-					if (measure.getType().equals(MeasureType.COMMON)) {
-						// 普通指标，直接加入到select表列中
-						measureSet.add(measure.getDefine());
-					} else if (measure.getType().equals(MeasureType.DEFINE)) {
-						// 当前不支持
-					} else if (measure.getType().equals(MeasureType.CAL)) {
-						// 当前不支持
-					}
-				}
-			}
-			idxMeta.setMeasureSet(measureSet);
+            // 处理指标
+            Set<String> measureSet = new HashSet<String>();
+            if (currCube.getMeasures() != null) {
+                for (String measureKey : currCube.getMeasures().keySet()) {
+                    Measure measure = currCube.getMeasures().get(measureKey);
+                    if (measure.getType().equals(MeasureType.COMMON)) {
+                        // 普通指标，直接加入到select表列中
+                        measureSet.add(measure.getDefine());
+                    } else if (measure.getType().equals(MeasureType.DEFINE)) {
+                        // 当前不支持
+                    } else if (measure.getType().equals(MeasureType.CAL)) {
+                        // 当前不支持
+                    }
+                }
+            }
+            idxMeta.setMeasureSet(measureSet);
             
             idxMeta.setReplicaNum(IndexShard.getDefaultShardReplicaNum());
             idxMeta.setDataSourceInfo(dataSourceInfo);
@@ -542,7 +542,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             Set<String> measureSet1 = idxMeta1.getMeasureSet();
             Set<String> measureSet2 = idxMeta2.getMeasureSet();
             Collection<String> measureIntersection = getIntersectionOf2Collection(
-            		measureSet1, measureSet2);
+                    measureSet1, measureSet2);
             if (measureIntersection != null) {
                 measureScore += measureIntersection.size();
             }
@@ -743,13 +743,11 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                     // 只设置一次
                     String idxFilePathPrefix = idxMeta.getDataSourceInfo().getDataSourceKey()
                         + File.separator + idxMeta.getFacttableName() + File.separator;
-					idxShard.setFilePath(idxFilePathPrefix
-							+ idxShard.getShardName()+ File.separator
-							+ IndexMeta.getIndexFilePathUpdate());
-					idxShard.setIdxFilePath(idxFilePathPrefix
-							+ idxShard.getShardName()+ File.separator
-							+ IndexMeta.getIndexFilePathIndex());
-
+                    idxShard.setFilePath(IndexMeta.getIndexFilePathUpdate() + idxFilePathPrefix
+                        + idxShard.getShardName());
+                    idxShard.setIdxFilePath(IndexMeta.getIndexFilePathIndex() + idxFilePathPrefix
+                        + idxShard.getShardName());
+                    
                     assignIndexShardList.add(idxShard);
                     
                     shardId = shardId + 1;
