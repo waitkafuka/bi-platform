@@ -31,11 +31,7 @@ import org.apache.log4j.Logger;
  * @author jiangyichao
  *
  */
-public class LocalFileOperationUtils {
-    /**
-     * 日志输出对象
-     */
-    private static final Logger LOG = Logger.getLogger(LocalFileOperationUtils.class);
+public final class LocalFileOperationUtils {
     
     /**
      * RESULT
@@ -57,6 +53,17 @@ public class LocalFileOperationUtils {
      */
     public static final String SUCCESS = "success";
 
+    /**
+     * 日志输出对象
+     */
+    private static final Logger LOG = Logger.getLogger(LocalFileOperationUtils.class);
+    
+    /**
+     * LocalFileOperationUtils
+     */
+    private LocalFileOperationUtils() {
+        
+    }
     /**
      * 在本地创建新文件
      * 
