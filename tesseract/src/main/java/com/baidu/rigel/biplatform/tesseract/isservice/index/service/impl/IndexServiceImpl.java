@@ -335,6 +335,11 @@ public class IndexServiceImpl implements IndexService {
         
         for (String tableName : sqlQueryMap.keySet()) {
             SqlQuery sqlQuery = sqlQueryMap.get(tableName);
+            
+            if(!StringUtils.isEmpty(sqlQuery.getIdName())){
+            	sqlQuery.getOrderBy().add(sqlQuery.getIdName()); 
+            }
+            
             long total = 0;
             if (idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
                 total = IndexFileSystemConstants.INDEX_DATA_TOTAL_IN_LIMITEDMODEL;
@@ -347,7 +352,7 @@ public class IndexServiceImpl implements IndexService {
             
             BigDecimal currMaxId = BigDecimal.ZERO;   
             
-            if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null && idxAction.equals(IndexAction.INDEX_UPDATE)){
+            if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null && !idxAction.getFromScratch()){
             	//数据正常更新，最上次的最大ID
             	currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
             }
@@ -377,12 +382,14 @@ public class IndexServiceImpl implements IndexService {
                 
                 currWhereStr=sqlQuery.getIdName() + " > " + currMaxId.longValue();
 				sqlQuery.getWhereList().add(currWhereStr);
+				
                 
                 TesseractResultSet currResult = this.dataQueryService.queryForDocListWithSQLQuery(
                     sqlQuery, dataSourceWrape, limitStart, limitEnd);
                 
                 IndexShard currIdxShard = null; 
                 int currIdxShardIdx=-1;
+                
                 while(currResult.size()!=0){
                 	//当前数据待处理，获取待处理的索引分片
                 	if(currIdxShard==null){
@@ -400,13 +407,15 @@ public class IndexServiceImpl implements IndexService {
                     if (currIdxShard.isFull() || isLastPiece) {
                         //设置当前分片的状态为内容已变更
                     	currIdxShard=null;
-                    	currIdxShardIdx=-1;
-                    	if(idxAction.equals(IndexAction.INDEX_MOD)){
+                    	
+                    	if(idxAction.equals(IndexAction.INDEX_MOD) || idxAction.equals(IndexAction.INDEX_MERGE)){
                     		currIdxShardIdx++;
+                    	}else{
+                    		currIdxShardIdx=-1;
                     	}
 						
                     }
-                    if(!idxAction.equals(IndexAction.INDEX_MOD)){
+                    if(!(idxAction.equals(IndexAction.INDEX_MOD) || idxAction.equals(IndexAction.INDEX_MERGE))){
                     	idxAction=IndexAction.INDEX_NORMAL;
                     }
                     
@@ -431,7 +440,11 @@ public class IndexServiceImpl implements IndexService {
             idxMeta.getMeasureSet().addAll(idxMeta.getMeasureInfoMergeSet());
             idxMeta.getDimInfoMergeSet().clear();
             idxMeta.getMeasureInfoMergeSet().clear();
-            idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
+            
+        }
+        
+        if(idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE) || idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT)){
+        	idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
         }
         
         for(IndexShard idxShard:idxMeta.getIdxShardList()){
@@ -440,6 +453,8 @@ public class IndexServiceImpl implements IndexService {
         		String bakFilePath=idxShard.getIdxFilePath();
         		idxShard.setIdxFilePath(servicePath);
         		idxShard.setFilePath(bakFilePath);
+        	}else if(idxAction.equals(IndexAction.INDEX_MERGE)){
+        		idxMeta.getIdxShardList().remove(idxShard);
         	}
         }
         this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
@@ -451,6 +466,9 @@ public class IndexServiceImpl implements IndexService {
         
     }
     
+    
+    
+    
     /**
      * getIndexShardByIndexAction 获取当前待处理的分片的数组下标
      * @param idxMeta 索引元数据
@@ -458,17 +476,27 @@ public class IndexServiceImpl implements IndexService {
      * @param idxShardIdx 要获取的数组下标
      * @return
      */
-    private int getIndexShardByIndexAction(IndexMeta idxMeta,IndexAction idxAction,int idxShardIdx){
-    	if(!idxAction.equals(IndexAction.INDEX_MOD) || idxShardIdx==-1){
-    		return getFreeIndexShardIndexForIndex(idxMeta);
-    	}else {
-    		if(idxShardIdx>=0 && idxShardIdx < idxMeta.getIdxShardList().size()){
-    			return idxShardIdx;
-    		}
-    	}
-    	return -1;
-    	
-    }
+	private int getIndexShardByIndexAction(IndexMeta idxMeta,
+			IndexAction idxAction, int idxShardIdx) {
+		if (idxAction.getFromScratch() && idxShardIdx >= 0
+				&& idxShardIdx < idxMeta.getIdxShardList().size()) {
+			//idxShardIdx正常，且idxAction为从0开始的，则直接反回
+			return idxShardIdx;
+		} else if (idxAction.getFromScratch() && idxShardIdx == -1 && !CollectionUtils.isEmpty(idxMeta.getIdxShardList())) {
+			for(int i=0; i<idxMeta.getIdxShardList().size();i++){
+				if(!idxMeta.getIdxShardList().get(i).isUpdate()){
+					idxShardIdx = i;
+					break;
+				}
+			}
+			
+			return idxShardIdx;
+		} else {
+			return getFreeIndexShardIndexForIndex(idxMeta);
+		}
+		
+
+	}
     
     /*
      * (non-Javadoc)
