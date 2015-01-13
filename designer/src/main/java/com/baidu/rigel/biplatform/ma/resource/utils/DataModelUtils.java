@@ -463,7 +463,7 @@ public class DataModelUtils {
                 // List<HeadField> tmpList=new ArrayList<HeadField>();
                 // tmpList.add(headField);
                 int currWidth = headField.getLeafSize();
-                rowField.setIndent(getIndentOfHeadField(headField,0));
+                rowField.setIndent(getIndentOfHeadField(headField, 0));
 //                rowField.setColspan(1);
                 rowField.setRowspan(currWidth == 0 ? 1 : currWidth);
                 String lineUniqueName = headField.getNodeUniqueName();
@@ -480,11 +480,12 @@ public class DataModelUtils {
                 if (!headField.isHasChildren()) {
                     rowField.setExpand(null);
                 } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
-                		if (headField.getLeafSize() == 0 && headField.getParent() == null) {
-                			rowField.setExpand(null);
-                		} else{
-                			rowField.setExpand(false);
-                		}
+				    if (headField.getLeafSize() == 0 && headField.getParent() == null
+				    		&& headField.getParentLevelField() == null) {
+						rowField.setExpand(null);
+					} else {
+						rowField.setExpand(false);
+					}
                 } else {
                     rowField.setExpand(true);
                 }
