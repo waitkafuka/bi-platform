@@ -39,12 +39,18 @@ import com.google.common.collect.Maps;
  * @author david.wang
  *
  */
-public class DataSourceDefineUtil {
+public final class DataSourceDefineUtil {
     
     /**
      * LOGGER
      */
     private static Logger logger = LoggerFactory.getLogger(DataSourceDefineUtil.class);
+    
+    /**
+     * 构造函数
+     */
+    private DataSourceDefineUtil() {
+    }
     
     /**
      * 获取数据源文件的文件名（含路径）
@@ -87,7 +93,7 @@ public class DataSourceDefineUtil {
         dsInfo.setUsername(dsDefine.getDbUser());
         dsInfo.setProductLine(dsDefine.getProductLine());
         dsInfo.setInstanceName(dsDefine.getDbInstance());
-        dsInfo.setDataSourceKey(dsDefine.getName());
+//        dsInfo.setDataSourceKey(dsDefine.getName());
         dsInfo.setDBProxy(true);
         List<String> urls = Lists.newArrayList();
         urls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
@@ -106,7 +112,7 @@ public class DataSourceDefineUtil {
             case ORACLE:
                 return DataBase.ORACLE;
             case H2:
-            		return DataBase.H2;
+                return DataBase.H2;
             default:
                 return DataBase.OTHER;
         }

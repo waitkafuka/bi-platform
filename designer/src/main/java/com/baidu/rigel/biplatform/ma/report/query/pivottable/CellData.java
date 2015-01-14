@@ -34,28 +34,28 @@ public class CellData implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /**
-	 * cellId
-	 */
+     * cellId
+     */
     private String cellId;
     
     /**
-	 * v
-	 */
+     * v
+     */
     private BigDecimal v;
     
     /**
-	 * str
-	 */
+     * str
+     */
     private String str;
     
     /**
-	 * formattedValue
-	 */
+     * formattedValue
+     */
     private String formattedValue;
     
     /**
-	 * style
-	 */
+     * style
+     */
     private Map<String, String> style = new HashMap<String, String>();
     
     /**

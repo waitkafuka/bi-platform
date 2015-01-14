@@ -42,48 +42,15 @@ import com.baidu.rigel.biplatform.ma.resource.BaseResource;
 public class ProductLineRegisterServiceImpl extends BaseResource implements ProductLineRegisterService {
     
     /**
-     * 日志对象
+     * 发布目录
      */
-    private static final Logger LOG = Logger.getLogger(ProductLineRegisterServiceImpl.class);
-           
-    /**
-     * 报表目录
-     */
-    @Value("${biplatform.ma.report.location}")
-    public String report;
+    public static final String RELEASE_PATH = "release";
     
     /**
      * dev目录
      */
     public static final String DEV_PATH = "dev";
     
-    /**
-     * 发布目录
-     */
-    public static final String RELEASE_PATH = "release";
-    
-    /**
-     * 数据源目录
-     */
-    @Value("${biplatform.ma.ds.location}")
-    public String ds;
-    
-    @Value("${biplatform.ma.auth.register.mail.administrator}")
-    private String mailReceiver;
-    
-    @Value("${biplatform.ma.auth.register.mail.subjectForRegister}")
-    private String mailSubject;
-    
-    @Value("${biplatform.ma.auth.register.mail.mailServerHost}")
-    private String mailServer;
-    
-    @Value("${biplatform.ma.auth.register.mail.senderMail}")
-    private String mailSender;
-    
-    @Value("${biplatform.ma.auth.register.mail.subjectForOpenService}")
-    private String openServiceSubject;
-    
- 
     /**
      * 编码方式
      */
@@ -95,6 +62,11 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     public static final String URL_PARAM_SEPERATOR = "&";
     
     /**
+     * 日志对象
+     */
+    private static final Logger LOG = Logger.getLogger(ProductLineRegisterServiceImpl.class);
+           
+    /**
      * 文件服务对象
      */
     @Resource
@@ -105,6 +77,48 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      */
     @Resource
     ProductLineManageService userManageService;
+    
+    /**
+     * 报表目录
+     */
+    @Value("${biplatform.ma.report.location}")
+    private String report;
+    
+    /**
+     * 数据源目录
+     */
+    @Value("${biplatform.ma.ds.location}")
+    private String ds;
+    
+    /**
+     * mailReceiver
+     */
+    @Value("${biplatform.ma.auth.register.mail.administrator}")
+    private String mailReceiver;
+    
+    /**
+     * mailSubject
+     */
+    @Value("${biplatform.ma.auth.register.mail.subjectForRegister}")
+    private String mailSubject;
+    
+    /**
+     * mailServer
+     */
+    @Value("${biplatform.ma.auth.register.mail.mailServerHost}")
+    private String mailServer;
+    
+    /**
+     * mailSender
+     */
+    @Value("${biplatform.ma.auth.register.mail.senderMail}")
+    private String mailSender;
+    
+    /**
+     * openServiceSubject
+     */
+    @Value("${biplatform.ma.auth.register.mail.subjectForOpenService}")
+    private String openServiceSubject;
     
     /**
      * @{inheritDoc}
@@ -183,7 +197,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         
         // 添加开通线上服务url
         stringBuilder.append("<td align=center><a href=" 
-        			+ makeUpOpenServiceUrl(user, 1, hostAddress, magicStr) + ">线上服务</a></td>");
+                    + makeUpOpenServiceUrl(user, 1, hostAddress, magicStr) + ">线上服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("<tr>");     

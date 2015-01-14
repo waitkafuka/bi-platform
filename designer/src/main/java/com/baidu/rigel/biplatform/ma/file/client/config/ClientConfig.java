@@ -26,7 +26,7 @@ import java.util.Properties;
  * @author jiangyichao
  *
  */
-public class ClientConfig {
+public final class ClientConfig {
 
     /**
      * 默认读取文件大小，单位为M
@@ -54,12 +54,17 @@ public class ClientConfig {
      */
     private static final Properties CONFIG = new Properties();
 
+    private ClientConfig() {
+    }
+    
     /**
      * 
      * @return 返回读取文件大小
      */
     public static double getFileReadSize() {
-        return Double.valueOf(CONFIG.getProperty(FILE_READ_SIZE_KEY, String.valueOf(1024 * 1024)));
+        final int defaultSizeBlock = 1024;
+        return Double.valueOf(CONFIG.getProperty(FILE_READ_SIZE_KEY, 
+                String.valueOf(defaultSizeBlock * defaultSizeBlock)));
     }
 
     /**

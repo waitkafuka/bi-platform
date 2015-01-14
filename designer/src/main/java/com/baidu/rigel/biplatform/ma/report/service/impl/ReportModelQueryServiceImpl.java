@@ -76,7 +76,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      */
     @Override
     public List<Member> getMembers(Cube cube, Dimension dimension, Level level, Map<String, String> params,
-    			String securityKey)
+                String securityKey)
             throws MiniCubeQueryException, DataSourceOperationException {
         LinkedHashMap<String, Integer> levelIndexRep = Maps.newLinkedHashMap();
         int index = 0;
@@ -127,7 +127,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         Level[] parentLevels = dim.getLevels().values().toArray(new Level[0]);
         List<Member> rootMembers = null;
         try {
-                rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
+            rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
             logger.error("Exception happened when getMemebers of dim " + dim.getName(),
                     e);
@@ -180,7 +180,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      */
     @Override
     public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache,
-    			boolean needSumary, String securityKey)
+                boolean needSumary, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
         return this.queryDatas(model, action, usingCache, needSumary, null, securityKey);
     }

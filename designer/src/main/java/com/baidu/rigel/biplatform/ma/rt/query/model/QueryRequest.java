@@ -103,7 +103,7 @@ public class QueryRequest implements Serializable {
      * QueryRequest
      */
     public QueryRequest(QueryStrategy queryStrategy, ExtendAreaContext context, 
-    		    Map<String, Object> globalParams) {
+                Map<String, Object> globalParams) {
         this.globalParams = globalParams;
         this.queryStrategy = queryStrategy;
         this.context = context;
@@ -240,28 +240,28 @@ public class QueryRequest implements Serializable {
         this.conditions = conditions;
     }
 
-	/**
-	 * 查询请求对应报表的运行时上下文
-	 * @return the context
-	 */
-	public ExtendAreaContext getContext() {
-		return context;
-	}
+    /**
+     * 查询请求对应报表的运行时上下文
+     * @return the context
+     */
+    public ExtendAreaContext getContext() {
+        return context;
+    }
 
 
-	/**
-	 * @return the dataSourceInfo
-	 */
-	public DataSourceInfo getDataSourceInfo() {
-		return context.getDefaultDsInfo();
-	}
+    /**
+     * @return the dataSourceInfo
+     */
+    public DataSourceInfo getDataSourceInfo() {
+        return context.getDefaultDsInfo();
+    }
 
-	/**
-	 * @return the globalParams
-	 */
-	public Map<String, Object> getGlobalParams() {
-		return globalParams;
-	}
+    /**
+     * @return the globalParams
+     */
+    public Map<String, Object> getGlobalParams() {
+        return globalParams;
+    }
 
     
     /** 
@@ -284,5 +284,5 @@ public class QueryRequest implements Serializable {
         this.reportId = reportId;
         
     }
-	
+    
 }

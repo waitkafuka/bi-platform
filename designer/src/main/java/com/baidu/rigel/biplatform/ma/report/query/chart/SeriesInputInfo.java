@@ -164,8 +164,8 @@ public class SeriesInputInfo implements Serializable {
     public static SeriesInputInfo generateEmptySeriesInputInfo(String yAxis) {
         
         SeriesInputInfo seriesUnit = new SeriesInputInfo();
-        seriesUnit.setDims(Lists.<Item> newArrayList());
-        seriesUnit.setInds(Lists.<Item> newArrayList());
+        seriesUnit.setDims(Lists.<Item>newArrayList());
+        seriesUnit.setInds(Lists.<Item>newArrayList());
         seriesUnit.setType(SeriesUnitType.LINE);
         return seriesUnit;
     }

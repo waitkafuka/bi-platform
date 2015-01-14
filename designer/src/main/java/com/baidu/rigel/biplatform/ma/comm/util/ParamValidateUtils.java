@@ -47,7 +47,7 @@ public final class ParamValidateUtils {
      * @return boolean -- if invalidate return false else true
      */
     public static boolean check(String name, Object value) {
-        if (name == null ) {
+        if (name == null) {
             return false;
         }
         if (value == null) {

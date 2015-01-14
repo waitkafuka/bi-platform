@@ -106,7 +106,8 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
      * getAllTablesAndCols(java.lang.String)
      */
     @Override
-    public List<RelationTableView> getAllTablesAndCols(String dsId, String securityKey) throws DataSourceOperationException {
+    public List<RelationTableView> getAllTablesAndCols(String dsId, String securityKey) 
+        throws DataSourceOperationException {
         DataSourceDefine ds = null;
         try {
             ds = dsService.getDsDefine(dsId);
@@ -121,8 +122,8 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         String pwd = ds.getDbPwd();
         DBInfoReader reader = null;
         try {
-	        	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
-	        			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             List<TableInfo> tables = reader.getAllTableInfos();
             List<RelationTableView> relationTables = Lists.newArrayList();
             for (TableInfo table : tables) {
@@ -135,9 +136,9 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             }
             return relationTables;
         } finally {
-        		if (reader != null) {
-        			reader.closeConn(); 
-        		}
+            if (reader != null) {
+                reader.closeConn(); 
+            }
         }
         
     }
@@ -168,7 +169,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             // 添加刷新时间和刷新类型
             int refreshType = detail.getRefreshType();
             // 构造枚举类型变量
-            RefreshType refresh = RefreshType.values()[refreshType-1];
+            RefreshType refresh = RefreshType.values()[refreshType - 1];
             int interval = 0;
             // 根据刷新时间类型，设置刷新间隔
             switch (refresh) {
@@ -196,9 +197,9 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             // modify by jiangyichao at 2014-09-12
             // add column message
             ColumnMetaDefine column = new ColumnMetaDefine(); 
-            if (names == null || names.size() == 0 || 
-                    StringUtils.isEmpty(reference.getMajorColumn()) 
-                            || !names.containsKey(reference.getMajorColumn())) {
+            if (names == null || names.size() == 0 
+                    || StringUtils.isEmpty(reference.getMajorColumn()) 
+                    || !names.containsKey(reference.getMajorColumn())) {
                 column.setCaption(detail.getCurrDim());
                 column.setName(detail.getCurrDim());
             } else {
@@ -256,7 +257,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         
         List<ColumnMetaDefine> cols = Lists.newArrayList();
         TimeType timeType = TimeTypeAdaptorUtils.parseToTimeType(detail.getField());
-        switch(timeType) {
+        switch (timeType) {
             case TimeYear: {
                 ColumnMetaDefine colYear = buildTimeCol("年份", TimeType.TimeYear.name());
                 cols.add(colYear);
@@ -348,7 +349,8 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
      */
     @Override
     public List<StandardDimTableMetaDefine> generateMetaDefine(String dsId,
-            NormalDimBindView normal, Map<String, String> names, String securityKey) throws DataSourceOperationException {
+            NormalDimBindView normal, Map<String, String> names, String securityKey) 
+            throws DataSourceOperationException {
         List<StandardDimTableMetaDefine> standMetaDefines = Lists.newArrayList();
         
         DataSourceDefine ds = null;
@@ -365,8 +367,8 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         
         DBInfoReader reader = null;
         try {
-	        	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-	        			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             for (NormalDimDetail detail : normal.getChildren()) {
                 StandardDimTableMetaDefine stand = new StandardDimTableMetaDefine();
                 ReferenceDefine reference = new ReferenceDefine();
@@ -380,9 +382,9 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
                 standMetaDefines.add(stand);
             }
         } finally {
-        		if (reader != null) {
-        			reader.closeConn();
-        		}
+            if (reader != null) {
+                reader.closeConn();
+            }
         }
         return standMetaDefines;
     }
@@ -473,9 +475,9 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
     public NormalDimDetail generateNormalDimBindView(StandardDimTableMetaDefine dimTable) {
         NormalDimDetail dim = new NormalDimDetail();
         if (StringUtils.isEmpty(dimTable.getReference().getMajorColumn()) 
-        		    || StringUtils.isEmpty(dimTable.getReference().getSalveColumn())
-        		    || StringUtils.isEmpty(dimTable.getName())) {
-        		return null;
+                    || StringUtils.isEmpty(dimTable.getReference().getSalveColumn())
+                    || StringUtils.isEmpty(dimTable.getName())) {
+            return null;
         }
         dim.setCurrDim(dimTable.getReference().getMajorColumn());
         dim.setField(dimTable.getReference().getSalveColumn());

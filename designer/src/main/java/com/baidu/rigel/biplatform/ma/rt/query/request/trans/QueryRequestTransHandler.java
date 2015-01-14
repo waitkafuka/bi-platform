@@ -56,7 +56,7 @@ abstract class QueryRequestTransHandler {
      * @return QueryAction
      * 
      */
-    abstract QueryAction transRequest(QueryRequest request) ;
+    abstract QueryAction transRequest(QueryRequest request);
     
     /**
      * 当前handler支持的查询策略

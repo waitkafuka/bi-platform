@@ -32,7 +32,8 @@ public class QueryMemberResultBuilder extends AbsQueryResultBuilder {
     
     
     /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder#isCanBuildResult(com.baidu.rigel.biplatform.ma.rt.query.service.QueryStrategy)
+     * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder
+     * #isCanBuildResult(com.baidu.rigel.biplatform.ma.rt.query.service.QueryStrategy)
      */
     @Override
     boolean isCanBuildResult(QueryStrategy queryStrategy) {
@@ -40,7 +41,9 @@ public class QueryMemberResultBuilder extends AbsQueryResultBuilder {
     }
     
     /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder#innerBuild(com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction, com.baidu.rigel.biplatform.ac.query.data.DataModel)
+     * @see com.baidu.rigel.biplatform.ma.rt.query.result.trans.AbsQueryResultBuilder
+     * #innerBuild(com.baidu.rigel.biplatform.ma.rt.query.service.QueryAction,
+     *  com.baidu.rigel.biplatform.ac.query.data.DataModel)
      */
     @Override
     QueryResult innerBuild(QueryAction queryAction, DataModel model) {

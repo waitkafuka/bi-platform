@@ -80,10 +80,15 @@ import com.google.common.collect.Sets;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class QueryUtils {
+public final class QueryUtils {
   
-
-	
+    /**
+     * 构造函数
+     */
+    private QueryUtils() {
+        
+    }
+    
     /**
      * 
      * 将查询动作转化成问题模型
@@ -128,11 +133,13 @@ public class QueryUtils {
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
-        SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+        if (orderDesc != null) {
+            SortType sortType = SortType.valueOf(orderDesc.getOrderType());
+            String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
+            SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
+            questionModel.setSortRecord(sortRecord);
+        }
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
-        String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
-        SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
-        questionModel.setSortRecord(sortRecord);
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
         return questionModel;
     }
@@ -167,12 +174,11 @@ public class QueryUtils {
      * @return DataSourceInfo
      */
     private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
-        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getName());
+        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
         ds.setDBProxy(true);
         try {
             ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
         } catch (Exception e) {
-            e.printStackTrace();
         }
         ds.setUsername(dsDefine.getDbUser());
         ds.setProductLine(dsDefine.getProductLine());
@@ -184,7 +190,6 @@ public class QueryUtils {
         try {
             jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
         } catch (Exception e) {
-            e.printStackTrace();
         }
         ds.setDataBase(DataBase.valueOf(dsDefine.getType().name()));
         ds.setJdbcUrls(jdbcUrls);
@@ -207,19 +212,19 @@ public class QueryUtils {
         items.putAll(queryAction.getColumns());
         items.putAll(queryAction.getRows());
         items.putAll(queryAction.getSlices());
-        int i = 0;
+        int firstIndex = 0;
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
             OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
                     area.getCubeId(), item.getOlapElementId());
             if (olapElement == null) {
-            		Cube cube = com.baidu.rigel.biplatform.ma.report.utils.QueryUtils.getCubeWithExtendArea(reportModel, area);
-            		for (Dimension dim : cube.getDimensions().values()) {
-            			if (dim.getId().equals(item.getOlapElementId())) {
-            				olapElement = dim;
-            				break;
-            			}
-            		}
+                Cube cube = com.baidu.rigel.biplatform.ma.report.utils.QueryUtils.getCubeWithExtendArea(reportModel, area);
+                for (Dimension dim : cube.getDimensions().values()) {
+                    if (dim.getId().equals(item.getOlapElementId())) {
+                        olapElement = dim;
+                        break;
+                    }
+                }
             }
             if (olapElement == null) {
                 continue;
@@ -249,21 +254,22 @@ public class QueryUtils {
                         Object drillValue = queryAction.getDrillDimValues().get(item);
                         String tmpValue = null;
                         if (valueObj instanceof String[]) {
-                        		tmpValue = ((String[]) valueObj)[0];
+                            tmpValue = ((String[]) valueObj)[0];
                         } else {
-                        		tmpValue = valueObj.toString();
+                            tmpValue = valueObj.toString();
                         }
                         if (drillValue != null && tmpValue.equals(drillValue)) {
                             data.setExpand(true);
-                        } else if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                        		&& queryAction.isChartQuery()) {
+                        } else if ((item.getPositionType() == PositionType.X 
+                            || item.getPositionType() == PositionType.S)
+                                && queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
                         }
                         datas.add(data);
                     } 
                     if (values.isEmpty() && queryAction.isChartQuery()) {
-                    		QueryData data = new QueryData(rootUniqueName + "s]");
+                        QueryData data = new QueryData(rootUniqueName + "s]");
                         data.setExpand(true);
                         data.setShow(false);
                         datas.add(data);
@@ -273,22 +279,25 @@ public class QueryUtils {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
                     if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                    		&& queryAction.isChartQuery()) {
+                            && queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);
                         datas.add(data);
                     } else if (dim.getType() == DimensionType.CALLBACK) {
-                    		QueryData data = new QueryData(dim.getAllMember().getUniqueName());
-                        data.setExpand(i == 0);
-                        data.setShow(i != 0);
+                        QueryData data = new QueryData(dim.getAllMember().getUniqueName());
+                        data.setExpand(firstIndex == 0);
+                        data.setShow(firstIndex != 0);
                         datas.add(data);
                     }
                     condition.setQueryDataNodes(datas);
                 }
-                ++i;
+                // 时间维度，并且在第一列位置，后续改成可配置方式
+                if (olapElement instanceof TimeDimension && firstIndex == 0) {
+                    condition.setMemberSortType(SortType.DESC);
+                }
+                ++firstIndex;
                 rs.put(condition.getMetaName(), condition);
-                
             }
         }
         return rs;
@@ -386,7 +395,7 @@ public class QueryUtils {
      * @throws QueryModelBuildException
      */
     public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area)
-            throws QueryModelBuildException {
+        throws QueryModelBuildException {
         Cube oriCube = getCubeFromReportModel(reportModel, area);
         Map<String, List<Dimension>> filterDims = collectFilterDim(reportModel);
         MiniCube cube = new MiniCube(area.getCubeId());
@@ -402,7 +411,7 @@ public class QueryUtils {
         if (logicModel == null) {
             throw new QueryModelBuildException("logic model is empty");
         }
-        Item[] items = logicModel.getItems();
+        Item[] items = logicModel.getItems(area.getType() != ExtendAreaType.TABLE);
         Map<String, Dimension> dimensions = new HashMap<String, Dimension>();
         Map<String, Measure> measures = new HashMap<String, Measure>();
         
@@ -417,7 +426,7 @@ public class QueryUtils {
             } else {
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(olapElement);
                 dim.setLevels(Maps.newLinkedHashMap());;
-                ((Dimension) olapElement).getLevels().values().forEach(level ->{
+                ((Dimension) olapElement).getLevels().values().forEach(level -> {
                     dim.getLevels().put(level.getName(), level);
                 });
                 dimensions.put(dim.getName(), dim);
@@ -433,7 +442,7 @@ public class QueryUtils {
                         area.getCubeId(), elementId);
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
                 dim.setLevels(Maps.newLinkedHashMap());
-                ((Dimension) element).getLevels().values().forEach(level ->{
+                ((Dimension) element).getLevels().values().forEach(level -> {
                     dim.getLevels().put(level.getName(), level);
                 });
                 dimensions.put(element.getName(), (Dimension) element);
@@ -445,34 +454,34 @@ public class QueryUtils {
                 measures.put(element.getName(), (Measure) element);
             }
         }
-        if (filterDims != null ) { //&& filterDims.get(area.getCubeId()) != null) {
-        		List<Dimension> dims = filterDims.get(area.getCubeId());
-        		if (dims != null) {
-        			for(Dimension dim : dims) {
-            			if (dim != null) {
-            				dimensions.put(dim.getName(), dim);
-            			}
-            		}
-        		}
-        		
-        		// TODO 处理不同cube共用同一查询条件情况
-        		filterDims.forEach((key, dimArray) -> {
-        			if (!key.equals(area.getCubeId())) {
-        				dimArray.stream().filter(dim -> {
-        					return dim instanceof TimeDimension;
-        				}).forEach(dim -> {
-        					for (Dimension tmp : oriCube.getDimensions().values()) {
-        						if (dim.getName().equals(tmp.getName())) {
-        							MiniCubeDimension tmpDim = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
-        							tmpDim.setLevels((LinkedHashMap<String, Level>) tmp.getLevels());
-        							tmpDim.setFacttableColumn(tmp.getFacttableColumn());
-        							tmpDim.setFacttableCaption(tmp.getFacttableCaption());
-        							dimensions.put(tmpDim.getName(), tmpDim);
-        						}
-        					}
-        				});
-        			}
-        		});
+        if (filterDims != null ) { // && filterDims.get(area.getCubeId()) != null) {
+            List<Dimension> dims = filterDims.get(area.getCubeId());
+            if (dims != null) {
+                for(Dimension dim : dims) {
+                    if (dim != null) {
+                        dimensions.put(dim.getName(), dim);
+                    }
+                }
+            }
+            
+            // TODO 处理不同cube共用同一查询条件情况
+            filterDims.forEach((key, dimArray) -> {
+                if (!key.equals(area.getCubeId())) {
+                    dimArray.stream().filter(dim -> {
+                        return dim instanceof TimeDimension;
+                    }).forEach(dim -> {
+                        for (Dimension tmp : oriCube.getDimensions().values()) {
+                            if (dim.getName().equals(tmp.getName())) {
+                                MiniCubeDimension tmpDim = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
+                                tmpDim.setLevels((LinkedHashMap<String, Level>) tmp.getLevels());
+                                tmpDim.setFacttableColumn(tmp.getFacttableColumn());
+                                tmpDim.setFacttableCaption(tmp.getFacttableCaption());
+                                dimensions.put(tmpDim.getName(), tmpDim);
+                            }
+                        }
+                    });
+                }
+            });
         }
         cube.setDimensions(dimensions);
         modifyMeasures(measures, oriCube);
@@ -489,42 +498,42 @@ public class QueryUtils {
      * @param oriCube
      */
     private static void modifyMeasures(Map<String, Measure> measures, Cube oriCube) {
-    		Set<String> refMeasuers = Sets.newHashSet();
-		measures.values().stream().filter(m -> {
-			return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
-		}).forEach(m -> {
-			ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
-			if (m.getType() == MeasureType.CAL) {
-				refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
-			} else {
-				final String refName = m.getName().substring(0, m.getName().length() - 3);
-				refMeasuers.add(refName);
-				if (m.getType() == MeasureType.RR) {
-					tmp.setFormula("rRate(${" + refName + "})");
-				} else if (m.getType() == MeasureType.SR) {
-					tmp.setFormula("sRate(${" + refName + "})");
-				}
-			}
-			tmp.setAggregator(Aggregator.CALCULATED);
-		});
-		refMeasuers.stream().filter(str -> {
-			return !measures.containsKey(str);
-		}).map(str -> {
-			Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
-			for (Map.Entry<String, Measure> tmp : entry) {
-				if (str.equals(tmp.getValue().getName())) {
-					return tmp.getValue();
-				}
-			}
-			return null;
-		}).forEach(m -> {
-			if (m != null) {
-				measures.put(m.getName(), m);
-			}
-		});
-	}
+        Set<String> refMeasuers = Sets.newHashSet();
+        measures.values().stream().filter(m -> {
+            return m.getType() == MeasureType.CAL || m.getType() == MeasureType.RR || m.getType() == MeasureType.SR;
+        }).forEach(m -> {
+            ExtendMinicubeMeasure tmp = (ExtendMinicubeMeasure) m;
+            if (m.getType() == MeasureType.CAL) {
+                refMeasuers.addAll(PlaceHolderUtils.getPlaceHolderKeys(tmp.getFormula()));
+            } else {
+                final String refName = m.getName().substring(0, m.getName().length() - 3);
+                refMeasuers.add(refName);
+                if (m.getType() == MeasureType.RR) {
+                    tmp.setFormula("rRate(${" + refName + "})");
+                } else if (m.getType() == MeasureType.SR) {
+                    tmp.setFormula("sRate(${" + refName + "})");
+                }
+            }
+            tmp.setAggregator(Aggregator.CALCULATED);
+        });
+        refMeasuers.stream().filter(str -> {
+            return !measures.containsKey(str);
+        }).map(str -> {
+            Set<Map.Entry<String, Measure>> entry = oriCube.getMeasures().entrySet();
+            for (Map.Entry<String, Measure> tmp : entry) {
+                if (str.equals(tmp.getValue().getName())) {
+                    return tmp.getValue();
+                }
+            }
+            return null;
+        }).forEach(m -> {
+            if (m != null) {
+                measures.put(m.getName(), m);
+            }
+        });
+    }
 
-	/**
+    /**
      * 
      * @param dim -- Dimension
      * @return Dimension
@@ -556,163 +565,163 @@ public class QueryUtils {
      * @return Map<String, List<Dimension>>
      */
     private static Map<String, List<Dimension>> collectFilterDim(ReportDesignModel model) {
-		Map<String, List<Dimension>> rs = Maps.newHashMap();
-		for (ExtendArea area : model.getExtendAreaList()) {
-			if (isFilterArea(area.getType())) {
-				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
-				if (rs.get(area.getCubeId()) == null) {
-					List<Dimension> dims = Lists.newArrayList();
-					area.listAllItems().values().forEach(key -> {
-						MiniCubeDimension dim = (MiniCubeDimension) 
-								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
-		                dim.setLevels(Maps.newLinkedHashMap());;
-		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
-		                    dim.getLevels().put(level.getName(), level);
-		                });
-		                dims.add(dim);
-					});
-					rs.put(area.getCubeId(), dims);
-				} else {
-					area.listAllItems().values().forEach(key -> {
-						MiniCubeDimension dim = (MiniCubeDimension) 
-								DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
-		                dim.setLevels(Maps.newLinkedHashMap());;
-		                cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
-		                    dim.getLevels().put(level.getName(), level);
-		                });
-						rs.get(area.getCubeId()).add(dim);
-					});
-				}
-	    		} 
-		}
-		return rs;
-	}
+        Map<String, List<Dimension>> rs = Maps.newHashMap();
+        for (ExtendArea area : model.getExtendAreaList()) {
+            if (isFilterArea(area.getType())) {
+                Cube cube = model.getSchema().getCubes().get(area.getCubeId());
+                if (rs.get(area.getCubeId()) == null) {
+                    List<Dimension> dims = Lists.newArrayList();
+                    area.listAllItems().values().forEach(key -> {
+                        MiniCubeDimension dim = (MiniCubeDimension) 
+                                DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+                        dim.setLevels(Maps.newLinkedHashMap());;
+                        cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+                            dim.getLevels().put(level.getName(), level);
+                        });
+                        dims.add(dim);
+                    });
+                    rs.put(area.getCubeId(), dims);
+                } else {
+                    area.listAllItems().values().forEach(key -> {
+                        MiniCubeDimension dim = (MiniCubeDimension) 
+                                DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+                        dim.setLevels(Maps.newLinkedHashMap());;
+                        cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
+                            dim.getLevels().put(level.getName(), level);
+                        });
+                        rs.get(area.getCubeId()).add(dim);
+                    });
+                }
+            } 
+        }
+        return rs;
+    }
 
-	/**
-	 * 
-	 * @param type
-	 * @return boolean
-	 * 
-	 */
-	public static boolean isFilterArea(ExtendAreaType type) {
-		return type == ExtendAreaType.TIME_COMP 
-				|| type == ExtendAreaType.SELECT 
-				|| type == ExtendAreaType.MULTISELECT;
-	}
+    /**
+     * 
+     * @param type
+     * @return boolean
+     * 
+     */
+    public static boolean isFilterArea(ExtendAreaType type) {
+        return type == ExtendAreaType.TIME_COMP 
+                || type == ExtendAreaType.SELECT 
+                || type == ExtendAreaType.MULTISELECT;
+    }
 
     /**
      * trans cube
      * @param cube
      * @return new Cube
      */
-	public static Cube transformCube(Cube cube) {
-		MiniCube newCube = (MiniCube) DeepcopyUtils.deepCopy(cube);
-		final Map<String, Measure> measures = Maps.newConcurrentMap();
-		cube.getMeasures().values().forEach(m -> {
-			measures.put(m.getName(), m);
-		});
-		newCube.setMeasures(measures);
-		final Map<String, Dimension> dimensions = Maps.newLinkedHashMap();
-		cube.getDimensions().values().forEach(dim -> {
-			MiniCubeDimension tmp = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
-			LinkedHashMap<String, Level> tmpLevel = Maps.newLinkedHashMap();
-			dim.getLevels().values().forEach(level -> {
-				tmpLevel.put(level.getName(), level);
-			});
-			tmp.setLevels(tmpLevel);
-			dimensions.put(tmp.getName(), tmp);
-		});
-		newCube.setDimensions(dimensions);
-		return newCube;
-	}
+    public static Cube transformCube(Cube cube) {
+        MiniCube newCube = (MiniCube) DeepcopyUtils.deepCopy(cube);
+        final Map<String, Measure> measures = Maps.newConcurrentMap();
+        cube.getMeasures().values().forEach(m -> {
+            measures.put(m.getName(), m);
+        });
+        newCube.setMeasures(measures);
+        final Map<String, Dimension> dimensions = Maps.newLinkedHashMap();
+        cube.getDimensions().values().forEach(dim -> {
+            MiniCubeDimension tmp = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
+            LinkedHashMap<String, Level> tmpLevel = Maps.newLinkedHashMap();
+            dim.getLevels().values().forEach(level -> {
+                tmpLevel.put(level.getName(), level);
+            });
+            tmp.setLevels(tmpLevel);
+            dimensions.put(tmp.getName(), tmp);
+        });
+        newCube.setDimensions(dimensions);
+        return newCube;
+    }
 
-	/**
-	 * decorate chart with extend area
-	 * @param chart
-	 * @param area
-	 */
-	public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
-		if (area.getType() == ExtendAreaType.CHART) {
-			// 设置topN默认设置
-			if (area.getLogicModel().getTopSetting() != null) {
-				MeasureTopSetting topSetting = area.getLogicModel().getTopSetting();
-				chart.setRecordSize(topSetting.getRecordSize());
-				chart.setTopedMeasureId(topSetting.getMeasureId());
-				chart.setTopType(topSetting.getTopType().name());
-				chart.setAreaId(area.getId());
-			}
-			String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
-				OlapElement tmp = getOlapElement(area, schema, item);
-				if (tmp != null) {
-					return tmp.getCaption();
-				} else {
-					return null;
-				}
-			}).filter(x -> x != null).toArray(String[] :: new);
-			chart.setAllDims(allDims);
-			String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
-				OlapElement tmp = getOlapElement(area, schema, item);
-				if (tmp != null) {
-					chart.getMeasureMap().put(tmp.getId(), tmp.getCaption());
-					return tmp.getCaption();
-				} else {
-					return null;
-				}
-			}).filter(x -> x != null).toArray(String[] :: new);
-			chart.setAllMeasures(allMeasures);
-			
-			final Item[] columns = area.getLogicModel().getColumns();
-			List<String> tmp = getOlapElementNames(
-					columns, area.getCubeId(), schema);
-			if (tmp.size() > 0) {
-				chart.setDefaultMeasures(tmp.toArray(new String[0]));
-			}
-			for (int i = 0; i < columns.length; ++i) {
-				chart.getMeasureMap().put(columns[i].getOlapElementId(), tmp.get(i));
-			}
-			List<String>  defaultDims = getOlapElementNames(
-					area.getLogicModel().getRows(), area.getCubeId(), schema);
-			if (defaultDims.size() > 0) {
-				chart.setDefaultDims(defaultDims.toArray(new String[0]));
-			}
-		} 
-	}
+    /**
+     * decorate chart with extend area
+     * @param chart
+     * @param area
+     */
+    public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
+        if (area.getType() == ExtendAreaType.CHART) {
+            // 设置topN默认设置
+            if (area.getLogicModel().getTopSetting() != null) {
+                MeasureTopSetting topSetting = area.getLogicModel().getTopSetting();
+                chart.setRecordSize(topSetting.getRecordSize());
+                chart.setTopedMeasureId(topSetting.getMeasureId());
+                chart.setTopType(topSetting.getTopType().name());
+                chart.setAreaId(area.getId());
+            }
+            String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
+                OlapElement tmp = getOlapElement(area, schema, item);
+                if (tmp != null) {
+                    return tmp.getCaption();
+                } else {
+                    return null;
+                }
+            }).filter(x -> x != null).toArray(String[] :: new);
+            chart.setAllDims(allDims);
+            String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
+                OlapElement tmp = getOlapElement(area, schema, item);
+                if (tmp != null) {
+                    chart.getMeasureMap().put(tmp.getId(), tmp.getCaption());
+                    return tmp.getCaption();
+                } else {
+                    return null;
+                }
+            }).filter(x -> x != null).toArray(String[] :: new);
+            chart.setAllMeasures(allMeasures);
+            
+            final Item[] columns = area.getLogicModel().getColumns();
+            List<String> tmp = getOlapElementNames(
+                    columns, area.getCubeId(), schema);
+            if (tmp.size() > 0) {
+                chart.setDefaultMeasures(tmp.toArray(new String[0]));
+            }
+            for (int i = 0; i < columns.length; ++i) {
+                chart.getMeasureMap().put(columns[i].getOlapElementId(), tmp.get(i));
+            }
+            List<String>  defaultDims = getOlapElementNames(
+                    area.getLogicModel().getRows(), area.getCubeId(), schema);
+            if (defaultDims.size() > 0) {
+                chart.setDefaultDims(defaultDims.toArray(new String[0]));
+            }
+        } 
+    }
 
-	/**
-	 * @param area
-	 * @param schema
-	 * @return
-	 */
-	private static List<String> getOlapElementNames(Item[] items, String cubeId, Schema schema) {
-		List<String> tmp = Lists.newArrayList();
-		if (items == null || items.length == 0) {
-			return tmp;
-		}
-		for (Item item : items) {
-			OlapElement olapElement = 
-					ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, item.getOlapElementId());
-			tmp.add(olapElement.getCaption());
-		}
-		return tmp;
-	}
+    /**
+     * @param area
+     * @param schema
+     * @return
+     */
+    private static List<String> getOlapElementNames(Item[] items, String cubeId, Schema schema) {
+        List<String> tmp = Lists.newArrayList();
+        if (items == null || items.length == 0) {
+            return tmp;
+        }
+        for (Item item : items) {
+            OlapElement olapElement = 
+                    ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, item.getOlapElementId());
+            tmp.add(olapElement.getCaption());
+        }
+        return tmp;
+    }
 
-	/**
-	 * 
-	 * @param area
-	 * @param schema
-	 * @param item
-	 * @return String
-	 * 
-	 */
-	private static OlapElement getOlapElement(ExtendArea area, Schema schema,
-			Item item) {
-		OlapElement olapElement = 
-				ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
-		if (olapElement != null) {
-			return olapElement;
-		}
-		return null;
-	}
+    /**
+     * 
+     * @param area
+     * @param schema
+     * @param item
+     * @return String
+     * 
+     */
+    private static OlapElement getOlapElement(ExtendArea area, Schema schema,
+            Item item) {
+        OlapElement olapElement = 
+                ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
+        if (olapElement != null) {
+            return olapElement;
+        }
+        return null;
+    }
     
 
 }

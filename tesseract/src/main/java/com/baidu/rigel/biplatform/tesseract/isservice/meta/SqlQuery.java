@@ -234,14 +234,14 @@ public class SqlQuery {
                     limitEnd = this.limitMap.get(LIMITMAP_KEY_LIMITEND);
                 }
                 if (limitStart >= 0 && limitEnd > 0) {
-                	limitStringBuffer.append(" limit ");
+                    limitStringBuffer.append(" limit ");
                     limitStringBuffer.append(limitStart);
                     limitStringBuffer.append(",");
                     limitStringBuffer.append(limitEnd);
-				} else if (limitEnd > 0) {
-					limitStringBuffer.append(" limit ");
-					limitStringBuffer.append(limitEnd);
-				}
+                } else if (limitEnd > 0) {
+                    limitStringBuffer.append(" limit ");
+                    limitStringBuffer.append(limitEnd);
+                }
                 
                 
                 sb.append(limitStringBuffer);

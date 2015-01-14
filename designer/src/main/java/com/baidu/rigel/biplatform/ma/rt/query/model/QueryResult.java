@@ -61,7 +61,7 @@ public class QueryResult implements Serializable {
      * @param key
      * @param value
      */
-    public <T extends Serializable> void addData (String key, T value) {
+    public <T extends Serializable> void addData(String key, T value) {
         this.mapDatas.put(key, value);
     }
     
@@ -70,7 +70,7 @@ public class QueryResult implements Serializable {
      * @param key
      * @return
      */
-    public Serializable removeData (String key) {
+    public Serializable removeData(String key) {
         return this.mapDatas.remove(key);
     }
     
@@ -79,7 +79,7 @@ public class QueryResult implements Serializable {
      * @param key
      * @return
      */
-    public Serializable getData (String key) {
+    public Serializable getData(String key) {
         return this.mapDatas.get(key);
     }
- }
+}

@@ -133,7 +133,7 @@ public class QueryServiceImpl implements QueryService {
         // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
         int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
         logger.info("query condition descarte:" + conditionDescartes);
-        logger.debug("question model:" + questionModel);
+        logger.debug("question model:{}", questionModel);
         if (questionModel.getQueryConditionLimit().isWarningAtOverFlow()
                 && conditionDescartes > questionModel.getQueryConditionLimit().getWarnningConditionSize()) {
             StringBuilder sb = new StringBuilder();
@@ -201,14 +201,14 @@ public class QueryServiceImpl implements QueryService {
      * @return DataModel
      */
     private DataModel sortAndTrunc(DataModel result, SortRecord sortRecord) {
-    		if (sortRecord != null) {
-    			DataModelUtils.sortDataModelBySort(result, sortRecord);
-    		}
-    		int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
-		return DataModelUtils.truncModel(result, recordSize); 
-	}
+            if (sortRecord != null) {
+                DataModelUtils.sortDataModelBySort(result, sortRecord);
+            }
+            int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
+        return DataModelUtils.truncModel(result, recordSize); 
+    }
 
-	private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
+    private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
         if (context == null) {
             throw new IllegalArgumentException("querycontext is null.");
         }

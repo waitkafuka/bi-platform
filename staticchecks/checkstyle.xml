@@ -182,7 +182,7 @@
         </module>
 		<!--方法个数-->
         <module name="MethodCount">
-            <property name="maxTotal" value="30"/>
+            <property name="maxTotal" value="50"/>
         </module>
 		
 		
@@ -336,7 +336,9 @@
         </module>
 		-->
         <module name="InnerAssignment"/>
+        <!-- 
         <module name="JUnitTestCase"/>
+         -->
         <module name="ReturnCount">
             <property name="max" value="5"/>
         </module>
@@ -352,10 +354,12 @@
         </module>
 		-->
         <module name="PackageDeclaration"/>
+        <!-- 
         <module name="RedundantThrows">
             <property name="severity" value="warning"/>
             <property name="allowUnchecked" value="true"/>
         </module>
+         -->
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
         <module name="SuperClone"/>

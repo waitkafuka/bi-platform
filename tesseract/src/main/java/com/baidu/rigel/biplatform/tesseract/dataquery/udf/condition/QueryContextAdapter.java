@@ -35,85 +35,85 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
  */
 public class QueryContextAdapter extends QueryContext {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 7631126790794933111L;
-	
-	/**
-	 * queryContext
-	 */
-	private final QueryContext queryContext;
-	
-	/**
-	 * questionModel
-	 */
-	private final QuestionModel questionModel;
-	
-	/**
-	 * cube
-	 */
-	private final Cube cube;
-	
-	/**
-	 * dataSoruceInfo
-	 */
-	private final DataSourceInfo dataSoruceInfo;
-	
-	private final QueryContextBuilder builder;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 7631126790794933111L;
+    
+    /**
+     * queryContext
+     */
+    private final QueryContext queryContext;
+    
+    /**
+     * questionModel
+     */
+    private final QuestionModel questionModel;
+    
+    /**
+     * cube
+     */
+    private final Cube cube;
+    
+    /**
+     * dataSoruceInfo
+     */
+    private final DataSourceInfo dataSoruceInfo;
+    
+    private final QueryContextBuilder builder;
 
-	/**
-	 * 构造函数
-	 * @param queryContext
-	 * @param questionModel
-	 * @param cube
-	 * @param dataSoruceInfo
-	 */
-	public QueryContextAdapter(QueryContext queryContext,
-			QuestionModel questionModel, Cube cube,
-			DataSourceInfo dataSoruceInfo, QueryContextBuilder builder) {
-		super();
-		this.queryContext = queryContext;
-		this.questionModel = questionModel;
-		this.cube = cube;
-		this.dataSoruceInfo = dataSoruceInfo;
-		this.builder = builder;
-	}
+    /**
+     * 构造函数
+     * @param queryContext
+     * @param questionModel
+     * @param cube
+     * @param dataSoruceInfo
+     */
+    public QueryContextAdapter(QueryContext queryContext,
+            QuestionModel questionModel, Cube cube,
+            DataSourceInfo dataSoruceInfo, QueryContextBuilder builder) {
+        super();
+        this.queryContext = queryContext;
+        this.questionModel = questionModel;
+        this.cube = cube;
+        this.dataSoruceInfo = dataSoruceInfo;
+        this.builder = builder;
+    }
 
-	/**
-	 * @return the queryContext
-	 */
-	public QueryContext getQueryContext() {
-		return queryContext;
-	}
+    /**
+     * @return the queryContext
+     */
+    public QueryContext getQueryContext() {
+        return queryContext;
+    }
 
-	/**
-	 * @return the questionModel
-	 */
-	public QuestionModel getQuestionModel() {
-		return questionModel;
-	}
+    /**
+     * @return the questionModel
+     */
+    public QuestionModel getQuestionModel() {
+        return questionModel;
+    }
 
-	/**
-	 * @return the cube
-	 */
-	public Cube getCube() {
-		return cube;
-	}
+    /**
+     * @return the cube
+     */
+    public Cube getCube() {
+        return cube;
+    }
 
-	/**
-	 * @return the dataSoruceInfo
-	 */
-	public DataSourceInfo getDataSoruceInfo() {
-		return dataSoruceInfo;
-	}
+    /**
+     * @return the dataSoruceInfo
+     */
+    public DataSourceInfo getDataSoruceInfo() {
+        return dataSoruceInfo;
+    }
 
-	/**
-	 * @return the builder
-	 */
-	public QueryContextBuilder getBuilder() {
-		return builder;
-	}
+    /**
+     * @return the builder
+     */
+    public QueryContextBuilder getBuilder() {
+        return builder;
+    }
 
     
     /*
@@ -235,5 +235,5 @@ public class QueryContextAdapter extends QueryContext {
         queryContext.addMemberNodeTreeByAxisType(axisType, nodeTree);
         
     }
-	
+    
 }

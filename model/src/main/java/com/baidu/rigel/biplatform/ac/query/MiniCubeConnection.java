@@ -89,6 +89,11 @@ public interface MiniCubeConnection {
      * DATASET_PARAM_KEY
      */
     String DATASET_PARAM_KEY = "datasets";
+    
+    /**
+     * 事实表更新主键区间对应的参数名称
+     */
+    String PARAMS = "params";
 
     /**
      * 查询结果
@@ -168,15 +173,17 @@ public interface MiniCubeConnection {
      *
      */
     public static class ConnectionUtil {
-    	
-    		/**
+        
+            /**
          * 刷新当前connection的缓存
          */
-        public static boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets) {
-            Map<String, String> params = new HashMap<String, String>(5);
+        public static boolean refresh(DataSourceInfo dataSourceInfo, String[] dataSets, String conditions) {
+            final Map<String, String> params = new HashMap<String, String>(5);
             params.put(DATASOURCEINFO_PARAM_KEY, AnswerCoreConstant.GSON.toJson(dataSourceInfo));
             params.put(DATASET_PARAM_KEY, StringUtils.join(dataSets, ','));
-
+            if (!StringUtils.isEmpty(conditions)) {
+                params.put(PARAMS, conditions);
+            }
             String responseJson = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/refresh", params);
             ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(responseJson, ResponseResult.class);
             if (responseResult.getData() != null) {

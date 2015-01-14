@@ -88,7 +88,7 @@ public class DIReportChart implements Serializable {
     /**
      * 分析指标中的最大值
      */
-    private BigDecimal maxValue = BigDecimal.valueOf(10000000000D);
+    private BigDecimal maxValue = BigDecimal.valueOf(100000);
     
     /**
      * 分析指标中的最小值
@@ -168,165 +168,165 @@ public class DIReportChart implements Serializable {
         this.yAxises = yAxises;
     }
 
-	/**
-	 * @return the allMeasures
-	 */
-	public String[] getAllMeasures() {
-		return allMeasures;
-	}
+    /**
+     * @return the allMeasures
+     */
+    public String[] getAllMeasures() {
+        return allMeasures;
+    }
 
-	/**
-	 * @param allMeasures the allMeasures to set
-	 */
-	public void setAllMeasures(String[] allMeasures) {
-		this.allMeasures = allMeasures;
-	}
+    /**
+     * @param allMeasures the allMeasures to set
+     */
+    public void setAllMeasures(String[] allMeasures) {
+        this.allMeasures = allMeasures;
+    }
 
-	/**
-	 * @return the defaultMeasuers
-	 */
-	public String[] getDefaultMeasures() {
-		return defaultMeasures;
-	}
+    /**
+     * @return the defaultMeasuers
+     */
+    public String[] getDefaultMeasures() {
+        return defaultMeasures;
+    }
 
-	/**
-	 * @param defaultMeasuers the defaultMeasuers to set
-	 */
-	public void setDefaultMeasures(String[] defaultMeasuers) {
-		this.defaultMeasures = defaultMeasuers;
-	}
+    /**
+     * @param defaultMeasuers the defaultMeasuers to set
+     */
+    public void setDefaultMeasures(String[] defaultMeasuers) {
+        this.defaultMeasures = defaultMeasuers;
+    }
 
-	/**
-	 * @return the allDims
-	 */
-	public String[] getAllDims() {
-		return allDims;
-	}
+    /**
+     * @return the allDims
+     */
+    public String[] getAllDims() {
+        return allDims;
+    }
 
-	/**
-	 * @param allDims the allDims to set
-	 */
-	public void setAllDims(String[] allDims) {
-		this.allDims = allDims;
-	}
+    /**
+     * @param allDims the allDims to set
+     */
+    public void setAllDims(String[] allDims) {
+        this.allDims = allDims;
+    }
 
-	/**
-	 * @return the defaultDims
-	 */
-	public String[] getDefaultDims() {
-		return defaultDims;
-	}
+    /**
+     * @return the defaultDims
+     */
+    public String[] getDefaultDims() {
+        return defaultDims;
+    }
 
-	/**
-	 * @param defaultDims the defaultDims to set
-	 */
-	public void setDefaultDims(String[] defaultDims) {
-		this.defaultDims = defaultDims;
-	}
+    /**
+     * @param defaultDims the defaultDims to set
+     */
+    public void setDefaultDims(String[] defaultDims) {
+        this.defaultDims = defaultDims;
+    }
 
-	/**
-	 * @return the maxValue
-	 */
-	public BigDecimal getMaxValue() {
-		return maxValue;
-	}
+    /**
+     * @return the maxValue
+     */
+    public BigDecimal getMaxValue() {
+        return maxValue;
+    }
 
-	/**
-	 * @param maxValue the maxValue to set
-	 */
-	public void setMaxValue(BigDecimal maxValue) {
-		this.maxValue = maxValue;
-	}
+    /**
+     * @param maxValue the maxValue to set
+     */
+    public void setMaxValue(BigDecimal maxValue) {
+        this.maxValue = maxValue;
+    }
 
-	/**
-	 * @return the minValue
-	 */
-	public BigDecimal getMinValue() {
-		return minValue;
-	}
+    /**
+     * @return the minValue
+     */
+    public BigDecimal getMinValue() {
+        return minValue;
+    }
 
-	/**
-	 * @param minValue the minValue to set
-	 */
-	public void setMinValue(BigDecimal minValue) {
-		this.minValue = minValue;
-	}
+    /**
+     * @param minValue the minValue to set
+     */
+    public void setMinValue(BigDecimal minValue) {
+        this.minValue = minValue;
+    }
 
-	/**
-	 * @return the topType
-	 */
-	public String getTopType() {
-		if (topType == null) {
-			topType = "NONE";
-		}
-		return topType;
-	}
+    /**
+     * @return the topType
+     */
+    public String getTopType() {
+        if (topType == null) {
+            topType = "NONE";
+        }
+        return topType;
+    }
 
-	/**
-	 * @param topType the topType to set
-	 */
-	public void setTopType(String topType) {
-		this.topType = topType;
-	}
+    /**
+     * @param topType the topType to set
+     */
+    public void setTopType(String topType) {
+        this.topType = topType;
+    }
 
-	/**
-	 * @return the recordSize
-	 */
-	public int getRecordSize() {
-		return recordSize;
-	}
+    /**
+     * @return the recordSize
+     */
+    public int getRecordSize() {
+        return recordSize;
+    }
 
-	/**
-	 * @param recordSize the recordSize to set
-	 */
-	public void setRecordSize(int recordSize) {
-		this.recordSize = recordSize;
-	}
+    /**
+     * @param recordSize the recordSize to set
+     */
+    public void setRecordSize(int recordSize) {
+        this.recordSize = recordSize;
+    }
 
-	/**
-	 * @return the topedMeasureId
-	 */
-	public String getTopedMeasureId() {
-		return topedMeasureId;
-	}
+    /**
+     * @return the topedMeasureId
+     */
+    public String getTopedMeasureId() {
+        return topedMeasureId;
+    }
 
-	/**
-	 * @param topedMeasureId the topedMeasureId to set
-	 */
-	public void setTopedMeasureId(String topedMeasureId) {
-		this.topedMeasureId = topedMeasureId;
-	}
+    /**
+     * @param topedMeasureId the topedMeasureId to set
+     */
+    public void setTopedMeasureId(String topedMeasureId) {
+        this.topedMeasureId = topedMeasureId;
+    }
 
-	/**
-	 * @return the measureMap
-	 */
-	public Map<String, String> getMeasureMap() {
-		if (this.measureMap == null) {
-			this.measureMap = Maps.newHashMap();
-		}
-		return measureMap;
-	}
+    /**
+     * @return the measureMap
+     */
+    public Map<String, String> getMeasureMap() {
+        if (this.measureMap == null) {
+            this.measureMap = Maps.newHashMap();
+        }
+        return measureMap;
+    }
 
-	/**
-	 * @param measureMap the measureMap to set
-	 */
-	public void setMeasureMap(Map<String, String> measureMap) {
-		this.measureMap = measureMap;
-	}
+    /**
+     * @param measureMap the measureMap to set
+     */
+    public void setMeasureMap(Map<String, String> measureMap) {
+        this.measureMap = measureMap;
+    }
 
-	/**
-	 * @return the areaId
-	 */
-	public String getAreaId() {
-		return areaId;
-	}
+    /**
+     * @return the areaId
+     */
+    public String getAreaId() {
+        return areaId;
+    }
 
-	/**
-	 * @param areaId the areaId to set
-	 */
-	public void setAreaId(String areaId) {
-		this.areaId = areaId;
-	}
+    /**
+     * @param areaId the areaId to set
+     */
+    public void setAreaId(String areaId) {
+        this.areaId = areaId;
+    }
     
     
 }

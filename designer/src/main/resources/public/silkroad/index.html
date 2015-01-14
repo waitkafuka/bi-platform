@@ -5,7 +5,8 @@
     <title>报表平台-配置端</title>
     <!--<link type="text/css" rel="stylesheet" href="asset/css/-di-silkroad-min.css"/>-->
     <link type="text/css" rel="stylesheet" href="src/css/all.css"/>
-    <link rel="stylesheet" href="/silkroad/asset/css/-di-product-min.css"/>
+    <!--<link rel="stylesheet" href="/silkroad/asset/css/-di-product-min.css"/>-->
+    <link rel="stylesheet" href="asset/css/-di-product-debug.css"/>
     <!--<link rel="stylesheet" href="/silkroad/asset/css/-di-product-debug.css"/>-->
 </head>
 <body>
@@ -13,7 +14,6 @@
 <div class="nav-placeholder"></div>
 <div class="main j-main"></div>
 <div class="foot ta-c j-foot">&copy; 版权信息</div>
-
 <script type="text/javascript" src="src/common/ZeroClipboard.js"></script>
 <script type="text/javascript" src="dep/require-2.1.11.js"></script>
 <script src="/silkroad/asset/-di-product-min.js"></script>
@@ -21,7 +21,7 @@
 <script type="text/javascript">
     // 此处会配置成为正式上线时使用的配置
     require.config({
-        baseUrl: 'asset',  //本地模拟为src，线上版问asset
+        baseUrl: 'src',  //本地模拟为src，线上版问asset
         paths: {
             'underscore': '../dep/underscore-1.6.0.min',
             'jquery': '../dep/jquery-1.11.1.min',

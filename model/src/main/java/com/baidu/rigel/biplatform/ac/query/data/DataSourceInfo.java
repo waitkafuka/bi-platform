@@ -21,7 +21,6 @@ package com.baidu.rigel.biplatform.ac.query.data;
 import java.io.Serializable;
 
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
-import com.baidu.rigel.biplatform.ac.util.Md5Util;
 
 /**
  * query datasource info
@@ -131,13 +130,11 @@ public interface DataSourceInfo extends Serializable {
     boolean validate();
 
     /**
-     * 返回数据源MD5
+     * 返回数据源的唯一ID
      * 
      * @return DataSource unique key
      */
-    default String getDataSourceKey() {
-        return Md5Util.encode(toString());
-    }
+    String getDataSourceKey();
 
     /**
      * 取得产品线信息，数据源对应的产品线

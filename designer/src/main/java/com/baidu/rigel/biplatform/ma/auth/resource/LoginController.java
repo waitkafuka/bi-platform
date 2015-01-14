@@ -30,7 +30,6 @@ import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
-import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 
 /**
@@ -63,9 +62,9 @@ public class LoginController extends RandomValidateCodeController {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult login(HttpServletRequest request, HttpServletResponse response) {
-    		ResponseResult rs = super.checkValidateCode(request);
+        ResponseResult rs = checkValidateCode(request);
         if (rs.getStatus() == ResponseResult.FAILED) {
-        		return rs;
+            return rs;
         }
         // 获取用户登录信息
         String productLine = request.getParameter("name");
@@ -100,10 +99,11 @@ public class LoginController extends RandomValidateCodeController {
         response.addCookie(productLineCookie);
 
         // 在请求中添加sessionId的cookie信息
-        String sessionId = UuidGeneratorUtils.generate();
-        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
-        sessionIdCookie.setPath(Constants.COOKIE_PATH);
-        response.addCookie(sessionIdCookie);
+//        String sessionId = UuidGeneratorUtils.generate();
+//        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
+//        sessionIdCookie.setPath(Constants.COOKIE_PATH);
+//        response.addCookie(sessionIdCookie);
+//        response.addHeader(Constants.COOKIE_PATH, sessionId);
         LOG.info("user [" + productLine + "] login bi-platform successfully");
         rs.setStatus(0);
         rs.setStatusInfo("successfully");

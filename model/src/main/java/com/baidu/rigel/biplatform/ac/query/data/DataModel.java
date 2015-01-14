@@ -143,20 +143,20 @@ public class DataModel implements Serializable {
 
     
     /**
-	 * @return the recordSize
-	 */
-	public int getRecordSize() {
-		return recordSize;
-	}
+     * @return the recordSize
+     */
+    public int getRecordSize() {
+        return recordSize;
+    }
 
-	/**
-	 * @param recordSize the recordSize to set
-	 */
-	public void setRecordSize(int recordSize) {
-		this.recordSize = recordSize;
-	}
+    /**
+     * @param recordSize the recordSize to set
+     */
+    public void setRecordSize(int recordSize) {
+        this.recordSize = recordSize;
+    }
 
-	/*
+    /*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#toString()

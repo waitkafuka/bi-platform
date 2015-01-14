@@ -62,7 +62,7 @@ public class HazelcastStoreManager implements StoreManager {
 
     public static final String EVENT_QUEUE = "eventQueue";
 
-	private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
+    private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
 
     private static final String HAZELCAST_SERVER_GROUP_USER_NAME = "hazelcastServer.groupUserName";
 
@@ -112,9 +112,12 @@ public class HazelcastStoreManager implements StoreManager {
         cfg.setInstanceName(prop.getProperty(HAZELCAST_SERVER_NAME, "TesseractHZ_Cluster"));
         
        // cfg.getQueueConfig(EVENT_QUEUE).addItemListenerConfig(new ItemListenerConfig(this.hazelcastQueueItemListener,true));
-        
-        cfg.getManagementCenterConfig().setEnabled(true);
-        cfg.getManagementCenterConfig().setUrl(prop.getProperty(HAZELCAST_MANCERTER_URL, "mancenterUrl"));
+        String manCenter = prop.getProperty(HAZELCAST_MANCERTER_URL);
+        boolean enableManCerter = Boolean.valueOf(prop.getProperty("hazelcastServer.mancenter.enable"));
+        if (enableManCerter && StringUtils.isNotBlank(manCenter)) {
+            cfg.getManagementCenterConfig().setEnabled(true);
+            cfg.getManagementCenterConfig().setUrl(manCenter);
+        }
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
         
@@ -130,9 +133,11 @@ public class HazelcastStoreManager implements StoreManager {
             location = "config/application.properties";
             LOGGER.info("default load config from {}", location);
         }
-        File propertiesFile = new File(System.getProperty("user.dir"), location);
+        String filePath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+        File propertiesFile = new File(new File(filePath).getParent(), location);
         Properties properties =null; 
         if(propertiesFile.exists()) {
+            LOGGER.info("load from config {}", propertiesFile.getAbsolutePath());
             properties = new Properties();
             FileInputStream fis = null;
             try {
@@ -145,7 +150,7 @@ public class HazelcastStoreManager implements StoreManager {
             }
         }
         if (properties == null || properties.isEmpty()) {
-            LOGGER.info("can not get default config from {} load config from {}", location,DEFAULT_TESSERACT_CONFIG);
+            LOGGER.info("can not get default config from {} load config from {}", propertiesFile.getAbsolutePath(),DEFAULT_TESSERACT_CONFIG);
             properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_TESSERACT_CONFIG);
         }
         return properties;

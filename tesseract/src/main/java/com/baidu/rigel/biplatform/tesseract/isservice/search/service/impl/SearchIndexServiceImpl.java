@@ -163,9 +163,9 @@ public class SearchIndexServiceImpl implements SearchService {
             long limitSize = 0;
             if (query.getLimit() != null) {
                 limitStart = query.getLimit().getStart();
-				if (query.getLimit().getSize() > 0) {
-					limitSize = query.getLimit().getSize();
-				}
+                if (query.getLimit().getSize() > 0) {
+                    limitSize = query.getLimit().getSize();
+                }
                 
             }
             TesseractResultSet currResult =
@@ -278,14 +278,14 @@ public class SearchIndexServiceImpl implements SearchService {
             }
             
             if(query.getWhere()!=null && query.getWhere().getAndList()!=null){
-            	for(Expression ex:query.getWhere().getAndList()){
-            		if(!idxSelect.contains(ex.getProperties())){
-            			result=false;
-            			break;
-            		}else{
-            			result=true;
-            		}
-            	}
+                for(Expression ex:query.getWhere().getAndList()){
+                    if(!idxSelect.contains(ex.getProperties())){
+                        result=false;
+                        break;
+                    }else{
+                        result=true;
+                    }
+                }
             }
             
         }

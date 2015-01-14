@@ -39,8 +39,21 @@ import com.google.common.collect.Sets;
  * @author zhongyi
  *
  */
-public class ElementUtils {
+public final class ElementUtils {
     
+    /**
+     * ElementUtils
+     */
+    private ElementUtils() {
+        
+    }
+    
+    /**
+     * 
+     * @param model
+     * @param cube
+     * @return Set<String>
+     */
     public static Set<String> getChangableDimNames(ReportDesignModel model, Cube cube) {
 
         Set<String> dimSet = Sets.newHashSet();

@@ -29,12 +29,15 @@ define([
                 'click .j-con-edit-btns .j-setting': 'initCompConfigBar',
                 'click .j-con-edit-btns .j-delete': 'deleteComp',
                 'click .j-button-save-report': 'saveReport',
+                'click .j-button-close-report': 'closeReport',
                 'click .j-button-publish-report': 'publishReport',
+                'click .j-button-preview-report': 'previewReport',
                 'click .j-comp-div': 'focusText',
                 'blur .j-comp-text': 'blurText',
                 'keydown .j-comp-text': 'keyDownText'
             },
-
+            /* 判断是否保存的变量 */
+            savestate: 0,
             /**
              * 构造函数
              *
@@ -308,11 +311,11 @@ define([
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
                 // 固定单选下拉框的高度
-                that.dragWidthHeight($component, 'SELECT', 27, 27);
+                that.dragWidthHeight($component, 'SELECT', 47, 47);
                 // 固定多选下拉框的高度
-                that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
+                that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 30, 30);
+                that.dragWidthHeight($component, 'TEXT', 50, 50);
             },
 
             /**
@@ -377,6 +380,7 @@ define([
                         $($component[i]).find('.j-setting').remove();
                     }
                 }
+                /**
                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
                     if ($conBtn.width() < 20) {
@@ -390,6 +394,7 @@ define([
                         $(this).html('+');
                     }
                 });
+                **/
             },
 
             /**
@@ -401,6 +406,33 @@ define([
                 this.model.saveReport(function () {
                     dialog.success('报表保存成功。');
                 });
+                this.savestate = 1;
+            },
+
+            /**
+             * 关闭报表
+             *
+             * @public
+             */
+            closeReport: function () {
+                if (this.savestate == 0) {
+                    dialog.warning('您未进行保存，请保存后关闭。');
+                }
+                else {
+                    this._destroyPanel();
+                    require(['report/list/main-view'], function (ReportListView) {
+                        new ReportListView({el: $('.j-main')});
+                    });
+                }
+            },
+
+            /**
+             * 调用面板模块销毁方法
+             * @private
+             */
+            _destroyPanel: function () {
+                window.dataInsight && window.dataInsight.main
+                && window.dataInsight.main.destroy();
             },
 
             /**
@@ -410,6 +442,15 @@ define([
              */
             publishReport: function () {
                 this.reportView.publishReport('POST');
+            },
+
+            /**
+             * 预览报表
+             *
+             * @public
+             */
+            previewReport: function () {
+                this.reportView.previewReport('POST');
             },
 
             /**

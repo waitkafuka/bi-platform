@@ -559,7 +559,7 @@ public class ReportDesignModelResource extends BaseResource {
      * 
      * @return 操作结果
      */
-    @RequestMapping(value = "/{id}/extend_area/{areaId}/item", method = { RequestMethod.POST })
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/item", method = {RequestMethod.POST})
     public ResponseResult addItem(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
         String cubeId = request.getParameter("cubeId");
@@ -639,8 +639,8 @@ public class ReportDesignModelResource extends BaseResource {
             model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
             // 需要移到业务方法中处理，此处为临时方案 TODO 需要确认
             if (element instanceof Measure) {
-            		area.getFormatModel().init(element.getName());
-//            		area.getFormatModel().getDataFormat().put(element.getName(), "");
+                area.getFormatModel().init(element.getName());
+//                    area.getFormatModel().getDataFormat().put(element.getName(), "");
             }
         } catch (ReportModelOperationException e) {
             logger.error("Exception when add or update item in area: " + areaId, e);
@@ -650,10 +650,10 @@ public class ReportDesignModelResource extends BaseResource {
             try {
                 if (element instanceof Dimension) {
                     model = manageService
-                    		.addOrUpdateItemIntoArea(model, areaId, DeepcopyUtils.deepCopy(item), PositionType.CAND_DIM);
+                        .addOrUpdateItemIntoArea(model, areaId, DeepcopyUtils.deepCopy(item), PositionType.CAND_DIM);
                 } else {
                     model = manageService
-                    		.addOrUpdateItemIntoArea(model, areaId, DeepcopyUtils.deepCopy(item), PositionType.CAND_IND);
+                        .addOrUpdateItemIntoArea(model, areaId, DeepcopyUtils.deepCopy(item), PositionType.CAND_IND);
                 }
             } catch (ReportModelOperationException e) {
                 logger.error("Fail in adding or updating item into area for id: " + areaId, e);
@@ -692,7 +692,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @return
      */
     @RequestMapping(value = "/{id}/extend_area/{areaId}/item_sorting",
-            method = { RequestMethod.POST })
+            method = {RequestMethod.POST})
     public ResponseResult changeItemOrder(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
@@ -719,7 +719,8 @@ public class ReportDesignModelResource extends BaseResource {
             return result;
         }
         try {
-            model = manageService.changeItemOrder(model, areaId, source, target, PositionType.valueOf(type.toUpperCase()));
+            model = manageService.changeItemOrder(model, areaId, source, 
+                target, PositionType.valueOf(type.toUpperCase()));
         } catch (ReportModelOperationException e) {
             logger.error("不能移动指定元素(" + source + ") from area(" + areaId + ")", e);
             return ResourceUtils.getErrorResult(e.getMessage(), 1);
@@ -749,7 +750,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @return 操作结果
      */
     @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{itemId}/type/{type}",
-            method = { RequestMethod.DELETE })
+            method = {RequestMethod.DELETE})
     public ResponseResult removeItem(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, @PathVariable("itemId") String olapElementId,
             @PathVariable("type") String type,
@@ -776,7 +777,7 @@ public class ReportDesignModelResource extends BaseResource {
         }
         ExtendArea oriArea = model.getExtendById(areaId);
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(), 
-        		oriArea.getCubeId(), olapElementId);
+                oriArea.getCubeId(), olapElementId);
         try {
             model = manageService.removeItem(model, areaId, olapElementId, PositionType.valueOf(type.toUpperCase()));
         } catch (ReportModelOperationException e) {
@@ -795,7 +796,7 @@ public class ReportDesignModelResource extends BaseResource {
 //        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
 //        model.getExtendById(areaId).getFormatModel().getToolTips().remove(element.getId());
         if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
-        		model.getExtendById(areaId).getFormatModel().reset();
+            model.getExtendById(areaId).getFormatModel().reset();
         }
         /**
          * 配置端，在修改Item以后，需要重新初始化上下文
@@ -834,7 +835,7 @@ public class ReportDesignModelResource extends BaseResource {
             logger.error("There are no such model in cache. Report Id: " + reportId, e);
             model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
             if (model == null) {
-            		return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+                return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
             }
         }
         try {
@@ -934,8 +935,8 @@ public class ReportDesignModelResource extends BaseResource {
         Item item = targetArea.getItem(itemId);
         ResponseResult result = new ResponseResult();
         if (item == null || item.getPositionType() == PositionType.X) {
-        		logger.error("can't set chart type on dimension");
-        		result.setStatus(1);
+            logger.error("can't set chart type on dimension");
+            result.setStatus(1);
             result.setStatusInfo("纬度不能设置图形格式");
             return result;
         }
@@ -977,7 +978,7 @@ public class ReportDesignModelResource extends BaseResource {
     public ResponseResult updateToolTips(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
-    		ResponseResult result = new ResponseResult();
+        ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -1013,7 +1014,7 @@ public class ReportDesignModelResource extends BaseResource {
     public ResponseResult updateFormatDef(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
-    		ResponseResult result = new ResponseResult();
+        ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -1049,7 +1050,7 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.GET })
     public ResponseResult queryMeasureToolTips(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-    		ResponseResult result = new ResponseResult();
+        ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -1065,7 +1066,7 @@ public class ReportDesignModelResource extends BaseResource {
         }
         result.setStatus(0);
         ExtendArea area = model.getExtendById(areaId);
-        	result.setData(area.getFormatModel().getToolTips());
+        result.setData(area.getFormatModel().getToolTips());
         result.setStatusInfo(SUCCESS);
         return result;
     }
@@ -1081,7 +1082,7 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.GET })
     public ResponseResult queryDataFormat(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-    		ResponseResult result = new ResponseResult();
+        ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -1097,7 +1098,7 @@ public class ReportDesignModelResource extends BaseResource {
         }
         result.setStatus(0);
         ExtendArea area = model.getExtendById(areaId);
-        	result.setData(area.getFormatModel().getDataFormat());
+        result.setData(area.getFormatModel().getDataFormat());
         result.setStatusInfo(SUCCESS);
         return result;
     }
@@ -1113,7 +1114,7 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.POST })
     public ResponseResult updateMesaureTopSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-    		ResponseResult result = new ResponseResult();
+        ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
             result.setStatus(1);
@@ -1148,16 +1149,16 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.GET })
     public ResponseResult getMesaureTopSettiong(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-	    	logger.info("begin query measuer top setting");
-	    	long begin = System.currentTimeMillis();
-    		ResponseResult result = new ResponseResult();
+        logger.info("begin query measuer top setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = model.getExtendById(areaId);
         result.setData(area.getLogicModel().getTopSetting());
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 
-        		GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
     }
     
@@ -1172,9 +1173,9 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.POST })
     public ResponseResult updateAreaOtherSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-	    	logger.info("begin query measuer top setting");
-	    	long begin = System.currentTimeMillis();
-    		ResponseResult result = new ResponseResult();
+        logger.info("begin query measuer top setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         String otherSetting = request.getParameter("others");
         ExtendArea area = model.getExtendById(areaId);
@@ -1184,7 +1185,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 
-        		GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
     }
     
@@ -1199,9 +1200,9 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.GET })
     public ResponseResult getAreaOtherSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
-	    	logger.info("begin query measuer other setting");
-	    	long begin = System.currentTimeMillis();
-    		ResponseResult result = new ResponseResult();
+        logger.info("begin query measuer other setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = model.getExtendById(areaId);
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
@@ -1209,7 +1210,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 
-        		GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
     }
     
@@ -1234,6 +1235,20 @@ public class ReportDesignModelResource extends BaseResource {
         return publishInfoBuilder.toString();
     }
     
-    
+    @RequestMapping(value = "/{reportId}/preview", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult preview(@PathVariable("reportId") String reportId, HttpServletRequest request,
+            HttpServletResponse response) {
+        long begin = System.currentTimeMillis();
+        String requestUri = request.getRequestURL().toString();
+        requestUri = requestUri.replace("/preview", "");
+        String token = ContextManager.getProductLine();
+        String uri = this.getPublishInfo(requestUri, token);
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setStatusInfo("successfully");
+        rs.setData(uri + "&reportPreview=true");
+        logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
     
 }

@@ -115,8 +115,8 @@ public class IndexWriterFactory {
         IndexWriter indexWriter = null;
         Integer maxSlot=0;
         if (INSTANCE.idxMaps.containsKey(idxPath)) {
-        	maxSlot=INSTANCE.idxMaps.get(idxPath);            
-        	maxSlot++;
+            maxSlot=INSTANCE.idxMaps.get(idxPath);            
+            maxSlot++;
         } 
         
         File indexFile = new File(idxPath+File.separator+maxSlot);

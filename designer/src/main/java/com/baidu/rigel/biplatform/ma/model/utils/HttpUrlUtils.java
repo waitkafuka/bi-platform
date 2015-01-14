@@ -34,12 +34,16 @@ import com.google.common.collect.Maps;
  * @author zhongyi
  *
  */
-public class HttpUrlUtils {
+public final class HttpUrlUtils {
     
     /**
      * LOG
      */
     private static final Logger LOG = LoggerFactory.getLogger(StarModelBuildServiceImpl.class);
+    
+    private HttpUrlUtils() {
+        
+    }
     
     /**
      * 获得基本URL

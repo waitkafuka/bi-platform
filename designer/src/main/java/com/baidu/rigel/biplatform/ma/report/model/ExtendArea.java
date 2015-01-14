@@ -135,7 +135,7 @@ public class ExtendArea implements Serializable {
             if (((TimerAreaLogicModel) getLogicModel()).getTimeDimensions() == null) {
                 return allItems;
             }
-            ((TimerAreaLogicModel) getLogicModel()).getTimeDimensions().keySet().forEach(item ->{
+            ((TimerAreaLogicModel) getLogicModel()).getTimeDimensions().keySet().forEach(item -> {
                 allItems.put(item.getId(), item);
             });
             return allItems;
@@ -150,15 +150,15 @@ public class ExtendArea implements Serializable {
             allItems.put(item.getOlapElementId(), item);
         }
         logicModel.getSelectionMeasures().values().forEach(item -> {
-        		if (!allItems.containsKey(item.getOlapElementId())) {
-        			allItems.put(item.getOlapElementId(), item);
-        		}
+                if (!allItems.containsKey(item.getOlapElementId())) {
+                    allItems.put(item.getOlapElementId(), item);
+                }
         });
         logicModel.getSelectionDims().values().forEach(item -> {
-	        	if (!allItems.containsKey(item.getOlapElementId())) {
-	    			allItems.put(item.getOlapElementId(), item);
-	    		}
-        	});
+                if (!allItems.containsKey(item.getOlapElementId())) {
+                    allItems.put(item.getOlapElementId(), item);
+                }
+            });
         return allItems;
     }
     
@@ -199,67 +199,67 @@ public class ExtendArea implements Serializable {
         return this.logicModel.getItem(itemId);
     }
 
-	/**
-	 * @return the formatModel
-	 */
-	public FormatModel getFormatModel() {
-	    if (this.formatModel == null) {
-	        this.formatModel = new FormatModel();
-	    }
-		return formatModel;
-	}
+    /**
+     * @return the formatModel
+     */
+    public FormatModel getFormatModel() {
+        if (this.formatModel == null) {
+            this.formatModel = new FormatModel();
+        }
+        return formatModel;
+    }
 
-	/**
-	 * 
-	 * @param item
-	 */
-	public void addSelectionMeasureItem(Item item) {
-		if (this.logicModel == null) {
-			this.logicModel = new LogicModel();
-		}
-		this.logicModel.getSelectionMeasures().put(item.getOlapElementId(), item);
-	}
+    /**
+     * 
+     * @param item
+     */
+    public void addSelectionMeasureItem(Item item) {
+        if (this.logicModel == null) {
+            this.logicModel = new LogicModel();
+        }
+        this.logicModel.getSelectionMeasures().put(item.getOlapElementId(), item);
+    }
 
-	/**
-	 * 
-	 * @param item
-	 */
-	public void addSelectionDimItem(Item item) {
-		if (this.logicModel == null) {
-			this.logicModel = new LogicModel();
-		}
-		this.logicModel.getSelectionDims().put(item.getOlapElementId(), item);		
-	}
+    /**
+     * 
+     * @param item
+     */
+    public void addSelectionDimItem(Item item) {
+        if (this.logicModel == null) {
+            this.logicModel = new LogicModel();
+        }
+        this.logicModel.getSelectionDims().put(item.getOlapElementId(), item);        
+    }
 
-	/**
-	 * 
-	 * @param olapElementId
-	 */
-	public void removeSelectDimItem(String olapElementId) {
-		this.logicModel.getSelectionDims().remove(olapElementId);
-	}
+    /**
+     * 
+     * @param olapElementId
+     */
+    public void removeSelectDimItem(String olapElementId) {
+        this.logicModel.getSelectionDims().remove(olapElementId);
+    }
 
-	public void removeSelectMeasureItem(String olapElementId) {
-		this.logicModel.getSelectionMeasures().remove(olapElementId);
-	}
+    public void removeSelectMeasureItem(String olapElementId) {
+        this.logicModel.getSelectionMeasures().remove(olapElementId);
+    }
 
-	/**
-	 * @return the otherSetting
-	 */
-	public Map<String, Object> getOtherSetting() {
-		if (this.otherSetting == null) {
-			this.otherSetting = Maps.newHashMap();
-		}
-		return otherSetting;
-	}
+    /**
+     * @return the otherSetting
+     */
+    public Map<String, Object> getOtherSetting() {
+        if (this.otherSetting == null) {
+            this.otherSetting = Maps.newHashMap();
+        }
+        return otherSetting;
+    }
 
-	/**
-	 * @param otherSetting the otherSetting to set
-	 */
-	public void setOtherSetting(Map<String, Object> otherSetting) {
-		this.otherSetting = otherSetting;
-	}
-	
-	
+    /**
+     * @param otherSetting the otherSetting to set
+     */
+    public void setOtherSetting(Map<String, Object> otherSetting) {
+        this.otherSetting = otherSetting;
+    }
+    
+    
 
 }
