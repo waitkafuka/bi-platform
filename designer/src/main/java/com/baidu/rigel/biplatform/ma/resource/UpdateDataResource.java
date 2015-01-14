@@ -119,19 +119,19 @@ public class UpdateDataResource extends BaseResource {
         try {
             JSONObject json = new JSONObject(str);
             if (StringUtils.isEmpty(json.getString("begin")) || StringUtils.isEmpty(json.getString("end"))) {
-                return false;
+                throw new IllegalStateException("request param status incorrected");
             }
-            int begin = Integer.valueOf(json.getString("begin"));
+            Long begin = Long.valueOf(json.getString("begin"));
             if (begin <= 0) {
-                return false;
+                throw new IllegalStateException("begin value need bigger than zero");
             }
-            int end = Integer.valueOf(json.getString("end"));
+            Long end = Long.valueOf(json.getString("end"));
             if (end <= begin) {
-                return false;
+                throw new IllegalStateException("end value must larger than begin");
             }
         } catch (Exception e) {
             LOG.info(e.getMessage(), e);
-            return false;
+            throw new IllegalStateException("request param must be json style");
         }
         return true;
     }

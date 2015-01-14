@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -172,6 +174,9 @@ public final class ResourceUtils {
             if (olapElement != null) {
                 obj.setCaption(olapElement.getCaption());
                 obj.setName(olapElement.getName());
+                if (olapElement instanceof Dimension) {
+                    obj.setDimGroup(((Dimension) olapElement).getType() == DimensionType.GROUP_DIMENSION);
+                }
                 rs.add(obj);
             }
         }
