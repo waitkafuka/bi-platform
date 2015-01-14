@@ -64,7 +64,7 @@
     vertical-align: middle;
     border: 1px solid #A8ADB6;
     background: #FFF;
-    width: 100px;
+    width: 95%;
     *display: inline;
     zoom: 1;
 }
@@ -130,19 +130,55 @@
 .ui-multi-select-item-focus {
     background: #E4EAFA;
 }
-/* 皮肤浅蓝边框 */
-.lightblue-border {
-    border: 1px solid #CCC;
-}
-/* 皮肤经典 */
-.classics-border {
-    border: 1px solid #A8ADB6;
-}
-/* 皮肤浅蓝下拉按钮 */
-.lightblue-background-sele {
+/* 明亮皮肤多选下拉按钮 */
+.lightblue .ui-multi-select-button {
     background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -o-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -ms-border-radius: 0px;
 }
-/* 下拉框多选按钮 */
-.lightblue-checkbox {
+/* 明亮皮肤多选框按钮 */
+.lightblue .ui-multi-select-item-icon {
+    position: absolute;
+    display: inline-block;
+    top: 2px;
+    left: 3px;
+    margin: 0 3px;
+    width: 13px;
+    height: 13px;
     background: url(img/ecui-1.png) 0 0 no-repeat;
+    overflow: hidden;
+}
+/* 明亮皮肤多选下啦框按钮 */
+.lightblue .ui-multi-select {
+    height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    border: 1px solid #CCC;
+    background: #FFF;
+    width: 95%;
+    *display: inline;
+    zoom: 1;
+}
+/* 明亮皮肤单选下啦框按钮 */
+.lightblue .ui-select-button {
+    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
+    padding: 0px;
+    margin: 0px;
+    border: 0px;
+    border-radius: 0px;
+    -webkit-border-radius: 0px;
+    -o-border-radius: 0px;
+    -moz-border-radius: 0px;
+    -ms-border-radius: 0px;
+}
+/* 明亮皮肤单选下拉边框按钮 */
+.lightblue .ui-multi-select-options {
+    border: 1px solid #CCC;
+    background: #FFF;
 }

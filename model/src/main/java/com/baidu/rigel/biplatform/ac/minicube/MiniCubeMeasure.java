@@ -20,8 +20,6 @@ import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * mini cube measure define
@@ -29,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author xiaoming.chen
  *
  */
-@JsonIgnoreProperties
 public class MiniCubeMeasure extends OlapElementDef implements Measure {
 
     /**
@@ -55,7 +52,6 @@ public class MiniCubeMeasure extends OlapElementDef implements Measure {
     /**
      * measure 所在cube
      */
-    @JsonIgnore
     @GsonIgnore
     private transient Cube cube;
 
@@ -99,12 +95,10 @@ public class MiniCubeMeasure extends OlapElementDef implements Measure {
         this.type = type;
     }
 
-    @JsonIgnore
     public Cube getCube() {
         return cube;
     }
 
-    @JsonIgnore
     public void setCube(Cube cube) {
         this.cube = cube;
     }
