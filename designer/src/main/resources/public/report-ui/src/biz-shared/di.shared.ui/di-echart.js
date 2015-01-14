@@ -103,7 +103,8 @@ $namespace('di.shared.ui');
     DI_ECHART_CLASS.init = function () {
         var key;
         var exportHandler = this.DEF.exportHandler;
-        
+        // TODO:
+//        this._uChart.attach('lztClick', this.$chartChecked, this);
         // 事件绑定
         for (key in exportHandler) {
             var id = exportHandler[key].datasourceId;
@@ -331,19 +332,19 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-    DI_ECHART_CLASS.$chartChecked = function (options) {
-
-        var outParam = this.$di('getDef').outParam;
-        if (!outParam) {
-            return;
-        }
-        var params = { uniqueName: options.args.param.uniqueName };
-        params[outParam.dim] = outParam.level;
-        this.$di(
-            'dispatchEvent',
-            options.args.eventName,
-            [params]
-        );
-    };
+//    DI_ECHART_CLASS.$chartChecked = function (options) {
+//
+////        var outParam = this.$di('getDef').outParam;
+////        if (!outParam) {
+////            return;
+////        }
+////        var params = { uniqueName: options.args.param.uniqueName };
+////        params[outParam.dim] = outParam.level;
+//        this.$di(
+//            'dispatchEvent',
+//            options.args.eventName,
+//            [{}]
+//        );
+//    };
 
 })();
