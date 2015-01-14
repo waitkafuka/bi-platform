@@ -42,7 +42,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class ReportDesignModelUtils {
+public final class ReportDesignModelUtils {
     
     /**
      * 日志记录工具
@@ -164,7 +164,8 @@ public class ReportDesignModelUtils {
      * @param cubeId
      * @return 存在返回定义，否则返回null
      */
-    public static OlapElement getDimOrIndDefineWithId(Schema schema, String cubeId, final String dimOrIndId) {
+    public static OlapElement getDimOrIndDefineWithId(Schema schema, 
+        String cubeId, final String dimOrIndId) {
         if (schema == null) {
             logger.info("schema is empty");
             return null;
@@ -184,7 +185,7 @@ public class ReportDesignModelUtils {
         if (cube.getDimensions() != null) {
 //            OlapElement dim = cube.getDimensions().get(dimOrIndId);
             Object[] tmp =  cube.getDimensions().values().stream().filter(dim -> {
-            		return dimOrIndId.equals(dim.getId()) || dimOrIndId.equals(dim.getName());
+                    return dimOrIndId.equals(dim.getId()) || dimOrIndId.equals(dim.getName());
             }).toArray();
             if (tmp != null && tmp.length == 1) {
                 logger.info("get dimension for cube [{}] with id [{}]", cube, dimOrIndId);
@@ -196,7 +197,7 @@ public class ReportDesignModelUtils {
         if (cube.getMeasures() != null) {
 //            OlapElement measure = cube.getMeasures().get(dimOrIndId);
             Object[] tmp= cube.getMeasures().values().stream().filter(m ->{
-            		return dimOrIndId.equals(m.getId()) || dimOrIndId.equals(m.getName());
+                    return dimOrIndId.equals(m.getId()) || dimOrIndId.equals(m.getName());
             }).toArray();
             if (tmp != null && tmp.length == 1) {
                 logger.info("get measuer for cube [{}] with id [{}]", cube, dimOrIndId);

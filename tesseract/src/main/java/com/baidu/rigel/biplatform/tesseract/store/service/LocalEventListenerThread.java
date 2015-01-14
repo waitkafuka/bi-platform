@@ -40,55 +40,55 @@ import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
  */
 @Service("localEventListenerThread")
 public class LocalEventListenerThread implements ApplicationContextAware {
-	/**
-	 * LOGGER
-	 */
-	private static final Logger LOGGER = LoggerFactory
-			                                        .getLogger(LocalEventListenerThread.class);
+    /**
+     * LOGGER
+     */
+    private static final Logger LOGGER = LoggerFactory
+                                                    .getLogger(LocalEventListenerThread.class);
 
-	/**
-	 * context
-	 */
-	private ApplicationContext context;
+    /**
+     * context
+     */
+    private ApplicationContext context;
 
-	/**
-	 * storeManager
-	 */
-	@Resource
-	private StoreManager storeManager;
+    /**
+     * storeManager
+     */
+    @Resource
+    private StoreManager storeManager;
 
-	/**
-	 * 从集群中拿出事件发布为本地事件
-	 */
-	public void getClusterEventAndPublish() {
+    /**
+     * 从集群中拿出事件发布为本地事件
+     */
+    public void getClusterEventAndPublish() {
 
-		try {
-			EventObject item = this.storeManager.getNextEvent();
-			context.publishEvent((ApplicationEvent) item);
-			LOGGER.info(String.format(
-					LogInfoConstants.INFO_PATTERN_PUBLISH_EVENT_SUCC, "run",
-					item));
+        try {
+            EventObject item = this.storeManager.getNextEvent();
+            context.publishEvent((ApplicationEvent) item);
+            LOGGER.info(String.format(
+                    LogInfoConstants.INFO_PATTERN_PUBLISH_EVENT_SUCC, "run",
+                    item));
 
-		} catch (Exception e) {
-			LOGGER.error(String.format(
-					LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "run",
-					"no param"), e);
+        } catch (Exception e) {
+            LOGGER.error(String.format(
+                    LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "run",
+                    "no param"), e);
 
-		}
-	}
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.springframework.context.ApplicationContextAware#setApplicationContext
-	 * (org.springframework.context.ApplicationContext)
-	 */
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
-		this.context = applicationContext;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.springframework.context.ApplicationContextAware#setApplicationContext
+     * (org.springframework.context.ApplicationContext)
+     */
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext)
+            throws BeansException {
+        this.context = applicationContext;
 
-	}
+    }
 
 }

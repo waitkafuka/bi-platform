@@ -207,7 +207,7 @@ public class DimConfigResource extends BaseResource {
                     NormalDimDetail dateDim = starModelBuildService
                         .generateNormalDimBindView((StandardDimTableMetaDefine) dimTable);
                     if (dateDim != null) {
-                    		normal.getChildren().add(dateDim);
+                        normal.getChildren().add(dateDim);
                     }
                 }
             }
@@ -233,13 +233,13 @@ public class DimConfigResource extends BaseResource {
             }
             List<ColumnInfo> cols = null;
             try {
-	            	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-	            			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+                reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
                 cols = reader.getColumnInfos(tableName);
             } finally {
-            		if (reader != null) {
-            			reader.closeConn(); 
-            		}
+                if (reader != null) {
+                    reader.closeConn(); 
+                }
             }
             if (CollectionUtils.isEmpty(cols)) {
                 String msg = String.format("不能从表%s中获取字段！", tableName);
@@ -311,11 +311,11 @@ public class DimConfigResource extends BaseResource {
         
         ReportDesignModel reportModel = getReportModel(reportId);
         DataSourceDefine ds = null;
-		try {
-			ds = dsService.getDsDefine(reportModel.getDsId());
-		} catch (DataSourceOperationException e1) {
-			logger.error("[ERROR] --- --- 获取数据源信息失败", e1);
-		}
+        try {
+            ds = dsService.getDsDefine(reportModel.getDsId());
+        } catch (DataSourceOperationException e1) {
+            logger.error("[ERROR] --- --- 获取数据源信息失败", e1);
+        }
         Schema schema = reportModel.getSchema();
         StarModel[] starModels = director.getStarModel(schema);
         for (StarModel starModel : starModels) {
@@ -373,35 +373,35 @@ public class DimConfigResource extends BaseResource {
      * 
      * @param starModel
      */
-	private void modifyFactTable(StarModel starModel, DataSourceDefine ds) {
-		if (ds == null) {
-			return;
-		}
-		List<ColumnInfo> cols = null;
-		DBInfoReader reader = null;
+    private void modifyFactTable(StarModel starModel, DataSourceDefine ds) {
+        if (ds == null) {
+            return;
+        }
+        List<ColumnInfo> cols = null;
+        DBInfoReader reader = null;
         try {
-            	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-            			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             cols = reader.getColumnInfos(starModel.getFactTable().getName());
         } finally {
-        		if (reader != null) {
-        			reader.closeConn(); 
-        		}
+            if (reader != null) {
+                reader.closeConn(); 
+            }
         }
         if (cols == null || cols.isEmpty()) {
-        		return;
+            return;
         }
         starModel.getFactTable().clearColumns();
         ColumnMetaDefine column = null;
         for (ColumnInfo col : cols) {
-        		column = new ColumnMetaDefine();
-        		column.setName(col.getId());
-        		column.setCaption(col.getName());
-	        	starModel.getFactTable().addColumn(column);
+            column = new ColumnMetaDefine();
+            column.setName(col.getId());
+            column.setCaption(col.getName());
+            starModel.getFactTable().addColumn(column);
         }
-	}
+    }
 
-	/**
+    /**
      * 
      * @param reportId
      * @return

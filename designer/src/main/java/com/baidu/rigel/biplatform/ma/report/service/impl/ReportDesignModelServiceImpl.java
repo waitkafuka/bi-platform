@@ -119,13 +119,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                         return -1;
                     }
                     firstStr = firstStr.replaceAll("[?]", "-");
-					String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
+                    String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
                             + Constants.FILE_NAME_SEPERATOR.length(), 
                             firstStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR));
                     secondStr = secondStr.replace("[?]", "-");
-					String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
+                    String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
                             + Constants.FILE_NAME_SEPERATOR.length(), 
-                            secondStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR) );
+                            secondStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR));
                     return tmp.compareTo(tmp2);
                 }
             });
@@ -273,12 +273,12 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             model.setId(UuidGeneratorUtils.generate());
         }
         try {
-        		ReportDesignModel oldReport = getModelByIdOrName(model.getId(), false);
-        		if (oldReport != null) {
-        			fileService.rm(generateDevReportLocation(oldReport));
-        		}
+            ReportDesignModel oldReport = getModelByIdOrName(model.getId(), false);
+            if (oldReport != null) {
+                fileService.rm(generateDevReportLocation(oldReport));
+            }
             boolean rs = fileService.write(generateDevReportLocation(model),
-                    SerializationUtils.serialize(model));
+                SerializationUtils.serialize(model));
             if (rs) {
                 return model;
             }
@@ -348,7 +348,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      * @return
      */
     private String getReleaseReportLocation(ReportDesignModel model) {
-        if(model == null) {
+        if (model == null) {
             return null;
         }
         String productLine = ContextManager.getProductLine();
@@ -363,7 +363,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      * @return
      */
     private String generateDevReportLocation(ReportDesignModel model) {
-        if(model == null) {
+        if (model == null) {
             return null;
         }
         StringBuilder builder = new StringBuilder();
@@ -412,18 +412,18 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         List<Cube> cubes = Lists.newArrayList();
         for (ExtendArea area : model.getExtendAreaList()) {
             try {
-            		// 忽略此类区域
-            		if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
-            				|| area.getType() == ExtendAreaType.SELECTION_AREA 
-            				|| area.getType() == ExtendAreaType.LITEOLAP_CHART
-            				|| area.getType() == ExtendAreaType.SELECT
-            				|| area.getType() == ExtendAreaType.MULTISELECT
-            				|| area.getType() == ExtendAreaType.TEXT
-            				|| QueryUtils.isFilterArea(area.getType())) {
-            			continue;
-            		}  
-        			Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
-        			cubes.add(cube);
+                // 忽略此类区域
+                if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
+                        || area.getType() == ExtendAreaType.SELECTION_AREA 
+                        || area.getType() == ExtendAreaType.LITEOLAP_CHART
+                        || area.getType() == ExtendAreaType.SELECT
+                        || area.getType() == ExtendAreaType.MULTISELECT
+                        || area.getType() == ExtendAreaType.TEXT
+                        || QueryUtils.isFilterArea(area.getType())) {
+                    continue;
+                }  
+                Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
+                cubes.add(cube);
             } catch (QueryModelBuildException e) {
                 logger.warn("It seems that logicmodel of area is null. Ingore this area. ");
                 continue;
@@ -438,64 +438,64 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         return true;
     }
 
-	@Override
-	public void updateAreaWithDataFormat(ExtendArea area, String dataFormat) {
-		FormatModel model = area.getFormatModel();
-		model.getDataFormat().putAll(convertStr2Map(dataFormat));
-	}
+    @Override
+    public void updateAreaWithDataFormat(ExtendArea area, String dataFormat) {
+        FormatModel model = area.getFormatModel();
+        model.getDataFormat().putAll(convertStr2Map(dataFormat));
+    }
 
-	/**
-	 * 讲json串转换为map
-	 * @param dataFormat
-	 * @return Map<String, String>
-	 */
-	private Map<String, String> convertStr2Map(String dataFormat) {
-		try {
-			JSONObject json = new JSONObject(dataFormat);
-			Map<String, String> rs = Maps.newHashMap();
-			for (String str : JSONObject.getNames(json)) {
-				rs.put(str, json.getString(str));
-			}
-			return rs;
-		} catch (JSONException e) {
-			throw new IllegalArgumentException("数据格式必须为Json格式， dataFormat = " + dataFormat);
-		}
-	}
+    /**
+     * 讲json串转换为map
+     * @param dataFormat
+     * @return Map<String, String>
+     */
+    private Map<String, String> convertStr2Map(String dataFormat) {
+        try {
+            JSONObject json = new JSONObject(dataFormat);
+            Map<String, String> rs = Maps.newHashMap();
+            for (String str : JSONObject.getNames(json)) {
+                rs.put(str, json.getString(str));
+            }
+            return rs;
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("数据格式必须为Json格式， dataFormat = " + dataFormat);
+        }
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
-		logger.info("[INFO] update tooltips define with : " + toolTips);
-		FormatModel model = area.getFormatModel();
-		model.getToolTips().putAll(convertStr2Map(toolTips));
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateAreaWithToolTips(ExtendArea area, String toolTips) {
+        logger.info("[INFO] update tooltips define with : " + toolTips);
+        FormatModel model = area.getFormatModel();
+        model.getToolTips().putAll(convertStr2Map(toolTips));
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateAreaWithTopSetting(ExtendArea area, String topSetting) {
-		logger.info("[INFO] receive user top N setting define : " + topSetting);
-		MeasureTopSetting setting = GsonUtils.fromJson(topSetting, MeasureTopSetting.class);
-		setting.setAreaId(area.getId());
-		area.getLogicModel().setTopSetting(setting);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateAreaWithTopSetting(ExtendArea area, String topSetting) {
+        logger.info("[INFO] receive user top N setting define : " + topSetting);
+        MeasureTopSetting setting = GsonUtils.fromJson(topSetting, MeasureTopSetting.class);
+        setting.setAreaId(area.getId());
+        area.getLogicModel().setTopSetting(setting);
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public void updateAreaWithOtherSetting(ExtendArea area, String otherSetting) {
-		@SuppressWarnings("unchecked")
-		Map<String, Object> setting = GsonUtils.fromJson(otherSetting, HashMap.class);
-		area.setOtherSetting(setting);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateAreaWithOtherSetting(ExtendArea area, String otherSetting) {
+        @SuppressWarnings("unchecked")
+        Map<String, Object> setting = GsonUtils.fromJson(otherSetting, HashMap.class);
+        area.setOtherSetting(setting);
+    }
 
-	@Override
-	public List<String> lsReportWithDsId(String id) {
-		String[] modelFileList = null;
+    @Override
+    public List<String> lsReportWithDsId(String id) {
+        String[] modelFileList = null;
         try {
             modelFileList = fileService.ls(getDevReportDir());
         } catch (FileServiceException e) {
@@ -507,13 +507,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         }
         List<String> rs = Lists.newArrayList();
         for (String str : modelFileList) {
-        		if (str.contains(id)) {
-        			rs.add(str.substring(str.indexOf(Constants.FILE_NAME_SEPERATOR),
-        					str.lastIndexOf(Constants.FILE_NAME_SEPERATOR))
-        					.replace(Constants.FILE_NAME_SEPERATOR, ""));
-        		}
+            if (str.contains(id)) {
+                rs.add(str.substring(str.indexOf(Constants.FILE_NAME_SEPERATOR),
+                        str.lastIndexOf(Constants.FILE_NAME_SEPERATOR))
+                        .replace(Constants.FILE_NAME_SEPERATOR, ""));
+            }
         }
         return rs;
-	}
+    }
     
 }

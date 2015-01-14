@@ -25,7 +25,7 @@ import com.baidu.rigel.biplatform.ma.rt.query.model.QueryResult;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class QueryResultBuildService {
+public final class QueryResultBuildService {
     
     /**
      * 结果集构造器
@@ -37,7 +37,7 @@ public class QueryResultBuildService {
      * @param builder
      * QueryResultBuildService
      */
-    private QueryResultBuildService (QueryResultBuilderWrapper builder) {
+    private QueryResultBuildService(QueryResultBuilderWrapper builder) {
         this.builder = builder;
     }
     

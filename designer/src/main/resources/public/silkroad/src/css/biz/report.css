@@ -663,6 +663,74 @@
 }
 /*@end*/
 
+/**
+ * @name                      :组件关联关系设置
+ * @author                    :lizhantong
+ * @email                     :lztlovely@126.com
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :暂无
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.comp-relation-event {
+    width: 520px;
+}
+.comp-relation-event > span  {
+    float: left;
+    width: 100%;
+    margin-bottom: 5px;;
+}
+.comp-realtion-box {
+    position: relative;
+    float: left;
+    width: 100%;
+    height: 300px;
+    border: 1px solid #c5c5c5;
+}
+.comp-realtion-param {
+    float: left;
+    width: 500px;
+    border: 1px solid #c5c5c5;
+    padding: 10px;
+}
+.comp-realtion-param > span {
+    float: left;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    line-height: 20px;
+}
+.comp-realtion-param > select {
+    float: left;
+    width: 100px;
+    height: 20px;
+    margin-right: 10px;
+}
+.span-out-param {
+    width: 80px;
+}
+.span-level {
+    width: 120px;
+}
+.comp-thumbnail {
+    position: absolute;
+    border: 1px solid red;
+}
+.comp-thumbnail-pic {
+    width: 100%;
+    height: 100%
+}
+.comp-thumbnail input {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+.comp-thumbnail img {
+    width: 100%;
+    height: 100%;
+}
+/*@end*/
+
 /* 文本框组件样式 */
 .text-div {
     width: 100%;

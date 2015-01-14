@@ -157,8 +157,8 @@ public class QueryRequestUtil {
             //QueryParser parser = new QueryParser(fieldName, new StandardAnalyzer());
             BooleanQuery subQuery = new BooleanQuery();
             for (String qs : andCondition.get(fieldName)) {
-				subQuery.add(new TermQuery(new Term(fieldName, qs)),
-						Occur.SHOULD);
+                subQuery.add(new TermQuery(new Term(fieldName, qs)),
+                        Occur.SHOULD);
             }
             queryAll.add(subQuery, Occur.MUST);
         }
@@ -182,7 +182,7 @@ public class QueryRequestUtil {
         SqlQuery result = new SqlQuery();
         // 处理from
         if(query.getGroupBy()!=null){
-        	result.setGroupBy(query.getGroupBy().getGroups());
+            result.setGroupBy(query.getGroupBy().getGroups());
         }
         
         LinkedList<String> fromList = new LinkedList<String>();
@@ -290,38 +290,38 @@ public class QueryRequestUtil {
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
-        	transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
+            transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
         
-        	if(!MapUtils.isEmpty(leafValueMap)) {
-        		transList.forEach( record -> {
-        			leafValueMap.forEach((prop,valueMap) -> {
-        				try {
-							String currValue = record.getField(prop) != null ? record.getField(
-									prop).toString() : null;
-							    Set<String> valueSet = leafValueMap.get(prop).get(currValue);
-							    if(valueSet != null){
-					                for (String value : valueSet) {
-					                	// TODO 这种方法暂时只支持一个节点对应一个父节点
-					                	record.setField(prop, value);
-					                }
-					            }
-						} catch (Exception e) {
-							e.printStackTrace();
-							throw new RuntimeException(e);
-						}
-        			});
-        			
-        			try {
-        				generateGroupBy(record, groupList);
-//						mapLeafValue2ValueOfRecord(record,leafValueMap,groupList);
-					} catch (Exception e) {
-						e.printStackTrace();
-						throw new RuntimeException(e);
-					}
-        		});
-        	}
+            if(!MapUtils.isEmpty(leafValueMap)) {
+                transList.forEach( record -> {
+                    leafValueMap.forEach((prop,valueMap) -> {
+                        try {
+                            String currValue = record.getField(prop) != null ? record.getField(
+                                    prop).toString() : null;
+                                Set<String> valueSet = leafValueMap.get(prop).get(currValue);
+                                if(valueSet != null){
+                                    for (String value : valueSet) {
+                                        // TODO 这种方法暂时只支持一个节点对应一个父节点
+                                        record.setField(prop, value);
+                                    }
+                                }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            throw new RuntimeException(e);
+                        }
+                    });
+                    
+                    try {
+                        generateGroupBy(record, groupList);
+//                        mapLeafValue2ValueOfRecord(record,leafValueMap,groupList);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         } else {
-        	return new SearchResultSet(null);
+            return new SearchResultSet(null);
         }
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
         current = System.currentTimeMillis();

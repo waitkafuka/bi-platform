@@ -32,12 +32,19 @@ import com.baidu.rigel.biplatform.ma.model.exception.DBInfoReadException;
  * @author zhongyi
  *
  */
-public class DBUrlGeneratorUtils {
+public final class DBUrlGeneratorUtils {
     
     /**
      * LOG
      */
     private static final Logger LOG = LoggerFactory.getLogger(DBUrlGeneratorUtils.class);
+    
+    /**
+     * DBUrlGeneratorUtils
+     */
+    private DBUrlGeneratorUtils() {
+        
+    }
     
     /**
      * 获取某个ds的url

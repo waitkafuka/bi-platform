@@ -29,23 +29,23 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
  */
 public final class ParseCoditionUtils {
 
-	/**
-	 * RateCoditionBuildeUtils
-	 */
-	private ParseCoditionUtils() {
-		
-	}
-	
-	/**
-	 * 包装queryContext
-	 * @param queryContext
-	 * @param questionModel
-	 * @param cube
-	 * @param dataSourceInfo
-	 * @return QueryContext
-	 */
-	public static QueryContext decorateQueryContext(QueryContext queryContext, 
-			QuestionModel questionModel, Cube cube, DataSourceInfo dataSourceInfo, QueryContextBuilder builder) {
-		return new QueryContextAdapter(queryContext, questionModel, cube, dataSourceInfo, builder);
-	}
+    /**
+     * RateCoditionBuildeUtils
+     */
+    private ParseCoditionUtils() {
+        
+    }
+    
+    /**
+     * 包装queryContext
+     * @param queryContext
+     * @param questionModel
+     * @param cube
+     * @param dataSourceInfo
+     * @return QueryContext
+     */
+    public static QueryContext decorateQueryContext(QueryContext queryContext, 
+            QuestionModel questionModel, Cube cube, DataSourceInfo dataSourceInfo, QueryContextBuilder builder) {
+        return new QueryContextAdapter(queryContext, questionModel, cube, dataSourceInfo, builder);
+    }
 }

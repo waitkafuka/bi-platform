@@ -85,14 +85,14 @@ public class FileClientHandler extends AbstractChannelInboundHandler {
         return message;
     }
 
-	/* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
-	 */
-	@Override
-	public <T extends AbstractMessage> void setMessage(T t) {
-		this.message=t;
-		
-	}
+    /* (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
+     */
+    @Override
+    public <T extends AbstractMessage> void setMessage(T t) {
+        this.message=t;
+        
+    }
     
     
     

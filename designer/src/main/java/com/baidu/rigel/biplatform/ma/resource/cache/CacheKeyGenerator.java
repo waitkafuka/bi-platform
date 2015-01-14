@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  *
  *         2014-8-6
  */
-public class CacheKeyGenerator {
+public final class CacheKeyGenerator {
     
     /**
      * DIV
@@ -39,6 +39,13 @@ public class CacheKeyGenerator {
      * RUNTIME_PREFIX
      */
     private static final String RUNTIME_PREFIX = "runtime_";
+    
+    /**
+     * 构造函数
+     */
+    private CacheKeyGenerator() {
+        
+    }
     
     /**
      * 

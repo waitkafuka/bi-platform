@@ -26,7 +26,15 @@ import java.util.LinkedHashMap;
  * @author zhongyi
  *
  */
-public class LinkedHashMapUtils {
+public final class LinkedHashMapUtils {
+    
+    /**
+     * 构造函数
+     */
+    private LinkedHashMapUtils() {
+        
+    }
+    
     /**
      * 
      * @param column
@@ -46,7 +54,7 @@ public class LinkedHashMapUtils {
                     newMap.put(entryKey, entryValue);
                 }
                 newMap.put(key, value);
-                i ++;
+                i++;
             }
         }
         return newMap;

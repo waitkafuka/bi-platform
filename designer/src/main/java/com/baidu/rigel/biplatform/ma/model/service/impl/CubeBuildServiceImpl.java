@@ -72,16 +72,16 @@ public class CubeBuildServiceImpl implements CubeBuildService {
         try {
             ds = dsService.getDsDefine(dsId);
             reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-            		DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             List<TableInfo> tables = reader.getAllTableInfos();
             return tables;
         } catch (Exception e) {
             logger.error("Fail in get ds by id: " + dsId, e);
             throw new DataSourceOperationException(e);
         } finally {
-        		if (reader != null) {
-        			reader.closeConn();
-        		}
+            if (reader != null) {
+                reader.closeConn();
+            }
         }
     }
     
@@ -108,8 +108,8 @@ public class CubeBuildServiceImpl implements CubeBuildService {
         }
         DBInfoReader reader = null;
         try {
-	        	reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-	        			DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
             for (String key : tableMap.keySet()) {
                 String[] tables = tableMap.get(key);
                 FactTableMetaDefine tableMeta = null;
@@ -138,9 +138,9 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                 }
             }
         } finally {
-        		if (reader != null) {
-        			reader.closeConn();
-        		}
+            if (reader != null) {
+                reader.closeConn();
+            }
         }
         return tableMetas;
     }

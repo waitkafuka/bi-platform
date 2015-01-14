@@ -23,14 +23,14 @@ package com.baidu.rigel.biplatform.ac.model.callback;
  */
 public enum CallbackType {
 
-	/**
-	 * 维度
-	 */
-	DIM,
-	
-	/**
-	 * 指标
-	 */
-	MEASURE;
-	
+    /**
+     * 维度
+     */
+    DIM,
+    
+    /**
+     * 指标
+     */
+    MEASURE;
+    
 }

@@ -120,27 +120,27 @@ public class FileServer extends ChannelHandlerAdapter {
 //            printUsage();
 //            System.exit(-1);
 //        }
-    		
-    		FileInputStream fis = null;
-    		String classLocation = FileServer.class.getProtectionDomain()
-    				.getCodeSource().getLocation().toString();
-    		final File configFile = new File(classLocation + "/../conf/fileserver.conf");
-    		Properties properties = new Properties();
-    		try {
-    			if (configFile.exists()) {
-    				fis = new FileInputStream(configFile);
-    			} else if (StringUtils.isNotEmpty(args[0])) {
-    				fis = new FileInputStream(args[0]);
-    			} else {
-    				printUsage();
-    				throw new RuntimeException("can't find correct file server configuration file!");
-    			}
-    			properties.load(fis);
-    		} finally {
-    			if (fis != null) {
-    				fis.close();
-    			}
-    		}
+        
+        FileInputStream fis = null;
+        String classLocation = FileServer.class.getProtectionDomain()
+                .getCodeSource().getLocation().toString();
+        final File configFile = new File(classLocation + "/../conf/fileserver.conf");
+        Properties properties = new Properties();
+        try {
+            if (configFile.exists()) {
+                fis = new FileInputStream(configFile);
+            } else if (StringUtils.isNotEmpty(args[0])) {
+                fis = new FileInputStream(args[0]);
+            } else {
+                printUsage();
+                throw new RuntimeException("can't find correct file server configuration file!");
+            }
+            properties.load(fis);
+        } finally {
+            if (fis != null) {
+                fis.close();
+            }
+        }
         int port = -1;
         try {
             port = Integer.valueOf(properties.getProperty(PORT_NUM_KEY));

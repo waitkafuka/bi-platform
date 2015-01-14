@@ -121,7 +121,7 @@ public class CacheManagerForResource {
      * 
      * @param key
      */
-	public void removeFromCache(String key) {
-		this.getCache().evict(key);
-	}
+    public void removeFromCache(String key) {
+        this.getCache().evict(key);
+    }
 }

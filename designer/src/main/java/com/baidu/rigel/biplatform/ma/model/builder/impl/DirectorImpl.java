@@ -204,23 +204,23 @@ public class DirectorImpl implements Director {
      * @param cube
      */
     private void resetMeasures(Map<String, Dimension> dims, Map<String, Dimension> oriDims, MiniCube cube) {
-		Iterator<String> it = cube.getMeasures().keySet().iterator();
-		final Map<String, Dimension> tmp = Maps.newHashMap();
-		oriDims.values().forEach(dim -> {
-			if (dim.getType() != DimensionType.GROUP_DIMENSION && dim.getTableName().equals(cube.getSource())) {
-				tmp.put(dim.getPrimaryKey(), dim);
-			}
-		});
-		while (it.hasNext()) {
-			Measure m = cube.getMeasures().get(it.next());
-			if (tmp.containsKey(m.getName())) {
-				Dimension dim = tmp.get(m.getName());
-				dims.put(dim.getId(), dim);
-			}
-		}
-	}
+        Iterator<String> it = cube.getMeasures().keySet().iterator();
+        final Map<String, Dimension> tmp = Maps.newHashMap();
+        oriDims.values().forEach(dim -> {
+            if (dim.getType() != DimensionType.GROUP_DIMENSION && dim.getTableName().equals(cube.getSource())) {
+                tmp.put(dim.getPrimaryKey(), dim);
+            }
+        });
+        while (it.hasNext()) {
+            Measure m = cube.getMeasures().get(it.next());
+            if (tmp.containsKey(m.getName())) {
+                Dimension dim = tmp.get(m.getName());
+                dims.put(dim.getId(), dim);
+            }
+        }
+    }
 
-	/**
+    /**
      * 
      * modify {@link Dimension} group define
      * @param dims -- the newest dimensions which update through star model
@@ -280,12 +280,12 @@ public class DirectorImpl implements Director {
      * 
      */
     private Map<String, Dimension> addOrReplaceDims(Map<String, Dimension> oriDims, List<Dimension> buildDims) {
-	    	Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
+        Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
 //        if (oriDims.isEmpty()) {
-//    		buildDims.forEach(dim -> {
-//    			oriDims.put(dim.getId(), dim);
-//    		});
-//        		return dims;
+//            buildDims.forEach(dim -> {
+//                oriDims.put(dim.getId(), dim);
+//            });
+//                return dims;
 //        }
         final Map<String, Dimension> dimIdents = new LinkedHashMap<String, Dimension>();
         oriDims.values().forEach(dim -> {
@@ -314,7 +314,7 @@ public class DirectorImpl implements Director {
         String ident = dim.getTableName();
         Level level = dim.getLevels().values().toArray(new Level[0])[0];
         if (level instanceof MiniCubeLevel) {
-        		return ident + "_" + ((MiniCubeLevel) level).getSource();
+            return ident + "_" + ((MiniCubeLevel) level).getSource();
         }
         return ident + "_" + ((CallbackLevel) level).getCallbackUrl();
     }
@@ -345,7 +345,7 @@ public class DirectorImpl implements Director {
         oriMeasures.values().stream()
                 .filter(oriMeasure -> { 
                     return !refCol.contains(oriMeasure.getDefine())
-                    		&& !StringUtils.isEmpty(oriMeasure.getName());
+                            && !StringUtils.isEmpty(oriMeasure.getName());
                 }).map(oriMeasure -> {
                     return oriMeasure.getName() + "&&" + oriMeasure.getId();
                 }).distinct().forEach(str -> {

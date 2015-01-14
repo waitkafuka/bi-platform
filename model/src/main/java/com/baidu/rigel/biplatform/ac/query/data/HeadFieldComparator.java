@@ -43,9 +43,9 @@ public class HeadFieldComparator implements Comparator<HeadField> {
 
     @Override
     public int compare(HeadField filed1, HeadField filed2) {
-    		if (filed2 == null && filed1 == null) {
-    			return 0;
-    		} else if (sortType == null || sortType.equals(SortType.NONE)) {
+            if (filed2 == null && filed1 == null) {
+                return 0;
+            } else if (sortType == null || sortType.equals(SortType.NONE)) {
             return 0;
         } else {
             if (filed2!= null && filed2.getSummarizeData() == null) {

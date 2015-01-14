@@ -27,7 +27,7 @@ import com.google.gson.GsonBuilder;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class GsonUtils {
+public final class GsonUtils {
     
     /**
      * gson

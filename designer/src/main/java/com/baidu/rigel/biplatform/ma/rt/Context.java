@@ -45,20 +45,20 @@ public final class Context implements Serializable {
      * global params
      */
     private ConcurrentHashMap<String, Object> globalParams = 
-    		    new ConcurrentHashMap<String, Object>();
+        new ConcurrentHashMap<String, Object>();
     
 //    /**
 //     * 
 //     */
 //    private ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = 
-//    		    new ConcurrentHashMap<String, ExtendAreaContext>();
+//                new ConcurrentHashMap<String, ExtendAreaContext>();
     
     /**
      * 构造函数
      * @param context ApplicationContext
      */
     public Context(ApplicationContext context) {
-    		this.appContext = context;
+        this.appContext = context;
     }
     
     /**
@@ -66,20 +66,20 @@ public final class Context implements Serializable {
      * @return ApplicationContext spring运行时
      */
     public ApplicationContext getApplicationContext() {
-    		return appContext;
+        return appContext;
     }
 
-	/**
-	 * @return the globalParams
-	 */
-	public ConcurrentHashMap<String, Object> getGlobalParams() {
-		return globalParams;
-	}
+    /**
+     * @return the globalParams
+     */
+    public ConcurrentHashMap<String, Object> getGlobalParams() {
+        return globalParams;
+    }
 
-	/**
-	 * @param globalParams the globalParams to set
-	 */
-	public void setGlobalParams(ConcurrentHashMap<String, Object> globalParams) {
-		this.globalParams = globalParams;
-	}    
+    /**
+     * @param globalParams the globalParams to set
+     */
+    public void setGlobalParams(ConcurrentHashMap<String, Object> globalParams) {
+        this.globalParams = globalParams;
+    }    
 }

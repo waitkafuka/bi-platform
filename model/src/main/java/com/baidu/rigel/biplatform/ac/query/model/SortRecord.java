@@ -53,9 +53,9 @@ public class SortRecord implements Serializable {
      * @param sortColumnUniqueName
      */
     public SortRecord(SortType sortType, String sortColumnUniqueName, int recordSize) {
-    		this.recordSize = recordSize;
-    		this.sortType = sortType;
-    		this.sortColumnUniquename = sortColumnUniqueName;
+            this.recordSize = recordSize;
+            this.sortType = sortType;
+            this.sortColumnUniquename = sortColumnUniqueName;
     }
     
     public enum SortType {
@@ -118,18 +118,18 @@ public class SortRecord implements Serializable {
             + sortColumnUniquename + "]";
     }
 
-	/**
-	 * @return the recordSize
-	 */
-	public int getRecordSize() {
-		return recordSize;
-	}
+    /**
+     * @return the recordSize
+     */
+    public int getRecordSize() {
+        return recordSize;
+    }
 
-	/**
-	 * @param recordSize the recordSize to set
-	 */
-	public void setRecordSize(int recordSize) {
-		this.recordSize = recordSize;
-	}
+    /**
+     * @param recordSize the recordSize to set
+     */
+    public void setRecordSize(int recordSize) {
+        this.recordSize = recordSize;
+    }
     
 }

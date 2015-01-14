@@ -133,17 +133,17 @@ public class ReportModelCacheManager {
         }
     }
 
-	/**
-	 * @param reportId
-	 * @return String
-	 */
-	private String genReportKey(String reportId) {
-		String sessionId = ContextManager.getSessionId();
+    /**
+     * @param reportId
+     * @return String
+     */
+    private String genReportKey(String reportId) {
+        String sessionId = ContextManager.getSessionId();
         String productLine = ContextManager.getProductLine();
         String sessionReportKey = CacheKeyGenerator.generateSessionReportKey(sessionId, reportId,
             productLine);
-		return sessionReportKey;
-	}
+        return sessionReportKey;
+    }
     
     /**
      * 从缓存中获取运行时模型
@@ -224,25 +224,25 @@ public class ReportModelCacheManager {
      * @param context 区域上下文
      */
     public void updateAreaContext(String areaId, ExtendAreaContext context) {
-    		int key = genAreaKey(areaId);
-    		cacheManagerForReource.setToCache(String.valueOf(key), context);
+        int key = genAreaKey(areaId);
+        cacheManagerForReource.setToCache(String.valueOf(key), context);
     }
 
-	/**
-	 * 区域id
-	 * @param areaId
-	 * @return int
-	 */
-	private int genAreaKey(String areaId) {
-		int key = new StringBuilder()
-			    .append(areaId)
-			    .append("_^-^_")
-			    .append(ContextManager.getSessionId())
-			    .append("_^-^_")
-			    .append(ContextManager.getProductLine())
-			    .toString().hashCode();
-		return key;
-	}
+    /**
+     * 区域id
+     * @param areaId
+     * @return int
+     */
+    private int genAreaKey(String areaId) {
+        int key = new StringBuilder()
+                .append(areaId)
+                .append("_^-^_")
+                .append(ContextManager.getSessionId())
+                .append("_^-^_")
+                .append(ContextManager.getProductLine())
+                .toString().hashCode();
+        return key;
+    }
     
     /**
      * 
@@ -252,11 +252,11 @@ public class ReportModelCacheManager {
      * 
      */
     public ExtendAreaContext getAreaContext(String areaId) {
-	    	int key = genAreaKey(areaId);
-		if (cacheManagerForReource.getFromCache(String.valueOf(key)) == null) {
-			return new ExtendAreaContext();
-		}
-		return (ExtendAreaContext) cacheManagerForReource.getFromCache(String.valueOf(key));
+        int key = genAreaKey(areaId);
+        if (cacheManagerForReource.getFromCache(String.valueOf(key)) == null) {
+            return new ExtendAreaContext();
+        }
+        return (ExtendAreaContext) cacheManagerForReource.getFromCache(String.valueOf(key));
     }
     
     /**
@@ -265,8 +265,8 @@ public class ReportModelCacheManager {
      * @param context 区域上下文
      */
     public void updateContext(String reportId, Context context) {
-            int key = genContextKey(reportId);
-            cacheManagerForReource.setToCache(String.valueOf(key), context);
+        int key = genContextKey(reportId);
+        cacheManagerForReource.setToCache(String.valueOf(key), context);
     }
 
     /**
@@ -293,7 +293,7 @@ public class ReportModelCacheManager {
      * 
      */
     public Context getContext(String reportId) {
-            int key = genContextKey(reportId);
+        int key = genContextKey(reportId);
         if (cacheManagerForReource.getFromCache(String.valueOf(key)) == null) {
             ReportDesignModel designModel = this.getReportModel(reportId);
             return RuntimeEvnUtil.initRuntimeEvn(designModel, null, null);

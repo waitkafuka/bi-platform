@@ -221,8 +221,8 @@ public class ReportQueryResource extends BaseResource {
 //            produces = "text/html;charset=utf-8")
 //    public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
 //            HttpServletResponse response) {
-//    		long begin = System.currentTimeMillis();
-//    		LOG.info("[INFO]--- --- begin invoke query report_vm request... ...");
+//            long begin = System.currentTimeMillis();
+//            LOG.info("[INFO]--- --- begin invoke query report_vm request... ...");
 //        ReportDesignModel model = null;
 //        try {
 //            model = reportModelCacheManager.loadReleaseReportModelToCache(reportId);
@@ -231,7 +231,7 @@ public class ReportQueryResource extends BaseResource {
 //            throw new IllegalStateException("未找到要查询的报表，请确认是否发布报表");
 //        }
 //        if (model == null) {
-//        		throw new IllegalStateException("未找到要查询的报表，请确认是否发布报表");
+//                throw new IllegalStateException("未找到要查询的报表，请确认是否发布报表");
 //        }
 //        ConcurrentHashMap<String, Object> globalParams = HttpServletRequestHelper.collectRequestParam(request);
 //        // ServletContext
@@ -243,11 +243,11 @@ public class ReportQueryResource extends BaseResource {
 //        reportModelCacheManager.updateContext(reportId, context);
 //        StringBuilder builder = this.genVm(model);
 //        LOG.info("[INFO] --- --- Successfully invoke query report vm request, cost : {} ms", 
-//        		(System.currentTimeMillis() - begin));
+//                (System.currentTimeMillis() - begin));
 //        return builder.toString();
 //    }
 //
-//	
+//    
 //
 //    @RequestMapping(value = "/{reportId}/report_json", method = { RequestMethod.GET },
 //            produces = "text/plain;charset=utf-8")
@@ -336,8 +336,8 @@ public class ReportQueryResource extends BaseResource {
 //     */
 //    @RequestMapping(value = "/{reportId}/runtime/context", method = { RequestMethod.POST })
 //    public ResponseResult updateContext(@PathVariable("reportId") String reportId, HttpServletRequest request) {
-//    		long begin = System.currentTimeMillis();
-//		LOG.info("[INFO]--- --- begin invoke update global context request... ...");
+//            long begin = System.currentTimeMillis();
+//        LOG.info("[INFO]--- --- begin invoke update global context request... ...");
 //        Map<String, String[]> contextParams = request.getParameterMap();
 //        Context context = reportModelCacheManager.getContext(reportId);
 //        
@@ -346,13 +346,13 @@ public class ReportQueryResource extends BaseResource {
 //        LOG.info("[INFO]--- --- old params = {}", oldParams);
 //        ConcurrentHashMap<String, Object> newParams = new ConcurrentHashMap<String, Object>();
 //        if (oldParams != null) {
-//	        	// TODO 更新时间参数
-//	        	for (String key : oldParams.keySet()) {
-//	        		String value = oldParams.get(key).toString();
-//	        		if (!(value.contains("start") && value.contains("end"))) {
-//	        			newParams.put(key, value);
-//	        		}
-//	        	}
+//                // TODO 更新时间参数
+//                for (String key : oldParams.keySet()) {
+//                    String value = oldParams.get(key).toString();
+//                    if (!(value.contains("start") && value.contains("end"))) {
+//                        newParams.put(key, value);
+//                    }
+//                }
 //        }
 //        // 更新请求参数
 //        for (String key : contextParams.keySet()) {
@@ -360,9 +360,9 @@ public class ReportQueryResource extends BaseResource {
 //            if (value != null && value.length > 0) {
 //                newParams.put(key, value[0]);
 //            } else if (newParams.contains(key)){
-//            		newParams.remove(key);
+//                    newParams.remove(key);
 //            } else { // 设置为null，避免由于脏数据导致查询条件异常
-//            		newParams.put(key, null);
+//                    newParams.put(key, null);
 //            }
 //        }  
 //        LOG.info("[INFO]--- --- new params = {}", newParams);
@@ -370,9 +370,9 @@ public class ReportQueryResource extends BaseResource {
 //        // 更新上下文请求
 //        reportModelCacheManager.updateContext(reportId, context);
 //        ResponseResult rs = ResourceUtils.getResult("Success Update Global Context", 
-//        		"Failed Update Global Context", "");
+//                "Failed Update Global Context", "");
 //        LOG.info("[INFO]--- --- update global context successfully , cost {} ms",
-//        		(System.currentTimeMillis() - begin));
+//                (System.currentTimeMillis() - begin));
 //        return rs;
 //    }
 //
@@ -400,7 +400,7 @@ public class ReportQueryResource extends BaseResource {
 //        ExtendAreaContext extendAreaContext = reportModelCacheManager.getAreaContext(areaId);
 //        // 没有初始化过扩展区域上下文，此处需要初始化
 //        if (extendAreaContext.getDefaultDsInfo() == null) {
-//	        	initExtendAreaContext(reportId, areaId, extendAreaContext);
+//                initExtendAreaContext(reportId, areaId, extendAreaContext);
 //        }
 //        /**
 //         * 4. 合并全局上下文信息与request请求信息,作为总的请求信息queryParams
@@ -440,26 +440,26 @@ public class ReportQueryResource extends BaseResource {
 //        return rs;       
 //    }
 //
-//	/**
-//	 * @param reportId
-//	 * @param areaId
-//	 * @param extendAreaContext
-//	 */
-//	private void initExtendAreaContext(String reportId, String areaId,
-//			ExtendAreaContext extendAreaContext) {
-//		try {
-//			ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
-//			DataSourceDefine dsDefine = dsService.getDsDefine(model.getDsId());
-//			RuntimeEvnUtil.initExtendAreaContext(extendAreaContext, model, dsDefine, areaId);
-//			extendAreaContext.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey));
-//			reportModelCacheManager.updateAreaContext(areaId, extendAreaContext);
-//		} catch (Exception e) {
-//			LOG.error("Report model is not in cache! ", e);
-//			throw new RuntimeException(e);
-//		}
-//	}
-//	
-//	/**
+//    /**
+//     * @param reportId
+//     * @param areaId
+//     * @param extendAreaContext
+//     */
+//    private void initExtendAreaContext(String reportId, String areaId,
+//            ExtendAreaContext extendAreaContext) {
+//        try {
+//            ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+//            DataSourceDefine dsDefine = dsService.getDsDefine(model.getDsId());
+//            RuntimeEvnUtil.initExtendAreaContext(extendAreaContext, model, dsDefine, areaId);
+//            extendAreaContext.setDefaultDsInfo(DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey));
+//            reportModelCacheManager.updateAreaContext(areaId, extendAreaContext);
+//        } catch (Exception e) {
+//            LOG.error("Report model is not in cache! ", e);
+//            throw new RuntimeException(e);
+//        }
+//    }
+//    
+//    /**
 //     * 初始化查询参数,初始化查询区域参数
 //     * @param reportId
 //     * @param request
@@ -468,47 +468,47 @@ public class ReportQueryResource extends BaseResource {
 //    @RequestMapping(value = "/{reportId}/init_params", method = { RequestMethod.POST })
 //    public ResponseResult initParams(@PathVariable("reportId") String reportId,
 //            HttpServletRequest request) {
-//    		long begin = System.currentTimeMillis();
-//    		LOG.info("[INFO]--- ---begin init params with report id {}", reportId);
-//    		String[] areaIds = request.getParameter("paramList").split(",");
-//    		if (areaIds == null || areaIds.length == 0) {
-//    			ResponseResult rs = new ResponseResult();
-//    			rs.setStatus(0);
-//    			LOG.info("[INFO]--- --- not needed init global params");
-//    	        return rs;
-//    		}
-//    		final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
-//    		Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
-//    		for (final String areaId : areaIds) {
-//			ExtendArea area = model.getExtendById(areaId);
-//			if (area != null && !QueryUtils.isFilterArea(area.getType()) && !area.listAllItems().isEmpty()) {
-//				Item item = area.listAllItems().values().toArray(new Item[0])[0];
-//				Cube cube = model.getSchema().getCubes().get(area.getCubeId());
-//				Cube tmpCube = QueryUtils.transformCube(cube);
-//				String dimId = item.getOlapElementId();
-//				Dimension dim = cube.getDimensions().get(dimId);
-//				if (dim != null) {
-//					List<Map<String, String>> values;
-//					try {
-//						List<Member> members = reportModelQueryService.getMembers(tmpCube, 
-//										tmpCube.getDimensions().get(dim.getName()),
-//										Maps.newHashMap(), securityKey).get(0);
-//						values = Lists.newArrayList();
-//						members.forEach(m -> {
-//							Map<String, String> tmp = Maps.newHashMap();
-//							tmp.put("value", m.getUniqueName());
-//							tmp.put("text", m.getCaption());
-//							values.add(tmp);
-//						});
-//						Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
-//						datasource.put("datasource", values);
-//						datas.put(areaId, datasource);
-//					} catch (Exception e) {
-//						LOG.info("[INFO] exception happened : " + e.getMessage());
-//					}
-//				}
-//			}
-//    		}
+//            long begin = System.currentTimeMillis();
+//            LOG.info("[INFO]--- ---begin init params with report id {}", reportId);
+//            String[] areaIds = request.getParameter("paramList").split(",");
+//            if (areaIds == null || areaIds.length == 0) {
+//                ResponseResult rs = new ResponseResult();
+//                rs.setStatus(0);
+//                LOG.info("[INFO]--- --- not needed init global params");
+//                return rs;
+//            }
+//            final ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+//            Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
+//            for (final String areaId : areaIds) {
+//            ExtendArea area = model.getExtendById(areaId);
+//            if (area != null && !QueryUtils.isFilterArea(area.getType()) && !area.listAllItems().isEmpty()) {
+//                Item item = area.listAllItems().values().toArray(new Item[0])[0];
+//                Cube cube = model.getSchema().getCubes().get(area.getCubeId());
+//                Cube tmpCube = QueryUtils.transformCube(cube);
+//                String dimId = item.getOlapElementId();
+//                Dimension dim = cube.getDimensions().get(dimId);
+//                if (dim != null) {
+//                    List<Map<String, String>> values;
+//                    try {
+//                        List<Member> members = reportModelQueryService.getMembers(tmpCube, 
+//                                        tmpCube.getDimensions().get(dim.getName()),
+//                                        Maps.newHashMap(), securityKey).get(0);
+//                        values = Lists.newArrayList();
+//                        members.forEach(m -> {
+//                            Map<String, String> tmp = Maps.newHashMap();
+//                            tmp.put("value", m.getUniqueName());
+//                            tmp.put("text", m.getCaption());
+//                            values.add(tmp);
+//                        });
+//                        Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
+//                        datasource.put("datasource", values);
+//                        datas.put(areaId, datasource);
+//                    } catch (Exception e) {
+//                        LOG.info("[INFO] exception happened : " + e.getMessage());
+//                    }
+//                }
+//            }
+//            }
 //        ResponseResult rs = new ResponseResult();
 //        rs.setStatus(0);
 //        rs.setData(datas);

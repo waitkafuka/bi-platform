@@ -10,7 +10,7 @@ define(['template'], function (template) {
         $out+=$escape($value.name);
         $out+='</option>\n                    ';
         });
-        $out+='\n                </select>\n                <span class="icon-data-sources j-icon-data-sources" title="数据模型相关设置"></span>\n            </div>\n            <div class="con-ind j-data-sources-setting-con-ind"></div>\n            <div class="con-dim j-data-sources-setting-con-dim"></div>\n        </div>\n    </div>\n    <div class="canvas j-canvas">\n        <div class="buttons btns-height j-global-btn"></div>\n        <div class="comp-setting j-con-comp-setting"></div>\n        <div class="report j-report"></div>\n        <div class="comp-menu j-global-menu"></div>\n        <span class="button button-flat-primary button-publish-report j-button-publish-report">发布</span>\n    </div>\n</div>';
+        $out+='\n                </select>\n                <span class="icon-data-sources j-icon-data-sources" title="数据模型相关设置"></span>\n            </div>\n            <div class="con-ind j-data-sources-setting-con-ind"></div>\n            <div class="con-dim j-data-sources-setting-con-dim"></div>\n        </div>\n    </div>\n    <div class="canvas j-canvas">\n        <div class="buttons btns-height j-global-btn"></div>\n        <div class="comp-setting j-con-comp-setting"></div>\n        <div class="report j-report"></div>\n        <div class="comp-menu j-global-menu"></div>\n        <span class="button button-flat-primary button-save-report j-button-save-report">保存</span>\n        <span class="button button-flat-primary button-publish-report j-button-publish-report">发布</span>\n    </div>\n</div>';
         return $out;
     }
     return { render: anonymous };

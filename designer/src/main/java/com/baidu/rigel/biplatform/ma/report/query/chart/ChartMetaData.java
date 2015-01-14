@@ -71,9 +71,9 @@ public class ChartMetaData implements Serializable {
      */
     public static ChartMetaData generateEmptyChartMetaData() {
         ChartMetaData chart = new ChartMetaData();
-        chart.setFilters(Lists.<Item> newArrayList());
-        chart.setXAxis(Lists.<Item> newArrayList());
-        chart.setSeriesSet(Lists.<SeriesInputInfo> newArrayList());
+        chart.setFilters(Lists.<Item>newArrayList());
+        chart.setXAxis(Lists.<Item>newArrayList());
+        chart.setSeriesSet(Lists.<SeriesInputInfo>newArrayList());
         SeriesInputInfo seriesUnit = SeriesInputInfo.generateEmptySeriesInputInfo(chart
                 .getDefaultYAxis());
         chart.getSeriesSet().add(seriesUnit);
@@ -86,7 +86,7 @@ public class ChartMetaData implements Serializable {
      * @param chart
      */
     public static void initYAxis(ChartMetaData chart) {
-        chart.setYAxises(Maps.<String, YAxis> newHashMap());
+        chart.setYAxises(Maps.<String, YAxis>newHashMap());
         YAxis yAxisLeft = new YAxis();
         yAxisLeft.setName("left");
         // yAxis_left.setUnitName("元");

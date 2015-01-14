@@ -33,10 +33,27 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
  * @author zhongyi
  *
  */
-public class DragRuleCheckUtils {
+public final class DragRuleCheckUtils {
     
+    /**
+     * logger
+     */
     private static Logger logger = LoggerFactory.getLogger(DragRuleCheckUtils.class);
     
+    /**
+     *DragRuleCheckUtils 
+     */
+    private DragRuleCheckUtils() {
+        
+    }
+    
+    /**
+     * 
+     * @param element
+     * @param position
+     * @param area
+     * @return boolean
+     */
     public static boolean checkIllegal(OlapElement element, PositionType position, ExtendArea area) {
         if (element == null || area == null) {
             logger.error("element or area can not be null!");

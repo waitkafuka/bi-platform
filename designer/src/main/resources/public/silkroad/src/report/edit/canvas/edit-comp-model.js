@@ -203,7 +203,6 @@ define(['url', 'constant'], function (Url, Constant) {
                     }
                 });
             }
-
         },
         /**
          * 获取数据格式数据

@@ -38,11 +38,18 @@ import com.google.common.collect.Maps;
  * @author zhongyi
  *
  */
-public class MockUtils {
+public final class MockUtils {
     
     private static final String[] DIMS = new String[]{
-            "北京", "天津", "河北", "上海", "重庆", "武汉", "南京", "成都", "青海", "长沙"
+        "北京", "天津", "河北", "上海", "重庆", "武汉", "南京", "成都", "青海", "长沙"
     };
+    
+    /**
+     * 构造函数
+     */
+    private MockUtils() {
+        
+    }
     
     /**
      * 
@@ -71,9 +78,9 @@ public class MockUtils {
         DataModel dataModel = new DataModel();
         List<HeadField> columnHeader = new ArrayList<HeadField>();
         // int c
-        String[] trades = { "房屋出租", "房地产其他", "皮革", "服装", "鞋帽", "纺织辅料", "服装鞋帽其他", "工艺品", "礼品", "饰品" };
+        String[] trades = {"房屋出租", "房地产其他", "皮革", "服装", "鞋帽", "纺织辅料", "服装鞋帽其他", "工艺品", "礼品", "饰品"};
         
-        String[] cols = { "消费", "点击", "访问人数", "人均消费", "平均价格", "总量", "分量", "单位产出", "月均订单数", "收入" };
+        String[] cols = {"消费", "点击", "访问人数", "人均消费", "平均价格", "总量", "分量", "单位产出", "月均订单数", "收入"};
         
         for (int i = 0; i < 10; ++i) {
             HeadField header = new HeadField(null);

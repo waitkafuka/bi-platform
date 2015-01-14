@@ -26,7 +26,14 @@ import java.util.regex.Pattern;
  * @author jiangyichao
  *
  */
-public class RegExUtils {
+public final class RegExUtils {
+
+    /**
+     * RegExUtils
+     */
+    private RegExUtils() {
+        
+    }
     /**
      * 根据正则表达式对表名进行分类
      * 

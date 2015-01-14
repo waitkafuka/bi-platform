@@ -25,145 +25,145 @@ import java.io.Serializable;
  */
 public class ColDefine implements Serializable {
 
-	/**
-	 * serialized id
-	 */
-	private static final long serialVersionUID = 1L;
+    /**
+     * serialized id
+     */
+    private static final long serialVersionUID = 1L;
 
-	/**
-	 * uniqueName
-	 */
-	private String uniqueName;
-	
-	/**
-	 * format
-	 */
-	private String format;
-	
-	/**
-	 * caption
-	 */
-	private String caption;
-	
-	/**
-	 * colDefinedId
-	 */
-	private String colDefineId;
-	
-	/**
-	 * showAxis
-	 */
-	private String showAxis;
-	
-	/**
-	 * linkBridge
-	 */
-	private String linkBridge;
+    /**
+     * uniqueName
+     */
+    private String uniqueName;
+    
+    /**
+     * format
+     */
+    private String format;
+    
+    /**
+     * caption
+     */
+    private String caption;
+    
+    /**
+     * colDefinedId
+     */
+    private String colDefineId;
+    
+    /**
+     * showAxis
+     */
+    private String showAxis;
+    
+    /**
+     * linkBridge
+     */
+    private String linkBridge;
 
-	/**
-	 * currentSort
-	 */
-	private String currentSort = "NULL";
-	
-	/**
-	 * 指标提示文本
-	 */
-	private String toolTip;
+    /**
+     * currentSort
+     */
+    private String currentSort = "NULL";
+    
+    /**
+     * 指标提示文本
+     */
+    private String toolTip;
 
-	/**
-	 * @return the uniqueName
-	 */
-	public String getUniqueName() {
-		return uniqueName;
-	}
+    /**
+     * @return the uniqueName
+     */
+    public String getUniqueName() {
+        return uniqueName;
+    }
 
-	/**
-	 * @param uniqueName
-	 *            the uniqueName to set
-	 */
-	public void setUniqueName(String uniqueName) {
-		this.uniqueName = uniqueName;
-	}
+    /**
+     * @param uniqueName
+     *            the uniqueName to set
+     */
+    public void setUniqueName(String uniqueName) {
+        this.uniqueName = uniqueName;
+    }
 
-	/**
-	 * @return the format
-	 */
-	public String getFormat() {
-		return format;
-	}
+    /**
+     * @return the format
+     */
+    public String getFormat() {
+        return format;
+    }
 
-	/**
-	 * @param format
-	 *            the format to set
-	 */
-	public void setFormat(String format) {
-		this.format = format;
-	}
+    /**
+     * @param format
+     *            the format to set
+     */
+    public void setFormat(String format) {
+        this.format = format;
+    }
 
-	public String getCaption() {
-		return caption;
-	}
+    public String getCaption() {
+        return caption;
+    }
 
-	public void setCaption(String caption) {
-		this.caption = caption;
-	}
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
 
-	public String getShowUniqueName() {
-		return colDefineId;
-	}
+    public String getShowUniqueName() {
+        return colDefineId;
+    }
 
-	public void setShowUniqueName(String showUniqueName) {
-		this.colDefineId = showUniqueName;
-	}
+    public void setShowUniqueName(String showUniqueName) {
+        this.colDefineId = showUniqueName;
+    }
 
-	public String getShowAxis() {
-		return showAxis;
-	}
+    public String getShowAxis() {
+        return showAxis;
+    }
 
-	public void setShowAxis(String showAxis) {
-		this.showAxis = showAxis;
-	}
+    public void setShowAxis(String showAxis) {
+        this.showAxis = showAxis;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public String toString() {
-		return "ColDefine [uniqueName=" + uniqueName + ", format=" + format
-				+ ", caption=" + caption + ", showUniqueName=" + colDefineId
-				+ ", ShowAxis=" + showAxis + ", currentSort=" + currentSort
-				+ "]";
-	}
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "ColDefine [uniqueName=" + uniqueName + ", format=" + format
+                + ", caption=" + caption + ", showUniqueName=" + colDefineId
+                + ", ShowAxis=" + showAxis + ", currentSort=" + currentSort
+                + "]";
+    }
 
-	public String getCurrentSort() {
-		return currentSort;
-	}
+    public String getCurrentSort() {
+        return currentSort;
+    }
 
-	public void setCurrentSort(String currentSort) {
-		this.currentSort = currentSort;
-	}
+    public void setCurrentSort(String currentSort) {
+        this.currentSort = currentSort;
+    }
 
-	public String getLinkBridge() {
-		return linkBridge;
-	}
+    public String getLinkBridge() {
+        return linkBridge;
+    }
 
-	public void setLinkBridge(String linkBridge) {
-		this.linkBridge = linkBridge;
-	}
+    public void setLinkBridge(String linkBridge) {
+        this.linkBridge = linkBridge;
+    }
 
-	/**
-	 * @return the toolTip
-	 */
-	public String getToolTip() {
-		return toolTip;
-	}
+    /**
+     * @return the toolTip
+     */
+    public String getToolTip() {
+        return toolTip;
+    }
 
-	/**
-	 * @param toolTip the toolTip to set
-	 */
-	public void setToolTip(String toolTip) {
-		this.toolTip = toolTip;
-	}
+    /**
+     * @param toolTip the toolTip to set
+     */
+    public void setToolTip(String toolTip) {
+        this.toolTip = toolTip;
+    }
 
-	
+    
 }

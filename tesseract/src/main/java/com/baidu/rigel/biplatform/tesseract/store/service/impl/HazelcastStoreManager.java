@@ -62,7 +62,7 @@ public class HazelcastStoreManager implements StoreManager {
 
     public static final String EVENT_QUEUE = "eventQueue";
 
-	private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
+    private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
 
     private static final String HAZELCAST_SERVER_GROUP_USER_NAME = "hazelcastServer.groupUserName";
 

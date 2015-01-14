@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 @Resource(name = "ResourceRepository")
 public class BaseResource {
 
-	@Value("${biplatform.ma.ser_key}")
-	protected String securityKey;
-	
+    @Value("${biplatform.ma.ser_key}")
+    protected String securityKey;
+    
 }

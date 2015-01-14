@@ -23,8 +23,11 @@ package com.baidu.rigel.biplatform.ma.rt.query.request.trans;
  * @author david.wang
  * @version 1.0.0.1
  */
-public class QueryRequestTransHandlerUtil {
+public final class QueryRequestTransHandlerUtil {
     
+    /**
+     * QueryRequestTransHandlerUtil
+     */
     private QueryRequestTransHandlerUtil() {
     }
     

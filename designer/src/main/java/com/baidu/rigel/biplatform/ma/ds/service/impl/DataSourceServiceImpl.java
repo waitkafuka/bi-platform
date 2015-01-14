@@ -16,7 +16,6 @@
 package com.baidu.rigel.biplatform.ma.ds.service.impl;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -167,29 +166,29 @@ public class DataSourceServiceImpl implements DataSourceService {
      */
     @Override
     public boolean isValidateConn(DataSourceDefine ds, String securityKey) {
-        DBInfoReader dBInfoReader = null;//new DBInfoReader();
+        DBInfoReader dBInfoReader = null; // new DBInfoReader();
         try {
-	        	// 创建数据库连接，如果不抛出异常，说明连接字符串正确，返回true
+                // 创建数据库连接，如果不抛出异常，说明连接字符串正确，返回true
             dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), 
-						ds.getDbPwd(),
-						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-			return true;
-           	
+                        ds.getDbPwd(),
+                        DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            return true;
+               
         } catch (Exception e) {
-			try {
-				String pwd = AesUtil.getInstance().encryptAndUrlEncoding(ds.getDbPwd(), securityKey);
-				dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
-						DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-				// dirty solution 兼容原有数据源定义 
-				ds.setDbPwd(pwd);
-				return true;
-			} catch (Exception e1) {
-				logger.error(e1.getMessage());
-				throw new RuntimeException(e1);
-			}
+            try {
+                String pwd = AesUtil.getInstance().encryptAndUrlEncoding(ds.getDbPwd(), securityKey);
+                dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
+                        DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+                // dirty solution 兼容原有数据源定义 
+                ds.setDbPwd(pwd);
+                return true;
+            } catch (Exception e1) {
+                logger.error(e1.getMessage());
+                throw new RuntimeException(e1);
+            }
         } finally {
             // 关闭数据库连接
-            if(dBInfoReader != null) {
+            if (dBInfoReader != null) {
                 dBInfoReader.closeConn();
             }
         }
@@ -303,7 +302,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         Collections.addAll(tmp, ds);
         Set<String> dict = new HashSet<String>();
         tmp.stream().forEach((String s) -> {
-        		dict.add(s.substring(0, s.indexOf("_")));
+            dict.add(s.substring(0, s.indexOf("_")));
             dict.add(s.substring(s.indexOf("_") + 1));
         });
         if (!dict.contains(idOrName)) {
@@ -332,7 +331,8 @@ public class DataSourceServiceImpl implements DataSourceService {
             throw new DataSourceOperationException("不能通过指定数据源id找到数据源定义： id ＝ " + id);
         }
         try {
-            return fileService.rm(genDsFilePath(getDatasourceDefineNameByIdOrName(ContextManager.getProductLine(), id)));
+            return fileService.rm(genDsFilePath(
+                getDatasourceDefineNameByIdOrName(ContextManager.getProductLine(), id)));
         } catch (FileServiceException e) {
             logger.error(e.getMessage(), e);
             throw new DataSourceOperationException(e);
@@ -376,9 +376,9 @@ public class DataSourceServiceImpl implements DataSourceService {
     /**
      * {@inheritDoc}
      */
-	@Override
-	public DataSourceDefine getDsDefine(String productLine, String dsName) throws DataSourceOperationException {
-		String fileName = getDatasourceDefineNameByIdOrName(productLine, dsName);
+    @Override
+    public DataSourceDefine getDsDefine(String productLine, String dsName) throws DataSourceOperationException {
+        String fileName = getDatasourceDefineNameByIdOrName(productLine, dsName);
         if (fileName == null) {
             return null;
         }
@@ -389,6 +389,6 @@ public class DataSourceServiceImpl implements DataSourceService {
             throw new DataSourceOperationException("未找到正确的数据源定义信息", e);
         }
 
-	}
+    }
     
 }

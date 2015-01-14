@@ -99,41 +99,41 @@ public interface ReportDesignModelService {
      * @throws DataSourceOperationException 
      */
     boolean publishReport(ReportDesignModel model, String securityKey) 
-    			throws ReportModelOperationException, DataSourceOperationException;
+                throws ReportModelOperationException, DataSourceOperationException;
 
     /**
      * 根据区域数据格式信息更新区域定义
      * @param area 区域定义
      * @param dataFormat 数据格式
      */
-	void updateAreaWithDataFormat(ExtendArea area, String dataFormat);
+    void updateAreaWithDataFormat(ExtendArea area, String dataFormat);
 
-	/**
-	 * 
-	 * @param area
-	 * @param toolTips
-	 */
-	void updateAreaWithToolTips(ExtendArea area, String toolTips);
+    /**
+     * 
+     * @param area
+     * @param toolTips
+     */
+    void updateAreaWithToolTips(ExtendArea area, String toolTips);
 
-	/**
-	 * 
-	 * @param area
-	 * @param topSetting
-	 */
-	void updateAreaWithTopSetting(ExtendArea area, String topSetting);
+    /**
+     * 
+     * @param area
+     * @param topSetting
+     */
+    void updateAreaWithTopSetting(ExtendArea area, String topSetting);
 
-	/**
-	 * 
-	 * @param area
-	 * @param otherSetting
-	 */
-	void updateAreaWithOtherSetting(ExtendArea area, String otherSetting);
+    /**
+     * 
+     * @param area
+     * @param otherSetting
+     */
+    void updateAreaWithOtherSetting(ExtendArea area, String otherSetting);
 
-	/**
-	 * 
-	 * @param id
-	 * @return List<String>
-	 */
-	List<String> lsReportWithDsId(String id);
+    /**
+     * 
+     * @param id
+     * @return List<String>
+     */
+    List<String> lsReportWithDsId(String id);
 
 }

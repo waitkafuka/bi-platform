@@ -62,7 +62,7 @@ public interface ReportModelQueryService {
      * @throws DataSourceOperationException 
      */
     public List<Member> getMembers(Cube cube, Dimension dimensin, Level level, Map<String, String> params, 
-    			String securityKey)
+                String securityKey)
             throws MiniCubeQueryException, DataSourceOperationException;
     
     /**
@@ -78,7 +78,7 @@ public interface ReportModelQueryService {
      * @throws MiniCubeQueryException
      */
     public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache,
-    			boolean needSumary, String securityKey)
+                boolean needSumary, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException;
     
     

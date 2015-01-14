@@ -64,7 +64,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         DIReportChart reportChart = new DIReportChart();
 //        reportChart.setTitle("趋势图");
 //        reportChart.setSubTitle("");
-        reportChart.setSeriesData(Lists.<SeriesDataUnit> newArrayList());
+        reportChart.setSeriesData(Lists.<SeriesDataUnit>newArrayList());
         // for(int i=0; i<tableResult.getColDefine().size(); i++){
         // SeriesInputInfo seriesInput = chartMeta.getSeriesSet().get(i);
         // if(!dataSets.containsKey(String.valueOf(i))){
@@ -72,46 +72,46 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         // }
         List<SeriesInputInfo> seriesInputs = Lists.newArrayList();
         for (int i = 0; i < chartType.size(); ++i) {
-	        	SeriesInputInfo seriesInput = new SeriesInputInfo();
-//	        	ColDefine define = tableResult.getColDefine().get(i);
-//	        	seriesInput.setName(define.getShowAxis());
-//	        	seriesInput.setyAxisName(define.getShowAxis());
-	        	seriesInputs.add(seriesInput);
+            SeriesInputInfo seriesInput = new SeriesInputInfo();
+//                ColDefine define = tableResult.getColDefine().get(i);
+//                seriesInput.setName(define.getShowAxis());
+//                seriesInput.setyAxisName(define.getShowAxis());
+            seriesInputs.add(seriesInput);
         }
 //        for(String type : chartType) {
-//        		if (isTimeChart) {
-//        			seriesInput.setType(SeriesUnitType.LINE);
-//        		} else {
-//        			seriesInput.setType(SeriesUnitType.valueOf(type));
-//        		}
-//	        	seriesInput.setyAxisName(type);
-//        	
+//                if (isTimeChart) {
+//                    seriesInput.setType(SeriesUnitType.LINE);
+//                } else {
+//                    seriesInput.setType(SeriesUnitType.valueOf(type));
+//                }
+//                seriesInput.setyAxisName(type);
+//            
 //        }
         List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInputs, tableResult, chartType, isTimeChart);
         reportChart.getSeriesData().addAll(seriesUnits);
         // }
         // ChartMetaData chartMeta = new ChartMetaData();
-        reportChart.setyAxises(Lists.<YAxis> newArrayList());
-        	YAxis yAxis = new YAxis(); // chartMeta.getYAxises().get("test_axis");
-        	yAxis.setName("纵轴");
-        	yAxis.setUnitName("单位");
-        	reportChart.getyAxises().add(yAxis);
+        reportChart.setyAxises(Lists.<YAxis>newArrayList());
+        YAxis yAxis = new YAxis(); // chartMeta.getYAxises().get("test_axis");
+        yAxis.setName("纵轴");
+        yAxis.setUnitName("单位");
+        reportChart.getyAxises().add(yAxis);
 
         /**
          * use the x axis from query result from first series.
          */
         reportChart.setxAxisCategories(getXAxisCategories(tableResult, isTimeChart));
-		if (isTimeChart) {
+        if (isTimeChart) {
             reportChart.setxAxisType(XAxisType.DATETIME.getName());
         } else {
             reportChart.setxAxisType(XAxisType.CATEGORY.getName());
         }
-		List<BigDecimal> maxAndMinValue = getMaxAndMinValue(reportChart);
-		if (maxAndMinValue != null && maxAndMinValue.size() >= 2) {
-			reportChart.setMaxValue(maxAndMinValue.get(0));
-			reportChart.setMinValue(maxAndMinValue.get(1));
-		}
-		return reportChart;
+        List<BigDecimal> maxAndMinValue = getMaxAndMinValue(reportChart);
+        if (maxAndMinValue != null && maxAndMinValue.size() >= 2) {
+            reportChart.setMaxValue(maxAndMinValue.get(0));
+            reportChart.setMinValue(maxAndMinValue.get(1));
+        }
+        return reportChart;
     }
 
     /**
@@ -120,26 +120,26 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @return List<BigDecimal>
      */
     private List<BigDecimal> getMaxAndMinValue(DIReportChart reportChart) {
-    		final List<BigDecimal> tmp = Lists.newArrayList();
-    		reportChart.getSeriesData().stream().forEach(data -> {
-    			if (data != null) {
-    				Collections.addAll(tmp, data.getData());
-    			}
-    		});
-    		BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } )
-    				.toArray(BigDecimal[] :: new);
-    		tmp.clear();
-    		Collections.addAll(tmp,tmpArray);
-    		Collections.sort(tmp);
-    		List<BigDecimal> rs = Lists.newArrayList();
-    		if (tmp.size() >= 2) {
-    			rs.add(tmp.get(tmp.size() - 1));
-    			rs.add(tmp.get(0));
-    		}
-		return rs;
-	}
+        final List<BigDecimal> tmp = Lists.newArrayList();
+        reportChart.getSeriesData().stream().forEach(data -> {
+            if (data != null) {
+                Collections.addAll(tmp, data.getData());
+            }
+        });
+        BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } )
+                .toArray(BigDecimal[] :: new);
+        tmp.clear();
+        Collections.addAll(tmp, tmpArray);
+        Collections.sort(tmp);
+        List<BigDecimal> rs = Lists.newArrayList();
+        if (tmp.size() >= 2) {
+            rs.add(tmp.get(tmp.size() - 1));
+            rs.add(tmp.get(0));
+        }
+        return rs;
+    }
 
-	/**
+    /**
      * 
      * @param pTable
      * @return
@@ -168,7 +168,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
                     /**
                      * TODO 格式不对忽略怎么样？
                      */
-                    e.printStackTrace();
+                    
                 }
                 categories.add(dateStr);
             } else {
@@ -187,7 +187,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @return
      */
     private List<SeriesDataUnit> getSeriesUnitsByInputUnit(List<SeriesInputInfo> seriesInput, 
-    			PivotTable pTable, Map<String, String> chartType, boolean isTimeChart) {
+                PivotTable pTable, Map<String, String> chartType, boolean isTimeChart) {
 
         List<SeriesDataUnit> units = Lists.newArrayList();
 
@@ -197,25 +197,25 @@ public class ChartBuildServiceImpl implements ChartBuildService {
             ColDefine col = columnDefs.get(i);
             // TODO the showName should be put in generateSeriesBranch method as
             // third parameter.
-        		SeriesInputInfo info = null;
+            SeriesInputInfo info = null;
             if (isTimeChart) {
-            		info = seriesInput.get(0);
-            		info.setType(SeriesUnitType.LINE);
+                info = seriesInput.get(0);
+                info.setType(SeriesUnitType.LINE);
             } else {
-            		info = seriesInput.get(i);
-            		String tmp = chartType.get(col.getUniqueName());
-            		if (tmp == null) {
-            			info.setType(SeriesUnitType.COLUMN);
-            		} else {
-            			info.setType(SeriesUnitType.valueOf(tmp.toUpperCase()));
-            		}
+                info = seriesInput.get(i);
+                String tmp = chartType.get(col.getUniqueName());
+                if (tmp == null) {
+                    info.setType(SeriesUnitType.COLUMN);
+                } else {
+                    info.setType(SeriesUnitType.valueOf(tmp.toUpperCase()));
+                }
             }
             SeriesDataUnit branchData = null;
             if (info.getType() == SeriesUnitType.MAP) {
-            		List<RowHeadField> rowHeadFields = pTable.getRowHeadFields().get(0);
-	            	branchData = generateSeriesBranch(pTable, col, info, i, rowHeadFields);
+                List<RowHeadField> rowHeadFields = pTable.getRowHeadFields().get(0);
+                branchData = generateSeriesBranch(pTable, col, info, i, rowHeadFields);
             } else {
-	            	branchData = generateSeriesBranch(pTable, col, info, i);
+                branchData = generateSeriesBranch(pTable, col, info, i);
             }
             units.add(branchData);
         }
@@ -232,30 +232,30 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @return SeriesDataUnit
      */
     private SeriesDataUnit generateSeriesBranch(PivotTable pTable, ColDefine col, 
-    			SeriesInputInfo info,
-    			int i, List<RowHeadField> rowHeadFields) {
-	    	if (pTable.getDataSourceColumnBased() == null 
-					|| pTable.getDataSourceColumnBased().size() <= i) { 
-			return null;
-		}
-	    List<CellData> columnData = pTable.getDataSourceColumnBased().get(i);
-	    SeriesDataUnit seriesUnit = new SeriesDataUnit();
-	    seriesUnit.setData(getDataFromCells(columnData));
-	    seriesUnit.setName(col.getCaption());
-	    seriesUnit.setType(info.getType().getName());
-	    seriesUnit.setFormat(col.getFormat());
-//	    seriesUnit.setProperties(genDataCaptions(rowHeadFields));
-	    seriesUnit.setyAxisName(info.getyAxisName());
-	    return seriesUnit;
-	}
+            SeriesInputInfo info,
+            int i, List<RowHeadField> rowHeadFields) {
+        if (pTable.getDataSourceColumnBased() == null 
+                || pTable.getDataSourceColumnBased().size() <= i) { 
+            return null;
+        }
+        List<CellData> columnData = pTable.getDataSourceColumnBased().get(i);
+        SeriesDataUnit seriesUnit = new SeriesDataUnit();
+        seriesUnit.setData(getDataFromCells(columnData));
+        seriesUnit.setName(col.getCaption());
+        seriesUnit.setType(info.getType().getName());
+        seriesUnit.setFormat(col.getFormat());
+//        seriesUnit.setProperties(genDataCaptions(rowHeadFields));
+        seriesUnit.setyAxisName(info.getyAxisName());
+        return seriesUnit;
+    }
 
-//	private String[][] genDataCaptions(List<RowHeadField> rowHeadFields) {
-//		return rowHeadFields.stream().map(headField -> {
-//			return new String[]{headField.getV(), headField.getUniqueName()};
-//		}).toArray(String[][] :: new);
-//	}
+//    private String[][] genDataCaptions(List<RowHeadField> rowHeadFields) {
+//        return rowHeadFields.stream().map(headField -> {
+//            return new String[]{headField.getV(), headField.getUniqueName()};
+//        }).toArray(String[][] :: new);
+//    }
 
-	/**
+    /**
      * 
      * @param pTable
      * @param columnUniqName
@@ -266,11 +266,11 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      * @return
      */
     private SeriesDataUnit generateSeriesBranch(PivotTable pTable, ColDefine col, SeriesInputInfo info, int i) {
-    		
-    		if (pTable.getDataSourceColumnBased() == null 
-    				|| pTable.getDataSourceColumnBased().size() <= i) { 
-    			return null;
-    		}
+            
+        if (pTable.getDataSourceColumnBased() == null 
+            || pTable.getDataSourceColumnBased().size() <= i) { 
+            return null;
+        }
         List<CellData> columnData = pTable.getDataSourceColumnBased().get(i);
         SeriesDataUnit seriesUnit = new SeriesDataUnit();
         seriesUnit.setData(getDataFromCells(columnData));

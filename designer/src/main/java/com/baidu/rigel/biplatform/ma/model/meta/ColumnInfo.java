@@ -35,37 +35,37 @@ public class ColumnInfo extends BaseInfo {
      */
     private String dataType;
 
-	/**
-	 * @return the dataType
-	 */
-	public String getDataType() {
-		return dataType;
-	}
+    /**
+     * @return the dataType
+     */
+    public String getDataType() {
+        return dataType;
+    }
 
-	/**
-	 * @param dataType the dataType to set
-	 */
-	public void setDataType(String dataType) {
-		this.dataType = dataType;
-	}
+    /**
+     * @param dataType the dataType to set
+     */
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    /* 
+     * (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 
-	/* 
-	 * (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    /* 
+     * (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
     
     
     

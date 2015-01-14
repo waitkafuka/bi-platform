@@ -549,7 +549,7 @@ public class SchemaManageServiceImpl implements SchemaManageService {
         }
         
         if (cube.getMeasures() == null || cube.getMeasures().isEmpty()) {
-           throw new IllegalStateException("cube's measures is empty"); 
+            throw new IllegalStateException("cube's measures is empty");
         }
         return cube;
     }

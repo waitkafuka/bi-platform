@@ -190,12 +190,12 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
     }
     
     /* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
-	 */
-	@Override
-	public <T extends AbstractMessage> void setMessage(T t) {
-		return ; 
-		
-	}
+     * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
+     */
+    @Override
+    public <T extends AbstractMessage> void setMessage(T t) {
+        return ; 
+        
+    }
     
 }

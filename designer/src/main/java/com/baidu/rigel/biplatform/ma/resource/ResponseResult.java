@@ -31,11 +31,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 public class ResponseResult implements Serializable {
     
     /**
-     * serialize id
-     */
-    private static final long serialVersionUID = -4826258907545698916L;
-    
-    /**
      * 操作成功
      */
     public static final int SUCCESS = 0;
@@ -44,6 +39,11 @@ public class ResponseResult implements Serializable {
      * 操作失败
      */
     public static final int FAILED = 1;
+
+    /**
+     * serialize id
+     */
+    private static final long serialVersionUID = -4826258907545698916L;
     
     /**
      * 返回状态信息，如提示信息、错误描述信息等
