@@ -54,6 +54,7 @@ import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
@@ -265,6 +266,12 @@ public final class QueryUtils {
                                 && queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
+                            // 修正展开方式
+                            if (item.getParams().get(Constants.LEVEL) != null 
+                                    && item.getParams().get(Constants.LEVEL).equals(1)) {
+                                data.setExpand(false);
+                                data.setShow(true);
+                            }
                         }
                         datas.add(data);
                     } 
@@ -466,7 +473,7 @@ public final class QueryUtils {
             
             // TODO 处理不同cube共用同一查询条件情况
             filterDims.forEach((key, dimArray) -> {
-                if (!key.equals(area.getCubeId())) {
+                if (key != null && !key.equals(area.getCubeId())) {
                     dimArray.stream().filter(dim -> {
                         return dim instanceof TimeDimension;
                     }).forEach(dim -> {

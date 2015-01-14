@@ -2,13 +2,13 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,$out='';$out+='<!-- 其他操作 -->\r\n<div class="data-format">\r\n    <div class="data-format-alone">\r\n        <div class="data-format-black">\r\n            <span>是否过滤空白行：</span>\r\n            <input type="checkbox"\r\n            ';
+        var $utils=template.utils,$helpers=$utils.$helpers,$out='';$out+='<!-- 其他操作 -->\n<div class="data-format">\n    <div class="data-format-alone">\n        <div class="data-format-black">\n            <span>是否过滤空白行：</span>\n            <input type="checkbox"\n            ';
         if($data.dataFormat.value == "false" ){
-        $out+='\r\n\r\n            ';
+        $out+='\n\n            ';
         }else{
-        $out+='\r\n                checked="checked"\r\n            ';
+        $out+='\n                checked="checked"\n            ';
         }
-        $out+=' />\r\n        </div>\r\n    </div>\r\n</div>';
+        $out+=' />\n        </div>\n    </div>\n</div>';
         return $out;
     }
     return { render: anonymous };

@@ -216,13 +216,13 @@ define([
              */
             addComp: function (compData, compType, $realComp) {
                 var that = this;
-
                 that.model.addComp(
                     compData,
                     compType,
                     // 创建组件的外壳
-                    function (id) {
-                        $realComp.attr('data-comp-id', id);
+                    function (dataCompId, reportCompId) {
+                        $realComp.attr('data-comp-id', dataCompId);
+                        $realComp.attr('report-comp-id', reportCompId);
                         return $realComp.clone();
                     },
                     function () {
@@ -441,7 +441,12 @@ define([
              * @public
              */
             publishReport: function () {
-                this.reportView.publishReport('POST');
+                if (this.savestate == 0) {
+                    dialog.warning('您未进行保存，请保存后发布。');
+                }
+                else {
+                    this.reportView.publishReport('POST');
+                }
             },
 
             /**

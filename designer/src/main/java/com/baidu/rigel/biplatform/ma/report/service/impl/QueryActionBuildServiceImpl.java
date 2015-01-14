@@ -286,6 +286,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             if (cpModel != null && !CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
                 cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
             }
+            targetLogicModel = DeepcopyUtils.deepCopy(targetLogicModel);
            return generateQueryAction(model.getSchema(),
                cubeId, cpModel, context, logicModelAreaId, false, model);
         }
@@ -302,15 +303,21 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     private QueryAction generateQueryAction(Schema schema, String cubeId,
             LogicModel targetLogicModel, Map<String, Object> context,
             String areaId, boolean needTimeRange, ReportDesignModel reportModel) {
+        if (targetLogicModel == null) {
+            return null;
+        }
         QueryAction action = new QueryAction();
         Cube oriCube = null;
         action.setExtendAreaId(areaId);
         try {
             oriCube = QueryUtils.getCubeWithExtendArea(reportModel, reportModel.getExtendById(areaId));
         } catch (QueryModelBuildException e) {
+            logger.error(e.getMessage(), e);
+            throw new RuntimeException(e.getMessage(), e);
         }
         for (String key : context.keySet()) {
             OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, key);
+//            Object level = context.get(key + "_level");
             if (element != null && !targetLogicModel.containsOlapElement(element.getId())) {
                 Item item = new Item();
                 item.setAreaId(areaId);
@@ -339,9 +346,6 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             }
         }
         
-        if (targetLogicModel == null) {
-            return null;
-        }
         Map<Item, Object> columns = genereateItemValues(schema,
                 cubeId, targetLogicModel.getColumns(), context, needTimeRange, oriCube);
         action.setColumns(columns);
@@ -419,6 +423,11 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             String elementId = item.getOlapElementId();
             if (StringUtils.isEmpty(elementId)) {
                 continue;
+            }
+            // 是否会影响其他值
+            Object showLevel = values.get(item.getOlapElementId() + "_level");
+            if (showLevel != null) {
+                item.getParams().put(Constants.LEVEL, Integer.valueOf(showLevel.toString()));
             }
             OlapElement element = ItemUtils.getOlapElementByItem(item, schema, cubeId);
             if (element == null) {

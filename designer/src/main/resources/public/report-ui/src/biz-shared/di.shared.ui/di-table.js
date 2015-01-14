@@ -195,7 +195,7 @@ $namespace('di.shared.ui');
                 offlineDownloadBtn
             ],
             'init'
-        )
+        );
         breadcrumb && breadcrumb.hide();
 
         this.$di('getEl').style.display = 'none';
@@ -214,7 +214,7 @@ $namespace('di.shared.ui');
                 this._uOfflineDownloadBtn
             ],
             'dispose'
-        )
+        );
         DI_TABLE.superClass.dispose.call(this);
     };
 
@@ -316,13 +316,13 @@ $namespace('di.shared.ui');
             var paramArr = [];
                 for (var j = 0; j < this._uTable._aColDefine.length; j++) {
                     if(this._uTable._aColDefine[j] && this._uTable._aColDefine[j].uniqueName){
-                       paramArr.push('colUniqueNames='+this._uTable._aColDefine[j].uniqueName); 
+                       paramArr.push('colUniqueNames=' + this._uTable._aColDefine[j].uniqueName);
                     }
                 };
             this.$sync(
                 this.getModel(),
                 'MEASURE_DES',
-                { colUniqueNamesArr: paramArr},
+                { colUniqueNamesArr: paramArr },
                 null,
                 null,
                 { 
@@ -578,7 +578,9 @@ $namespace('di.shared.ui');
         this.$di(
             'dispatchEvent', 
             'rowclick',
-            [{ uniqueName: rowDefItem.uniqueName }]
+            [{
+                uniqueName: rowDefItem.uniqueName
+            }]
         );
     };
 
@@ -648,10 +650,16 @@ $namespace('di.shared.ui');
          *
          * @event
          */
+        var outParam = this.$di('getDef').outParam;
+        if (!outParam) {
+            return;
+        }
+        var params = { uniqueName: options.args.param.uniqueName};
+        params[outParam.dim] = outParam.level;
         this.$di(
             'dispatchEvent',
             options.args.eventName,
-            [{ uniqueName: options.args.param.uniqueName }]
+            [params]
         );
     };
 

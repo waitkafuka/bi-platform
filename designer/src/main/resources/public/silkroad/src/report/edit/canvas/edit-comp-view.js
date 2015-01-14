@@ -50,11 +50,9 @@ define([
                 'click .j-set-topn': 'getTopnList',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
-                'change .select-type': 'selectTypeChange',
-                'change .select-skin': 'selectSkinChange'
+                'change .select-type': 'selectTypeChange'
+                //'change .select-skin': 'selectSkinChange'
             },
-            // 下拉框样式类型ID
-            selected: 0,
             /**
              * 下拉框类型改变
              *
@@ -69,20 +67,18 @@ define([
                 var compId =  $target.attr('data-comp-id');
                 // 先析构组件
                 this.canvasView._component.dispose();
-
                 // 修改entity中下拉框类型
                 for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
                     if (
-                            compId === entityDefs[i].compId
-                            &&
-                            (
-                                entityDefs[i].clzKey === 'ECUI_SELECT' || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
-                            )
-                        ) {
-                        entityDefs[i].clzKey = selType;
+                        compId === entityDefs[i].compId
+                        &&
+                        (
+                            entityDefs[i].clzKey === 'ECUI_SELECT' || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                        )
+                    ) {
+                    entityDefs[i].clzKey = selType;
                     }
                 }
-
                 // 修改reportVm中对应组件div的data-mold属性
                 var selects = this.canvasView.model.$reportVm
                     .find('[data-component-type=SELECT]');
@@ -97,7 +93,6 @@ define([
                 this.model.canvasModel.saveJsonVm(
                     this.canvasView.showReport.call(this.canvasView)
                 );
-                //this.selectSkinChange();
             },
 
             /**
@@ -107,36 +102,29 @@ define([
              * @public
              */
             selectSkinChange: function () {
-                var $ele = this.$el.find(("[data-component-type='SELECT']"));
-                var $selects = $ele.find("[class *='comp-box']");
-                var skintype = $('.select-skin').val();
-                var $selectoption = $("[class *='ui-multi-select-options ui-panel']");
-                if (skintype == 'lightblue') {
-                    this.selected = 'lightblue';
-                    $selects.each(function () {
-                        var  $this = $(this).children().eq(0);
-                        $this.addClass('lightblue-border');
-                        $this.find('span').eq(1).addClass('lightblue-background-sele');
-                    });
-                    $selectoption.each(function () {
-                        var  $this = $(this);
-                        $this.addClass('lightblue-border');
-                        $this.find('[class *= "ui-multi-select-item-icon"]').addClass('lightblue-checkbox');
-                    });
-                }
-                else if (skintype == 'classics') {
-                    this.selected = 'classics';
-                    $selects.each(function () {
-                        var  $this = $(this).children().eq(0);
-                        $this.removeClass('lightblue-border');
-                        $this.find('span').eq(1).removeClass('lightblue-background-sele');
-                    });
-                    $selectoption.each(function () {
-                        var  $this = $(this);
-                        $this.removeClass('lightblue-border');
-                        $this.find('[class *= "ui-multi-select-item-icon"]').removeClass('lightblue-checkbox');
-                    });
-                }
+                var $target = $(event.target);
+                var skinType = $target.val();
+                var compId =  $target.attr('data-comp-id');
+                var option = this.$el.find('.select-skin').eq(0).find('option');
+                // 修改reportVm中对应组件div的data-skin属性
+                var selects = this.canvasView.model.$reportVm
+                    .find('[data-component-type=SELECT]');
+                selects.each(function () {
+                    var  $this = $(this);
+                    if ($this.attr('data-comp-id') == compId) {
+                        // 下拉框组件外框添加当前皮肤属性
+                        $this.attr('data-skin', skinType);
+                        for (var i = 0; i < option.length; i ++) {
+                            $this.removeClass($(option[i]).attr('value'));
+                        }
+                        $this.addClass(skinType);
+                    }
+                });
+
+                // 保存vm与json，保存成功后展示报表
+                this.model.canvasModel.saveJsonVm(
+                    this.canvasView.showReport.call(this.canvasView)
+                );
             },
 
             /**
@@ -170,8 +158,10 @@ define([
                 var compId = $shell.attr('data-comp-id');
                 var compType = $shell.attr('data-component-type');
                 var compMold = $shell.attr('data-mold');
+                //var compSkin = $shell.attr('data-skin');
                 that.model.compId = compId;
                 that.model.compType = compType;
+                //that.model.compSkin = compSkin;
                 // 需要先处理一下之前可能存在的编辑条与active状态
                 that.hideEditBar();
 
@@ -181,23 +171,14 @@ define([
                     var template = that._adapterEditCompTemplate(compType);
                     data.compType = compType;
                     compMold && (data.compMold = compMold);
+                    //data.compSkin = compSkin;
+                    //compSkin && (data.compSkin = compSkin);
                     var html = template.render(data);
                     that.$el.find('.j-con-comp-setting').html(html);
                     that.initLineAccept(compType);
                     $shell.addClass('active').mouseout();
                     // 初始化横轴和纵轴数据项的顺序调整
                     that.initSortingItem();
-                    // 设置样式下拉菜单默认值
-                    var $selectparent = $target.parent().parent();
-                    var $skin = that.$el.find('.select-skin');
-                    if($selectparent.attr('data-component-type') == 'SELECT') {
-                        if (that.selected == 'lightblue') {
-                            $skin.val('lightblue');
-                        }
-                        else if (that.selected == 'classics') {
-                            $skin.val('classics');
-                        }
-                    }
                     // 调整画布大小
                     that.canvasView.parentView.ueView.setSize();
                 });

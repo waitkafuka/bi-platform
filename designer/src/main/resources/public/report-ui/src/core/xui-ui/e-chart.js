@@ -476,7 +476,8 @@
         var legend = {
             // orient: 'vertical',
             x: 'center',
-            y: 'bottom'
+            y: 'bottom',
+            padding: 5
 //            borderColor: '#ccc',
 //            borderWidth: 0.5
         };
@@ -745,6 +746,9 @@
             toolTip.formatter = "{a} <br/>{b} : {c} ({d}%)";
             toolTip.trigger = 'item';
         }
+        else if (this._chartType === 'map') {
+            toolTip.trigger = 'item';
+        }
         else {
             toolTip.trigger = 'axis';
             // 在此将提示信息的format属性加上以便方便显示
@@ -834,11 +838,10 @@
             || this._chartType === 'bar'
             || this._chartType === 'line'
             || this._chartType === 'pie'
-            ) {
+        ) {
             this.$setupDataRoom(options);
             this.$setupToolBox(options);
             this.$setupYAxis(options);
-            this.$setupLegend(options);
             this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
@@ -862,6 +865,7 @@
         if (this._chartType === 'pie') {
             options.calculable = true;
         }
+        this.$setupLegend(options);
         return options;
     };
     UI_E_CHART_CLASS.$preload = function () {

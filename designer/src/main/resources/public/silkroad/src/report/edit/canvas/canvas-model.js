@@ -3,10 +3,17 @@
  * @author 赵晓强(longze_xq@163.com)
  * @date 2014-08-05
  */
-define([
+define(
+    [
         'url',
+        'constant',
         'report/component-box/components/form-config'
-    ], function (Url, formModel) {
+    ],
+    function (
+        Url,
+        Constant,
+        formModel
+    ) {
         var rootId = 'snpt.';
 
         return Backbone.Model.extend({
@@ -160,8 +167,9 @@ define([
                 compType,
                 serverData
             ) {
-                var vm = createShell(serverData.id);
-
+                // var reportId = rootId + serverData.id + Constant.COMPONENT_ID_SUFFIX[compType];
+                var reportId = rootId + serverData.id;
+                var vm = createShell(serverData.id, reportId);
                 vm.html(
                     compData.vm.render({
                         rootId: rootId,
