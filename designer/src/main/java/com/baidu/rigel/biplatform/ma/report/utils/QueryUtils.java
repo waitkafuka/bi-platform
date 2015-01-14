@@ -473,7 +473,7 @@ public final class QueryUtils {
             
             // TODO 处理不同cube共用同一查询条件情况
             filterDims.forEach((key, dimArray) -> {
-                if (!key.equals(area.getCubeId())) {
+                if (key != null && !key.equals(area.getCubeId())) {
                     dimArray.stream().filter(dim -> {
                         return dim instanceof TimeDimension;
                     }).forEach(dim -> {
