@@ -2,7 +2,9 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,compId=$data.compId,compType=$data.compType,$each=$utils.$each,xAxis=$data.xAxis,item=$data.item,$index=$data.$index,yAxis=$data.yAxis,sAxis=$data.sAxis,$out='';$out+='<div class="con-comp-setting-type1 j-comp-setting" data-comp-id="';
+        var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,reportCompId=$data.reportCompId,compId=$data.compId,compType=$data.compType,$each=$utils.$each,xAxis=$data.xAxis,item=$data.item,$index=$data.$index,yAxis=$data.yAxis,sAxis=$data.sAxis,$out='';$out+='<div class="con-comp-setting-type1 j-comp-setting" report-comp-id="';
+        $out+=$escape(reportCompId);
+        $out+='" data-comp-id="';
         $out+=$escape(compId);
         $out+='" data-comp-type="';
         $out+=$escape(compType);

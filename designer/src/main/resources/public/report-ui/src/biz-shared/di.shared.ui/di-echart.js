@@ -92,14 +92,7 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_ECHART_CLASS.$createView = function (options) {
-
         this._uChart = this.$di('vuiCreate', 'mainChart');
-
-        // 下载按钮
-        this._uDownloadBtn = this.$di('vuiCreate', 'topn');
-
-        // 离线下载
-        this._uOfflineDownloadBtn = this.$di('vuiCreate', 'offlineDownload');
     };
 
     /**
@@ -225,7 +218,7 @@ $namespace('di.shared.ui');
      */
     DI_ECHART_CLASS.enable = function () {
         foreachDo(
-            [this._uChart, this._uDownloadBtn, this._uOfflineDownloadBtn], 
+            [this._uChart],
             'enable'
         );
         DI_ECHART.superClass.enable.call(this);
@@ -330,6 +323,27 @@ $namespace('di.shared.ui');
      */
     DI_ECHART_CLASS.$handleOfflineDownloadError = function (status, ejsonObj, options) {
         DIALOG.alert(LANG.SAD_FACE + LANG.OFFLINE_DOWNLOAD_FAIL);
+    };
+
+    /**
+     * 图形选中
+     * TODO:怎么让图形选中，执行此方法
+     *
+     * @protected
+     */
+    DI_ECHART_CLASS.$chartChecked = function (options) {
+
+        var outParam = this.$di('getDef').outParam;
+        if (!outParam) {
+            return;
+        }
+        var params = { uniqueName: options.args.param.uniqueName };
+        params[outParam.dim] = outParam.level;
+        this.$di(
+            'dispatchEvent',
+            options.args.eventName,
+            [params]
+        );
     };
 
 })();

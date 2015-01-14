@@ -58,7 +58,8 @@ define(function () {
         CALENDAR: '-vu-form-calendar',
         TEXT: '-vu-form-text',
         MULTISELECT: '-vu-form-multiselect',
-        CHART: '-vu-chart'
+        CHART: '-vu-chart',
+        TABLE: '-vu-table'
     };
 
     return {

@@ -213,14 +213,13 @@ define([
              */
             addComp: function (compData, compType, $realComp) {
                 var that = this;
-
                 that.model.addComp(
                     compData,
                     compType,
                     // 创建组件的外壳
-                    function (id) {
+                    function (dataCompId, reportCompId) {
                         $realComp.attr('data-comp-id', dataCompId);
-                        $realComp.attr('report-comp-id', id);
+                        $realComp.attr('report-comp-id', reportCompId);
                         return $realComp.clone();
                     },
                     function () {
