@@ -78,4 +78,10 @@ public interface Constants {
      * NEED_LIMITED
      */
     String NEED_LIMITED = "needLimited";
+    
+    /**
+     * 级次关系
+     */
+    String LEVEL = "LEVEL";
+    
 }
