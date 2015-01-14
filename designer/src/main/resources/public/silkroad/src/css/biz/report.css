@@ -426,8 +426,8 @@
 }
 .canvas .button-publish-report {
     position: fixed;
-    bottom: 5px;
-    right: 96px;
+    bottom: 15px;
+    right: 20px;
     z-index: 5;
 }
 

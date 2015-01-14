@@ -441,7 +441,12 @@ define([
              * @public
              */
             publishReport: function () {
-                this.reportView.publishReport('POST');
+                if (this.savestate == 0) {
+                    dialog.warning('您未进行保存，请保存后发布。');
+                }
+                else {
+                    this.reportView.publishReport('POST');
+                }
             },
 
             /**
