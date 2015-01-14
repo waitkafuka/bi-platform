@@ -30,7 +30,17 @@ define(['template'], function (template) {
         if($data.compMold && $data.compMold==="ECUI_MULTI_SELECT"){
         $out+=' selected="selected"';
         }
-        $out+='>\n                多选\n            </option>\n        </select>\n    </div>\n</div>';
+        $out+='>\n                多选\n            </option>\n        </select>\n        <!--<span>下拉框皮肤：</span>-->\n        <!--<select class="select-skin" data-comp-id="';
+        $out+=$escape(compId);
+        $out+='">-->\n            <!--<option value="classics" ';
+        if($data.compSkin && $data.compSkin==="classics"){
+        $out+=' selected="selected"';
+        }
+        $out+='>-->\n            <!--经典样式-->\n            <!--</option>-->\n            <!--<option value="lightblue" ';
+        if($data.compSkin && $data.compSkin==="lightblue"){
+        $out+=' selected="selected"';
+        }
+        $out+='>-->\n            <!--商桥样式-->\n            <!--</option>-->\n        <!--</select>-->\n    </div>\n</div>';
         return $out;
     }
     return { render: anonymous };
