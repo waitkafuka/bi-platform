@@ -117,18 +117,14 @@ define([
                         dialog.alert('请先拖入指标和维度');
                         return;
                     }
-                    if (data.xAxis.length < 0 && data.yAxis.length < 0) {
-                        dialog.alert('请先拖入指标和维度');
-                        return;
-                    }
                     var htmlData = {};
                     htmlData.outParamDim = data.xAxis;
-                    htmlData.selectDim = activeEntity.outParam ? activeEntity.outParam.dim : null;
+                    htmlData.selectDimId = activeEntity.outParam ? activeEntity.outParam.dimId : null;
                     htmlData.selectLevel = activeEntity.outParam ? activeEntity.outParam.level : null;
-
+                    htmlData.selectDimName = activeEntity.outParam ? activeEntity.outParam.dimName : null;
                     var levelData = {
-                        'level1': '当前级别',
-                        'level12': '下一级别'
+                        '1': '当前级',
+                        '2': '下一级'
                     };
                     htmlData.outParamLevel = levelData;
                     var html;
@@ -196,10 +192,6 @@ define([
                             },
                             action: {
                                 name: 'sync'
-                            },
-                            dataOpt: {
-                                outParamDim: 'lzt',
-                                outParamDimLevel: 'top'
                             }
 //                            action: {
 //                                name: 'syncLiteOlapInds'
@@ -237,7 +229,9 @@ define([
                     if (!activeEntity.outParam) {
                         activeEntity.outParam = {};
                     }
-                    activeEntity.outParam.dim = $('.j-comp-relation-event-out-param').val();
+                    var dimValue = $('.j-comp-relation-event-out-param').val().split('$');
+                    activeEntity.outParam.dimId = dimValue[0];
+                    activeEntity.outParam.dimName = dimValue[1];
                     activeEntity.outParam.level = $('.j-comp-relation-event-out-param-level').val();
                     // TODO:保存json，关闭窗口
                     // 保存vm与json，保存成功后展示报表
