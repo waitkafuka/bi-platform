@@ -139,7 +139,20 @@ public final class CallbackServiceInvoker {
         switch (statusType) {
             case SUCCESS:
                 return "成功受理请求";
-            
+            case COOKIE_VALUE_IS_NULL:
+            case INTERNAL_SERVER_ERROR:
+            case INVALID_PARAM_TYPE:
+            case INVALIDATE_PARAM_NUM:
+            case INVALIDATE_USER_ID:
+            case MIS_PARAM:
+            case NOT_CONTENT_COOKIE:
+            case NOT_PROVIDE_USER_ID:
+            case PARAM_NOT_ASSIGN_VALUE:
+            case UN_AUTH:
+            case UN_KNOW_SERVICE:
+            case UN_SUPPORTED_METHOD:
+            case UNKNOW_PARAMS:
+                default:
         }
         return "未知错误，请联系系统管理人员";
     }
