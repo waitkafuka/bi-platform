@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -64,6 +65,7 @@ public class UpdateDataResource extends BaseResource {
      * @param response HttpServletResponse
      * @return ResponseResult
      */
+    @SuppressWarnings("unchecked")
     @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseResult updateData(HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOG.info("[INFO] --- --- begin update index meta with new request");
@@ -81,12 +83,12 @@ public class UpdateDataResource extends BaseResource {
         ResponseResult rs = new ResponseResult();
         DataSourceDefine ds = dsService.getDsDefine(dsName);
         DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds, securityKey);
-        Map<String, String> conds = Maps.newHashMap();
+        Map<String, Map<String, String>> conds = Maps.newHashMap();
         for (String factTable : factTableArray) {
             String str = request.getParameter(factTable);
             LOG.info("[INFO] --- --- conditions for {} is : {}", factTable, str);
             if (isValidate(str)) {
-                conds.put(factTable, str);
+                conds.put(factTable, GsonUtils.fromJson(str, HashMap.class));
             }
         }
         String condsStr = null;
@@ -126,7 +128,7 @@ public class UpdateDataResource extends BaseResource {
                 throw new IllegalStateException("begin value need bigger than zero");
             }
             Long end = Long.valueOf(json.getString("end"));
-            if (end <= begin) {
+            if (end < begin) {
                 throw new IllegalStateException("end value must larger than begin");
             }
         } catch (Exception e) {

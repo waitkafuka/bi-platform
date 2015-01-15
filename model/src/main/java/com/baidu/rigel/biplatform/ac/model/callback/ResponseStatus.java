@@ -24,6 +24,11 @@ package com.baidu.rigel.biplatform.ac.model.callback;
 public enum ResponseStatus {
     
     /**
+     * SUCCESS
+     */
+    SUCCESS(2000),
+    
+    /**
      * 未知服务
      */
     UN_KNOW_SERVICE(404),
