@@ -370,3 +370,51 @@
     height: 18px;
     text-align: center;
 }
+/*.norm-box .callback-index {*/
+    /*width: 400px;*/
+    /*border: 1px solid #C3C3C3;*/
+    /*height: 100px;*/
+/*}*/
+.callback-index {
+    float: left;
+    width: 550px;
+    margin-left: 8px
+}
+.callback-index-all {
+    float: left;
+    width: 500px;
+}
+.callback-form {
+    border: 1px solid #C3C3C3;
+    width: 500px;
+    height: 136px
+}
+.callback-name {
+    display: inline-block;
+    width: 125px;
+    height: 100%;
+    margin-left: 3px;
+}
+.callback-name div {
+    text-align: left;
+    color: #000000;
+    font-size: 14px;
+    font-family: '微软雅黑';
+    width: 100px;
+    margin: 10px 0 0 25px;
+    height: 22px;
+}
+.callback-text {
+    float: right;
+    display: inline-block;
+    width: 350px;
+    height: 100%;
+    margin-right: 20px;
+}
+.callback-text input{
+    float: right;
+    display: inline-block;
+    width: 330px;
+    height: 20px;
+    margin: 8px 0 0 0;
+}

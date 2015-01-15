@@ -53,7 +53,6 @@ define(
                 }
             }
             html = mgrTemplate.render({indList: indList, hasDerive: hasDerive});
-
             // 弹出衍生指标管理窗口
             dialog.showDialog({
                 dialog: {
@@ -106,6 +105,7 @@ define(
                     buttons: {
                         "提交": function () {
                             var $dialogDom = $(this);
+                            console.log($dialogDom);
                             that._submitMethodTypeValue($dialogDom, function () {
                                 $dialogDom.dialog('close');
                             });
@@ -150,6 +150,7 @@ define(
             result.calDeriveInds = this._getDeriveData($dom);
             result.extendInds.rr = this._getSrRrData(1, $dom);
             result.extendInds.sr = this._getSrRrData(2, $dom);
+            result.callback = this._getCallBackData($dom);
 
             that.model.submitMethodTypeValue(result, closeDialog);
         },
@@ -255,6 +256,31 @@ define(
                     'caption': $ind.val(),
                     'formula': $inputs.eq(1).val()
                 };
+                data.push(item);
+            });
+            return data;
+        },
+        /**
+         * 获取回调指标数据
+         *
+         * @param {$HTMLEelment} $dom 衍生指标管理dom元素
+         * @private
+         * @return {Array} data 计算列指标数组
+         */
+        _getCallBackData: function ($dom) {
+            var data = [];
+            // 获取创建计算列
+            $dom.find('.j-callback-index-all').eq(0).find('.callback-form').each(function () {
+                var $inputs = $(this).find('.callback-text').eq(0);
+                var item = {
+                    'id':  $inputs.attr('id') || '',
+                    'name': $inputs.find('.call-name').eq(0).val() || '',
+                    'caption': $inputs.find('.call-caption').eq(0).val() || '',
+                    'url': $inputs.find('.call-url').eq(0).val() || '',
+                    'properties': {}
+                };
+                var pro = item.properties;
+                pro.timeOut = $inputs.find('.call-timeout').val() || '';
                 data.push(item);
             });
             return data;

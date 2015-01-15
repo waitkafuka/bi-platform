@@ -69,9 +69,7 @@
                     </div>
                 </div>
             </div>
-
             <div class="data-sources-derive-list-select f-l hide j-data-sources-derive-list-select">
-
                 <div class="item">
                     <label class="label-inds-item f-l">添加环比指标</label>
                     <div class="area-inds-item j-area-inds-item-rr f-l">
@@ -110,7 +108,49 @@
             </div>
         </div>
     </div>
-    <div class="norm-box" id="j-box-callbackIndex">
+    <div class="norm-box " id="j-box-callbackIndex" style="display: none;">
+        <div class="description">
+            <div class="description-create">
+                设置回调指标区域，在下方进行设置
+                <div class="derive-inds-error hide j-derive-inds-error"></div>
+            </div>
+        </div>
+        <div class="callback-index">
+            <div class="callback-index-all j-callback-index-all">
+                {{each indList.data}}
+                {{if $value.type == "CALLBACK"}}
+                <div class="callback-form">
+                    <div class="callback-name">
+                        <div>显示名称:</div>
+                        <div>回调指标名称:</div>
+                        <div>回调地址:</div>
+                        <div>请求超时时间:</div>
+                    </div>
+                    <div class="callback-text">
+                        <input class="call-name" value="{{$value.name}}" placeholder="由数字,字母,汉字组成"/>
+                        <input class="call-caption" value="{{$value.caption}}" placeholder="由数字,字母,下划线组成并以数字开头"/>
+                        <input class="call-url" value="{{$value.url}}" placeholder="url"/>
+                        <input class="call-timeout" value="{{$value.properties.timeOut}}" placeholder="有数字组成"/>
+                    </div>
+                </div>
+                {{/if}}
+                {{/each}}
+                <div class="callback-form">
+                    <div class="callback-name">
+                        <div>显示名称:</div>
+                        <div>回调指标名称:</div>
+                        <div>回调地址:</div>
+                        <div>请求超时时间:</div>
+                    </div>
+                    <div class="callback-text">
+                        <input class="call-name" placeholder="由数字,字母,汉字组成"/>
+                        <input class="call-caption" placeholder="由数字,字母,下划线组成并以数字开头"/>
+                        <input class="call-url" placeholder="url"/>
+                        <input class="call-timeout" placeholder="有数字组成"/>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>
