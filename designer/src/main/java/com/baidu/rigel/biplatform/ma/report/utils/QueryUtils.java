@@ -266,11 +266,15 @@ public final class QueryUtils {
                                 && queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
-                            // 修正展开方式
-                            if (item.getParams().get(Constants.LEVEL) != null 
-                                    && item.getParams().get(Constants.LEVEL).equals(1)) {
-                                data.setExpand(false);
+                        }
+                        // 修正展开方式
+                        if (item.getParams().get(Constants.LEVEL) != null) {
+                            if (item.getParams().get(Constants.LEVEL).equals(1)) {
+                                data.setExpand(!queryAction.isChartQuery());
                                 data.setShow(true);
+                            } else if (item.getParams().get(Constants.LEVEL).equals(2)) {
+                                data.setExpand(true);
+                                data.setShow(false);
                             }
                         }
                         datas.add(data);
