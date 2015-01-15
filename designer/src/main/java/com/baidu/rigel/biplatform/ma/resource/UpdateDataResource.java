@@ -65,7 +65,6 @@ public class UpdateDataResource extends BaseResource {
      * @param response HttpServletResponse
      * @return ResponseResult
      */
-    @SuppressWarnings("unchecked")
     @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseResult updateData(HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOG.info("[INFO] --- --- begin update index meta with new request");
