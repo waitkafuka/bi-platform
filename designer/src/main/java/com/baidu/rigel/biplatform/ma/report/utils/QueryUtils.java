@@ -434,6 +434,7 @@ public final class QueryUtils {
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(olapElement);
                 dim.setLevels(Maps.newLinkedHashMap());;
                 ((Dimension) olapElement).getLevels().values().forEach(level -> {
+                    level.setDimension(dim);
                     dim.getLevels().put(level.getName(), level);
                 });
                 dimensions.put(dim.getName(), dim);
@@ -450,6 +451,7 @@ public final class QueryUtils {
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
                 dim.setLevels(Maps.newLinkedHashMap());
                 ((Dimension) element).getLevels().values().forEach(level -> {
+                    level.setDimension(dim);
                     dim.getLevels().put(level.getName(), level);
                 });
                 dimensions.put(element.getName(), (Dimension) element);
