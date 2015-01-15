@@ -382,12 +382,13 @@
 }
 .callback-index-all {
     float: left;
-    width: 500px;
+    width: 550px;
 }
 .callback-form {
     border: 1px solid #C3C3C3;
     width: 500px;
-    height: 136px
+    height: 136px;
+    float: left;
 }
 .callback-name {
     display: inline-block;
@@ -417,4 +418,33 @@
     width: 330px;
     height: 20px;
     margin: 8px 0 0 0;
+}
+.callback-add {
+    width: 15px;
+    height: 15px;
+    font-size: 20px;
+    float: left;
+    text-align: center;
+    margin: 0 0 0 15px;
+    cursor: pointer;
+    color: #33ccff;
+    font-weight: bold;
+}
+.callback-close {
+    width: 20px;
+    height: 20px;
+    float: right;
+    text-align: center;
+    border: 1px solid #C3C3C3;
+    cursor: pointer;
+    color: #999;
+    font-weight: bold;
+    margin-right: 12px;
+}
+.callback-retractable {
+    background: red;
+    width: 20px;
+    height: 20px;
+    float: right;
+    border: 1px solid #C3C3C3;
 }
