@@ -109,6 +109,23 @@ define([
                             $(this).attr('checked', 'checked');
                         }
                     });
+                    var $eventOutParam = $('.j-comp-relation-event-out-param');
+                    eventRelationChange($eventOutParam);
+                    $eventOutParam.unbind().change(function () {
+                        eventRelationChange($eventOutParam);
+                    });
+                }
+                function eventRelationChange($eventOutParam) {
+                    var val = $eventOutParam.val();
+                    var dimGroup = $eventOutParam.find('option:selected').attr('dimGroup');
+                    if (dimGroup === 'false') {
+                        $('.span-level').hide();
+                        $('.j-comp-relation-event-out-param-level').hide();
+                    }
+                    else {
+                        $('.span-level').show();
+                        $('.j-comp-relation-event-out-param-level').show();
+                    }
                 }
                 // 打开弹出框
                 function openDialog(data) {
