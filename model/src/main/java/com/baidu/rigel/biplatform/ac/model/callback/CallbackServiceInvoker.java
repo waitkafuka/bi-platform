@@ -70,6 +70,10 @@ public final class CallbackServiceInvoker {
         LOG.info("[INFO] --- --- callback type : {}", type.name());
         LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+        if (timeOutMillSecond <= 0) {
+            timeOutMillSecond = 1000;
+        }
+        params.put(HttpRequest.SOCKET_TIME_OUT, String.valueOf(timeOutMillSecond));
         String responseStr = HttpRequest.sendPost(url, params);
         CallbackResponse response = convertStrToResponse(responseStr, type);
         LOG.info(response.toString());

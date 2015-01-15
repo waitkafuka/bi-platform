@@ -19,9 +19,11 @@
 package com.baidu.rigel.biplatform.ma.resource.view.vo;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
+import com.google.common.collect.Maps;
 
 /**
  * Measure View Object
@@ -70,7 +72,20 @@ public class MeasureObject implements Serializable {
      */
     private boolean canToDim;
     
+    /**
+     * 表达式
+     */
     private String formula;
+    
+    /**
+     * url
+     */
+    private String url;
+    
+    /**
+     * properties
+     */
+    private Map<String, String> properties = Maps.newHashMap();
     
     /**
      * expr
@@ -150,6 +165,34 @@ public class MeasureObject implements Serializable {
      */
     public String getFormula() {
         return formula;
+    }
+
+    /**
+     * @return the url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * @param url the url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * @return the properties
+     */
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
     }
     
     
