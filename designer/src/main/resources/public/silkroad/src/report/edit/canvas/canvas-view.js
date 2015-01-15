@@ -102,7 +102,7 @@ define([
                     tolerance: 'intersect',
                     drop: function (event, ui) {
                         var $report = $(this);
-                        var $realComp = ui.helper.clone().html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
+                        var $realComp = ui.helper.clone().html('<div style="width:100%; height:20px"></div><div class="ta-c">组件占位，配置数据后展示组件</div>');
                         var compType = $realComp.attr('data-component-type');
                         var compData = compBoxModel.getComponentData(compType);
                         $realComp.removeClass(compData.iconClass + ' active');

@@ -349,20 +349,8 @@ $namespace('di.shared.ui');
         //      6e72140667f37b984d9764f5aca6b6cb_level:0
         // }
         var params = {};
-        // TODO:name值需要改动
-        params[outParam.dimId] = options.name;
+        params[outParam.dimId] = '[' + options.dimMap[outParam.dimId] + '].[' + options.name + ']';
         params[outParam.dimId + '_level'] = outParam.level;
-//        var uniqueName = options.args.param.uniqueName;
-//        uniqueName = uniqueName.replace(/{/g, '');
-//        var uniqueNames = uniqueName.split('}');
-//        for (var i = 0, iLen = uniqueNames.length; i < iLen - 1 ; i ++) {
-//            var tempName = uniqueNames[i].split('.')[0];
-//            tempName = tempName.replace('[', '').replace(']', '');
-//            if (outParam.dimName === tempName) {
-//                params[outParam.dimId] = uniqueNames[i];
-//                params[outParam.dimId + '_level'] = outParam.level;
-//            }
-//        }
         this.$di(
             'dispatchEvent',
             'rowselect',
