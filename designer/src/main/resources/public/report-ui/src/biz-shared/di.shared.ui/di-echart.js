@@ -103,8 +103,7 @@ $namespace('di.shared.ui');
     DI_ECHART_CLASS.init = function () {
         var key;
         var exportHandler = this.DEF.exportHandler;
-        // TODO:
-//        this._uChart.attach('lztClick', this.$chartChecked, this);
+        this._uChart.attach('chartClick', this.$chartClick, this);
         // 事件绑定
         for (key in exportHandler) {
             var id = exportHandler[key].datasourceId;
@@ -332,19 +331,43 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-//    DI_ECHART_CLASS.$chartChecked = function (options) {
-//
-////        var outParam = this.$di('getDef').outParam;
-////        if (!outParam) {
-////            return;
-////        }
-////        var params = { uniqueName: options.args.param.uniqueName };
-////        params[outParam.dim] = outParam.level;
-//        this.$di(
-//            'dispatchEvent',
-//            options.args.eventName,
-//            [{}]
-//        );
-//    };
+    DI_ECHART_CLASS.$chartClick = function (options) {
+
+//        var outParam = this.$di('getDef').outParam;
+//        if (!outParam) {
+//            return;
+//        }
+//        var params = { uniqueName: options.args.param.uniqueName };
+//        params[outParam.dim] = outParam.level;
+        var outParam = this.$di('getDef').outParam;
+        if (!outParam) {
+            return;
+        }
+        // 整理后端需要的数据格式
+        // {
+        //      6e72140667f37b984d9764f5aca6b6cb:[dim_trade_trade_l1].[广播通信]
+        //      6e72140667f37b984d9764f5aca6b6cb_level:0
+        // }
+        var params = {};
+        // TODO:name值需要改动
+        params[outParam.dimId] = options.name;
+        params[outParam.dimId + '_level'] = outParam.level;
+//        var uniqueName = options.args.param.uniqueName;
+//        uniqueName = uniqueName.replace(/{/g, '');
+//        var uniqueNames = uniqueName.split('}');
+//        for (var i = 0, iLen = uniqueNames.length; i < iLen - 1 ; i ++) {
+//            var tempName = uniqueNames[i].split('.')[0];
+//            tempName = tempName.replace('[', '').replace(']', '');
+//            if (outParam.dimName === tempName) {
+//                params[outParam.dimId] = uniqueNames[i];
+//                params[outParam.dimId + '_level'] = outParam.level;
+//            }
+//        }
+        this.$di(
+            'dispatchEvent',
+            'rowselect',
+            [params]
+        );
+    };
 
 })();

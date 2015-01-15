@@ -476,8 +476,8 @@
         var legend = {
             // orient: 'vertical',
             x: 'center',
-            y: 'bottom',
-            padding: 5
+            y: 'bottom'
+//            padding: 5
 //            borderColor: '#ccc',
 //            borderWidth: 0.5
         };
@@ -801,13 +801,18 @@
      * @public
      */
     UI_E_CHART_CLASS.$createChart = function (options) {
+        var that = this;
         var start;
         var end;
         var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
+        this._oChart.on(echarts.config.EVENT.CLICK, chartClick);
         if (!this._chartType === 'pie') {
             this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
+        }
+        function chartClick(options) {
+            that.notify('chartClick', options);
         }
         function zoomChage(param) {
             start = param.zoom.xStart;
@@ -828,7 +833,10 @@
      */
     UI_E_CHART_CLASS.$initOptions = function () {
         var options = {
-            title: { text: '' }
+            grid: {
+                x: '90px',
+                y: '10px'
+            }
         };
 
         this.$setupSeries(options);
