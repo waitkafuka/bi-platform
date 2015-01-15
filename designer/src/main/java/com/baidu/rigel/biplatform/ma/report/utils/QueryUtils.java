@@ -657,14 +657,17 @@ public final class QueryUtils {
                 chart.setTopType(topSetting.getTopType().name());
                 chart.setAreaId(area.getId());
             }
+            final Map<String, String> dimMap = Maps.newConcurrentMap();
             String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);
                 if (tmp != null) {
+                    dimMap.put(tmp.getId(), tmp.getName());
                     return tmp.getCaption();
                 } else {
                     return null;
                 }
             }).filter(x -> x != null).toArray(String[] :: new);
+            chart.setDimMap(dimMap);
             chart.setAllDims(allDims);
             String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);

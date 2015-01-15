@@ -84,4 +84,9 @@ public interface Constants {
      */
     String LEVEL = "LEVEL";
     
+    /**
+     * SOCKET_TIME_OUT_KEY
+     */
+    String SOCKET_TIME_OUT_KEY = "timeOut";
+    
 }

@@ -3,13 +3,15 @@
 var demoData = {
     outParamDim: {
         id: '',
-        caption: ''
+        caption: '',
+        name: ''
     },
     levelData: {
         'level1': '当前级别',
         'level12': '下一级别'
     },
-    selectDim: '',
+    selectDimId: '',
+    selectDimName: '',
     selectLevel: ''
 };
 -->
@@ -22,7 +24,7 @@ var demoData = {
         <span class="span-out-param">选择传出维度</span>
         <select class="j-comp-relation-event-out-param">
             {{each outParamDim as $option key}}
-            <option value={{$option.id}}
+            <option value="{{$option.id}}${{$option.name}}" dimGroup="{{if $option.dimGroup === true}}true{{else}}false{{/if}}"
             {{if selectDim && $option.id === selectDim}}
             selected="selected"
             {{/if}}>{{$option.caption}}

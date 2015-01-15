@@ -96,6 +96,7 @@ define(
                         });
                         // tab切换事件
                         $(this).on('click', '.j-classification', function (event) {
+                            that._tabBox(event);
                             that._tabClick(event);
                         });
                         $(this).on('click', '.area-inds-item-ind-delete', function (event) {
@@ -317,6 +318,34 @@ define(
                 .show()
                 .siblings()
                 .hide();
+        },
+        /**
+         * callback回调指标切换
+         *
+         * @param {event} event tab事件
+         * @private
+         */
+        _tabBox: function (event) {
+            var id;
+            if (event.target.tagName.toLowerCase() == 'span') {
+                id = $(event.target).parent().attr('id');
+                fnTabBox(id);
+            }
+            else if (event.target.tagName.toLowerCase() == 'li') {
+                id = $(event.target).attr('id');
+                fnTabBox(id);
+            }
+
+            function fnTabBox(id) {
+                if (id == 'j-tab-callback') {
+                    $('.norm-box').hide();
+                    $('#j-box-callbackIndex').show();
+                }
+                else {
+                    $('.norm-box').hide();
+                    $('#j-box-norm').show();
+                }
+            }
         }
     });
 });

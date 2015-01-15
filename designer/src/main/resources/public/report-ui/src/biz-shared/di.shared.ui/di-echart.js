@@ -103,7 +103,7 @@ $namespace('di.shared.ui');
     DI_ECHART_CLASS.init = function () {
         var key;
         var exportHandler = this.DEF.exportHandler;
-        
+        this._uChart.attach('chartClick', this.$chartClick, this);
         // 事件绑定
         for (key in exportHandler) {
             var id = exportHandler[key].datasourceId;
@@ -331,17 +331,29 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-    DI_ECHART_CLASS.$chartChecked = function (options) {
+    DI_ECHART_CLASS.$chartClick = function (options) {
 
+//        var outParam = this.$di('getDef').outParam;
+//        if (!outParam) {
+//            return;
+//        }
+//        var params = { uniqueName: options.args.param.uniqueName };
+//        params[outParam.dim] = outParam.level;
         var outParam = this.$di('getDef').outParam;
         if (!outParam) {
             return;
         }
-        var params = { uniqueName: options.args.param.uniqueName };
-        params[outParam.dim] = outParam.level;
+        // 整理后端需要的数据格式
+        // {
+        //      6e72140667f37b984d9764f5aca6b6cb:[dim_trade_trade_l1].[广播通信]
+        //      6e72140667f37b984d9764f5aca6b6cb_level:0
+        // }
+        var params = {};
+        params[outParam.dimId] = '[' + options.dimMap[outParam.dimId] + '].[' + options.name + ']';
+        params[outParam.dimId + '_level'] = outParam.level;
         this.$di(
             'dispatchEvent',
-            options.args.eventName,
+            'rowselect',
             [params]
         );
     };

@@ -19,8 +19,12 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
+import com.google.common.collect.Maps;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
 
 /**
  * 
@@ -70,9 +74,13 @@ public final class CallbackServiceInvoker {
         LOG.info("[INFO] --- --- callback type : {}", type.name());
         LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+        if (timeOutMillSecond <= 0) {
+            timeOutMillSecond = 1000;
+        }
+        params.put(HttpRequest.SOCKET_TIME_OUT, String.valueOf(timeOutMillSecond));
         String responseStr = HttpRequest.sendPost(url, params);
         CallbackResponse response = convertStrToResponse(responseStr, type);
-        LOG.info(response.toString());
+        LOG.info("[INFO] --- --- resposne : {}", response);
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
         long end = System.currentTimeMillis() - begin;
         LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
@@ -82,12 +90,70 @@ public final class CallbackServiceInvoker {
     }
 
     /**
-     * 
+     * 将callback请求结果封装为CallbackResponse，如因404等错误信息需cache异常另处理
      * @param responseStr
      * @param type
      * @return CallbackResponse
      */
     private static CallbackResponse convertStrToResponse(String responseStr, CallbackType type) {
-        return null;
+        LOG.info("[INFO] --- --- message received from callback server  is {}", responseStr);
+        CallbackResponse rs = new CallbackResponse();
+        long begin = System.currentTimeMillis();
+        if (StringUtils.isEmpty(responseStr)) {
+            throw new RuntimeException("请求响应未满足协议规范");
+        }
+        JsonObject json = new JsonParser().parse(responseStr).getAsJsonObject();
+        int status = json.get("status").getAsInt();
+        String message = json.get("message").getAsString();
+        String provider = json.get("provider").getAsString();
+        String cost = json.get("cost").getAsString();
+        String version = json.get("version").getAsString();
+        LOG.info("[INFO] ------------------------------callback response desc -----------------------------------");
+        LOG.info("[INFO] --- --- status : {}", status);
+        LOG.info("[INFO] --- --- message : {}", message);
+        LOG.info("[INFO] --- --- provider : {}", provider);
+        LOG.info("[INFO] --- --- cost : {}", cost);
+        LOG.info("[INFO] --- --- callback version : {}", version);
+        LOG.info("[INFO] -----------------------------end print response desc -----------------------------------");
+        LOG.info("[INFO] --- --- package result to CallbackResponse cost {} ms",
+                (System.currentTimeMillis() - begin));
+        rs.setCost(Integer.valueOf(StringUtils.isEmpty(cost) ? "0" : cost));
+        rs.setStatus(ResponseStatus.valueOf(String.valueOf(status)));
+        rs.setProvider(provider);
+        rs.setVersion(version);
+        rs.setMessage(getNlsMessage(status));
+        if (ResponseStatus.SUCCESS.getValue() == status) {
+            // 处理结果
+        }
+        return rs;
+    }
+
+    /**
+     * 获取提示信息
+     * @param status
+     * @return String
+     */
+    private static String getNlsMessage(int status) {
+        ResponseStatus statusType = ResponseStatus.valueOf(String.valueOf(status));
+        // 以后考虑国际化，此处为临时方案
+        switch (statusType) {
+            case SUCCESS:
+                return "成功受理请求";
+            case COOKIE_VALUE_IS_NULL:
+            case INTERNAL_SERVER_ERROR:
+            case INVALID_PARAM_TYPE:
+            case INVALIDATE_PARAM_NUM:
+            case INVALIDATE_USER_ID:
+            case MIS_PARAM:
+            case NOT_CONTENT_COOKIE:
+            case NOT_PROVIDE_USER_ID:
+            case PARAM_NOT_ASSIGN_VALUE:
+            case UN_AUTH:
+            case UN_KNOW_SERVICE:
+            case UN_SUPPORTED_METHOD:
+            case UNKNOW_PARAMS:
+                default:
+        }
+        return "未知错误，请联系系统管理人员";
     }
 }

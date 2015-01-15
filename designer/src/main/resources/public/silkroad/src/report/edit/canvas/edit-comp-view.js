@@ -19,9 +19,11 @@ define([
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'report/edit/canvas/topn-setting-template',
+        'report/edit/canvas/comp-relation-event-setting-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
-        'report/edit/canvas/norm-info-depict-template'
+        'report/edit/canvas/norm-info-depict-template',
+        'report/edit/canvas/filter-blank-line-template'
     ],
     function (
         template,
@@ -36,9 +38,11 @@ define([
         defaultSelectedTimeSettingTemplate,
         dataFormatSettingTemplate,
         topnSettingTemplate,
+        compRelationEventSettingTemplate,
         FloatWindow,
         indMenuTemplate,
-        normInfoDepictTemplate
+        normInfoDepictTemplate,
+        filterBlankLineTemplate
         ) {
 
         return Backbone.View.extend({
@@ -48,10 +52,277 @@ define([
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
                 'click .j-set-topn': 'getTopnList',
+                'click .j-set-relation': 'setCompRelationEvent',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
-                'change .select-type': 'selectTypeChange'
-                //'change .select-skin': 'selectSkinChange'
+                'change .select-type': 'selectTypeChange',
+                'click .j-others-operate': 'getFilterBlankLine'
+            },
+
+            //------------------------------------------
+            // 设置组件关联关系
+            //------------------------------------------
+
+            /**
+             * 设置组件关联关系
+             *
+             * @param {event} event 点击事件（报表组件上的 关联 按钮）
+             * @public
+             */
+            setCompRelationEvent: function (event) {
+                var that = this;
+                // 获取组件本身的属性信息
+                // 当前编辑组件的 组件id（组件在silkroad端主要使用的id）
+                var activeSilkroadCompId = that.getActiveCompId();
+                // 当前编辑组件的 组件id（组件在report-ui端主要使用的id）
+                var activeProductCompId = that.getActiveReportCompId();
+                var reportJson = this.model.get('canvasModel').reportJson;
+                var entityDefs = reportJson.entityDefs; // 组件实例数组
+                var activeEntity = $.getTargetElement(activeSilkroadCompId, entityDefs);
+                var activeCompRealtionIds = $.getEntityInteractionsId(activeEntity);
+                var proportionW;
+                var proportionH;
+                that.model.getCompAxis(activeSilkroadCompId, openDialog);
+                // 渲染缩略图
+                function renderThumbnail() {
+                    // 渲染缩略图
+                    var canvasWidth = $('.j-report').width();
+                    // TODO:此高度好像是有问题的
+                    var canvasHeight = $('.di-o_o-body').height();
+                    // 获取缩略比例
+                    var sumbnailWidth = $('.comp-realtion-box').width();
+                    var sumbnailHeight = $('.comp-realtion-box').height();
+                    proportionW = sumbnailWidth / canvasWidth;
+                    proportionH = sumbnailHeight / canvasHeight;
+                    // 获取到所有组件
+                    var compItems = $('.j-report').find('.j-component-item');
+                    compItems.each(function () {
+                        appendThumbnail($(this));
+                    });
+                    // 绑定缩略图里面checkbox事件，当点击后，改变当前选中状态
+                    var $chks = $('input[name="comp-thumbnail"]');
+                    $chks.unbind().click(function () {
+                        if ($(this).attr('checked')) {
+                            $(this).removeAttr('checked');
+                        }
+                        else {
+                            $(this).attr('checked', 'checked');
+                        }
+                    });
+                    var $eventOutParam = $('.j-comp-relation-event-out-param');
+                    eventRelationChange($eventOutParam);
+                    $eventOutParam.unbind().change(function () {
+                        eventRelationChange($eventOutParam);
+                    });
+                }
+                function eventRelationChange($eventOutParam) {
+                    var val = $eventOutParam.val();
+                    var dimGroup = $eventOutParam.find('option:selected').attr('dimGroup');
+                    if (dimGroup === 'false') {
+                        $('.span-level').hide();
+                        $('.j-comp-relation-event-out-param-level').hide();
+                    }
+                    else {
+                        $('.span-level').show();
+                        $('.j-comp-relation-event-out-param-level').show();
+                    }
+                }
+                // 打开弹出框
+                function openDialog(data) {
+                    if (!data.xAxis || !data.yAxis) {
+                        dialog.alert('请先拖入指标和维度');
+                        return;
+                    }
+                    if (data.xAxis.length < 0 && data.yAxis.length < 0) {
+                        dialog.alert('请先拖入指标和维度');
+                        return;
+                    }
+                    var htmlData = {};
+                    htmlData.outParamDim = data.xAxis;
+                    htmlData.selectDimId = activeEntity.outParam ? activeEntity.outParam.dimId : null;
+                    htmlData.selectLevel = activeEntity.outParam ? activeEntity.outParam.level : null;
+                    htmlData.selectDimName = activeEntity.outParam ? activeEntity.outParam.dimName : null;
+                    var levelData = {
+                        '1': '当前级',
+                        '2': '下一级'
+                    };
+                    htmlData.outParamLevel = levelData;
+                    var html;
+                    html = compRelationEventSettingTemplate.render(htmlData);
+                    dialog.showDialog({
+                        title: '组件关联关系设置',
+                        content: html,
+                        dialog: {
+                            width: 550,
+                            height: 550,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveCompRelation($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                    renderThumbnail();
+                }
+
+                /**
+                 * 保存数据关联关系
+                 * 不管被关联组件原来是否存在关联关系，按照缩略图里面的选中状态重新进行关联
+                 * 情况1：如果原来存在关联，缩略图里面并无修改，那么json中之前关联关系依旧
+                 * 情况2：如果原来存在关联关系，缩略图里面取消了此关系，那么json中取消关联关系
+                 * 情况3：如果原来不存在关联关系，缩略图里面进行了关联，那么json中添加关联关系
+                 */
+                function saveCompRelation($dialog) {
+                    // 获取到选中的待关联组件
+                    var $chks = $('input[name="comp-thumbnail"]');
+                    var compIdArry = [];
+                    //var selCompIdArr = [];
+                    $chks.each(function () {
+                        var $this = $(this);
+                        var idObj = {};
+                        if ($this.attr('checked')) {
+                            idObj.checked = true;
+                        }
+                        else {
+                            idObj.checked = false;
+                        }
+                        idObj.id = $(this).val();
+                        compIdArry.push(idObj);
+                    });
+                    // 循环遍历组件，往reportJson中添加关联关系
+                    for (var x = 0, xLen = compIdArry.length; x < xLen; x ++) {
+                        // 获取被关联组件的json配置信息
+                        var curEntity = $.getTargetElement(compIdArry[x].id, entityDefs);
+
+                        var intTemp = {
+                            event: {
+                                rid: activeProductCompId,
+                                // TODO:对应修改
+                                name: 'rowselect'
+                            },
+                            action: {
+                                name: 'sync'
+                            }
+//                            action: {
+//                                name: 'syncLiteOlapInds'
+//                            },
+//                            dataOpt: {
+//                                needShowCalcInds: true,
+//                                submitMode: 'IMMEDIATE',
+//                                reportType: 'RTPL_OLAP_TABLE',
+//                                datasourceId: {
+//                                    SELECT: 'LIST_SELECT'
+//                                }
+//                            }
+                        };
+//                        curEntity.outParamDim = 'lzt';
+//                        curEntity.outParamDimLevel = 'top';
+                        // 如果存在事件关联
+                        if (curEntity.interactions) {
+                            // TODO:需要判断是勾选上了，还是取消掉了
+                            // 判断当前实例中是否已经有对应事件关联
+                            var hasRelation = $.hasRelation(activeProductCompId, curEntity);
+                            if (hasRelation > -1) {
+                                curEntity.interactions.splice(hasRelation, 1);
+                            }
+                            // 如果勾选，就添加关联关系
+                            if (compIdArry[x].checked) {
+                                curEntity.interactions.push(intTemp);
+                            }
+                         }
+                        // 如果不存在事件关联
+                        else {
+                            curEntity.interactions = [];
+                            curEntity.interactions.push(intTemp);
+                        }
+                    }
+                    if (!activeEntity.outParam) {
+                        activeEntity.outParam = {};
+                    }
+                    var dimValue = $('.j-comp-relation-event-out-param').val().split('$');
+                    activeEntity.outParam.dimId = dimValue[0];
+                    activeEntity.outParam.dimName = dimValue[1];
+                    activeEntity.outParam.level = $('.j-comp-relation-event-out-param-level').val();
+                    // TODO:保存json，关闭窗口
+                    // 保存vm与json，保存成功后展示报表
+                    that.model.canvasModel.saveJsonVm(
+                        function () {
+                            $dialog.dialog('close');
+                            that.canvasView.showReport.call(that.canvasView);
+                        }
+                    );
+                }
+                // 添加缩略图
+                function appendThumbnail($this) {
+                    var tW = $this.width();
+                    var tH = $this.height();
+                    var tL = parseInt($this.css('left'));
+                    var tT = parseInt($this.css('top'));
+                    var nW = tW * proportionW;
+                    var nH = tH * proportionH;
+                    var nT = tT * proportionH;
+                    var nL = tL * proportionW;
+                    var compType = $this.attr('data-component-type');
+                    var compId = $this.attr('data-comp-id');
+                    var reportCompId = $this.attr('report-comp-id');
+                    var imgName = '';
+                    switch (compType) {
+                        case 'CHART':
+                            imgName = 'chart';
+                            break;
+                        case 'TABLE':
+                            imgName = 'table';
+                            break;
+                    }
+                    var chkStr = '';
+                    var checkedStr = '';
+                    // 如果不是当前组件的缩略图，可以勾选
+                    if (activeSilkroadCompId !== compId) {
+                        // 如果此组件，已经被当前编辑状态的组件所关联，那么将不能设定关联关系
+                        if (!$.isInArray(reportCompId, activeCompRealtionIds)) {
+                            var curEntity = $.getTargetElement(compId, entityDefs);
+                            var curCompInteraIds;
+                            if (curEntity) {
+                                curCompInteraIds = $.getEntityInteractionsId(curEntity);
+                                if ($.isInArray(activeProductCompId, curCompInteraIds)) {
+                                    checkedStr = ' checked=checked';
+                                }
+                            }
+                            chkStr = '<input type="checkbox" name="comp-thumbnail" '+ checkedStr + ' value="' + compId + '" />';
+                        }
+                    }
+                    var $Div = $(
+                        ['<div class="comp-thumbnail">',
+                            chkStr,
+                            '<div class="comp-thumbnail-pic">',
+                            // TODO:路径可能会改
+                                '<img src="src/css/img/thumbnail-', imgName, '.png"/>',
+                            '</div>',
+                        '</div>'].join('')
+                    );
+                    // 添加位置信息以及宽度高度
+                    $Div.css({
+                        width: nW + 'px',
+                        height: nH + 'px',
+                        left: nL + 'px',
+                        top: nT + 'px'
+                    });
+                    // 添加其他有用属性信息
+                    $Div.attr('data-component-type', compType);
+                    $Div.attr('data-mold', $this.attr('data-mold'));
+                    $Div.attr('data-comp-id', compId);
+                    $('.comp-realtion-box').append($Div);
+                }
             },
             /**
              * 下拉框类型改变
@@ -67,18 +338,20 @@ define([
                 var compId =  $target.attr('data-comp-id');
                 // 先析构组件
                 this.canvasView._component.dispose();
+
                 // 修改entity中下拉框类型
                 for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
                     if (
-                        compId === entityDefs[i].compId
-                        &&
-                        (
-                            entityDefs[i].clzKey === 'ECUI_SELECT' || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
-                        )
-                    ) {
-                    entityDefs[i].clzKey = selType;
+                            compId === entityDefs[i].compId
+                            &&
+                            (
+                                entityDefs[i].clzKey === 'ECUI_SELECT' || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                            )
+                        ) {
+                        entityDefs[i].clzKey = selType;
                     }
                 }
+
                 // 修改reportVm中对应组件div的data-mold属性
                 var selects = this.canvasView.model.$reportVm
                     .find('[data-component-type=SELECT]');
@@ -86,38 +359,6 @@ define([
                     var  $this = $(this);
                     if ($this.attr('data-comp-id') === compId) {
                         $this.attr('data-mold', selType);
-                    }
-                });
-
-                // 保存vm与json，保存成功后展示报表
-                this.model.canvasModel.saveJsonVm(
-                    this.canvasView.showReport.call(this.canvasView)
-                );
-            },
-
-            /**
-             * 下拉框皮肤改变
-             *
-             * @param {event} event 点击事件（报表组件上的编辑按钮）
-             * @public
-             */
-            selectSkinChange: function () {
-                var $target = $(event.target);
-                var skinType = $target.val();
-                var compId =  $target.attr('data-comp-id');
-                var option = this.$el.find('.select-skin').eq(0).find('option');
-                // 修改reportVm中对应组件div的data-skin属性
-                var selects = this.canvasView.model.$reportVm
-                    .find('[data-component-type=SELECT]');
-                selects.each(function () {
-                    var  $this = $(this);
-                    if ($this.attr('data-comp-id') == compId) {
-                        // 下拉框组件外框添加当前皮肤属性
-                        $this.attr('data-skin', skinType);
-                        for (var i = 0; i < option.length; i ++) {
-                            $this.removeClass($(option[i]).attr('value'));
-                        }
-                        $this.addClass(skinType);
                     }
                 });
 
@@ -155,13 +396,15 @@ define([
                 var that = this;
                 var $target = $(event.target);
                 var $shell = $target.parents('.j-component-item');
+                // 在silkroad中额外添加的组件id
                 var compId = $shell.attr('data-comp-id');
+                // 组件本身的id
+                var reportCompId = $shell.attr('report-comp-id');
                 var compType = $shell.attr('data-component-type');
                 var compMold = $shell.attr('data-mold');
-                //var compSkin = $shell.attr('data-skin');
                 that.model.compId = compId;
                 that.model.compType = compType;
-                //that.model.compSkin = compSkin;
+
                 // 需要先处理一下之前可能存在的编辑条与active状态
                 that.hideEditBar();
 
@@ -170,15 +413,15 @@ define([
                     data.compId = compId;
                     var template = that._adapterEditCompTemplate(compType);
                     data.compType = compType;
+                    data.reportCompId = reportCompId;
                     compMold && (data.compMold = compMold);
-                    //data.compSkin = compSkin;
-                    //compSkin && (data.compSkin = compSkin);
                     var html = template.render(data);
                     that.$el.find('.j-con-comp-setting').html(html);
                     that.initLineAccept(compType);
                     $shell.addClass('active').mouseout();
                     // 初始化横轴和纵轴数据项的顺序调整
                     that.initSortingItem();
+
                     // 调整画布大小
                     that.canvasView.parentView.ueView.setSize();
                 });
@@ -998,6 +1241,7 @@ define([
                         var $this = $(this);
                         var name = $this.attr('name');
                         data[name] = $this.val();
+                        //console.log(data[name]);
                     });
                     that.model.saveDataFormatInfo(compId, data, function () {
                         $dialog.dialog('close');
@@ -1142,6 +1386,71 @@ define([
             },
 
             /**
+             * 获取过滤空白行，并弹框展现
+             *
+             * @param {event} event 点击事件
+             * @public
+             */
+            getFilterBlankLine: function (event) { //TODO:实现业务逻辑
+                var that = this;
+                var compId = that.getActiveCompId();
+                that.model.getFilterBlankLine(compId, openDataFormatDialog);
+                /**
+                 * 打开数据格式设置弹框
+                 */
+                function openDataFormatDialog(data) {
+                    var html;
+                    if (!data) {
+                        dialog.alert('没有指标');
+                        return;
+                    }
+                    html = filterBlankLineTemplate.render(
+                        data
+                    );
+                    dialog.showDialog({
+                        title: '其他操作',
+                        content: html,
+                        dialog: {
+                            width: 320,
+                            height: 170,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function() {
+                                        saveFilterBlankLine($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
+                                }
+                            ]
+                        }
+                    });
+                }
+                /**
+                 * 保存数据格式
+                 */
+                function saveFilterBlankLine($dialog) {
+                    var $check = $('.data-format-black').find('input').eq(0);
+                    var data = {};
+                    if ($check.is(':checked')) {
+                        data.filterBlank = "true";
+                    }
+                    else {
+                        data.filterBlank = "false";
+                    }
+                    that.model.saveFilterBlankLine(compId, data, function () {
+                        $dialog.dialog('close');
+                        that.canvasView.showReport();
+                    });
+                }
+            },
+
+            /**
              * 获取活动状态的组件的id
              *
              * @public
@@ -1150,6 +1459,10 @@ define([
             getActiveCompId: function () {
                 var $compSetting = this.$conCompSetting.find('.j-comp-setting');
                 return $compSetting.attr('data-comp-id');
+            },
+            getActiveReportCompId: function () {
+                var $compSetting = this.$conCompSetting.find('.j-comp-setting');
+                return $compSetting.attr('report-comp-id');
             }
         });
 

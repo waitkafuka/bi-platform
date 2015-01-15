@@ -87,7 +87,8 @@ public class ChartBuildServiceImpl implements ChartBuildService {
 //                seriesInput.setyAxisName(type);
 //            
 //        }
-        List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInputs, tableResult, chartType, isTimeChart);
+        List<SeriesDataUnit> seriesUnits = getSeriesUnitsByInputUnit(seriesInputs,
+                tableResult, chartType, isTimeChart);
         reportChart.getSeriesData().addAll(seriesUnits);
         // }
         // ChartMetaData chartMeta = new ChartMetaData();
@@ -126,8 +127,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
                 Collections.addAll(tmp, data.getData());
             }
         });
-        BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } )
-                .toArray(BigDecimal[] :: new);
+        BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } ).toArray(BigDecimal[] :: new);
         tmp.clear();
         Collections.addAll(tmp, tmpArray);
         Collections.sort(tmp);

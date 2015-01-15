@@ -829,15 +829,14 @@ public class ReportDesignModelResource extends BaseResource {
         if (this.reportDesignModelService.getModelByIdOrName(reportId, false) == null) {
             return ResourceUtils.getErrorResult("未保存的报表，不能发布", 1);
         }
-        try {
-            model = reportModelCacheManager.getReportModel(reportId);
-        } catch (CacheOperationException e) {
-            logger.error("There are no such model in cache. Report Id: " + reportId, e);
-            model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
-            if (model == null) {
-                return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
-            }
+//        try {
+//            model = reportModelCacheManager.getReportModel(reportId);
+        model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
+//        } catch (CacheOperationException e) {
+        if (model == null) {
+            return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
         }
+//        }
         try {
             this.reportDesignModelService.publishReport(model, securityKey);
         } catch (ReportModelOperationException | DataSourceOperationException e) {

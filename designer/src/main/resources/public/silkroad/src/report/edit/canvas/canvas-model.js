@@ -171,7 +171,8 @@ define(
                 var reportId = rootId + serverData.id;
                 var vm = createShell(serverData.id, reportId);
                 vm.html(
-                    compData.vm.render({
+                    '<div style="width:100%; height:20px"></div>'
+                    + compData.vm.render({
                         rootId: rootId,
                         serverData: serverData
                     })
