@@ -15,16 +15,19 @@
  */
 package com.baidu.rigel.biplatform.ac.model.callback;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
-import com.google.common.collect.Maps;
-import com.google.gson.JsonParser;
+import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -65,7 +68,7 @@ public final class CallbackServiceInvoker {
      * @return CallbackResponse callback响应
      */
     public static CallbackResponse invokeCallback(String url, Map<String, String> params,
-            CallbackType type, int timeOutMillSecond) {
+            CallbackType type, long timeOutMillSecond) {
         long begin = System.currentTimeMillis();
         LOG.info("[INFO] --- --- begin invoke callback service ... ...");
         LOG.info("[INFO] --- --- params : {}", params);
@@ -123,9 +126,23 @@ public final class CallbackServiceInvoker {
         rs.setVersion(version);
         rs.setMessage(getNlsMessage(status));
         if (ResponseStatus.SUCCESS.getValue() == status) {
-            // 处理结果
+            rs.setData(getCallbackValue(json.get("data").getAsString(), type));
         }
         return rs;
+    }
+
+    private static List<CallbackValue> getCallbackValue(String data, CallbackType type) {
+        List<CallbackValue> rs = Lists.newArrayList();
+        if (StringUtils.isEmpty(data)) {
+            return rs;
+        }
+        switch (type) {
+            case DIM:
+                rs = AnswerCoreConstant.GSON.fromJson(data, new TypeToken<List<CallbackDimTreeNode>>(){}.getType());
+            case MEASURE:
+                rs = AnswerCoreConstant.GSON.fromJson(data, new TypeToken<List<CallbackMeasureVaue>>(){}.getType());
+        }
+        throw new IllegalStateException("错误的响应结果");
     }
 
     /**
@@ -140,19 +157,32 @@ public final class CallbackServiceInvoker {
             case SUCCESS:
                 return "成功受理请求";
             case COOKIE_VALUE_IS_NULL:
+                return "Cookie未设置正确的值";
             case INTERNAL_SERVER_ERROR:
+                return "服务器内部异常";
             case INVALID_PARAM_TYPE:
+                return "参数类型错误";
             case INVALIDATE_PARAM_NUM:
+                return "参数个数不正确";
             case INVALIDATE_USER_ID:
+                return "错误的用户身份信息";
             case MIS_PARAM:
+                return "参数丢失";
             case NOT_CONTENT_COOKIE:
+                return "未提供cookie信息";
             case NOT_PROVIDE_USER_ID:
+                return "未提供用户身份信息";
             case PARAM_NOT_ASSIGN_VALUE:
+                return "错误的参数值";
             case UN_AUTH:
+                return "未授权";
             case UN_KNOW_SERVICE:
+                return "错误的请求地址";
             case UN_SUPPORTED_METHOD:
+                return "错误的请求方法";
             case UNKNOW_PARAMS:
-                default:
+                return "未知参数";
+            default:
         }
         return "未知错误，请联系系统管理人员";
     }

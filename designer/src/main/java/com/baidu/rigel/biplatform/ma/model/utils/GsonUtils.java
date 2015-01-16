@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.ma.model.utils;
 
+import java.lang.reflect.Type;
+
 import org.apache.commons.lang.StringUtils;
 
 import com.google.gson.Gson;
@@ -53,6 +55,19 @@ public final class GsonUtils {
             return null;
         }
         return GSON.fromJson(json, clazz);
+    }
+    
+    /**
+     * 
+     * @param json
+     * @param type
+     * @return T
+     */
+    public static <T> T fromJson(String json, Type type) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        return GSON.fromJson(json, type);
     }
     
     /**
