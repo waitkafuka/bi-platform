@@ -126,7 +126,7 @@ public class QueryRequestUtil {
                     }
                 }
             }
-            if(query.getSelect().getQueryProperties().contains(ex.getProperties())){
+            if(query.getSelect().getQueryProperties().contains(ex.getProperties()) && !curr.isEmpty()){
                 resultMap.put(ex.getProperties(), curr);
             }
         }
@@ -289,10 +289,14 @@ public class QueryRequestUtil {
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
+        List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
+        int dimSize = query.getSelect().getQueryProperties().size();
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
             transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
         
-            if(!MapUtils.isEmpty(leafValueMap)) {
+            if(MapUtils.isNotEmpty(leafValueMap)) {
+                // 如果一个叶子对应多个父节点，克隆一个再塞回去
+                List<ResultRecord> copyLeafRecords = new ArrayList<ResultRecord>();
                 transList.forEach( record -> {
                     leafValueMap.forEach((prop,valueMap) -> {
                         try {
@@ -300,9 +304,18 @@ public class QueryRequestUtil {
                                     prop).toString() : null;
                                 Set<String> valueSet = leafValueMap.get(prop).get(currValue);
                                 if(valueSet != null){
+                                    int i = 0;
                                     for (String value : valueSet) {
-                                        // TODO 这种方法暂时只支持一个节点对应一个父节点
-                                        record.setField(prop, value);
+                                        if(i > 0) {
+                                            ResultRecord newRec = DeepcopyUtils.deepCopy(record);
+                                            newRec.setField(prop, value);
+                                            generateGroupBy(newRec, groupList);
+                                            copyLeafRecords.add(newRec);
+                                        }else {
+                                            record.setField(prop, value);
+                                            generateGroupBy(record, groupList);
+                                        }
+                                        i++;
                                     }
                                 }
                         } catch (Exception e) {
@@ -310,23 +323,18 @@ public class QueryRequestUtil {
                             throw new RuntimeException(e);
                         }
                     });
-                    
-                    try {
-                        generateGroupBy(record, groupList);
-//                        mapLeafValue2ValueOfRecord(record,leafValueMap,groupList);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
                 });
+                if(CollectionUtils.isNotEmpty(copyLeafRecords)) {
+                    // 处理汇总节点的时候，得进行下处理和过滤
+                    transList.addAll(copyLeafRecords);
+                }
+                transList = AggregateCompute.aggregate(transList, dimSize, queryMeasures);
             }
         } else {
             return new SearchResultSet(null);
         }
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
         current = System.currentTimeMillis();
-        int dimSize = query.getSelect().getQueryProperties().size();
-        List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
         
         if(CollectionUtils.isEmpty(queryMeasures)){
             return new SearchResultSet(AggregateCompute.distinct(transList));
@@ -338,10 +346,6 @@ public class QueryRequestUtil {
            }
         });
         
-        // 对非汇总节点先进行汇总计算
-        if(MapUtils.isNotEmpty(leafValueMap)){
-            transList = AggregateCompute.aggregate(transList, dimSize, queryMeasures);
-        }
         
         if(MapUtils.isNotEmpty(allDimVal)){
 //            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);

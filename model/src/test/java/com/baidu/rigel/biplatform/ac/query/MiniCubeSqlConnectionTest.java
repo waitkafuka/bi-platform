@@ -53,7 +53,6 @@ public class MiniCubeSqlConnectionTest {
      * @throws IOException
      */
     @Test
-    @Ignore
     public void testQuery() throws IOException {
 
         File f = new File("c:/test.json");
