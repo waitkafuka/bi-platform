@@ -120,6 +120,12 @@ public class DIReportChart implements Serializable {
      */
     private String areaId;
     
+    /**
+     * dimMap
+     */
+    private Map<String, String> dimMap;
+    
+    
     public String getTitle() {
         return title;
     }
@@ -327,6 +333,19 @@ public class DIReportChart implements Serializable {
     public void setAreaId(String areaId) {
         this.areaId = areaId;
     }
-    
+
+    public void setDimMap(Map<String, String> dimMap) {
+        this.dimMap =dimMap;
+    }
+
+    /**
+     * @return the dimMap
+     */
+    public Map<String, String> getDimMap() {
+        if (this.dimMap == null) {
+            this.dimMap = Maps.newHashMap();
+        }
+        return dimMap;
+    }
     
 }

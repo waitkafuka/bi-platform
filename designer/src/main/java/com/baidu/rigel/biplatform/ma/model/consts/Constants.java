@@ -84,4 +84,14 @@ public interface Constants {
      */
     String LEVEL = "LEVEL";
     
+    /**
+     * SOCKET_TIME_OUT_KEY
+     */
+    String SOCKET_TIME_OUT_KEY = "timeOut";
+
+    /**
+     * 判断是否由设计器发起请求
+     */
+    String IN_EDITOR = "isEdit";
+    
 }

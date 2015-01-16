@@ -4,11 +4,17 @@ define(['template'], function (template) {
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,outParamDim=$data.outParamDim,$option=$data.$option,key=$data.key,$escape=$utils.$escape,selectDim=$data.selectDim,outParamLevel=$data.outParamLevel,selectLevel=$data.selectLevel,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    outParamDim: {\n        id: \'\',\n        caption: \'\',\n        name: \'\'\n    },\n    levelData: {\n        \'level1\': \'当前级别\',\n        \'level12\': \'下一级别\'\n    },\n    selectDimId: \'\',\n    selectDimName: \'\',\n    selectLevel: \'\'\n};\n-->\n<div class="comp-relation-event">\n    <span>选择被关联组件</span>\n    <div class="comp-realtion-box">\n    </div>\n    <span>选择传出参数</span>\n    <div class="comp-realtion-param">\n        <span class="span-out-param">选择传出维度</span>\n        <select class="j-comp-relation-event-out-param">\n            ';
         $each(outParamDim,function($option,key){
-        $out+='\n            <option value=';
+        $out+='\n            <option value="';
         $out+=$escape($option.id);
         $out+='$';
         $out+=$escape($option.name);
-        $out+='\n            ';
+        $out+='" dimGroup="';
+        if($option.dimGroup === true){
+        $out+='true';
+        }else{
+        $out+='false';
+        }
+        $out+='"\n            ';
         if(selectDim && $option.id === selectDim){
         $out+='\n            selected="selected"\n            ';
         }

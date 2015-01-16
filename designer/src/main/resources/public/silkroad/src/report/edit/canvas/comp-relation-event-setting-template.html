@@ -24,7 +24,7 @@ var demoData = {
         <span class="span-out-param">选择传出维度</span>
         <select class="j-comp-relation-event-out-param">
             {{each outParamDim as $option key}}
-            <option value={{$option.id}}${{$option.name}}
+            <option value="{{$option.id}}${{$option.name}}" dimGroup="{{if $option.dimGroup === true}}true{{else}}false{{/if}}"
             {{if selectDim && $option.id === selectDim}}
             selected="selected"
             {{/if}}>{{$option.caption}}

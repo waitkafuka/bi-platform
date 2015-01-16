@@ -140,6 +140,7 @@
         this._defaultDims = dataWrap.defaultDims;
         this._mapMinValue = dataWrap.mapMinValue;
         this._mapMaxValue = dataWrap.mapMaxValue;
+        this._dimMap = dataWrap.dimMap;
         !isSilent && this.render();
     };
 
@@ -426,7 +427,7 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                    yAxisOption.boundaryGap = [0.1, 0.1];
+                   // yAxisOption.boundaryGap = [0.1, 0.1];
                     yAxisOption.splitNumber = 5;
 //                    if (option.title.text) {
 //                        yAxisOption.axisLabel = {
@@ -811,8 +812,12 @@
         if (!this._chartType === 'pie') {
             this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
         }
-        function chartClick(options) {
-            that.notify('chartClick', options);
+        function chartClick(args) {
+            var o = {
+                name: args.name,
+                dimMap: that._dimMap
+            };
+            that.notify('chartClick', o);
         }
         function zoomChage(param) {
             start = param.zoom.xStart;
@@ -835,7 +840,8 @@
         var options = {
             grid: {
                 x: '90px',
-                y: '10px'
+                y: '10px',
+                borderWidth: 0
             }
         };
 
