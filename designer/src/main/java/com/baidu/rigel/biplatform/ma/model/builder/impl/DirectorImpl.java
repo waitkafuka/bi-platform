@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
@@ -41,6 +43,7 @@ import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
@@ -49,6 +52,8 @@ import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+
 
 
 /**
@@ -367,10 +372,51 @@ public class DirectorImpl implements Director {
                     }
                 }
             });
+        // 同环比、计算列处理
+        oriCube.getMeasures().forEach((k, v) -> {
+            if (v instanceof CallbackMeasure) {
+                newMeasures.put(v.getId(), v);
+            }
+            if (v.getType() == MeasureType.CAL || v.getType() == MeasureType.SR || v.getType() == MeasureType.RR) {
+                ExtendMinicubeMeasure m = (ExtendMinicubeMeasure) v;
+                if (checkRefMeasuer(m.getRefIndNames(), newMeasures)) {
+                    newMeasures.put(v.getId(), v);
+                }
+            }
+        });
         
         return newMeasures;
     }
     
+    /**
+     * 
+     * @param newMeasures 
+     * @param refNames 
+     * @return
+     */
+    private boolean checkRefMeasuer(Set<String> refNames, Map<String, Measure> newMeasures) {
+        boolean rs = true;
+        if (refNames == null || refNames.size() == 0) {
+            return rs;
+        }
+        String[] measuerNames = newMeasures.values().stream().map(m -> {
+            return m.getName();
+        }).toArray(String[] :: new);
+        List<String> tmp = Lists.newArrayList();
+        Collections.addAll(tmp, measuerNames);
+        for (String ref : refNames) {
+            if (!tmp.contains(ref)) {
+                return false;
+            }
+        }
+//        for (String str : refNames) {
+//            if (refNames.contains(entry.getKey()) || refNames.contains(entry.getValue().getName())) {
+//                continue;
+//            }
+//        }
+        return rs;
+    }
+
     /**
      * 
      * {@inheritDoc}
