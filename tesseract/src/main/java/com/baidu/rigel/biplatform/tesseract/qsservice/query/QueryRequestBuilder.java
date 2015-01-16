@@ -29,7 +29,6 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
-import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.From;
@@ -105,8 +104,7 @@ public class QueryRequestBuilder {
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
             for (MemberNodeTree node : nodeTrees) {
-                if ((!MetaNameUtil.isAllMemberName(node.getName()) || !node.getChildren().isEmpty())
-                        && StringUtils.isNotBlank(node.getQuerySource())) {
+                if (StringUtils.isNotBlank(node.getQuerySource())) {
                     request.selectAndGroupBy(node.getQuerySource());
                     Expression expression = expressions.get(node.getQuerySource());
                     if (expression == null) {
@@ -115,7 +113,9 @@ public class QueryRequestBuilder {
                     }
                     expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
                 }
-                buildSelectAndGroupBy(node.getChildren(), request, expressions);
+                if (CollectionUtils.isNotEmpty(node.getChildren())) {
+                    buildSelectAndGroupBy(node.getChildren(), request, expressions);
+                }
             }
         }
     }
