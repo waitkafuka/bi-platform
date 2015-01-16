@@ -46,10 +46,10 @@ public class IndexFileSystemConstants {
 	/**
 	 * MOD_KEY_START
 	 */
-	public static final String MOD_KEY_START = "BEGIN";
+	public static final String MOD_KEY_START = "begin";
 	/**
 	 * MOD_KEY_END
 	 */
-	public static final String MOD_KEY_END = "END";
+	public static final String MOD_KEY_END = "end";
     
 }

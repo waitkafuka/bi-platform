@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.tesseract.action;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -391,9 +392,12 @@ public class MetaQueryAction {
 
             String dataSetString = requestParams.get(MiniCubeConnection.DATASET_PARAM_KEY);
             String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
+            String paramsJason=requestParams.get(MiniCubeConnection.PARAMS);
+            
+            Map<String,Map<String,BigDecimal>> params=AnswerCoreConstant.GSON.fromJson(paramsJason,new TypeToken<Map<String,Map<String,BigDecimal>>>() {}.getType());
             DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
             
-            metaDataService.refresh(dataSourceInfo, dataSetString);
+            metaDataService.refresh(dataSourceInfo, dataSetString,params);
             
             return ResponseResultUtils.getCorrectResult("success", "refresh success.");
         } catch (JsonSyntaxException e) {

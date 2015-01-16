@@ -260,5 +260,22 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
         }
         
     }
+    
+    @Override
+    public void refresh(DataSourceInfo dataSourceInfo, String dataSetStr, Map<String,Map<String,BigDecimal>> params) throws Exception {
+        MetaDataService.checkDataSourceInfo(dataSourceInfo);
+        if(StringUtils.isBlank(dataSetStr)) {
+            LOG.error("dataSet name String is null,refresh all datasource");
+            dataSetStr = "";
+        }
+        LOG.info("refresh datasource:{} dataSet:{}",dataSourceInfo,dataSetStr);
+        
+        String[] dataSet=dataSetStr.split(",");
+        
+        UpdateIndexByDatasourceEvent updateEvent = new UpdateIndexByDatasourceEvent(dataSourceInfo.getDataSourceKey(), dataSet,params);
+        storeManager.putEvent(updateEvent);
+        
+    }
+    
 
 }
