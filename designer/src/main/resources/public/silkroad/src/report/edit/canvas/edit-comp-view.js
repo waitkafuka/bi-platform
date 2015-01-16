@@ -133,7 +133,7 @@ define([
                         dialog.alert('请先拖入指标和维度');
                         return;
                     }
-                    if (data.xAxis.length < 0 && data.yAxis.length < 0) {
+                    if (data.xAxis.length < 0 || data.yAxis.length < 0) {
                         dialog.alert('请先拖入指标和维度');
                         return;
                     }
