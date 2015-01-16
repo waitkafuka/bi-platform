@@ -74,23 +74,23 @@ define(['template'], function (template) {
         }
         $out+='\r\n                        ';
         });
-        $out+='\r\n                        <input type="text" class="input-inds-item f-l"/>\r\n                    </div>\r\n                </div>\r\n            <span class="select-description f-l">\r\n                描述：双击左侧指标后进入右侧，新指标以标签的形式展现，移入出现删除按钮。添加后的指标出现在左侧指标区域\r\n            </span>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <div class="norm-box " id="j-box-callbackIndex" style="display: none;">\r\n        <div class="description">\r\n            <div class="description-create">\r\n                设置回调指标区域，在下方进行设置\r\n                <div class="derive-inds-error hide j-derive-inds-error"></div>\r\n            </div>\r\n        </div>\r\n        <div class="callback-index">\r\n            <div class="callback-index-all j-callback-index-all">\r\n                ';
+        $out+='\r\n                        <input type="text" class="input-inds-item f-l"/>\r\n                    </div>\r\n                </div>\r\n            <span class="select-description f-l">\r\n                描述：双击左侧指标后进入右侧，新指标以标签的形式展现，移入出现删除按钮。添加后的指标出现在左侧指标区域\r\n            </span>\r\n            </div>\r\n        </div>\r\n    </div>\r\n    <div class="norm-box" id="j-box-callbackIndex" style="display: none;">\r\n        <div class="description" style="padding: 18px 0 6px 13px">\r\n            <div class="description-create">\r\n                设置回调指标区域，在下方进行设置\r\n                <div class="derive-inds-error hide j-derive-inds-error"></div>\r\n            </div>\r\n        </div>\r\n        <div class="callback-index">\r\n            <div class="callback-index-all j-callback-index-all">\r\n                ';
         $each(indList.data,function($value,$index){
-        $out+='\r\n                ';
         if($value.type == "CALLBACK"){
-        $out+='\r\n                <div class="callback-form">\r\n                    <div class="callback-name">\r\n                        <div>显示名称:</div>\r\n                        <div>回调指标名称:</div>\r\n                        <div>回调地址:</div>\r\n                        <div>请求超时时间:</div>\r\n                    </div>\r\n                    <div class="callback-text">\r\n                        <input class="call-name" value="';
+        $out+='\r\n                <div class="callback-form-box">\r\n                    <div class="callback-form" id="';
+        $out+=$escape($value.id);
+        $out+='">\r\n                        <div class="callback-name">\r\n                            <div>回调指标名称:</div>\r\n                            <div>显示名称:</div>\r\n                            <div>回调地址:</div>\r\n                            <div>请求超时时间:</div>\r\n                        </div>\r\n                        <div class="callback-text">\r\n                            <input class="call-name" placeholder="由数字,字母,汉字组成" value="';
         $out+=$escape($value.name);
-        $out+='" placeholder="由数字,字母,汉字组成"/>\r\n                        <input class="call-caption" value="';
+        $out+='"/>\r\n                            <input class="call-caption" placeholder="由数字,字母,下划线组成并以数字开头" value="';
         $out+=$escape($value.caption);
-        $out+='" placeholder="由数字,字母,下划线组成并以数字开头"/>\r\n                        <input class="call-url" value="';
+        $out+='"/>\r\n                            <input class="call-url" placeholder="回调地址" value="';
         $out+=$escape($value.url);
-        $out+='" placeholder="url"/>\r\n                        <input class="call-timeout" value="';
+        $out+='"/>\r\n                            <input class="call-timeout" placeholder="有数字组成" value="';
         $out+=$escape($value.properties.timeOut);
-        $out+='" placeholder="有数字组成"/>\r\n                    </div>\r\n                </div>\r\n                ';
+        $out+='"/>\r\n                        </div>\r\n                    </div>\r\n                    <div class="close-retractable callback-close" title="删除">×</div>\r\n                    <div class="close-retractable callback-retractable " title="收进">-</div>\r\n                    <div class="callback-title"><div></div></div>\r\n                </div>\r\n                ';
         }
-        $out+='\r\n                ';
         });
-        $out+='\r\n                <div class="callback-form">\r\n                    <div class="callback-name">\r\n                        <div>显示名称:</div>\r\n                        <div>回调指标名称:</div>\r\n                        <div>回调地址:</div>\r\n                        <div>请求超时时间:</div>\r\n                    </div>\r\n                    <div class="callback-text">\r\n                        <input class="call-name" placeholder="由数字,字母,汉字组成"/>\r\n                        <input class="call-caption" placeholder="由数字,字母,下划线组成并以数字开头"/>\r\n                        <input class="call-url" placeholder="url"/>\r\n                        <input class="call-timeout" placeholder="有数字组成"/>\r\n                    </div>\r\n                </div>\r\n                <div class="callback-close" title="删除">一</div>\r\n                <!--<div class="callback-retractable " title="收进"></div>-->\r\n            </div>\r\n        </div>\r\n        <div class="callback-add" title="添加">+</div>\r\n    </div>\r\n</div>';
+        $out+='\r\n            </div>\r\n        </div>\r\n        <div class="callback-add j-callback-add" title="添加">+</div>\r\n    </div>\r\n</div>';
         return $out;
     }
     return { render: anonymous };
