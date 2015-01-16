@@ -441,7 +441,7 @@
                 yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
-                yAxisOption.boundaryGap = [0.1, 0.1];
+                // yAxisOption.boundaryGap = [0.1, 0.1];
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
