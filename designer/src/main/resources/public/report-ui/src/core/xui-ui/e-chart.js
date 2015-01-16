@@ -427,7 +427,7 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                    yAxisOption.boundaryGap = [0.1, 0.1];
+                   // yAxisOption.boundaryGap = [0.1, 0.1];
                     yAxisOption.splitNumber = 5;
 //                    if (option.title.text) {
 //                        yAxisOption.axisLabel = {
@@ -441,7 +441,7 @@
                 yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
-                yAxisOption.boundaryGap = [0.1, 0.1];
+                // yAxisOption.boundaryGap = [0.1, 0.1];
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -840,7 +840,8 @@
         var options = {
             grid: {
                 x: '90px',
-                y: '10px'
+                y: '10px',
+                borderWidth: 0
             }
         };
 

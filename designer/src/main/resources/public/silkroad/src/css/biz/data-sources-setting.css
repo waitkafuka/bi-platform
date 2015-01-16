@@ -370,3 +370,122 @@
     height: 18px;
     text-align: center;
 }
+/*.norm-box .callback-index {*/
+    /*width: 400px;*/
+    /*border: 1px solid #C3C3C3;*/
+    /*height: 100px;*/
+/*}*/
+.callback-index {
+    float: left;
+    width: 550px;
+    margin-left: 8px
+}
+.callback-index-all {
+    float: left;
+    width: 550px;
+    margin-left: 3px;
+}
+.callback-form-box {
+    float: left;
+}
+.callback-form {
+    border: 1px solid #C3C3C3;
+    width: 500px;
+    height: 136px;
+    float: left;
+    margin-top: 7px;
+}
+.callback-name {
+    display: inline-block;
+    width: 125px;
+    height: 100%;
+    margin-left: 3px;
+}
+.callback-name div {
+    text-align: left;
+    color: #000000;
+    font-size: 14px;
+    font-family: '微软雅黑';
+    width: 100px;
+    margin: 10px 0 0 25px;
+    height: 22px;
+}
+.callback-text {
+    float: right;
+    display: inline-block;
+    width: 350px;
+    height: 100%;
+    margin-right: 20px;
+}
+.callback-text input{
+    float: right;
+    display: inline-block;
+    width: 330px;
+    height: 20px;
+    margin: 8px 0 0 0;
+}
+.callback-add {
+    width: 15px;
+    height: 15px;
+    font-size: 20px;
+    float: left;
+    text-align: center;
+    margin: 0 0 0 15px;
+    cursor: pointer;
+    color: #33ccff;
+    font-weight: bold;
+}
+.close-retractable {
+    width: 19px;
+    height: 19px;
+    float: right;
+    text-align: center;
+    border: 1px solid #C3C3C3;
+    cursor: pointer;
+    color: #999;
+    margin: 7px 0 0 2px;
+    font-size: 16px;
+    line-height: 18px;
+}
+.callback-close:hover{
+    width: 19px;
+    height: 19px;
+    float: right;
+    text-align: center;
+    cursor: pointer;
+    color: #FFF;
+    font-size: 16px;
+    line-height: 18px;
+    background: #3399ff;
+    border:1px solid #3399ff;
+    margin-top: 7px;
+}
+.callback-retractable:hover{
+    width: 19px;
+    height: 19px;
+    float: right;
+    text-align: center;
+    cursor: pointer;
+    color: #FFF;
+    font-size: 20px;
+    line-height: 18px;
+    background: #3399ff;
+    border:1px solid #3399ff;
+    margin-top: 7px;
+}
+.callback-retractable {
+    font-size: 16px;
+}
+.callback-title {
+    border: 1px solid #C3C3C3;
+    width: 500px;
+    height: 19px;
+    float: left;
+    margin-top: 7px;
+    font-weight: bold;
+    display: none;
+}
+.callback-title div{
+    color: #333;
+    margin-left: 15px;
+}

@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -37,6 +36,7 @@ import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.google.common.collect.Maps;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -65,7 +65,6 @@ public class UpdateDataResource extends BaseResource {
      * @param response HttpServletResponse
      * @return ResponseResult
      */
-    @SuppressWarnings("unchecked")
     @RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseResult updateData(HttpServletRequest request, HttpServletResponse response) throws Exception {
         LOG.info("[INFO] --- --- begin update index meta with new request");
@@ -88,7 +87,7 @@ public class UpdateDataResource extends BaseResource {
             String str = request.getParameter(factTable);
             LOG.info("[INFO] --- --- conditions for {} is : {}", factTable, str);
             if (isValidate(str)) {
-                conds.put(factTable, GsonUtils.fromJson(str, HashMap.class));
+                conds.put(factTable, GsonUtils.fromJson(str, new TypeToken<Map<String, String>>() {}.getType()));
             }
         }
         String condsStr = null;

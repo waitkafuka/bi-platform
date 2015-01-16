@@ -431,7 +431,7 @@ public class QueryDataResource extends BaseResource {
             HttpServletRequest request) {
         long begin = System.currentTimeMillis();
         logger.info("[INFO]--- ---begin init runtime env");
-        boolean edit = Boolean.valueOf(request.getParameter("isEdit"));
+        boolean edit = Boolean.valueOf(request.getParameter(Constants.IN_EDITOR));
         ReportDesignModel model = null;
         if (edit) {
             /**
@@ -485,13 +485,15 @@ public class QueryDataResource extends BaseResource {
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
         Map<String, Object> newParams = Maps.newHashMap();
-        if (contextParams.get("isEdit") != null || runTimeModel.getContext().getParams().containsKey("isEdit")) {
+        if (contextParams.get(Constants.IN_EDITOR) != null 
+                || runTimeModel.getContext().getParams().containsKey(Constants.IN_EDITOR)) {
             Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
             for (String key : oldParams.keySet()) {
                 String value = oldParams.get(key).toString();
                 if (!(value.contains("start") && value.contains("end"))) {
                     newParams.put(key, value);
                 }
+                newParams.put(Constants.IN_EDITOR, true);
             }
         }
         runTimeModel.getContext().reset();

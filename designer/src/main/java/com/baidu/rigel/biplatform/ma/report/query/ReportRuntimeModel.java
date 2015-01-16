@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.TimeCondition;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
@@ -547,6 +548,11 @@ public class ReportRuntimeModel implements Serializable {
      */
     public void setModel(ReportDesignModel model) {
         this.model = model;
+    }
+
+    public void init(ReportDesignModel model, boolean force, boolean inEdit) {
+        this.init(model, force);
+        this.getContext().put(Constants.IN_EDITOR, true);
     }
     
     
