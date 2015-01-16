@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -226,7 +227,8 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                     }
                 } 
                 // 设计器中
-                if (requestParams.get("isEdit") != null && Boolean.valueOf(requestParams.get("isEdit").toString())) {
+                if (requestParams.get(Constants.IN_EDITOR) != 
+                        null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
                     PageInfo pageInfo = new PageInfo();
                     pageInfo.setPageSize(100);
                     pageInfo.setTotalPage(1);
