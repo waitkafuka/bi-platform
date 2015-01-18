@@ -36,10 +36,12 @@ import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -224,6 +226,14 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                         questionModel.getRequestParams().put(key, (String) value);
                     }
                 } 
+                // 设计器中
+                if (requestParams.get(Constants.IN_EDITOR) != 
+                        null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
+                    PageInfo pageInfo = new PageInfo();
+                    pageInfo.setPageSize(100);
+                    pageInfo.setTotalPage(1);
+                    questionModel.setPageInfo(pageInfo);
+                }
             }
         } catch (QueryModelBuildException e) {
             if (model.getExtendById(action.getExtendAreaId()).getLogicModel() != null) {

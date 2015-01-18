@@ -266,11 +266,15 @@ public final class QueryUtils {
                                 && queryAction.isChartQuery()) {
                             data.setExpand(true);
                             data.setShow(false);
-                            // 修正展开方式
-                            if (item.getParams().get(Constants.LEVEL) != null 
-                                    && item.getParams().get(Constants.LEVEL).equals(1)) {
-                                data.setExpand(false);
+                        }
+                        // 修正展开方式
+                        if (item.getParams().get(Constants.LEVEL) != null) {
+                            if (item.getParams().get(Constants.LEVEL).equals(1)) {
+                                data.setExpand(!queryAction.isChartQuery());
                                 data.setShow(true);
+                            } else if (item.getParams().get(Constants.LEVEL).equals(2)) {
+                                data.setExpand(true);
+                                data.setShow(false);
                             }
                         }
                         datas.add(data);
@@ -434,6 +438,7 @@ public final class QueryUtils {
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(olapElement);
                 dim.setLevels(Maps.newLinkedHashMap());;
                 ((Dimension) olapElement).getLevels().values().forEach(level -> {
+                    level.setDimension(dim);
                     dim.getLevels().put(level.getName(), level);
                 });
                 dimensions.put(dim.getName(), dim);
@@ -450,6 +455,7 @@ public final class QueryUtils {
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
                 dim.setLevels(Maps.newLinkedHashMap());
                 ((Dimension) element).getLevels().values().forEach(level -> {
+                    level.setDimension(dim);
                     dim.getLevels().put(level.getName(), level);
                 });
                 dimensions.put(element.getName(), (Dimension) element);
@@ -657,14 +663,17 @@ public final class QueryUtils {
                 chart.setTopType(topSetting.getTopType().name());
                 chart.setAreaId(area.getId());
             }
+            final Map<String, String> dimMap = Maps.newConcurrentMap();
             String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);
                 if (tmp != null) {
+                    dimMap.put(tmp.getId(), tmp.getName());
                     return tmp.getCaption();
                 } else {
                     return null;
                 }
             }).filter(x -> x != null).toArray(String[] :: new);
+            chart.setDimMap(dimMap);
             chart.setAllDims(allDims);
             String[] allMeasures = area.getLogicModel().getSelectionMeasures().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);

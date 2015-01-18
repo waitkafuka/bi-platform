@@ -18,6 +18,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.meta;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +77,15 @@ public interface MetaDataService {
      * @throws Exception
      */
     void refresh(DataSourceInfo dataSourceInfo, String dataSetStr) throws Exception;
+    
+    /**
+     * refresh 刷新
+     * @param dataSourceInfo
+     * @param dataSetStr
+     * @param params
+     * @throws Exception
+     */
+    void refresh(DataSourceInfo dataSourceInfo, String dataSetStr, Map<String,Map<String,BigDecimal>> params) throws Exception;
 
     /**
      * 获取level的members

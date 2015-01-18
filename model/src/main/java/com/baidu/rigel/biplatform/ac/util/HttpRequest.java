@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +80,16 @@ public class HttpRequest {
      * COOKIE_PARAM_NAME cookie参数的名称，参数如果是这个名称，自动放到请求的头信息中
      */
     public static final String COOKIE_PARAM_NAME = "Cookie";
+    
+    /**
+     * socket timeout 
+     */
+    public static final String SOCKET_TIME_OUT = "timeOut";
+    
+    /**
+     * connTimeOut;
+     */
+    public static final String CONNECTION_TIME_OUT = "connTimeOut";
 
     /**
      * LOGGER
@@ -90,7 +101,7 @@ public class HttpRequest {
      * 
      * @return 默认的HttpClient
      */
-    public static HttpClient getDefaultHttpClient() {
+    public static HttpClient getDefaultHttpClient(Map<String, String> params) {
         Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json");
         List<Header> headers = new ArrayList<Header>(1);
         headers.add(header);
@@ -119,12 +130,27 @@ public class HttpRequest {
                 .register("rfc2965", new RFC2965SpecFactory())
                 .register(NO_CHECK_COOKIES, cookieSpecProvider)
                 .build();
+        String socketTimeout = "50000";
+        String connTimeout = "1000";
+        if (params != null) {
+            if (params.containsKey(SOCKET_TIME_OUT)) {
+                socketTimeout = params.get(SOCKET_TIME_OUT);
+            }
+            if (params.containsKey(CONNECTION_TIME_OUT)) {
+                socketTimeout = params.get(CONNECTION_TIME_OUT);
+            }
+        }
         // 设置默认的cookie的安全策略为不校验
-        RequestConfig requestConfigBuilder = RequestConfig.custom().setCookieSpec(NO_CHECK_COOKIES).build();
+        RequestConfig requestConfigBuilder = RequestConfig.custom()
+                .setCookieSpec(NO_CHECK_COOKIES)
+                .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
+                .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
+                .build();
         HttpClient client = HttpClients.custom()
                 .setDefaultCookieSpecRegistry(cookieSpecRegistry)
                 .setDefaultRequestConfig(requestConfigBuilder)
-                .setDefaultHeaders(headers).build();
+                .setDefaultHeaders(headers)
+                .build();
         return client;
     }
 
@@ -187,13 +213,14 @@ public class HttpRequest {
         String prefix = "", suffix = "";
         String[] addresses = new String[] { urlNameString };
         if (urlNameString.contains("[") && urlNameString.contains("]")) {
-            addresses = urlNameString.substring(urlNameString.indexOf("[") + 1, urlNameString.indexOf("]")).split(" ");
+            addresses = urlNameString.substring(urlNameString.indexOf("[") + 1, 
+                urlNameString.indexOf("]")).split(" ");
             prefix = urlNameString.substring(0, urlNameString.indexOf("["));
             suffix = urlNameString.substring(urlNameString.indexOf("]") + 1);
         }
         LOGGER.info("start to send get:" + urlNameString);
         long current = System.currentTimeMillis();
-
+        Exception ex = null;
         for (String address : addresses) {
             String requestUrl = prefix + address + suffix;
             try {
@@ -202,16 +229,16 @@ public class HttpRequest {
                     // 需要将cookie添加进去
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
                 }
-
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, true);
                 LOGGER.info("end send get :" + urlNameString + " cost:" + (System.currentTimeMillis() - current));
                 return content;
             } catch (Exception e) {
+                ex = e;
                 LOGGER.warn("send get error " + requestUrl + ",retry next one", e);
             }
         }
-        throw new RuntimeException("send get failed[" + urlNameString + "].");
+        throw new RuntimeException(ex);
     }
 
     /**
@@ -222,7 +249,7 @@ public class HttpRequest {
      * @return URL 所代表远程资源的响应结果
      */
     public static String sendGet(String url, Map<String, String> params) {
-        return sendGet(getDefaultHttpClient(), url, params);
+        return sendGet(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params);
     }
 
     /**
@@ -302,7 +329,7 @@ public class HttpRequest {
      * @return URL 所代表远程资源的响应结果
      */
     public static String sendPost(String url, Map<String, String> params) {
-        return sendPost(getDefaultHttpClient(), url, params);
+        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params);
     }
 
     /**

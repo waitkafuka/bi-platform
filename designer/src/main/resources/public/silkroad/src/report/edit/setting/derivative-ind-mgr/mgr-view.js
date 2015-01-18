@@ -10,14 +10,16 @@ define(
         'dialog',
         'common/float-window',
         'report/edit/setting/derivative-ind-mgr/mgr-template',
-        'report/edit/setting/derivative-ind-mgr/mgr-model'
+        'report/edit/setting/derivative-ind-mgr/mgr-model',
+        'report/edit/setting/derivative-ind-mgr/callback-template'
     ],
     function (
         template,
         dialog,
         FloatWindow,
         mgrTemplate,
-        Model
+        Model,
+        CallbackTemplate
     ) {
 
     return Backbone.View.extend({
@@ -53,7 +55,6 @@ define(
                 }
             }
             html = mgrTemplate.render({indList: indList, hasDerive: hasDerive});
-
             // 弹出衍生指标管理窗口
             dialog.showDialog({
                 dialog: {
@@ -77,7 +78,6 @@ define(
                                     .parent()
                                     .find('.j-input-datasource-address')
                                     .attr('id');
-
                                 if (id) {
                                     that.model.deleteInd(id, function () {
                                         $(event.target).parents('.j-derive-item').remove();
@@ -96,11 +96,48 @@ define(
                         });
                         // tab切换事件
                         $(this).on('click', '.j-classification', function (event) {
+                            that._tabBox(event);
                             that._tabClick(event);
                         });
                         $(this).on('click', '.area-inds-item-ind-delete', function (event) {
                             that._deleteSrRrInd($(event.target));
                         });
+                        $(this).on('click', '.callback-close', function () {
+                            //console.log($(this));
+                            $(this).parent().remove();
+                        });
+                        $(this).on('click', '.callback-add', function () {
+                            $(this).prev('div').find('.callback-index-all').prepend(CallbackTemplate.render());
+                        });
+                        $(this).on('click', '.callback-retractable', function () {
+                            var border = $(this).siblings();
+
+                            if ($(this).text() == '-') {
+                                $(this).text('+');
+                                border.each(function () {
+                                    if ($(this).attr('class') == 'callback-form') {
+                                        $(this).hide();
+                                    }
+                                    else if ($(this).attr('class') == 'callback-title') {
+                                        var showname = $(this).siblings('.callback-form').find('.call-caption').val();
+                                        $(this).find('div').text(showname);
+                                        $(this).show();
+                                    }
+                                });
+                            }
+                            else if ($(this).text() == '+') {
+                                $(this).text('-');
+                                border.each(function () {
+                                    if ($(this).attr('class') == 'callback-form') {
+                                        $(this).show();
+                                    }
+                                    else if ($(this).attr('class') == 'callback-title') {
+                                        $(this).hide();
+                                    }
+                                });
+                            }
+
+                        })
                     },
                     buttons: {
                         "提交": function () {
@@ -149,6 +186,7 @@ define(
             result.calDeriveInds = this._getDeriveData($dom);
             result.extendInds.rr = this._getSrRrData(1, $dom);
             result.extendInds.sr = this._getSrRrData(2, $dom);
+            result.callback = this._getCallBackData($dom);
 
             that.model.submitMethodTypeValue(result, closeDialog);
         },
@@ -259,6 +297,31 @@ define(
             return data;
         },
         /**
+         * 获取回调指标数据
+         *
+         * @param {$HTMLEelment} $dom 衍生指标管理dom元素
+         * @private
+         * @return {Array} data 计算列指标数组
+         */
+        _getCallBackData: function ($dom) {
+            var data = [];
+            // 获取创建计算列
+            $dom.find('.j-callback-index-all').eq(0).find('.callback-form').each(function () {
+                var $inputs = $(this).find('.callback-text').eq(0);
+                var item = {
+                    'id':  $(this).attr('id') || '',
+                    'name': $inputs.find('.call-name').eq(0).val() || '',
+                    'caption': $inputs.find('.call-caption').eq(0).val() || '',
+                    'url': $inputs.find('.call-url').eq(0).val() || '',
+                    'properties': {}
+                };
+                var pro = item.properties;
+                pro.timeOut = $inputs.find('.call-timeout').val() || '';
+                data.push(item);
+            });
+            return data;
+        },
+        /**
          * 获取同比（环比）指标的数据
          *
          * @param {number} type 1：环比；2：同比
@@ -317,6 +380,34 @@ define(
                 .show()
                 .siblings()
                 .hide();
+        },
+        /**
+         * callback回调指标切换
+         *
+         * @param {event} event tab事件
+         * @private
+         */
+        _tabBox: function (event) {
+            var id;
+            if (event.target.tagName.toLowerCase() == 'span') {
+                id = $(event.target).parent().attr('id');
+                fnTabBox(id);
+            }
+            else if (event.target.tagName.toLowerCase() == 'li') {
+                id = $(event.target).attr('id');
+                fnTabBox(id);
+            }
+
+            function fnTabBox(id) {
+                if (id == 'j-tab-callback') {
+                    $('.norm-box').hide();
+                    $('#j-box-callbackIndex').show();
+                }
+                else {
+                    $('.norm-box').hide();
+                    $('#j-box-norm').show();
+                }
+            }
         }
     });
 });

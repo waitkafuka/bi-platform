@@ -15,7 +15,9 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.index.service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -34,6 +36,15 @@ import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistExcepti
  *
  */
 public interface IndexService {
+	
+	/**
+	 * doIndexByIndexAction
+	 * @param indexMeta 索引元数据
+	 * @param idxAction 索引动作
+	 * @param dataMap 修订数据时，提供修订的起止范围
+	 * @throws Exception 有可能抛出异常
+	 */
+	void doIndexByIndexAction(IndexMeta indexMeta,IndexAction idxAction,Map<String, BigDecimal> dataMap) throws Exception;
     
     /**
      * 
@@ -43,6 +54,7 @@ public interface IndexService {
      *            索引元数据
      * @param idxAction
      *            索引动作
+     * 
      * @return boolean
      * @throws IndexMetaIsNullException
      *             可能抛出的异常
@@ -84,8 +96,9 @@ public interface IndexService {
     /**
      * updateIndexByDataSourceKey 跟据数据源、事实表增量更新索引数据
      * @param dataSourceKey 数据源信息
-     * @param dataSetNames 事实表信息
+     * @param factTableNames 事实表信息
+     * @param dataSetMap 待修订的事实表及起始ID信息
      * @throws IndexAndSearchException
      */
-    void updateIndexByDataSourceKey(String dataSourceKey, String[] dataSetNames) throws IndexAndSearchException;
+    void updateIndexByDataSourceKey(String dataSourceKey,String[] factTableNames, Map<String,Map<String,BigDecimal>> dataSetMap) throws IndexAndSearchException;
 }

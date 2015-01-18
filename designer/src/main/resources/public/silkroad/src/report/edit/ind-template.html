@@ -13,6 +13,16 @@
         </span>
     </div>
     {{/if}}{{/each}}
+    {{each indList.data}} {{if $value.type == "CALLBACK"}}
+    <div class="item c-m hover-bg j-root-line j-org-ind j-olap-element" data-id="{{$value.id}}">
+        <span class="item-text ellipsis j-item-text" title="{{$value.tag}}（{{$value.name}}）">
+            {{$value.caption}}（{{$value.name}}）
+        </span>
+        <span class="icon-letter collect j-method-type" title="点击设置指标汇总方式">
+            {{indList.map[$value.aggregator]}}
+        </span>
+    </div>
+    {{/if}}{{/each}}
 </div>
 {{each indList.data}}{{if $value.type == "CAL" || $value.type == "RR" || $value.type == "SR"}}
 <div class="item c-m hover-bg j-olap-element j-cal-ind" data-id="{{$value.id}}">

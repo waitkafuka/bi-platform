@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.auth.bo;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -26,6 +27,7 @@ import org.json.JSONObject;
 
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -64,6 +66,16 @@ public class CalMeasureViewBo implements Serializable {
     private String caption;
     
     /**
+     * 回调指标url
+     */
+    private String url;
+    
+    /**
+     * 属性信息
+     */
+    private Map<String, String> properties;
+    
+    /**
      * 衍生指标
      */
     private List<CalMeasureViewBo> cals = Lists.newArrayList();
@@ -77,6 +89,11 @@ public class CalMeasureViewBo implements Serializable {
      * 环比
      */
     private List<CalMeasureViewBo> hbs = Lists.newArrayList();
+    
+    /**
+     * 回调指标
+     */
+    private List<CalMeasureViewBo> callback = Lists.newArrayList();
     
     /**
      * referenceId
@@ -229,8 +246,10 @@ public class CalMeasureViewBo implements Serializable {
             JSONObject extendInd = jsonObj.getJSONObject("extendInds");
             JSONArray rr = extendInd.getJSONArray("rr");
             JSONArray sr = extendInd.getJSONArray("sr");
+            JSONArray callback = jsonObj.getJSONArray("callback");
             viewBo.setTbs(generalCalMeasure(sr));
             viewBo.setHbs(generalCalMeasure(rr));
+            viewBo.setCallback(generalCalMeasure(callback));
             JSONArray calMembers = jsonObj.getJSONArray("calDeriveInds");
             viewBo.setCals(generalCalMeasure(calMembers));
             // 衍生指标
@@ -261,5 +280,54 @@ public class CalMeasureViewBo implements Serializable {
         }
         return rs;
     }
+
+    /**
+     * @return the url
+     */
+    public String getUrl() {
+        return url;
+    }
+
+    /**
+     * @param url the url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    /**
+     * @return the properties
+     */
+    public Map<String, String> getProperties() {
+        if (this.properties == null) {
+            this.properties = Maps.newHashMap();
+        }
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    /**
+     * @return the callback
+     */
+    public List<CalMeasureViewBo> getCallback() {
+        if (this.callback == null) {
+            this.callback = Lists.newArrayList();
+        }
+        return callback;
+    }
+
+    /**
+     * @param callback the callback to set
+     */
+    public void setCallback(List<CalMeasureViewBo> callback) {
+        this.callback = callback;
+    }
+    
     
 }

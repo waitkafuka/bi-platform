@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
@@ -46,6 +47,7 @@ import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.auth.bo.CalMeasureViewBo;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.SchemaManageService;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
@@ -177,6 +179,13 @@ public class SchemaManageResource {
             measureObj.setType(measure.getType());
             if (measure.getType() == MeasureType.CAL) {
                 measureObj.setFormula(((ExtendMinicubeMeasure) measure).getFormula()); 
+            }
+            if (measure instanceof CallbackMeasure) {
+                CallbackMeasure m = (CallbackMeasure) measure;
+                measureObj.setUrl(m.getCallbackUrl());
+                Map<String, String> prop = Maps.newHashMap();
+                prop.put(Constants.SOCKET_TIME_OUT_KEY, String.valueOf(m.getSocketTimeOut()));
+                measureObj.setProperties(prop);
             }
             measureObj.setCanToDim(changableInds.contains(measure.getName()));
             measures.add(measureObj);
