@@ -42,6 +42,7 @@ import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.exception.OverflowQueryConditionException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
+import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
@@ -55,6 +56,9 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContextSplit
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
+import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
+import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
+import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
 /**
  * 查询接口实现
@@ -185,6 +189,21 @@ public class QueryServiceImpl implements QueryService {
         DataModel result = null;
         try {
             TesseractResultSet resultSet = searchService.query(queryRequest);
+            
+            if (queryRequest.getGroupBy() != null && CollectionUtils.isNotEmpty(queryRequest.getGroupBy().getGroups())) {
+                try {
+                    resultSet = QueryRequestUtil.processGroupBy(resultSet, queryRequest, queryContext);
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                    logger.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + queryRequest
+                            + "]", e));
+                    throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                            IndexAndSearchException.QUERYEXCEPTION_MESSAGE, IndexAndSearchExceptionType.SEARCH_EXCEPTION),
+                            e, IndexAndSearchExceptionType.SEARCH_EXCEPTION);
+                }
+
+            }
+            
             result = new DataModelBuilder(resultSet, queryContext).build();
         } catch (IndexAndSearchException e) {
             logger.error("query occur when search queryRequest：" + queryContext, e);
