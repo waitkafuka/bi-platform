@@ -316,7 +316,7 @@ public class QueryRequestUtil {
     private static Map<String, String> coolectAllMem(MemberNodeTree memberNodeTree) {
         Map<String,String> allDimVal = new HashMap<String, String>();
         if (memberNodeTree.isSummary()) {
-            allDimVal.put(memberNodeTree.getQuerySource(), memberNodeTree.getCaption());
+            allDimVal.put(memberNodeTree.getQuerySource(), memberNodeTree.getName());
             return allDimVal;
         } else {
             if(memberNodeTree.getChildren().size() == 1) {

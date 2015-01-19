@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.tesseract.qsservice.query.impl;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel.FillDataType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -52,6 +54,7 @@ import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
 import com.baidu.rigel.biplatform.parser.result.ComputeResult;
 import com.baidu.rigel.biplatform.parser.result.ListComputeResult;
 import com.baidu.rigel.biplatform.parser.util.ConditionUtil;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.CallbackCondition;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.ParseCoditionUtils;
 import com.baidu.rigel.biplatform.tesseract.exception.IllegalSplitResultException;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
@@ -105,19 +108,26 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         QueryContextSplitResult result = new QueryContextSplitResult(QueryContextSplitStrategy.MeasureType, queryContext);
         // 按照指标类型拆分，只考虑指标类型
         if (CollectionUtils.isNotEmpty(queryContext.getQueryMeasures())) {
-            
+            Set<String> callbackMeasureName = new HashSet<String>();
             CompileContext compileContext = null;
             for(Iterator<MiniCubeMeasure> it = queryContext.getQueryMeasures().iterator(); it.hasNext();) {
                 MiniCubeMeasure measure = it.next();
                 // 取出所有的计算列指标
                 if (measure.getAggregator().equals(Aggregator.CALCULATED)) {
-                    ExtendMinicubeMeasure extendMeasure = (ExtendMinicubeMeasure) measure;
-                    compileContext = CompileExpression.compile(extendMeasure.getFormula());
-                    result.getCompileContexts().put(measure.getUniqueName(), compileContext);
+                    if(measure.getType().equals(MeasureType.CALLBACK)) {
+                        callbackMeasureName.add(measure.getUniqueName());
+                    } else {
+                        ExtendMinicubeMeasure extendMeasure = (ExtendMinicubeMeasure) measure;
+                        compileContext = CompileExpression.compile(extendMeasure.getFormula());
+                        result.getCompileContexts().put(measure.getUniqueName(), compileContext);
+                    }
                     it.remove();
                 }
             }
             Map<Condition, Set<String>> conditions = ConditionUtil.simpleMergeContexsCondition(result.getCompileContexts().values());
+            if(CollectionUtils.isNotEmpty(callbackMeasureName)) {
+                conditions.put(CallbackCondition.getInstance(), callbackMeasureName);
+            }
             if(MapUtils.isNotEmpty(conditions)) {
                 conditions.forEach((con, vars) -> {
                     // TODO 这里先这么写，无法执行，等雨学提交代码再修改
