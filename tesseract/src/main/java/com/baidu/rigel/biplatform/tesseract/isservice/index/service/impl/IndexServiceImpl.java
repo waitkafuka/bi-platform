@@ -260,8 +260,6 @@ public class IndexServiceImpl implements IndexService {
                 "updateIndexByDataSourceKey", dataSourceKey));
             throw new IllegalArgumentException();
         }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-            "updateIndexByDataSourceKey", dataSourceKey));
         
         List<IndexMeta> metaList = new ArrayList<IndexMeta>();
         IndexAction idxAction=IndexAction.INDEX_UPDATE;
@@ -272,6 +270,9 @@ public class IndexServiceImpl implements IndexService {
         			List<IndexMeta> fTableMetaList=this.indexMetaService.getIndexMetasByFactTableName(factTableName,dataSourceKey);
         			if(!CollectionUtils.isEmpty(fTableMetaList)){
         				metaList.addAll(fTableMetaList);
+        			}else{
+        				LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
+        			            "updateIndexByDataSourceKey", dataSourceKey,"can not find IndexMeta for Facttable:["+factTableNames+"]"));
         			}
     			}
         	}else {
@@ -280,11 +281,13 @@ public class IndexServiceImpl implements IndexService {
         	}
         }else {
         	idxAction=IndexAction.INDEX_MOD;
-        	for (String factTableName : dataSetMap.keySet()) {
-        		List<IndexMeta> fTableMetaList=this.indexMetaService.getIndexMetasByFactTableName(factTableName,dataSourceKey);
-    			if(!CollectionUtils.isEmpty(fTableMetaList)){
-    				metaList.addAll(fTableMetaList);
-    			}
+			for (String factTableName : dataSetMap.keySet()) {
+				List<IndexMeta> fTableMetaList = this.indexMetaService
+						.getIndexMetasByFactTableName(factTableName,
+								dataSourceKey);
+				if (!CollectionUtils.isEmpty(fTableMetaList)) {
+					metaList.addAll(fTableMetaList);
+				}
 			}
         	
         }     
@@ -298,13 +301,17 @@ public class IndexServiceImpl implements IndexService {
             try {
                 doIndexByIndexAction(meta, idxAction,tableDataSetMap );
             } catch (Exception e) {
-                LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-                    "updateIndexByDataSourceKey", dataSourceKey));
-                String message = TesseractExceptionUtils.getExceptionMessage(
-                    IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
-                throw new IndexAndSearchException(message, e.getCause(),
-                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
+				LOGGER.info(String.format(
+						LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
+						"updateIndexByDataSourceKey",
+						"DataSourceKey:[" + dataSourceKey + "] FactTable:["
+								+ meta.getFacttableName() + "] IndexMetaId:["
+								+ meta.getIndexMetaId() + "]"));
+				String message = TesseractExceptionUtils.getExceptionMessage(
+						IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
+						IndexAndSearchExceptionType.INDEX_EXCEPTION);
+				throw new IndexAndSearchException(message, e.getCause(),
+						IndexAndSearchExceptionType.INDEX_EXCEPTION);
             }
         }
         try {
@@ -371,10 +378,7 @@ public class IndexServiceImpl implements IndexService {
                     dataSourceWrape);
             }
             
-            boolean isLastPiece = false;            
-            
-            
-            
+            boolean isLastPiece = false;  
             long pcount = IndexFileSystemConstants.FETCH_SIZE_FROM_DATASOURCE;
             // 目前是跟据数据量进行划分
             if (pcount > total) {
