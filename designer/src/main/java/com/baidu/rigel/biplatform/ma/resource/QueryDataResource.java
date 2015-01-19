@@ -761,12 +761,39 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("reportChart", chart);
         }
         areaContext.getQueryStatus().add(result);
+        // 清除当前request中的请求参数，保证areaContext的参数正确
+        resetAreaContext(areaContext, request);
+        resetContext(runTimeModel.getLocalContext().get(areaId), request);
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
+    }
+
+    /**
+     * 
+     * @param queryContext
+     * @param request
+     */
+    private void resetContext(QueryContext queryContext, HttpServletRequest request) {
+        Enumeration<String> params = request.getParameterNames();
+        while (params.hasMoreElements()) {
+            queryContext.getParams().remove(params.nextElement());
+        }
+    }
+
+    /**
+     * 
+     * @param areaContext
+     * @param request
+     */
+    private void resetAreaContext(ExtendAreaContext areaContext, HttpServletRequest request) {
+        Enumeration<String> params = request.getParameterNames();
+        while (params.hasMoreElements()) {
+            areaContext.getParams().remove(params.nextElement());
+        }
     }
 
     /**

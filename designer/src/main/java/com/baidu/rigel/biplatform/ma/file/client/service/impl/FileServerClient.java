@@ -27,8 +27,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Request;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Response;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.ResponseStatus;
@@ -71,7 +73,8 @@ public final class FileServerClient {
      */
     public Response doRequest(String server, int port, final Request request) {
         EventLoopGroup work = new NioEventLoopGroup(1);
-        String message = null;
+//        String message = null;
+        ChannelFuture future = null;
         try {
             final Response rs = new Response(ResponseStatus.FAIL, "failed", null);
             ChannelHandlerAdapter requestHandler = new ChannelHandlerAdapter() {
@@ -123,6 +126,7 @@ public final class FileServerClient {
             };
             Bootstrap strap = new Bootstrap();
             strap.group(work).option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1000)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<NioSocketChannel>() {
                     
@@ -139,19 +143,23 @@ public final class FileServerClient {
                 });
             long begin = System.currentTimeMillis();
             logger.debug("Begin invoke do file operation request ... ...");
-            ChannelFuture future = strap.connect(server, port);
+            future = strap.connect(server, port);
             future.channel().closeFuture().sync();
             logger.debug("Success execute request option cost time: "
                 + (System.currentTimeMillis() - begin) + "ms");
             return rs;
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            message = e.getMessage();
+//            message = e.getMessage();
+            throw new RuntimeException(e.getMessage(), e);
         } finally {
+            if (future != null) {
+                future.channel().disconnect();
+            }
             work.shutdownGracefully();
         }
-        Response rs = new Response(ResponseStatus.FAIL, message, null);
-        return rs;
+//        Response rs = new Response(ResponseStatus.FAIL, message, null);
+//        return rs;
     }
     
     
