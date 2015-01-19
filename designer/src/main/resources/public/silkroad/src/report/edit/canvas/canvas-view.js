@@ -252,8 +252,8 @@ define([
                 var $target = $(event.target);
                 var $comp = $target.parents('.j-component-item');
                 var compId = $comp.attr('data-comp-id');
-
-                this.model.deleteComp(compId, function () {
+                var reportCompId = $comp.attr('report-comp-id');
+                this.model.deleteComp(compId, reportCompId, function () {
                     $comp.remove();
                     that.editCompView.hideEditBar();
                     // 刷新报表展示
