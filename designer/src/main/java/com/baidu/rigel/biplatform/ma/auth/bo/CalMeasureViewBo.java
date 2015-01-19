@@ -246,7 +246,7 @@ public class CalMeasureViewBo implements Serializable {
             JSONObject extendInd = jsonObj.getJSONObject("extendInds");
             JSONArray rr = extendInd.getJSONArray("rr");
             JSONArray sr = extendInd.getJSONArray("sr");
-            JSONArray callback = extendInd.getJSONArray("callback");
+            JSONArray callback = jsonObj.getJSONArray("callback");
             viewBo.setTbs(generalCalMeasure(sr));
             viewBo.setHbs(generalCalMeasure(rr));
             viewBo.setCallback(generalCalMeasure(callback));

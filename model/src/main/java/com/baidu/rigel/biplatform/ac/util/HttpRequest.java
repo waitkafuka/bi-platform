@@ -220,7 +220,7 @@ public class HttpRequest {
         }
         LOGGER.info("start to send get:" + urlNameString);
         long current = System.currentTimeMillis();
-
+        Exception ex = null;
         for (String address : addresses) {
             String requestUrl = prefix + address + suffix;
             try {
@@ -234,10 +234,11 @@ public class HttpRequest {
                 LOGGER.info("end send get :" + urlNameString + " cost:" + (System.currentTimeMillis() - current));
                 return content;
             } catch (Exception e) {
+                ex = e;
                 LOGGER.warn("send get error " + requestUrl + ",retry next one", e);
             }
         }
-        throw new RuntimeException("send get failed[" + urlNameString + "].");
+        throw new RuntimeException(ex);
     }
 
     /**

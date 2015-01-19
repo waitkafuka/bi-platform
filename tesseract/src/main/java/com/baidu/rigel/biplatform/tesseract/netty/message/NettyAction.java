@@ -41,6 +41,10 @@ public enum NettyAction implements Serializable {
      */
     NETTY_ACTION_UPDATE("NETTY_ACTION_UPDATE"),
     /**
+     * NETTY_ACTION_MOD 索引修订
+     */
+    NETTY_ACTION_MOD("NETTY_ACTION_MOD"),
+    /**
      * NETTY_ACTION_INDEX_FEEDBACK 建索引结果反馈
      */
     NETTY_ACTION_INDEX_FEEDBACK("NETTY_ACTION_INDEX_FEEDBACK"),

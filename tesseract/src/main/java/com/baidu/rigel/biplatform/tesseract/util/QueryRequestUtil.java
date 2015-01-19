@@ -39,7 +39,9 @@ import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
+import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
@@ -98,7 +100,7 @@ public class QueryRequestUtil {
      *         Map<String,String> key is leafvalue of QueryObject and value is
      *         value of QueryObject
      */
-    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query, Map<String,String> allDims) {
+    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query) {
         if (query == null || query.getWhere() == null || query.getWhere().getAndList() == null) {
             throw new IllegalArgumentException();
         }
@@ -116,9 +118,7 @@ public class QueryRequestUtil {
                     if (valueSet == null) {
                         valueSet = new HashSet<String>();
                     }
-                    if(qo.isSummary()){
-                        allDims.put(ex.getProperties(), qo.getValue());
-                    }else if(!StringUtils.equals(leaf, qo.getValue())){
+                    if(!qo.isSummary() && !StringUtils.equals(leaf, qo.getValue())){
                         valueSet.add(qo.getValue());
                     }
                     if(CollectionUtils.isNotEmpty(valueSet)){
@@ -126,7 +126,7 @@ public class QueryRequestUtil {
                     }
                 }
             }
-            if(query.getSelect().getQueryProperties().contains(ex.getProperties())){
+            if(query.getSelect().getQueryProperties().contains(ex.getProperties()) && !curr.isEmpty()){
                 resultMap.put(ex.getProperties(), curr);
             }
         }
@@ -278,21 +278,76 @@ public class QueryRequestUtil {
 //    }
     
     
+    /** 
+     * collectAllMem
+     * @param queryContext
+     * @return
+     */
+    private static Map<String, String> collectAllMem(QueryContext queryContext) {
+        Map<String,String> allDimVal = new HashMap<String, String>();
+        if (CollectionUtils.isNotEmpty(queryContext.getColumnMemberTrees())) {
+            queryContext.getColumnMemberTrees().forEach(tree -> {
+                allDimVal.putAll(coolectAllMem(tree));
+            });
+        }
+        
+        if (CollectionUtils.isNotEmpty(queryContext.getRowMemberTrees())) {
+            queryContext.getRowMemberTrees().forEach(tree -> {
+                allDimVal.putAll(coolectAllMem(tree));
+            });
+        }
+        
+        return allDimVal;
+    }
+    
+    
+    
+    /** 
+     * coolectAllMem
+     * @param memberNodeTree
+     * @return
+     */
+    
+    /** 
+     * coolectAllMem
+     * @param memberNodeTree
+     * @return
+     */
+    private static Map<String, String> coolectAllMem(MemberNodeTree memberNodeTree) {
+        Map<String,String> allDimVal = new HashMap<String, String>();
+        if (memberNodeTree.isSummary()) {
+            allDimVal.put(memberNodeTree.getQuerySource(), memberNodeTree.getCaption());
+            return allDimVal;
+        } else {
+            if(memberNodeTree.getChildren().size() == 1) {
+                return coolectAllMem(memberNodeTree.getChildren().get(0));
+            }
+            return allDimVal;
+        }
+    }
+    
+    
     public static TesseractResultSet processGroupBy(TesseractResultSet dataSet,
-            QueryRequest query) throws NoSuchFieldException {
+            QueryRequest query, QueryContext queryContext) throws NoSuchFieldException {
         
         LinkedList<ResultRecord> transList = null;
-        Map<String,String> allDimVal = new HashMap<String, String>();
         long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
-            .transQueryRequest2LeafMap(query, allDimVal);
+            .transQueryRequest2LeafMap(query);
+        Map<String,String> allDimVal = collectAllMem(queryContext);
+        
+        
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
+        List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
+        int dimSize = query.getSelect().getQueryProperties().size();
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
             transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
         
-            if(!MapUtils.isEmpty(leafValueMap)) {
+            if(MapUtils.isNotEmpty(leafValueMap)) {
+                // 如果一个叶子对应多个父节点，克隆一个再塞回去
+                List<ResultRecord> copyLeafRecords = new ArrayList<ResultRecord>();
                 transList.forEach( record -> {
                     leafValueMap.forEach((prop,valueMap) -> {
                         try {
@@ -300,9 +355,19 @@ public class QueryRequestUtil {
                                     prop).toString() : null;
                                 Set<String> valueSet = leafValueMap.get(prop).get(currValue);
                                 if(valueSet != null){
+                                    int i = 0;
                                     for (String value : valueSet) {
-                                        // TODO 这种方法暂时只支持一个节点对应一个父节点
-                                        record.setField(prop, value);
+                                        if(i > 0) {
+                                            // 如果一个节点有多个父亲，那么在算总的汇总值得时候，会有数据问题。
+                                            ResultRecord newRec = DeepcopyUtils.deepCopy(record);
+                                            newRec.setField(prop, value);
+                                            generateGroupBy(newRec, groupList);
+                                            copyLeafRecords.add(newRec);
+                                        }else {
+                                            record.setField(prop, value);
+                                            generateGroupBy(record, groupList);
+                                        }
+                                        i++;
                                     }
                                 }
                         } catch (Exception e) {
@@ -310,23 +375,18 @@ public class QueryRequestUtil {
                             throw new RuntimeException(e);
                         }
                     });
-                    
-                    try {
-                        generateGroupBy(record, groupList);
-//                        mapLeafValue2ValueOfRecord(record,leafValueMap,groupList);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
                 });
+                if(CollectionUtils.isNotEmpty(copyLeafRecords)) {
+                    // 处理汇总节点的时候，得进行下处理和过滤
+                    transList.addAll(copyLeafRecords);
+                }
+                transList = AggregateCompute.aggregate(transList, dimSize, queryMeasures);
             }
         } else {
             return new SearchResultSet(null);
         }
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
         current = System.currentTimeMillis();
-        int dimSize = query.getSelect().getQueryProperties().size();
-        List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
         
         if(CollectionUtils.isEmpty(queryMeasures)){
             return new SearchResultSet(AggregateCompute.distinct(transList));
@@ -338,10 +398,6 @@ public class QueryRequestUtil {
            }
         });
         
-        // 对非汇总节点先进行汇总计算
-        if(MapUtils.isNotEmpty(leafValueMap)){
-            transList = AggregateCompute.aggregate(transList, dimSize, queryMeasures);
-        }
         
         if(MapUtils.isNotEmpty(allDimVal)){
 //            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);

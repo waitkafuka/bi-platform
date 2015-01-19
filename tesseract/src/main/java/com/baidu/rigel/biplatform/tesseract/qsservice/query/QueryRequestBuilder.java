@@ -105,8 +105,7 @@ public class QueryRequestBuilder {
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
             for (MemberNodeTree node : nodeTrees) {
-                if ((!MetaNameUtil.isAllMemberName(node.getName()) || !node.getChildren().isEmpty())
-                        && StringUtils.isNotBlank(node.getQuerySource())) {
+                if (StringUtils.isNotBlank(node.getQuerySource()) && !MetaNameUtil.isAllMemberName(node.getName())) {
                     request.selectAndGroupBy(node.getQuerySource());
                     Expression expression = expressions.get(node.getQuerySource());
                     if (expression == null) {
@@ -115,7 +114,9 @@ public class QueryRequestBuilder {
                     }
                     expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
                 }
-                buildSelectAndGroupBy(node.getChildren(), request, expressions);
+                if (CollectionUtils.isNotEmpty(node.getChildren())) {
+                    buildSelectAndGroupBy(node.getChildren(), request, expressions);
+                }
             }
         }
     }

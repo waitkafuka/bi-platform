@@ -612,9 +612,11 @@ public class SchemaManageServiceImpl implements SchemaManageService {
         
         extendMeasure.getCallback().forEach(measureBo -> {
             CallbackMeasure m = new CallbackMeasure(measureBo.getName());
-            if (StringUtils.isEmpty(measureBo.getId())) {
+            if (!StringUtils.isEmpty(measureBo.getId())) {
                 m = (CallbackMeasure) cube.getMeasures().get(measureBo.getId());
-            } 
+            } else {
+                m.setId(UuidGeneratorUtils.generate());
+            }
             if (m != null) {
                 m.setCallbackUrl(measureBo.getUrl());
                 m.setName(measureBo.getName());

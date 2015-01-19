@@ -82,11 +82,13 @@
     /**
      * 验证码刷新
      */
-    var refreshValidateCode = function () {
+    var refreshValidateCode = function (id) {
         var $validate = dom.validate_code;
         $validate.each(function () {
-            var src = $(this).attr('src');
-            $(this).attr('src', src + '?' + Math.random());
+            if ($(this).attr('id') == id) {
+                var src = $(this).attr('src');
+                $(this).attr('src', src + '?' + Math.random());
+            }
         });
     };
     /**
@@ -178,7 +180,7 @@
                         else {
                             alert('注册失败：' + msg.statusInfo);
                             // 注册失败验证码刷新
-                            refreshValidateCode();
+                            refreshValidateCode('register-code');
                         }
                         //$.get('www.baidu.com');
                         //$("#resText").html(msg);
@@ -272,7 +274,7 @@
 //                        $usename.next('div').html(errorsign);
                         $signvalidateCode.parent().next('div').html(msg.statusInfo);
                         // 登录失败验证码刷新
-                        refreshValidateCode();
+                        refreshValidateCode('sign-code');
                     }
                 }
             });

@@ -15,7 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ac.model.callback;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 
@@ -26,7 +26,7 @@ import java.util.List;
  * @author david.wang
  *
  */
-public class CallbackMeasureVaue extends HashMap<String, List<String>> implements CallbackValue {
+public class CallbackMeasureVaue extends LinkedHashMap<String, List<String>> implements CallbackValue {
 
     /**
      * serialVersionUID

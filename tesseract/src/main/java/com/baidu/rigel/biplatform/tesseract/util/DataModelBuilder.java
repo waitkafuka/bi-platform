@@ -17,10 +17,14 @@ package com.baidu.rigel.biplatform.tesseract.util;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +60,12 @@ public class DataModelBuilder {
      * HEAD_KEY_SPLIT
      */
     private static final String HEAD_KEY_SPLIT = "_+_";
+    
+    
+    /** 
+     * PROP_KEY_SPLIT
+     */
+    private static final String PROP_KEY_SPLIT = "^_^";
 
     /**
      * tesseractResultSet 查询结果
@@ -95,13 +105,13 @@ public class DataModelBuilder {
          * get the order of row head
          */
         List<List<String>> rowNodeName = new ArrayList<List<String>>();
-        List<String> rowHeadNames = getHeadNameByOrder(queryContext.getRowMemberTrees(), rowNodeName);
+        List<MemberTreePropResult> rowHeadNames = getHeadNameByOrder(queryContext.getRowMemberTrees(), rowNodeName);
 
         /**
          * get the order of col head
          */
         List<List<String>> columnNodeName = new ArrayList<List<String>>();
-        List<String> colHeadNames = getHeadNameByOrder(queryContext.getColumnMemberTrees(), columnNodeName);
+        List<MemberTreePropResult> colHeadNames = getHeadNameByOrder(queryContext.getColumnMemberTrees(), columnNodeName);
         // 构造交叉后的行列取数的KEY
         List<String> rowAxisKeys = generateAxisKeys(rowNodeName, null);
         List<String> columnAxisKeys = generateAxisKeys(columnNodeName, queryContext.getQueryMeasures());
@@ -152,17 +162,25 @@ public class DataModelBuilder {
      * @return 将ResultSet转换成的单元格数据
      * @throws Exception 取数的异常
      */
-    private Map<String, Map<String, BigDecimal>> parseResultSet(List<String> rowHeadNames, List<String> colHeadNames)
+    private Map<String, Map<String, BigDecimal>> parseResultSet(List<MemberTreePropResult> rowHeadNames, List<MemberTreePropResult> colHeadNames)
             throws Exception {
 
         // 结构是 列 行，指标 值
         Map<String, Map<String, BigDecimal>> data = Maps.newHashMap();
         while (this.tesseractResultSet.next()) {
             StringBuilder oneLine = new StringBuilder();
-            for (String rowHeadName : rowHeadNames) {
-                oneLine.append(rowHeadName);
-                oneLine.append(tesseractResultSet.getString(rowHeadName));
-                oneLine.append(HEAD_KEY_SPLIT);
+            for (MemberTreePropResult rowHeadName : rowHeadNames) {
+                
+                for(String prop : rowHeadName.queryPropers.keySet()) {
+                    String value = tesseractResultSet.getString(prop);
+                    if (rowHeadName.queryPropers.get(prop).isEmpty() || rowHeadName.queryPropers.get(prop).contains(value)) {
+                        oneLine.append(prop);
+                        oneLine.append(PROP_KEY_SPLIT);
+                        oneLine.append(value);
+                        oneLine.append(HEAD_KEY_SPLIT);
+                        break;
+                    }
+                }
             }
             if(oneLine.length() > 1){
                 oneLine.delete(oneLine.length() - HEAD_KEY_SPLIT.length(), oneLine.length());
@@ -171,10 +189,17 @@ public class DataModelBuilder {
             }
             Map<String, BigDecimal> colValues = Maps.newHashMap();
             StringBuilder oneColumn = new StringBuilder();
-            for (String colHeadName : colHeadNames) {
-                oneColumn.append(colHeadName);
-                oneColumn.append(tesseractResultSet.getString(colHeadName));
-                oneColumn.append(HEAD_KEY_SPLIT);
+            for (MemberTreePropResult colHeadName : colHeadNames) {
+                for(String prop : colHeadName.queryPropers.keySet()) {
+                    String value = tesseractResultSet.getString(prop);
+                    if (colHeadName.queryPropers.get(prop).isEmpty() || colHeadName.queryPropers.get(prop).contains(value)) {
+                        oneColumn.append(prop);
+                        oneColumn.append(value);
+                        oneColumn.append(HEAD_KEY_SPLIT);
+                        break;
+                    }
+                }
+                
             }
             for (MiniCubeMeasure measure : queryContext.getQueryMeasures()) {
                 StringBuilder columnKey = new StringBuilder();
@@ -225,18 +250,52 @@ public class DataModelBuilder {
      * 获取交叉维度查询的key，按照一定顺序
      * 
      * @param memberNodes 交叉维度节点
+     * @param rowNodeName
      * @return 维度查询KEY列表
      */
-    private List<String> getHeadNameByOrder(List<MemberNodeTree> memberNodes, List<List<String>> rowNodeName) {
-        List<String> headNames = Lists.newArrayList();
+    private List<MemberTreePropResult> getHeadNameByOrder(List<MemberNodeTree> memberNodes, List<List<String>> rowNodeName) {
+        List<MemberTreePropResult> headNames = Lists.newArrayList();
         for (int i = 0; i < memberNodes.size(); i++) {
             MemberNodeTree nodeTree = memberNodes.get(i);
             if (MetaNameUtil.isAllMemberName(nodeTree.getName()) && nodeTree.getChildren().isEmpty()) {
                 return headNames;
             }
-            rowNodeName.add(getNodeName(nodeTree, null, headNames));
+            MemberTreePropResult treeProp = new MemberTreePropResult();
+            rowNodeName.add(getNodeName(nodeTree, null, treeProp));
+            if(MapUtils.isEmpty(treeProp.getQueryPropers())) {
+                log.warn("query proper:{} is null,skip",nodeTree);
+                continue;
+            }
+            headNames.add(treeProp);
+            
         }
         return headNames;
+    }
+    
+    
+    
+    /** 
+     *  解析节点树的查询属性对应的值，中间结果，用完就扔,构造层内部类，方便后续添加属性
+     * @author xiaoming.chen
+     * @version  2015年1月16日 
+     * @since jdk 1.8 or after
+     */
+    class MemberTreePropResult {
+        
+        /** 
+         * queryPropers 非叶子节点对应的查询属性，VALUE为查询的值
+         */
+        private Map<String, Set<String>> queryPropers = new LinkedHashMap<String, Set<String>>(3);
+
+        /** 
+         * 获取 queryPropers 
+         * @return the queryPropers 
+         */
+        public Map<String, Set<String>> getQueryPropers() {
+        
+            return queryPropers;
+        }
+
     }
 
     /**
@@ -246,23 +305,32 @@ public class DataModelBuilder {
      * @param nodeNames 节点列表
      * @return 查询的节点的名称列表
      */
-    private List<String> getNodeName(MemberNodeTree nodeTree, List<String> nodeNames, List<String> dimSources) {
+    private List<String> getNodeName(MemberNodeTree nodeTree, List<String> nodeNames, MemberTreePropResult treePropResult) {
         if (nodeNames == null) {
             nodeNames = new ArrayList<String>();
         }
+        String prop = nodeTree.getQuerySource();
         if (StringUtils.isNotBlank(nodeTree.getName())) {
             if (MetaNameUtil.isAllMemberName(nodeTree.getName()) && nodeTree.getChildren().isEmpty()) {
                 return nodeNames;
             }
-            nodeNames.add(nodeTree.getQuerySource() + nodeTree.getName());
-            if (StringUtils.isNotBlank(nodeTree.getQuerySource()) && !dimSources.contains(nodeTree.getQuerySource())) {
-                dimSources.add(nodeTree.getQuerySource());
+            if(StringUtils.isNotBlank(prop)) {
+                nodeNames.add(prop + PROP_KEY_SPLIT + nodeTree.getName());
+                treePropResult.getQueryPropers().put(prop, new HashSet<String>());
             }
         }
         if (CollectionUtils.isNotEmpty(nodeTree.getChildren())) {
+            String childProp = null;
             for (MemberNodeTree child : nodeTree.getChildren()) {
-                getNodeName(child, nodeNames, dimSources);
+                getNodeName(child, nodeNames, treePropResult);
+                if (childProp == null) {
+                    childProp = child.getQuerySource();
+                }
             }
+            if(StringUtils.isNotBlank(prop) && !prop.equals(childProp)) {
+                treePropResult.getQueryPropers().get(prop).add(nodeTree.getName());
+            }
+            
         }
         return nodeNames;
     }
