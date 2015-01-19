@@ -15,10 +15,11 @@
  */
 package com.baidu.rigel.biplatform.ma.file.client.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +29,6 @@ import com.baidu.rigel.biplatform.ma.common.file.protocol.Request;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Response;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.ResponseStatus;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
-import com.google.common.collect.Maps;
 
 /**
  * 文件流操作实现类，主要提供读取内容，向服务器写内容
@@ -46,7 +46,7 @@ public class RequestProxy {
     /**
      * 服务器地址、端口缓存
      */
-    private static final LinkedHashMap<String, Integer> SERVERS = Maps.newLinkedHashMap();
+    private static final List<String> SERVERS = Collections.synchronizedList(new ArrayList<String>());
     
     /**
      * 文件服务器客户端
@@ -100,10 +100,10 @@ public class RequestProxy {
         if (SERVERS.isEmpty()) {
             initServers();
         }
-        Set<Map.Entry<String, Integer>> entry = SERVERS.entrySet();
         Response response = null;
-        for (Map.Entry<String, Integer> tmp : entry) {
-            response = client.doRequest(tmp.getKey(), tmp.getValue(), request);
+        for (String tmp : SERVERS) {
+            String[] server = tmp.split(":");
+            response = client.doRequest(server[0], Integer.valueOf(server[1]), request);
             if (response.getStatus() != ResponseStatus.FAIL) {
                 break;
             }
@@ -114,8 +114,7 @@ public class RequestProxy {
     private void initServers() {
         String[] servers = host.split(",");
         for (String server : servers) {
-            String[] tmp = server.split(":");
-            SERVERS.put(tmp[0], Integer.valueOf(tmp[1]));
+            SERVERS.add(server);
         }
     }
 }
