@@ -16,11 +16,15 @@
 package com.baidu.rigel.biplatform.ma.report.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -66,6 +70,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
@@ -737,6 +742,58 @@ public final class QueryUtils {
             return olapElement;
         }
         return null;
+    }
+
+    /**
+     * 修正报表区域模型参数
+     * @param request
+     * @param model
+     */
+    public static Map<String, Object> resetContextParam(final HttpServletRequest request, ReportDesignModel model) {
+        Map<String, Object> rs = Maps.newHashMap();
+        Collection<ReportParam> params = DeepcopyUtils.deepCopy(model.getParams()).values();
+        if (params.size() == 0) {
+            return rs;
+        }
+        Map<String, String> requestParams = collectRequestParams(params, request);
+        params.forEach(param -> {
+            if (param.isNeeded() && StringUtils.isEmpty(requestParams.get(param.getName()))) {
+                if (StringUtils.isEmpty(param.getDefaultValue())) {
+                    throw new RuntimeException("必要参数未赋值");
+                }
+                rs.put(param.getElementId(), param.getDefaultValue());
+            } else if (!StringUtils.isEmpty(requestParams.get(param.getName()))) {
+                rs.put(param.getElementId(), requestParams.get(param.getName()).split(","));
+            } else if (!StringUtils.isEmpty(param.getDefaultValue())) {
+                rs.put(param.getElementId(), param.getDefaultValue());
+            }
+        });
+        return rs;
+    }
+
+    /**
+     * 
+     * @param params
+     * @param request
+     * @return Map<String, String>
+     */
+    private static Map<String, String> collectRequestParams(Collection<ReportParam> params,
+            HttpServletRequest request) {
+        Map<String, String> rs = Maps.newHashMap();
+        request.getParameterMap().forEach((k, v) -> {
+            rs.put(k, v[0]);
+        }); 
+        // cookie中如果包含参数值，覆盖url中参数
+        if (request.getCookies() != null)  {
+            for (Cookie cookie : request.getCookies()) {
+                rs.put(cookie.getName(), cookie.getValue());
+            }
+        }
+        
+        // 如果当前线程中包含参数值，则覆盖cookie中参数值
+        rs.putAll(ContextManager.getParams());
+        
+        return rs;
     }
     
 

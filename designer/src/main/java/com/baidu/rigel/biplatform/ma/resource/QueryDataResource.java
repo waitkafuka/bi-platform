@@ -496,11 +496,19 @@ public class QueryDataResource extends BaseResource {
                 newParams.put(Constants.IN_EDITOR, true);
             }
         }
+        
         runTimeModel.getContext().reset();
         runTimeModel.getLocalContext().forEach((key, value) -> {
                 value.reset();
                 value.setParams(newParams);
         });
+        
+        /**
+         * 依据查询请求，根据报表参数定义，增量添加报表区域模型参数
+         */
+        Map<String, Object> tmp = 
+                QueryUtils.resetContextParam(request, reportModelCacheManager.getReportModel(reportId));
+        newParams.putAll(tmp);
         runTimeModel.getContext().setParams(newParams);
         ReportDesignModel model = runTimeModel.getModel(); 
         //reportModelCacheManager.getReportModel(reportId);
@@ -637,6 +645,7 @@ public class QueryDataResource extends BaseResource {
          * 4. 更新区域本地的上下文
          */
         ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
+        
         /**
          * 5. 生成查询动作QueryAction
          */
