@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -60,6 +61,7 @@ import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DragRuleCheckUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -1250,4 +1252,83 @@ public class ReportDesignModelResource extends BaseResource {
         return rs;
     }
     
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param olapElementId
+     * @param type
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/params", method = {RequestMethod.POST})
+    public ResponseResult addOrModifyParams(@PathVariable("id") String reportId, HttpServletRequest request) {
+
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        String paramsStr = request.getParameter("params");
+        if (StringUtils.isEmpty(paramsStr)) {
+            Map<String, String> params = GsonUtils.fromJson(request.getParameter("params"),
+                    new TypeToken<Map<String, String>>(){}.getType());
+            model.setParams(params);
+        }
+        /**
+         * 配置端，在修改Item以后，需要重新初始化上下文
+         */
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        runTimeModel.init(model, true, true);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("successfully remode item from area");
+        result.setStatus(0);
+        result.setData(model);
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param olapElementId
+     * @param type
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/params", method = {RequestMethod.GET})
+    public ResponseResult getParams(@PathVariable("id") String reportId, HttpServletRequest request) {
+
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        result.setData(model.getParams());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
 }
