@@ -189,6 +189,11 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
 //        return result;
 //    }
 
+    
+    /*
+     * (non-Javadoc) 
+     * @see com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitService#mergeDataModel(com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContextSplitResult) 
+     */
     @Override
     public DataModel mergeDataModel(QueryContextSplitResult splitResult) {
         long current = System.currentTimeMillis();
@@ -200,8 +205,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         dataModel.setColumnHeadFields(DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getColumnMemberTrees(),
                 splitResult.getOriQueryContext().getQueryMeasures()));
         dataModel.setRowHeadFields(DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getRowMemberTrees(), null));
-        
-        
+        List<HeadField> rowLeafs = DataModelUtils.getLeafNodeList(dataModel.getRowHeadFields());
         
         // 条件，指标UniqueName，父节点UniqueName，数据
         Map<Condition, Map<String, Map<String, List<BigDecimal>>>> dataModelDatas = new HashMap<Condition, Map<String,Map<String,List<BigDecimal>>>>(splitResult.getDataModels().size());
@@ -224,61 +228,96 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
             dataModelDatas.put(con, dataModelData);
             
         });
-        if(!dataModelDatas.containsKey(EmptyCondition.getInstance())) {
-            dataModelDatas.put(EmptyCondition.getInstance(), new HashMap<>());
-        }
+        
+
+        // 常量公式计算出来的值
+        Map<String, List<BigDecimal>> constantResult = new HashMap<>(1);
         // TODO 优化循环策略
         splitResult.getCompileContexts().forEach((measureName,compileContext) -> {
            Map<String, List<BigDecimal>> calCulateDatas = new HashMap<>();
            Map<String, Map<Condition, Map<String, ComputeResult>>> categoryVariableVal = new HashMap<>();
-           for(Entry<Condition,Set<String>> entry : compileContext.getConditionVariables().entrySet()) {
-               Map<String, Map<String, List<BigDecimal>>> dataModelData = dataModelDatas.get(entry.getKey());
-               if(dataModelData == null) {
-                   throw new IllegalSplitResultException(splitResult, "dataModel is null by condition" + entry.getKey(), "MERGE_MODEL");
-               }
-               // parentNode uniqueName, varName, data
-               for(String var : entry.getValue()) {
-                   String name = MetaNameUtil.generateMeasureUniqueName(PlaceHolderUtils.getKeyFromPlaceHolder(var));
-                   if (!dataModelData.containsKey(name)) {
-                       throw new IllegalSplitResultException(splitResult, "miss variable:" + var, "MERGE_MODEL");
+           if (MapUtils.isNotEmpty(compileContext.getConditionVariables())) {
+               for(Entry<Condition,Set<String>> entry : compileContext.getConditionVariables().entrySet()) {
+                   Map<String, Map<String, List<BigDecimal>>> dataModelData = dataModelDatas.get(entry.getKey());
+                   if(dataModelData == null) {
+                       throw new IllegalSplitResultException(splitResult, "dataModel is null by condition" + entry.getKey(), "MERGE_MODEL");
                    }
-                   for(String parentNodeUniqueName : dataModelData.get(name).keySet()) {
-                       if(!categoryVariableVal.containsKey(parentNodeUniqueName)) {
-                           categoryVariableVal.put(parentNodeUniqueName, new HashMap<>());
+                   // parentNode uniqueName, varName, data
+                   if (CollectionUtils.isNotEmpty(entry.getValue())) {
+                       for(String var : entry.getValue()) {
+                           String name = MetaNameUtil.generateMeasureUniqueName(PlaceHolderUtils.getKeyFromPlaceHolder(var));
+                           if (!dataModelData.containsKey(name)) {
+                               throw new IllegalSplitResultException(splitResult, "miss variable:" + var, "MERGE_MODEL");
+                           }
+                           for(String parentNodeUniqueName : dataModelData.get(name).keySet()) {
+                               if(!categoryVariableVal.containsKey(parentNodeUniqueName)) {
+                                   categoryVariableVal.put(parentNodeUniqueName, new HashMap<>());
+                               }
+                               if (!categoryVariableVal.get(parentNodeUniqueName).containsKey(entry.getKey())) {
+                                   categoryVariableVal.get(parentNodeUniqueName).put(entry.getKey(), new HashMap<>());
+                               }
+                               categoryVariableVal.get(parentNodeUniqueName).get(entry.getKey()).put(var, new ListComputeResult(dataModelData.get(name).get(parentNodeUniqueName)));
+                           }
                        }
-                       if (!categoryVariableVal.get(parentNodeUniqueName).containsKey(entry.getKey())) {
-                           categoryVariableVal.get(parentNodeUniqueName).put(entry.getKey(), new HashMap<>());
-                       }
-                       categoryVariableVal.get(parentNodeUniqueName).get(entry.getKey()).put(var, new ListComputeResult(dataModelData.get(name).get(parentNodeUniqueName)));
+                   } else {
+                       constantResult.put(measureName, ListComputeResult.transfer(compileContext.getNode().getResult(null), rowLeafs.size()).getData());
                    }
                }
-               
-           }
-           for(String parentName : categoryVariableVal.keySet()) {
-               // 清理一下，避免对后续造成影响
-               compileContext.getVariablesResult().clear();
-               compileContext.setVariablesResult(categoryVariableVal.get(parentName));
+               for(String parentName : categoryVariableVal.keySet()) {
+                   // 清理一下，避免对后续造成影响
+                   compileContext.getVariablesResult().clear();
+                   compileContext.setVariablesResult(categoryVariableVal.get(parentName));
 //                   compileContext.getVariablesResult().put(entry.getKey(), categoryVariableVal.get(parentName));
-               calCulateDatas.put(parentName, ((ListComputeResult)compileContext.getNode().getResult(compileContext)).getData());
+                   calCulateDatas.put(parentName, ((ListComputeResult)compileContext.getNode().getResult(compileContext)).getData());
+               }
+           }
+           if(!dataModelDatas.containsKey(EmptyCondition.getInstance())) {
+               dataModelDatas.put(EmptyCondition.getInstance(), new HashMap<>());
            }
            dataModelDatas.get(EmptyCondition.getInstance()).put(measureName, calCulateDatas);
         });
-        mergeDataModelDatas(dataModel, dataModelDatas.get(EmptyCondition.getInstance()));
+        mergeDataModelDatas(dataModel, dataModelDatas.get(EmptyCondition.getInstance()),constantResult);
         log.info("merge datamodel cost:{}ms",System.currentTimeMillis() - current);
         return dataModel;
     }
     
     
-    private void mergeDataModelDatas(DataModel dataModel, Map<String, Map<String, List<BigDecimal>>> datas){
+    
+    /** 
+     * mergeDataModelDatas
+     * @param dataModel
+     * @param datas
+     * @param constantResult
+     */
+    private void mergeDataModelDatas(DataModel dataModel, Map<String, Map<String, List<BigDecimal>>> datas, Map<String, List<BigDecimal>> constantResult){
+        List<HeadField> rowLeafs = DataModelUtils.getLeafNodeList(dataModel.getRowHeadFields());
+        
         List<HeadField> oriColumnFields = DataModelUtils.getLeafNodeList(dataModel.getColumnHeadFields());
         oriColumnFields.forEach(field -> {
-            String pName = NONE;
-            if(field.getParentLevelField() != null) {
-                pName = field.getParentLevelField().getNodeUniqueName();
+            if(constantResult.containsKey(field.getValue())) {
+                field.setCompareDatas(constantResult.get(field.getValue()));
+            } else {
+                String pName = NONE;
+                if(field.getParentLevelField() != null) {
+                    pName = field.getParentLevelField().getNodeUniqueName();
+                }
+                field.setCompareDatas(datas.get(field.getValue()).get(pName));
             }
-            field.setCompareDatas(datas.get(field.getValue()).get(pName));
         });
-        DataModelUtils.fillColumnData(dataModel, FillDataType.COLUMN);
+        
+        List<HeadField> columnLeafs = DataModelUtils.getLeafNodeList(dataModel.getColumnHeadFields());
+        dataModel.getColumnBaseData().clear();
+
+        for (int i = 0; i < columnLeafs.size(); i++) {
+            HeadField rowField = columnLeafs.get(i);
+            dataModel.getColumnBaseData().add(rowField.getCompareDatas());
+            while (dataModel.getColumnBaseData().get(i).size() < rowLeafs.size()) {
+                dataModel.getColumnBaseData().get(i).add(null);
+            }
+        }
+        
     }
+    
+    
 
 }

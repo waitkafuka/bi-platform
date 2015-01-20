@@ -55,7 +55,7 @@ public class MiniCubeSqlConnectionTest {
     @Test
     public void testQuery() throws IOException {
 
-        File f = new File("c:/test.json");
+        File f = new File("c:/qm.txt");
         BufferedReader br = new BufferedReader(new FileReader(f));
         StringBuilder sb = new StringBuilder();
         String lineStr = null;

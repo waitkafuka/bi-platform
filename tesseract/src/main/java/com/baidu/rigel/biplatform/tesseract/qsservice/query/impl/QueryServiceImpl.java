@@ -18,9 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.qsservice.query.impl;
 import java.util.List;
 import java.util.Set;
 
-
 import javax.annotation.Resource;
-
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -29,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -42,7 +39,7 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
-import com.baidu.rigel.biplatform.parser.context.Condition.ConditionType;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.CallbackCondition;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.exception.OverflowQueryConditionException;
@@ -165,7 +162,7 @@ public class QueryServiceImpl implements QueryService {
             // TODO 抛出到其它节点去,后续需要修改成调用其它节点的方法
             splitResult.getConditionQueryContext().forEach((con, context) -> {
                         DataModel dm = null;
-                        if (con.getConditionType().equals(ConditionType.Other)) {
+                        if (con instanceof CallbackCondition) {
                             try {
                                 TesseractResultSet resultSet = callbackSearchService.query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, context, questionModel.isUseIndex(),null));
                                 dm = new DataModelBuilder(resultSet, context).build();
