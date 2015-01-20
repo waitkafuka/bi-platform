@@ -49,6 +49,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.model.TimerAreaLogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelManageService;
@@ -1281,8 +1282,8 @@ public class ReportDesignModelResource extends BaseResource {
         }
         String paramsStr = request.getParameter("params");
         if (StringUtils.isEmpty(paramsStr)) {
-            Map<String, String> params = GsonUtils.fromJson(request.getParameter("params"),
-                    new TypeToken<Map<String, String>>(){}.getType());
+            Map<String, ReportParam> params = GsonUtils.fromJson(request.getParameter("params"),
+                    new TypeToken<Map<String, ReportParam>>(){}.getType());
             model.setParams(params);
         }
         /**

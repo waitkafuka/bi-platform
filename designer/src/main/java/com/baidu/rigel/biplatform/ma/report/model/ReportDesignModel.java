@@ -117,7 +117,7 @@ public class ReportDesignModel implements Serializable {
     /**
      * 报表参数映射关系
      */
-    private Map<String, String> params = Maps.newHashMap();
+    private Map<String, ReportParam> params = Maps.newHashMap();
     
     public String getId() {
         return id;
@@ -320,7 +320,7 @@ public class ReportDesignModel implements Serializable {
     /**
      * @return the params
      */
-    public Map<String, String> getParams() {
+    public Map<String, ReportParam> getParams() {
         if (this.params == null) {
             this.params = Maps.newHashMap();
         }
@@ -330,7 +330,7 @@ public class ReportDesignModel implements Serializable {
     /**
      * @param params the params to set
      */
-    public void setParams(Map<String, String> params) {
+    public void setParams(Map<String, ReportParam> params) {
         this.params = params;
     }
     

@@ -587,7 +587,7 @@ public class SchemaManageServiceImpl implements SchemaManageService {
         }
         extendMeasure.getCals().stream().forEach(cal -> {
             if (StringUtils.isEmpty(cal.getId())) {
-                ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(cal.getName());
+                ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(cal.getCaption());
                 m.setAggregator(Aggregator.SUM);
                 m.setCaption(cal.getCaption());
                 m.setCube(cube);
@@ -595,14 +595,14 @@ public class SchemaManageServiceImpl implements SchemaManageService {
                 m.setFormula(cal.getFormula());
                 m.setRefIndNames(cal.getReferenceNames());
                 m.setType(MeasureType.CAL);
-                m.setName(cal.getCaption());
+//                m.setName(cal.getCaption());
                 m.setId(UuidGeneratorUtils.generate());
                 cube.getMeasures().put(m.getId(), m);
             } else {
                 Measure m = cube.getMeasures().get(cal.getId());
                 if (m != null) {
                     ((ExtendMinicubeMeasure) m).setCaption(cal.getCaption());
-                    ((ExtendMinicubeMeasure) m).setName(cal.getName());
+                    ((ExtendMinicubeMeasure) m).setName(cal.getCaption());
                     ((ExtendMinicubeMeasure) m).setFormula(cal.getFormula());
                     ((ExtendMinicubeMeasure) m).setRefIndNames(cal.getReferenceNames());
                 }
