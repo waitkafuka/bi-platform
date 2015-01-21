@@ -74,8 +74,13 @@ define([
                  */
                 function openDataFormatDialog(data) {
                     var html;
+                    // 初始化参数维度数据(包括维度数据与参数维度数据合并)
+                    var initdata = {};
+                    initdata.para = data.data;
+                    initdata.dimList = arr.dimList;
+                    //arr data;
                     html = ParaBtnTemplate.render(
-                        data
+                        initdata
                     );
                     dialog.showDialog({
                         content: html,
@@ -118,6 +123,7 @@ define([
                 var result = {};
                 result.params = {};
                 result.params = this._getParaDimData($dom);
+                //console.log(data);
                 this.model.getParameterDimData(reportId, result);
             },
 
@@ -137,10 +143,10 @@ define([
                     var paraelementId = $(this).find('.parameter-id').val();
                     result[paraname] = {};
                     var para = result[paraname];
-                    para['name'] = paraname;
-                    para['defaultValue'] = paradefault;
-                    para['needed'] = paraneeded;
-                    para['elementId'] = paraelementId;
+                    para.name = paraname;
+                    para.defaultValue = paradefault;
+                    para.needed = paraneeded;
+                    para.elementId = paraelementId;
                 });
                 return result;
             },

@@ -42,7 +42,7 @@ define(['url'], function (Url) {
             $.ajax({
                 url: Url.getParameterDimData(reportId),
                 type: 'post',
-                data: JSON.stringify(data),
+                data: 'params=' + JSON.stringify(data.params),
                 success: function (data) {
                 }
             });
