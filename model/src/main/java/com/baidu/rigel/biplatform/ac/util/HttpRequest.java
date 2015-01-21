@@ -301,7 +301,7 @@ public class HttpRequest {
             LOGGER.info("post url is : " + postUrl);
             try {
                 HttpUriRequest request = RequestBuilder.post()
-                            .setUri(postUrl).addParameters(nameValues.toArray(new NameValuePair[0]))
+                            .setUri(postUrl) // .addParameters(nameValues.toArray(new NameValuePair[0]))
                             .setEntity(new UrlEncodedFormEntity(nameValues, "utf-8"))
                             .build();
                 if (StringUtils.isNotBlank(cookie)) {

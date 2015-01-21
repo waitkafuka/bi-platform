@@ -155,8 +155,10 @@ public class CallbackResponse implements Serializable {
         str.append("{ status : " + status.name());
         str.append(", message : " + message);
         str.append(", data : [");
-        for (CallbackValue value : data) {
-            str.append(value.toString() + ",");
+        if (data != null) {
+            for (CallbackValue value : data) {
+                str.append(value.toString() + ",");
+            }
         }
         str.append("]");
         str.append(", cost : " + cost + "ms,");
