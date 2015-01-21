@@ -17,6 +17,7 @@
 package com.baidu.rigel.biplatform.parser.result;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -41,10 +42,41 @@ public class ListComputeResult extends AbstractResult<List<BigDecimal>> {
     public ListComputeResult() {
     }
     
+    
     @Override
     public ResultType getResultType() {
         return ResultType.LIST;
-        
+    }
+    
+    
+    /** 
+     * transfer 将一个简单的结果转换成List结果，每个值都是简单结果的值
+     * @param singleResult
+     * @param size
+     * @return
+     */
+    public static ListComputeResult transfer(ComputeResult trsan, int size) {
+        if(trsan == null) {
+            throw new IllegalArgumentException("single result is null");
+        }
+        ListComputeResult result = new ListComputeResult();
+        if (trsan.getResultType().equals(ResultType.LIST)) {
+            if (result.getData().size() < size) {
+                for(int i = result.getData().size(); i < size; i++) {
+                    result.getData().add(null);
+                }
+            }else {
+                result.setData(result.getData().subList(0, size));
+            }
+        } else {
+            BigDecimal data = ((SingleComputeResult)trsan).getData();
+            List<BigDecimal> datas = new ArrayList<BigDecimal>(size);
+            for(int i = 0; i < size; i++) {
+                datas.add(data);
+            }
+            result.setData(datas);
+        }
+        return result;
     }
 
 }

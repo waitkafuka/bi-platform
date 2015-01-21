@@ -5,11 +5,13 @@ package com.baidu.rigel.biplatform.parser.node.impl;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
+import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
 import com.baidu.rigel.biplatform.parser.exception.NodeCompileException;
 import com.baidu.rigel.biplatform.parser.node.AbstractNode;
 import com.baidu.rigel.biplatform.parser.result.ComputeResult;
@@ -102,7 +104,9 @@ public class DataNode extends AbstractNode {
 
     @Override
     public Map<Condition, Set<String>> collect() {
-        return new HashMap<Condition, Set<String>>();
+        Map<Condition, Set<String>> result = new HashMap<Condition, Set<String>>(1);
+        result.put(EmptyCondition.getInstance(), new HashSet<String>(1));
+        return result;
         
     }
 
