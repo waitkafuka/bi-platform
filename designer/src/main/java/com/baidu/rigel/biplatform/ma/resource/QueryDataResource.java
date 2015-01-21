@@ -46,7 +46,6 @@ import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
-import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
@@ -54,7 +53,6 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
@@ -193,13 +191,13 @@ public class QueryDataResource extends BaseResource {
         }
         final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
         Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
-        DataSourceInfo dsInfo = null;
-        try {
-            dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsService.getDsDefine(model.getDsId()), 
-                    securityKey);
-        } catch (DataSourceOperationException e1) {
-            logger.error(e1.getMessage(), e1);
-        }
+//        DataSourceInfo dsInfo = null;
+//        try {
+//            dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsService.getDsDefine(model.getDsId()), 
+//                    securityKey);
+//        } catch (DataSourceOperationException e1) {
+//            logger.error(e1.getMessage(), e1);
+//        }
         for (final String areaId : areaIds) {
             ExtendArea area = model.getExtendById(areaId);
             if (area != null && isQueryComp(area.getType())
@@ -210,21 +208,21 @@ public class QueryDataResource extends BaseResource {
                 String dimId = item.getOlapElementId();
                 Dimension dim = cube.getDimensions().get(dimId);
                 if (dim != null) {
-//                    List<Map<String, String>> values;
+                    List<Map<String, String>> values;
                     try {
-//                        values = Lists.newArrayList();
+                        values = Lists.newArrayList();
                         List<Member> members = reportModelQueryService
                                 .getMembers(tmpCube, 
                                 tmpCube.getDimensions().get(dim.getName()),
                                 Maps.newHashMap(), securityKey).get(0);
-//                        members.forEach(m -> {
-//                            Map<String, String> tmp = Maps.newHashMap();
-//                            tmp.put("value", m.getUniqueName());
-//                            tmp.put("text", m.getCaption());
-//                            values.add(tmp);
-//                        });
-                        List<Map<String, String>> values = 
-                                QueryUtils.getMembersWithChildrenValue(members, tmpCube, dsInfo, Maps.newHashMap());
+                        members.forEach(m -> {
+                            Map<String, String> tmp = Maps.newHashMap();
+                            tmp.put("value", m.getUniqueName());
+                            tmp.put("text", m.getCaption());
+                            values.add(tmp);
+                        });
+//                        List<Map<String, String>> values = 
+//                                QueryUtils.getMembersWithChildrenValue(members, tmpCube, dsInfo, Maps.newHashMap());
                         Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
                         datasource.put("datasource", values);
                         datas.put(areaId, datasource);
