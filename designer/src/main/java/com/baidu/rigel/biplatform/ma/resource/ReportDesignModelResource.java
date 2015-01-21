@@ -1282,7 +1282,7 @@ public class ReportDesignModelResource extends BaseResource {
         }
         String paramsStr = request.getParameter("params");
         if (!StringUtils.isEmpty(paramsStr)) {
-            Map<String, ReportParam> params = GsonUtils.fromJson(paramsStr,
+            Map<String, ReportParam> params = GsonUtils.fromJson(request.getParameter("params"),
                     new TypeToken<Map<String, ReportParam>>(){}.getType());
             model.setParams(params);
         }
