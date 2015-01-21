@@ -18,6 +18,9 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.event;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -42,6 +45,8 @@ public class UpdateIndexByDatasourceEvent extends ApplicationEvent {
      */
     private String[] dataSetNames;
     
+    private Map<String,Map<String,BigDecimal>> dataSetMap;
+    
     /**
      * Constructor by
      * 
@@ -52,6 +57,15 @@ public class UpdateIndexByDatasourceEvent extends ApplicationEvent {
         if (source != null) {
             dataSourceKey = (String) source;
         }
+    }
+    
+    /** 
+     * 构造函数
+     */
+    public UpdateIndexByDatasourceEvent(String dataSourceKey, String[] dataSetNames, Map<String,Map<String,BigDecimal>> dataSetMap) {
+        this(dataSourceKey);
+        this.dataSetNames = dataSetNames;
+        this.dataSetMap=dataSetMap;
     }
     
     /** 
@@ -89,16 +103,25 @@ public class UpdateIndexByDatasourceEvent extends ApplicationEvent {
     
         return dataSetNames;
     }
+    
+    
 
     
-    /*
+    /**
+	 * @return the dataSetMap
+	 */
+	public Map<String, Map<String, BigDecimal>> getDataSetMap() {
+		return dataSetMap;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
-        return "UpdateIndexByDatasourceEvent [dataSourceKey=" + dataSourceKey + "]";
+        return "UpdateIndexByDatasourceEvent [dataSourceKey=" + dataSourceKey + "][dataSetNames="+this.dataSetNames+"][dataSetMap="+this.dataSetMap+"]";
     }
     
 }

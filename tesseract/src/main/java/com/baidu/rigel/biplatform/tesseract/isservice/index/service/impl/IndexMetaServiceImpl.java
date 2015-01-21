@@ -742,11 +742,9 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                     // 设置索引文件路径=datasourceinfo.getKey+"/"+facttablename+shardname
                     // 只设置一次
                     String idxFilePathPrefix = idxMeta.getDataSourceInfo().getDataSourceKey()
-                        + File.separator + idxMeta.getFacttableName() + File.separator;
-                    idxShard.setFilePath(IndexMeta.getIndexFilePathUpdate() + idxFilePathPrefix
-                        + idxShard.getShardName());
-                    idxShard.setIdxFilePath(IndexMeta.getIndexFilePathIndex() + idxFilePathPrefix
-                        + idxShard.getShardName());
+                        + File.separator + idxMeta.getFacttableName() + File.separator + idxMeta.getIndexMetaId() + File.separator;
+                    idxShard.setFilePath(idxFilePathPrefix + idxShard.getShardName()+File.separator+IndexMeta.getIndexFilePathUpdate());
+                    idxShard.setIdxFilePath(idxFilePathPrefix + idxShard.getShardName()+File.separator+IndexMeta.getIndexFilePathIndex());
                     
                     assignIndexShardList.add(idxShard);
                     

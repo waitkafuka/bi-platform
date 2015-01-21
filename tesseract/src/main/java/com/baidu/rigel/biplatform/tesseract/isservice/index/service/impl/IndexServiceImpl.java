@@ -30,6 +30,7 @@ import java.util.Set;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,15 +198,16 @@ public class IndexServiceImpl implements IndexService {
                     this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
                     continue;
                 } else if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
-                    idxAction = IndexAction.INDEX_UPDATE;
+                    idxAction = IndexAction.INDEX_MERGE;
                 }
-                boolean idxResult = false;
+ //               boolean idxResult = false;
                 
                 try {
                     
-                    idxResult = doIndex(idxMeta, idxAction);
+//                    idxResult = doIndex(idxMeta, idxAction);
+                	doIndexByIndexAction(idxMeta, idxAction, null);
                     
-                } catch (IllegalArgumentException | IndexMetaIsNullException | DataSourceException e) {
+                } catch (Exception e) {
                     LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
                         "initMiniCubeIndex", "[cubeList:" + cubeList + "][dataSourceInfo:"
                             + dataSourceInfo + "][indexAsap:" + indexAsap + "][limited:" + limited
@@ -219,8 +221,7 @@ public class IndexServiceImpl implements IndexService {
                 } finally {
                     LOGGER.info(String.format(
                         LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
-                        "initMiniCubeIndex", "[Index indexmeta : " + idxMeta.toString() + " "
-                            + Boolean.toString(idxResult) + "]"));
+                        "initMiniCubeIndex", "[Index indexmeta : " + idxMeta.toString()));
                 }
             }
         }
@@ -248,8 +249,9 @@ public class IndexServiceImpl implements IndexService {
         }
     }
     
-    
-    public void updateIndexByDataSourceKey(String dataSourceKey, String[] dataSetNames) throws IndexAndSearchException {
+    @Override
+	public void updateIndexByDataSourceKey(String dataSourceKey,String[] factTableNames,
+			Map<String, Map<String, BigDecimal>> dataSetMap) throws IndexAndSearchException {
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "updateIndexByDataSourceKey", dataSourceKey));
@@ -258,33 +260,58 @@ public class IndexServiceImpl implements IndexService {
                 "updateIndexByDataSourceKey", dataSourceKey));
             throw new IllegalArgumentException();
         }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-            "updateIndexByDataSourceKey", dataSourceKey));
         
         List<IndexMeta> metaList = new ArrayList<IndexMeta>();
+        IndexAction idxAction=IndexAction.INDEX_UPDATE;
         
-        if (!ArrayUtils.isEmpty(dataSetNames)) {
-            for (String factTableName : dataSetNames) {
-                metaList.addAll(this.indexMetaService
-                            .getIndexMetasByFactTableName(factTableName,
-                                dataSourceKey));
-            }
-        } else {
-            metaList = this.indexMetaService
-                    .getIndexMetasByDataSourceKey(dataSourceKey);
-        }
+        if(MapUtils.isEmpty(dataSetMap)){
+        	if(!ArrayUtils.isEmpty(factTableNames)){
+        		for (String factTableName : factTableNames) {
+        			List<IndexMeta> fTableMetaList=this.indexMetaService.getIndexMetasByFactTableName(factTableName,dataSourceKey);
+        			if(!CollectionUtils.isEmpty(fTableMetaList)){
+        				metaList.addAll(fTableMetaList);
+        			}else{
+        				LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
+        			            "updateIndexByDataSourceKey", dataSourceKey,"can not find IndexMeta for Facttable:["+factTableNames+"]"));
+        			}
+    			}
+        	}else {
+        		metaList = this.indexMetaService
+    					.getIndexMetasByDataSourceKey(dataSourceKey);
+        	}
+        }else {
+        	idxAction=IndexAction.INDEX_MOD;
+			for (String factTableName : dataSetMap.keySet()) {
+				List<IndexMeta> fTableMetaList = this.indexMetaService
+						.getIndexMetasByFactTableName(factTableName,
+								dataSourceKey);
+				if (!CollectionUtils.isEmpty(fTableMetaList)) {
+					metaList.addAll(fTableMetaList);
+				}
+			}
+        	
+        }     
+		
         
         for (IndexMeta meta : metaList) {
+        	Map<String,BigDecimal> tableDataSetMap=null;
+        	if(!MapUtils.isEmpty(dataSetMap)){
+        		tableDataSetMap=dataSetMap.get(meta.getFacttableName());
+        	}
             try {
-                this.doIndex(meta, IndexAction.INDEX_UPDATE);
+                doIndexByIndexAction(meta, idxAction,tableDataSetMap );
             } catch (Exception e) {
-                LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-                    "updateIndexByDataSourceKey", dataSourceKey));
-                String message = TesseractExceptionUtils.getExceptionMessage(
-                    IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
-                throw new IndexAndSearchException(message, e.getCause(),
-                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
+				LOGGER.info(String.format(
+						LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
+						"updateIndexByDataSourceKey",
+						"DataSourceKey:[" + dataSourceKey + "] FactTable:["
+								+ meta.getFacttableName() + "] IndexMetaId:["
+								+ meta.getIndexMetaId() + "]"));
+				String message = TesseractExceptionUtils.getExceptionMessage(
+						IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
+						IndexAndSearchExceptionType.INDEX_EXCEPTION);
+				throw new IndexAndSearchException(message, e.getCause(),
+						IndexAndSearchExceptionType.INDEX_EXCEPTION);
             }
         }
         try {
@@ -302,6 +329,197 @@ public class IndexServiceImpl implements IndexService {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
             "updateIndexByDataSourceKey", dataSourceKey));
     }
+    
+    public void doIndexByIndexAction(IndexMeta indexMeta,IndexAction idxAction,Map<String, BigDecimal> dataMap) throws Exception{
+    	LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "doIndexByIndexAction",
+                "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"));
+    	IndexMeta idxMeta = indexMeta;
+    	if (idxMeta == null || idxAction == null) {
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "doIndexByIndexAction",
+                "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"));
+            throw new IllegalArgumentException();
+        }
+    	//1. IndexMeta-->SQLQuery
+    	Map<String, SqlQuery> sqlQueryMap = transIndexMeta2SQLQuery(idxMeta, idxAction, dataMap);
+    	//2. get a connection
+    	SqlDataSourceWrap dataSourceWrape = (SqlDataSourceWrap) this.dataSourcePoolService.getDataSourceByKey(idxMeta.getDataSourceInfo());
+    	if (dataSourceWrape == null) {
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS, "doIndexByIndexAction",
+                "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"),
+                "getDataSourceByKey return null");
+            throw new DataSourceException();
+        }
+    	// 3. get data & write index
+        Map<String, BigDecimal> maxDataIdMap = new HashMap<String, BigDecimal>();
+        
+        
+        for (String tableName : sqlQueryMap.keySet()) {
+            SqlQuery sqlQuery = sqlQueryMap.get(tableName);
+            
+            if(!StringUtils.isEmpty(sqlQuery.getIdName())){
+            	sqlQuery.getOrderBy().add(sqlQuery.getIdName()); 
+            }
+            
+            long total = 0;
+			BigDecimal currMaxId = BigDecimal.valueOf(-1);
+
+			if (idxMeta.getDataDescInfo().getMaxDataId(tableName) != null
+					&& !idxAction.getFromScratch()) {
+				// 数据正常更新，最上次的最大ID
+				currMaxId = idxMeta.getDataDescInfo().getMaxDataId(tableName);
+			}
+			// 其它情况，init、merge情况currMaxId=0，mod情况currMaxId可以为0 
+			String currWhereStr=sqlQuery.getIdName() + " > " + currMaxId.longValue();
+			sqlQuery.getWhereList().add(currWhereStr);
+            if (idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+                total = IndexFileSystemConstants.INDEX_DATA_TOTAL_IN_LIMITEDMODEL;
+            } else {
+                total = this.dataQueryService.queryForLongWithSql(getCountSQLBySQLQuery(sqlQuery),
+                    dataSourceWrape);
+            }
+            
+            boolean isLastPiece = false;  
+            long pcount = IndexFileSystemConstants.FETCH_SIZE_FROM_DATASOURCE;
+            // 目前是跟据数据量进行划分
+            if (pcount > total) {
+                pcount = total;
+            }
+            if (!StringUtils.isEmpty(sqlQuery.getIdName())
+                    && !CollectionUtils.isEmpty(sqlQuery.getSelectList())) {
+                sqlQuery.getSelectList().add(sqlQuery.getIdName());
+            }
+            
+            
+            for (int i = 0; i * pcount < total; i++) {
+                long limitStart = 0;
+                long limitEnd = pcount;
+                if ((i + 1) * pcount >= total || idxAction.equals(IndexAction.INDEX_MOD)) {
+                    isLastPiece = true;
+                }
+                
+                if(sqlQuery.getWhereList().contains(currWhereStr)){
+                	sqlQuery.getWhereList().remove(currWhereStr);
+                }
+                
+                currWhereStr=sqlQuery.getIdName() + " > " + currMaxId.longValue();
+				sqlQuery.getWhereList().add(currWhereStr);
+				
+                
+                TesseractResultSet currResult = this.dataQueryService.queryForDocListWithSQLQuery(
+                    sqlQuery, dataSourceWrape, limitStart, limitEnd);
+                
+                IndexShard currIdxShard = null; 
+                int currIdxShardIdx=-1;
+                
+                while(currResult.size()!=0){
+                	//当前数据待处理，获取待处理的索引分片
+                	if(currIdxShard==null){
+                		currIdxShardIdx=this.getIndexShardByIndexAction(idxMeta, idxAction, currIdxShardIdx);
+                		currIdxShard=idxMeta.getIdxShardList().get(currIdxShardIdx);                		
+                	}
+                	
+                	//处理
+                	Map<String, Object> result = writeIndex(currResult, idxAction, currIdxShard,
+                            isLastPiece, sqlQuery.getIdName());
+                	
+                	currResult = (TesseractResultSet) result.get(RESULT_KEY_DATA);
+                    currMaxId = (BigDecimal) result.get(RESULT_KEY_MAXID);                    
+                    currIdxShard=(IndexShard)result.get(RESULT_KEY_INDEXSHARD);
+                    if (currIdxShard.isFull() || isLastPiece) {
+                        //设置当前分片的状态为内容已变更
+                    	currIdxShard=null;
+                    	
+                    	if(idxAction.equals(IndexAction.INDEX_MOD) || idxAction.equals(IndexAction.INDEX_MERGE) || idxAction.equals(IndexAction.INDEX_MERGE_NORMAL)){
+                    		currIdxShardIdx++;
+                    	}else{
+                    		currIdxShardIdx=-1;
+                    	}
+						
+                    }
+                    if(idxAction.equals(IndexAction.INDEX_MERGE)){                    	
+                    	idxAction=IndexAction.INDEX_MERGE_NORMAL;
+                    }else if(!idxAction.equals(IndexAction.INDEX_MOD) && !idxAction.equals(IndexAction.INDEX_MERGE_NORMAL)){
+                    	idxAction=IndexAction.INDEX_NORMAL;
+                    }
+                    
+                }
+                
+            }
+            
+            maxDataIdMap.put(tableName, currMaxId);
+            
+        }
+        
+        if(!idxAction.equals(IndexAction.INDEX_MOD)){
+        	//除了修订的情况外，init merge update都需要保存上次索引后的最大id
+        	idxMeta.getDataDescInfo().setMaxDataIdMap(maxDataIdMap);
+        }
+        
+        if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
+            idxMeta.getCubeIdSet().addAll(idxMeta.getCubeIdMergeSet());
+            idxMeta.getCubeIdMergeSet().clear();
+            
+            idxMeta.getDimSet().addAll(idxMeta.getDimInfoMergeSet());
+            idxMeta.getMeasureSet().addAll(idxMeta.getMeasureInfoMergeSet());
+            idxMeta.getDimInfoMergeSet().clear();
+            idxMeta.getMeasureInfoMergeSet().clear();
+            
+        }
+        
+        if(idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE) || idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT)){
+        	idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
+        }
+        
+        for(IndexShard idxShard:idxMeta.getIdxShardList()){
+        	if(idxShard.isUpdate()){
+        		String servicePath=idxShard.getFilePath();
+        		String bakFilePath=idxShard.getIdxFilePath();
+        		idxShard.setIdxFilePath(servicePath);
+        		idxShard.setFilePath(bakFilePath);
+        	}else if(idxAction.equals(IndexAction.INDEX_MERGE)){
+        		idxMeta.getIdxShardList().remove(idxShard);
+        	}
+        }
+        this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
+        
+        
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "doIndex",
+            "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"));
+        return;
+        
+    }
+    
+    
+    
+    
+    /**
+     * getIndexShardByIndexAction 获取当前待处理的分片的数组下标
+     * @param idxMeta 索引元数据
+     * @param idxAction 动作
+     * @param idxShardIdx 要获取的数组下标
+     * @return
+     */
+	private int getIndexShardByIndexAction(IndexMeta idxMeta,
+			IndexAction idxAction, int idxShardIdx) {
+		if (idxAction.getFromScratch() && idxShardIdx >= 0
+				&& idxShardIdx < idxMeta.getIdxShardList().size()) {
+			//idxShardIdx正常，且idxAction为从0开始的，则直接反回
+			return idxShardIdx;
+		} else if (idxAction.getFromScratch() && idxShardIdx == -1 && !CollectionUtils.isEmpty(idxMeta.getIdxShardList())) {
+			for(int i=0; i<idxMeta.getIdxShardList().size();i++){
+				if(!idxMeta.getIdxShardList().get(i).isUpdate()){
+					idxShardIdx = i;
+					break;
+				}
+			}
+			
+			return idxShardIdx;
+		} else {
+			return getFreeIndexShardIndexForIndex(idxMeta);
+		}
+		
+
+	}
     
     /*
      * (non-Javadoc)
@@ -340,7 +558,7 @@ public class IndexServiceImpl implements IndexService {
             "doIndex", "transIndexMeta2SQLQuery success"));
         
         // s2. prepare index depends on idxState and indexAction
-        boolean isUpdate = false;
+        //boolean isUpdate = false;
         
         // init params depend on action and idxState
         if (idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT)
@@ -353,13 +571,13 @@ public class IndexServiceImpl implements IndexService {
                 .getCurrentNode().getClusterName());
             
         } else if ((idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE) || !idxMeta
-            .getIdxState().equals(IndexState.INDEX_UNAVAILABLE))
-            && idxAction.equals(IndexAction.INDEX_UPDATE)) {
+            .getIdxState().equals(IndexState.INDEX_UNAVAILABLE)) && idxAction.equals(IndexAction.INDEX_MERGE)
+            || idxAction.equals(IndexAction.INDEX_UPDATE) ) {
             
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                 "doIndex", "index merge and update before index"));
             // 索引更新
-            if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
+            if (idxAction.equals(IndexAction.INDEX_MERGE)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                     "doIndex", "process merge"));
                 boolean needMerge=true;
@@ -369,20 +587,21 @@ public class IndexServiceImpl implements IndexService {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                     "doIndex", "process update before index"));
                 // 正常更新               
-                for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
-                    List<String> whereList = sqlQueryMap.get(tableName).getWhereList();
-                    if (whereList == null) {
-                        whereList = new ArrayList<String>();
-                    }
-                    BigDecimal maxId = idxMeta.getDataDescInfo().getMaxDataId(tableName);
-                    if (maxId != null && !maxId.equals(BigDecimal.ZERO)) {
-                        String where = idxMeta.getDataDescInfo().getIdStr() + " > "
-                            + maxId.longValue();
-                        whereList.add(where);
-                    }
-                    sqlQueryMap.get(tableName).setWhereList(whereList);
-                }
-                isUpdate = Boolean.TRUE;
+//                for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
+//                    List<String> whereList = sqlQueryMap.get(tableName).getWhereList();
+//                    if (whereList == null) {
+//                        whereList = new ArrayList<String>();
+//                    }
+//                    BigDecimal maxId = idxMeta.getDataDescInfo().getMaxDataId(tableName);
+//                    if (maxId != null && !maxId.equals(BigDecimal.ZERO)) {
+//                        String where = idxMeta.getDataDescInfo().getIdStr() + " > "
+//                            + maxId.longValue();
+//                        whereList.add(where);
+//                    }
+//                    sqlQueryMap.get(tableName).setWhereList(whereList);
+//                }
+				
+                
                 
             }
             
@@ -427,18 +646,21 @@ public class IndexServiceImpl implements IndexService {
             }
             
             boolean isLastPiece = false;
-            boolean isInit = true;
+            
             
             //初始化finishIndex
             if(!isLastPiece){
-                finishIndex=false;
+            	finishIndex=false;
             }
             
             BigDecimal currMaxId = BigDecimal.ZERO;            
             //初始化maxId
-            if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null){
-                currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
+            
+            if(idxMeta.getDataDescInfo().getMaxDataId(tableName)!=null && idxAction.equals(IndexAction.INDEX_UPDATE)){
+            	//数据正常更新，最上次的最大ID
+            	currMaxId=idxMeta.getDataDescInfo().getMaxDataId(tableName);
             }
+            //否则，init和merge情况currMaxId=0   
             
             long pcount = IndexFileSystemConstants.FETCH_SIZE_FROM_DATASOURCE;
             // 目前是跟据数据量进行划分
@@ -452,8 +674,8 @@ public class IndexServiceImpl implements IndexService {
             
             String currWhereStr="";
             for (int i = 0; i * pcount < total; i++) {
-                long startForTime=System.nanoTime();
-                
+            	long startForTime=System.nanoTime();
+            	
                 long limitStart = 0;
                 long limitEnd = pcount;
                 if ((i + 1) * pcount >= total) {
@@ -461,25 +683,25 @@ public class IndexServiceImpl implements IndexService {
                 }
                 
                 if(sqlQuery.getWhereList().contains(currWhereStr)){
-                    sqlQuery.getWhereList().remove(currWhereStr);
+                	sqlQuery.getWhereList().remove(currWhereStr);
                 }
                 
                 currWhereStr=sqlQuery.getIdName() + " > " + currMaxId.longValue();
-                sqlQuery.getWhereList().add(currWhereStr);
+				sqlQuery.getWhereList().add(currWhereStr);
                 long startSqlTime=System.nanoTime();
                 TesseractResultSet currResult = this.dataQueryService.queryForDocListWithSQLQuery(
                     sqlQuery, dataSourceWrape, limitStart, limitEnd);
                 long endTime=System.nanoTime();
                 totalOtherTime+=(endTime-startForTime);
                 totalSqlTime+=(endTime-startSqlTime);
-                
+                //取出数据待处理
                 while (currResult.size() != 0) {
                     // 向索引分片中写入数据
-                    if (currIdxShard == null) {
-                        currIdxShard = getFreeIndexShardForIndex(idxMeta);
-                    }
+					if (currIdxShard == null) {
+						currIdxShard = getFreeIndexShardForIndex(idxMeta);
+					}
                     long startWriteIndex=System.nanoTime();
-                    Map<String, Object> result = writeIndex(currResult, isInit, isUpdate, currIdxShard,
+                    Map<String, Object> result = writeIndex(currResult, idxAction, currIdxShard,
                         isLastPiece, sqlQuery.getIdName());
                     long endWriteIndex=System.nanoTime();
                     
@@ -495,18 +717,13 @@ public class IndexServiceImpl implements IndexService {
                         // 这时，需要设置cube数据不可用
                         idxMeta.setIdxState(IndexState.INDEX_UNAVAILABLE);
                         idxMeta = saveIndexShardIntoIndexMeta(currIdxShard, idxMeta);
-                        currIdxShard = null;
-                        if(isLastPiece){
-                            finishIndex=true;
-                        }
+						currIdxShard = null;
+						if(isLastPiece){
+							finishIndex=true;
+						}
                     }
                     
-                    if (isInit) {
-                        isInit = Boolean.FALSE;
-                    }
-                    if (isUpdate) {
-                        isUpdate = Boolean.FALSE;
-                    }
+                    idxAction=IndexAction.INDEX_NORMAL;
                     
                 }
                 
@@ -515,6 +732,7 @@ public class IndexServiceImpl implements IndexService {
                 
                 
             }
+           
             maxDataIdMap.put(tableName, currMaxId);
             
         }
@@ -525,7 +743,11 @@ public class IndexServiceImpl implements IndexService {
         System.out.println("******************************************total for time cost : " +totalForTime+" ns ***************************************");
         System.out.println("******************************************total other time cost : " +totalOtherTime+" ns ***************************************");
         System.out.println("******************************************total sql time cost : " +totalSqlTime+" ns ***************************************");
-        idxMeta.getDataDescInfo().setMaxDataIdMap(maxDataIdMap);
+        if(!idxAction.equals(IndexAction.INDEX_MOD)){
+        	//除了修订的情况外，init merge update都需要保存上次索引后的最大id
+        	idxMeta.getDataDescInfo().setMaxDataIdMap(maxDataIdMap);
+        }
+        
         if (idxMeta.getIdxState().equals(IndexState.INDEX_AVAILABLE_NEEDMERGE)) {
             idxMeta.getCubeIdSet().addAll(idxMeta.getCubeIdMergeSet());
             idxMeta.getCubeIdMergeSet().clear();
@@ -536,7 +758,7 @@ public class IndexServiceImpl implements IndexService {
             idxMeta.getMeasureInfoMergeSet().clear();
         }
         if(finishIndex){
-            idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
+        	idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
             this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
         }
         
@@ -545,6 +767,7 @@ public class IndexServiceImpl implements IndexService {
             "[indexMeta:" + indexMeta + "][idxAction:" + idxAction + "]"));
         return true;
     }
+    
     
     /**
      * 
@@ -574,6 +797,30 @@ public class IndexServiceImpl implements IndexService {
         }
         
         return result;
+    }
+    
+    /**
+     * 从索引元数据中获取空闲索引分片的数组下标
+     * @param indexMeta
+     * @return int 若找到，返回>-1的值，否则为-1
+     */
+    private int getFreeIndexShardIndexForIndex(IndexMeta indexMeta){
+    	int result=-1;
+    	IndexMeta idxMeta = indexMeta;
+    	if (idxMeta == null || idxMeta.getIdxShardList() == null) {
+            throw new IllegalArgumentException();
+        }
+    	if (this.indexMetaService.isIndexShardFull(idxMeta)) {
+            idxMeta = this.indexMetaService.assignIndexShard(idxMeta, this.isNodeService
+                    .getCurrentNode().getClusterName());
+        }
+    	for(int i=0;i<idxMeta.getIdxShardList().size();i++){
+    		if(idxMeta.getIdxShardList().get(i)!=null && !idxMeta.getIdxShardList().get(i).isFull()){
+    			result=i;
+    			break;
+    		}
+    	}
+    	return result;
     }
     
     /**
@@ -631,18 +878,17 @@ public class IndexServiceImpl implements IndexService {
      *             可能抛出的异常
      * 
      */
-    public Map<String, Object> writeIndex(TesseractResultSet data, boolean isInit,
-            boolean isUpdate, IndexShard idxShard, boolean lastPiece, String idName)
+    public Map<String, Object> writeIndex(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard, boolean lastPiece, String idName)
             throws IndexAndSearchException {
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "writeIndex",
-            "[data:" + data + "][isUpdate:" + isUpdate + "][idxShard:" + idxShard + "][lastPiece:"
+            "[data:" + data + "][idxAction:" + idxAction + "][idxShard:" + idxShard + "][lastPiece:"
                 + lastPiece + "][idName:" + idName + "]"));
         // 数据分片规则
         // 调用
         
         IndexMessage message = null;
-        message = isClient.index(data, isInit, isUpdate, idxShard, idName, lastPiece);
+        message = isClient.index(data, idxAction, idxShard, idName, lastPiece);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, 
                 "writeIndex", "index success"));
@@ -653,12 +899,11 @@ public class IndexServiceImpl implements IndexService {
         
         if (idxShard.isFull() || lastPiece) {
             // 设置提供服务的目录：
-            String absoluteFilePath = message.getIdxPath();
             String absoluteIdxFilePath = message.getIdxServicePath();
-            
-            idxShard.setFilePathWithAbsoluteFilePath(absoluteFilePath, idxShard.getNode());
-            idxShard.setIdxFilePathWithAbsoluteIdxFilePath(absoluteIdxFilePath, idxShard.getNode());
-            
+//            
+//            idxShard.setFilePathWithAbsoluteFilePath(absoluteFilePath, idxShard.getNode());
+//            idxShard.setIdxFilePathWithAbsoluteIdxFilePath(absoluteIdxFilePath, idxShard.getNode());
+            idxShard.setUpdate(Boolean.TRUE);
             // 启动数据copy线程拷贝数据到备分节点上
             if (CollectionUtils.isEmpty(idxShard.getReplicaNodeList())) {
                 List<Node> assignedNodeList = this.isNodeService.assignFreeNodeForReplica(
@@ -681,7 +926,8 @@ public class IndexServiceImpl implements IndexService {
             
             for (Node node : idxShard.getReplicaNodeList()) {
                 int retryTimes = 0;
-                String targetFilePath = idxShard.getAbsoluteIdxFilePath(node);
+                //拷贝到指定的目录
+                String targetFilePath = idxShard.getAbsoluteFilePath(node);
                 ServerFeedbackMessage backMessage = null;
                 while (retryTimes < TesseractConstant.RETRY_TIMES) {
                     backMessage = isClient.copyIndexDataToRemoteNode(absoluteIdxFilePath,
@@ -711,7 +957,7 @@ public class IndexServiceImpl implements IndexService {
         result.put(RESULT_KEY_MAXID, message.getMaxId());
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "writeIndex",
-            "[data:" + data + "][isUpdate:" + isUpdate + "][idxShard:" + idxShard + "][lastPiece:"
+            "[data:" + data + "][idxAction:" + idxAction + "][idxShard:" + idxShard + "][lastPiece:"
                 + lastPiece + "][idName:" + idName + "]"));
         return result;
         
@@ -755,6 +1001,62 @@ public class IndexServiceImpl implements IndexService {
         
         return result;
     }
+    
+    /**
+     * 根据IndexMeta获取从事实表中取数据的SQLQuery对像
+     * @param idxMeta 当前的idxMeta
+     * @param idxAction 索引动作
+     * @return Map<String, SqlQuery> 返回sqlquery对像
+     * @throws IndexMetaIsNullException 当idxMeta为空时会抛出异常
+     */
+    private Map<String, SqlQuery> transIndexMeta2SQLQuery(IndexMeta idxMeta,IndexAction idxAction,Map<String, BigDecimal> dataMap)
+            throws IndexMetaIsNullException {
+        Map<String, SqlQuery> result = new HashMap<String, SqlQuery>();
+        if (idxMeta == null || idxMeta.getDataDescInfo() == null) {
+            throw generateIndexMetaIsNullException(idxMeta);
+        }
+        
+        if(idxAction.equals(IndexAction.INDEX_MOD) && MapUtils.isEmpty(dataMap) ){
+        	throw new IllegalArgumentException();
+        }
+        
+        boolean needMerge=Boolean.FALSE;
+        if(idxAction.equals(IndexAction.INDEX_MERGE)){
+        	needMerge=Boolean.TRUE;
+        }
+        Set<String> selectList = idxMeta.getSelectList(needMerge);
+        if (selectList == null) {
+            selectList = new HashSet<String>();
+        }
+        String idName=idxMeta.getDataDescInfo().getIdStr();
+        BigDecimal start=null;
+        BigDecimal end=null;
+        if(idxAction.equals(IndexAction.INDEX_MOD) && !MapUtils.isEmpty(dataMap) ){
+        	start=dataMap.get(IndexFileSystemConstants.MOD_KEY_START);
+        	end=dataMap.get(IndexFileSystemConstants.MOD_KEY_END);
+        } 
+        for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
+            SqlQuery sqlQuery = new SqlQuery();
+            LinkedList<String> fromList = new LinkedList<String>();
+            fromList.add(tableName);
+            sqlQuery.setFromList(fromList);
+            sqlQuery.getSelectList().addAll(selectList);
+            result.put(tableName, sqlQuery);
+            if(!StringUtils.isEmpty(idName)){
+                sqlQuery.setIdName(idName);
+            }
+            if(start!=null){
+            	sqlQuery.getWhereList().add(idName+" >= "+start);
+            	 if(end!=null){
+                 	sqlQuery.getWhereList().add(idName+" <= "+end);
+                 }
+            }
+           
+        }
+        
+        return result;
+    }
+    
     
     /**
      * 

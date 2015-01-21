@@ -203,7 +203,6 @@ define([
                     for (var x = 0, xLen = compIdArry.length; x < xLen; x ++) {
                         // 获取被关联组件的json配置信息
                         var curEntity = $.getTargetElement(compIdArry[x].id, entityDefs);
-
                         var intTemp = {
                             event: {
                                 rid: activeProductCompId,
@@ -229,7 +228,6 @@ define([
 //                        curEntity.outParamDimLevel = 'top';
                         // 如果存在事件关联
                         if (curEntity.interactions) {
-                            // TODO:需要判断是勾选上了，还是取消掉了
                             // 判断当前实例中是否已经有对应事件关联
                             var hasRelation = $.hasRelation(activeProductCompId, curEntity);
                             if (hasRelation > -1) {
@@ -275,6 +273,8 @@ define([
                     var compType = $this.attr('data-component-type');
                     var compId = $this.attr('data-comp-id');
                     var reportCompId = $this.attr('report-comp-id');
+                    var curEntity = $.getTargetElement(compId, entityDefs);
+                    var clzType = curEntity.clzType;
                     var imgName = '';
                     switch (compType) {
                         case 'CHART':
@@ -287,10 +287,9 @@ define([
                     var chkStr = '';
                     var checkedStr = '';
                     // 如果不是当前组件的缩略图，可以勾选
-                    if (activeSilkroadCompId !== compId) {
+                    if (clzType === 'COMPONENT') {
                         // 如果此组件，已经被当前编辑状态的组件所关联，那么将不能设定关联关系
-                        if (!$.isInArray(reportCompId, activeCompRealtionIds)) {
-                            var curEntity = $.getTargetElement(compId, entityDefs);
+                        if  (activeSilkroadCompId !== compId && !$.isInArray(reportCompId, activeCompRealtionIds)) {
                             var curCompInteraIds;
                             if (curEntity) {
                                 curCompInteraIds = $.getEntityInteractionsId(curEntity);
@@ -300,28 +299,28 @@ define([
                             }
                             chkStr = '<input type="checkbox" name="comp-thumbnail" '+ checkedStr + ' value="' + compId + '" />';
                         }
-                    }
-                    var $Div = $(
-                        ['<div class="comp-thumbnail">',
-                            chkStr,
-                            '<div class="comp-thumbnail-pic">',
-                            // TODO:路径可能会改
+                        var $Div = $(
+                            ['<div class="comp-thumbnail">',
+                                chkStr,
+                                '<div class="comp-thumbnail-pic">',
+                                // TODO:路径可能会改
                                 '<img src="src/css/img/thumbnail-', imgName, '.png"/>',
-                            '</div>',
-                        '</div>'].join('')
-                    );
-                    // 添加位置信息以及宽度高度
-                    $Div.css({
-                        width: nW + 'px',
-                        height: nH + 'px',
-                        left: nL + 'px',
-                        top: nT + 'px'
-                    });
-                    // 添加其他有用属性信息
-                    $Div.attr('data-component-type', compType);
-                    $Div.attr('data-mold', $this.attr('data-mold'));
-                    $Div.attr('data-comp-id', compId);
-                    $('.comp-realtion-box').append($Div);
+                                '</div>',
+                                '</div>'].join('')
+                        );
+                        // 添加位置信息以及宽度高度
+                        $Div.css({
+                            width: nW + 'px',
+                            height: nH + 'px',
+                            left: nL + 'px',
+                            top: nT + 'px'
+                        });
+                        // 添加其他有用属性信息
+                        $Div.attr('data-component-type', compType);
+                        $Div.attr('data-mold', $this.attr('data-mold'));
+                        $Div.attr('data-comp-id', compId);
+                        $('.comp-realtion-box').append($Div);
+                    }
                 }
             },
             /**

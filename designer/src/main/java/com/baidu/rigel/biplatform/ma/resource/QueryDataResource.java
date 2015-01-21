@@ -496,11 +496,19 @@ public class QueryDataResource extends BaseResource {
                 newParams.put(Constants.IN_EDITOR, true);
             }
         }
+        
         runTimeModel.getContext().reset();
         runTimeModel.getLocalContext().forEach((key, value) -> {
                 value.reset();
                 value.setParams(newParams);
         });
+        
+        /**
+         * 依据查询请求，根据报表参数定义，增量添加报表区域模型参数
+         */
+        Map<String, Object> tmp = 
+                QueryUtils.resetContextParam(request, reportModelCacheManager.getReportModel(reportId));
+        newParams.putAll(tmp);
         runTimeModel.getContext().setParams(newParams);
         ReportDesignModel model = runTimeModel.getModel(); 
         //reportModelCacheManager.getReportModel(reportId);
@@ -637,6 +645,7 @@ public class QueryDataResource extends BaseResource {
          * 4. 更新区域本地的上下文
          */
         ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
+        
         /**
          * 5. 生成查询动作QueryAction
          */
@@ -761,12 +770,39 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("reportChart", chart);
         }
         areaContext.getQueryStatus().add(result);
+        // 清除当前request中的请求参数，保证areaContext的参数正确
+        resetAreaContext(areaContext, request);
+        resetContext(runTimeModel.getLocalContext().get(areaId), request);
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
+    }
+
+    /**
+     * 
+     * @param queryContext
+     * @param request
+     */
+    private void resetContext(QueryContext queryContext, HttpServletRequest request) {
+        Enumeration<String> params = request.getParameterNames();
+        while (params.hasMoreElements()) {
+            queryContext.getParams().remove(params.nextElement());
+        }
+    }
+
+    /**
+     * 
+     * @param areaContext
+     * @param request
+     */
+    private void resetAreaContext(ExtendAreaContext areaContext, HttpServletRequest request) {
+        Enumeration<String> params = request.getParameterNames();
+        while (params.hasMoreElements()) {
+            areaContext.getParams().remove(params.nextElement());
+        }
     }
 
     /**

@@ -354,6 +354,7 @@ public final class DataModelUtils {
         data.setCellId("");
         data.setFormattedValue("I,III.DD");
         if (value != null) {
+            value = value.setScale(8);
             data.setV(value);
         }
         return data;
