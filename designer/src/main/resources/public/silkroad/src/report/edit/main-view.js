@@ -31,7 +31,7 @@ define([
             // view事件绑定
             events: {
                 'change .j-cube-select': 'changeCube',
-                //'click .j-global-para': 'setglobalbtn',
+                'click .j-global-para': 'setglobalbtn',
                 'click .j-global-component': 'shiftMenu'
             },
 
@@ -57,7 +57,10 @@ define([
              * 参数维度弹出框事件
              */
             setglobalbtn: function () {
-                this.btnsView.setGlobal();
+                this.model.loadDimList();
+                var dim = {};
+                dim.dimList = this.model.get('dimList');
+                this.btnsView.setGlobal(dim);
             },
 
             /**
@@ -163,11 +166,11 @@ define([
                     // 如果触发元素，不属于组件添加按钮区域
                     if (
                         !$.contains($('.j-global-component')[0], e.target)
-                    ) {
+                        ) {
                         // 如果触发元素，不属于组件区域
                         if (
                             $('.j-all-menus') && (!$.contains($('.j-all-menus')[0], e.target))
-                        ) {
+                            ) {
                             // 上面两个条件都满足，组件区域如果显示，那么就该隐藏掉
                             if ($('.j-con-component') && (!$('.j-con-component').is(':hidden'))) {
                                 $('.j-all-menus').hide();
