@@ -73,7 +73,6 @@ public class QueryRequestBuilder {
         buildSelectAndGroupBy(queryContext.getColumnMemberTrees(), request, expressions);
         buildSelectAndGroupBy(queryContext.getRowMemberTrees(), request, expressions);
 
-        request.getWhere().getAndList().addAll(expressions.values());
         // 构造filter的条件
         if (MapUtils.isNotEmpty(queryContext.getFilterMemberValues())) {
             queryContext.getFilterMemberValues().forEach((properties, values) -> {
@@ -83,6 +82,7 @@ public class QueryRequestBuilder {
             });
         }
 
+        request.getWhere().getAndList().addAll(expressions.values());
         int start = 0;
         int size = -1;
         if (pageInfo != null) {

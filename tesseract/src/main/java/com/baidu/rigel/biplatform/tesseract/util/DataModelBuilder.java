@@ -194,6 +194,7 @@ public class DataModelBuilder {
                     String value = tesseractResultSet.getString(prop);
                     if (colHeadName.queryPropers.get(prop).isEmpty() || colHeadName.queryPropers.get(prop).contains(value)) {
                         oneColumn.append(prop);
+                        oneColumn.append(PROP_KEY_SPLIT);
                         oneColumn.append(value);
                         oneColumn.append(HEAD_KEY_SPLIT);
                         break;
