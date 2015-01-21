@@ -27,7 +27,7 @@ public interface DICallbackService<T> {
     /**
      * CALLBACK接口版本号1.0
      */
-    public static final String CALLBACK_VERSION_1 = "1.0";
+    public static final String CALLBACK_VERSION_1 = "1.0.0";
 
     /**
      * 封装请求callback的参数

@@ -331,6 +331,12 @@ public class QueryDataResource extends BaseResource {
 //            return "";
 //        }
 //        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        /**
+         * 依据查询请求，根据报表参数定义，增量添加报表区域模型参数
+         */
+        Map<String, Object> tmp = 
+                QueryUtils.resetContextParam(request, model);
+        runtimeModel.getContext().getParams().putAll(tmp);;
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         StringBuilder builder = buildVMString(reportId, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
@@ -484,32 +490,25 @@ public class QueryDataResource extends BaseResource {
         Map<String, String[]> contextParams = request.getParameterMap();
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
-        Map<String, Object> newParams = Maps.newHashMap();
         if (contextParams.get(Constants.IN_EDITOR) != null 
                 || runTimeModel.getContext().getParams().containsKey(Constants.IN_EDITOR)) {
-            Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
-            for (String key : oldParams.keySet()) {
-                String value = oldParams.get(key).toString();
-                if (!(value.contains("start") && value.contains("end"))) {
-                    newParams.put(key, value);
-                }
-                newParams.put(Constants.IN_EDITOR, true);
-            }
+//            Map<String, Object> newParams = Maps.newHashMap();
+//            Map<String, Object> oldParams = runTimeModel.getContext().getParams(); 
+//            for (String key : oldParams.keySet()) {
+//                String value = oldParams.get(key).toString();
+//                if (!(value.contains("start") && value.contains("end"))) {
+//                    newParams.put(key, value);
+//                }
+//            }
+//            newParams.put(Constants.IN_EDITOR, true);
+//            runTimeModel.getContext().reset();
+//            runTimeModel.getLocalContext().forEach((key, value) -> {
+//                value.reset();
+//                value.setParams(newParams);
+//            });
         }
         
-        runTimeModel.getContext().reset();
-        runTimeModel.getLocalContext().forEach((key, value) -> {
-                value.reset();
-                value.setParams(newParams);
-        });
         
-        /**
-         * 依据查询请求，根据报表参数定义，增量添加报表区域模型参数
-         */
-        Map<String, Object> tmp = 
-                QueryUtils.resetContextParam(request, reportModelCacheManager.getReportModel(reportId));
-        newParams.putAll(tmp);
-        runTimeModel.getContext().setParams(newParams);
         ReportDesignModel model = runTimeModel.getModel(); 
         //reportModelCacheManager.getReportModel(reportId);
         for (String key : contextParams.keySet()) {

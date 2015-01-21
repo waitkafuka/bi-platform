@@ -298,14 +298,17 @@ public class HttpRequest {
         long current = System.currentTimeMillis();
         for (String address : addresses) {
             String postUrl = prefix + address + suffix;
+            LOGGER.info("post url is : " + postUrl);
             try {
-                HttpUriRequest request =
-                        RequestBuilder.post().setUri(postUrl).setEntity(new UrlEncodedFormEntity(nameValues, "utf-8"))
-                                .build();
+                HttpUriRequest request = RequestBuilder.post()
+                            .setUri(postUrl).addParameters(nameValues.toArray(new NameValuePair[0]))
+                            .setEntity(new UrlEncodedFormEntity(nameValues, "utf-8"))
+                            .build();
                 if (StringUtils.isNotBlank(cookie)) {
                     // 需要将cookie添加进去
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
                 }
+//                client.
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, false);
                 StringBuilder sb = new StringBuilder();

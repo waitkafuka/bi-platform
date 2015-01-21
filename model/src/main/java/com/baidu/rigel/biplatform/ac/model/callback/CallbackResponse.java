@@ -93,7 +93,7 @@ public class CallbackResponse implements Serializable {
     /**
      * @return the data
      */
-    public List<CallbackValue> getData() {
+    public List<? extends CallbackValue> getData() {
         return data;
     }
 
