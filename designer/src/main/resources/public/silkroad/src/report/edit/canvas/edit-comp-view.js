@@ -274,10 +274,10 @@ define([
                     var compId = $this.attr('data-comp-id');
                     var reportCompId = $this.attr('report-comp-id');
                     var curEntity = $.getTargetElement(compId, entityDefs);
-                    var clzType = curEntity.clzType;
                     if (!curEntity) {
                         return;
                     }
+                    var clzType = curEntity.clzType;
                     var imgName = '';
                     switch (compType) {
                         case 'CHART':
