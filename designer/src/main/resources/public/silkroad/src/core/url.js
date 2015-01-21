@@ -84,6 +84,28 @@ define(function () {
     }
 
     /**
+     * 参数维度提交基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 参数维度获取的基本路径
+     */
+    function getParameterDimData(reportId) {
+        return getReportsBaseUrl(reportId);
+    }
+
+    /**
+     * 参数维度获取基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 参数维度获取的基本路径
+     */
+    function getParameterDim(reportId) {
+        return getReportsBaseUrl(reportId);
+    }
+
+    /**
      * 获取组件区的基本路径
      *
      * @param {string} reportId 报表id
@@ -799,6 +821,30 @@ define(function () {
     Url.getFilterBlankLine = function (reportId, compId) {
         return getExtendAreaBaseUrl(reportId, compId)
             + '/othersetting';
+    };
+
+    /**
+     * 参数维度获取
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.getParameterDim = function (reportId) {
+        return getParameterDim(reportId)
+            + '/params';
+    };
+
+    /**
+     * 参数维度提交
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.getParameterDimData = function (reportId) {
+        return getParameterDimData(reportId)
+            + '/params';
     };
 
     return Url;

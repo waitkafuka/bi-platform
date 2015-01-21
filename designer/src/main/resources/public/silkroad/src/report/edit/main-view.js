@@ -31,7 +31,7 @@ define([
             // view事件绑定
             events: {
                 'change .j-cube-select': 'changeCube',
-                //'click .j-global-para': 'setglobalbtn',
+                'click .j-global-para': 'setglobalbtn',
                 'click .j-global-component': 'shiftMenu'
             },
 
@@ -57,7 +57,11 @@ define([
              * 参数维度弹出框事件
              */
             setglobalbtn: function () {
-                this.btnsView.setGlobal();
+                this.model.loadDimList();
+                var dim = {};
+                var arr = this.model.get('dimList');
+                dim.dimList = arr;
+                this.btnsView.setGlobal(dim);
             },
 
             /**
