@@ -281,7 +281,7 @@
 /* 组件相关设置配置区 */
 .comp-setting .data-axis-line {
     margin: 5px 0 5px 20px;
-    padding: 5px;
+    padding: 3px 3px 3px 5px;
     position: relative;
     border: 1px solid #d7d7d7;
 }
@@ -308,11 +308,11 @@
     background: white;
     font-size: 12px;
     padding: 2px 18px 2px 3px;
-    margin: 3px;
+    margin-left: 3px;
     position: relative;
     border-radius: 3px;
     border: 1px solid #e6e3e3;
-    height: 20px
+    height: 18px
 }
 .comp-setting .item:hover .icon{
     position: absolute;
@@ -326,10 +326,17 @@
     font-weight: normal;
     cursor: pointer;
 }
+.comp-setting .icon {
+    height: 14px;
+    line-height: 13px;
+}
 .comp-setting .item .icon-font {
     /*float: left;*/
     display: inline-block;
-    margin-top: 2px;
+}
+.comp-setting .item .icon-font {
+    /*float: left;*/
+    display: inline-block;
 }
 .comp-setting .item .icon-chart {
     float: left;
