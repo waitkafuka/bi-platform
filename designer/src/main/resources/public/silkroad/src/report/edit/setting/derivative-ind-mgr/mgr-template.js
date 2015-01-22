@@ -79,15 +79,15 @@ define(['template'], function (template) {
         if($value.type == "CALLBACK"){
         $out+='\r\n                <div class="callback-form-box">\r\n                    <div class="callback-form" id="';
         $out+=$escape($value.id);
-        $out+='">\r\n                        <div class="callback-name">\r\n                            <div>回调指标名称:</div>\r\n                            <div>显示名称:</div>\r\n                            <div>回调地址:</div>\r\n                            <div>请求超时时间:</div>\r\n                        </div>\r\n                        <div class="callback-text">\r\n                            <input class="call-name" placeholder="由数字,字母,下划线组成并以数字开头" value="';
+        $out+='">\r\n                        <div class="callback-name">\r\n                            <div>回调指标名称:</div>\r\n                            <div>显示名称:</div>\r\n                            <div>回调地址:</div>\r\n                            <div>请求超时时间:</div>\r\n                        </div>\r\n                        <div class="callback-text">\r\n                            <input class="call-name call-text" placeholder="由数字,字母,下划线组成并以数字开头" title="由数字,字母,下划线组成并以数字开头" value="';
         $out+=$escape($value.name);
-        $out+='"/>\r\n                            <input class="call-caption" placeholder="由数字,字母,汉字组成" value="';
+        $out+='"/>\r\n                            <input class="call-caption call-text" placeholder="由数字,字母,汉字组成" title="由数字,字母,汉字组成" value="';
         $out+=$escape($value.caption);
-        $out+='"/>\r\n                            <input class="call-url" placeholder="回调地址" value="';
+        $out+='"/>\r\n                            <input class="call-url call-text" placeholder="回调地址" title="回调地址" value="';
         $out+=$escape($value.url);
-        $out+='"/>\r\n                            <input class="call-timeout" placeholder="由数字组成" value="';
+        $out+='"/>\r\n                            <input class="call-timeout call-text" placeholder="由整数组成" value="';
         $out+=$escape($value.properties.timeOut);
-        $out+='"/>\r\n                        </div>\r\n                    </div>\r\n                    <div class="close-retractable callback-close" title="删除">×</div>\r\n                    <div class="close-retractable callback-retractable " title="收进">-</div>\r\n                    <div class="callback-title"><div></div></div>\r\n                </div>\r\n                ';
+        $out+='" />\r\n                        </div>\r\n                    </div>\r\n                    <div class="close-retractable j-callback-close" title="删除">×</div>\r\n                    <div class="close-retractable j-callback-retractable " title="收进">-</div>\r\n                    <div class="callback-title"><div></div><div></div></div>\r\n                </div>\r\n                ';
         }
         });
         $out+='\r\n            </div>\r\n        </div>\r\n        <div class="callback-add j-callback-add" title="添加">+</div>\r\n    </div>\r\n</div>';
