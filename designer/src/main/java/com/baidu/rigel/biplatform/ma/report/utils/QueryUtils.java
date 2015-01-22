@@ -310,7 +310,7 @@ public final class QueryUtils {
                     condition.setQueryDataNodes(datas);
                 }
                 // 时间维度，并且在第一列位置，后续改成可配置方式
-                if (olapElement instanceof TimeDimension && firstIndex == 0) {
+                if (olapElement instanceof TimeDimension && firstIndex == 0 && !queryAction.isChartQuery()) {
                     condition.setMemberSortType(SortType.DESC);
                 }
                 ++firstIndex;
@@ -769,6 +769,7 @@ public final class QueryUtils {
                 rs.put(param.getElementId(), param.getDefaultValue());
             }
         });
+        rs.putAll(requestParams);
         return rs;
     }
 
@@ -793,7 +794,11 @@ public final class QueryUtils {
         
         // 如果当前线程中包含参数值，则覆盖cookie中参数值
         rs.putAll(ContextManager.getParams());
-        
+        // 容错，处理其他可能的参数
+        rs.remove(Constants.RANDOMCODEKEY);
+        rs.remove(Constants.TOKEN);
+        rs.remove(Constants.BIPLATFORM_PRODUCTLINE);
+
         return rs;
     }
 

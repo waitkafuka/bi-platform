@@ -65,6 +65,9 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
 //        MetaDataService.checkDataSourceInfo(dataSourceInfo);
         CallbackLevel callbackLevel = (CallbackLevel) level;
         
+        if (params.isEmpty()) {
+            params.putAll(callbackLevel.getCallbackParams());
+        }
         CallbackResponse response = 
                 CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), params, CallbackType.DIM);
         if (response.getStatus() == ResponseStatus.SUCCESS) {
