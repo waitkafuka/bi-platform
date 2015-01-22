@@ -36,7 +36,7 @@
 .meta-condition-sel-line {
     padding: 0;
     margin-left: 79px;
-    margin-right: 300px;
+    margin-right: 100px;
     background-color: #F0F0F0;
     border: 1px solid #D8D8D8;
 }
@@ -47,4 +47,5 @@
 }
 .olap-meta-select-sel {
     vertical-align: middle;
+    width: 190px;
 }

@@ -42,7 +42,6 @@
     border-left: 0 solid white;
     border-right: 0 solid white;
 }
-
 .ui-hscrollbar {
     height: 16px;
     background: #F0F0F0;
@@ -67,18 +66,17 @@
 }
 .ui-hscrollbar-prev {
     width: 16px;
-    height: 16px;
+    height: 17px;
     background: url(img/icon2.png) -41px -83px no-repeat;
     overflow: hidden;
 }
 .ui-hscrollbar-next {
     width: 16px;
-    height: 16px;
+    height: 17px;
     background: url(img/icon2.png) -41px -65px no-repeat;
     overflow: hidden;
 }
 .ui-hscrollbar .ui-scrollbar-thumb {
-    height: 16px;
+    height: 17px;
     border: 1px solid #A2BCC7;
 }
-

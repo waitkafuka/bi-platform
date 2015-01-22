@@ -26,8 +26,7 @@
     *display: inline;
     *zoom: 1;
 }
-.ui-dim-item-primary 
-.ui-dim-item-text {
+.ui-dim-item-primary .ui-dim-item-text {
     color: #F00;
 }
 .ui-dim-item-button {
@@ -48,4 +47,3 @@
     padding: 3px;
     overflow: auto;
 }
-

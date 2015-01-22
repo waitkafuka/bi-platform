@@ -63,8 +63,8 @@
     _height: 26px;
     width: 1px;
     margin-top: 1px;
-    border-top: solid 1px #DFECF3;
-    background-color: #D6E7F1;
+    border-top: solid 1px #9FA9B5;
+    background-color: #7C8999;
 }
 .ui-tab-item .ui-tab-item-lledge {
     display: inline-block;
@@ -74,8 +74,8 @@
     height: 26px;
     _height: 27px;
     width: 1px;
-    border-top: solid 1px #DFECF3;
-    background-color: #EAF3F8;
+    border-top: solid 1px #9FA9B5;
+    background-color: #7C8999;
 }
 .ui-tab-item .ui-tab-item-inner {
     display: inline-block;
@@ -84,55 +84,44 @@
     vertical-align: top;
     height: 26px;
     _height: 27px;
-    border-top: 1px solid #D6E7F1;
-    border-left: 1px solid #EAF3F8;
-    border-right: 1px solid #EAF3F8;
-    background-color: #EAF3F8;
+    color: white;
+    border-top: 1px solid #7C8999;
+    border-left: 1px solid #7C8999;
+    border-right: 1px solid #7C8999;
+    background-color: #7C8999;
 }
 .ui-tab-item-hover .ui-tab-item-ledge {
-    border-top: solid 1px #DFECF3;
-    background-color: #68BEF1;
+    border-top: solid 1px #87BBEB;
+    background-color: #348CDC;
 }
 .ui-tab-item-hover .ui-tab-item-lledge {
-    border-top: solid 1px #DFECF3;
-    background-color: #74C8F4;
+    border-top: solid 1px #87BBEB;
+    background-color: #348CDC;
 }
 .ui-tab-item-hover .ui-tab-item-inner {
     color: white;
-    border-top: 1px solid #68BEF1;
-    border-left: 1px solid #74C8F4;
-    border-right: 1px solid #74C8F4;
-    background-color: #74C8F4;
+    border-top: 1px solid #348CDC;
+    border-left: 1px solid #348CDC;
+    border-right: 1px solid #348CDC;
+    background-color: #348CDC;
 }
-.ui-tab-item-active .ui-tab-item-ledge {
-    border-top: solid 1px #74C8F4;
-    background-color: #55ACD7;
-}
-.ui-tab-item-active .ui-tab-item-lledge {
-    border-top: solid 1px #74C8F4;
-    background-color: #55ACD7;
-}
-.ui-tab-item-active .ui-tab-item-inner {
-    color: white;
-    border-top: 1px solid #4AA0D1;
-    border-left: 1px solid #55ACD7;
-    border-right: 1px solid #55ACD7;
-    background-color: #55ACD7;
-}
+.ui-tab-item-active .ui-tab-item-ledge,
 .ui-tab-item-selected .ui-tab-item-ledge {
-    border-top: solid 1px #74C8F4;
-    background-color: #55ACD7;
+    border-top: solid 1px #60A5E3;
+    background-color: #2070BB;
 }
+.ui-tab-item-active .ui-tab-item-lledge,
 .ui-tab-item-selected .ui-tab-item-lledge {
-    border-top: solid 1px #74C8F4;
-    background-color: #55ACD7;
+    border-top: solid 1px #60A5E3;
+    background-color: #2070BB;
 }
+.ui-tab-item-active .ui-tab-item-inner,
 .ui-tab-item-selected .ui-tab-item-inner {
     color: white;
-    border-top: 1px solid #4AA0D1;
-    border-left: 1px solid #55ACD7;
-    border-right: 1px solid #55ACD7;
-    background-color: #55ACD7;
+    border-top: 1px solid #2070BB;
+    border-left: 1px solid #2070BB;
+    border-right: 1px solid #2070BB;
+    background-color: #2070BB;
 }
 
 .ui-tab-item-container {
@@ -192,4 +181,3 @@
 .ui-tab-item-selected .ui-tab-close-btn-icon {
     background-position: -12px -25px;
 }
-

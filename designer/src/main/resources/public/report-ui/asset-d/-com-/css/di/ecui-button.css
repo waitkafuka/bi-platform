@@ -5,7 +5,7 @@
     display: inline-block;
     font-size: 12px;
     line-height: 18px;
-    padding: 0px 12px;
+    padding: 2px 15px;
     margin-right: 6px;
     overflow: hidden;
     cursor: pointer;
@@ -22,18 +22,26 @@
     *zoom: 1;
 }
 .ui-button {
-    background: url(img/icon.png) 0px -103px repeat-x;
-    border:  1px solid #7FAFC7;
+    /*background: url(img/icon.png) 0px -103px repeat-x;*/
+    /*border:  1px solid #7FAFC7;*/
+    background: #2584DA;
+    border: 1px solid #2070BB;
+    color: white;
 }
 .ui-button-hover {
-    background-position: 0px -127px;
+    /*background-position: 0px -127px;*/
+    background: #4E9AE0;
 }
 .ui-button-active {
-    background: #F4F4F4;
+    background: #78B3E7;
 }
 .ui-button-g {
-    background:  url(img/icon.png) 0px -55px repeat-x;
+/*    background:  url(img/icon.png) 0px -55px repeat-x;
     border:  1px solid #7FAFC7;
+*/
+    background: #2584DA;
+    border: 1px solid #2070BB;
+    color: white;
 }
 .ui-button-g-hover {
     background-position: 0px -79px;
@@ -127,6 +135,79 @@
     background: #E6E6E6;
     border-top: 1px solid #D7D7D7;
 }
+/* 重色按钮 */
+.ui-g-btn {
+    border: 1px solid #2070BB;
+    background-color: #2584DA;
+    color: #FFF;
+    padding: 0;
+}
+.ui-g-btn-hover {
+    background-color: #4E9AE0;
+}
+.ui-g-btn-active {
+    background-color: #1A578E;
+}
+.ui-g-btn .ui-button-inner {
+    line-height: 16px;
+    padding: 0 20px 3px 20px;
+    vertical-align: top;
+    background-color: #2584DA;
+    border-top: 1px solid #2584DA;
+    margin-top: 1px;
+    -webkit-border-radius: 1px;
+    -o-border-radius: 1px;
+    -moz-border-radius: 1px;
+    -ms-border-radius: 1px;
+    border-radius: 1px;    
+}
+.ui-g-btn-hover .ui-button-inner {
+    background-color: #4E9AE0;
+    border-top: 1px solid #4E9AE0;
+}
+.ui-g-btn-active .ui-button-inner {
+    border-top: 1px solid #206BB0;
+    background-color: #247CCC;
+}
+.ui-g-btn .ui-button-text {
+    vertical-align: middle;
+}
+/* 轻按钮 */
+.ui-lite-btn {
+    border: 1px solid #CCC;
+    background-color: #F7F7F7;
+    color: #3C78A2;
+    padding: 0;
+}
+.ui-lite-btn-hover {
+    background-color: #FCFCFC;
+}
+.ui-lite-btn-active {
+    background-color: #BBB;
+}
+.ui-lite-btn .ui-button-inner {
+    padding: 0 10px 3px 10px;
+    line-height: 16px;
+    background-color: #F7F7F7;
+    border-top: 1px solid #F7F7F7;
+    margin-top: 1px;
+    -webkit-border-radius: 1px;
+    -o-border-radius: 1px;
+    -moz-border-radius: 1px;
+    -ms-border-radius: 1px;
+    border-radius: 1px;    
+}
+.ui-lite-btn-hover .ui-button-inner {
+    background-color: #FCFCFC;
+    border-top: 1px solid #FCFCFC;
+}
+.ui-lite-btn-active .ui-button-inner {
+    border-top: 1px solid #DDD;
+    background-color: #EEE;
+}
+.ui-lite-btn .ui-button-text {
+    vertical-align: middle;
+}
 /* 下载按钮 */
 .ui-download-btn {
     border: 1px solid #FFF;
@@ -174,4 +255,3 @@
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
 }
-
