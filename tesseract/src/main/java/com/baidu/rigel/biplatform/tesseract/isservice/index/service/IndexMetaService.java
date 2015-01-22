@@ -125,4 +125,12 @@ public interface IndexMetaService {
      */
     List<IndexMeta> getIndexMetasByDataSourceKey(String dataSourceKey);
     
+    /**
+     * saveIndexMetaLocally 写索引元数据到本地镜像
+     * @param idxMeta
+     * @return
+     * @throws Exception
+     */
+    boolean saveIndexMetaLocally(IndexMeta idxMeta) throws Exception;
+    
 }

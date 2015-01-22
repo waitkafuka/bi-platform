@@ -105,18 +105,20 @@ public interface IsNodeService {
      * 
      * @param idxShard
      *            索引分片
+     * @param clusterName 集群名称
      * @return List<Node> List<Node>
      */
-    List<Node> getAvailableNodeListByIndexShard(IndexShard idxShard);
+    List<Node> getAvailableNodeListByIndexShard(IndexShard idxShard, String clusterName);
     
     /**
      * 
      * getFreeSearchNodeByIndexShard 获取当前索引分片下空闲的查询节点
      * 
      * @param idxShard
+     * @param clusterName
      * @return Node
      */
-    Node getFreeSearchNodeByIndexShard(IndexShard idxShard);
+    Node getFreeSearchNodeByIndexShard(IndexShard idxShard, String clusterName);
     
     /**
      * 
@@ -162,5 +164,27 @@ public interface IsNodeService {
      * @return
      */
     Node getCurrentNode();
+    
+	/**
+	 * getNodeMapByNodeKey 跟据集群名称、nodeKey列表，拿到对应的节点信息，不区分节点状态
+	 * 
+	 * @param clusterName
+	 *            集群名称
+	 * @param nodeKeyList
+	 *            nodeKey列表
+	 * @return Map<String,Node>
+	 */
+	Map<String, Node> getNodeMapByNodeKey(String clusterName, List<String> nodeKeyList, boolean isAvailable);
+
+	/**
+	 * getNodeMapByClusterName 跟据集群名称拿到集群中节点信息，不区分节点状态
+	 * 
+	 * @param clusterName
+	 *            集群名称
+	 * @param isAvailable
+	 *            是否过滤不可用节点
+	 * @return Map<String,Node>
+	 */
+	Map<String, Node> getNodeMapByClusterName(String clusterName, boolean isAvailable);
     
 }

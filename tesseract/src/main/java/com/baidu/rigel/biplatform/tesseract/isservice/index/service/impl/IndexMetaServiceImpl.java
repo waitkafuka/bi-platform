@@ -28,6 +28,7 @@ import java.util.UUID;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.DataDescInfo;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
@@ -49,9 +51,11 @@ import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.store.service.impl.AbstractMetaService;
+import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -741,8 +745,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                     idxShard.setFull(false);
                     // 设置索引文件路径=datasourceinfo.getKey+"/"+facttablename+shardname
                     // 只设置一次
-                    String idxFilePathPrefix = idxMeta.getDataSourceInfo().getDataSourceKey()
-                        + File.separator + idxMeta.getFacttableName() + File.separator + idxMeta.getIndexMetaId() + File.separator;
+                    String idxFilePathPrefix = idxMeta.getIndexMetaFileDirPath();
                     idxShard.setFilePath(idxFilePathPrefix + idxShard.getShardName()+File.separator+IndexMeta.getIndexFilePathUpdate());
                     idxShard.setIdxFilePath(idxFilePathPrefix + idxShard.getShardName()+File.separator+IndexMeta.getIndexFilePathIndex());
                     
@@ -819,5 +822,72 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         
         return result;
     }
+    
+    public void saveIndexMetaImage(Node node) {
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "saveNodeImage",
+            "[node:" + node + "]"));
+        if (node == null || StringUtils.isEmpty(node.getClusterName())) {
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
+                "saveNodeImage", "[node:" + node + "]"));
+            throw new IllegalArgumentException();
+        }
+        FileUtils.write(node.getImageFilePath(), SerializationUtils.serialize(node), true);
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "saveNodeImage",
+            "[node:" + node + "]"));
+    }
+
+	/* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService#saveIndexMetaLocally(com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta)
+	 */
+	@Override
+	public boolean saveIndexMetaLocally(IndexMeta idxMeta) throws Exception {
+		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "saveIndexMetaLocally",
+	            "[idxMeta:" + idxMeta + "]"));
+		if(idxMeta == null ){
+			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_ERROR, "saveIndexMetaLocally",
+		            "[idxMeta:" + idxMeta + "]"));
+			return false;
+		}
+		Node currNode=this.isNodeService.getCurrentNode();
+		File idxMetaFileDir=new File(currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath());
+		if(idxMetaFileDir.isDirectory() && idxMetaFileDir.exists()){
+			//如果是目录并且存在
+			String idxMetaImageNewFileName=idxMetaFileDir+File.separator+idxMeta.getIndexMetaId() + IndexFileSystemConstants.INDEX_META_IMAGE_FILE_NEW;
+			String idxMetaImageBakFileName=idxMetaFileDir+File.separator+idxMeta.getIndexMetaId() + IndexFileSystemConstants.INDEX_META_IMAGE_FILE_BAK;
+			String idxMetaImageFileName=idxMetaFileDir+File.separator+idxMeta.getIndexMetaId() + IndexFileSystemConstants.INDEX_META_IMAGE_FILE_SAVED;
+			String idxMetaStr=AnswerCoreConstant.GSON.toJson(idxMeta, new TypeToken<IndexMeta>(){}.getType());
+			
+			File idxMetaImageNewFile=new File(idxMetaImageNewFileName);
+			File idxMetaImageBakFile=new File(idxMetaImageBakFileName);
+			File idxMetaImageFile=new File(idxMetaImageFileName);
+			
+			if(idxMetaImageNewFile.exists()){
+				idxMetaImageNewFile.deleteOnExit();
+			}
+			
+			
+			Boolean result=FileUtils.write(idxMetaImageNewFileName, idxMetaStr.getBytes(), Boolean.TRUE);
+			if(result){
+				
+				if(idxMetaImageBakFile.exists()){
+					idxMetaImageBakFile.deleteOnExit();
+				}
+				FileUtils.copyFolder(idxMetaImageFileName, idxMetaImageBakFileName);
+				if(idxMetaImageFile.exists()){
+					idxMetaImageFile.deleteOnExit();
+				}
+				FileUtils.copyFolder(idxMetaImageNewFileName, idxMetaImageFileName);
+				
+			}
+		}else{
+			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_ERROR, "saveIndexMetaLocally",
+		            "[idxMeta:" + idxMeta + "][idxMetaFileDir:"+idxMetaFileDir.getAbsolutePath()+" does not exist]"));
+		}
+		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "saveIndexMetaLocally",
+	            "[idxMeta:" + idxMeta + "]"));
+		return false;
+	}
+    
+    
     
 }
