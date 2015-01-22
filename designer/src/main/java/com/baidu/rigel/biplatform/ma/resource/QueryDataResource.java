@@ -682,11 +682,18 @@ public class QueryDataResource extends BaseResource {
          * 1. 获取缓存DesignModel对象
          */
         ReportDesignModel model;
+        
+        /**
+         * 3. 获取运行时对象
+         */
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        
         try {
             model = getDesignModelFromRuntimeModel(reportId);
-            if (!model.isPersStatus()) {
-                model = reportModelCacheManager.getReportModel(reportId);
-            }
+//            if (!model.isPersStatus()) {
+//                model = reportModelCacheManager.getReportModel(reportId);
+//                runTimeModel.init(model, true, true);
+//            }
                     //reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
@@ -700,10 +707,7 @@ public class QueryDataResource extends BaseResource {
         if (targetArea == null) {
             throw new IllegalStateException("can't get report define");
         }
-        /**
-         * 3. 获取运行时对象
-         */
-        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        
         /**
          * 4. 更新区域本地的上下文
          */
