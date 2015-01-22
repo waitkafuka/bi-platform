@@ -27,9 +27,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -41,6 +43,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
 
 
 
@@ -76,6 +79,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
@@ -559,15 +563,31 @@ public class QueryDataResource extends BaseResource {
         
         ReportDesignModel model = runTimeModel.getModel(); 
         //reportModelCacheManager.getReportModel(reportId);
+        Map<String, String> params = Maps.newHashMap();
+        if (model.getParams() != null) {
+            model.getParams().forEach((k, v) -> {
+                params.put(v.getElementId(), v.getName());
+            });
+        }
+        String[] tmp = null;
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
              */
-                
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
                 runTimeModel.getContext().put(getRealKey(model, key), value[0]);
+                if (params.containsKey(key)) {
+                    String paramName = params.get(key);
+                    tmp = MetaNameUtil.parseUnique2NameArray(value[0]);
+                    runTimeModel.getContext().put(paramName, tmp[tmp.length - 1]);
+                }
             }
+            /**
+             * 修正报表配置的参数的值
+             * 
+             */
+            
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",

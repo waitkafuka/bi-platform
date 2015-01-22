@@ -237,12 +237,12 @@ public class MiniCubeMember extends OlapElementDef implements Member {
             this.uniqueName = uniqueName;
             return uniqueName;
         }
-
-        // TODO 需要考虑时间维值
         if (parent == null) {
-            return MetaNameUtil.makeUniqueName(level.getDimension(), getName());
+            this.uniqueName = MetaNameUtil.makeUniqueName(level.getDimension(), getName());
+        } else {
+            this.uniqueName = MetaNameUtil.makeUniqueName(parent, getName());
         }
-        return MetaNameUtil.makeUniqueName(parent, getName());
+        return this.uniqueName;
     }
 
     /**
