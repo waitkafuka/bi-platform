@@ -57,9 +57,9 @@ define(['backbone', 'dialog'], function (Backbone, dialog) {
     function initProduct() {
         var vmJsonPath = '../test/demo/report/new-report/vm-json';
         require(['report/component-combination/enter', vmJsonPath], function(component, VmJson) {
-            var vmJsomObject = VmJson.date;
+            // var vmJsomObject = VmJson.handsonTable;
             //var vmJsomObject = VmJson.dateChart;
-            //var vmJsomObject = VmJson.table;
+             var vmJsomObject = VmJson.table;
             //var vmJsomObject = VmJson.twoTable;
             //var vmJsomObject = VmJson.liteolapTableChart;
             if (cmmp) {
@@ -70,7 +70,8 @@ define(['backbone', 'dialog'], function (Backbone, dialog) {
             var options = {
                 parentEl: $('.di-o_o-body')[0],
                 rptHtml: vmJsomObject.html.join(''),
-                rptJson: vmJsomObject.json
+                rptJson: vmJsomObject.json,
+                reportId: '66d1c58a02d7c0c0919f797f386d15df'
             };
             component.start(options);
         });

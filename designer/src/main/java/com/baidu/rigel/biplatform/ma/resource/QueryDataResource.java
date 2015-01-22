@@ -25,13 +25,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +37,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-
-
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -353,6 +347,7 @@ public class QueryDataResource extends BaseResource {
 //                    response.addCookie(sessionIdCookie);
             } else {
                 model = reportDesignModelService.getModelByIdOrName(reportId, true);
+                model.setPersStatus(true);
 //                    runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
             }
             runtimeModel = new ReportRuntimeModel(reportId);
@@ -492,12 +487,14 @@ public class QueryDataResource extends BaseResource {
              * 编辑报表
              */
             model = reportModelCacheManager.loadReportModelToCache(reportId);
+            model.setPersStatus(false);
         } else {
             /**
              * 如果是新建的报表，从缓存中找
              */
             try {
                 model = reportModelCacheManager.getReportModel(reportId);
+                model.setPersStatus(false);
             } catch (CacheOperationException e) {
                 logger.info("[INFO]There are no such model in cache. Report Id: " + reportId, e);
                 return ResourceUtils.getErrorResult("缓存中不存在的报表！id: " + reportId, 1);
@@ -559,15 +556,31 @@ public class QueryDataResource extends BaseResource {
         
         ReportDesignModel model = runTimeModel.getModel(); 
         //reportModelCacheManager.getReportModel(reportId);
+        Map<String, String> params = Maps.newHashMap();
+        if (model.getParams() != null) {
+            model.getParams().forEach((k, v) -> {
+                params.put(v.getElementId(), v.getName());
+            });
+        }
+        String[] tmp = null;
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
              */
-                
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0) {
                 runTimeModel.getContext().put(getRealKey(model, key), value[0]);
+                if (params.containsKey(key)) {
+                    String paramName = params.get(key);
+                    tmp = MetaNameUtil.parseUnique2NameArray(value[0]);
+                    runTimeModel.getContext().put(paramName, tmp[tmp.length - 1]);
+                }
             }
+            /**
+             * 修正报表配置的参数的值
+             * 
+             */
+            
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
@@ -669,9 +682,19 @@ public class QueryDataResource extends BaseResource {
          * 1. 获取缓存DesignModel对象
          */
         ReportDesignModel model;
+        
+        /**
+         * 3. 获取运行时对象
+         */
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        
         try {
             model = getDesignModelFromRuntimeModel(reportId);
-                    // reportModelCacheManager.getReportModel(reportId);
+//            if (!model.isPersStatus()) {
+//                model = reportModelCacheManager.getReportModel(reportId);
+//                runTimeModel.init(model, true, true);
+//            }
+                    //reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             ResponseResult rs = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -684,10 +707,7 @@ public class QueryDataResource extends BaseResource {
         if (targetArea == null) {
             throw new IllegalStateException("can't get report define");
         }
-        /**
-         * 3. 获取运行时对象
-         */
-        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        
         /**
          * 4. 更新区域本地的上下文
          */

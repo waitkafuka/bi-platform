@@ -64,7 +64,7 @@ public class AnalysisChartBuildServiceImpl implements AnalysisChartBuildService 
             }
         }
         for (Item item : cols) {
-            if (!item.equals(timeDimItem)) {
+            if (item != null && !item.equals(timeDimItem)) {
                 item.setPositionType(PositionType.Y);
                 chartCols.add(item);
             }

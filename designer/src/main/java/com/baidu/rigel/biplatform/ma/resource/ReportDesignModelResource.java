@@ -798,7 +798,7 @@ public class ReportDesignModelResource extends BaseResource {
         model.getExtendById(areaId).getFormatModel().removeItem(element.getName());
 //        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
 //        model.getExtendById(areaId).getFormatModel().getToolTips().remove(element.getId());
-        if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
+        if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 0) {
             model.getExtendById(areaId).getFormatModel().reset();
         }
         /**

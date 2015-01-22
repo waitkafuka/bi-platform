@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,7 @@ import com.baidu.rigel.biplatform.ac.model.callback.ResponseStatus;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -64,12 +66,14 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
 //        MetaDataService.checkCube(cube);
 //        MetaDataService.checkDataSourceInfo(dataSourceInfo);
         CallbackLevel callbackLevel = (CallbackLevel) level;
-        
-        if (params.isEmpty()) {
-            params.putAll(callbackLevel.getCallbackParams());
+        Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
+        if (MapUtils.isNotEmpty(params)) {
+            callbackParams.putAll(params);
         }
+        
         CallbackResponse response = 
-                CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), params, CallbackType.DIM);
+                CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), 
+                callbackParams, CallbackType.DIM);
         if (response.getStatus() == ResponseStatus.SUCCESS) {
             @SuppressWarnings("unchecked")
             List<CallbackDimTreeNode> posTree = (List<CallbackDimTreeNode>) response.getData();
@@ -146,8 +150,13 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
 //        MetaDataService.checkDataSourceInfo(dataSourceInfo);
 //        List<CallBackTreeNode> posTree = fetchCallBack(level, params);
         CallbackLevel callbackLevel = (CallbackLevel) level;
+        Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
+        if (MapUtils.isNotEmpty(params)) {
+            callbackParams.putAll(params);
+        }
         CallbackResponse response = 
-                CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), params, CallbackType.DIM);
+                CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), 
+                callbackParams, CallbackType.DIM);
         if (response.getStatus() == ResponseStatus.SUCCESS) {
             @SuppressWarnings("unchecked")
             List<CallbackDimTreeNode> posTree = (List<CallbackDimTreeNode>) response.getData();
