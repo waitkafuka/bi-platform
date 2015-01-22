@@ -25,9 +25,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +42,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+
+
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -93,6 +100,7 @@ import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
 
 
 /**
@@ -190,33 +198,53 @@ public class QueryDataResource extends BaseResource {
             return rs;
         }
         final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
+        final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
+        Map<String, String> params = Maps.newHashMap();
+        runtimeModel.getContext().getParams().forEach((k, v) -> {
+            params.put(k,v == null ? "" : v.toString());
+        }); 
+//        DataSourceInfo dsInfo = null;
+//        try {
+//            dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsService.getDsDefine(model.getDsId()), 
+//                    securityKey);
+//        } catch (DataSourceOperationException e1) {
+//            logger.error(e1.getMessage(), e1);
+//        }
         for (final String areaId : areaIds) {
             ExtendArea area = model.getExtendById(areaId);
             if (area != null && isQueryComp(area.getType())
                     && !area.listAllItems().isEmpty()) {
-                Item item = area.listAllItems().values()
-                        .toArray(new Item[0])[0];
-                Cube cube = model.getSchema().getCubes()
-                        .get(area.getCubeId());
+                Item item = area.listAllItems().values().toArray(new Item[0])[0];
+                Cube cube = model.getSchema().getCubes().get(area.getCubeId());
                 Cube tmpCube = QueryUtils.transformCube(cube);
                 String dimId = item.getOlapElementId();
                 Dimension dim = cube.getDimensions().get(dimId);
                 if (dim != null) {
                     List<Map<String, String>> values;
                     try {
+                        values = Lists.newArrayList();
                         List<Member> members = reportModelQueryService
                                 .getMembers(tmpCube, 
-                                        tmpCube.getDimensions().get(dim.getName()),
-                                        Maps.newHashMap(), securityKey).get(0);
-                        values = Lists.newArrayList();
+                                tmpCube.getDimensions().get(dim.getName()), params, securityKey).get(0);
                         members.forEach(m -> {
-                            Map<String, String> tmp = Maps
-                                    .newHashMap();
+                            Map<String, String> tmp = Maps.newHashMap();
                             tmp.put("value", m.getUniqueName());
                             tmp.put("text", m.getCaption());
+                            MiniCubeMember realMember = (MiniCubeMember) m;
+                            if (realMember.getParent() != null) {
+                                tmp.put("parent", realMember.getParent().getUniqueName());
+                            } else {
+                                tmp.put("parent", "");
+                            }
                             values.add(tmp);
+                            List<Map<String, String>> children = getChildren(realMember, realMember.getChildren());
+                            if (children != null && !children.isEmpty()) {
+                                values.addAll(children);
+                            }
                         });
+//                        List<Map<String, String>> values = 
+//                                QueryUtils.getMembersWithChildrenValue(members, tmpCube, dsInfo, Maps.newHashMap());
                         Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
                         datasource.put("datasource", values);
                         datas.put(areaId, datasource);
@@ -231,6 +259,26 @@ public class QueryDataResource extends BaseResource {
         rs.setData(datas);
         rs.setStatusInfo("OK");
         logger.info("[INFO]--- --- successfully init params, cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
+
+    private List<Map<String, String>> getChildren(Member parent, List<Member> children) {
+        if (children == null || children.isEmpty()) {
+            return null;
+        }
+        List<Map<String, String>> rs = Lists.newArrayList();
+        MiniCubeMember tmp = null;
+        for (Member m : children) {
+            tmp = (MiniCubeMember) m;
+            Map<String, String> map = Maps.newHashMap();
+            map.put("value", tmp.getUniqueName());
+            map.put("text", tmp.getCaption());
+            map.put("parent", parent.getUniqueName());
+            rs.add(map);
+            if (!CollectionUtils.isEmpty(tmp.getChildren())) {
+                rs.addAll(getChildren(tmp, tmp.getChildren()));
+            }
+        }
         return rs;
     }
 

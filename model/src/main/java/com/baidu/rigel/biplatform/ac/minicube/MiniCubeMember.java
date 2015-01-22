@@ -307,4 +307,14 @@ public class MiniCubeMember extends OlapElementDef implements Member {
         }
     }
 
+    /**
+     * get current member's children
+     * NOTE：sometime, invoke current method very dangerous. if you do this,
+     * please make sure the children already initialized, even though, this method can not promise you can get correct
+     * result.
+     * @return List<Member>
+     */
+    public List<Member> getChildren() {
+        return this.children;
+    }
 }
