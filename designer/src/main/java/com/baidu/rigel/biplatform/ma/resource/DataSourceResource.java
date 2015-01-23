@@ -307,8 +307,7 @@ public class DataSourceResource extends BaseResource {
                 } else {
                     boolean result = dsService.removeDataSource(id);
                     Map<String, String> params = Maps.newHashMap();
-                    params.put("dataSourceInfo", id);
-                    HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/datasource/destroy", params);
+                    HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/datasource/destroy/" + id, params);
                     rs.setStatus(0);
                     rs.setStatusInfo(String.valueOf(result));
                 }
