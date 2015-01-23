@@ -648,25 +648,27 @@ $namespace('di.shared.ui');
          * @event
          */
         var outParam = this.$di('getDef').outParam;
-        if (!outParam) {
-            return;
-        }
-        // 整理后端需要的数据格式
-        // {
-        //      6e72140667f37b984d9764f5aca6b6cb:[dim_trade_trade_l1].[广播通信]
-        //      6e72140667f37b984d9764f5aca6b6cb_level:0
-        // }
         var params = {};
-        var uniqueName = options.args.param.uniqueName;
-        uniqueName = uniqueName.replace(/{/g, '');
-        var uniqueNames = uniqueName.split('}');
-        for (var i = 0, iLen = uniqueNames.length; i < iLen - 1 ; i ++) {
-            var tempName = uniqueNames[i].split('.')[0];
-            tempName = tempName.replace('[', '').replace(']', '');
-            if (outParam.dimName === tempName) {
-                params[outParam.dimId] = uniqueNames[i];
-                params[outParam.dimId + '_level'] = outParam.level;
+        if (outParam) {
+            // 整理后端需要的数据格式
+            // {
+            //      6e72140667f37b984d9764f5aca6b6cb:[dim_trade_trade_l1].[广播通信]
+            //      6e72140667f37b984d9764f5aca6b6cb_level:0
+            // }
+            var uniqueName = options.args.param.uniqueName;
+            uniqueName = uniqueName.replace(/{/g, '');
+            var uniqueNames = uniqueName.split('}');
+            for (var i = 0, iLen = uniqueNames.length; i < iLen - 1 ; i ++) {
+                var tempName = uniqueNames[i].split('.')[0];
+                tempName = tempName.replace('[', '').replace(']', '');
+                if (outParam.dimName === tempName) {
+                    params[outParam.dimId] = uniqueNames[i];
+                    params[outParam.dimId + '_level'] = outParam.level;
+                }
             }
+        }
+        else {
+            params.uniqueName = options.args.param.uniqueName;
         }
         this.$di(
             'dispatchEvent',
