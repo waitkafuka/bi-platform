@@ -18,7 +18,6 @@ define(['url'], function (Url) {
          */
         submitMethodTypeValue: function (data, callback) {
             var that = this;
-            console.log(JSON.stringify(data));
             $.ajax({
                 url: Url.submitDeriveIndsInfo(
                     window.dataInsight.main.id,

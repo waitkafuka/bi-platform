@@ -59,8 +59,7 @@ define(function () {
                         },
                         "dataOpt": {
                             "submitMode": "CONFIRM"
-                        },
-                        "reportTemplateId": "RTPL_VIRTUAL_ID"
+                        }
                     },
                     {
                         "id": "snpt1.vu-form1-confirm1",
@@ -1600,9 +1599,61 @@ define(function () {
                     }
                 ]
             }
+        },
+        handsonTable: {
+            html: [
+                '<div class="di-o_o-block table-block" data-o_o-di="snpt1.cpnt-table1">',
+                '<div class="di-o_o-line">',
+                '<div class="vu-table" data-o_o-di="snpt1.vu-table1"></div>',
+                '</div>',
+                '</div>'
+            ],
+            json: {
+                "desc" : "查询条件||多维表格",
+                "diKey": "DEPICT",
+                "clzDefs": [
+                    {
+                        "clzKey": "OLAP_TABLE",
+                        "dataOpt": {
+                            "emptyHTML": "未查询到相关数据"
+                        }
+                    },
+                    {
+                        "clzKey": "ECUI_SELECT",
+                        "dataOpt": {
+                            "optionSize": 10
+                        }
+                    }
+                ],
+                "entityDefs": [
+                    {
+                        "id": "snpt1",
+                        "clzType": "SNIPPET"
+                    },
+                    {
+                        "id": "snpt1.cpnt-table1",
+                        "clzType": "COMPONENT",
+                        "clzKey": "DI_TABLE",
+                        "sync": { "viewDisable": "ALL" },
+                        "init": {
+                            "action": { "name": "sync" }
+                        },
+                        "vuiRef": {
+                            "mainTable": "snpt1.vu-table1"
+                        },
+                        "init": {
+                            "action": { "name": "sync" }
+                        }
+                    },
+                    {
+                        "id": "snpt1.vu-table1",
+                        "clzType": "VUI",
+                        "clzKey": "HANDSON_TABLE",
+                        "name": "table"
+                    }
+                ]
+            }
         }
-
     };
-
     return VmJson;
 });

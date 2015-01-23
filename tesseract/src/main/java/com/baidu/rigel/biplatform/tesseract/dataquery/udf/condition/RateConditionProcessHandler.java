@@ -153,17 +153,17 @@ abstract class RateConditionProcessHandler {
         }
         DimensionCondition tmp = (DimensionCondition) condition;
         List<QueryData> queryDatas = Lists.newArrayList();
-        int memberSize = -1;
-        try {
-            memberSize = getMembers(dimension, adapter).size();
-        } catch (MiniCubeQueryException e1) {
-            LOG.error(e1.getMessage(), e1);
-            throw new IllegalStateException("未能正确的获取当前时间维度的成员信息");
-        }
+//        int memberSize = -1;
+//        try {
+//            memberSize = getMembers(dimension, adapter).size();
+//        } catch (MiniCubeQueryException e1) {
+//            LOG.error(e1.getMessage(), e1);
+//            throw new IllegalStateException("未能正确的获取当前时间维度的成员信息");
+//        }
         final boolean hasQueryNodeDatas = CollectionUtils.isEmpty(tmp.getQueryDataNodes());
         boolean isExpand = hasQueryNodeDatas? false : tmp.getQueryDataNodes().get(0).isExpand();
         boolean isShow = hasQueryNodeDatas? false : tmp.getQueryDataNodes().get(0).isShow();
-        for (int i = 0; i <memberSize; ++i) {
+        for (int i = 0; i < days.length; ++i) {
             QueryData data = new QueryData("[" + dimension.getName() + "].[" + days[i] + "]");
             data.setExpand(isExpand);
             data.setShow(isShow);

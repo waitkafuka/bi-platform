@@ -1,10 +1,16 @@
 /**
  * calendar-plus
  */
-.ui-calendar-plus{ 
+.ui-calendar-plus { 
     font-size:12px;
     width: auto;
     min-width: 150px
+}
+.ui-calendar-plus .ui-button-hover {
+    background: white;
+}
+.ui-calendar-plus .ui-button-active {
+    background: #B7B7B7;
 }
 .ui-calendar-plus .ml10 {
     margin-left: 10px;
@@ -14,7 +20,9 @@
 }
 .ui-calendar-plus-box .ui-calendar-text {
     font-size: 14px;
-    font-family: '微软雅黑', Arial;
+    font-family: Arial;
+    font-weight: bold;
+    color: #555;
 }
 .ui-calendar-plus-box .ui-calendar {
     width: auto;
@@ -38,9 +46,9 @@
     background: none;
 }
 .ui-calendar-plus-box {
+    margin-right: 10px;
     display: inline-block;
     *display: inline;
     zoom: 1;
     vertical-align: middle;
 }
-

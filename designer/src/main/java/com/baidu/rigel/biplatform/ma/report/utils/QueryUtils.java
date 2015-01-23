@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
+import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -309,7 +310,7 @@ public final class QueryUtils {
                     condition.setQueryDataNodes(datas);
                 }
                 // 时间维度，并且在第一列位置，后续改成可配置方式
-                if (olapElement instanceof TimeDimension && firstIndex == 0) {
+                if (olapElement instanceof TimeDimension && firstIndex == 0 && !queryAction.isChartQuery()) {
                     condition.setMemberSortType(SortType.DESC);
                 }
                 ++firstIndex;
@@ -768,6 +769,7 @@ public final class QueryUtils {
                 rs.put(param.getElementId(), param.getDefaultValue());
             }
         });
+        rs.putAll(requestParams);
         return rs;
     }
 
@@ -792,6 +794,39 @@ public final class QueryUtils {
         
         // 如果当前线程中包含参数值，则覆盖cookie中参数值
         rs.putAll(ContextManager.getParams());
+        // 容错，处理其他可能的参数
+        rs.remove(Constants.RANDOMCODEKEY);
+        rs.remove(Constants.TOKEN);
+        rs.remove(Constants.BIPLATFORM_PRODUCTLINE);
+
+        return rs;
+    }
+
+    /**
+     * TODO:
+     * @param members
+     * @return List<Map<String, String>>
+     */
+    public static List<Map<String, String>> getMembersWithChildrenValue(List<Member> members,
+            Cube cube, DataSourceInfo dataSource, Map<String, String> params) {
+        List<Map<String, String>> rs = Lists.newArrayList();
+        if (members == null || members.isEmpty()) {
+            return rs;
+        }
+        members.forEach(m -> {
+            Map<String, String> tmp = Maps.newHashMap();
+            tmp.put("value", m.getUniqueName());
+            tmp.put("text", m.getCaption());
+            Member parent = m.getParentMember(cube, dataSource, params);
+            if (parent != null) {
+                tmp.put("parent", parent.getUniqueName());
+            }
+            rs.add(tmp);
+            List<Member> children = m.getChildMembers(cube, dataSource, params);
+            if (children != null) {
+                rs.addAll(getMembersWithChildrenValue(children, cube, dataSource, params));
+            }
+        });
         
         return rs;
     }
