@@ -171,7 +171,7 @@ define(
                 var reportId = rootId + serverData.id;
                 var vm = createShell(serverData.id, reportId);
                 vm.html(
-                    '<div style="width:100%; height:20px"></div>'
+                    '<div class="placeholer-20" style="width:100%; height:20px"></div>'
                     + compData.vm.render({
                         rootId: rootId,
                         serverData: serverData
@@ -394,13 +394,13 @@ define(
              */
             saveReport: function (success) {
                 var that = this;
-
+                var vm = that.$reportVm.prop('outerHTML').replace(/<div class=\"placeholer-20\" style=\"width:100%; height:20px\"><\/div>/g,'');
                 $.ajax({
                     url: Url.saveReport(that.id),
                     type: 'PUT',
                     data: {
                         json: JSON.stringify(that.reportJson),
-                        vm: that.$reportVm.prop('outerHTML')
+                        vm: vm
                     },
                     success: function () {
                         success && success();
@@ -417,13 +417,13 @@ define(
             saveJsonVm: function (success) {
                 var that = this;
                 success = success || new Function();
-
+                var vm = that.$reportVm.prop('outerHTML').replace(/<div class=\"placeholer-20\" style=\"width:100%; height:20px\"><\/div>/g,'');
                 $.ajax({
                     url: Url.saveJsonVm(that.id),
                     type: 'PUT',
                     data: {
                         json: JSON.stringify(that.reportJson),
-                        vm: that.$reportVm.prop('outerHTML')
+                        vm: vm
                     },
                     success: function () {
                         success();
