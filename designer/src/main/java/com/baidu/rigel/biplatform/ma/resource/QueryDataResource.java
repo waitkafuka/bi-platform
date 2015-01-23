@@ -434,12 +434,12 @@ public class QueryDataResource extends BaseResource {
         builder.append("<html>");
         builder.append("<head>");
         builder.append("<meta content='text/html' 'charset=UTF-8'>");
-        builder.append("<link rel='stylesheet' href='/silkroad/asset/css/-di-product-min.css'/>");
+        builder.append("<link rel='stylesheet' href='/silkroad/asset/di/css/-di-product-min.css'/>");
         builder.append("</head>");
         builder.append("<body>");
         builder.append(vm);
         
-        builder.append("<script src='/silkroad/asset/{0}/-di-product-min.js'>");
+        builder.append("<script src='/silkroad/asset/di/-di-product-min.js'>");
         builder.append("</script>");
         builder.append(js);
         builder.append("</body>");
