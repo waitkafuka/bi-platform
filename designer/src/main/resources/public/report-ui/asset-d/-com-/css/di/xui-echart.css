@@ -8,8 +8,8 @@
     z-index:0;
 }
 .xui-e-chart-header {
-    width:100%;
-    height: 20%;
+    width: 100%;
+    height: 25px;
 }
 .xui-e-chart-title {
     font-weight:bold;

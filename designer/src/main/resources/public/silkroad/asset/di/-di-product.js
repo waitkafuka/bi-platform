@@ -92,7 +92,6 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.helper/util.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.arg/arg-handler-factory.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/echart-topn.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/handson-table.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/hidden-input.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/multi-checkbox.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/offline-download.js" type="text/javascript"><\/script>' );
@@ -129,7 +128,6 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-echart-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-form-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-plane-table-model.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-privot-table-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-rptsave-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-rtplclone-model.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/di-table-model.js" type="text/javascript"><\/script>' );
