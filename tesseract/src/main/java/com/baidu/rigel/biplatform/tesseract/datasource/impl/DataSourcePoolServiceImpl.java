@@ -69,9 +69,10 @@ public class DataSourcePoolServiceImpl implements DataSourcePoolService {
      */
     @Override
     public void updateDataSourceInfo(DataSourceInfo dataSourceInfo) throws DataSourceException {
-        // 先删除，在初始化
+        // 先删除，在初始化,后续需要对数据源信息进行判断以后再判断
         destroyDataSourceInfo(dataSourceInfo);
         initDataSourceInfo(dataSourceInfo);
+        LOG.info("save new datasource info cache");
     }
 
     /*
@@ -86,9 +87,11 @@ public class DataSourcePoolServiceImpl implements DataSourcePoolService {
         DataSourceManager dataSourceManager = DataSourceManagerFactory.getDataSourceManagerInstance(dataSourceInfo);
         // 先从内存中移除数据源对象
         dataSourceManager.removeDataSource(dataSourceInfo.getDataSourceKey());
+        LOG.info("remove datasource from mem datasource pool");
         Cache dsInfoCache = storeManager.getDataStore(DATASOURCEINFO_POOL_CACHE_NAME);
         // 在从cache中移除数据源信息
         dsInfoCache.evict(dataSourceInfo.getDataSourceKey());
+        LOG.info("remove datasource info from cache:{}",dsInfoCache);
         return true;
     }
 

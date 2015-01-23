@@ -16,13 +16,18 @@
  */
 package com.baidu.rigel.biplatform.tesseract.action;
 
+import java.util.Map;
+
 import javax.annotation.Resource;
 
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
 import com.baidu.rigel.biplatform.ac.util.ResponseResultUtils;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
@@ -50,9 +55,11 @@ public class DataSourceManageAction {
      * @return
      */
     @RequestMapping("/add")
-    public ResponseResult addDataSourceInfo(@RequestParam DataSourceInfo dataSourceInfo) {
-        
+    public ResponseResult addDataSourceInfo(@RequestBody String updateJson) {
         try {
+            Map<String, String> requestParams = MetaQueryAction.parseRequestJson(updateJson);
+            String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
+            DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
             dataSourcePoolService.initDataSourceInfo(dataSourceInfo);
         } catch (DataSourceException e) {
             ResponseResultUtils.getErrorResult(e.getMessage(), 100);
@@ -60,11 +67,11 @@ public class DataSourceManageAction {
         return ResponseResultUtils.getCorrectResult("OK", null);
     }
     
-    @RequestMapping("/destroy")
-    public ResponseResult destroyDataSource(@RequestParam DataSourceInfo dataSourceInfo) {
+    @RequestMapping("/destroy/{dsId}")
+    public ResponseResult destroyDataSource(@PathVariable String dsId) {
         // TODO 改完集群缓存方案后需要修改，需要通知所有节点进行删除
         try {
-            dataSourcePoolService.destroyDataSourceInfo(dataSourceInfo);
+            dataSourcePoolService.destroyDataSourceInfo(dsId);
         } catch (DataSourceException e) {
             ResponseResultUtils.getErrorResult(e.getMessage(), 101);
         }
@@ -73,9 +80,12 @@ public class DataSourceManageAction {
     
     
     @RequestMapping("/update")
-    public ResponseResult updateDataSource(@RequestParam DataSourceInfo dataSourceInfo) {
-        // TODO 改完集群缓存方案后需要修改，需要通知所有节点进行更新
+    public ResponseResult updateDataSource(@RequestBody String updateJson) {
         try {
+            Map<String, String> requestParams = MetaQueryAction.parseRequestJson(updateJson);
+            String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
+            DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
+            // TODO 改完集群缓存方案后需要修改，需要通知所有节点进行更新
             dataSourcePoolService.updateDataSourceInfo(dataSourceInfo);
         } catch (DataSourceException e) {
             ResponseResultUtils.getErrorResult(e.getMessage(), 102);

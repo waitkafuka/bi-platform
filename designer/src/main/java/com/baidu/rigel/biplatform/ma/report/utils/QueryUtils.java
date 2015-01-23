@@ -58,6 +58,7 @@ import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -279,6 +280,11 @@ public final class QueryUtils {
                                 data.setExpand(!queryAction.isChartQuery());
                                 data.setShow(true);
                             } else if (item.getParams().get(Constants.LEVEL).equals(2)) {
+                                data.setExpand(true);
+                                data.setShow(false);
+                            } 
+                            if (MetaNameUtil.isAllMemberUniqueName(data.getUniqueName()) 
+                                    && queryAction.isChartQuery()){
                                 data.setExpand(true);
                                 data.setShow(false);
                             }

@@ -337,6 +337,7 @@ public class QueryDataResource extends BaseResource {
         try {
             if (!StringUtils.isEmpty(reportPreview) && Boolean.valueOf(reportPreview)) {
                 model = DeepcopyUtils.deepCopy(reportModelCacheManager.getReportModel(reportId));
+                model.setPersStatus(false);
                     // 这里需要重新生成session id 并且放到cookie中
                     // 这里需要将此处逻辑抽象到工具类中
 //                    String sessionId = UuidGeneratorUtils.generate();
@@ -351,9 +352,9 @@ public class QueryDataResource extends BaseResource {
 //                    runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
             }
             runtimeModel = new ReportRuntimeModel(reportId);
-            if (model == null) {
-                throw new RuntimeException("未加载到必须的报表模型");
-            }
+//            if (model == null) {
+//                throw new RuntimeException("未加载到必须的报表模型");
+//            }
             runtimeModel.init(model, true);
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
@@ -381,7 +382,7 @@ public class QueryDataResource extends BaseResource {
                 QueryUtils.resetContextParam(request, model);
         runtimeModel.getContext().getParams().putAll(tmp);;
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
-        StringBuilder builder = buildVMString(reportId, response, model);
+        StringBuilder builder = buildVMString(reportId, request, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
         return builder.toString();
     }
@@ -392,7 +393,7 @@ public class QueryDataResource extends BaseResource {
      * @param model
      * @return StringBuilder
      */
-    private StringBuilder buildVMString(String reportId,
+    private StringBuilder buildVMString(String reportId, HttpServletRequest request,
             HttpServletResponse response, ReportDesignModel model) {
         // TODO 临时方案，以后前端做
         String vm = model.getVmContent();
@@ -402,7 +403,7 @@ public class QueryDataResource extends BaseResource {
                 + "                {" + "\r\n" + "                    externalParam: {" + "\r\n"
                 + "                    'reportId':'"
                 + reportId
-                + "','phase':'dev','token':'tieba'},"
+                + "','phase':'dev'},"
                 + "\r\n"
                 + "                    globalType: 'PRODUCT',"
                 + "\r\n"
@@ -433,12 +434,12 @@ public class QueryDataResource extends BaseResource {
         builder.append("<html>");
         builder.append("<head>");
         builder.append("<meta content='text/html' 'charset=UTF-8'>");
-        builder.append("<link rel='stylesheet' href='/silkroad/asset/css/-di-product-min.css'/>");
+        builder.append("<link rel='stylesheet' href='/silkroad/asset/di/css/-di-product-min.css'/>");
         builder.append("</head>");
         builder.append("<body>");
         builder.append(vm);
         
-        builder.append("<script src='/silkroad/asset/-di-product-min.js'>");
+        builder.append("<script src='/silkroad/asset/di/-di-product-min.js'>");
         builder.append("</script>");
         builder.append(js);
         builder.append("</body>");
@@ -689,11 +690,14 @@ public class QueryDataResource extends BaseResource {
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         
         try {
-            model = getDesignModelFromRuntimeModel(reportId);
-//            if (!model.isPersStatus()) {
-//                model = reportModelCacheManager.getReportModel(reportId);
-//                runTimeModel.init(model, true, true);
-//            }
+            Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
+            Object preview = runTimeModel.getContext().get("reportPreview");
+            if ((isEditor != null && isEditor.toString().equals("true")) 
+                    || (preview != null && preview.toString().equals("true"))) {
+                model = reportModelCacheManager.getReportModel(reportId);
+            } else {
+                model = getDesignModelFromRuntimeModel(reportId);
+            }
                     //reportModelCacheManager.getReportModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
