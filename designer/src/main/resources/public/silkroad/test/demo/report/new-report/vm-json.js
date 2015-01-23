@@ -828,6 +828,7 @@ define(function () {
         // 表格vm和json
         table: {
             html: [
+                '<div style="width: 1500px">',
                 '<div class="di-o_o-block table-block" data-o_o-di="snpt1.cpnt-table1">',
                 '<div class="di-o_o-line">',
                 '<div class="di-o_o-item" data-o_o-di="snpt1.vu-table1-download1"></div>',
@@ -842,6 +843,7 @@ define(function () {
                 '<div class="di-table-prompt">',
                 '<div class="di-table-count" data-o_o-di="snpt1.vu-table1-count1">',
                 '符合查询条件的数据只显示<span class="di-table-count-num">#{currRecordCount}</span>条。',
+                '</div>',
                 '</div>',
                 '</div>',
                 '</div>',
