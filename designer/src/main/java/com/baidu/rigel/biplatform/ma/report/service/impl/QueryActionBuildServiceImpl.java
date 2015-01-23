@@ -334,13 +334,18 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 oriCube.getDimensions().values().forEach(dim -> {
                     if (dim.getId().equals(key)) {
                         Item item = new Item();
-	                    item.setAreaId(areaId);
-	                    item.setCubeId(cubeId);
-	                    item.setId(dim.getId());
-	                    item.setOlapElementId(dim.getId());
-	                    item.setPositionType(PositionType.S);
-	                    item.setSchemaId(schema.getId());
-	                    targetLogicModel.addSlice(item);
+                        if (targetLogicModel.getItemByOlapElementId(key) != null) {
+                            item = targetLogicModel.getItemByOlapElementId(key) ;
+                        }
+                        item.setAreaId(areaId);
+                        item.setCubeId(cubeId);
+                        item.setId(dim.getId());
+                        item.setOlapElementId(dim.getId());
+                        if (item.getPositionType() == null) {
+                            item.setPositionType(PositionType.S);
+                        }
+                        item.setSchemaId(schema.getId());
+                        targetLogicModel.addSlice(item);
                     }
                 });
             }
