@@ -1,29 +1,33 @@
 /**
  * Table
  */
-.ui-table {
-    border-top: 3px solid #2070BB;
-}
+/*.ui-table {*/
+    /*border-top: 3px solid #2070BB;*/
+/*}*/
 .ui-table table {
     table-layout: fixed;
 }
 .ui-table-head {
-    border: 1px solid #E6E6E6;
+    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #CCC;
     height: 30px;
 }
 .ui-table-locked-head {
-    border: 1px solid #E6E6E6;
+    border: 1px solid #CCC;
     height: 30px;
     overflow: hidden;
 }
-.ui-table-layout, 
+.ui-table-layout {
+    border-right: 1px solid #CCC;
+}
 .ui-table-locked-layout {
     border-left: 1px solid #CCC;
     border-right: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
 }
 .ui-table-cell {
     background: #FFF;
-    border-right: 1px solid #CCC;
     border-bottom: 1px solid #CCC;
     height: 30px;
     line-height: 30px;
@@ -43,10 +47,7 @@
 }
 .ui-table-hcell, 
 .ui-table-rowhcell {
-    background: #F6F6F6;
-    border-right: 1px solid #E6E6E6;
-    border-bottom: 1px solid #E6E6E6;
-    color: #3C78A2;
+    color: #000;
     height: 30px;
     line-height: 30px;
     padding: 0 9px;
@@ -97,13 +98,14 @@
 }
 .ui-table-row {
     cursor: pointer;
+    background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
     background: #FCFCC8;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
-    background: #FFFF99;
+    background: #FFF;
 }
 /*.ui-table-row {
     cursor: pointer;
