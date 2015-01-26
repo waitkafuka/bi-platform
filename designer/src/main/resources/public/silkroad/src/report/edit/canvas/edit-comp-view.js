@@ -939,9 +939,7 @@ define([
                 var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
-
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
+                this.model.canvasModel.saveJsonVm();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
@@ -955,8 +953,6 @@ define([
              * @public
              */
             afterAddTableCompAxis: function (option){
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
             },
 
             /**
@@ -988,7 +984,6 @@ define([
                 json.dateKey[letter] = id;
                 json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
                 this.model.canvasModel.saveJsonVm();
-                this.model.canvasModel.saveReport();
             },
 
             /**

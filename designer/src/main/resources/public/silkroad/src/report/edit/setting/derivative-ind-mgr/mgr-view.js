@@ -135,50 +135,50 @@ define(
                                         $(this).hide();
                                     }
                                     else if ($(this).attr('class') == 'callback-title') {
-                                        var callname = '由数字,字母,下划线组成并以数字开头';
-                                        var callcaption = '由数字,字母,汉字组成';
-                                        var callurl = '回调地址';
-                                        var calltimeout = '由整数组成';
-                                        var $ele = $(this).siblings('.callback-form').find('.call-text');
-                                        var $caption = $(this).siblings('.callback-form').find('.call-caption');
-                                        var showname = $caption.val();
-                                        var num = 0;
-                                        $ele.each(function () {
-                                            if ($(this).val() == '') {
-                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
-                                            }
-                                            else if ($(this).attr('placeholder') == callname && !((/^[a-zA-Z][a-zA-Z0-9_]*$/).test($(this).val()))) {
-                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
-                                            }
-                                            else if ($(this).attr('placeholder') == callcaption && ((/[^a-zA-Z0-9\u4E00-\u9FA5]/).test($(this).val()))) {
-                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
-                                            }
-                                            else if ($(this).attr('placeholder') == calltimeout && ((/[^0-9]/).test($(this).val()))) {
-                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
-                                            }
-                                        });
-
-                                        $ele.each(function () {
-                                            if ($(this).val() == '' || $(this).css('color') == 'rgb(255, 0, 0)') {
-                                                $that.siblings('.callback-title').children().eq(1).css('color', 'rgb(255, 0, 0)');
-                                                $that.siblings('.callback-title').children().eq(1).text('(数据格式存在错误)');
-                                                num = 1;
-                                            }
-                                            else {
-                                                if (num == 0) {
-                                                    $that.siblings('.callback-title').children().eq(1).text('');
-                                                }
-
-                                            }
-                                        });
-                                        if ($caption.css('color') == 'rgb(255, 0, 0)') {
-                                            $that.siblings('.callback-title').children().eq(0).css('color', 'rgb(255, 0, 0)');
-                                            $that.siblings('.callback-title').children().eq(0).text('显示名称错误');
-                                        }
-                                        else {
-                                            $that.siblings('.callback-title').children().eq(0).css('color', 'rgb(0, 0, 0)');
-                                            $that.siblings('.callback-title').children().eq(0).text(showname);
-                                        }
+//                                        var callname = '由数字,字母,下划线组成并以数字开头';
+//                                        var callcaption = '由数字,字母,汉字组成';
+//                                        var callurl = '回调地址';
+//                                        var calltimeout = '由整数组成';
+//                                        var $ele = $(this).siblings('.callback-form').find('.call-text');
+//                                        var $caption = $(this).siblings('.callback-form').find('.call-caption');
+//                                        var showname = $caption.val();
+//                                        var num = 0;
+//                                        $ele.each(function () {
+//                                            if ($(this).val() == '') {
+//                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
+//                                            }
+//                                            else if ($(this).attr('placeholder') == callname && !((/^[a-zA-Z][a-zA-Z0-9_]*$/).test($(this).val()))) {
+//                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
+//                                            }
+//                                            else if ($(this).attr('placeholder') == callcaption && ((/[^a-zA-Z0-9\u4E00-\u9FA5]/).test($(this).val()))) {
+//                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
+//                                            }
+//                                            else if ($(this).attr('placeholder') == calltimeout && ((/[^0-9]/).test($(this).val()))) {
+//                                                $(this).css('color', 'rgb(255, 0, 0)').val('格式错误请重新输入');
+//                                            }
+//                                        });
+//
+//                                        $ele.each(function () {
+//                                            if ($(this).val() == '' || $(this).css('color') == 'rgb(255, 0, 0)') {
+//                                                $that.siblings('.callback-title').children().eq(1).css('color', 'rgb(255, 0, 0)');
+//                                                $that.siblings('.callback-title').children().eq(1).text('(数据格式存在错误)');
+//                                                num = 1;
+//                                            }
+//                                            else {
+//                                                if (num == 0) {
+//                                                    $that.siblings('.callback-title').children().eq(1).text('');
+//                                                }
+//
+//                                            }
+//                                        });
+//                                        if ($caption.css('color') == 'rgb(255, 0, 0)') {
+//                                            $that.siblings('.callback-title').children().eq(0).css('color', 'rgb(255, 0, 0)');
+//                                            $that.siblings('.callback-title').children().eq(0).text('显示名称错误');
+//                                        }
+//                                        else {
+//                                            $that.siblings('.callback-title').children().eq(0).css('color', 'rgb(0, 0, 0)');
+//                                            $that.siblings('.callback-title').children().eq(0).text(showname);
+//                                        }
                                         $(this).show();
                                     }
                                 });
@@ -200,10 +200,11 @@ define(
                     buttons: {
                         "提交": function () {
                             var $dialogDom = $(this);
-                            var callback = that._submitMethodTypeValue($dialogDom, function () {
-                                if (callback == 0) {
+                            //var callback =
+                            that._submitMethodTypeValue($dialogDom, function () {
+                                //if (callback == 0) {
                                     $dialogDom.dialog('close');
-                                }
+                                //}
                             });
                         },
                         '取消': function () {
@@ -246,14 +247,14 @@ define(
             result.extendInds.rr = this._getSrRrData(1, $dom);
             result.extendInds.sr = this._getSrRrData(2, $dom);
             // callback回调维度前端判定
-            var callBackData = this._getCallBackData($dom);
-            if (callBackData != 0) {
-                result.callback = this._getCallBackData($dom);
-                that.model.submitMethodTypeValue(result, closeDialog);
-            }
-            else {
-                return 0;
-            }
+//            var callBackData = this._getCallBackData($dom);
+//            if (callBackData != 0) {
+            result.callback = this._getCallBackData($dom);
+            that.model.submitMethodTypeValue(result, closeDialog);
+//            }
+//            else {
+//                return 0;
+//            }
         },
         /**
          * 新增一行计算列
@@ -374,56 +375,56 @@ define(
             var calltimeout = '由整数组成';
             var data = [];
             var inputnum = 1;
+//            $dom.find('.j-callback-index-all').eq(0).find('.callback-form').each(function () {
+//                var $inputs = $(this).find('.callback-text').eq(0);
+//                var $infor = $inputs.find('input');
+//                // 判断当前callback表单是否符合规范
+//                $infor.each(function () {
+//                    if ($(this).val() == '' ) {
+//                        $(this).css('color', 'red').val('输入不能为空');
+//                        if ($(this).attr('placeholder') == callcaption) {
+//                            $(this).parent().parent().siblings('.callback-title').find('div').css('color', 'red').text('显示名称格式错误');
+//                        }
+//                    }
+//                    else if ($(this).attr('placeholder') == callname && !((/^[a-zA-Z][a-zA-Z0-9_]*$/).test($(this).val()))) {
+//                        $(this).css('color', 'red').val('格式错误请重新输入');
+//                    }
+//                    else if ($(this).attr('placeholder') == callcaption && ((/[^a-zA-Z0-9\u4E00-\u9FA5]/).test($(this).val()))) {
+//                        $(this).css('color', 'red').val('格式错误请重新输入');
+//                    }
+//                    else if ($(this).attr('placeholder') == calltimeout && ((/[^0-9]/).test($(this).val()))) {
+//                        $(this).css('color', 'red').val('格式错误请重新输入');
+//                    }
+//                });
+//
+//                for (var i = 0; i <= $infor.length; i ++) {
+//                    if ($($infor[i]).css('color') == 'rgb(255, 0, 0)') {
+//                        inputnum = 0;
+//                        break;
+//                    }
+//                }
+//            });
+//
+//            if (inputnum == 0) {
+//                return 0;
+//            }
+//            else {
             $dom.find('.j-callback-index-all').eq(0).find('.callback-form').each(function () {
                 var $inputs = $(this).find('.callback-text').eq(0);
-                var $infor = $inputs.find('input');
-                // 判断当前callback表单是否符合规范
-                $infor.each(function () {
-                    if ($(this).val() == '' ) {
-                        $(this).css('color', 'red').val('输入不能为空');
-                        if ($(this).attr('placeholder') == callcaption) {
-                            $(this).parent().parent().siblings('.callback-title').find('div').css('color', 'red').text('显示名称格式错误');
-                        }
-                    }
-                    else if ($(this).attr('placeholder') == callname && !((/^[a-zA-Z][a-zA-Z0-9_]*$/).test($(this).val()))) {
-                        $(this).css('color', 'red').val('格式错误请重新输入');
-                    }
-                    else if ($(this).attr('placeholder') == callcaption && ((/[^a-zA-Z0-9\u4E00-\u9FA5]/).test($(this).val()))) {
-                        $(this).css('color', 'red').val('格式错误请重新输入');
-                    }
-                    else if ($(this).attr('placeholder') == calltimeout && ((/[^0-9]/).test($(this).val()))) {
-                        $(this).css('color', 'red').val('格式错误请重新输入');
-                    }
-                });
-
-                for (var i = 0; i <= $infor.length; i ++) {
-                    if ($($infor[i]).css('color') == 'rgb(255, 0, 0)') {
-                        inputnum = 0;
-                        break;
-                    }
-                }
+                // 获取当前callback维度表单数据
+                var item = {
+                    'id': $(this).attr('id') || '',
+                    'name': $inputs.find('.call-name').eq(0).val() || '',
+                    'caption': $inputs.find('.call-caption').eq(0).val() || '',
+                    'url': $inputs.find('.call-url').eq(0).val() || '',
+                    'properties': {}
+                };
+                var pro = item.properties;
+                pro.timeOut = $inputs.find('.call-timeout').val() || '';
+                data.push(item);
             });
-
-            if (inputnum == 0) {
-                return 0;
-            }
-            else {
-                $dom.find('.j-callback-index-all').eq(0).find('.callback-form').each(function () {
-                    var $inputs = $(this).find('.callback-text').eq(0);
-                    // 获取当前callback维度表单数据
-                    var item = {
-                        'id': $(this).attr('id') || '',
-                        'name': $inputs.find('.call-name').eq(0).val() || '',
-                        'caption': $inputs.find('.call-caption').eq(0).val() || '',
-                        'url': $inputs.find('.call-url').eq(0).val() || '',
-                        'properties': {}
-                    };
-                    var pro = item.properties;
-                    pro.timeOut = $inputs.find('.call-timeout').val() || '';
-                    data.push(item);
-                });
-                return data;
-            }
+            return data;
+            //}
 
         },
         /**
