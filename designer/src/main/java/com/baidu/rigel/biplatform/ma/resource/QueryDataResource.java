@@ -793,7 +793,7 @@ public class QueryDataResource extends BaseResource {
 //            String[] dims = new String[0];
             if (table.getDataSourceColumnBased().size() == 0) {
                 ResponseResult rs = new ResponseResult();
-                rs.setStatus(1);
+                rs.setStatus(0);
                 rs.setStatusInfo("未查到任何数据");
                 return rs;
             } else {

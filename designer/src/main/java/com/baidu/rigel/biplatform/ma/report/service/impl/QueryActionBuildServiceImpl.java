@@ -402,6 +402,15 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         topSet.getTopType().name(), topSet.getRecordSize());
             }
         }
+        ExtendArea area = reportModel.getExtendById(areaId);
+        if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
+            if (filterBlank == null) {
+                action.setFilterBlank(false);
+            } else {
+                action.setFilterBlank(Boolean.valueOf(filterBlank.toString()));
+            }
+        }
         action.setMeasureOrderDesc(orderDesc);
         return action;
     }

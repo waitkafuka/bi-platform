@@ -79,6 +79,8 @@ public class QueryAction implements Serializable {
     private boolean chartQuery;
     
     private MeasureOrderDesc measureOrderDesc;
+
+    private boolean filterBlank = false;
     
     
     /**
@@ -296,4 +298,21 @@ public class QueryAction implements Serializable {
         }
             
     }
+
+    /**
+     * 
+     * @param filterBlank
+     */
+    public void setFilterBlank(boolean filterBlank) {
+        this.filterBlank  = filterBlank;
+    }
+
+    /**
+     * @return the filterBlank
+     */
+    public boolean isFilterBlank() {
+        return filterBlank;
+    }
+    
+    
 }
