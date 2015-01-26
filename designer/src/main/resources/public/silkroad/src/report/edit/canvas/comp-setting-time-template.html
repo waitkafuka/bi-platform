@@ -13,5 +13,14 @@
     <div class="data-axis-line data-axis-line-48 data-btn-line">
         <span class="letter">设置:</span>
         <span class="icon-letter icon-letter-btn j-set-default-time">默认选中时间</span>
+        <span>时间选择类型：</span>
+        <select class="select-calendar-type" data-comp-id="{{compId}}" data-comp-type="TIME_COMP">
+            <option value="CAL_SELECT" {{if $data.compMold && $data.compMold==="CAL_SELECT"}} selected="selected"{{/if}}>
+            时间单选
+            </option>
+            <option value="DOUBLE_CAL_SELECT" {{if $data.compMold && $data.compMold==="DOUBLE_CAL_SELECT"}} selected="selected"{{/if}}>
+            时间双选
+            </option>
+        </select>
     </div>
 </div>

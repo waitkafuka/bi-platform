@@ -10,7 +10,7 @@
 $namespace('di.shared.ui');
 
 (function() {
-    
+
     //------------------------------------------
     // 引用 
     //------------------------------------------
@@ -30,7 +30,7 @@ $namespace('di.shared.ui');
 
     /**
      * DI 表单视图组件
-     * 
+     *
      * @class
      * @extends xui.XView
      * @param {Object} options
@@ -40,7 +40,7 @@ $namespace('di.shared.ui');
      * @param {(Object|boolean)=} options.confirmBtn 是否有确认按钮
      *      如果为Object则内容为，{ text: '按钮文字' }
      */
-    var DI_FORM = $namespace().DIForm = 
+    var DI_FORM = $namespace().DIForm =
         inheritsObject(INTERACT_ENTITY);
     var DI_FORM_CLASS = DI_FORM.prototype;
 
@@ -81,6 +81,10 @@ $namespace('di.shared.ui');
             this._aInput.push(o);
             // 使用json格式传输数据
             o.$di('setOpt', 'cfgOpt', 'paramMode', 'JSON');
+            // 在vui中为clzKey为RANGE_CALENDAR的注册事件
+            if (o.$di('getDef').clzKey === 'RANGE_CALENDAR'){
+                o.attach('calChangeDate', this.$handleChange, this);
+            }
         }
 
         // 创建“确认”控件
@@ -177,12 +181,12 @@ $namespace('di.shared.ui');
 
         // 视图禁用
         /*
-        var diEvent = this.$di('getEvent');
-        var vd = diEvent.viewDisable;
-        vd && this.getModel().attachOnce(
-            ['sync.preprocess.DATA',  vd.disable],
-            ['sync.complete.DATA', vd.enable]
-        );*/
+         var diEvent = this.$di('getEvent');
+         var vd = diEvent.viewDisable;
+         vd && this.getModel().attachOnce(
+         ['sync.preprocess.DATA',  vd.disable],
+         ['sync.complete.DATA', vd.enable]
+         );*/
 
         // 初始化参数
         var paramList = [];
@@ -225,7 +229,7 @@ $namespace('di.shared.ui');
 
     /**
      * 渲染主体
-     * 
+     *
      * @protected
      */
     DI_FORM_CLASS.$renderMain = function(data, ejsonObj, options) {
@@ -235,7 +239,7 @@ $namespace('di.shared.ui');
         // 设置数据并渲染
         for (var i = 0, input; i < inputs.length; i++ ) {
             input = inputs[i];
-        	var curData = buildData(ejsonObj.data, input);
+            var curData = buildData(ejsonObj.data, input);
             input.$di(
                 'setData',
                 curData,
@@ -249,10 +253,10 @@ $namespace('di.shared.ui');
         );
 
     };
-    
+
     /**
      * 渲染同步
-     * 
+     *
      * @protected
      */
     DI_FORM_CLASS.$renderAsync = function(data, ejsonObj, options) {
@@ -283,7 +287,7 @@ $namespace('di.shared.ui');
          */
         this.$di('dispatchEvent', this.$diEvent('rendered', options));
     };
-    
+
     /**
      * 窗口改变后重新计算大小
      *
@@ -303,7 +307,7 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('enable');
         DI_FORM.superClass.enable.call(this);
-    };    
+    };
 
     /**
      * 禁用操作
@@ -316,11 +320,11 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('disable');
         DI_FORM.superClass.disable.call(this);
-    };    
+    };
 
     /**
      * 初始数据加载完成
-     * 
+     *
      * @protected
      */
     DI_FORM_CLASS.$handleDataLoaded = function(data, ejsonObj, options) {
@@ -330,7 +334,7 @@ $namespace('di.shared.ui');
          * @event
          */
         this.$di(
-            'dispatchEvent', 
+            'dispatchEvent',
             this.$diEvent('dataloaded', options)
         );
     };
@@ -375,7 +379,7 @@ $namespace('di.shared.ui');
 
     /**
      * 获取数据错误处理
-     * 
+     *
      * @protected
      */
     DI_FORM_CLASS.$handleDataError = function(status, ejsonObj, options) {
@@ -399,7 +403,7 @@ $namespace('di.shared.ui');
 
     /**
      * 获取async数据错误处理
-     * 
+     *
      * @protected
      */
     DI_FORM_CLASS.$handleAsyncError = function() {
@@ -472,6 +476,11 @@ $namespace('di.shared.ui');
             if (clzKey === 'X_CALENDAR') {
                 dateName = input.$di('getDef').name;
                 dateKey = input.$di('getDef').dateKey;
+            }
+            else if (clzKey === 'RANGE_CALENDAR') {
+                dateKey = input.$di('getDef').dateKey.D;
+                var dataValue = input.$di('getValue');
+                options[dateKey] = dataValue;
             }
             else {
                 name = input.$di('getDef').name;

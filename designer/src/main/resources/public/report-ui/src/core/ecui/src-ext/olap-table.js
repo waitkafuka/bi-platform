@@ -646,6 +646,7 @@
                 useBag ? ('<div class="' + type + '-hcell-bag">') : '', 
                     innerStr, 
                 useBag ? '</div>' : '',
+            '<span>123</span>',
             '</th>'
         );
     }; 
