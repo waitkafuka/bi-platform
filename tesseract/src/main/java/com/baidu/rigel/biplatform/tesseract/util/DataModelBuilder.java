@@ -345,7 +345,7 @@ public class DataModelBuilder {
     public static List<HeadField> buildAxisHeadFields(List<MemberNodeTree> treeNodes, List<MiniCubeMeasure> measures) {
         List<HeadField> result = Lists.newArrayList();
         for (MemberNodeTree nodeTree : treeNodes) {
-            List<HeadField> curHeadFields = buildFieldsByMemberNodeTree(nodeTree, result.isEmpty());
+            List<HeadField> curHeadFields = buildFieldsByMemberNodeTree(nodeTree, result.isEmpty(), null);
             if (result.isEmpty()) {
                 result.addAll(curHeadFields);
             } else {
@@ -410,22 +410,23 @@ public class DataModelBuilder {
         return DeepcopyUtils.deepCopy(nodes);
     }
 
-    public static List<HeadField> buildFieldsByMemberNodeTree(MemberNodeTree nodeTree, boolean isFirstNode) {
+    public static List<HeadField> buildFieldsByMemberNodeTree(MemberNodeTree nodeTree, boolean isFirstNode, HeadField parent) {
         List<HeadField> result = Lists.newArrayList();
-        HeadField parent = null;
+        HeadField node = null;
         if (StringUtils.isNotBlank(nodeTree.getName())) {
-            parent = buildField(nodeTree, isFirstNode);
+            node = buildField(nodeTree, isFirstNode, parent);
         }
         List<HeadField> children = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(nodeTree.getChildren())) {
-            nodeTree.getChildren().forEach((node) -> {
-                children.addAll(buildFieldsByMemberNodeTree(node, isFirstNode));
+            final HeadField parentField = node;
+            nodeTree.getChildren().forEach((field) -> {
+                children.addAll(buildFieldsByMemberNodeTree(field, isFirstNode, parentField));
             });
         }
 
-        if (parent != null) {
-            parent.setChildren(children);
-            result.add(parent);
+        if (node != null) {
+            node.setChildren(children);
+            result.add(node);
             return result;
         } else {
             return children;
@@ -438,7 +439,7 @@ public class DataModelBuilder {
      * @param node 节点
      * @return DataModel的头节点
      */
-    private static HeadField buildField(MemberNodeTree node, boolean isParent) {
+    private static HeadField buildField(MemberNodeTree node, boolean isParent, HeadField parent) {
         HeadField headField = new HeadField(null);
         headField.setCaption(node.getCaption());
         headField.setValue(node.getUniqueName());
@@ -446,6 +447,7 @@ public class DataModelBuilder {
             headField.getNodeUniqueName();
         }
         headField.setHasChildren(node.isHasChildren());
+        headField.setParent(parent);
         return headField;
     }
 
