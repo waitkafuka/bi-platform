@@ -149,6 +149,7 @@ public final class QueryUtils {
         }
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
+        questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
     }
     

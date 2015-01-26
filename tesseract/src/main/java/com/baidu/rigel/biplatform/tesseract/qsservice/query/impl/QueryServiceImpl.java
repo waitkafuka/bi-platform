@@ -185,6 +185,9 @@ public class QueryServiceImpl implements QueryService {
         if (result != null) {
             result = sortAndTrunc(result, questionModel.getSortRecord());
         }
+        if (questionModel.isFilterBlank()) {
+            DataModelUtils.filterBlankRow(result);
+        }
         return result;
 
     }
