@@ -774,6 +774,8 @@
                 par.$flushThis();
             }
 
+            this._bLayerShow = false;
+
             par && triggerEvent(par, 'layerhide');
 
             if (this._bLayerChanged) {
@@ -783,8 +785,6 @@
                 this._bLayerChanged = false;
             }
         }
-
-        this._bLayerShow = false;
 
         UI_X_CALENDAR_CLASS.Layer.superClass.hide.apply(this, arguments);
     };

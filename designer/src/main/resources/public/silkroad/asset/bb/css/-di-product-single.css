@@ -279,7 +279,7 @@
     font-size: 12px;
 }
 .ui-select-button {
-    background: url(img/icon2.png) -16px -64px no-repeat;
+    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
     padding: 0px;
     margin: 0px;
     border: 0px;
@@ -293,11 +293,13 @@
     background-position: 4px -64px;
 }
 .ui-select-options {
-    border: 1px solid #A8ADB6;
+    border-left: 1px solid #A8ADB6;
+    border-right: 1px solid #A8ADB6;
     background: #FFF;
     font-size: 12px;
 }
 .ui-select-item {
+    border-bottom: 1px solid #A8ADB6;
     white-space: nowrap;
     height: 20px;
     line-height: 20px;
@@ -319,7 +321,7 @@
     height: 20px;
     display: inline-block;
     vertical-align: middle;
-    border: 1px solid #A8ADB6;
+    border: 1px solid #CCC;
     background: #FFF;
     width: 95%;
     *display: inline;
@@ -334,7 +336,7 @@
     cursor: default;
 }
 .ui-multi-select-button {
-    background: url(img/icon2.png) -16px -64px no-repeat;
+    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
     padding: 0px;
     margin: 0px;
     border: 0px;
@@ -348,7 +350,8 @@
     background-position: 4px -64px;
 }
 .ui-multi-select-options {
-    border: 1px solid #A8ADB6;
+    border-left: 1px solid #CCC;
+    border-right: 1px solid #CCC;
     background: #FFF;
 }
 .ui-multi-select-item {
@@ -371,7 +374,7 @@
     margin: 0 3px;
     width: 13px;
     height: 13px;
-    background: url(img/ecui.png) 0 0 no-repeat;
+    background: url(img/ecui-1.png) 0 0 no-repeat;
     overflow: hidden;
 }
 .ui-multi-select-item-hover .ui-multi-select-item-icon {
@@ -387,57 +390,9 @@
 .ui-multi-select-item-focus {
     background: #E4EAFA;
 }
-/* 明亮皮肤多选下拉按钮 */
-.lightblue .ui-multi-select-button {
-    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
-    border-radius: 0px;
-    -webkit-border-radius: 0px;
-    -o-border-radius: 0px;
-    -moz-border-radius: 0px;
-    -ms-border-radius: 0px;
-}
-/* 明亮皮肤多选框按钮 */
-.lightblue .ui-multi-select-item-icon {
-    position: absolute;
-    display: inline-block;
-    top: 2px;
-    left: 3px;
-    margin: 0 3px;
-    width: 13px;
-    height: 13px;
-    background: url(img/ecui-1.png) 0 0 no-repeat;
-    overflow: hidden;
-}
-/* 明亮皮肤多选下啦框按钮 */
-.lightblue .ui-multi-select {
-    height: 20px;
-    display: inline-block;
-    vertical-align: middle;
-    border: 1px solid #CCC;
-    background: #FFF;
-    width: 95%;
-    *display: inline;
-    zoom: 1;
-}
-/* 明亮皮肤单选下啦框按钮 */
-.lightblue .ui-select-button {
-    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
-    border-radius: 0px;
-    -webkit-border-radius: 0px;
-    -o-border-radius: 0px;
-    -moz-border-radius: 0px;
-    -ms-border-radius: 0px;
-}
-/* 明亮皮肤单选下拉边框按钮 */
-.lightblue .ui-multi-select-options {
-    border: 1px solid #CCC;
-    background: #FFF;
+
+.ui-multi-select-options .ui-item{
+    border-bottom: 1px solid #CCC;
 }
 /**
  * 左侧菜单
@@ -2016,29 +1971,33 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 /**
  * Table
  */
-.ui-table {
-    border-top: 3px solid #2070BB;
-}
+/*.ui-table {*/
+    /*border-top: 3px solid #2070BB;*/
+/*}*/
 .ui-table table {
     table-layout: fixed;
 }
 .ui-table-head {
-    border: 1px solid #E6E6E6;
+    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #CCC;
     height: 30px;
 }
 .ui-table-locked-head {
-    border: 1px solid #E6E6E6;
+    border: 1px solid #CCC;
     height: 30px;
     overflow: hidden;
 }
-.ui-table-layout, 
+.ui-table-layout {
+    border-right: 1px solid #CCC;
+}
 .ui-table-locked-layout {
     border-left: 1px solid #CCC;
     border-right: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
 }
 .ui-table-cell {
     background: #FFF;
-    border-right: 1px solid #CCC;
     border-bottom: 1px solid #CCC;
     height: 30px;
     line-height: 30px;
@@ -2058,10 +2017,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-table-hcell, 
 .ui-table-rowhcell {
-    background: #F6F6F6;
-    border-right: 1px solid #E6E6E6;
-    border-bottom: 1px solid #E6E6E6;
-    color: #3C78A2;
+    color: #000;
     height: 30px;
     line-height: 30px;
     padding: 0 9px;
@@ -2112,13 +2068,14 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-table-row {
     cursor: pointer;
+    background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
     background: #FCFCC8;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
-    background: #FFFF99;
+    background: #FFF;
 }
 /*.ui-table-row {
     cursor: pointer;
@@ -3186,6 +3143,7 @@ li {
     padding: 10px;
     font-size: 12px;
     min-height: 200px;
+    background: #F0F4F7;
 }
 .di-o_o-block {
     position: relative;
@@ -3295,7 +3253,18 @@ li {
     overflow: hidden;
     height: 0px;
 }
-
+.report .shell-component {
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid #F0F4F7;
+    background: #F0F4F7;
+}
+.report .shell-component:hover {
+    border: 1px solid #00AFF2;
+}
+.canvas .report {
+    background: #F0F4F7;
+}
 /**
  * di-ui.css
  * Copyright 2012 Baidu Inc. All rights reserved.
@@ -3412,6 +3381,233 @@ div.di-dim-level-find-msg span{
 }
 
 
+/** Base container **/
+.kalendae {
+	display: inline-block;zoom:1.3;*display:inline;
+	background: #fbfff9;
+	padding:10px;
+	margin:5px;
+	border-radius:5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	font-size:11px;
+	font-family:'Helvetica Neue', 'Helvetica';
+	cursor:default;
+	position:relative;
+}
+
+/** Popup Container for Kalendae.Input **/
+.kalendae.k-floating {
+	position:absolute;
+	top:0;
+	left:0;
+	z-index:100000;
+	margin:0;
+	box-shadow:0 1px 3px rgba(0,0,0,0.75);
+	-moz-box-shadow:0 1px 3px rgba(0,0,0,0.75);
+	-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.75);
+}
+
+/** Kalendae.Input's popup close button **/
+.kalendae .k-btn-close {
+	position:absolute;
+	top:-8px;
+	right:-8px;
+	width:16px;
+	height:16px;
+	background:white;
+	border:2px solid #ccc;
+	color:#999;
+	line-height:17px;
+	text-align:center;
+	font-size:13px;
+	border-radius:10px;
+	box-shadow:0 1px 3px rgba(0,0,0,0.75);
+	cursor:pointer;
+}
+.kalendae .k-btn-close:after {content:"\2716";}
+.kalendae .k-btn-close:hover {
+	color:#7EA0E2;
+	background:white;
+	border-color:#7EA0E2;
+}
+
+/** Month Container **/
+.kalendae .k-calendar {display: inline-block;zoom:1;*display:inline;width:155px;vertical-align:top;}
+
+/** Month Separator **/
+.kalendae .k-separator {display: inline-block;zoom:1;*display:inline;width:2px;vertical-align:top;background:#ddd;height:155px;margin:0px 10px;}
+
+/** Month Title Row **/
+.kalendae .k-title {text-align:center;white-space:nowrap;position:relative;height:18px;}
+.kalendae .k-caption {font-size:12px;line-height:18px;}
+
+
+/** Month and Year Buttons **/
+.kalendae .k-btn-previous-month,
+.kalendae .k-btn-next-month,
+.kalendae .k-btn-previous-year,
+.kalendae .k-btn-next-year {width:16px;height:16px;cursor:pointer;position:absolute;top:-3px;color:#777;font-size:26px; line-height: 18px; font-weight: bold; font-family: arial}
+
+.kalendae .k-btn-previous-year {left:0;}
+.kalendae .k-btn-previous-month {left:16px;}
+.kalendae .k-btn-next-month {right:16px;}
+.kalendae .k-btn-next-year {right:0;}
+
+.kalendae .k-btn-previous-month:after {content:"\2039";}
+.kalendae .k-btn-next-month:after {content:"\203A";}
+
+.kalendae .k-btn-previous-year:after {content:"\00AB";}
+.kalendae .k-btn-next-year:after {content:"\00BB";}
+
+.kalendae .k-btn-previous-month:hover,
+.kalendae .k-btn-next-month:hover {color:#7EA0E2;}
+
+.kalendae .k-btn-previous-year:hover,
+.kalendae .k-btn-next-year:hover {color:#6FDF81;}
+
+/** Remove extra buttons when calendar shows multiple months **/
+.kalendae .k-first-month .k-btn-next-month,
+.kalendae .k-middle-month .k-btn-next-month,
+.kalendae .k-middle-month .k-btn-previous-month,
+.kalendae .k-last-month .k-btn-previous-month,
+.kalendae .k-first-month .k-btn-next-year,
+.kalendae .k-middle-month .k-btn-next-year,
+.kalendae .k-middle-month .k-btn-previous-year,
+.kalendae .k-last-month .k-btn-previous-year {display:none;}
+
+/** Force specific width for month container contents **/
+.kalendae .k-title,
+.kalendae .k-header,
+.kalendae .k-days {
+	width:154px;
+	display:block;
+	overflow:hidden;
+}
+
+
+/** Hide unusable buttons **/
+.kalendae.k-disable-next-month-btn .k-btn-next-month,
+.kalendae.k-disable-previous-month-btn .k-btn-previous-month,
+.kalendae.k-disable-next-year-btn .k-btn-next-year,
+.kalendae.k-disable-previous-year-btn .k-btn-previous-year {
+	display:none;
+}
+
+
+/** Week columns and day cells **/
+.kalendae .k-header span,
+.kalendae .k-days span {
+	float:left;
+	margin:1px 1px;
+}
+
+.kalendae .k-header span {
+	text-align:center;
+	font-weight:bold;
+	width:20px;
+	padding:1px 0;
+	color:#666;
+}
+
+.kalendae .k-days span {
+	text-align:right;
+	width:13px;
+	height:1.1em;
+	line-height:1em;
+	padding:2px 3px 2px 2px;
+	border:1px solid transparent;
+	border-radius:3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	color:#999;
+}
+
+/** Today **/
+.kalendae .k-today {
+	text-decoration:underline;
+}
+
+/** Selectable but not selected day  **/
+.kalendae .k-days span.k-active {
+	border-color:#ddd;
+	background-color:#fff;
+	cursor:pointer;
+	color:#333;
+}
+
+/** Selected day, when outside the selectable area **/
+.kalendae .k-days span.k-selected {
+	border-color:#1072A5;
+	color:#1072A5;
+}
+
+/** Selected day, when inside the selectable area **/
+.kalendae .k-days span.k-selected.k-active {
+	background:#7EA0E2;
+	color:white;
+}
+
+/** Days between the start and end points on a range, outside of the selectable area **/
+.kalendae .k-days span.k-range {
+	background:none;
+	border-color:#6DD4FE;
+}
+
+/** Days between the start and end points on a range, inside of the selectable area **/
+.kalendae .k-days span.k-range.k-active {
+	background:#C4D4F1;
+	border-color:#19AEFE;
+	color:#333;
+}
+
+/** Selectable day, hovered **/
+.kalendae .k-days span.k-active:hover {
+	border-color:#666;
+}
+
+/** Days outside of the month view (before the first day of the month, after the last day of the month) **/
+.kalendae .k-days span.k-out-of-month {color:#ddd;}
+
+
+
+/*-------------------------------------IE8 ONLY CODE BELOW THIS LINE--------------------------------------------*/
+
+.kalendae.ie8.k-floating {
+	border:1px solid #ccc;
+}
+
+.kalendae.ie8 .k-btn-close {
+	width:20px;
+	height:20px;
+	border:none;
+	background:url('../img/close.png') no-repeat top left;
+}
+.kalendae.ie8 .k-btn-close:after {display:none;}
+
+.kalendae.ie8 .k-btn-previous-month,
+.kalendae.ie8 .k-btn-next-month,
+.kalendae.ie8 .k-btn-previous-year,
+.kalendae.ie8 .k-btn-next-year {width:16px;height:16px;cursor:pointer;background:#777 url('../img/arrows.png') no-repeat center left;position:absolute;top:0;}
+
+.kalendae.ie8 .k-btn-next-month,
+.kalendae.ie8 .k-btn-next-year {background-position:center right;}
+
+.kalendae.ie8 .k-btn-previous-month:hover,
+.kalendae.ie8 .k-btn-next-month:hover {background-color:#7EA0E2;}
+
+.kalendae.ie8 .k-btn-previous-year,
+.kalendae.ie8 .k-btn-next-year {background-color:#333;}
+
+.kalendae.ie8 .k-btn-previous-year:hover,
+.kalendae.ie8 .k-btn-next-year:hover {background-color:#6FDF81;}
+
+.kalendae.ie8 .k-btn-previous-month:after,
+.kalendae.ie8 .k-btn-next-month:after,
+.kalendae.ie8 .k-btn-previous-year:after,
+.kalendae.ie8 .k-btn-next-year:after {display:none;}
+
+
 /**
  * Meta Condition
  */
@@ -3521,7 +3717,7 @@ div.di-dim-level-find-msg span{
 
 .comp-box {
     width: 100%;
-    height: 90%;
+    height: 60%;
     overflow: auto
 }
 .component-item {
