@@ -81,7 +81,6 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/echarts/echarts-plain-original.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/echarts/echarts-plain-map.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xui-ui/e-chart.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/kalendae.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/ajax.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/dict.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/lang.js" type="text/javascript"><\/script>' );
@@ -102,11 +101,12 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.ui/dim-select-panel.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/olap-meta-dragger.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/olap-meta-select.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/kalendae.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/range-calendar.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rptsave-save.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rptsave-tab.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/simple-radio.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/text-label.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/range-calendar.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.adapter/general-adapter-method.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/common-param-factory.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.model/engine.js" type="text/javascript"><\/script>' );
