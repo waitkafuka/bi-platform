@@ -341,6 +341,12 @@ public class QueryRequestUtil {
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
+        // 这里开始算值都得将count改成sum了
+        queryMeasures.forEach(measure -> {
+            if(measure.getAggregator().equals(Aggregator.COUNT)){
+                measure.setAggregator(Aggregator.SUM);
+            }
+        });
         int dimSize = query.getSelect().getQueryProperties().size();
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
             transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
@@ -392,11 +398,6 @@ public class QueryRequestUtil {
             return new SearchResultSet(AggregateCompute.distinct(transList));
         }
         
-        queryMeasures.forEach(measure -> {
-           if(measure.getAggregator().equals(Aggregator.COUNT)){
-               measure.setAggregator(Aggregator.SUM);
-           }
-        });
         
         
         if(MapUtils.isNotEmpty(allDimVal)){

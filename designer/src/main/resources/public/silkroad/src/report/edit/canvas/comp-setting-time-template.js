@@ -20,7 +20,17 @@ define(['template'], function (template) {
         $out+=$escape(item.name);
         $out+='）\n            </span>\n            <span class="icon hide j-delete" title="删除">×</span>\n        </div>\n        ';
         });
-        $out+='\n    </div>\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\n        <span class="letter">设置:</span>\n        <span class="icon-letter icon-letter-btn j-set-default-time">默认选中时间</span>\n    </div>\n</div>';
+        $out+='\n    </div>\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\n        <span class="letter">设置:</span>\n        <span class="icon-letter icon-letter-btn j-set-default-time">默认选中时间</span>\n        <span>时间选择类型：</span>\n        <select class="select-calendar-type" data-comp-id="';
+        $out+=$escape(compId);
+        $out+='" data-comp-type="TIME_COMP">\n            <option value="CAL_SELECT" ';
+        if($data.compMold && $data.compMold==="CAL_SELECT"){
+        $out+=' selected="selected"';
+        }
+        $out+='>\n            时间单选\n            </option>\n            <option value="DOUBLE_CAL_SELECT" ';
+        if($data.compMold && $data.compMold==="DOUBLE_CAL_SELECT"){
+        $out+=' selected="selected"';
+        }
+        $out+='>\n            时间双选\n            </option>\n        </select>\n    </div>\n</div>';
         return $out;
     }
     return { render: anonymous };

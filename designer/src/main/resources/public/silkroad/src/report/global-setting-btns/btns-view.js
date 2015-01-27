@@ -40,35 +40,6 @@ define([
                 var that = this;
                 var reportId = window.dataInsight.main.id;
                 this.model.getParameterDim(reportId, openDataFormatDialog);
-//                dialog.showDialog({
-//                    content: ParaBtnTemplate.render(),
-//                    title: '参数维度设置',
-//                    dialog: {
-//                        height: 400,
-//                        width: 500,
-//                        open: function () {
-//                            var $this = $(this);
-//                            // 删除维度事件绑定
-//                            $this.on('click', '.j-global-close', function () {
-//                                $(this).parent().remove();
-//                            });
-//                            // 创建维度事件绑定
-//                            $this.find('.j-global-add').click(function () {
-//                                $('.j-con-global-attr').append(SelectTemplate.render(arr));
-//                            });
-//                        },
-//                        buttons: {
-//                            '确认': function () {
-//                                var $para = $(this);
-//                                that._getParaDim(reportId, $para);
-//                                $(this).dialog('close');
-//                            },
-//                            '取消': function () {
-//                                $(this).dialog('close');
-//                            }
-//                        }
-//                    }
-//                });
                 /**
                  * 打开数据格式设置弹框
                  */
@@ -123,7 +94,6 @@ define([
                 var result = {};
                 result.params = {};
                 result.params = this._getParaDimData($dom);
-                //console.log(data);
                 this.model.getParameterDimData(reportId, result);
             },
 
@@ -183,6 +153,12 @@ define([
                     title: '预览',
                     className: 'button-preview-report'
                 }
+//                {
+//                    id: 'skin-report',
+//                    picName: 'skin',
+//                    title: '换肤',
+//                    className: 'button-skin'
+//                }
             ],
 
             /**
