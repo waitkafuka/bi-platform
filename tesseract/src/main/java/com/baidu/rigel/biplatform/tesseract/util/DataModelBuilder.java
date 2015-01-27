@@ -407,7 +407,7 @@ public class DataModelBuilder {
                 packageParentLevelField(field.getChildren(), parentLevelField);
             }
         }
-        return DeepcopyUtils.deepCopy(nodes);
+        return nodes;
     }
 
     public static List<HeadField> buildFieldsByMemberNodeTree(MemberNodeTree nodeTree, boolean isFirstNode, HeadField parent) {
