@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.tesseract.store.service.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.EventObject;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
@@ -109,6 +111,7 @@ public class HazelcastStoreManager implements StoreManager {
         }
         cfg.getGroupConfig().setName(prop.getProperty(HAZELCAST_SERVER_GROUP_USER_NAME, "tesseract-cluster"));
         cfg.getGroupConfig().setPassword(prop.getProperty(HAZELCAST_SERVER_GROUP_PASSWORD, "tesseract"));
+        
         cfg.setInstanceName(prop.getProperty(HAZELCAST_SERVER_NAME, "TesseractHZ_Cluster"));
         
        // cfg.getQueueConfig(EVENT_QUEUE).addItemListenerConfig(new ItemListenerConfig(this.hazelcastQueueItemListener,true));
@@ -118,9 +121,19 @@ public class HazelcastStoreManager implements StoreManager {
             cfg.getManagementCenterConfig().setEnabled(true);
             cfg.getManagementCenterConfig().setUrl(manCenter);
         }
+        System.setProperty("hazelcast.socket.bind.any", "false");
+        String ip = "127.0.0.1";
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            LOGGER.warn("get ip error, {}",e.getMessage());
+        }
+        LOGGER.info("local memchine ip: {}", ip);
+        cfg.getProperties();//.getGroupProperties().SOCKET_SERVER_BIND_ANY
+        cfg.getNetworkConfig().getInterfaces().addInterface(ip);
+        
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-        
         tcpIpConfig.addMember(prop.getProperty(HAZELCAST_SERVER_MEMBERS,"127.0.0.1"));
         tcpIpConfig.setEnabled(true);
         

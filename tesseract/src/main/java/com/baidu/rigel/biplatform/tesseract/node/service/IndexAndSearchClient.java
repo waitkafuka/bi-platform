@@ -308,36 +308,36 @@ public class IndexAndSearchClient {
     }
     
 //    public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,String idName,MessageStatus ms){
-//		logger.info("index:[data=" + data + "][idxAction=" + idxAction
-//				+ "][idxShard=" + idxShard + "][idName:" + idName + "] start");
-//		if (data == null || idxShard == null
-//				|| StringUtils.isEmpty(idxShard.getFilePath())
-//				|| StringUtils.isEmpty(idxShard.getIdxFilePath())) {
-//			throw new IllegalArgumentException();
-//		}
-//		NettyAction action = null;
-//		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
-//			action = NettyAction.NETTY_ACTION_UPDATE;
-//		} else if(idxAction.equals(IndexAction.INDEX_MOD)){
-//			action = NettyAction.NETTY_ACTION_MOD; 
-//		}else if (idxAction.equals(IndexAction.INDEX_MERGE)
-//				|| idxAction.equals(IndexAction.INDEX_INIT)
-//				|| idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
-//			action = NettyAction.NETTY_ACTION_INITINDEX;
-//		} else {
-//			action = NettyAction.NETTY_ACTION_INDEX;
-//		}
-//		
-//		MessageHeader messageHeader = new MessageHeader(action, data.toString());
-//		IndexMessage message = new IndexMessage(messageHeader, data);
-//		message.setIdxPath(idxShard.getAbsoluteFilePath());
-//		message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath());
-//		message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
-//		message.setIdName(idName);
-//		if(ms.equals(MessageStatus.MESSAGE_STATUS_FIN)){
-//			message.setLastPiece(lastPiece);
-//		}
-//		
+//      logger.info("index:[data=" + data + "][idxAction=" + idxAction
+//              + "][idxShard=" + idxShard + "][idName:" + idName + "] start");
+//      if (data == null || idxShard == null
+//              || StringUtils.isEmpty(idxShard.getFilePath())
+//              || StringUtils.isEmpty(idxShard.getIdxFilePath())) {
+//          throw new IllegalArgumentException();
+//      }
+//      NettyAction action = null;
+//      if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
+//          action = NettyAction.NETTY_ACTION_UPDATE;
+//      } else if(idxAction.equals(IndexAction.INDEX_MOD)){
+//          action = NettyAction.NETTY_ACTION_MOD; 
+//      }else if (idxAction.equals(IndexAction.INDEX_MERGE)
+//              || idxAction.equals(IndexAction.INDEX_INIT)
+//              || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+//          action = NettyAction.NETTY_ACTION_INITINDEX;
+//      } else {
+//          action = NettyAction.NETTY_ACTION_INDEX;
+//      }
+//      
+//      MessageHeader messageHeader = new MessageHeader(action, data.toString());
+//      IndexMessage message = new IndexMessage(messageHeader, data);
+//      message.setIdxPath(idxShard.getAbsoluteFilePath());
+//      message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath());
+//      message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
+//      message.setIdName(idName);
+//      if(ms.equals(MessageStatus.MESSAGE_STATUS_FIN)){
+//          message.setLastPiece(lastPiece);
+//      }
+//      
 //    }
     
     public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,
@@ -349,18 +349,18 @@ public class IndexAndSearchClient {
             throw new IllegalArgumentException();
         }
         
-		NettyAction action = null;
-		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
-			action = NettyAction.NETTY_ACTION_UPDATE;
-		} else if (idxAction.equals(IndexAction.INDEX_MOD)) {
-			action = NettyAction.NETTY_ACTION_MOD;
-		} else if (idxAction.equals(IndexAction.INDEX_MERGE)
-				    || idxAction.equals(IndexAction.INDEX_INIT)
-				    || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
-			action = NettyAction.NETTY_ACTION_INITINDEX;
-		} else {
-			action = NettyAction.NETTY_ACTION_INDEX;
-		}
+        NettyAction action = null;
+        if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
+            action = NettyAction.NETTY_ACTION_UPDATE;
+        } else if (idxAction.equals(IndexAction.INDEX_MOD)) {
+            action = NettyAction.NETTY_ACTION_MOD;
+        } else if (idxAction.equals(IndexAction.INDEX_MERGE)
+                    || idxAction.equals(IndexAction.INDEX_INIT)
+                    || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+            action = NettyAction.NETTY_ACTION_INITINDEX;
+        } else {
+            action = NettyAction.NETTY_ACTION_INDEX;
+        }
         MessageHeader messageHeader = new MessageHeader(action, data.toString());
         IndexMessage message = new IndexMessage(messageHeader, data);
         message.setIdxPath(idxShard.getAbsoluteFilePath());
@@ -395,27 +395,47 @@ public class IndexAndSearchClient {
         return result;
     }
     
-    
+    /**
+     * getIndexFileCopyTmpDirPath 
+     * @param filePath
+     * @return
+     */
+    private String getIndexFileCopyTmpDirPath(String filePath){
+        StringBuffer sb=new StringBuffer();
+        if(!StringUtils.isEmpty(filePath)){
+            sb.append(filePath.substring(0, filePath.indexOf("indexbase")));
+            sb.append("indexbase");
+            sb.append(File.separator);
+            sb.append("copytmp");
+            sb.append(File.separator);
+        }
+        return sb.toString();
+    }
     
     public ServerFeedbackMessage copyIndexDataToRemoteNode(String filePath, String targetFilePath, boolean replace,
-        Node node) throws IndexAndSearchException {
+        Node remodeNode) throws IndexAndSearchException {
         logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "copyIndexDataToRemoteNode", "[filePath:" + filePath + "][replace:" + replace
-                + "][Node:" + node + "]"));
+                + "][remodeNode:" + remodeNode + "]"));
         
-        if (StringUtils.isEmpty(filePath) || node == null) {
+        if (StringUtils.isEmpty(filePath) || remodeNode == null) {
             logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
                 "copyIndexDataToRemoteNode", "[filePath:" + filePath + "][replace:" + replace
-                    + "][nodeList:" + node + "]"));
+                    + "][nodeList:" + remodeNode + "]"));
             throw new IllegalArgumentException();
         }
+        String tmpBaseDir=getIndexFileCopyTmpDirPath(filePath);
+        File tmpBaseDirFile=new File(tmpBaseDir);
+        if(!tmpBaseDirFile.exists()){
+            tmpBaseDirFile.mkdirs();
+        }
         // 压缩
-        String compressedFilePath = filePath + ".tar.gz";
+        String compressedFilePath = tmpBaseDir +System.currentTimeMillis() + ".tar.gz";
         File compressedFile = new File(compressedFilePath);
         compressedFile.deleteOnExit();
         
         try {
-            compressedFilePath = FileUtils.doCompressFile(filePath);
+            compressedFilePath = FileUtils.doCompressFile(filePath,compressedFilePath);
         } catch (IOException e2) {
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                 IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
@@ -465,7 +485,7 @@ public class IndexAndSearchClient {
                 sfm.setLast(isLast);
 
                 FileClientHandler handler = new FileClientHandler();
-                AbstractMessage bMessage = this.executeAction(action, sfm, handler, node);
+                AbstractMessage bMessage = this.executeAction(action, sfm, handler, remodeNode);
                 
                 if (bMessage instanceof ServerFeedbackMessage) {
                     backMessage = (ServerFeedbackMessage) bMessage;

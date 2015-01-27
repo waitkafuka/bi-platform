@@ -108,10 +108,14 @@ public final class CallbackServiceInvoker {
         }
         JsonObject json = new JsonParser().parse(responseStr).getAsJsonObject();
         int status = json.get("status").getAsInt();
-        String message = json.get("message") == JsonNull.INSTANCE ? "" : json.get("message").getAsString();
-        String provider = json.get("provider").getAsString();
-        String cost = json.get("cost").getAsString();
-        String version = json.get("version").getAsString();
+        String message = json.get("message") == null || json.get("message") == JsonNull.INSTANCE ? 
+                "unknown" : json.get("message").getAsString();
+        String provider = json.get("provider") == null || json.get("provider") == JsonNull.INSTANCE ?
+                "unknown" : json.get("provider").getAsString();
+        String cost = json.get("cost") == null || json.get("cost") == JsonNull.INSTANCE ?
+                "" :json.get("cost").getAsString();
+        String version = json.get("version") == null || json.get("version") == JsonNull.INSTANCE ?
+                "unknown" :json.get("version").getAsString();
         LOG.info("[INFO] ------------------------------callback response desc -----------------------------------");
         LOG.info("[INFO] --- --- status : {}", status);
         LOG.info("[INFO] --- --- message : {}", message);
