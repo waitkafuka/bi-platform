@@ -427,7 +427,7 @@ public class FileUtils {
      *            Name of the file to be compressed
      * @throws IOException
      */
-    public static String doCompressFile(String inFileName) throws IOException {
+    public static String doCompressFile(String inFileName,String outFileName) throws IOException {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "doCompressFile",
             "[inFileName:" + inFileName + "]"));
         FileOutputStream fOut = null;
@@ -437,7 +437,7 @@ public class FileUtils {
         if (StringUtils.isEmpty(inFileName)) {
             throw new IllegalArgumentException();
         }
-        String compressedFileName = inFileName + "." + System.currentTimeMillis() + ".tar.gz";
+        String compressedFileName = outFileName;
         
         FileInputStream fi = null;
         BufferedInputStream sourceStream = null;

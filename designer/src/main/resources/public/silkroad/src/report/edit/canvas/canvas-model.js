@@ -171,7 +171,7 @@ define(
                 var reportId = rootId + serverData.id;
                 var vm = createShell(serverData.id, reportId);
                 vm.html(
-                    '<div style="width:100%; height:20px"></div>'
+                    '<div class="placeholer-20" style="width:100%; height:20px"></div>'
                     + compData.vm.render({
                         rootId: rootId,
                         serverData: serverData
@@ -229,17 +229,18 @@ define(
              * 删除报表中的某一组件,具体发送异步请求
              *
              * @param {string} compId 组件Id
+             * @param {string} reportCompId 组件在report-ui端使用的Id
              * @param {Function} success 回调函数
              * @public
              */
-            deleteComp: function (compId, success) {
+            deleteComp: function (compId, reportCompId, success) {
                 var that = this;
 
                 $.ajax({
                     url: Url.deleteComp(that.id, compId),
                     type: 'DELETE',
                     success: function () {
-                        that._deleteComp(compId, success);
+                        that._deleteComp(compId, reportCompId, success);
                     }
                 });
             },
@@ -248,10 +249,11 @@ define(
              * 删除报表中的某一组件,具体处理本地数据
              *
              * @param {string} compId 组件Id
+             * @param {string} reportCompId 组件在report-ui端使用的Id
              * @param {Function} success 回调函数
              * @private
              */
-            _deleteComp: function (compId, success) {
+            _deleteComp: function (compId, reportCompId, success) {
                 var that = this;
                 var isDeleteVUI = false;
                 success = success || new Function();
@@ -279,6 +281,23 @@ define(
                         arr.splice(i, 1);
                         // 某些组件的数据项可能是一组而并非一个，比如table
                         i--;
+                    }
+                    // TODO:如果当前组件含有被关联组件，那么也要删除关联关系:测试
+                    if (arr[i].clzType === 'COMPONENT' && arr[i].interactions) {
+                        for (var j = 0, jLen = arr[i].interactions.length; j < jLen; j ++) {
+                            var inter =  arr[i].interactions[j];
+                            if (inter.event && inter.event.rid === reportCompId) {
+                                arr[i].interactions.splice(j, 1);
+                            }
+                            else if (inter.events) {
+                                for (var x = 0, xLen = inter.events.length; x < xLen; x ++ ) {
+                                    if (inter.events[x].rid === reportCompId) {
+                                        inter.events.splice(x, 1);
+                                    }
+                                }
+                            }
+
+                        }
                     }
                 }
 
@@ -375,13 +394,13 @@ define(
              */
             saveReport: function (success) {
                 var that = this;
-
+                var vm = that.$reportVm.prop('outerHTML').replace(/<div class=\"placeholer-20\" style=\"width:100%; height:20px\"><\/div>/g,'');
                 $.ajax({
                     url: Url.saveReport(that.id),
                     type: 'PUT',
                     data: {
                         json: JSON.stringify(that.reportJson),
-                        vm: that.$reportVm.prop('outerHTML')
+                        vm: vm
                     },
                     success: function () {
                         success && success();
@@ -398,13 +417,13 @@ define(
             saveJsonVm: function (success) {
                 var that = this;
                 success = success || new Function();
-
+                var vm = that.$reportVm.prop('outerHTML').replace(/<div class=\"placeholer-20\" style=\"width:100%; height:20px\"><\/div>/g,'');
                 $.ajax({
                     url: Url.saveJsonVm(that.id),
                     type: 'PUT',
                     data: {
                         json: JSON.stringify(that.reportJson),
-                        vm: that.$reportVm.prop('outerHTML')
+                        vm: vm
                     },
                     success: function () {
                         success();

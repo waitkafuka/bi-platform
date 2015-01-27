@@ -16,11 +16,15 @@
 package com.baidu.rigel.biplatform.ma.report.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -37,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
+import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -53,6 +58,7 @@ import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -66,6 +72,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
@@ -142,6 +149,7 @@ public final class QueryUtils {
         }
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
+        questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
     }
     
@@ -275,6 +283,11 @@ public final class QueryUtils {
                             } else if (item.getParams().get(Constants.LEVEL).equals(2)) {
                                 data.setExpand(true);
                                 data.setShow(false);
+                            } 
+                            if (MetaNameUtil.isAllMemberUniqueName(data.getUniqueName()) 
+                                    && queryAction.isChartQuery()){
+                                data.setExpand(true);
+                                data.setShow(false);
                             }
                         }
                         datas.add(data);
@@ -304,7 +317,7 @@ public final class QueryUtils {
                     condition.setQueryDataNodes(datas);
                 }
                 // 时间维度，并且在第一列位置，后续改成可配置方式
-                if (olapElement instanceof TimeDimension && firstIndex == 0) {
+                if (olapElement instanceof TimeDimension && firstIndex == 0 && !queryAction.isChartQuery()) {
                     condition.setMemberSortType(SortType.DESC);
                 }
                 ++firstIndex;
@@ -737,6 +750,92 @@ public final class QueryUtils {
             return olapElement;
         }
         return null;
+    }
+
+    /**
+     * 修正报表区域模型参数
+     * @param request
+     * @param model
+     */
+    public static Map<String, Object> resetContextParam(final HttpServletRequest request, ReportDesignModel model) {
+        Map<String, Object> rs = Maps.newHashMap();
+        Collection<ReportParam> params = DeepcopyUtils.deepCopy(model.getParams()).values();
+        if (params.size() == 0) {
+            return rs;
+        }
+        Map<String, String> requestParams = collectRequestParams(params, request);
+        params.forEach(param -> {
+            if (param.isNeeded() && StringUtils.isEmpty(requestParams.get(param.getName()))) {
+                if (StringUtils.isEmpty(param.getDefaultValue())) {
+                    throw new RuntimeException("必要参数未赋值");
+                }
+                rs.put(param.getElementId(), param.getDefaultValue());
+            } else if (!StringUtils.isEmpty(requestParams.get(param.getName()))) {
+                rs.put(param.getElementId(), requestParams.get(param.getName()).split(","));
+            } else if (!StringUtils.isEmpty(param.getDefaultValue())) {
+                rs.put(param.getElementId(), param.getDefaultValue());
+            }
+        });
+        rs.putAll(requestParams);
+        return rs;
+    }
+
+    /**
+     * 
+     * @param params
+     * @param request
+     * @return Map<String, String>
+     */
+    private static Map<String, String> collectRequestParams(Collection<ReportParam> params,
+            HttpServletRequest request) {
+        Map<String, String> rs = Maps.newHashMap();
+        request.getParameterMap().forEach((k, v) -> {
+            rs.put(k, v[0]);
+        }); 
+        // cookie中如果包含参数值，覆盖url中参数
+        if (request.getCookies() != null)  {
+            for (Cookie cookie : request.getCookies()) {
+                rs.put(cookie.getName(), cookie.getValue());
+            }
+        }
+        
+        // 如果当前线程中包含参数值，则覆盖cookie中参数值
+        rs.putAll(ContextManager.getParams());
+        // 容错，处理其他可能的参数
+        rs.remove(Constants.RANDOMCODEKEY);
+        rs.remove(Constants.TOKEN);
+        rs.remove(Constants.BIPLATFORM_PRODUCTLINE);
+
+        return rs;
+    }
+
+    /**
+     * TODO:
+     * @param members
+     * @return List<Map<String, String>>
+     */
+    public static List<Map<String, String>> getMembersWithChildrenValue(List<Member> members,
+            Cube cube, DataSourceInfo dataSource, Map<String, String> params) {
+        List<Map<String, String>> rs = Lists.newArrayList();
+        if (members == null || members.isEmpty()) {
+            return rs;
+        }
+        members.forEach(m -> {
+            Map<String, String> tmp = Maps.newHashMap();
+            tmp.put("value", m.getUniqueName());
+            tmp.put("text", m.getCaption());
+            Member parent = m.getParentMember(cube, dataSource, params);
+            if (parent != null) {
+                tmp.put("parent", parent.getUniqueName());
+            }
+            rs.add(tmp);
+            List<Member> children = m.getChildMembers(cube, dataSource, params);
+            if (children != null) {
+                rs.addAll(getMembersWithChildrenValue(children, cube, dataSource, params));
+            }
+        });
+        
+        return rs;
     }
     
 

@@ -21,3 +21,17 @@
     padding: 0;
     overflow: hidden;
 }
+
+
+.cond-block {
+    border: 1px solid #DDD;
+    padding: 5px 8px;
+}
+.vu-table {
+    height: 500px;
+}
+.table-block {
+    width: 1040px;
+    /*width: 100%;*/
+}
+

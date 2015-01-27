@@ -110,6 +110,10 @@ define(['url', 'constant'], function (Url, Constant) {
 
             compJson.dataSetOpt.timeTypeList = config.timeTypeList;
             compJson.dataSetOpt.timeTypeOpt = config.timeTypeOpt;
+            // 设置range time的参数
+            if (config.rangeTimeTypeOpt.startDateOpt !== undefined) {
+                compJson.dataSetOpt.rangeTimeTypeOpt = config.rangeTimeTypeOpt;
+            }
             this.canvasModel.saveJsonVm(success);
         },
 

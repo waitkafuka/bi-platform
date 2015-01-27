@@ -25,7 +25,7 @@ var demoData = {
         <select class="j-comp-relation-event-out-param">
             {{each outParamDim as $option key}}
             <option value="{{$option.id}}${{$option.name}}" dimGroup="{{if $option.dimGroup === true}}true{{else}}false{{/if}}"
-            {{if selectDim && $option.id === selectDim}}
+            {{if selectDimId && $option.id === selectDimId}}
             selected="selected"
             {{/if}}>{{$option.caption}}
             </option>

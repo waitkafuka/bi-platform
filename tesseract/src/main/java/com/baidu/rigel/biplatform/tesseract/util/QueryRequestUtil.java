@@ -39,7 +39,9 @@ import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
+import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
@@ -98,7 +100,7 @@ public class QueryRequestUtil {
      *         Map<String,String> key is leafvalue of QueryObject and value is
      *         value of QueryObject
      */
-    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query, Map<String,String> allDims) {
+    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query) {
         if (query == null || query.getWhere() == null || query.getWhere().getAndList() == null) {
             throw new IllegalArgumentException();
         }
@@ -116,9 +118,7 @@ public class QueryRequestUtil {
                     if (valueSet == null) {
                         valueSet = new HashSet<String>();
                     }
-                    if(qo.isSummary()){
-                        allDims.put(ex.getProperties(), qo.getValue());
-                    }else if(!StringUtils.equals(leaf, qo.getValue())){
+                    if(!qo.isSummary() && !StringUtils.equals(leaf, qo.getValue())){
                         valueSet.add(qo.getValue());
                     }
                     if(CollectionUtils.isNotEmpty(valueSet)){
@@ -278,18 +278,75 @@ public class QueryRequestUtil {
 //    }
     
     
+    /** 
+     * collectAllMem
+     * @param queryContext
+     * @return
+     */
+    private static Map<String, String> collectAllMem(QueryContext queryContext) {
+        Map<String,String> allDimVal = new HashMap<String, String>();
+        if (CollectionUtils.isNotEmpty(queryContext.getColumnMemberTrees())) {
+            queryContext.getColumnMemberTrees().forEach(tree -> {
+                allDimVal.putAll(coolectAllMem(tree));
+            });
+        }
+        
+        if (CollectionUtils.isNotEmpty(queryContext.getRowMemberTrees())) {
+            queryContext.getRowMemberTrees().forEach(tree -> {
+                allDimVal.putAll(coolectAllMem(tree));
+            });
+        }
+        
+        return allDimVal;
+    }
+    
+    
+    
+    /** 
+     * coolectAllMem
+     * @param memberNodeTree
+     * @return
+     */
+    
+    /** 
+     * coolectAllMem
+     * @param memberNodeTree
+     * @return
+     */
+    private static Map<String, String> coolectAllMem(MemberNodeTree memberNodeTree) {
+        Map<String,String> allDimVal = new HashMap<String, String>();
+        if (memberNodeTree.isSummary()) {
+            allDimVal.put(memberNodeTree.getQuerySource(), memberNodeTree.getName());
+            return allDimVal;
+        } else {
+            if(memberNodeTree.getChildren().size() == 1) {
+                return coolectAllMem(memberNodeTree.getChildren().get(0));
+            }
+            return allDimVal;
+        }
+    }
+    
+    
     public static TesseractResultSet processGroupBy(TesseractResultSet dataSet,
-            QueryRequest query) throws NoSuchFieldException {
+            QueryRequest query, QueryContext queryContext) throws NoSuchFieldException {
         
         LinkedList<ResultRecord> transList = null;
-        Map<String,String> allDimVal = new HashMap<String, String>();
         long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
-            .transQueryRequest2LeafMap(query, allDimVal);
+            .transQueryRequest2LeafMap(query);
+        Map<String,String> allDimVal = collectAllMem(queryContext);
+        
+        
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
+        // 这里开始算值都得将count改成sum了
+        queryMeasures.forEach(measure -> {
+            if(measure.getAggregator().equals(Aggregator.COUNT)){
+                measure.setAggregator(Aggregator.SUM);
+            }
+        });
         int dimSize = query.getSelect().getQueryProperties().size();
         if (dataSet != null && dataSet.size() != 0 && dataSet instanceof SearchResultSet) {
             transList = (LinkedList<ResultRecord>) ((SearchResultSet) dataSet).getResultQ();
@@ -307,6 +364,7 @@ public class QueryRequestUtil {
                                     int i = 0;
                                     for (String value : valueSet) {
                                         if(i > 0) {
+                                            // 如果一个节点有多个父亲，那么在算总的汇总值得时候，会有数据问题。
                                             ResultRecord newRec = DeepcopyUtils.deepCopy(record);
                                             newRec.setField(prop, value);
                                             generateGroupBy(newRec, groupList);
@@ -340,11 +398,6 @@ public class QueryRequestUtil {
             return new SearchResultSet(AggregateCompute.distinct(transList));
         }
         
-        queryMeasures.forEach(measure -> {
-           if(measure.getAggregator().equals(Aggregator.COUNT)){
-               measure.setAggregator(Aggregator.SUM);
-           }
-        });
         
         
         if(MapUtils.isNotEmpty(allDimVal)){

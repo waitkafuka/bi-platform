@@ -237,12 +237,12 @@ public class MiniCubeMember extends OlapElementDef implements Member {
             this.uniqueName = uniqueName;
             return uniqueName;
         }
-
-        // TODO 需要考虑时间维值
         if (parent == null) {
-            return MetaNameUtil.makeUniqueName(level.getDimension(), getName());
+            this.uniqueName = MetaNameUtil.makeUniqueName(level.getDimension(), getName());
+        } else {
+            this.uniqueName = MetaNameUtil.makeUniqueName(parent, getName());
         }
-        return MetaNameUtil.makeUniqueName(parent, getName());
+        return this.uniqueName;
     }
 
     /**
@@ -307,4 +307,14 @@ public class MiniCubeMember extends OlapElementDef implements Member {
         }
     }
 
+    /**
+     * get current member's children
+     * NOTE：sometime, invoke current method very dangerous. if you do this,
+     * please make sure the children already initialized, even though, this method can not promise you can get correct
+     * result.
+     * @return List<Member>
+     */
+    public List<Member> getChildren() {
+        return this.children;
+    }
 }

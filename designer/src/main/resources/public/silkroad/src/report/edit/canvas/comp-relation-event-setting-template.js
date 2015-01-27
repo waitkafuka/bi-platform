@@ -2,9 +2,9 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,outParamDim=$data.outParamDim,$option=$data.$option,key=$data.key,$escape=$utils.$escape,selectDim=$data.selectDim,outParamLevel=$data.outParamLevel,selectLevel=$data.selectLevel,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    outParamDim: {\n        id: \'\',\n        caption: \'\',\n        name: \'\'\n    },\n    levelData: {\n        \'level1\': \'当前级别\',\n        \'level12\': \'下一级别\'\n    },\n    selectDimId: \'\',\n    selectDimName: \'\',\n    selectLevel: \'\'\n};\n-->\n<div class="comp-relation-event">\n    <span>选择被关联组件</span>\n    <div class="comp-realtion-box">\n    </div>\n    <span>选择传出参数</span>\n    <div class="comp-realtion-param">\n        <span class="span-out-param">选择传出维度</span>\n        <select class="j-comp-relation-event-out-param">\n            ';
+        var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,outParamDim=$data.outParamDim,$option=$data.$option,key=$data.key,$escape=$utils.$escape,selectDimId=$data.selectDimId,outParamLevel=$data.outParamLevel,selectLevel=$data.selectLevel,$out='';$out+='<!--\r\n数据例子：\r\nvar demoData = {\r\n    outParamDim: {\r\n        id: \'\',\r\n        caption: \'\',\r\n        name: \'\'\r\n    },\r\n    levelData: {\r\n        \'level1\': \'当前级别\',\r\n        \'level12\': \'下一级别\'\r\n    },\r\n    selectDimId: \'\',\r\n    selectDimName: \'\',\r\n    selectLevel: \'\'\r\n};\r\n-->\r\n<div class="comp-relation-event">\r\n    <span>选择被关联组件</span>\r\n    <div class="comp-realtion-box">\r\n    </div>\r\n    <span>选择传出参数</span>\r\n    <div class="comp-realtion-param">\r\n        <span class="span-out-param">选择传出维度</span>\r\n        <select class="j-comp-relation-event-out-param">\r\n            ';
         $each(outParamDim,function($option,key){
-        $out+='\n            <option value="';
+        $out+='\r\n            <option value="';
         $out+=$escape($option.id);
         $out+='$';
         $out+=$escape($option.name);
@@ -14,27 +14,27 @@ define(['template'], function (template) {
         }else{
         $out+='false';
         }
-        $out+='"\n            ';
-        if(selectDim && $option.id === selectDim){
-        $out+='\n            selected="selected"\n            ';
+        $out+='"\r\n            ';
+        if(selectDimId && $option.id === selectDimId){
+        $out+='\r\n            selected="selected"\r\n            ';
         }
         $out+='>';
         $out+=$escape($option.caption);
-        $out+='\n            </option>\n            ';
+        $out+='\r\n            </option>\r\n            ';
         });
-        $out+='\n        </select>\n        <span class="span-level">选择当前还是下一级</span>\n        <select class="j-comp-relation-event-out-param-level">\n            ';
+        $out+='\r\n        </select>\r\n        <span class="span-level">选择当前还是下一级</span>\r\n        <select class="j-comp-relation-event-out-param-level">\r\n            ';
         $each(outParamLevel,function($option,key){
-        $out+='\n            <option value=';
+        $out+='\r\n            <option value=';
         $out+=$escape(key);
-        $out+='\n            ';
+        $out+='\r\n            ';
         if(selectLevel && key === selectLevel){
-        $out+='\n            selected="selected"\n            ';
+        $out+='\r\n            selected="selected"\r\n            ';
         }
         $out+='>';
         $out+=$escape($option);
-        $out+='\n            </option>\n            ';
+        $out+='\r\n            </option>\r\n            ';
         });
-        $out+='\n        </select>\n    </div>\n</div>';
+        $out+='\r\n        </select>\r\n    </div>\r\n</div>';
         return $out;
     }
     return { render: anonymous };

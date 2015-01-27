@@ -17,6 +17,7 @@ define([
         'report/edit/canvas/comp-setting-chart-template',
         'report/edit/canvas/vui-setting-select-template',
         'report/edit/canvas/default-selected-time-setting-template',
+        'report/edit/canvas/default-selected-range-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'report/edit/canvas/topn-setting-template',
         'report/edit/canvas/comp-relation-event-setting-template',
@@ -36,6 +37,7 @@ define([
         compSettingChartTemplate,
         vuiSettingSelectTemplate,
         defaultSelectedTimeSettingTemplate,
+        defaultSelectedRangeTimeSettingTemplate,
         dataFormatSettingTemplate,
         topnSettingTemplate,
         compRelationEventSettingTemplate,
@@ -43,7 +45,7 @@ define([
         indMenuTemplate,
         normInfoDepictTemplate,
         filterBlankLineTemplate
-        ) {
+    ) {
 
         return Backbone.View.extend({
             events: {
@@ -56,6 +58,7 @@ define([
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
                 'change .select-type': 'selectTypeChange',
+                'change .select-calendar-type': 'selectCalendarTypeChange',
                 'click .j-others-operate': 'getFilterBlankLine'
             },
 
@@ -203,7 +206,6 @@ define([
                     for (var x = 0, xLen = compIdArry.length; x < xLen; x ++) {
                         // 获取被关联组件的json配置信息
                         var curEntity = $.getTargetElement(compIdArry[x].id, entityDefs);
-
                         var intTemp = {
                             event: {
                                 rid: activeProductCompId,
@@ -229,7 +231,6 @@ define([
 //                        curEntity.outParamDimLevel = 'top';
                         // 如果存在事件关联
                         if (curEntity.interactions) {
-                            // TODO:需要判断是勾选上了，还是取消掉了
                             // 判断当前实例中是否已经有对应事件关联
                             var hasRelation = $.hasRelation(activeProductCompId, curEntity);
                             if (hasRelation > -1) {
@@ -275,6 +276,11 @@ define([
                     var compType = $this.attr('data-component-type');
                     var compId = $this.attr('data-comp-id');
                     var reportCompId = $this.attr('report-comp-id');
+                    var curEntity = $.getTargetElement(compId, entityDefs);
+                    if (!curEntity) {
+                        return;
+                    }
+                    var clzType = curEntity.clzType;
                     var imgName = '';
                     switch (compType) {
                         case 'CHART':
@@ -287,10 +293,9 @@ define([
                     var chkStr = '';
                     var checkedStr = '';
                     // 如果不是当前组件的缩略图，可以勾选
-                    if (activeSilkroadCompId !== compId) {
+                    if (clzType === 'COMPONENT') {
                         // 如果此组件，已经被当前编辑状态的组件所关联，那么将不能设定关联关系
-                        if (!$.isInArray(reportCompId, activeCompRealtionIds)) {
-                            var curEntity = $.getTargetElement(compId, entityDefs);
+                        if  (activeSilkroadCompId !== compId && !$.isInArray(reportCompId, activeCompRealtionIds)) {
                             var curCompInteraIds;
                             if (curEntity) {
                                 curCompInteraIds = $.getEntityInteractionsId(curEntity);
@@ -300,28 +305,28 @@ define([
                             }
                             chkStr = '<input type="checkbox" name="comp-thumbnail" '+ checkedStr + ' value="' + compId + '" />';
                         }
-                    }
-                    var $Div = $(
-                        ['<div class="comp-thumbnail">',
-                            chkStr,
-                            '<div class="comp-thumbnail-pic">',
-                            // TODO:路径可能会改
+                        var $Div = $(
+                            ['<div class="comp-thumbnail">',
+                                chkStr,
+                                '<div class="comp-thumbnail-pic">',
+                                // TODO:路径可能会改
                                 '<img src="src/css/img/thumbnail-', imgName, '.png"/>',
-                            '</div>',
-                        '</div>'].join('')
-                    );
-                    // 添加位置信息以及宽度高度
-                    $Div.css({
-                        width: nW + 'px',
-                        height: nH + 'px',
-                        left: nL + 'px',
-                        top: nT + 'px'
-                    });
-                    // 添加其他有用属性信息
-                    $Div.attr('data-component-type', compType);
-                    $Div.attr('data-mold', $this.attr('data-mold'));
-                    $Div.attr('data-comp-id', compId);
-                    $('.comp-realtion-box').append($Div);
+                                '</div>',
+                                '</div>'].join('')
+                        );
+                        // 添加位置信息以及宽度高度
+                        $Div.css({
+                            width: nW + 'px',
+                            height: nH + 'px',
+                            left: nL + 'px',
+                            top: nT + 'px'
+                        });
+                        // 添加其他有用属性信息
+                        $Div.attr('data-component-type', compType);
+                        $Div.attr('data-mold', $this.attr('data-mold'));
+                        $Div.attr('data-comp-id', compId);
+                        $('.comp-realtion-box').append($Div);
+                    }
                 }
             },
             /**
@@ -367,7 +372,53 @@ define([
                     this.canvasView.showReport.call(this.canvasView)
                 );
             },
+            /**
+             * 日历下拉框类型改变
+             *
+             * @param {event} event 点击事件（报表组件上的编辑按钮）
+             * @public
+             */
+            selectCalendarTypeChange: function (event) {
+                // 下拉框类型
+                var that = this;
+                var $target = $(event.target);
+                var selType = $target.val();
+                var entityDefs = this.model.canvasModel.reportJson.entityDefs;
+                var compId =  $target.attr('data-comp-id');
+                // 先析构组件
+                this.canvasView._component.dispose();
 
+                // 修改entity中下拉框类型,设置可拖拽面板中的属性值
+                for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
+                    if (compId === entityDefs[i].compId) {
+                        //entityDefs[i].clzKey = selType;
+                        // 获取组件的配置信息
+                        var compType = $target.attr('data-comp-type');
+                        var compData = that.model.canvasModel.compBoxModel.getComponentData(compType);
+                        if('CAL_SELECT' === selType){
+                            entityDefs[i].clzKey = compData.entityDescription.clzKey;
+                        } else if('DOUBLE_CAL_SELECT' === selType){
+                            entityDefs[i].clzKey = compData.entityDescriptionRangeCalendar.clzKey;
+                        }
+
+                    }
+                }
+
+                // 修改reportVm中对应组件div的data-mold属性
+                var selects = this.canvasView.model.$reportVm
+                    .find('[data-component-type=TIME_COMP]');
+                selects.each(function () {
+                    var  $this = $(this);
+                    if ($this.attr('data-comp-id') === compId) {
+                        $this.attr('data-mold', selType);
+                    }
+                });
+
+                // 保存vm与json，保存成功后展示报表
+                this.model.canvasModel.saveJsonVm(
+                    this.canvasView.showReport.call(this.canvasView)
+                );
+            },
             /**
              * 报表组件的编辑模块 初始化函数
              *
@@ -937,9 +988,7 @@ define([
                 var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
-
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
+                this.model.canvasModel.saveJsonVm();
             },
             /**
              * 添加完成数据项之后要做的特殊dom处理-表格
@@ -953,8 +1002,6 @@ define([
              * @public
              */
             afterAddTableCompAxis: function (option){
-//                this.model.canvasModel.saveJsonVm();
-//                this.model.canvasModel.saveReport();
             },
 
             /**
@@ -986,7 +1033,6 @@ define([
                 json.dateKey[letter] = id;
                 json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
                 this.model.canvasModel.saveJsonVm();
-                this.model.canvasModel.saveReport();
             },
 
             /**
@@ -1105,12 +1151,32 @@ define([
                 var compBoxModel = that.model.canvasModel.compBoxModel;
                 var compId = that.getActiveCompId();
                 var compData = that.model.getCompDataById(compId);
-                // 可做逻辑拆分，将部分代码拆分到model中
-                var deSwitchConfig = compBoxModel.getComponentData('TIME_COMP').deSwitchConfig;
-                var renderTemplateData = deSwitchConfig(compData[0].dataSetOpt.timeTypeOpt);
-                var html = defaultSelectedTimeSettingTemplate.render({
-                    list: renderTemplateData
-                });
+                if (compData[0].clzKey === 'RANGE_CALENDAR'){
+                    var compBoxModel = that.model.canvasModel.compBoxModel;
+                    // 可做逻辑拆分，将部分代码拆分到model中
+                    var renderTemplateData = null;
+                    if (compData[0].dataSetOpt.rangeTimeTypeOpt !== undefined){
+                        renderTemplateData = {
+                            start: compData[0].dataSetOpt.rangeTimeTypeOpt.startDateOpt,
+                            end: compData[0].dataSetOpt.rangeTimeTypeOpt.endDateOpt
+                        };
+                    } else {
+                        renderTemplateData = compBoxModel.getComponentData('TIME_COMP').rangeConfig;
+                    }
+                    var html = defaultSelectedRangeTimeSettingTemplate.render({
+                        item: renderTemplateData
+                    });
+                }
+                else {
+                    var compBoxModel = that.model.canvasModel.compBoxModel;
+                    // 可做逻辑拆分，将部分代码拆分到model中
+                    var deSwitchConfig = compBoxModel.getComponentData('TIME_COMP').deSwitchConfig;
+                    var renderTemplateData = deSwitchConfig(compData[0].dataSetOpt.timeTypeOpt);
+                    var html = defaultSelectedTimeSettingTemplate.render({
+                        list: renderTemplateData
+                    });
+
+                }
 
                 /**
                  * 从表单中提取配置数据
@@ -1134,6 +1200,9 @@ define([
                         data.type = particleSize;
                         // 默认时间，单个可能是单选
                         data.date = [val + unit];
+                        // 设置data range的情况
+                        data.startDateOpt = $this.find('[name="startDateSetting"]').val();
+                        data.endDateOpt = $this.find('[name="endDateSetting"]').val();
                         arr.push(data);
                     });
 

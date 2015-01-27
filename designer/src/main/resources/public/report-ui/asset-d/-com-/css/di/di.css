@@ -75,15 +75,15 @@
     -ms-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .global-prompt-waiting {
-    width: 24px; 
-    height: 24px; 
-    background: url('img/waiting.gif') 0px 0px no-repeat; 
-    overflow: hidden; 
+    width: 24px;
+    height: 24px;
+    background: url('img/waiting.gif') 0px 0px no-repeat;
+    overflow: hidden;
     float: left;
 }
 .global-prompt-waiting-text {
-    margin-left: 34px; 
-    height: 24px; 
+    margin-left: 34px;
+    height: 24px;
     line-height: 24px;
     font-family: "微软雅黑", Serif;
     font-size: 14px;

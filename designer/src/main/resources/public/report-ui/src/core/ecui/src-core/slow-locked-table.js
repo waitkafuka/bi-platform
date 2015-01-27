@@ -250,7 +250,10 @@ _eFill       - 用于控制中部宽度的单元格
             (this.$$paddingLeft = pos) +
                 (this.$$paddingRight =
                     this._nRight < cols.length ? this.$$mainWidth - cols[this._nRight].$$pos : 0);
-
+        // TODO:如果当前表格宽度小于外围div宽度，那么重设表格宽度
+        if (this.$$paddingLeft + this.$$mainWidth < this.$$width) {
+            this.$$mainWidth = this.$$width - this.$$paddingLeft;
+        }
         // console.log('=================== locked-table $cache 1] ' + ((new Date()).getTime() - ddd));
         // var ddd = new Date();
 

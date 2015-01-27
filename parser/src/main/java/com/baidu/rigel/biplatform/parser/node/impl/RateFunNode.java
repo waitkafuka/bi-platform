@@ -41,7 +41,11 @@ public class RateFunNode extends FunctionNode {
         if(BigDecimal.ZERO.equals(arg2)) {
             return null;
         }
-        return arg1.divide(arg2, ParserConstant.COMPUTE_SCALE, BigDecimal.ROUND_HALF_UP).subtract(BigDecimal.ONE);
+        try {
+            return arg1.divide(arg2, ParserConstant.COMPUTE_SCALE, BigDecimal.ROUND_HALF_UP).subtract(BigDecimal.ONE);
+        } catch (ArithmeticException e) {
+            return null;
+        }
     }
 
 
@@ -62,8 +66,6 @@ public class RateFunNode extends FunctionNode {
             }
         }
     }
-    
-
 
 }
 

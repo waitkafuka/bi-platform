@@ -173,9 +173,13 @@
      * @param {Array.<Object>} options.datasource 主体数据
      *      条件格式：每个节点中有：{Object} style字段。参见getCondFmt。
      * @param {Array.<Object>} options.colFields 上表头（不仅是内容区域，包括了左表头）
+     *                         options.colFields.colspan 列合并数
+     *                         options.colFields.rowspan 行合并数
+     *                         options.colFields.uniqName 列uniqName（有疑问）
+     *                         options.colFields.v 列名
      * @param {Array.<Object>} options.colDefine 列定义（不仅是内容区域，包括了左表头）
      *      排序：每个节点中有：{string} orderby字段，值可为：'asc', 'desc', 'none'（默认为空，不排序）
-     *      宽度：每个节点中有：{number} width字段。可不指定
+     *      宽度：每个节点中有：{number} width字段。可不指定（有疑问，这个width是干什么用的）
      * @param {Array.<Object>} options.rowHeadFields 左表头
      *      缩进：每个节点有{number} indent字段，值为0, 1, 2, 3 （默认为空，不缩进）
      *      链接下钻：每个节点有{boolean} drillByLink字段
@@ -632,6 +636,13 @@
         //不然文本过多的话会显示不全
         // TODO:支持tips
         var useBag = dom.ieVersion < 8;
+        var strTableHeaderTips = (innerStr === '')
+            ? ''
+            : (
+                '<div class="table-tips-box"><div class="table-head-tips" title="'
+                + innerStr
+                + '">?</div></div>'
+            );
         html.push(
             '<th ', 
                 span.join(' '), ' ',
@@ -640,8 +651,9 @@
                 '" style="', styleStr.join(' '), 
             '">',
                 useBag ? ('<div class="' + type + '-hcell-bag">') : '', 
-                    innerStr, 
+                    innerStr,
                 useBag ? '</div>' : '',
+                strTableHeaderTips,
             '</th>'
         );
     }; 

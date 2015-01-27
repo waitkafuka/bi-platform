@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +49,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.model.TimerAreaLogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelManageService;
@@ -60,6 +62,7 @@ import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DragRuleCheckUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -376,6 +379,8 @@ public class ReportDesignModelResource extends BaseResource {
         
         try {
             model.setPersStatus(true); 
+//            model.setJsonContent(request.getParameter("json"));
+//            model.setVmContent(request.getParameter("vm"));
             model = reportDesignModelService.saveOrUpdateModel(model);
             if (model != null) { 
                 reportModelCacheManager.updateReportModelToCache(id, model);
@@ -795,7 +800,7 @@ public class ReportDesignModelResource extends BaseResource {
         model.getExtendById(areaId).getFormatModel().removeItem(element.getName());
 //        model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
 //        model.getExtendById(areaId).getFormatModel().getToolTips().remove(element.getId());
-        if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 1) {
+        if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 0) {
             model.getExtendById(areaId).getFormatModel().reset();
         }
         /**
@@ -931,20 +936,30 @@ public class ReportDesignModelResource extends BaseResource {
          * check whether the element exist
          */
         ExtendArea targetArea = model.getExtendById(areaId);
-        Item item = targetArea.getItem(itemId);
         ResponseResult result = new ResponseResult();
-        if (item == null || item.getPositionType() == PositionType.X) {
-            logger.error("can't set chart type on dimension");
-            result.setStatus(1);
-            result.setStatusInfo("纬度不能设置图形格式");
-            return result;
+        if (!"COLUMN".equals(type) && !"LINE".equals(type)) {
+            for (Item item : targetArea.getLogicModel().getColumns()) {
+                item.getParams().put("chartType", type);
+            }
+            for (Item item : targetArea.getLogicModel().getSelectionMeasures().values()) {
+                item.getParams().put("chartType", type);
+            }
+        } else {
+            Item item = targetArea.getItem(itemId);
+            if (item == null || item.getPositionType() == PositionType.X) {
+                logger.error("can't set chart type on dimension");
+                result.setStatus(1);
+                result.setStatusInfo("纬度不能设置图形格式");
+                return result;
+            }
+            item.getParams().put("chartType", type);
+            try {
+                model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
+            } catch (ReportModelOperationException e) {
+                logger.error("Exception when add or update item in area: " + areaId, e);
+            }
         }
-        item.getParams().put("chartType", type);
-        try {
-            model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
-        } catch (ReportModelOperationException e) {
-            logger.error("Exception when add or update item in area: " + areaId, e);
-        }
+        
         
         if (model == null) {
             result.setStatus(1);
@@ -1250,4 +1265,83 @@ public class ReportDesignModelResource extends BaseResource {
         return rs;
     }
     
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param olapElementId
+     * @param type
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/params", method = {RequestMethod.POST})
+    public ResponseResult addOrModifyParams(@PathVariable("id") String reportId, HttpServletRequest request) {
+
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        String paramsStr = request.getParameter("params");
+        if (!StringUtils.isEmpty(paramsStr)) {
+            Map<String, ReportParam> params = GsonUtils.fromJson(request.getParameter("params"),
+                    new TypeToken<Map<String, ReportParam>>(){}.getType());
+            model.setParams(params);
+        }
+        /**
+         * 配置端，在修改Item以后，需要重新初始化上下文
+         */
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        runTimeModel.init(model, true, true);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("successfully remode item from area");
+        result.setStatus(0);
+        result.setData(model);
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param olapElementId
+     * @param type
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/params", method = {RequestMethod.GET})
+    public ResponseResult getParams(@PathVariable("id") String reportId, HttpServletRequest request) {
+
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        result.setData(model.getParams());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
 }

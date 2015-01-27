@@ -21,6 +21,8 @@ import java.util.Date;
 
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
+import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
+import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
@@ -66,38 +68,46 @@ class SrDenominatorConditionProcessHandler extends RateConditionProcessHandler {
         cal.add(Calendar.YEAR, -1);
         TimeRangeDetail timeRange = null;
         switch (timeType) {
-        case TimeDay:
-            timeRange = TimeUtils.getDays(cal.getTime(), 0, 0);
-            break;
-        case TimeWeekly:
-            // 星期需要特殊处理
-            try {
-                SimpleDateFormat sdf = new SimpleDateFormat();
-                sdf.applyPattern(TimeRangeDetail.FORMAT_STRING);
-                int weekIndex = TimeUtils.getWeekIndex(sdf.format(firstDayOfTimeRange));
-                cal.set(Calendar.MONTH, 0);
-                cal.set(Calendar.DAY_OF_YEAR, 1);
-                cal.add(Calendar.DAY_OF_YEAR, 7 * weekIndex);
-                timeRange = TimeUtils.getWeekDays(cal.getTime());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            break;
-        case TimeMonth:
-            timeRange = TimeUtils.getMonthDays(cal.getTime());
-            break;
-        case TimeQuarter:
-            timeRange = TimeUtils.getQuarterDays(cal.getTime());
-            break;
-        case TimeYear:
-            timeRange = TimeUtils.getYearDays(cal.getTime());
-            break;
-        default:
-            throw new RuntimeException("未知的时间维度类型：" + timeType.name());
+            case TimeDay:
+                MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
+                int size = 0;
+                if (condition instanceof DimensionCondition) {
+                    DimensionCondition dimCondition = (DimensionCondition) condition;
+                    size = dimCondition.getQueryDataNodes().size();
+                }
+                timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);
+                break;
+            case TimeWeekly:
+                // 星期需要特殊处理
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat();
+                    sdf.applyPattern(TimeRangeDetail.FORMAT_STRING);
+                    int weekIndex = TimeUtils.getWeekIndex(sdf.format(firstDayOfTimeRange));
+                    cal.set(Calendar.MONTH, 0);
+                    cal.set(Calendar.DAY_OF_YEAR, 1);
+                    cal.add(Calendar.DAY_OF_YEAR, 7 * weekIndex);
+                    timeRange = TimeUtils.getWeekDays(cal.getTime());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            case TimeMonth:
+                timeRange = TimeUtils.getMonthDays(cal.getTime());
+                break;
+            case TimeQuarter:
+                timeRange = TimeUtils.getQuarterDays(cal.getTime());
+                break;
+            case TimeYear:
+                timeRange = TimeUtils.getYearDays(cal.getTime());
+                break;
+            default:
+                throw new RuntimeException("未知的时间维度类型：" + timeType.name());
         }
         if (timeRange == null) {
             throw new RuntimeException("未知的时间维度类型：" + timeType.name());
         }
+        
+       
         String[] days = timeRange.getDays();
         QueryContext rs = createOrModifyNewContext(days, dimension, adapter);
         return rs;

@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.google.common.collect.Lists;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -81,7 +82,7 @@ public final class CallbackServiceInvoker {
             timeOutMillSecond = 1000;
         }
         params.put(HttpRequest.SOCKET_TIME_OUT, String.valueOf(timeOutMillSecond));
-        String responseStr = HttpRequest.sendPost(url, params);
+        String responseStr = HttpRequest.sendGet(url, params);
         CallbackResponse response = convertStrToResponse(responseStr, type);
         LOG.info("[INFO] --- --- resposne : {}", response);
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
@@ -107,10 +108,14 @@ public final class CallbackServiceInvoker {
         }
         JsonObject json = new JsonParser().parse(responseStr).getAsJsonObject();
         int status = json.get("status").getAsInt();
-        String message = json.get("message").getAsString();
-        String provider = json.get("provider").getAsString();
-        String cost = json.get("cost").getAsString();
-        String version = json.get("version").getAsString();
+        String message = json.get("message") == null || json.get("message") == JsonNull.INSTANCE ? 
+                "unknown" : json.get("message").getAsString();
+        String provider = json.get("provider") == null || json.get("provider") == JsonNull.INSTANCE ?
+                "unknown" : json.get("provider").getAsString();
+        String cost = json.get("cost") == null || json.get("cost") == JsonNull.INSTANCE ?
+                "unknown" :json.get("cost").getAsString();
+        String version = json.get("version") == null || json.get("version") == JsonNull.INSTANCE ?
+                "unknown" :json.get("version").getAsString();
         LOG.info("[INFO] ------------------------------callback response desc -----------------------------------");
         LOG.info("[INFO] --- --- status : {}", status);
         LOG.info("[INFO] --- --- message : {}", message);
@@ -121,14 +126,23 @@ public final class CallbackServiceInvoker {
         LOG.info("[INFO] --- --- package result to CallbackResponse cost {} ms",
                 (System.currentTimeMillis() - begin));
         rs.setCost(Integer.valueOf(StringUtils.isEmpty(cost) ? "0" : cost));
-        rs.setStatus(ResponseStatus.valueOf(String.valueOf(status)));
+        rs.setStatus(getStatus(status));
         rs.setProvider(provider);
         rs.setVersion(version);
         rs.setMessage(getNlsMessage(status));
         if (ResponseStatus.SUCCESS.getValue() == status) {
-            rs.setData(getCallbackValue(json.get("data").getAsString(), type));
+            rs.setData(getCallbackValue(json.get("data").toString(), type));
         }
         return rs;
+    }
+
+    private static ResponseStatus getStatus(int status) {
+        for (ResponseStatus tmp : ResponseStatus.values()) {
+            if (tmp.getValue() == status) {
+                return tmp;
+            }
+        }
+        throw new UnsupportedOperationException("状态码错误：未知状态");
     }
 
     private static List<CallbackValue> getCallbackValue(String data, CallbackType type) {
@@ -138,9 +152,9 @@ public final class CallbackServiceInvoker {
         }
         switch (type) {
             case DIM:
-                rs = AnswerCoreConstant.GSON.fromJson(data, new TypeToken<List<CallbackDimTreeNode>>(){}.getType());
+                return AnswerCoreConstant.GSON.fromJson(data, new TypeToken<List<CallbackDimTreeNode>>(){}.getType());
             case MEASURE:
-                rs = AnswerCoreConstant.GSON.fromJson(data, new TypeToken<List<CallbackMeasureVaue>>(){}.getType());
+                return AnswerCoreConstant.GSON.fromJson(data, new TypeToken<List<CallbackMeasureVaue>>(){}.getType());
         }
         throw new IllegalStateException("错误的响应结果");
     }
@@ -151,7 +165,7 @@ public final class CallbackServiceInvoker {
      * @return String
      */
     private static String getNlsMessage(int status) {
-        ResponseStatus statusType = ResponseStatus.valueOf(String.valueOf(status));
+        ResponseStatus statusType = getStatus(status);
         // 以后考虑国际化，此处为临时方案
         switch (statusType) {
             case SUCCESS:

@@ -29,8 +29,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
+import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
+import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
+import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
@@ -231,6 +236,10 @@ public class DataSourceResource extends BaseResource {
                 assignNewValue(productLine, request, define);
                 define.setDbPwd(define.getDbPwd());
                 dsService.saveOrUpdateDataSource(define, securityKey);
+                Map<String, String> params = Maps.newHashMap();
+                DataSourceInfo info = DataSourceDefineUtil.parseToDataSourceInfo(define, securityKey);
+                params.put("dataSourceInfo", AnswerCoreConstant.GSON.toJson(info));
+                HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "datasource/update", params);
                 logger.info("successfully update datasource with id " + id);
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
@@ -240,7 +249,7 @@ public class DataSourceResource extends BaseResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             rs.setStatus(1);
-            rs.setStatusInfo("error : " + e.getMessage());
+            rs.setStatusInfo("error : 数据更新出错");
         }
         return rs;
     }
@@ -297,13 +306,15 @@ public class DataSourceResource extends BaseResource {
                     return rs;
                 } else {
                     boolean result = dsService.removeDataSource(id);
+                    Map<String, String> params = Maps.newHashMap();
+                    HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/datasource/destroy/" + id, params);
                     rs.setStatus(0);
                     rs.setStatusInfo(String.valueOf(result));
                 }
             }
         } catch (DataSourceOperationException e) {
             rs.setStatus(1);
-            rs.setStatusInfo(e.getMessage());
+            rs.setStatusInfo("删除数据出错");
             logger.error(e.getMessage(), e);
         }
         return rs;

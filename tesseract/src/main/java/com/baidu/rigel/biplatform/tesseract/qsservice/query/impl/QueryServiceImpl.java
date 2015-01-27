@@ -25,6 +25,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
@@ -38,11 +39,14 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.CallbackCondition;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.exception.OverflowQueryConditionException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
+import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
+import com.baidu.rigel.biplatform.tesseract.isservice.search.service.impl.CallbackSearchServiceImpl;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
@@ -55,6 +59,9 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContextSplit
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
+import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
+import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
+import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
 /**
  * 查询接口实现
@@ -96,6 +103,9 @@ public class QueryServiceImpl implements QueryService {
     
     @Resource
     private QueryContextBuilder queryContextBuilder;
+    
+    @Autowired
+    private CallbackSearchServiceImpl callbackSearchService;
 
     @Override
     public DataModel query(QuestionModel questionModel, QueryContext queryContext,
@@ -151,10 +161,20 @@ public class QueryServiceImpl implements QueryService {
             Cube finalCube = cube;
             // TODO 抛出到其它节点去,后续需要修改成调用其它节点的方法
             splitResult.getConditionQueryContext().forEach((con, context) -> {
-                        splitResult.getDataModels().put(
-                                con,
-                                executeQuery(dsInfo, finalCube, context, questionModel.isUseIndex(),
-                                        questionModel.getPageInfo()));
+                        DataModel dm = null;
+                        if (con instanceof CallbackCondition) {
+                            try {
+                                TesseractResultSet resultSet = callbackSearchService.query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, context, questionModel.isUseIndex(),null));
+                                dm = new DataModelBuilder(resultSet, context).build();
+                            } catch (Exception e) {
+                                logger.error("catch error when process callback measure {}",e.getMessage());
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            dm = executeQuery(dsInfo, finalCube, context, questionModel.isUseIndex(),
+                                    questionModel.getPageInfo());
+                        }
+                        splitResult.getDataModels().put(con, dm);
             });
             
             result = queryContextSplitService.mergeDataModel(splitResult);
@@ -164,6 +184,9 @@ public class QueryServiceImpl implements QueryService {
         }
         if (result != null) {
             result = sortAndTrunc(result, questionModel.getSortRecord());
+        }
+        if (questionModel.isFilterBlank()) {
+            DataModelUtils.filterBlankRow(result);
         }
         return result;
 
@@ -185,6 +208,21 @@ public class QueryServiceImpl implements QueryService {
         DataModel result = null;
         try {
             TesseractResultSet resultSet = searchService.query(queryRequest);
+            
+            if (queryRequest.getGroupBy() != null && CollectionUtils.isNotEmpty(queryRequest.getGroupBy().getGroups())) {
+                try {
+                    resultSet = QueryRequestUtil.processGroupBy(resultSet, queryRequest, queryContext);
+                } catch (NoSuchFieldException e) {
+                    e.printStackTrace();
+                    logger.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + queryRequest
+                            + "]", e));
+                    throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                            IndexAndSearchException.QUERYEXCEPTION_MESSAGE, IndexAndSearchExceptionType.SEARCH_EXCEPTION),
+                            e, IndexAndSearchExceptionType.SEARCH_EXCEPTION);
+                }
+
+            }
+            
             result = new DataModelBuilder(resultSet, queryContext).build();
         } catch (IndexAndSearchException e) {
             logger.error("query occur when search queryRequest：" + queryContext, e);

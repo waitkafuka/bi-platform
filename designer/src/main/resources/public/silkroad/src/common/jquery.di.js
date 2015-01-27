@@ -131,6 +131,11 @@ $.getTargetElement = function (id, entityArray) {
     return target;
 };
 
+// 获取到含有当前id的组件实例的clzType
+$.getTargetElementClzType = function (id, entityArray) {
+    return $.getTargetElement(id, entityArray).clzType;
+};
+
 // 判断当前实例中是否已有事件关联:如果返回-1，说明没有关联
 // TODO:写注释
 $.hasRelation = function (id, entity) {

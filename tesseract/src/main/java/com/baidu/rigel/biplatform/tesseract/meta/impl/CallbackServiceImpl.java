@@ -44,7 +44,9 @@ public class CallbackServiceImpl extends DICallBackServiceFetch<List<CallBackTre
     public List<CallBackTreeNode> parseFromJson(String jsonStr) {
         FetchUrlResult fetchUrlResult = AnswerCoreConstant.GSON.fromJson(jsonStr, FetchUrlResult.class);
         List<CallBackTreeNode> result = null;
-        if (StringUtils.equals(CALLBACK_VERSION_1, fetchUrlResult.getVersion())) {
+        String oldVersion = "1.0";
+        if (StringUtils.equals(CALLBACK_VERSION_1, fetchUrlResult.getVersion()) 
+                || StringUtils.equals(CALLBACK_VERSION_1, oldVersion)) {
             CallBackTreeFetchUrlResult posTreeFetchResult =
                     AnswerCoreConstant.GSON.fromJson(jsonStr, CallBackTreeFetchUrlResult.class);
             result = posTreeFetchResult.getData();

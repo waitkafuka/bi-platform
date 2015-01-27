@@ -29,6 +29,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.From;
@@ -72,7 +73,6 @@ public class QueryRequestBuilder {
         buildSelectAndGroupBy(queryContext.getColumnMemberTrees(), request, expressions);
         buildSelectAndGroupBy(queryContext.getRowMemberTrees(), request, expressions);
 
-        request.getWhere().getAndList().addAll(expressions.values());
         // 构造filter的条件
         if (MapUtils.isNotEmpty(queryContext.getFilterMemberValues())) {
             queryContext.getFilterMemberValues().forEach((properties, values) -> {
@@ -82,6 +82,7 @@ public class QueryRequestBuilder {
             });
         }
 
+        request.getWhere().getAndList().addAll(expressions.values());
         int start = 0;
         int size = -1;
         if (pageInfo != null) {
@@ -104,7 +105,7 @@ public class QueryRequestBuilder {
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
             for (MemberNodeTree node : nodeTrees) {
-                if (StringUtils.isNotBlank(node.getQuerySource())) {
+                if (StringUtils.isNotBlank(node.getQuerySource()) && !MetaNameUtil.isAllMemberName(node.getName())) {
                     request.selectAndGroupBy(node.getQuerySource());
                     Expression expression = expressions.get(node.getQuerySource());
                     if (expression == null) {

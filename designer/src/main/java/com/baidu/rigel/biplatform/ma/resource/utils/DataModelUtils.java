@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -354,6 +355,7 @@ public final class DataModelUtils {
         data.setCellId("");
         data.setFormattedValue("I,III.DD");
         if (value != null) {
+            value = value.setScale(8, RoundingMode.HALF_UP);
             data.setV(value);
         }
         return data;

@@ -415,7 +415,7 @@
     display: inline-block;
     width: 350px;
     height: 100%;
-    margin-right: 20px;
+    margin-right: 15px;
 }
 .callback-text input{
     float: right;
@@ -446,8 +446,9 @@
     margin: 7px 0 0 2px;
     font-size: 16px;
     line-height: 18px;
+    border-radius: 4px;
 }
-.callback-close:hover{
+.close-retractable:hover{
     width: 19px;
     height: 19px;
     float: right;
@@ -459,19 +460,7 @@
     background: #3399ff;
     border:1px solid #3399ff;
     margin-top: 7px;
-}
-.callback-retractable:hover{
-    width: 19px;
-    height: 19px;
-    float: right;
-    text-align: center;
-    cursor: pointer;
-    color: #FFF;
-    font-size: 20px;
-    line-height: 18px;
-    background: #3399ff;
-    border:1px solid #3399ff;
-    margin-top: 7px;
+    border-radius: 4px;
 }
 .callback-retractable {
     font-size: 16px;
@@ -488,4 +477,5 @@
 .callback-title div{
     color: #333;
     margin-left: 15px;
+    display: inline-block;
 }

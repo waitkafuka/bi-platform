@@ -20,6 +20,8 @@ import java.util.Date;
 
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
+import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
+import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
@@ -67,7 +69,13 @@ class RrDenominatorConditionProcessHandler  extends RateConditionProcessHandler 
         TimeRangeDetail timeRange = null;
         switch (timeType) {
             case TimeDay:
-                timeRange = TimeUtils.getDays(cal.getTime(), 0, 0);
+                MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
+                int size = 0;
+                if (condition instanceof DimensionCondition) {
+                    DimensionCondition dimCondition = (DimensionCondition) condition;
+                    size = dimCondition.getQueryDataNodes().size();
+                }
+                timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);
                 break;
             case TimeWeekly:
                 timeRange = TimeUtils.getWeekDays(cal.getTime());

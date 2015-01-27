@@ -18,7 +18,9 @@
  */
 package com.baidu.rigel.biplatform.tesseract.datasource;
 
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
@@ -39,7 +41,7 @@ public interface DataSourcePoolService {
     /**
      * LOG
      */
-    Logger LOG = Logger.getLogger(DataSourcePoolService.class);
+    Logger LOG = LoggerFactory.getLogger(DataSourcePoolService.class);
 
     /**
      * 初始化数据源信息，包括数据源信息存储和建立数据源

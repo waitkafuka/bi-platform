@@ -15,7 +15,10 @@
  */
 package com.baidu.rigel.biplatform.ma.report.utils;
 
+import java.util.Map;
+
 import com.baidu.rigel.biplatform.ma.utils.ThreadLocalResourceHolder;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -36,6 +39,11 @@ public final class ContextManager {
      * PRODUCT_LINE
      */
     private static final String PRODUCT_LINE = "biplatform_productline";
+    
+    /**
+     * 当前执行线程需要的参数
+     */
+    private static final String PARAMS = "params";
     
     /**
      * 构造函数
@@ -80,7 +88,7 @@ public final class ContextManager {
     
     /**
      * 
-     * @return
+     * @return productLine
      */
     public static String getProductLine() {
         return (String) ThreadLocalResourceHolder.getProperty(PRODUCT_LINE);
@@ -93,4 +101,27 @@ public final class ContextManager {
         ThreadLocalResourceHolder.unbindProperty(PRODUCT_LINE);
     }
     
+    public static void setParams(Map<String, String> params) {
+        ThreadLocalResourceHolder.bindProperty(PARAMS, params);
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, String> getParams() {
+        Object tmp = ThreadLocalResourceHolder.getProperty(PARAMS);
+        if (tmp == null) {
+            return Maps.newHashMap();
+        }
+        if (tmp instanceof Map) {
+            return (Map<String, String>) tmp;
+        }
+        throw new RuntimeException("参数类型错误");
+    }
+    
+    public static void cleanParams() {
+        ThreadLocalResourceHolder.unbindProperty(PARAMS);
+    }
 }

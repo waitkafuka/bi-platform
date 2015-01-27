@@ -88,6 +88,11 @@ public class QuestionModel implements Serializable {
      * isUseIndex 是否使用索引，默认为true
      */
     private boolean isUseIndex = true;
+    
+    /**
+     * 是否过滤空白行
+     */
+    private boolean filterBlank = false;
 
     /**
      * getter method for property axisMetas
@@ -294,6 +299,20 @@ public class QuestionModel implements Serializable {
      */
     public void setUseIndex(boolean isUseIndex) {
         this.isUseIndex = isUseIndex;
+    }
+
+    /**
+     * @return the filterBlank
+     */
+    public boolean isFilterBlank() {
+        return filterBlank;
+    }
+
+    /**
+     * @param filterBlank the filterBlank to set
+     */
+    public void setFilterBlank(boolean filterBlank) {
+        this.filterBlank = filterBlank;
     }
 
     // /**

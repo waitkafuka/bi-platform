@@ -334,13 +334,18 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 oriCube.getDimensions().values().forEach(dim -> {
                     if (dim.getId().equals(key)) {
                         Item item = new Item();
-	                    item.setAreaId(areaId);
-	                    item.setCubeId(cubeId);
-	                    item.setId(dim.getId());
-	                    item.setOlapElementId(dim.getId());
-	                    item.setPositionType(PositionType.S);
-	                    item.setSchemaId(schema.getId());
-	                    targetLogicModel.addSlice(item);
+                        if (targetLogicModel.getItemByOlapElementId(key) != null) {
+                            item = targetLogicModel.getItemByOlapElementId(key) ;
+                        }
+                        item.setAreaId(areaId);
+                        item.setCubeId(cubeId);
+                        item.setId(dim.getId());
+                        item.setOlapElementId(dim.getId());
+                        if (item.getPositionType() == null) {
+                            item.setPositionType(PositionType.S);
+                        }
+                        item.setSchemaId(schema.getId());
+                        targetLogicModel.addSlice(item);
                     }
                 });
             }
@@ -395,6 +400,15 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 orderDesc = new QueryAction.MeasureOrderDesc(
                         measures.get(topSet.getMeasureId()).getName(), 
                         topSet.getTopType().name(), topSet.getRecordSize());
+            }
+        }
+        ExtendArea area = reportModel.getExtendById(areaId);
+        if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
+            if (filterBlank == null) {
+                action.setFilterBlank(false);
+            } else {
+                action.setFilterBlank(Boolean.valueOf(filterBlank.toString()));
             }
         }
         action.setMeasureOrderDesc(orderDesc);

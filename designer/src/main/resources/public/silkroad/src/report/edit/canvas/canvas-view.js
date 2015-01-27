@@ -102,7 +102,7 @@ define([
                     tolerance: 'intersect',
                     drop: function (event, ui) {
                         var $report = $(this);
-                        var $realComp = ui.helper.clone().html('<div style="width:100%; height:20px"></div><div class="ta-c">组件占位，配置数据后展示组件</div>');
+                        var $realComp = ui.helper.clone().html('<div class="placeholer-20" style="width:100%; height:20px"></div><div class="ta-c">组件占位，配置数据后展示组件</div>');
                         var compType = $realComp.attr('data-component-type');
                         var compData = compBoxModel.getComponentData(compType);
                         $realComp.removeClass(compData.iconClass + ' active');
@@ -252,8 +252,8 @@ define([
                 var $target = $(event.target);
                 var $comp = $target.parents('.j-component-item');
                 var compId = $comp.attr('data-comp-id');
-
-                this.model.deleteComp(compId, function () {
+                var reportCompId = $comp.attr('report-comp-id');
+                this.model.deleteComp(compId, reportCompId, function () {
                     $comp.remove();
                     that.editCompView.hideEditBar();
                     // 刷新报表展示
@@ -381,7 +381,7 @@ define([
                     }
                 }
                 /**
-                $component.find('.j-fold').click(function () {
+                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
                     if ($conBtn.width() < 20) {
                         $conBtn.width('auto');
@@ -394,7 +394,7 @@ define([
                         $(this).html('+');
                     }
                 });
-                **/
+                 **/
             },
 
             /**
