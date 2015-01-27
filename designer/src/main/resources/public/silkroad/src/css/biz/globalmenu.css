@@ -27,6 +27,7 @@
 }
 .skin-menu-box {
     background: #f9f9f7;
+    margin: 5px;
 }
 .classic-skin {
     background: #FFF;
@@ -35,9 +36,12 @@
     background: #CFEBF5;
 }
 .skin-type {
-    margin: 5px;
+    padding: 5px;
     height: 20px;
     cursor: pointer;
+}
+.skin-type:hover{
+    background: #e4e4e4;
 }
 .skin-type div{
     float: left;

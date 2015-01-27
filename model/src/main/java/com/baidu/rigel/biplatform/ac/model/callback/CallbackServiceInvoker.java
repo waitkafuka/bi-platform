@@ -113,7 +113,7 @@ public final class CallbackServiceInvoker {
         String provider = json.get("provider") == null || json.get("provider") == JsonNull.INSTANCE ?
                 "unknown" : json.get("provider").getAsString();
         String cost = json.get("cost") == null || json.get("cost") == JsonNull.INSTANCE ?
-                "unknown" :json.get("cost").getAsString();
+                "" :json.get("cost").getAsString();
         String version = json.get("version") == null || json.get("version") == JsonNull.INSTANCE ?
                 "unknown" :json.get("version").getAsString();
         LOG.info("[INFO] ------------------------------callback response desc -----------------------------------");
