@@ -15,6 +15,9 @@
  */
 package com.baidu.rigel.biplatform.ma.auth.resource;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -123,6 +126,11 @@ public class RegisterController extends RandomValidateCodeController {
             }
             // 获取用户信息        
             ProductlineInfo user = this.getUserFromUrl(request, false);
+            if (isInValid(user)) {
+                rs.setStatus(1);
+                rs.setStatusInfo("用户名非法");
+                return rs;
+            }
             LOG.info("begin open online service for user [" + user.getName() + "]");
             // 开通线上服务，如果发生异常，直接抛出
             if (productLineRegisterService.openOnlineService(user) != 0) {
@@ -144,6 +152,16 @@ public class RegisterController extends RandomValidateCodeController {
         return rs;
     }
     
+    private boolean isInValid(ProductlineInfo user) {
+        String reg = "^[a-zA-z][a-zA-Z0-9_]{2,9}$";
+        Pattern pat = Pattern.compile(reg);  
+        Matcher matcher = pat.matcher(user.getName());
+        if (!matcher.matches()) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 开通线下服务产品线
      */
@@ -151,9 +169,22 @@ public class RegisterController extends RandomValidateCodeController {
     @ResponseBody
     public ResponseResult openOfflineService(HttpServletRequest request, HttpServletResponse response) {
         ResponseResult rs = new ResponseResult();
-        try {   
+        try {
+            String magicStr = request.getParameter("magicStr"); 
+            if (StringUtils.isEmpty(cacheManagerForResource.getFromCache(magicStr))) {
+                rs.setStatus(1);
+                rs.setStatusInfo("已经开通，不能重复开通");
+                return rs;
+            } else {
+                cacheManagerForResource.deleteFromCache(magicStr);
+            }
             // 获取用户信息
             ProductlineInfo user = this.getUserFromUrl(request, false);
+            if (isInValid(user)) {
+                rs.setStatus(1);
+                rs.setStatusInfo("用户名非法");
+                return rs;
+            }
             LOG.info("begin open offline service for user [" + user.getName() + "]");
             // 开通线下服务
             if (productLineRegisterService.openOfflineService(user) != 0) {
