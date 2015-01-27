@@ -18,7 +18,7 @@
     float: left;
     line-height: 18px;            
     vertical-align: middle;
-    width: 330px;
+    width: auto;
 }
 .di-table-count-num {
     font-size: 14px;

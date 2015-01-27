@@ -96,12 +96,12 @@ define([
                         var compType = ui.helper.attr('data-component-type');
                         var compData = that.model.getComponentData(compType);
                         startScrollTop = $report.scrollTop();
+                        console.log($report);
                         $('.j-all-menus').hide();
                         ui.helper.html('临时展示').css({
                             'width': '100px',
                             'height': '100px',
-                            'cursor': 'move',
-                            'background': '#ffffff'
+                            'cursor': 'move'
                         }).addClass('active shell-component j-component-border');
                         ui.helper.attr('data-default-width', compData.defaultWidth);
                         ui.helper.attr('data-default-height', compData.defaultHeight);

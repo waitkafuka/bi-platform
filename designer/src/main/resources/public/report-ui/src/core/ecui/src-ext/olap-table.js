@@ -636,6 +636,13 @@
         //不然文本过多的话会显示不全
         // TODO:支持tips
         var useBag = dom.ieVersion < 8;
+        var strTableHeaderTips = (innerStr === '')
+            ? ''
+            : (
+                '<div class="table-tips-box"><div class="table-head-tips" title="'
+                + innerStr
+                + '">?</div></div>'
+            );
         html.push(
             '<th ', 
                 span.join(' '), ' ',
@@ -644,9 +651,9 @@
                 '" style="', styleStr.join(' '), 
             '">',
                 useBag ? ('<div class="' + type + '-hcell-bag">') : '', 
-                    innerStr, 
+                    innerStr,
                 useBag ? '</div>' : '',
-            '<span>123</span>',
+                strTableHeaderTips,
             '</th>'
         );
     }; 

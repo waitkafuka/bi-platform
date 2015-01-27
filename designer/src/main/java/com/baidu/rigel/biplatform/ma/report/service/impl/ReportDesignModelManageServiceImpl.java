@@ -178,7 +178,8 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
      * @param area
      */
     private void changeSelItemChartType(Item item, ExtendArea area) {
-        final Object chartType = item.getParams().get("chartType");
+        final String chartTypeKey = "chartType";
+        final Object chartType = item.getParams().get(chartTypeKey);
         if (chartType == null) {
             return;
         }
@@ -188,15 +189,14 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
         }
         Map<String, Item> tmpMap = DeepcopyUtils.deepCopy(area.getLogicModel().getSelectionMeasures());
         tmpMap.forEach((k, v) -> {
-            Object tmp = v.getParams().get("chartType");
-            final String chartTypeKey = "chartType";
+            Object tmp = v.getParams().get(chartTypeKey);
             if (tmp != null) {
                 if ("column".equalsIgnoreCase(chartType.toString()) || "line".equalsIgnoreCase(chartType.toString())) {
                     if (!"column".equalsIgnoreCase(tmp.toString()) && !"line".equalsIgnoreCase(tmp.toString())) {
                         v.getParams().put(chartTypeKey, chartType);
                     }
                 } else {
-                    v.getParams().put(chartTypeKey, chartType);
+                    v.getParams().put(chartTypeKey, tmp);
                 }
             } else {
                 v.getParams().put(chartTypeKey, chartType);;

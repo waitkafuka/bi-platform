@@ -68,7 +68,12 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         CallbackLevel callbackLevel = (CallbackLevel) level;
         Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
         if (MapUtils.isNotEmpty(params)) {
-            callbackParams.putAll(params);
+            params.forEach((k, v) -> {
+                if (callbackParams.containsKey(k)) {
+                    callbackParams.put(k, v);
+                }
+            }); 
+//            callbackParams.putAll(params);
         }
         
         CallbackResponse response = 
@@ -152,7 +157,12 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         CallbackLevel callbackLevel = (CallbackLevel) level;
         Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
         if (MapUtils.isNotEmpty(params)) {
-            callbackParams.putAll(params);
+            params.forEach((k, v) -> {
+                if (callbackParams.containsKey(k)) {
+                    callbackParams.put(k, v);
+                }
+            }); 
+//            callbackParams.putAll(params);
         }
         CallbackResponse response = 
                 CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), 

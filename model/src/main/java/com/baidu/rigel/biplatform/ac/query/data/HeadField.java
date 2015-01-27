@@ -451,4 +451,101 @@ public class HeadField implements Serializable {
         this.hasChildren = hasChildren;
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((caption == null) ? 0 : caption.hashCode());
+        result = prime * result + ((children == null) ? 0 : children.hashCode());
+        result = prime * result + ((extInfos == null) ? 0 : extInfos.hashCode());
+        result = prime * result + (hasChildren ? 1231 : 1237);
+        result = prime * result + ((nodeList == null) ? 0 : nodeList.hashCode());
+        result = prime * result + ((nodeUniqueName == null) ? 0 : nodeUniqueName.hashCode());
+        result = prime * result + ((parent == null) ? 0 : parent.hashCode());
+        result = prime * result + ((parentLevelField == null) ? 0 : parentLevelField.hashCode());
+        result = prime * result + ((value == null) ? 0 : value.hashCode());
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof HeadField)) {
+            return false;
+        }
+        HeadField other = (HeadField) obj;
+        if (caption == null) {
+            if (other.caption != null) {
+                return false;
+            }
+        } else if (!caption.equals(other.caption)) {
+            return false;
+        }
+        if (children == null) {
+            if (other.children != null) {
+                return false;
+            }
+        } else if (!children.equals(other.children)) {
+            return false;
+        }
+        if (extInfos == null) {
+            if (other.extInfos != null) {
+                return false;
+            }
+        } else if (!extInfos.equals(other.extInfos)) {
+            return false;
+        }
+        if (hasChildren != other.hasChildren) {
+            return false;
+        }
+        if (nodeList == null) {
+            if (other.nodeList != null) {
+                return false;
+            }
+        } else if (!nodeList.equals(other.nodeList)) {
+            return false;
+        }
+        if (nodeUniqueName == null) {
+            if (other.nodeUniqueName != null) {
+                return false;
+            }
+        } else if (!nodeUniqueName.equals(other.nodeUniqueName)) {
+            return false;
+        }
+        if (parent == null) {
+            if (other.parent != null) {
+                return false;
+            }
+        } else if (!parent.equals(other.parent)) {
+            return false;
+        }
+        if (parentLevelField == null) {
+            if (other.parentLevelField != null) {
+                return false;
+            }
+        } else if (!parentLevelField.equals(other.parentLevelField)) {
+            return false;
+        }
+        if (value == null) {
+            if (other.value != null) {
+                return false;
+            }
+        } else if (!value.equals(other.value)) {
+            return false;
+        }
+        return true;
+    }
+
+    
 }

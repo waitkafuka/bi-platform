@@ -251,6 +251,7 @@
             "<%= prop.dirBinCom %>/css/<%= prop.skin %>/xui-*.css",
             "<%= prop.dirBinCom %>/css/<%= prop.skin %>/di.css",
             "<%= prop.dirBinCom %>/css/<%= prop.skin %>/diui-*.css",
+            // TODO：下面这个需要整理后干掉，不应该有的
             "<%= prop.dirBinCom %>/css/<%= prop.skin %>/product.css"
         ],
         "consoleBaseCSS": [
@@ -329,6 +330,7 @@
         { "filePath": "<%= prop.dirDIView %>/liteolap-meta-config.js", "depends": ["<%= prop.dirDIModel %>/olap-meta-config-model.js"] },
         { "filePath": "<%= prop.dirDIView %>/panel-page.js", "depends": ["ecuiBaseJS"] },
 
+
         // DI Inner VUI （包含了全部）
         { "filePath": "<%= prop.dirInnerVUI %>/hidden-input.js", "depends": [] },
         { "filePath": "<%= prop.dirInnerVUI %>/offline-download.js", "depends": ["<%= prop.dirECUIExt %>/h-button.js", "<%= prop.dirECUICore %>/form.js"] },
@@ -337,7 +339,7 @@
         { "filePath": "<%= prop.dirInnerVUI %>/text-label.js", "depends": [] },
         { "filePath": "<%= prop.dirInnerVUI %>/multi-checkbox.js", "depends": [] },
         { "filePath": "<%= prop.dirInnerVUI %>/simple-radio.js", "depends": [] },
-
+        { "filePath": "<%= prop.dirInnerVUI %>/range-calendar.js", "depends": ["<%= prop.dirSrcCore %>/rangecalendar/kalendae.js"] },
         // ecui core （包含了全部）
         { "filePath": "<%= prop.dirECUICore %>/items.js", "depends": ["ecuiBaseJS"] },
         { "filePath": "<%= prop.dirECUICore %>/month-view.js", "depends": ["ecuiBaseJS"] },
@@ -452,6 +454,7 @@
         { "clzPath": "di.shared.vui.SimpleRadio", "filePath": "<%= prop.dirInnerVUI %>/simple-radio.js" },
         { "clzPath": "di.shared.vui.SaveButton", "filePath": "<%= prop.dirInnerVUI %>/rptsave-save.js" },
         { "clzPath": "di.shared.vui.TabButton", "filePath": "<%= prop.dirInnerVUI %>/rptsave-tab.js" },
+        { "clzPath": "di.shared.vui.RangeCalendar", "filePath": "<%= prop.dirInnerVUI %>/range-calendar.js" },
         // xui-ui
         { "clzPath": "xui.ui.EChart", "filePath": "<%= prop.dirXUI %>/e-chart.js" },
         // ecui core

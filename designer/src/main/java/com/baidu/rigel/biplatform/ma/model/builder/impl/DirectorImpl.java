@@ -36,6 +36,7 @@ import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
@@ -300,7 +301,8 @@ public class DirectorImpl implements Director {
             String dimIdent = buildDimIdent(dim);
             if (dimIdents.containsKey(dimIdent)) {
                 Dimension tmp = dimIdents.get(dimIdent);
-                dims.put(tmp.getId(), tmp);
+                ((MiniCubeDimension) dim).setId(tmp.getId());
+                dims.put(tmp.getId(), dim);
             } else {
                 dims.put(dim.getId(), dim);
             }

@@ -379,6 +379,8 @@ public class ReportDesignModelResource extends BaseResource {
         
         try {
             model.setPersStatus(true); 
+//            model.setJsonContent(request.getParameter("json"));
+//            model.setVmContent(request.getParameter("vm"));
             model = reportDesignModelService.saveOrUpdateModel(model);
             if (model != null) { 
                 reportModelCacheManager.updateReportModelToCache(id, model);
@@ -934,20 +936,30 @@ public class ReportDesignModelResource extends BaseResource {
          * check whether the element exist
          */
         ExtendArea targetArea = model.getExtendById(areaId);
-        Item item = targetArea.getItem(itemId);
         ResponseResult result = new ResponseResult();
-        if (item == null || item.getPositionType() == PositionType.X) {
-            logger.error("can't set chart type on dimension");
-            result.setStatus(1);
-            result.setStatusInfo("纬度不能设置图形格式");
-            return result;
+        if (!"COLUMN".equals(type) && !"LINE".equals(type)) {
+            for (Item item : targetArea.getLogicModel().getColumns()) {
+                item.getParams().put("chartType", type);
+            }
+            for (Item item : targetArea.getLogicModel().getSelectionMeasures().values()) {
+                item.getParams().put("chartType", type);
+            }
+        } else {
+            Item item = targetArea.getItem(itemId);
+            if (item == null || item.getPositionType() == PositionType.X) {
+                logger.error("can't set chart type on dimension");
+                result.setStatus(1);
+                result.setStatusInfo("纬度不能设置图形格式");
+                return result;
+            }
+            item.getParams().put("chartType", type);
+            try {
+                model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
+            } catch (ReportModelOperationException e) {
+                logger.error("Exception when add or update item in area: " + areaId, e);
+            }
         }
-        item.getParams().put("chartType", type);
-        try {
-            model = manageService.addOrUpdateItemIntoArea(model, areaId, item, item.getPositionType());
-        } catch (ReportModelOperationException e) {
-            logger.error("Exception when add or update item in area: " + areaId, e);
-        }
+        
         
         if (model == null) {
             result.setStatus(1);

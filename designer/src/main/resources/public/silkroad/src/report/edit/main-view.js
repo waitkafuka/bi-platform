@@ -32,7 +32,8 @@ define([
             events: {
                 'change .j-cube-select': 'changeCube',
                 'click .j-global-para': 'setglobalbtn',
-                'click .j-global-component': 'shiftMenu'
+                'click .j-global-component': 'shiftMenu',
+                'click .j-button-skin': 'shiftMenu'
             },
 
             /**
