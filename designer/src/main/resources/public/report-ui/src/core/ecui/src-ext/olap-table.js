@@ -643,8 +643,8 @@
             : (
             '<div class="' + type + '-heade-th-content">'
             + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
-            + '<span class="'+ type + '-head-tips" title="' + innerStr + '">?</span>'
             + '<span class="'+ classSortStr + '">  </span>'
+            + '<span class="'+ type + '-head-tips" title="' + innerStr + '">?</span>'
             + '<span class="' + type + '-head-drag"></span>'
             + '</div>'
             );

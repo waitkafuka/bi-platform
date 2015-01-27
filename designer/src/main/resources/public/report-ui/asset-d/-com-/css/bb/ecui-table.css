@@ -105,7 +105,7 @@
     background: #DCEFD1;
 }*/
 .ui-table-cell-align-right {
-    text-align: center;
+    text-align: left;
 }
 .ui-table-cell-align-center {
     text-align: center;
@@ -255,12 +255,12 @@
     background-position: -10px -106px;
 }
 .ui-table-head-tips {
-    width: 17px;
-    height: 17px;
+    width: 15px;
+    height: 15px;
     margin-left: 2px;
     background: #8A8C8C;
     border-radius: 8px;
-    line-height: 17px;
+    line-height: 15px;
     color: #FFF;
     display: inline-block;
 }
