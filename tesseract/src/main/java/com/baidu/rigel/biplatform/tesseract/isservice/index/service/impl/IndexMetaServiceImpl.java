@@ -384,21 +384,10 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         if (idxMeta.getIdxShardList() != null) {
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
                 idxShard.setIdxVersion(idxMeta.getIdxVersion());
-                idxShard.setIdxMeta(idxMeta);
+                
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
                     "saveOrUpdateIndexMeta", "[indexMeta:" + idxMeta + "]", "saving node"));
-                if (idxShard.getNode() != null) {
-                    idxShard.getNode().getUsedIndexShardList().add(idxShard);
-                    super.saveOrUpdateMetaStore(idxShard.getNode(), Node.getDataStoreName());
-                    for (Node node : idxShard.getReplicaNodeList()) {
-                        if (node.getUsedIndexShardList() != null
-                                && !node.getUsedIndexShardList().contains(idxShard)) {
-                            node.getUsedIndexShardList().add(idxShard);
-                        }
-                        super.saveOrUpdateMetaStore(node, Node.getDataStoreName());
-                    }
-                    
-                }
+                
             }
         }
         boolean result = super.saveOrUpdateMetaStore(idxMeta, IndexMeta.getDataStoreName());
@@ -584,13 +573,18 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
      * 
      * @param idxShardList
      *            索引分片列表
+     * @param clusterName
+     *            集群名称
      * @return List<Node> 机器节点信息
      */
-    private List<Node> getNodeListForExistIndexShard(List<IndexShard> idxShardList) {
+    private List<Node> getNodeListForExistIndexShard(List<IndexShard> idxShardList,String clusterName) {
         List<Node> nodeList = new ArrayList<Node>();
-        if (idxShardList != null) {
+        if (idxShardList != null && !StringUtils.isEmpty(clusterName)) {
             for (IndexShard idxShard : idxShardList) {
-                nodeList.add(idxShard.getNode());
+                List<Node> idxShardNodeList=this.isNodeService.getAvailableNodeListByIndexShard(idxShard, clusterName);
+                if(!CollectionUtils.isEmpty(idxShardNodeList)){
+                	nodeList.addAll(idxShardNodeList);
+                }
             }
         }
         return nodeList;
@@ -690,7 +684,8 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                 idxMeta.getProductLine(), idxMeta.getStoreKey());
             
             // 当前产品线的索引分片所在的结点列表
-            List<Node> idxShardNodeList = this.getNodeListForExistIndexShard(idxShardList);
+            List<Node> idxShardNodeList = this.getNodeListForExistIndexShard(idxShardList,idxMeta.getClusterName());
+            
             
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                 "assignIndexShard", "assign node begin"));

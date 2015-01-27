@@ -57,17 +57,15 @@ public interface IsNodeService {
      */
     Map<Node, Integer> assignFreeNode(int blockCount, String clusterName);
     
+
     /**
-     * 
-     * 申请节点副本
-     * 
-     * @param blockCount
-     *            需要的个数
-     * @param node
-     *            当前的结点
-     * @return List<Node> 返回申请到的节点列表
+     * 分配数据副本所在的节点
+     * @param blockCount 需要的个数
+     * @param nodeKey 指定的节点KEY
+     * @param clusterName 所在集群名称
+     * @return Map<String,Node>
      */
-    List<Node> assignFreeNodeForReplica(int blockCount, Node node);
+    Map<String,Node> assignFreeNodeForReplica(int blockCount, String nodeKey, String clusterName);
     
     /**
      * 
@@ -166,15 +164,25 @@ public interface IsNodeService {
     Node getCurrentNode();
     
 	/**
-	 * getNodeMapByNodeKey 跟据集群名称、nodeKey列表，拿到对应的节点信息，不区分节点状态
+	 * getNodeMapByNodeKey 跟据集群名称、nodeKey列表，拿到对应的节点信息
 	 * 
 	 * @param clusterName
 	 *            集群名称
 	 * @param nodeKeyList
 	 *            nodeKey列表
+	 * @param isAvailable 是否可用
 	 * @return Map<String,Node>
 	 */
 	Map<String, Node> getNodeMapByNodeKey(String clusterName, List<String> nodeKeyList, boolean isAvailable);
+	
+	/**
+	 * getNodeByNodeKey 跟据集群名称、nodeKey，拿到对应的节点信息，不区分节点状态
+	 * @param clusterName 集群名称
+	 * @param nodeKeyL nodeKey
+	 * @param isAvailable 是否可用
+	 * @return Node
+	 */
+	Node getNodeByNodeKey(String clusterName, String nodeKey, boolean isAvailable);
 
 	/**
 	 * getNodeMapByClusterName 跟据集群名称拿到集群中节点信息，不区分节点状态

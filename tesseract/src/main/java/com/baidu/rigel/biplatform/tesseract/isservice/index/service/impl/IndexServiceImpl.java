@@ -654,9 +654,9 @@ public class IndexServiceImpl implements IndexService {
 				"writeIndex", "[data:" + data + "][idxAction:" + idxAction
 						+ "][idxShard:" + idxShard + "][lastPiece:" + lastPiece
 						+ "][idName:" + idName + "]"));
-		// 数据分片规则
-		// 调用
-
+		
+		Node node=this.isNodeService.getNodeMapByNodeKey(idxShard.getClusterName(), nodeKeyList, isAvailable)
+		
 		IndexMessage message = null;
 		message = isClient.index(data, idxAction, idxShard, idName, lastPiece);
 
@@ -668,39 +668,35 @@ public class IndexServiceImpl implements IndexService {
 
 		if (idxShard.isFull() || lastPiece) {
 			// 设置提供服务的目录：
-			String absoluteIdxFilePath = message.getIdxServicePath();
-			//
-			// idxShard.setFilePathWithAbsoluteFilePath(absoluteFilePath,
-			// idxShard.getNode());
-			// idxShard.setIdxFilePathWithAbsoluteIdxFilePath(absoluteIdxFilePath,
-			// idxShard.getNode());
+			String absoluteIdxFilePath = message.getIdxServicePath();			
 			idxShard.setUpdate(Boolean.TRUE);
 			// 启动数据copy线程拷贝数据到备分节点上
+			
+			Map<String,Node> assignedNodeMap=new HashMap<String,Node>();
 			if (CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList())) {
-				List<Node> assignedNodeList = this.isNodeService
-						.assignFreeNodeForReplica(
-								IndexShard.getDefaultShardReplicaNum() - 1,
-								idxShard.getNode());
+				
+				assignedNodeMap=this.isNodeService.assignFreeNodeForReplica(IndexShard.getDefaultShardReplicaNum() - 1,
+								idxShard.getNodeKey(),idxShard.getClusterName());
 
-				if (assignedNodeList != null && assignedNodeList.size() > 0) {
-					if (assignedNodeList.contains(idxShard.getNode())) {
-						assignedNodeList.remove(idxShard.getNode());
+				if (MapUtils.isNotEmpty(assignedNodeMap)) {
+					if (assignedNodeMap.keySet().contains(idxShard.getNodeKey())) {
+						assignedNodeMap.remove(idxShard.getNodeKey());
 					}
-					idxShard.setReplicaNodeList(assignedNodeList);
+					List<String> replicaNodeKeyList= new ArrayList<String>();
+					if(MapUtils.isNotEmpty(assignedNodeMap)){
+						replicaNodeKeyList.addAll(assignedNodeMap.keySet());
+					}					
+					idxShard.setReplicaNodeKeyList(replicaNodeKeyList);
 				}
 
 			}
 
-			for (Node node : idxShard.getReplicaNodeList()) {
-				node.setNodeState(NodeState.NODE_UNAVAILABLE);
-				this.isNodeService.saveOrUpdateNodeInfo(node);
+			
 
-			}
-
-			for (Node node : idxShard.getReplicaNodeList()) {
+			for (Node node : assignedNodeMap.values()) {
 				int retryTimes = 0;
 				// 拷贝到指定的目录
-				String targetFilePath = idxShard.getAbsoluteFilePath(node);
+				String targetFilePath = idxShard.getAbsoluteFilePath(node.getIndexBaseDir());
 				ServerFeedbackMessage backMessage = null;
 				while (retryTimes < TesseractConstant.RETRY_TIMES) {
 					backMessage = isClient.copyIndexDataToRemoteNode(

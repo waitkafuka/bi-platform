@@ -309,7 +309,7 @@ public class IndexAndSearchClient {
      * @return IndexMessage
      * @throws IndexAndSearchException
      */
-    public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,
+    public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,Node node,
         String idName, boolean lastPiece) throws IndexAndSearchException {
         logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "][idName:" + idName + "] start");
@@ -332,8 +332,8 @@ public class IndexAndSearchClient {
 		}
         MessageHeader messageHeader = new MessageHeader(action, data.toString());
         IndexMessage message = new IndexMessage(messageHeader, data);
-        message.setIdxPath(idxShard.getAbsoluteFilePath());
-        message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath());
+        message.setIdxPath(idxShard.getAbsoluteFilePath(node.getIndexBaseDir()));
+        message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath(node.getIndexBaseDir()));
         message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
         message.setIdName(idName);
         message.setLastPiece(lastPiece);
@@ -343,7 +343,7 @@ public class IndexAndSearchClient {
         IndexMessage result = null;
         IndexClientHandler handler = new IndexClientHandler();
         try {
-            ret = this.executeAction(action, message, handler, idxShard.getNode());
+            ret = this.executeAction(action, message, handler, node);
             if (ret instanceof IndexMessage) {
                 result = (IndexMessage) ret;
             } else {
@@ -496,7 +496,7 @@ public class IndexAndSearchClient {
         MessageHeader messageHeader = new MessageHeader(action);
         
         SearchRequestMessage message = new SearchRequestMessage(messageHeader, query);
-        message.setIdxPath(idxShard.getAbsoluteIdxFilePath(searchNode));
+        message.setIdxPath(idxShard.getAbsoluteIdxFilePath(searchNode.getIndexBaseDir()));
         
         AbstractMessage ret = null;
         

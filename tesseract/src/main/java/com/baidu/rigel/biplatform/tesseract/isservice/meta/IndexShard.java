@@ -54,18 +54,23 @@ public class IndexShard implements Serializable {
      * shardId
      */
     private Long shardId;
+    
+    /**
+     * 集群名称
+     */
+    private String clusterName;    
+    
     /**
      * nodekey 主节点key
-     */
-    
+     */    
     private String nodeKey;
     
+    /**
+     * 数据复本所在的节点KEY
+     */
     private List<String> replicaNodeKeyList;
     
-    /**
-     * replicaNodeList 复本所在节点
-     */
-    //private List<Node> replicaNodeList;
+    
     /**
      * idxShardStrategy
      */
@@ -407,69 +412,95 @@ public class IndexShard implements Serializable {
 	public boolean isUpdate() {
 		return isUpdate;
 	}
+	
+	
 
-	/*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
-        result = prime * result + ((idxFilePath == null) ? 0 : idxFilePath.hashCode());
-        result = prime * result + ((shardId == null) ? 0 : shardId.hashCode());
-        result = prime * result + ((shardName == null) ? 0 : shardName.hashCode());
-        return result;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        IndexShard other = (IndexShard) obj;
-        if (filePath == null) {
-            if (other.filePath != null) {
-                return false;
-            }
-        } else if (!filePath.equals(other.filePath)) {
-            return false;
-        }
-        if (idxFilePath == null) {
-            if (other.idxFilePath != null) {
-                return false;
-            }
-        } else if (!idxFilePath.equals(other.idxFilePath)) {
-            return false;
-        }
-        if (shardId == null) {
-            if (other.shardId != null) {
-                return false;
-            }
-        } else if (!shardId.equals(other.shardId)) {
-            return false;
-        }
-        if (shardName == null) {
-            if (other.shardName != null) {
-                return false;
-            }
-        } else if (!shardName.equals(other.shardName)) {
-            return false;
-        }
-        return true;
-    }
+	/**
+	 * @return the clusterName
+	 */
+	public String getClusterName() {
+		return clusterName;
+	}
+
+	/**
+	 * @param clusterName the clusterName to set
+	 */
+	public void setClusterName(String clusterName) {
+		this.clusterName = clusterName;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((clusterName == null) ? 0 : clusterName.hashCode());
+		result = prime * result
+				+ ((filePath == null) ? 0 : filePath.hashCode());
+		result = prime * result
+				+ ((idxFilePath == null) ? 0 : idxFilePath.hashCode());
+		result = prime * result + ((shardId == null) ? 0 : shardId.hashCode());
+		result = prime * result
+				+ ((shardName == null) ? 0 : shardName.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof IndexShard)) {
+			return false;
+		}
+		IndexShard other = (IndexShard) obj;
+		if (clusterName == null) {
+			if (other.clusterName != null) {
+				return false;
+			}
+		} else if (!clusterName.equals(other.clusterName)) {
+			return false;
+		}
+		if (filePath == null) {
+			if (other.filePath != null) {
+				return false;
+			}
+		} else if (!filePath.equals(other.filePath)) {
+			return false;
+		}
+		if (idxFilePath == null) {
+			if (other.idxFilePath != null) {
+				return false;
+			}
+		} else if (!idxFilePath.equals(other.idxFilePath)) {
+			return false;
+		}
+		if (shardId == null) {
+			if (other.shardId != null) {
+				return false;
+			}
+		} else if (!shardId.equals(other.shardId)) {
+			return false;
+		}
+		if (shardName == null) {
+			if (other.shardName != null) {
+				return false;
+			}
+		} else if (!shardName.equals(other.shardName)) {
+			return false;
+		}
+		return true;
+	}
+
+	
     
 }

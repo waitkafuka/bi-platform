@@ -72,50 +72,40 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
         return result;
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#
-     * assignFreeNodeForReplica(int,
-     * com.baidu.rigel.biplatform.tesseract.node.meta.Node)
-     */
-    @Override
-    public List<Node> assignFreeNodeForReplica(int blockCount, Node node) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][node:" + node + "]"));
-        List<Node> currentNodeList = getNodeListByClusterName(node.getClusterName());
-        sortNodeListByFreeBlockCount(currentNodeList);
-        List<Node> result = new ArrayList<Node>();
-        if (blockCount < 1) {
-            return new ArrayList<Node>();
-        }
-        for (Node currNode : currentNodeList) {
-            if (currNode.getNodeState().equals(NodeState.NODE_AVAILABLE)
-                    && !currNode.equals(node) && currNode.getFreeBlockNum() > 0) {
-                result.add(currNode);
-                if (result.size() == blockCount) {
-                    break;
-                }
-            }
-        }
-        if (result.size() > 0) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
-                "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][node:" + node + "]",
-                "assign node success,node count:" + result.size()));
-        } else {
-            // 没有合适的分片，把本机分给它
-            // for (Node currNode : currentNodeList) {
-            // if (currNode.equals(node)) {
-            // result.add(currNode);
-            // }
-            // }
-        }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
-            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][node:" + node + "]"));
-        return result;
-    }
-    
-    @Override
+    /* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#assignFreeNodeForReplica(int, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Map<String,Node> assignFreeNodeForReplica(int blockCount, String nodeKey,
+			String clusterName) {
+		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
+	            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]"));
+	        List<Node> currentNodeList = getNodeListByClusterName(clusterName);
+	        sortNodeListByFreeBlockCount(currentNodeList);
+	        Map<String,Node> result = new HashMap<String,Node>();
+	        if (blockCount < 1) {
+	            return new HashMap<String,Node>();
+	        }
+	        for (Node currNode : currentNodeList) {
+	            if (currNode.getNodeState().equals(NodeState.NODE_AVAILABLE)
+	                    && !currNode.getNodeKey().equals(nodeKey) && currNode.getFreeBlockNum() > 0) {
+	                result.put(currNode.getNodeKey(),currNode);
+	                if (result.size() == blockCount) {
+	                    break;
+	                }
+	            }
+	        }
+	        if (result.size() > 0) {
+	            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
+	                "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]",
+	                "assign node success,node count:" + result.size()));
+	        }
+	        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
+	            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]"));
+	        return result;
+	}
+
+	@Override
     public Map<Node, Integer> assignFreeNodeByNodeList(List<Node> existNodeList, int blockCount,
         String clusterName) {
         if (existNodeList == null || existNodeList.size() == 0) {
