@@ -183,7 +183,7 @@ public class SearchIndexServiceImpl implements SearchService {
             List<TesseractResultSet> idxShardResultSetList = new ArrayList<TesseractResultSet>();
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
                 TesseractResultSet curr = null;
-                Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
+                Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard);
                 searchNode.searchRequestCountAdd();
                 this.isNodeService.saveOrUpdateNodeInfo(searchNode);
                 try {
@@ -214,19 +214,7 @@ public class SearchIndexServiceImpl implements SearchService {
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                 "merging final result"));
-        if (query.getGroupBy() != null && CollectionUtils.isNotEmpty(query.getGroupBy().getGroups())) {
-            try {
-                result = QueryRequestUtil.processGroupBy(result, query);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-                LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query
-                        + "]", e));
-                throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                        IndexAndSearchException.QUERYEXCEPTION_MESSAGE, IndexAndSearchExceptionType.SEARCH_EXCEPTION),
-                        e, IndexAndSearchExceptionType.SEARCH_EXCEPTION);
-            }
-
-        }
+        
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
