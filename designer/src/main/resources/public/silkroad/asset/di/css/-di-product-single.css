@@ -2227,6 +2227,20 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     /*下降绿箭*/
     background-position: -10px -106px;
 }
+.table-head-tips {
+    width: 17px;
+    height: 17px;
+    margin-left: 2px;
+    background: #8A8C8C;
+    border-radius: 8px;
+    line-height: 17px;
+    color: #FFF;
+}
+.table-tips-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+}
 /** 
  * Pager
  */ 

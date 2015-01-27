@@ -31,6 +31,7 @@
     height: 500px;
 }
 .table-block {
-    width: 1040px;
+    /*width: 1040px;*/
+    width: 100%;
 }
 
