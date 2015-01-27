@@ -381,7 +381,7 @@ define([
                     }
                 }
                 /**
-                $component.find('.j-fold').click(function () {
+                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
                     if ($conBtn.width() < 20) {
                         $conBtn.width('auto');
@@ -394,7 +394,7 @@ define([
                         $(this).html('+');
                     }
                 });
-                **/
+                 **/
             },
 
             /**
