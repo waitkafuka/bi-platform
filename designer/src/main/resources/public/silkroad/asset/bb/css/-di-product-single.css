@@ -210,16 +210,16 @@
 }
 /* 下载按钮 */
 .ui-download-btn {
-    border: 1px solid #FFF;
-    background-color: #FFF;
+    border: 1px solid #F0F4F7;
+    background-color: #F0F4F7;
     color: #3C78A2;
     padding: 0;
 }
 .ui-download-btn-hover {
-    background-color: #FCFCFC;
+    background-color: #F0F4F7;
 }
 .ui-download-btn-active {
-    background-color: #BBB;
+    background-color: #F0F4F7;
 }
 .ui-download-btn .ui-button-inner {
     padding: 2px 0px 4px 3px;
@@ -231,12 +231,12 @@
     border-radius: 1px;
 }
 .ui-download-btn-hover .ui-button-inner {
-    background-color: #FCFCFC;
-    border-top: 1px solid #FCFCFC;
+    background-color: #F0F4F7;
+    border-top: 1px solid #F0F4F7;
 }
 .ui-download-btn-active .ui-button-inner {
-    border-top: 1px solid #DDD;
-    background-color: #EEE;
+    border-top: 1px solid F0F4F7;
+    background-color: F0F4F7;
 }
 .ui-download-btn .ui-button-left {
     background: url(img/download.png) no-repeat;
@@ -2071,7 +2071,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
-    background: #FCFCC8;
+    background: #CCC;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
@@ -2235,6 +2235,20 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-condfmt-arr-4 {
     /*下降绿箭*/
     background-position: -10px -106px;
+}
+.table-head-tips {
+    width: 17px;
+    height: 17px;
+    margin-left: 2px;
+    background: #8A8C8C;
+    border-radius: 8px;
+    line-height: 17px;
+    color: #FFF;
+}
+.table-tips-box {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
 }
 /** 
  * Pager
@@ -3717,7 +3731,7 @@ div.di-dim-level-find-msg span{
 
 .comp-box {
     width: 100%;
-    height: 60%;
+    height: 90%;
     overflow: auto
 }
 .component-item {
@@ -3782,6 +3796,7 @@ div.di-dim-level-find-msg span{
     height: 500px;
 }
 .table-block {
-    width: 1040px;
+    /*width: 1040px;*/
+    width: 100%;
 }
 
