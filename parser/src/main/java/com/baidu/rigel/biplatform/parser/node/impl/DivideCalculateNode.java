@@ -53,7 +53,12 @@ public class DivideCalculateNode extends CalculateNode {
             return null;
         }
         // divede 0 exception no check
-        return arg1.divide(arg2, ParserConstant.COMPUTE_SCALE, BigDecimal.ROUND_HALF_UP);
+        try {
+            return arg1.divide(arg2, ParserConstant.COMPUTE_SCALE, BigDecimal.ROUND_HALF_UP);
+        } catch (ArithmeticException e) {
+            return null;
+            
+        }
     }
     
     
