@@ -40,7 +40,7 @@ public class IndexShard implements Serializable {
     /**
      * 默认复本数
      */
-    private static final int DEFAULT_SHARD_REPLICA_NUM = 2;
+    private static final int DEFAULT_SHARD_REPLICA_NUM = 1;
     
     /**
      * 当前分片数据是否有变动
