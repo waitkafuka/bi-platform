@@ -48,7 +48,7 @@ define([
             },
 
             /**
-             * 切换皮肤
+             * 更换皮肤
              *
              * @public
              */
@@ -56,20 +56,21 @@ define([
                 // 皮肤类型
                 var type = '';
                 var $this = $(event.target);
+                // 报表id
                 var reportId = window.dataInsight.main.id;
                 if ($this.attr('class').indexOf('j-skin-btn') != -1) {
-                    type = '/' + $this.attr('id');
+                    type = $this.attr('id');
                 }
                 else {
-                    type = '/' + $this.parent().attr('id');
+                    type = $this.parent().attr('id');
                 }
-                this.model.getSkinType(reportId, type, function () {
-                    $('.link-skin').attr(
-                        'href', '/silkroad/asset/'
-                        + type
-                        + '/css/-di-product-debug.css');
-                });
-
+                this.model.getSkinType(reportId, type);
+                // 更换link里面的路径
+                $('.link-skin').attr(
+                    'href', '/silkroad/asset/'
+                    + type
+                    + '/css/-di-product-debug.css');
+                $('.skin-menu').hide();
             }
 
         });
