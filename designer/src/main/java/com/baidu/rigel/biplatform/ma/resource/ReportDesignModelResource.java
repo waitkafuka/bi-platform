@@ -1344,4 +1344,28 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatusInfo(SUCCESS);
         return result;
     }
+    
+    /**
+     * 设置报表主题
+     * @param id
+     * @param type
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/theme/{type}", method = { RequestMethod.GET })
+    public ResponseResult modifyTheme(@PathVariable("id") String id, @PathVariable("type") String type,
+        HttpServletRequest request) {
+        ReportDesignModel model = reportModelCacheManager.getReportModel(id);
+        if (model == null) {
+            model = reportDesignModelService.getModelByIdOrName(id, false);
+        }
+        if (model == null) {
+            throw new RuntimeException("未查到报表定义信息");
+        }
+        model.setTheme(type);
+        reportModelCacheManager.updateReportModelToCache(id, model);
+        ResponseResult rs = getResult(SUCCESS, "can not get mode define info", model);
+        logger.info("query operation rs is : " + rs.toString());
+        return rs;
+    }
+    
 }
