@@ -69,6 +69,17 @@ define(function () {
     }
 
     /**
+     * 更换皮肤提交基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 更换皮肤提交基本路径
+     */
+    function getSkinType(reportId) {
+        return getReportsBaseUrl(reportId);
+    }
+
+    /**
      * 获取cube的基本路径
      *
      * @param {string} reportId 数据源id
@@ -848,17 +859,6 @@ define(function () {
     };
 
     /**
-     * 参数维度提交基本路径
-     *
-     * @param {string} reportId 报表id
-     * @public
-     * @return {string} 参数维度获取的基本路径
-     */
-    function getSkinType(reportId) {
-        return getReportsBaseUrl(reportId);
-    }
-
-    /**
      * 更换皮肤
      *
      * @param {string} reportId 报表id
@@ -868,7 +868,7 @@ define(function () {
      */
     Url.getSkinType = function (reportId, type) {
         return getSkinType(reportId)
-            + '/theme' + type;
+            + '/theme/' + type;
     };
 
     return Url;
