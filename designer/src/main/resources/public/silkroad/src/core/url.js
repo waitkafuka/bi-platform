@@ -847,5 +847,29 @@ define(function () {
             + '/params';
     };
 
+    /**
+     * 参数维度提交基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 参数维度获取的基本路径
+     */
+    function getSkinType(reportId) {
+        return getReportsBaseUrl(reportId);
+    }
+
+    /**
+     * 更换皮肤
+     *
+     * @param {string} reportId 报表id
+     * @param {string} type 皮肤类型
+     * @public
+     * @return {string} url
+     */
+    Url.getSkinType = function (reportId, type) {
+        return getSkinType(reportId)
+            + '/theme' + type;
+    };
+
     return Url;
 });
