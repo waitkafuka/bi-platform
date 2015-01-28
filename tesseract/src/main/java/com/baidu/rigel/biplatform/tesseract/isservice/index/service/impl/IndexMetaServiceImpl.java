@@ -382,7 +382,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                 idxShard.setIdxVersion(idxMeta.getIdxVersion());
                 idxShard.setIdxMeta(idxMeta);
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
-                    "saveOrUpdateIndexMeta", "[indexMeta:" + idxMeta + "]", "saving node"));
+                        "saveOrUpdateIndexMeta", "[indexMeta:" + idxMeta + "][idxShard:"+idxShard.getShardName()+"]", "saving node"));
                 if (idxShard.getNode() != null) {
                     idxShard.getNode().getUsedIndexShardList().add(idxShard);
                     super.saveOrUpdateMetaStore(idxShard.getNode(), Node.getDataStoreName());
