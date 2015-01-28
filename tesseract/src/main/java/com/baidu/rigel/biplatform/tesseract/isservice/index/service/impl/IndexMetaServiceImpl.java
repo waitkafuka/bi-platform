@@ -28,7 +28,6 @@ import java.util.UUID;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,7 +40,6 @@ import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.DataDescInfo;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
@@ -51,11 +49,9 @@ import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.store.service.impl.AbstractMetaService;
-import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -384,10 +380,21 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         if (idxMeta.getIdxShardList() != null) {
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
                 idxShard.setIdxVersion(idxMeta.getIdxVersion());
-                
+                idxShard.setIdxMeta(idxMeta);
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
-                    "saveOrUpdateIndexMeta", "[indexMeta:" + idxMeta + "][idxShard:"+idxShard.getShardName()+"]", "saving node"));
-                
+                        "saveOrUpdateIndexMeta", "[indexMeta:" + idxMeta + "][idxShard:"+idxShard.getShardName()+"]", "saving node"));
+                if (idxShard.getNode() != null) {
+                    idxShard.getNode().getUsedIndexShardList().add(idxShard);
+                    super.saveOrUpdateMetaStore(idxShard.getNode(), Node.getDataStoreName());
+                    for (Node node : idxShard.getReplicaNodeList()) {
+                        if (node.getUsedIndexShardList() != null
+                                && !node.getUsedIndexShardList().contains(idxShard)) {
+                            node.getUsedIndexShardList().add(idxShard);
+                        }
+                        super.saveOrUpdateMetaStore(node, Node.getDataStoreName());
+                    }
+                    
+                }
             }
         }
         boolean result = super.saveOrUpdateMetaStore(idxMeta, IndexMeta.getDataStoreName());
@@ -573,18 +580,13 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
      * 
      * @param idxShardList
      *            索引分片列表
-     * @param clusterName
-     *            集群名称
      * @return List<Node> 机器节点信息
      */
-    private List<Node> getNodeListForExistIndexShard(List<IndexShard> idxShardList,String clusterName) {
+    private List<Node> getNodeListForExistIndexShard(List<IndexShard> idxShardList) {
         List<Node> nodeList = new ArrayList<Node>();
-        if (idxShardList != null && !StringUtils.isEmpty(clusterName)) {
+        if (idxShardList != null) {
             for (IndexShard idxShard : idxShardList) {
-                List<Node> idxShardNodeList=this.isNodeService.getAvailableNodeListByIndexShard(idxShard, clusterName);
-                if(!CollectionUtils.isEmpty(idxShardNodeList)){
-                	nodeList.addAll(idxShardNodeList);
-                }
+                nodeList.add(idxShard.getNode());
             }
         }
         return nodeList;
@@ -684,8 +686,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                 idxMeta.getProductLine(), idxMeta.getStoreKey());
             
             // 当前产品线的索引分片所在的结点列表
-            List<Node> idxShardNodeList = this.getNodeListForExistIndexShard(idxShardList,idxMeta.getClusterName());
-            
+            List<Node> idxShardNodeList = this.getNodeListForExistIndexShard(idxShardList);
             
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                 "assignIndexShard", "assign node begin"));
@@ -740,7 +741,8 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                     idxShard.setFull(false);
                     // 设置索引文件路径=datasourceinfo.getKey+"/"+facttablename+shardname
                     // 只设置一次
-                    String idxFilePathPrefix = idxMeta.getIndexMetaFileDirPath();
+                    String idxFilePathPrefix = idxMeta.getDataSourceInfo().getDataSourceKey()
+                        + File.separator + idxMeta.getFacttableName() + File.separator + idxMeta.getIndexMetaId() + File.separator;
                     idxShard.setFilePath(idxFilePathPrefix + idxShard.getShardName()+File.separator+IndexMeta.getIndexFilePathUpdate());
                     idxShard.setIdxFilePath(idxFilePathPrefix + idxShard.getShardName()+File.separator+IndexMeta.getIndexFilePathIndex());
                     
@@ -817,72 +819,5 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         
         return result;
     }
-    
-    public void saveIndexMetaImage(Node node) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "saveNodeImage",
-            "[node:" + node + "]"));
-        if (node == null || StringUtils.isEmpty(node.getClusterName())) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-                "saveNodeImage", "[node:" + node + "]"));
-            throw new IllegalArgumentException();
-        }
-        FileUtils.write(node.getImageFilePath(), SerializationUtils.serialize(node), true);
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "saveNodeImage",
-            "[node:" + node + "]"));
-    }
-
-	/* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService#saveIndexMetaLocally(com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta)
-	 */
-	@Override
-	public boolean saveIndexMetaLocally(IndexMeta idxMeta) throws Exception {
-		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "saveIndexMetaLocally",
-	            "[idxMeta:" + idxMeta + "]"));
-		if(idxMeta == null ){
-			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_ERROR, "saveIndexMetaLocally",
-		            "[idxMeta:" + idxMeta + "]"));
-			return false;
-		}
-		Node currNode=this.isNodeService.getCurrentNode();
-		File idxMetaFileDir=new File(currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath());
-		if(idxMetaFileDir.isDirectory() && idxMetaFileDir.exists()){
-			//如果是目录并且存在
-			String idxMetaImageNewFileName=idxMetaFileDir+File.separator+idxMeta.getIndexMetaId() + IndexFileSystemConstants.INDEX_META_IMAGE_FILE_NEW;
-			String idxMetaImageBakFileName=idxMetaFileDir+File.separator+idxMeta.getIndexMetaId() + IndexFileSystemConstants.INDEX_META_IMAGE_FILE_BAK;
-			String idxMetaImageFileName=idxMetaFileDir+File.separator+idxMeta.getIndexMetaId() + IndexFileSystemConstants.INDEX_META_IMAGE_FILE_SAVED;
-			String idxMetaStr=AnswerCoreConstant.GSON.toJson(idxMeta, new TypeToken<IndexMeta>(){}.getType());
-			
-			File idxMetaImageNewFile=new File(idxMetaImageNewFileName);
-			File idxMetaImageBakFile=new File(idxMetaImageBakFileName);
-			File idxMetaImageFile=new File(idxMetaImageFileName);
-			
-			if(idxMetaImageNewFile.exists()){
-				idxMetaImageNewFile.deleteOnExit();
-			}
-			
-			
-			Boolean result=FileUtils.write(idxMetaImageNewFileName, idxMetaStr.getBytes(), Boolean.TRUE);
-			if(result){
-				
-				if(idxMetaImageBakFile.exists()){
-					idxMetaImageBakFile.deleteOnExit();
-				}
-				FileUtils.copyFolder(idxMetaImageFileName, idxMetaImageBakFileName);
-				if(idxMetaImageFile.exists()){
-					idxMetaImageFile.deleteOnExit();
-				}
-				FileUtils.copyFolder(idxMetaImageNewFileName, idxMetaImageFileName);
-				
-			}
-		}else{
-			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_ERROR, "saveIndexMetaLocally",
-		            "[idxMeta:" + idxMeta + "][idxMetaFileDir:"+idxMetaFileDir.getAbsolutePath()+" does not exist]"));
-		}
-		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "saveIndexMetaLocally",
-	            "[idxMeta:" + idxMeta + "]"));
-		return false;
-	}
-    
-    
     
 }
