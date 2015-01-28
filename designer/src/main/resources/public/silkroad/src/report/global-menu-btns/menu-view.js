@@ -4,18 +4,20 @@
  * @date 2014-12-24
  */
 define([
-        'report/global-menu-btns/component-menu-template'
+        'report/global-menu-btns/component-menu-template',
+        'report/global-menu-btns/main-model'
     ],
     function (
-        ComponentMenuTemplate
+        ComponentMenuTemplate,
+        MenuMainModel
         ) {
         return Backbone.View.extend({
-
             /**
              * 构造函数
              *
              */
             initialize: function () {
+                this.model = new MenuMainModel();
             },
 
             /**
@@ -43,16 +45,31 @@ define([
                     $nowmenu.hide();
                 }
 
-//                for (var i = 0; i<$menu.length; i ++) {
-//                    if ($($menu[i]).attr('id') == id) {
-//                        if ($($menu[i]).css('display') == 'none') {
-//                            $($menu[i]).show();
-//                        }
-//                        else {
-//                            $($menu[i]).hide();
-//                        }
-//                    }
-//                }
+            },
+
+            /**
+             * 切换皮肤
+             *
+             * @public
+             */
+            chanceTheme : function (event) {
+                // 皮肤类型
+                var type = '';
+                var $this = $(event.target);
+                var reportId = window.dataInsight.main.id;
+                if ($this.attr('class').indexOf('j-skin-btn') != -1) {
+                    type = '/' + $this.attr('id');
+                }
+                else {
+                    type = '/' + $this.parent().attr('id');
+                }
+                this.model.getSkinType(reportId, type, function () {
+                    $('.link-skin').attr(
+                        'href', '/silkroad/asset/'
+                        + type
+                        + '/css/-di-product-debug.css');
+                });
+
             }
 
         });
