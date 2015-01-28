@@ -96,7 +96,6 @@ define([
                         var compType = ui.helper.attr('data-component-type');
                         var compData = that.model.getComponentData(compType);
                         startScrollTop = $report.scrollTop();
-                        console.log($report);
                         $('.j-all-menus').hide();
                         ui.helper.html('临时展示').css({
                             'width': '100px',

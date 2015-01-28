@@ -131,6 +131,7 @@ public class HazelcastStoreManager implements StoreManager {
         LOGGER.info("local memchine ip: {}", ip);
         cfg.getProperties();//.getGroupProperties().SOCKET_SERVER_BIND_ANY
         cfg.getNetworkConfig().getInterfaces().addInterface(ip);
+        cfg.getNetworkConfig().getInterfaces().setEnabled(true);
         
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();

@@ -7,8 +7,7 @@
  * @author: sushuang(sushuang)
  */
 
- (function() {
-    
+(function() {
     var core = ecui;
     var dom = core.dom;
     var array = core.array;
@@ -73,10 +72,10 @@
     var UI_OLAP_TABLE_CLASS = UI_OLAP_TABLE.prototype;
 
     var UI_OLAP_TABLE_CELL_CLASS = (
-            UI_OLAP_TABLE_CLASS.Cell = inheritsControl(
-                UI_LOCKED_TABLE_CLASS.Cell
-            )
-        ).prototype;
+        UI_OLAP_TABLE_CLASS.Cell = inheritsControl(
+            UI_LOCKED_TABLE_CLASS.Cell
+        )
+    ).prototype;
 
     var UI_TABLE_HCELL_CLASS = UI_OLAP_TABLE_CLASS.HCell.prototype;
 
@@ -108,7 +107,7 @@
      * @return {Object} css和style
      */
     function getCondFmt(condFmtDef, ctrlCssBase) {
-        var ret = { 
+        var ret = {
             text: { css: [], style: [] },
             outer: { css: [], style: [] },
             left: { css: [], style: [] },
@@ -120,11 +119,11 @@
         // 箭头
         if (condFmtDef.arr) {
             ret.right.css.push(
-                ctrlCssBase + '-condfmt-arr',
-                ctrlCssBase + '-condfmt-arr-' + condFmtDef.arr
+                    ctrlCssBase + '-condfmt-arr',
+                    ctrlCssBase + '-condfmt-arr-' + condFmtDef.arr
             );
         }
-        
+
         // 背景色
         if (condFmtDef.bg) {
             if (condFmtDef.bg.indexOf('#') >= 0) {
@@ -167,7 +166,7 @@
 
     /**
      * 设置参数
-     * 
+     *
      * @protected
      * @param {Object} options 参数
      * @param {Array.<Object>} options.datasource 主体数据
@@ -238,12 +237,12 @@
 
         // this.$validate();
 
-        this._nLeftLock = options.leftLock = 
-            this._bInvalid 
-                ? 0 
+        this._nLeftLock = options.leftLock =
+            this._bInvalid
+                ? 0
                 : (
-                    this._aRowHeadFields.length
-                        ? this._aRowHeadFields[0].length : 0
+                this._aRowHeadFields.length
+                    ? this._aRowHeadFields[0].length : 0
                 );
 
         this._nRightLock = options.rightLock = 0;
@@ -254,12 +253,12 @@
 
     /**
      * 校验输入数据
-     * 
+     *
      * @protected
      */
     UI_OLAP_TABLE_CLASS.$validate = function() {
         this._bInvalid = false;
-        
+
         var colCount = validateLength.call(this, this._aColFields);
         var rowHeadColCount = validateLength.call(this, this._aRowHeadFields);
         var dataCount = validateLength.call(this, this._aData);
@@ -269,7 +268,7 @@
         }
         if (rowHeadColCount + dataCount != colCount) {
             this._bInvalid = true;
-        } 
+        }
         if (this._aRowHeadFields.length != this._aData.length) {
             this._bInvalid = true;
         }
@@ -277,7 +276,7 @@
 
     /**
      * 校验二维数组宽高是否合法（含盖计算colspan和rowspan）
-     * 
+     *
      * @private
      * @this {ui.OlapTable} 控件本身
      * @return {number} length
@@ -351,13 +350,13 @@
 
         detachEvent(WINDOW, 'resize', repaint);
 
-        
+
         // ===================== ch 1200
         this.$disposeInner();
 
         // console.log('=================== olap-table setData start] ' + ((new Date()).getTime() - ddd));
         // ddd = new Date();
-        
+
         var el = this.getOuter();
         el.innerHTML = '';
         this.$setBody(el);
@@ -369,13 +368,13 @@
 
         // console.log('=================== olap-table setData 2] ' + ((new Date()).getTime() - ddd));
         // ddd = new Date();
-        
+
         // ==================== ch 518
         UI_OLAP_TABLE.client.call(
-            this, 
-            el, 
+            this,
+            el,
             extend(
-                { uid: this._sUID, primary: this._sPrimary }, 
+                { uid: this._sUID, primary: this._sPrimary },
                 options
             )
         );
@@ -389,7 +388,7 @@
 
         // console.log('=================== olap-table setData 4] ' + ((new Date()).getTime() - ddd));
         // ddd = new Date();
-        
+
         // =================== ch 1102
         this.init();
 
@@ -415,7 +414,7 @@
 
     /**
      * 析构内部
-     * 
+     *
      * @protected
      */
     UI_OLAP_TABLE_CLASS.$disposeInner = function() {
@@ -423,11 +422,11 @@
         this.$dispose = new Function();
         disposeControl(this);
         this.$dispose = disposeFunc;
-    }    
+    }
 
     /**
      * 渲染HTML
-     * 
+     *
      * @protected
      * @param {HTMLElement} el 控件容器
      */
@@ -442,7 +441,7 @@
         var colFields = this._aColFields || [];
         var colDefine = this._aColDefine || [];
         var reportTemplateId = this._reportTemplateId;
-        
+
         var rowHeadFields = this._aRowHeadFields || [];
         var rowDefine = this._aRowDefine || [];
         var leftLock = this._nLeftLock;
@@ -479,9 +478,9 @@
                         this.$renderHCell(
                             html,
                             // 目前只有最底层才传colField
-                            i == colFields.length - 1 ? colDefine[j] : null,
+                                i == colFields.length - 1 ? colDefine[j] : null,
                             wrap,
-                            j < this._nLeftLock ? j : (j - this._nLeftLock),
+                                j < this._nLeftLock ? j : (j - this._nLeftLock),
                             i
                         );
                     }
@@ -491,17 +490,17 @@
             html.push('</thead>');
 
 
-            
+
 
             // 表内容
             html.push('<tbody>');
             if (this._bInvalid || !datasource.length) {
                 html.push(
                     '<tr>',
-                        '<td class="', type, '-cell-empty" align="middle" colspan="',
-                            colFields.length, '">',
-                            this._sEmptyHTML,
-                        '</td>',
+                    '<td class="', type, '-cell-empty" align="middle" colspan="',
+                    colFields.length, '">',
+                    this._sEmptyHTML,
+                    '</td>',
                     '</tr>'
                 );
             }
@@ -516,7 +515,7 @@
                             }
                             this.$renderRowHCell(
                                 html,
-                                colDefine[j], 
+                                colDefine[j],
                                 wrap,
                                 j,
                                 i
@@ -527,11 +526,11 @@
                     for (j = 0; j < line.length; j ++) {
                         wrap = line[j];
                         this.$renderCell(
-                            html, 
-                            colDefine[leftLock + j], 
+                            html,
+                            colDefine[leftLock + j],
                             rowDefine[i],
                             wrap,
-                            j, 
+                            j,
                             i
                         );
                     }
@@ -554,7 +553,7 @@
 
         // ====================================
         // ddd = new Date();
-        
+
         // ============================= ch 293 （分批加载来优化）
         el.innerHTML = html;
 
@@ -577,21 +576,21 @@
     }
 
     /**
-    * 根据返回数据设置olap表格的指标解释到表格td的title标签中
-    */
+     * 根据返回数据设置olap表格的指标解释到表格td的title标签中
+     */
     UI_OLAP_TABLE_CLASS.$setMeasureDes4Table = function(data){
         var el = this.getOuter();
         var type = this.getTypes()[0];
         var tableHeaders = q(type + '-olap-ind-describe', el);
         for (var i = 0; i < tableHeaders.length; i++) {
-                 var header = tableHeaders[i];
-                 if(header.getAttribute('uniquename')){
-                    var uniquename = header.getAttribute('uniquename');
-                    if(data.descriptions[uniquename]){
-                        header.title = data.descriptions[uniquename]; 
-                    }
-                 }
-            };
+            var header = tableHeaders[i];
+            if(header.getAttribute('uniquename')){
+                var uniquename = header.getAttribute('uniquename');
+                if(data.descriptions[uniquename]){
+                    header.title = data.descriptions[uniquename];
+                }
+            }
+        };
     }
     /**
      * 渲染上方表头节点
@@ -601,9 +600,10 @@
     UI_OLAP_TABLE_CLASS.$renderHCell = function(
         // 只有最底层有colField
         html, colDefItem, wrap, x, y
-    ) {
+        ) {
         var type = this.getType();
         var classStr = [type + '-hcell'];
+        var classSortStr = type + '-hcell-sort-' + colDefItem.orderby;
         var styleStr = [];
         var attrStr = [];
         var span = [];
@@ -617,8 +617,10 @@
         if (colDefItem && colDefItem.width) {
             //styleStr.push('width:' + colDefItem.width + 'px;');
         }
+        // TODO:把排序样式放在th里面的span里面
         if (colDefItem && colDefItem.orderby) {
-            classStr.push(type + '-hcell-sort-' + colDefItem.orderby);
+            classSortStr = type + '-hcell-sort-' + colDefItem.orderby;
+            // classStr.push(type + '-hcell-sort-' + colDefItem.orderby);
             attrStr.push('data-orderby="' + colDefItem.orderby + '"');
         }
         if (colDefItem && colDefItem.toolTip) {
@@ -639,24 +641,26 @@
         var strTableHeaderTips = (innerStr === '')
             ? ''
             : (
-                '<div class="table-tips-box"><div class="table-head-tips" title="'
-                + innerStr
-                + '">?</div></div>'
+            '<div class="' + type + '-heade-th-content">'
+            + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
+            + '<span class="'+ classSortStr + '">  </span>'
+            + '<span class="'+ type + '-head-tips" title="' + innerStr + '">?</span>'
+            + '<span class="' + type + '-head-drag"></span>'
+            + '</div>'
             );
         html.push(
-            '<th ', 
-                span.join(' '), ' ',
-                attrStr.join(' '), ' ',
-                ' class="', classStr.join(' '), 
-                '" style="', styleStr.join(' '), 
+            '<th ',
+            span.join(' '), ' ',
+            attrStr.join(' '), ' ',
+            ' class="', classStr.join(' '),
+            '" style="', styleStr.join(' '),
             '">',
-                useBag ? ('<div class="' + type + '-hcell-bag">') : '', 
-                    innerStr,
-                useBag ? '</div>' : '',
-                strTableHeaderTips,
+            useBag ? ('<div class="' + type + '-hcell-bag">') : '',
+            useBag ? '</div>' : '',
+            strTableHeaderTips,
             '</th>'
         );
-    }; 
+    };
 
     /**
      * 渲染左侧表头节点
@@ -686,20 +690,20 @@
         innerStr = this.$renderCellInner('ROWHCELL', null, wrap, attrStr, classStr, styleStr);
 
         html.push(
-            '<td ', 
-                span.join(' '), ' ', 
-                attrStr.join(' '), ' ',
-                ' style="', styleStr.join(' '), 
-                '" class="', classStr.join(' '), 
+            '<td ',
+            span.join(' '), ' ',
+            attrStr.join(' '), ' ',
+            ' style="', styleStr.join(' '),
+            '" class="', classStr.join(' '),
             '">',
-                innerStr, 
+            innerStr,
             '</td>'
         );
     };
 
     /**
      * 渲染内容节点
-     * 
+     *
      * @protected
      */
     UI_OLAP_TABLE_CLASS.$renderCell = function(html, colDefItem, rowDefItem, wrap, x, y) {
@@ -721,19 +725,19 @@
         innerStr = this.$renderCellInner(
             'CCELL',
             colDefItem,
-            wrap, 
+            wrap,
             attrStr,
-            classStr, 
+            classStr,
             styleStr
         );
 
         html.push(
-            '<td ', 
-                attrStr.join(' '), ' ',
-                ' style="', styleStr.join(' '), 
-                '" class="', classStr.join(' '), 
+            '<td ',
+            attrStr.join(' '), ' ',
+            ' style="', styleStr.join(' '),
+            '" class="', classStr.join(' '),
             '">',
-                innerStr, 
+            innerStr,
             '</td>'
         );
     };
@@ -752,7 +756,7 @@
      */
     UI_OLAP_TABLE_CLASS.$renderCellInner = function(
         cellType, defItem, wrap, attrStr, classStr, styleStr
-    ) {
+        ) {
         var indentStyle = '';
         var clz = '';
         var type = this.getType();
@@ -773,7 +777,7 @@
         if (wrap.drillByLink) {
             attrStr.push('data-cell-link="true"');
             value = '<a href="#" class="' + type + '-cell-link" data-cell-link-drill-a="1">' + value + '</a>';
-        } 
+        }
         // 增加判断逻辑，如果改行是手动汇总行，那么linkBridge也不能有点击，否则后台没法处理
         else if (defItem && defItem.linkBridge && wrap.cellId && wrap.cellId.indexOf('[SUMMARY_NODE].[ALL]') < 0) {
             attrStr.push('data-cell-link="true"');
@@ -785,22 +789,22 @@
         if (condFmt) {
             value = (
                     condFmt.left.css.length > 0 || condFmt.left.style.length > 0
-                        ? '<span class="' + condFmt.left.css.join(' ') 
-                            + '" style="' + condFmt.left.style.join(' ') + '">' + '</span>'
-                        : ''
+                ? '<span class="' + condFmt.left.css.join(' ')
+                + '" style="' + condFmt.left.style.join(' ') + '">' + '</span>'
+                : ''
                 )
                 + (
-                    condFmt.text.css.length > 0 || condFmt.text.style.length > 0
-                        ? '<span class="' + condFmt.text.css.join(' ')
-                            + '" style="' + condFmt.text.style.join(' ') + '">' + value + '</span>'
-                        : value
-                )
+                        condFmt.text.css.length > 0 || condFmt.text.style.length > 0
+                    ? '<span class="' + condFmt.text.css.join(' ')
+                    + '" style="' + condFmt.text.style.join(' ') + '">' + value + '</span>'
+                    : value
+                    )
                 + (
-                    condFmt.right.css.length > 0 || condFmt.right.style.length > 0
-                        ? '<span class="' + condFmt.right.css.join(' ') 
-                            + '" style="' + condFmt.right.style.join(' ') + '">' + '</span>'
-                        : ''
-                );
+                        condFmt.right.css.length > 0 || condFmt.right.style.length > 0
+                    ? '<span class="' + condFmt.right.css.join(' ')
+                    + '" style="' + condFmt.right.style.join(' ') + '">' + '</span>'
+                    : ''
+                    );
 
             if (condFmt.outer.css.length > 0 || condFmt.outer.style.length > 0) {
                 classStr.push.apply(classStr, condFmt.outer.css);
@@ -810,20 +814,20 @@
 
         if (wrap.expand != null) {
             attrStr.push(
-                'data-e-c="' + (!wrap.expand ? 'expanded' : 'collapsed') + '"'
+                    'data-e-c="' + (!wrap.expand ? 'expanded' : 'collapsed') + '"'
             );
             clz = type + '-e-c-icon ' + type
                 + (!wrap.expand ? '-expanded-icon ' : '-collapsed-icon ');
             value = [
-                '<div style="' + indentStyle + ' text-align:left;" class="'
+                    '<div style="' + indentStyle + ' text-align:left;" class="'
                     + type + '-tree-item">',
                     '<div class="' + clz + '"></div>',
-                    value,
+                value,
                 '</div>',
             ].join('');
         }
         else if (indentStyle) {
-            value = '<div style="' + indentStyle 
+            value = '<div style="' + indentStyle
                 + 'text-align:left;">' + value + '</div>';
         }
 
@@ -868,10 +872,10 @@
         var me = this;
         var tds = this.getOuter().getElementsByTagName('td');
         for (
-            var i = 0, tdEl, aEls, aEl, o, j; 
-            tdEl = tds[i]; 
+            var i = 0, tdEl, aEls, aEl, o, j;
+            tdEl = tds[i];
             i ++
-        ) {
+            ) {
             if (tdEl.getAttribute('data-cell-link')) {
                 aEls = tdEl.getElementsByTagName('a');
 
@@ -880,13 +884,13 @@
                     if (aEl.getAttribute('data-cell-link-drill-a')) {
                         aEl.onclick = (function(wrap) {
                             return function() {
-                                !me._bDisabled 
-                                    && triggerEvent(
-                                        me, 
-                                        'celllinkdrill', 
-                                        null, 
-                                        [wrap]
-                                    );
+                                !me._bDisabled
+                                && triggerEvent(
+                                    me,
+                                    'celllinkdrill',
+                                    null,
+                                    [wrap]
+                                );
                                 return false;
                             }
                         })(this._aRowHeadFields[o.y][o.x]);
@@ -894,17 +898,17 @@
                     else if (aEl.getAttribute('data-cell-link-bridge-a')) {
                         aEl.onclick = (function(colDefItem, rowDefItem) {
                             return function() {
-                                !me._bDisabled 
-                                    && triggerEvent(
-                                        me, 
-                                        'celllinkbridge', 
-                                        null, 
-                                        [colDefItem, rowDefItem]
-                                    );
+                                !me._bDisabled
+                                && triggerEvent(
+                                    me,
+                                    'celllinkbridge',
+                                    null,
+                                    [colDefItem, rowDefItem]
+                                );
                                 return false;
                             }
                         })(
-                            this._aColDefine[this._nLeftLock + o.x], 
+                            this._aColDefine[this._nLeftLock + o.x],
                             this._aRowDefine[o.y]
                         );
                     }
@@ -919,7 +923,7 @@
      * @public
      * @param {number} rowIndex 内容行序号，从0开始
      * @param {number} colIndex 内容列序号，从0开始
-     */    
+     */
     // UI_OLAP_TABLE_CLASS.clickContentCell = function(rowIndex, colIndex) {
     //     var cell = this.getContentCell(rowIndex, colIndex);
     //     cell && cell.$handleCellClick();
@@ -936,7 +940,7 @@
     UI_OLAP_TABLE_CLASS.getContentCell = function(rowIndex, colIndex) {
         rowIndex = this._aRows[rowIndex];
         return rowIndex && rowIndex.getCell(
-            (this._nLeftLock || 0) + colIndex
+                (this._nLeftLock || 0) + colIndex
         ) || null;
     };
 
@@ -985,10 +989,10 @@
     UI_OLAP_TABLE_CLASS.$initRowChecked = function() {
         var rowCheck = this._oRowCheck;
         for (
-            var i = 0, rowCtrl; 
-            i < (rowCheck.rowChecked || []).length; 
+            var i = 0, rowCtrl;
+            i < (rowCheck.rowChecked || []).length;
             i ++
-        ) {
+            ) {
             // LockedTable失去了对内容row的引用，所以用这种不太好看的方法找到
             if (rowCtrl = this.$getContentRow(rowCheck.rowChecked[i])) {
                 this.$setRowChecked(rowCtrl, true);
@@ -1011,17 +1015,17 @@
             if (checked
                 && !rowCtrl._bRowChecked
                 && rowCheck.rowCheckCount < rowCheck.rowCheckMax
-            ) {
+                ) {
                 rowCtrl._bRowChecked = true;
                 addClass(rowCtrl.getMain(), type + '-row-checked');
                 rowCheck.rowCheckCount ++;
                 return true;
             }
 
-            if (!checked 
+            if (!checked
                 && rowCtrl._bRowChecked
                 && rowCheck.rowCheckCount > rowCheck.rowCheckMin
-            ) {
+                ) {
                 rowCtrl._bRowChecked = false;
                 removeClass(rowCtrl.getMain(), type + '-row-checked');
                 rowCheck.rowCheckCount --;
@@ -1056,7 +1060,7 @@
 
     /**
      * 让表格的横滚始终悬浮在页面视窗低端
-     * 
+     *
      * @param {ecui.ui.CustomTable} con
      */
     function setFloatHScroll(con) {
@@ -1064,9 +1068,9 @@
 
         el = con._eBrowser ? con._eBrowser : con._uHScrollbar.getOuter();
         el.style.top = MIN(
-            getView().bottom - getPosition(con.getOuter()).top 
+                getView().bottom - getPosition(con.getOuter()).top
                 - el.offsetHeight,
-            con.getHeight() - el.offsetHeight
+                con.getHeight() - el.offsetHeight
         ) + 'px';
 
         setStyle(el, 'zIndex', 1);
@@ -1086,12 +1090,12 @@
             // 以str优先，如果没有则取v字段
             ? wrap.str
             : String(
-                wrap.v == null 
-                    ? ' - '
-                    : format
-                        ? formatNumber(wrap.v, format, void 0, void 0, true)
-                        : wrap.v
-            );
+                wrap.v == null
+                ? ' - '
+                : format
+                ? formatNumber(wrap.v, format, void 0, void 0, true)
+                : wrap.v
+        );
         var prompt;
         var cut = this._oCut[cellType];
         if (cut) {
@@ -1105,16 +1109,16 @@
                 prompt = null;
             }
         }
-        return { 
-            value: encodeHTML(value), 
-            prompt: prompt && encodeHTML(prompt) 
+        return {
+            value: encodeHTML(value),
+            prompt: prompt && encodeHTML(prompt)
         };
     }
 
     /**
      * 如果wrap不是对象，包装成对象
      *
-     * @private 
+     * @private
      * @param {*} wrap 数据元素
      */
     function objWrap(wrap) {
@@ -1122,14 +1126,14 @@
             wrap = { v: wrap };
         }
         return wrap;
-    }    
+    }
 
     /**
      * 得到cell坐标
-     * 
+     *
      * @protected
      * @return {Object} 形如：{x: 4, y: 5}
-     */    
+     */
     function getCellPosition(el) {
         var pos = el.getAttribute('data-cell-pos');
         if (pos) {
@@ -1167,9 +1171,9 @@
         if (orderby = this.getOuter().getAttribute('data-orderby')) {
             var pos = getCellPosition(this.getOuter());
             triggerEvent(
-                tableCtrl, 
-                'sort', 
-                null, 
+                tableCtrl,
+                'sort',
+                null,
                 [tableCtrl._aColDefine[(tableCtrl._nLeftLock || 0) + pos.x]]
             );
         }
@@ -1181,7 +1185,7 @@
 
     /**
      * 点击事件
-     * 
+     *
      * @event
      * @protected
      */
@@ -1189,21 +1193,21 @@
         UI_OLAP_TABLE_CLASS.Cell.superClass.$click.call(this, event);
 
         // 链接则不走handleCellClick
-        if (!event.target 
+        if (!event.target
             || !(
                 event.target.getAttribute('data-cell-link-drill-a')
                 || event.target.getAttribute('data-cell-link-bridge-a')
-            )
-        ) {
+                )
+            ) {
             this.$handleCellClick();
         }
     };
 
     /**
      * 处理cell点击事件
-     * 
+     *
      * @protected
-     */    
+     */
     UI_OLAP_TABLE_CELL_CLASS.$handleCellClick = function() {
         var el = this.getOuter();
         var tableCtrl = this.getParent().getParent();
@@ -1211,10 +1215,10 @@
 
         // 左表头节点
         if (el.getAttribute('data-row-h') && (ec = el.getAttribute('data-e-c'))) {
-            if (getMouseX(this) <= 
-                    toNumber(getStyle(el.firstChild, 'marginLeft')) 
-                    + toNumber(getStyle(el.firstChild, 'paddingLeft'))
-            ) {
+            if (getMouseX(this) <=
+                toNumber(getStyle(el.firstChild, 'marginLeft'))
+                + toNumber(getStyle(el.firstChild, 'paddingLeft'))
+                ) {
                 var pos;
                 var cellWrap;
                 var rowWrap;
@@ -1224,7 +1228,7 @@
                 }
                 triggerEvent(
                     tableCtrl,
-                    (ec == 'expanded' ? 'collapse' : 'expand'), 
+                    (ec == 'expanded' ? 'collapse' : 'expand'),
                     null,
                     [cellWrap, rowWrap]
                 );
@@ -1273,4 +1277,4 @@
             }
         }
     };
- }) ();
+}) ();
