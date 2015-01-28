@@ -37,34 +37,34 @@
     max-width: 200px;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
-    word-break: keep-all;  
+    white-space: nowrap;
+    word-break: keep-all;
 }
 .ui-table-cell-limited{
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
+    white-space: nowrap;
 }
-.ui-table-hcell, 
+.ui-table-hcell,
 .ui-table-rowhcell {
     color: #000;
     height: 30px;
     line-height: 30px;
     padding: 0 9px;
     margin: 0;
-    vertical-align: middle;
+    /*vertical-align: middle;*/
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
-    word-break: keep-all;     
+    white-space: nowrap;
+    word-break: keep-all;
 }
 .ui-table-hcell-bag {
-    margin: 0 10px 0 10px; 
+    margin: 0 10px 0 10px;
 }
 .ui-plane-table-hcell-bag{
-	margin: 0 20px 0 20px; 
+	margin: 0 20px 0 20px;
 }
 .ui-plane-table-hcell-bag-lastcolumn{
 	padding: 0 33px 0 0;
@@ -72,7 +72,7 @@
 .ui-table-rowhcell {
     text-align: center;
     text-align: left;
-    color: #333;    
+    color: #333;
 }
 /* 解决ie7下（固定列）单元格自动换行的问题（强制所有文字不换行，溢出隐藏） */
 .ui-table-rowhcell div {
@@ -80,32 +80,20 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.ui-table-hcell-sort,
-.ui-table-hcell-sort-none {
-    background-image: url(img/icon.png);
-    background-position: right -240px;
-    background-repeat: no-repeat;
-}
-.ui-table-hcell-sort-desc {
-    background-image: url(img/icon.png);
-    background-position: right -296px;
-    background-repeat: no-repeat;
-}
-.ui-table-hcell-sort-asc {
-    background-image: url(img/icon.png);
-    background-position: right -352px;
-    background-repeat: no-repeat;
-}
+
 .ui-table-row {
     cursor: pointer;
     background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
-    background: #CCC;
+    background: #FFF;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
     background: #FFF;
+}
+.ui-table-ccell {
+    text-align: center;
 }
 /*.ui-table-row {
     cursor: pointer;
@@ -117,7 +105,7 @@
     background: #DCEFD1;
 }*/
 .ui-table-cell-align-right {
-    text-align: right;
+    text-align: left;
 }
 .ui-table-cell-align-center {
     text-align: center;
@@ -240,7 +228,7 @@
 }
 /*条件格式*/
 .ui-table-condfmt-arr {
-    background: url(img/icon2.png) 0 -106px;    
+    background: url(img/icon2.png) 0 -106px;
     width: 10px;
     height: 10px;
     overflow: hidden;
@@ -266,17 +254,60 @@
     /*下降绿箭*/
     background-position: -10px -106px;
 }
-.table-head-tips {
-    width: 17px;
-    height: 17px;
+.ui-table-head-tips {
+    width: 15px;
+    height: 15px;
     margin-left: 2px;
     background: #8A8C8C;
     border-radius: 8px;
-    line-height: 17px;
+    line-height: 15px;
     color: #FFF;
-}
-.table-tips-box {
     display: inline-block;
-    width: 15px;
-    height: 15px;
+}
+.ui-table-head-drag {
+    position: absolute;
+    width: 5px;
+    height: 100%;
+    top: 0px;
+    right: 0px;
+    cursor: col-resize;
+}
+.ui-table-heade-th-content {
+    text-align: center;
+    height: 30px;
+}
+.ui-table-head-font {
+
+}
+.ui-table-hcell-sort-desc {
+    background-image: url(img/icon-hcell-desc.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    height: 18px;
+    display: inline-block;
+    color: #E7F9FE;
+    vertical-align: middle;
+}
+.ui-table-hcell-sort-asc {
+    background-image: url(img/icon-hcell-asc.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    display: inline-block;
+    height: 18px;
+    color: #E7F9FE;
+    vertical-align: middle;
+}
+.ui-table-hcell-sort,
+.ui-table-hcell-sort-none {
+    background-image: url(img/icon-hcell-sort.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    display: inline-block;
+    height: 18px;
+    color: #E7F9FE;
+    vertical-align: middle;
+}
+.ui-table-heade-th-content span {
+    padding: 0;
+    margin-left: 7px;
 }
