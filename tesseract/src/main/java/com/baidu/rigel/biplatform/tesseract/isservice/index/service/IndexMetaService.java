@@ -133,4 +133,11 @@ public interface IndexMetaService {
      */
     boolean saveIndexMetaLocally(IndexMeta idxMeta) throws Exception;
     
+    /**
+     * loadIndexMetasLocalImage 从本地镜像中读取索引元数据信息
+     * @param idxBaseDir
+     * @return
+     */
+    List<IndexMeta> loadIndexMetasLocalImage(String idxBaseDir,String currNodeKey);
+    
 }

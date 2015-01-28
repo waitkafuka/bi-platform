@@ -693,27 +693,27 @@ public class IndexServiceImpl implements IndexService {
 
 			
 
-			for (Node node : assignedNodeMap.values()) {
+			for (Node currNode : assignedNodeMap.values()) {
 				int retryTimes = 0;
 				// 拷贝到指定的目录
-				String targetFilePath = idxShard.getAbsoluteFilePath(node.getIndexBaseDir());
+				String targetFilePath = idxShard.getAbsoluteFilePath(currNode.getIndexBaseDir());
 				ServerFeedbackMessage backMessage = null;
 				while (retryTimes < TesseractConstant.RETRY_TIMES) {
 					backMessage = isClient.copyIndexDataToRemoteNode(
-							absoluteIdxFilePath, targetFilePath, true, node);
+							absoluteIdxFilePath, targetFilePath, true, currNode);
 					if (backMessage.getResult().equals(FileUtils.SUCC)) {
-						node.setNodeState(NodeState.NODE_AVAILABLE);
-						this.isNodeService.saveOrUpdateNodeInfo(node);
+						currNode.setNodeState(NodeState.NODE_AVAILABLE);
+						this.isNodeService.saveOrUpdateNodeInfo(currNode);
 						LOGGER.info(String
 								.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
 										"writeIndex", "copy index success to "
-												+ node));
+												+ currNode));
 						break;
 					} else {
 						LOGGER.info(String
 								.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
 										"writeIndex", "retry copy index to "
-												+ node));
+												+ currNode));
 						retryTimes++;
 					}
 
