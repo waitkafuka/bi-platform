@@ -655,10 +655,10 @@ public class IndexServiceImpl implements IndexService {
 						+ "][idxShard:" + idxShard + "][lastPiece:" + lastPiece
 						+ "][idName:" + idName + "]"));
 		
-		Node node=this.isNodeService.getNodeMapByNodeKey(idxShard.getClusterName(), nodeKeyList, isAvailable)
+		Node node=this.isNodeService.getNodeByNodeKey(idxShard.getClusterName(), idxShard.getNodeKey(), Boolean.TRUE);
 		
 		IndexMessage message = null;
-		message = isClient.index(data, idxAction, idxShard, idName, lastPiece);
+		message = isClient.index(data, idxAction, idxShard,node, idName, lastPiece);
 
 		LOGGER.info(String.format(
 				LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,

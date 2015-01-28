@@ -316,7 +316,35 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
     	return result;
     }
     
-    /*
+    
+    
+    /* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#getNodeByNodeKey(java.lang.String, java.lang.String, boolean)
+	 */
+	@Override
+	public Node getNodeByNodeKey(String clusterName, String nodeKey,boolean isAvailable) {
+		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
+				"getNodeByNodeKey", "[clusterName:" + clusterName
+						+ "][nodeKey:" + nodeKey + "][isAvailable:"
+						+ isAvailable + "]"));
+
+		if(StringUtils.isEmpty(nodeKey) || StringUtils.isEmpty(clusterName)){
+			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
+					"getNodeByNodeKey", "[clusterName:" + clusterName
+							+ "][nodeKey:" + nodeKey + "][isAvailable:"
+							+ isAvailable + "]","param illegal"));
+			return null;
+		}
+		List<String> nodeKeyList=new ArrayList<String>();
+		nodeKeyList.add(nodeKey);
+		Map<String,Node> nodeMap=getNodeMapByNodeKey(clusterName,nodeKeyList,isAvailable);
+		if(MapUtils.isNotEmpty(nodeMap) && nodeMap.containsKey(nodeKey)){
+			return nodeMap.get(nodeKey);
+		}
+		return null;
+	}
+
+	/*
      * (non-Javadoc)
      * 
      * @see com.baidu.rigel.biplatform.tesseract.node.service.ISNodeService#
