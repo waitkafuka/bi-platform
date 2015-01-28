@@ -152,13 +152,13 @@ define([
                     picName: 'preview',
                     title: '预览',
                     className: 'button-preview-report'
+                },
+                {
+                    id: 'skin-report',
+                    picName: 'skin',
+                    title: '换肤',
+                    className: 'button-skin'
                 }
-//                {
-//                    id: 'skin-report',
-//                    picName: 'skin',
-//                    title: '换肤',
-//                    className: 'button-skin'
-//                }
             ],
 
             /**

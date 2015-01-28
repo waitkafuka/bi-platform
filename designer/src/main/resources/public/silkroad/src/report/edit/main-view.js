@@ -33,7 +33,8 @@ define([
                 'change .j-cube-select': 'changeCube',
                 'click .j-global-para': 'setglobalbtn',
                 'click .j-global-component': 'shiftMenu',
-                'click .j-button-skin': 'shiftMenu'
+                'click .j-button-skin': 'shiftMenu',
+                'click .j-skin-btn': 'chanceTheme'
             },
 
             /**
@@ -166,17 +167,19 @@ define([
                 $(document).mousedown(function (e) {
                     // 如果触发元素，不属于组件添加按钮区域
                     if (
-                        !$.contains($('.j-global-component')[0], e.target)
+                        !$.contains($('.j-global-btn')[0], e.target)
                         ) {
                         // 如果触发元素，不属于组件区域
                         if (
-                            $('.j-all-menus') && (!$.contains($('.j-all-menus')[0], e.target))
+                            $('.j-all-menus') && (!$.contains($('.j-global-menu')[0], e.target))
                             ) {
                             // 上面两个条件都满足，组件区域如果显示，那么就该隐藏掉
-                            if ($('.j-con-component') && (!$('.j-con-component').is(':hidden'))) {
-                                $('.j-all-menus').hide();
-                            }
-
+                            //if ($('.j-con-component') && (!$('.j-con-component').is(':hidden'))) {
+                            $('.j-all-menus').each(function () {
+                                $(this).hide();
+                            });
+                            //$('.j-all-menus').hide();
+                            //}
                         }
 
                     }
@@ -207,6 +210,15 @@ define([
              */
             shiftMenu : function (event) {
                 this.menuView.shiftMenu(event);
+            },
+
+            /**
+             * 切换皮肤
+             *
+             * @public
+             */
+            chanceTheme : function (event) {
+                this.menuView.chanceTheme(event);
             }
 
         });

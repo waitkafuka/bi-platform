@@ -265,8 +265,8 @@
     position: absolute;
     width: 5px;
     height: 100%;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
     cursor: col-resize;
 }
 .ui-table-heade-th-content {
