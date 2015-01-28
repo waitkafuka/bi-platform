@@ -1351,7 +1351,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @param type
      * @return ResponseResult
      */
-    @RequestMapping(value = "/{id}/theme/{type}", method = { RequestMethod.GET })
+    @RequestMapping(value = "/{id}/theme/{type}", method = { RequestMethod.POST })
     public ResponseResult modifyTheme(@PathVariable("id") String id, @PathVariable("type") String type,
         HttpServletRequest request) {
         ReportDesignModel model = reportModelCacheManager.getReportModel(id);
