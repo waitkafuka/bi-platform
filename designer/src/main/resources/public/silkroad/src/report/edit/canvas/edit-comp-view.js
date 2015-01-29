@@ -397,7 +397,7 @@ define([
                         return ;
                     }
                     // 先析构组件
-                    this.canvasView._component.dispose();
+                    that.canvasView._component.dispose();
 
                     // 修改entity中下拉框类型,设置可拖拽面板中的属性值
                     for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
@@ -416,7 +416,7 @@ define([
                     }
 
                     // 修改reportVm中对应组件div的data-mold属性
-                    var selects = this.canvasView.model.$reportVm
+                    var selects = that.canvasView.model.$reportVm
                         .find('[data-component-type=TIME_COMP]');
                     selects.each(function () {
                         var  $this = $(this);
@@ -427,7 +427,7 @@ define([
 
                     // 保存vm与json，保存成功后展示报表
                     that.model.canvasModel.saveJsonVm(
-                        this.canvasView.showReport.call(that.canvasView)
+                        that.canvasView.showReport.call(that.canvasView)
                     );
                 }
 
