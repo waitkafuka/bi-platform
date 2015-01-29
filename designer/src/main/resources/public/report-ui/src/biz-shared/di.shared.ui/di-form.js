@@ -480,7 +480,7 @@ $namespace('di.shared.ui');
             else if (clzKey === 'RANGE_CALENDAR') {
                 dateKey = input.$di('getDef').dateKey.D;
                 var dataValue = input.$di('getValue');
-                options[dateKey] = dataValue;
+                options[dateKey] = JSON.stringify(dataValue);
             }
             else {
                 name = input.$di('getDef').name;

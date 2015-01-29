@@ -12,7 +12,9 @@ define(['template'], function (template) {
         }
         $out+='\n\n    ';
         if(item.type == 'W'){
-        $out+='\n    <div class="item j-item" data-type="W">\n        <div class="title">周粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="-1"/>\n            <select>\n                <option value="D"';
+        $out+='\n    <div class="item j-item" data-type="W">\n        <div class="title">周粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="';
+        $out+=$escape(item.defaultSelectedVal);
+        $out+='"/>\n            <select>\n                <option value="D"';
         if(item.defaultSelectedUnit == 'D'){
         $out+=' selected';
         }

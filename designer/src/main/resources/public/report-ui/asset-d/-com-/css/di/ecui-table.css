@@ -278,3 +278,10 @@
     width: 15px;
     height: 15px;
 }
+.ui-table-dot-line {
+    position: absolute;
+    width: 1px;
+    border-right: 2px dashed #ccc;
+    display: none;
+    cursor: col-resize;
+}
