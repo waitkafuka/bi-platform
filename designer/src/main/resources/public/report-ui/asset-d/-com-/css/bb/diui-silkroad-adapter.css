@@ -15,7 +15,7 @@
     overflow: auto
 }
 .component-item {
-    overflow: auto;
+    /*overflow: auto;*/
 }
 .hide {
     display: none;

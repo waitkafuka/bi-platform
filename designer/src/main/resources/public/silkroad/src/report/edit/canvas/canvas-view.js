@@ -230,10 +230,13 @@ define([
                         that.initDrag($realComp);
                         that.initResize($realComp);
                         that.addEditBtns($realComp);
+                        that.removeGuides($realComp);
+                        that.addGuides($realComp);
                         $realComp.find('.j-con-edit-btns').css({
                             'width': 'auto',
                             'height': 'auto'
-                        }).find('.j-fold').html('－');
+                        });
+                        //.find('.j-fold').html('－');
                         if ($realComp.attr('data-component-type') === 'TEXT') {
                             that.showReport(true);
                         }
@@ -316,6 +319,10 @@ define([
                 that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 50, 50);
+                // 删除参考线-避免重复渲染产生多余的参考线
+                that.removeGuides($component);
+                // 调整后添加参考线
+                that.addGuides($component);
             },
 
             /**

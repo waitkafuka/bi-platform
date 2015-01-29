@@ -14,9 +14,6 @@
     height: 90%;
     overflow: auto;
 }
-.component-item {
-    overflow: auto;
-}
 .hide {
     display: none;
 }
