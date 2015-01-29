@@ -343,7 +343,7 @@ define([
                 var compId =  $target.attr('data-comp-id');
                 // 先析构组件
                 this.canvasView._component.dispose();
-
+                // TODO:添加维度为空时，限制
                 // 修改entity中下拉框类型
                 for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
                     if (
@@ -394,6 +394,7 @@ define([
                         } else {
                             $target.val('CAL_SELECT');
                         }
+                        dialog.alert('请选维度');
                         return ;
                     }
                     // 先析构组件
