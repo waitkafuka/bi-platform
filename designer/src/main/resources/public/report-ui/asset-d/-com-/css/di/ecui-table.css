@@ -79,27 +79,14 @@
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.ui-table-hcell-sort,
-.ui-table-hcell-sort-none {
-    background-image: url(img/icon.png);
-    background-position: right -240px;
-    background-repeat: no-repeat;
-}
-.ui-table-hcell-sort-desc {
-    background-image: url(img/icon.png);
-    background-position: right -296px;
-    background-repeat: no-repeat;
-}
-.ui-table-hcell-sort-asc {
-    background-image: url(img/icon.png);
-    background-position: right -352px;
-    background-repeat: no-repeat;
-}
 .ui-table-row {
     cursor: pointer;
 }
 .ui-table-row-hover .ui-table-ccell {
-    background: #FCFCC8;
+    background: #FFFF99;
+}
+.ui-table-row-hover {
+    background: #ccc;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
@@ -264,24 +251,67 @@
     /*下降绿箭*/
     background-position: -10px -106px;
 }
-.table-head-tips {
-    width: 17px;
-    height: 17px;
-    margin-left: 2px;
-    background: #8A8C8C;
-    border-radius: 8px;
-    line-height: 17px;
-    color: #FFF;
-}
-.table-tips-box {
-    display: inline-block;
+.ui-table-head-tips {
     width: 15px;
     height: 15px;
+    margin-left: 7px;
+    background: #999;
+    border-radius: 8px;
+    line-height: 15px;
+    color: #FFF;
+    display: inline-block;
 }
-.ui-table-dot-line {
+.ui-table-head-drag {
     position: absolute;
-    width: 1px;
-    border-right: 2px dashed #ccc;
-    display: none;
+    width: 5px;
+    height: 100%;
+    top: 0;
+    right: 0;
     cursor: col-resize;
+}
+.ui-table-heade-th-content {
+    position: relative;
+    text-align: center;
+    height: 30px;
+    margin: 0 auto;
+}
+.ui-table-hcell-sort-desc {
+    background-image: url(img/icon-hcell-desc.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    height: 18px;
+    display: inline-block;
+    color: #E7F9FE;
+    position: absolute;
+    right: 0;
+    top: 7px;
+}
+.ui-table-hcell-sort-asc {
+    background-image: url(img/icon-hcell-asc.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    display: inline-block;
+    height: 18px;
+    color: #E7F9FE;
+    position: absolute;
+    right: 0;
+    top: 7px;
+}
+.ui-table-hcell-sort,
+.ui-table-hcell-sort-none {
+    background-image: url(img/icon-hcell-sort.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    display: inline-block;
+    height: 18px;
+    color: #E7F9FE;
+    position: absolute;
+    right: 0;
+    top: 7px;
+}
+.ui-table-heade-th-content span {
+    padding: 0;
+}
+.ui-table-head-font {
+    margin-left: 5px;
 }

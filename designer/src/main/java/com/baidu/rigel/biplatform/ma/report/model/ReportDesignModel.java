@@ -115,6 +115,11 @@ public class ReportDesignModel implements Serializable {
     private String vmContent;
     
     /**
+     * 主题
+     */
+    private String theme;
+    
+    /**
      * 报表参数映射关系
      */
     private Map<String, ReportParam> params = Maps.newHashMap();
@@ -333,5 +338,23 @@ public class ReportDesignModel implements Serializable {
     public void setParams(Map<String, ReportParam> params) {
         this.params = params;
     }
+
+    /**
+     * @return the theme
+     */
+    public String getTheme() {
+        if (StringUtils.isEmpty(this.theme)) {
+            this.theme = "di";
+        }
+        return theme;
+    }
+
+    /**
+     * @param theme the theme to set
+     */
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
+    
     
 }
