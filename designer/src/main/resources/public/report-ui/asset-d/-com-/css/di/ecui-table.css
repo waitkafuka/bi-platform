@@ -315,3 +315,18 @@
 .ui-table-head-font {
     margin-left: 5px;
 }
+
+.ui-table-head-drag {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 10px;
+    height: 100%;
+}
+.ui-table-dot-line {
+    position: absolute;
+    width: 1px;
+    border-right: 2px dashed #ccc;
+    display: none;
+    cursor: col-resize;
+}
