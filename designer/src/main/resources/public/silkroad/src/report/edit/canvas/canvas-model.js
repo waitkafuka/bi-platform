@@ -270,9 +270,10 @@ define(
                             arr[i].clzType == 'VUI'
                             &&
                             (
-                                arr[i].clzKey == 'X_CALENDAR'
-                                || arr[i].clzKey == 'ECUI_SELECT'
-                                || arr[i].clzKey == 'ECUI_MULTI_SELECT'
+                                arr[i].clzKey === 'X_CALENDAR'
+                                || arr[i].clzKey === 'RANGE_CALENDAR'
+                                || arr[i].clzKey === 'ECUI_SELECT'
+                                || arr[i].clzKey === 'ECUI_MULTI_SELECT'
                             )
                         ) {
                             that._deleteCompFromForm(arr[i].id);
