@@ -1239,7 +1239,7 @@ define([
                                     var $this = $(this);
                                     var rangeStart = $this.find('[name="startDateSetting"]').val();
                                     var rangeEnd = $this.find('[name="endDateSetting"]').val();
-                                    // 如果设置range时间时，rangeend如果大于rangestart则不能设置。
+                                    // 如果设置range时间时，默认设置时rangeend如果大于rangestart则不能设置  。
                                     if (rangeStart !== undefined && rangeEnd !== undefined) {
                                         if (rangeEnd > rangeStart) {
                                             dialog.alert("设置的默认结束时间应小于默认开始时间");
