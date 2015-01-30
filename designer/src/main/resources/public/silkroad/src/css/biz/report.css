@@ -189,7 +189,7 @@
 }
 .report .shell-component {
     position: absolute;
-    overflow: hidden;
+    /*overflow: hidden;*/
     border: 1px solid #ffffff;
 }
 .report .shell-component:hover {
@@ -261,7 +261,7 @@
     border-right: 1px dashed #007777;
 }
 .guide-bottom {
-    bottom: -1px;
+    bottom: 0;
     width: 10000px;
     left: -5000px;
     border-bottom: 1px dashed #007777;

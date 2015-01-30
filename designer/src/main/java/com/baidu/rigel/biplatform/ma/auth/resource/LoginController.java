@@ -68,6 +68,7 @@ public class LoginController extends RandomValidateCodeController {
         }
         // 获取用户登录信息
         String productLine = request.getParameter("name");
+        LOG.info("login user info : user = " + productLine);
         String pwd = request.getParameter("pwd");
         // modify by jiangyichao at 2014-09-12 加密产品线
         String productLineEncrypt = productLine;

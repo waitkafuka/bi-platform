@@ -220,7 +220,7 @@
      */
     DOM.getPreviousSibling = function(el) {
         return el.previousElementSibling || el.previousSibling;
-    }
+    };
 
 })();
 

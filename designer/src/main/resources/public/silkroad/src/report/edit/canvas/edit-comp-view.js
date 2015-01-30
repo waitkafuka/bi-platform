@@ -343,7 +343,7 @@ define([
                 var compId =  $target.attr('data-comp-id');
                 // 先析构组件
                 this.canvasView._component.dispose();
-
+                // TODO:添加维度为空时，限制
                 // 修改entity中下拉框类型
                 for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
                     if (
@@ -385,39 +385,53 @@ define([
                 var selType = $target.val();
                 var entityDefs = this.model.canvasModel.reportJson.entityDefs;
                 var compId =  $target.attr('data-comp-id');
-                // 先析构组件
-                this.canvasView._component.dispose();
-
-                // 修改entity中下拉框类型,设置可拖拽面板中的属性值
-                for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
-                    if (compId === entityDefs[i].compId) {
-                        //entityDefs[i].clzKey = selType;
-                        // 获取组件的配置信息
-                        var compType = $target.attr('data-comp-type');
-                        var compData = that.model.canvasModel.compBoxModel.getComponentData(compType);
-                        if('CAL_SELECT' === selType){
-                            entityDefs[i].clzKey = compData.entityDescription.clzKey;
-                        } else if('DOUBLE_CAL_SELECT' === selType){
-                            entityDefs[i].clzKey = compData.entityDescriptionRangeCalendar.clzKey;
+                var activeSilkroadCompId = that.getActiveCompId();
+                that.model.getCompAxis(activeSilkroadCompId, handleSelectedChange);
+                function handleSelectedChange(data) {
+                    if (data.xAxis.length <= 0) {
+                        if ('CAL_SELECT' === selType){
+                            $target.val('DOUBLE_CAL_SELECT');
+                        } else {
+                            $target.val('CAL_SELECT');
                         }
-
+                        dialog.alert('请选维度');
+                        return ;
                     }
+                    // 先析构组件
+                    that.canvasView._component.dispose();
+
+                    // 修改entity中下拉框类型,设置可拖拽面板中的属性值
+                    for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
+                        if (compId === entityDefs[i].compId) {
+                            //entityDefs[i].clzKey = selType;
+                            // 获取组件的配置信息
+                            var compType = $target.attr('data-comp-type');
+                            var compData = that.model.canvasModel.compBoxModel.getComponentData(compType);
+                            if('CAL_SELECT' === selType){
+                                entityDefs[i].clzKey = compData.entityDescription.clzKey;
+                            } else if('DOUBLE_CAL_SELECT' === selType){
+                                entityDefs[i].clzKey = compData.entityDescriptionRangeCalendar.clzKey;
+                            }
+
+                        }
+                    }
+
+                    // 修改reportVm中对应组件div的data-mold属性
+                    var selects = that.canvasView.model.$reportVm
+                        .find('[data-component-type=TIME_COMP]');
+                    selects.each(function () {
+                        var  $this = $(this);
+                        if ($this.attr('data-comp-id') === compId) {
+                            $this.attr('data-mold', selType);
+                        }
+                    });
+
+                    // 保存vm与json，保存成功后展示报表
+                    that.model.canvasModel.saveJsonVm(
+                        that.canvasView.showReport.call(that.canvasView)
+                    );
                 }
 
-                // 修改reportVm中对应组件div的data-mold属性
-                var selects = this.canvasView.model.$reportVm
-                    .find('[data-component-type=TIME_COMP]');
-                selects.each(function () {
-                    var  $this = $(this);
-                    if ($this.attr('data-comp-id') === compId) {
-                        $this.attr('data-mold', selType);
-                    }
-                });
-
-                // 保存vm与json，保存成功后展示报表
-                this.model.canvasModel.saveJsonVm(
-                    this.canvasView.showReport.call(this.canvasView)
-                );
             },
             /**
              * 报表组件的编辑模块 初始化函数
@@ -1223,6 +1237,15 @@ define([
                                 text: '提交',
                                 click: function () {
                                     var $this = $(this);
+                                    var rangeStart = $this.find('[name="startDateSetting"]').val();
+                                    var rangeEnd = $this.find('[name="endDateSetting"]').val();
+                                    // 如果设置range时间时，rangeend如果大于rangestart则不能设置。
+                                    if (rangeStart !== undefined && rangeEnd !== undefined) {
+                                        if (rangeEnd > rangeStart) {
+                                            dialog.alert("设置的默认结束时间应小于默认开始时间");
+                                            return ;
+                                        }
+                                    }
                                     // 提取表单数据
                                     var data = getDataFromForm($this);
                                     // 处理并回填json
