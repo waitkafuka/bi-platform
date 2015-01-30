@@ -16,7 +16,7 @@
     height: 30px;
     overflow: hidden;
 }
-.ui-table-layout, 
+.ui-table-layout,
 .ui-table-locked-layout {
     border-left: 1px solid #CCC;
     border-right: 1px solid #CCC;
@@ -33,15 +33,15 @@
     max-width: 200px;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
-    word-break: keep-all;  
+    white-space: nowrap;
+    word-break: keep-all;
 }
 .ui-table-cell-limited{
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
+    white-space: nowrap;
 }
-.ui-table-hcell, 
+.ui-table-hcell,
 .ui-table-rowhcell {
     background: #F6F6F6;
     border-right: 1px solid #E6E6E6;
@@ -56,14 +56,14 @@
     font-weight: normal;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
-    word-break: keep-all;     
+    white-space: nowrap;
+    word-break: keep-all;
 }
 .ui-table-hcell-bag {
-    margin: 0 10px 0 10px; 
+    margin: 0 10px 0 10px;
 }
 .ui-plane-table-hcell-bag{
-	margin: 0 20px 0 20px; 
+	margin: 0 20px 0 20px;
 }
 .ui-plane-table-hcell-bag-lastcolumn{
 	padding: 0 33px 0 0;
@@ -71,7 +71,7 @@
 .ui-table-rowhcell {
     text-align: center;
     text-align: left;
-    color: #333;    
+    color: #333;
 }
 /* 解决ie7下（固定列）单元格自动换行的问题（强制所有文字不换行，溢出隐藏） */
 .ui-table-rowhcell div {
@@ -225,7 +225,7 @@
 }
 /*条件格式*/
 .ui-table-condfmt-arr {
-    background: url(img/icon2.png) 0 -106px;    
+    background: url(img/icon2.png) 0 -106px;
     width: 10px;
     height: 10px;
     overflow: hidden;
@@ -314,4 +314,19 @@
 }
 .ui-table-head-font {
     margin-left: 5px;
+}
+
+.ui-table-head-drag {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 10px;
+    height: 100%;
+}
+.ui-table-dot-line {
+    position: absolute;
+    width: 1px;
+    border-right: 2px dashed #ccc;
+    display: none;
+    cursor: col-resize;
 }

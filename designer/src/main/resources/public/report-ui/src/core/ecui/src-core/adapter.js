@@ -175,6 +175,27 @@
             // 或者先使用 removeClass 方法删除之前的样式
             el.className += ' ' + className;
         },
+        /**
+        * 判断 Element 对象有没有当前样式
+        * @public
+        *
+        * @param {HTMLElement} el Element 对象
+        * @param {string} className 样式名，可以是多个，中间使用空白符分隔
+        */
+        hasClass = dom.hasClass = function (el, className) {
+                var oldClasses = el.className.split(/\s+/).sort();
+                var newClasses = className.split(/\s+/).sort();
+                var i = oldClasses.length;
+                var j = newClasses.length;
+
+                for (; i && j; ) {
+                    if (oldClasses[i - 1] == newClasses[j - 1]) {
+                        j--;
+                    }
+                    i--;
+                }
+                return j <= 0;
+        },
 
         /**
          * 获取所有 parentNode 为指定 Element 的子 Element 集合。
@@ -545,7 +566,28 @@
             }
             return el;
         },
-
+            /**
+             * 根据样式获取Element
+             * @public
+             *
+             * @param {HTMLElement} parent Element 对象
+             * @param {string} tagName 标签
+             * @param {string} className 样式
+             */
+        getElementsByClass = dom.getElementsByClass = function(parent, tagName, className) {
+            var oEls = parent.getElementsByTagName(tagName);
+            var arr = [];
+            for (var i = 0; i < oEls.length; i++) {
+                var oClassName = oEls[i].className.split(" ");
+                for (var j = 0; j < oClassName.length; j++) {
+                    if (className == oClassName[j]) {
+                        arr.push(oEls[i]);
+                        break;
+                    }
+                }
+            }
+            return arr;
+        },
         /**
          * 设置 Element 对象的样式值。
          * @public

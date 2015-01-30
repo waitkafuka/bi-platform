@@ -126,12 +126,11 @@
 }
 .report .shell-component {
     position: absolute;
-    overflow: hidden;
     border: 1px solid #F0F4F7;
     background: #F0F4F7;
 }
 .report .shell-component:hover {
-    border: 1px solid #00AFF2;
+    border: 1px solid rgba(0, 119, 119, 0.168627);
 }
 .canvas .report {
     background: #F0F4F7;

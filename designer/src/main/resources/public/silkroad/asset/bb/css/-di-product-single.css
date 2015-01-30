@@ -2007,34 +2007,34 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     max-width: 200px;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
-    word-break: keep-all;  
+    white-space: nowrap;
+    word-break: keep-all;
 }
 .ui-table-cell-limited{
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
+    white-space: nowrap;
 }
-.ui-table-hcell, 
+.ui-table-hcell,
 .ui-table-rowhcell {
     color: #000;
     height: 30px;
     line-height: 30px;
     padding: 0 9px;
     margin: 0;
-    vertical-align: middle;
+    /*vertical-align: middle;*/
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;
     overflow: hidden;
-    white-space: nowrap;  
-    word-break: keep-all;     
+    white-space: nowrap;
+    word-break: keep-all;
 }
 .ui-table-hcell-bag {
-    margin: 0 10px 0 10px; 
+    margin: 0 10px 0 10px;
 }
 .ui-plane-table-hcell-bag{
-	margin: 0 20px 0 20px; 
+	margin: 0 20px 0 20px;
 }
 .ui-plane-table-hcell-bag-lastcolumn{
 	padding: 0 33px 0 0;
@@ -2042,7 +2042,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-rowhcell {
     text-align: center;
     text-align: left;
-    color: #333;    
+    color: #333;
 }
 /* 解决ie7下（固定列）单元格自动换行的问题（强制所有文字不换行，溢出隐藏） */
 .ui-table-rowhcell div {
@@ -2050,32 +2050,20 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.ui-table-hcell-sort,
-.ui-table-hcell-sort-none {
-    background-image: url(img/icon.png);
-    background-position: right -240px;
-    background-repeat: no-repeat;
-}
-.ui-table-hcell-sort-desc {
-    background-image: url(img/icon.png);
-    background-position: right -296px;
-    background-repeat: no-repeat;
-}
-.ui-table-hcell-sort-asc {
-    background-image: url(img/icon.png);
-    background-position: right -352px;
-    background-repeat: no-repeat;
-}
+
 .ui-table-row {
     cursor: pointer;
     background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
-    background: #CCC;
+    background: #FFF;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
     background: #FFF;
+}
+.ui-table-ccell {
+    text-align: center;
 }
 /*.ui-table-row {
     cursor: pointer;
@@ -2087,7 +2075,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     background: #DCEFD1;
 }*/
 .ui-table-cell-align-right {
-    text-align: right;
+    text-align: left;
 }
 .ui-table-cell-align-center {
     text-align: center;
@@ -2210,7 +2198,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 /*条件格式*/
 .ui-table-condfmt-arr {
-    background: url(img/icon2.png) 0 -106px;    
+    background: url(img/icon2.png) 0 -106px;
     width: 10px;
     height: 10px;
     overflow: hidden;
@@ -2236,19 +2224,69 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     /*下降绿箭*/
     background-position: -10px -106px;
 }
-.table-head-tips {
-    width: 17px;
-    height: 17px;
+.ui-table-head-tips {
+    width: 15px;
+    height: 15px;
     margin-left: 2px;
     background: #8A8C8C;
     border-radius: 8px;
-    line-height: 17px;
-    color: #FFF;
-}
-.table-tips-box {
+    line-height: 15px;
+    color: #E7F9FE;
     display: inline-block;
-    width: 15px;
-    height: 15px;
+}
+.ui-table-heade-th-content {
+    text-align: center;
+    height: 30px;
+}
+.ui-table-head-font {
+
+}
+.ui-table-hcell-sort-desc {
+    background-image: url(img/icon-hcell-desc.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    height: 18px;
+    display: inline-block;
+    color: #E7F9FE;
+    vertical-align: middle;
+}
+.ui-table-hcell-sort-asc {
+    background-image: url(img/icon-hcell-asc.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    display: inline-block;
+    height: 18px;
+    color: #E7F9FE;
+    vertical-align: middle;
+}
+.ui-table-hcell-sort,
+.ui-table-hcell-sort-none {
+    background-image: url(img/icon-hcell-sort.png);
+    background-repeat: no-repeat;
+    width: 8px;
+    display: inline-block;
+    height: 18px;
+    color: #E7F9FE;
+    vertical-align: middle;
+}
+.ui-table-heade-th-content span {
+    padding: 0;
+    margin-left: 7px;
+}
+
+.ui-table-head-drag {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 10px;
+    height: 100%;
+}
+.ui-table-dot-line {
+    position: absolute;
+    width: 1px;
+    border-right: 2px dashed #ccc;
+    display: none;
+    cursor: col-resize;
 }
 /** 
  * Pager
@@ -3397,9 +3435,9 @@ div.di-dim-level-find-msg span{
 
 /** Base container **/
 .kalendae {
-	display: inline-block;zoom:1.3;*display:inline;
+	display: inline-block;
+    *display:inline;
 	background: #fbfff9;
-	padding:10px;
 	margin:5px;
 	border-radius:5px;
 	-moz-border-radius: 5px;
@@ -3447,14 +3485,14 @@ div.di-dim-level-find-msg span{
 }
 
 /** Month Container **/
-.kalendae .k-calendar {display: inline-block;zoom:1;*display:inline;width:155px;vertical-align:top;}
+.kalendae .k-calendar {display: inline-block;zoom:1;*display:inline;width:210px;vertical-align:top;}
 
 /** Month Separator **/
-.kalendae .k-separator {display: inline-block;zoom:1;*display:inline;width:2px;vertical-align:top;background:#ddd;height:155px;margin:0px 10px;}
+.kalendae .k-separator {display: inline-block;zoom:1;*display:inline;width:2px;vertical-align:top;background:#CCCED4;height:165px;}
 
 /** Month Title Row **/
-.kalendae .k-title {text-align:center;white-space:nowrap;position:relative;height:18px;}
-.kalendae .k-caption {font-size:12px;line-height:18px;}
+.kalendae .k-title {text-align:center;white-space:nowrap;position:relative;height:30px;background: #CCCED4;}
+.kalendae .k-caption {font-size:12px;line-height:18px;background: #CCCED4;}
 
 
 /** Month and Year Buttons **/
@@ -3494,7 +3532,7 @@ div.di-dim-level-find-msg span{
 .kalendae .k-title,
 .kalendae .k-header,
 .kalendae .k-days {
-	width:154px;
+	width:210px;
 	display:block;
 	overflow:hidden;
 }
@@ -3517,16 +3555,17 @@ div.di-dim-level-find-msg span{
 }
 
 .kalendae .k-header span {
-	text-align:center;
-	font-weight:bold;
-	width:20px;
-	padding:1px 0;
-	color:#666;
+    text-align: center;
+    font-family: "微软雅黑";
+    width: 20px;
+    color: #000;
+    padding-top: 1px;
+    margin-left: 8px;
 }
 
 .kalendae .k-days span {
 	text-align:right;
-	width:13px;
+	width:15px;
 	height:1.1em;
 	line-height:1em;
 	padding:2px 3px 2px 2px;
@@ -3534,6 +3573,7 @@ div.di-dim-level-find-msg span{
 	border-radius:3px;
 	-moz-border-radius: 3px;
 	-webkit-border-radius: 3px;
+    margin-top: 5px;
 	color:#999;
 }
 
@@ -3620,7 +3660,16 @@ div.di-dim-level-find-msg span{
 .kalendae.ie8 .k-btn-next-month:after,
 .kalendae.ie8 .k-btn-previous-year:after,
 .kalendae.ie8 .k-btn-next-year:after {display:none;}
-
+.keydays {
+    background: #F1F1F1;
+}
+.k-header {
+    height: 20px;
+    background: #F1F1F1;
+}
+.k-days {
+    background: #FFF;
+}
 
 /**
  * Meta Condition
