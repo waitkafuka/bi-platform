@@ -73,6 +73,7 @@ public final class FileServerClient {
      */
     public Response doRequest(String server, int port, final Request request) {
         EventLoopGroup work = new NioEventLoopGroup(1);
+        logger.info("request info =====: " + request);
 //        String message = null;
         ChannelFuture future = null;
         try {
