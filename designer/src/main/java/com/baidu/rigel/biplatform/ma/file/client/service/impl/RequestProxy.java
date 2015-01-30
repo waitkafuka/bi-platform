@@ -101,8 +101,10 @@ public class RequestProxy {
             initServers();
         }
         Response response = null;
+        LOG.info("connect to file server : " + SERVERS);
         for (String tmp : SERVERS) {
             String[] server = tmp.split(":");
+            LOG.info("connect to file server : " + server[0] + " port " + server[1]);
             response = client.doRequest(server[0], Integer.valueOf(server[1]), request);
             if (response.getStatus() != ResponseStatus.FAIL) {
                 break;
