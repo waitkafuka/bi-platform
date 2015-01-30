@@ -9,13 +9,9 @@
 /**
  * 标记且功能性css，在console会起标记作用
  */
-.di-o_o-body {
-    position: relative;
-    padding: 10px;
-    font-size: 12px;
-    min-height: 200px;
-    background: #F0F4F7;
-}
+/*.ecui-loaded .di-o_o-bgcolor {*/
+    /*background: #F0F4F7;*/
+/*}*/
 .di-o_o-block {
     position: relative;
     /*margin: 0 10px 20px 0;*/
@@ -126,12 +122,12 @@
 }
 .report .shell-component {
     position: absolute;
-    border: 1px solid #F0F4F7;
-    background: #F0F4F7;
+    /*border: 1px solid #F0F4F7;*/
+    /*background: #F0F4F7;*/
 }
 .report .shell-component:hover {
     border: 1px solid rgba(0, 119, 119, 0.168627);
 }
 .canvas .report {
-    background: #F0F4F7;
+    background-color: #F0F4F7;
 }

@@ -20,8 +20,8 @@ define([
             // 事件
             events: {
                 'change #component-group-selector': 'showCompByGroup',
-                'mouseover .j-component-border': 'showEditor',
-                'mouseout .j-component-border': 'hideEditor'
+                'mouseover .j-component-border': 'showEditorLine',
+                'mouseout .j-component-border': 'hideEditorLine'
                 //'click .j-component-box-fold': 'fold'
             },
 
@@ -139,26 +139,32 @@ define([
             **/
 
             /**
-             * 组件编辑区域移入出现
+             * 组件编辑区以及参考线域移入出现
              *
              * @public
              */
-            showEditor: function () {
+            showEditorLine: function () {
                 var $compElement = this.$el.find($('.j-component-border'));
                 $compElement.mouseover(function () {
+                    // 操作区在鼠标移出当前组件时出现
                     $(this).find('.con-edit-btns').show();
+                    // 参考线在鼠标移出当前组件时出现
+                    $(this).find('.j-guide-line').show();
                 });
             },
 
             /**
-             * 组件编辑区域移出隐藏
+             * 组件编辑区以及参考线域移出隐藏
              *
              * @public
              */
-            hideEditor: function () {
+            hideEditorLine: function () {
                 var $compElement = this.$el.find($('.j-component-border'));
                 $compElement.mouseout(function () {
+                    // 操作区在鼠标移出当前组件时消失
                     $(this).find('.con-edit-btns').hide();
+                    // 参考线在鼠标移出当前组件时消失
+                    $(this).find('.j-guide-line').hide();
                 });
             },
 

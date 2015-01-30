@@ -122,3 +122,6 @@
     overflow: hidden;
     height: 0px;
 }
+.canvas .report {
+    background-color: #FFF;
+}

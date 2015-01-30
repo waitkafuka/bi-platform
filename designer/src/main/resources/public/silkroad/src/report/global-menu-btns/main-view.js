@@ -69,10 +69,17 @@ define([
                 this.model.getSkinType(reportId, type);
                 // 更换link里面的路径
                 $('.link-skin').attr(
-                    'href', '/silkroad/asset/'
+                    'href', 'silkroad/asset/'
                     + type
                     + '/css/-di-product-debug.css');
                 $('.skin-menu').hide();
+
+                // 更换线上link里面的路径
+//                $('.link-skin').attr(
+//                    'href', 'asset/'
+//                        + type
+//                        + '/css/-di-product-min.css');
+//                $('.skin-menu').hide();
             },
 
             /**
@@ -81,23 +88,35 @@ define([
              * @public
              */
             referenceLine : function (event) {
-                // 获取全部参考线
-                var $line = $('.j-guide-line');
-                var lineNum = $line.length;
-                // 根据参考线个数进行对应操作
-                if (lineNum == 0) {
-                    dialog.warning('未添加组件，或未找到参考线请添加组件并重试');
+                var imglineurl = 'url(' + '/silkroad/src/css/img/grid.png)';
+                var imgemptyurl = 'url(' + '/silkroad/src/css/img/grid-empty.png)';
+                var $report = $('.report');
+                console.log($report.css('background-image'));
+                if ($report.css('background-image') != imglineurl) {
+                    $report.css('background-image', imgemptyurl);
+                    dialog.alert('背景参考线已关闭');
                 }
                 else {
-                    if ($line.is(':visible')) {
-                        $line.hide();
-                        dialog.alert('参考线已关闭，再次点击启用。');
-                    }
-                    else {
-                        $line.show();
-                        dialog.alert('参考线已打开，再次点击关闭。');
-                    }
+                    $report.css('background-image', imglineurl);
+                    dialog.alert('背景参考线已打开');
                 }
+//                // 获取全部参考线
+//                var $line = $('.j-guide-line');
+//                var lineNum = $line.length;
+//                // 根据参考线个数进行对应操作
+//                if (lineNum == 0) {
+//                    dialog.warning('未添加组件，或未找到参考线请添加组件并重试');
+//                }
+//                else {
+//                    if ($line.is(':visible')) {
+//                        $line.hide();
+//                        dialog.alert('参考线已关闭，再次点击启用。');
+//                    }
+//                    else {
+//                        $line.show();
+//                        dialog.alert('参考线已打开，再次点击关闭。');
+//                    }
+//                }
             }
 
         });

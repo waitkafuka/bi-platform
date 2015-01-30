@@ -395,6 +395,7 @@ define(
             saveReport: function (success) {
                 var that = this;
                 var vm = that.$reportVm.prop('outerHTML').replace(/<div class=\"placeholer-20\" style=\"width:100%; height:20px\"><\/div>/g,'');
+                // vm = that.$reportVm.prop('outerHTML').replace(/^(<div data-o_o-di=\"snpt\").*?(di-o_o-body\">)$/, '<div data-o_o-di="snpt" class="di-o_o-bgcolor di-o_o-body">');
                 $.ajax({
                     url: Url.saveReport(that.id),
                     type: 'PUT',
@@ -418,6 +419,7 @@ define(
                 var that = this;
                 success = success || new Function();
                 var vm = that.$reportVm.prop('outerHTML').replace(/<div class=\"placeholer-20\" style=\"width:100%; height:20px\"><\/div>/g,'');
+                // vm = that.$reportVm.prop('outerHTML').replace(/^(<div data-o_o-di=\"snpt\").*?(di-o_o-body\">)$/, '<div data-o_o-di="snpt" class="di-o_o-bgcolor di-o_o-body">');
                 $.ajax({
                     url: Url.saveJsonVm(that.id),
                     type: 'PUT',
