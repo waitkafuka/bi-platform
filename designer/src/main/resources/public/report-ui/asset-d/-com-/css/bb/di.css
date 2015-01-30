@@ -122,7 +122,7 @@
 }
 .report .shell-component {
     position: absolute;
-    /*border: 1px solid #F0F4F7;*/
+    border: 1px solid #F0F4F7;
     /*background: #F0F4F7;*/
 }
 .report .shell-component:hover {

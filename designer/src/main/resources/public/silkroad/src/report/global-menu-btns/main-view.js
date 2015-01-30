@@ -69,7 +69,7 @@ define([
                 this.model.getSkinType(reportId, type);
                 // 更换link里面的路径
                 $('.link-skin').attr(
-                    'href', 'silkroad/asset/'
+                    'href', 'asset/'
                     + type
                     + '/css/-di-product-debug.css');
                 $('.skin-menu').hide();
