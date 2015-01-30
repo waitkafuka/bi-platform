@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -30,6 +31,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -668,6 +670,62 @@ public class FileUtils {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "doUncompressFile",
             "[inFileName:" + inFileName + "]"));
         return decompressedFileName;
+    }
+    
+    /**
+     * 判断当前dir是否为空目录
+     * @param dir
+     * @return boolean
+     */
+    public static boolean isEmptyDir(File dir){
+    	boolean result=false;
+    	if(dir!=null && dir.exists() && dir.isDirectory() && !ArrayUtils.isEmpty(dir.listFiles())){
+    		result=true;
+    	}
+    	return result;
+    }
+    
+    /**
+     * 判断给定的文件后缀在当前文件目录下是否存在
+     * @param dir 文件目录
+     * @param fileSuffix 文件后缀
+     * @return boolean
+     */
+    public static boolean isExistGivingFileSuffix(File dir,String fileSuffix){
+    	boolean result=false;
+    	if(!isEmptyDir(dir) && !StringUtils.isEmpty(fileSuffix)){
+    		File[] files=dir.listFiles(new LocalImageFilenameFilter(fileSuffix));
+    		if(!ArrayUtils.isEmpty(files)){
+    			result=true;
+    		}
+    	}
+    	
+    	return result;
+    }
+    
+    public static class LocalImageFilenameFilter implements FilenameFilter{
+    	
+    	private String fileSuffix;
+    	
+		public LocalImageFilenameFilter(String fileSuffix) {
+			super();
+			this.fileSuffix = fileSuffix;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.io.FilenameFilter#accept(java.io.File, java.lang.String)
+		 */
+		@Override
+		public boolean accept(File dir, String name) {
+			if(name.indexOf(fileSuffix)==-1){
+				return false;
+			}
+			if(name.lastIndexOf(fileSuffix) == name.indexOf(fileSuffix)){
+				return true;
+			}
+			return false;
+		}
+    	
     }
     
 }

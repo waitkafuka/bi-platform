@@ -55,15 +55,23 @@ public class IndexShard implements Serializable {
      * shardId
      */
     private Long shardId;
-    /**
-     * node 主节点
-     */
-    private Node node;
     
     /**
-     * replicaNodeList 复本所在节点
+     * 集群名称
      */
-    private List<Node> replicaNodeList;
+    private String clusterName;    
+    
+    /**
+     * nodekey 主节点key
+     */    
+    private String nodeKey;
+    
+    /**
+     * 数据复本所在的节点KEY
+     */
+    private List<String> replicaNodeKeyList;
+    
+    
     /**
      * idxShardStrategy
      */
@@ -96,11 +104,6 @@ public class IndexShard implements Serializable {
     private IndexState idxState = IndexState.INDEX_UNAVAILABLE;
     
     /**
-     * 当前索引分片所属的IndexMeta 注意：这个idxMeta只用于保存节点镜像用
-     */
-    private IndexMeta idxMeta;
-    
-    /**
      * 构造函数
      * 
      * @param shardName
@@ -111,7 +114,7 @@ public class IndexShard implements Serializable {
     public IndexShard(String shardName, Node node) {
         super();
         this.shardName = shardName;
-        this.node = node;
+        this.nodeKey = node.getNodeKey();
     }
     
     /**
@@ -153,25 +156,37 @@ public class IndexShard implements Serializable {
     }
     
     /**
-     * getter method for property node
-     * 
-     * @return the node
-     */
-    public Node getNode() {
-        return node;
-    }
-    
-    /**
-     * setter method for property node
-     * 
-     * @param node
-     *            the node to set
-     */
-    public void setNode(Node node) {
-        this.node = node;
-    }
-    
-    /**
+	 * @return the nodeKey
+	 */
+	public String getNodeKey() {
+		return nodeKey;
+	}
+
+	/**
+	 * @param nodeKey the nodeKey to set
+	 */
+	public void setNodeKey(String nodeKey) {
+		this.nodeKey = nodeKey;
+	}
+
+	/**
+	 * @return the replicaNodeKeyList
+	 */
+	public List<String> getReplicaNodeKeyList() {
+		if(this.replicaNodeKeyList==null){
+			this.replicaNodeKeyList=new ArrayList<String>();
+		}
+		return replicaNodeKeyList;
+	}
+
+	/**
+	 * @param replicaNodeKeyList the replicaNodeKeyList to set
+	 */
+	public void setReplicaNodeKeyList(List<String> replicaNodeKeyList) {
+		this.replicaNodeKeyList = replicaNodeKeyList;
+	}
+
+	/**
      * getter method for property idxShardStrategy
      * 
      * @return the idxShardStrategy
@@ -203,13 +218,10 @@ public class IndexShard implements Serializable {
         return this.filePath;
     }
     
-    public String getAbsoluteFilePath(Node node) {
-        return this.concatIndexBaseDir(this.filePath, node);
+    public String getAbsoluteFilePath(String nodeIndexBaseDir) {
+        return this.concatIndexBaseDir(this.filePath, nodeIndexBaseDir);
     }
     
-    public String getAbsoluteFilePath() {
-        return this.concatIndexBaseDir(this.filePath, node);
-    }
     
     /**
      * setter method for property filePath
@@ -259,15 +271,11 @@ public class IndexShard implements Serializable {
         return this.idxFilePath;
     }
     
-    public String getAbsoluteIdxFilePath(Node node) {
+    public String getAbsoluteIdxFilePath(String nodeIndexBaseDir) {
         
-        return this.concatIndexBaseDir(this.idxFilePath, node);
+        return this.concatIndexBaseDir(this.idxFilePath, nodeIndexBaseDir);
     }
     
-    public String getAbsoluteIdxFilePath() {
-        
-        return this.concatIndexBaseDir(this.idxFilePath, node);
-    }
     
     /**
      * setter method for property idxFilePath
@@ -344,28 +352,6 @@ public class IndexShard implements Serializable {
     }
     
     /**
-     * getter method for property replicaNodeList
-     * 
-     * @return the replicaNodeList
-     */
-    public List<Node> getReplicaNodeList() {
-        if (this.replicaNodeList == null) {
-            this.replicaNodeList = new ArrayList<Node>();
-        }
-        return replicaNodeList;
-    }
-    
-    /**
-     * setter method for property replicaNodeList
-     * 
-     * @param replicaNodeList
-     *            the replicaNodeList to set
-     */
-    public void setReplicaNodeList(List<Node> replicaNodeList) {
-        this.replicaNodeList = replicaNodeList;
-    }
-    
-    /**
      * getter method for property idxState
      * 
      * @return the idxState
@@ -385,26 +371,6 @@ public class IndexShard implements Serializable {
     }
     
     /**
-     * getter method for property idxMeta
-     * 
-     * @return the idxMeta
-     */
-    public IndexMeta getIndexMeta() {
-        
-        return idxMeta;
-    }
-    
-    /**
-     * setter method for property idxMeta
-     * 
-     * @param idxMeta
-     *            the idxMeta to set
-     */
-    public void setIdxMeta(IndexMeta idxMeta) {
-        this.idxMeta = idxMeta;
-    }
-    
-    /**
      * 
      * concatIndexBaseDir
      * 
@@ -414,10 +380,10 @@ public class IndexShard implements Serializable {
      *            节点
      * @return String
      */
-    private String concatIndexBaseDir(String filePath, Node node) {
+    private String concatIndexBaseDir(String filePath, String nodeIndexBaseDir) {
         StringBuilder sb = new StringBuilder();
-        if (node != null && !StringUtils.isEmpty(node.getIndexBaseDir())) {
-            sb.append(node.getIndexBaseDir());
+        if (!StringUtils.isEmpty(nodeIndexBaseDir)) {
+            sb.append(nodeIndexBaseDir);
             sb.append(File.separator);
         }
         sb.append(filePath);
@@ -450,69 +416,95 @@ public class IndexShard implements Serializable {
 	public boolean isUpdate() {
 		return isUpdate;
 	}
+	
+	
 
-	/*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
-        result = prime * result + ((idxFilePath == null) ? 0 : idxFilePath.hashCode());
-        result = prime * result + ((shardId == null) ? 0 : shardId.hashCode());
-        result = prime * result + ((shardName == null) ? 0 : shardName.hashCode());
-        return result;
-    }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        IndexShard other = (IndexShard) obj;
-        if (filePath == null) {
-            if (other.filePath != null) {
-                return false;
-            }
-        } else if (!filePath.equals(other.filePath)) {
-            return false;
-        }
-        if (idxFilePath == null) {
-            if (other.idxFilePath != null) {
-                return false;
-            }
-        } else if (!idxFilePath.equals(other.idxFilePath)) {
-            return false;
-        }
-        if (shardId == null) {
-            if (other.shardId != null) {
-                return false;
-            }
-        } else if (!shardId.equals(other.shardId)) {
-            return false;
-        }
-        if (shardName == null) {
-            if (other.shardName != null) {
-                return false;
-            }
-        } else if (!shardName.equals(other.shardName)) {
-            return false;
-        }
-        return true;
-    }
+	/**
+	 * @return the clusterName
+	 */
+	public String getClusterName() {
+		return clusterName;
+	}
+
+	/**
+	 * @param clusterName the clusterName to set
+	 */
+	public void setClusterName(String clusterName) {
+		this.clusterName = clusterName;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((clusterName == null) ? 0 : clusterName.hashCode());
+		result = prime * result
+				+ ((filePath == null) ? 0 : filePath.hashCode());
+		result = prime * result
+				+ ((idxFilePath == null) ? 0 : idxFilePath.hashCode());
+		result = prime * result + ((shardId == null) ? 0 : shardId.hashCode());
+		result = prime * result
+				+ ((shardName == null) ? 0 : shardName.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof IndexShard)) {
+			return false;
+		}
+		IndexShard other = (IndexShard) obj;
+		if (clusterName == null) {
+			if (other.clusterName != null) {
+				return false;
+			}
+		} else if (!clusterName.equals(other.clusterName)) {
+			return false;
+		}
+		if (filePath == null) {
+			if (other.filePath != null) {
+				return false;
+			}
+		} else if (!filePath.equals(other.filePath)) {
+			return false;
+		}
+		if (idxFilePath == null) {
+			if (other.idxFilePath != null) {
+				return false;
+			}
+		} else if (!idxFilePath.equals(other.idxFilePath)) {
+			return false;
+		}
+		if (shardId == null) {
+			if (other.shardId != null) {
+				return false;
+			}
+		} else if (!shardId.equals(other.shardId)) {
+			return false;
+		}
+		if (shardName == null) {
+			if (other.shardName != null) {
+				return false;
+			}
+		} else if (!shardName.equals(other.shardName)) {
+			return false;
+		}
+		return true;
+	}
+
+	
     
 }

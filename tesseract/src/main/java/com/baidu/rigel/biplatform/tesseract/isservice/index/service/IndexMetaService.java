@@ -136,8 +136,17 @@ public interface IndexMetaService {
     /**
      * loadIndexMetasLocalImage 从本地镜像中读取索引元数据信息
      * @param idxBaseDir
+     * @param currNodeKey
+     * @param clusterName
      * @return
      */
-    List<IndexMeta> loadIndexMetasLocalImage(String idxBaseDir,String currNodeKey);
+    List<IndexMeta> loadIndexMetasLocalImage(String idxBaseDir,String currNodeKey,String clusterName);
+    
+    /**
+     * recoverLocalIndexMetaWithCluster
+     * @param idxMetaList 待恢复的idxMeta列表
+     * @param clusterName 集群名称
+     */
+    void recoverLocalIndexMetaWithCluster(List<IndexMeta> idxMetaList,String clusterName);
     
 }

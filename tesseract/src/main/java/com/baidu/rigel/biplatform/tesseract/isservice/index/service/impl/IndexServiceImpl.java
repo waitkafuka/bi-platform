@@ -43,6 +43,7 @@ import com.baidu.rigel.biplatform.tesseract.dataquery.service.DataQueryService;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
 import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
+import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexMetaWriteImageEvent;
 import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexUpdateEvent;
 import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexUpdateEvent.IndexUpdateInfo;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
@@ -215,6 +216,7 @@ public class IndexServiceImpl implements IndexService {
 
 				try {
 					doIndexByIndexAction(idxMeta, idxAction, null);
+					
 				} catch (Exception e) {
 					LOGGER.error(String.format(
 							LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
@@ -278,7 +280,12 @@ public class IndexServiceImpl implements IndexService {
 	 * @throws Exception
 	 */
 	private void publistIndexMetaWriteEvent(IndexMeta meta) throws Exception{
-		
+		if(meta!=null){
+			IndexMetaWriteImageEvent event=new IndexMetaWriteImageEvent(meta);
+			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+					"updateIndexByDataSourceKey", "post IndexMetaWriteImageEvent with IndexMetaId:"+meta.getIndexMetaId()));
+			this.storeManager.postEvent(event);
+		}
 	}
 
 	@Override
@@ -542,7 +549,8 @@ public class IndexServiceImpl implements IndexService {
 			}
 		}
 		this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
-
+		publistIndexMetaWriteEvent(idxMeta);
+		
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
 				"doIndex", "[indexMeta:" + indexMeta + "][idxAction:"
 						+ idxAction + "]"));

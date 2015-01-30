@@ -18,12 +18,10 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.startup;
 
-import java.io.File;
 import java.util.List;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -35,7 +33,6 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
-import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.meta.NodeState;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchServer;
@@ -118,12 +115,8 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
             // 恢复本地镜像
             Node currNode = isServer.getNode();
             if (currNode != null) {
-                // 如果本地镜像存在
-                File localImage = new File(currNode.getImageFilePath());
-                if (localImage.exists()) {
-                    // 恢复本地元数据
-                    loadLocalInfo(currNode);
-                }
+            	 // 恢复本地元数据
+                loadLocalInfo(currNode);
             }
             
             // 启动状态更新&检查线程
@@ -131,10 +124,6 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
                 .getBean(ClusterNodeCheckThread.class);
             clusterNodeCheckThread.start();
             
-//            // 启动hz中的queue事件监听
-//            LocalEventListenerThread localListenerThread = this.context
-//                .getBean(LocalEventListenerThread.class);
-//            localListenerThread.start();
         } else {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_ERROR,
                 "IndexAndSearchStartupListener.onApplicationEvent-Server is not running ", event));
@@ -162,48 +151,10 @@ public class IndexAndSearchStartupListener implements ApplicationContextAware,
     private void loadLocalInfo(Node node) {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "loadLocalInfo",
             "[Node:" + node + "]"));
-        Node currNode = node;
-        currNode = this.isNodeService.loadLocalNodeImage(currNode);
-        
-        // 当前节点不是一个空节点
-        if (currNode != null && currNode.getUsedIndexShardList() != null) {
-            for (IndexShard idxShard : currNode.getUsedIndexShardList()) {
-                
-                IndexMeta idxMeta = idxShard.getIndexMeta();
-                
-                String cubeId = null;
-                IndexMeta remoteIndexMeta = null;
-                if (idxMeta != null && idxMeta.getCubeIdSet() != null
-                        && idxMeta.getCubeIdSet().size() > 0) {
-                    cubeId = idxMeta.getCubeIdSet().toArray(new String[0])[0];
-                    remoteIndexMeta = this.idxMetaService.getIndexMetaByCubeId(cubeId,
-                        IndexMeta.getDataStoreName());
-                }
-                // 由于现有的本地镜像都是在存完后再写的，所以remote的版本一定是最新的
-                // 两种情况：
-                // 1、集群中的索引元数据中存在node信息，只不过是node独立的状态被标记为不可用，只需要同步node的信息就可以，不需要fix索引元数据信息
-                // 2、整个集群都宕掉了，需要重建
-                if (remoteIndexMeta != null) {
-                    idxMeta = remoteIndexMeta;
-                    // 集群中有一部分数据
-                    IndexShard remoteIdxShard = null;
-                    for (IndexShard iShard : remoteIndexMeta.getIdxShardList()) {
-                        if (iShard.equals(idxShard)) {
-                            remoteIdxShard = iShard;
-                            break;
-                        }
-                    }
-                    remoteIdxShard = updateNodeInfoOfIndexShard(remoteIdxShard, currNode);
-                    idxMeta = remoteIndexMeta;
-                    
-                } else {
-                    idxShard = updateNodeInfoOfIndexShard(idxShard, currNode);
-                }
-                this.idxMetaService.saveOrUpdateIndexMeta(idxMeta);
-            }
-        }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "loadLocalInfo",
-            "[Node:" + node + "]"));
+        List<IndexMeta> idxMetaList=this.idxMetaService.loadIndexMetasLocalImage(node.getIndexBaseDir(), node.getNodeKey(), node.getClusterName());
+        this.idxMetaService.recoverLocalIndexMetaWithCluster(idxMetaList, node.getClusterName());
+       
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "loadLocalInfo", "[Node:" + node + "]"));
     }
     
    
