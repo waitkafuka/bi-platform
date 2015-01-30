@@ -4,10 +4,12 @@
  * @date 2014-12-24
  */
 define([
+        'dialog',
         'report/global-menu-btns/component-menu-template',
         'report/global-menu-btns/main-model'
     ],
     function (
+        dialog,
         ComponentMenuTemplate,
         MenuMainModel
         ) {
@@ -71,6 +73,31 @@ define([
                     + type
                     + '/css/-di-product-debug.css');
                 $('.skin-menu').hide();
+            },
+
+            /**
+             * 更换皮肤
+             *
+             * @public
+             */
+            referenceLine : function (event) {
+                // 获取全部参考线
+                var $line = $('.j-guide-line');
+                var lineNum = $line.length;
+                // 根据参考线个数进行对应操作
+                if (lineNum == 0) {
+                    dialog.warning('未添加组件，或未找到参考线请添加组件并重试');
+                }
+                else {
+                    if ($line.is(':visible')) {
+                        $line.hide();
+                        dialog.alert('参考线已关闭，再次点击启用。');
+                    }
+                    else {
+                        $line.show();
+                        dialog.alert('参考线已打开，再次点击关闭。');
+                    }
+                }
             }
 
         });
