@@ -56,7 +56,7 @@ abstract class TesseractRateFunction extends RateFunNode {
         VariableNode variable = (VariableNode) this.getArgs().get(0);
         variables.add(variable.getVariableExp());
         Map<Condition, Set<String>> rs = Maps.newHashMap();
-        Condition numeratorCondition = EmptyCondition.getInstance();//new RateCondition(true, type, variable.getVariableExp());
+        Condition numeratorCondition = EmptyCondition.getInstance(); // new RateCondition(true, type, variable.getVariableExp());
         rs.put(numeratorCondition, variables);
         Condition denominatorCondition = new RateCondition(false, type, variable.getVariableExp());
         rs.put(denominatorCondition, variables);
