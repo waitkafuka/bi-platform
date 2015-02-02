@@ -805,3 +805,8 @@
 .j-guide-line {
     display: none;
 }
+
+/* 背景参考线 */
+.di-o_o-body {
+    background-image: url(../img/grid.png);
+}
