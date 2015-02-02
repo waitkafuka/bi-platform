@@ -7,6 +7,13 @@
  * @depend:  xui, xutil
  */
 
+
+
+
+
+
+
+
 $namespace('di.shared.vui');
 
 (function () {
@@ -48,28 +55,103 @@ $namespace('di.shared.vui');
      */
     function constructor(options) {
         var me = this;
-        var calendarId = 'range-cal-' + (new Date()).getTime();
-        var html = "<input type='text' readonly='readonly' "
-            + "style='width: 250px' "
-            + "id='" + calendarId + "'"
-            + "/>";
-        options.el.innerHTML = html;
-        var rangeCal = new Kalendae.Input(calendarId, {
-            direction:'past',
-            months: 2,
-            mode: 'range'
-        });
-        options.vuiType = 'Range_Calendar';
-        rangeCal.subscribe('change', function (date, action) {
-            // 判断如果没有选择时间范围，不做任何事情
-            if (this.getSelected().indexOf(' - ') > 0) {
-                me.currentDate = this.getSelected();
-                me.notify('calChangeDate', me.currentDate);
-            }
-        });
-        this.rangeCal = rangeCal;
+//        var calendarId = 'range-cal-' + (new Date()).getTime();
+//        var html = "<input type='text' readonly='readonly' "
+//            + "style='width: 250px' "
+//            + "id='" + calendarId + "'"
+//            + "/>";
+//        options.el.innerHTML = html;
+//        var rangeCal = new Kalendae.Input(calendarId, {
+//            direction:'past',
+//            months: 2,
+//            mode: 'range'
+//        });
+//        options.vuiType = 'Range_Calendar';
+//        rangeCal.subscribe('change', function (date, action) {
+//            // 判断如果没有选择时间范围，不做任何事情
+//            if (this.getSelected().indexOf(' - ') > 0) {
+//                me.currentDate = this.getSelected();
+//                me.notify('calChangeDate', me.currentDate);
+//            }
+//        });
+
+//        var calendarId = 'range-cal-' + (new Date()).getTime();
+//        var html = '<div id="' + calendarId + '"></div>';
+//        options.el.innerHTML = html;
+//
+//        var cal = esui.create(
+//            'RangeCalendar',
+//            {
+//                "type": "RangeCalendar",
+//                "name": calendarId,
+//                "id": calendarId,
+//                "value": "",
+//                "endlessCheck": "true",
+//                "isEndless": "false",
+//                "range": "2011-03-02 00:00:00,2015-04-02 23:59:59",
+//                "showedShortCut": "昨天,最近7天,上周",
+//                "extensions": [],
+//                "renderOptions": {},
+//                "main": document.getElementById(calendarId)
+//            }
+//        );
+//        cal.render();
+//        cal.on('change', function (event) {
+//            console.log(event.begin);
+//            console.log(event.end);
+//            me.currentDate = event.begin + ' - ' + event.end;
+//            me.notify('calChangeDate', event.begin + ' - ' + event.end);
+//        });
+//        this.rangeCal = cal;
+//        this.calendarId = calendarId;
+        this.renderCalendar(options);
     };
-    
+
+    /**
+     * 设置数据
+     *
+     * @public
+     * @param {Object} data 数据
+     * @param {(Object|Array}} data.datasource 数据集
+     * @param {*} data.value 当前数据
+     */
+    RANGE_CALENDAR_CLASS.renderCalendar = function (options) {
+        var me = this;
+        var calendarId = 'range-cal-' + (new Date()).getTime();
+        var html = '<div id="' + calendarId + '"></div>';
+        options.el.innerHTML = html;
+        var cal = esui.create(
+            'RangeCalendar',
+            {
+                "type": "RangeCalendar",
+                "name": calendarId,
+                "id": calendarId,
+                "value": "",
+                "endlessCheck": "true",
+                "isEndless": "false",
+                "showedShortCut": "昨天,最近7天,上周",
+                "extensions": [],
+                "renderOptions": {},
+                "main": document.getElementById(calendarId)
+            }
+        );
+        // 设置可选择的范围，结束时间为昨天以后可以选择
+        cal.range.end = new Date(Kalendae.moment().subtract({d:1}).format('YYYY-MM-DD'));
+        // 设置默认选择的范围，昨天
+        cal.setRawValue({
+            begin: new Date(Kalendae.moment().subtract({d:1}).format('YYYY-MM-DD')),
+            end: new Date(Kalendae.moment().subtract({d:1}).format('YYYY-MM-DD'))
+        });
+        cal.render();
+        cal.on('change', function (event) {
+            var begin = me.getDateStr(event.begin);
+            var end = me.getDateStr(event.end);
+            me.currentDate = begin + ' - ' + end;
+            me.notify('calChangeDate', me.currentDate);
+        });
+        this.rangeCal = cal;
+        this.calendarId = calendarId;
+    };
     /**
      * 设置数据
      *
@@ -81,11 +163,46 @@ $namespace('di.shared.vui');
     RANGE_CALENDAR_CLASS.setData = function (data) {
         var startDateOpt = data.rangeTimeTypeOpt.startDateOpt;
         var endDateOpt = data.rangeTimeTypeOpt.endDateOpt;
-        this.rangeCal.setSelected(Kalendae.moment().subtract({d:Math.abs(startDateOpt)}));
-        this.rangeCal.addSelected(Kalendae.moment().add('days',endDateOpt));
+        var begin;
+        var end;
+        if (startDateOpt < 0){
+            begin = Kalendae.moment().subtract({d:Math.abs(startDateOpt)}).format('YYYY-MM-DD');
+        } else {
+            begin = Kalendae.moment().add({d:Math.abs(startDateOpt)}).format('YYYY-MM-DD');
+        }
+        if (endDateOpt < 0){
+            end = Kalendae.moment().subtract({d:Math.abs(endDateOpt)}).format('YYYY-MM-DD');
+        } else {
+            end = Kalendae.moment().add({d:Math.abs(endDateOpt)}).format('YYYY-MM-DD');
+        }
+
+        Kalendae.moment().subtract({d:Math.abs(startDateOpt)});
+        var setting = {
+            begin: new Date(begin),
+            end: new Date(end)
+        };
+        this.rangeCal.setRawValue(setting);
+        this.rangeCal.render();
         this._oData = data;
     };
 
+    /**
+     * 获取时间,将date转换成字符串类型
+     *
+     * @public
+     * @param {Object} date日期对象
+     */
+    RANGE_CALENDAR_CLASS.getDateStr = function (date) {
+        var month = (date.getMonth()+1);
+        var day = date.getDate();
+        if (month < 10) {
+            month = '0' + month;
+        }
+        if (day < 10) {
+            day = '0' + day;
+        }
+        return date.getFullYear() + '-' + month + '-' + day;
+    };
     /**
      * 得到当前值
      *
@@ -122,3 +239,5 @@ $namespace('di.shared.vui');
     };
 
 })();
+
+
