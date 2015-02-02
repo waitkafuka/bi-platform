@@ -30,4 +30,12 @@ public class BaseResource {
     @Value("${biplatform.ma.ser_key}")
     protected String securityKey;
     
+    /**
+     * 根据产品线信息获取当前产品线加密密钥
+     * @param productLine
+     * @return String
+     */
+    protected String getSecurityKey(String productLine) {
+        return null;
+    }
 }

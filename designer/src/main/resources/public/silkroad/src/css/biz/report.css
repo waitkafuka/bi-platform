@@ -171,11 +171,12 @@
     overflow: auto;
     min-height: 200px;
     position: relative;
-    /*border-left: 2px solid #cccccc;*/
-    /*border-right: 2px solid #cccccc;*/
-    /*border-bottom: 2px solid #cccccc;*/
     border: 2px solid #cccccc;
     width: 99.5%;
+
+}
+.report {
+    background-image: url(../img/grid.png);
 }
 .canvas .report.active {
     border: 2px solid #65b0fa;
@@ -189,7 +190,7 @@
 }
 .report .shell-component {
     position: absolute;
-    overflow: hidden;
+    /*overflow: hidden;*/
     border: 1px solid #ffffff;
 }
 .report .shell-component:hover {
@@ -261,7 +262,7 @@
     border-right: 1px dashed #007777;
 }
 .guide-bottom {
-    bottom: -1px;
+    bottom: 0;
     width: 10000px;
     left: -5000px;
     border-bottom: 1px dashed #007777;
@@ -798,4 +799,14 @@
 /* 下拉框皮肤样式 */
 .select-skin option{
     height: 20px;
+}
+
+/* 参考线整体样式 */
+.j-guide-line {
+    display: none;
+}
+
+/* 背景参考线 */
+.di-o_o-body {
+    background-image: url(../img/grid.png);
 }

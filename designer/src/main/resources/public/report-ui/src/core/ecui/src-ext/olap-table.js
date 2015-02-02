@@ -636,17 +636,17 @@
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr);
         //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
         //不然文本过多的话会显示不全
-        // TODO:支持tips
+        // TODO:如果是最后一个，就不加drag
         var useBag = dom.ieVersion < 8;
         var strTableHeaderTips = (innerStr === '')
             ? ''
             : (
             '<div class="' + type + '-heade-th-content">'
             + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
-            + '<span class="'+ classSortStr + '">  </span>'
+            + '<span class="'+ classSortStr + '"></span>'
             + '<span class="'+ type + '-head-tips" title="' + innerStr + '">?</span>'
-            + '<span class="' + type + '-head-drag"></span>'
             + '</div>'
+            + '<span class="' + type + '-head-drag"></span>'
             );
         html.push(
             '<th ',

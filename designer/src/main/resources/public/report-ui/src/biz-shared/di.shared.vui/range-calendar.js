@@ -55,6 +55,7 @@ $namespace('di.shared.vui');
             + "/>";
         options.el.innerHTML = html;
         var rangeCal = new Kalendae.Input(calendarId, {
+            direction:'past',
             months: 2,
             mode: 'range'
         });

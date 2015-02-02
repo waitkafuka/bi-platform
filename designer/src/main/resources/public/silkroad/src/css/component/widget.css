@@ -103,12 +103,6 @@
     padding: 0 2px 2px 0;
     background: url(../img/btn-icons.png) no-repeat 4px -2px;
 }
-.btn-report-icon:hover {
-    color: #4491c4;
-}
-.btn-report-icon:active {
-    background-color: #deebf3;
-}
 .btn-has-icon-copy {
     background-position: 4px -33px;
 }
