@@ -13,7 +13,7 @@ define([
         'report/edit/drag-ind-dim/main-view',
         'report/edit/ue-view',
         'report/global-setting-btns/btns-view',
-        'report/global-menu-btns/menu-view'
+        'report/global-menu-btns/main-view'
     ],
     function (
         template,
@@ -25,7 +25,7 @@ define([
         DragView,
         UEView,
         BtnsView,
-        MenuView
+        MainView
         ) {
         return Backbone.View.extend({
             // view事件绑定
@@ -35,6 +35,7 @@ define([
                 'click .j-global-component': 'shiftMenu',
                 'click .j-button-skin': 'shiftMenu',
                 'click .j-skin-btn': 'chanceTheme'
+//                'click .j-button-line': 'referenceLine'
             },
 
             /**
@@ -51,7 +52,7 @@ define([
                 });
                 this.model.loadCubeList();
                 this.btnsView = new BtnsView();
-                this.menuView = new MenuView();
+                this.mainView = new MainView();
                 this.initListening();
             },
 
@@ -162,7 +163,7 @@ define([
                 // 工具条按钮区域按钮添加
                 this.$el.find('.j-global-btn').html((new BtnsView).createBtns());
                 // 工具条菜单区域菜单添加
-                this.$el.find('.j-global-menu').html((new MenuView).componentMenu());
+                this.$el.find('.j-global-menu').html((new MainView).componentMenu());
                 // FIXME:临时使用，重构时，逻辑干掉
                 $(document).mousedown(function (e) {
                     // 如果触发元素，不属于组件添加按钮区域
@@ -209,7 +210,7 @@ define([
              * @public
              */
             shiftMenu : function (event) {
-                this.menuView.shiftMenu(event);
+                this.mainView.shiftMenu(event);
             },
 
             /**
@@ -218,9 +219,17 @@ define([
              * @public
              */
             chanceTheme : function (event) {
-                this.menuView.chanceTheme(event);
-            }
+                this.mainView.chanceTheme(event);
+            },
 
+            /**
+             * 切换皮肤
+             *
+             * @public
+             */
+            referenceLine : function (event) {
+                this.mainView.referenceLine(event);
+            }
         });
     }
 );

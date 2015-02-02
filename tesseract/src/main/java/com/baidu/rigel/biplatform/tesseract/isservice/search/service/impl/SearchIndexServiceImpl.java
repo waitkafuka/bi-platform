@@ -183,7 +183,7 @@ public class SearchIndexServiceImpl implements SearchService {
             List<TesseractResultSet> idxShardResultSetList = new ArrayList<TesseractResultSet>();
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
                 TesseractResultSet curr = null;
-                Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard);
+                Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
                 searchNode.searchRequestCountAdd();
                 this.isNodeService.saveOrUpdateNodeInfo(searchNode);
                 try {

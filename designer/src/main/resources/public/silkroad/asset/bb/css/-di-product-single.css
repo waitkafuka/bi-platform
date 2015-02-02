@@ -2017,6 +2017,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-table-hcell,
 .ui-table-rowhcell {
+    position: relative;
     color: #000;
     height: 30px;
     line-height: 30px;
@@ -3307,12 +3308,11 @@ li {
 }
 .report .shell-component {
     position: absolute;
-    overflow: hidden;
     border: 1px solid #F0F4F7;
     background: #F0F4F7;
 }
 .report .shell-component:hover {
-    border: 1px solid #00AFF2;
+    border: 1px solid rgba(0, 119, 119, 0.168627);
 }
 .canvas .report {
     background: #F0F4F7;
@@ -3784,7 +3784,7 @@ div.di-dim-level-find-msg span{
     overflow: auto
 }
 .component-item {
-    overflow: auto;
+    /*overflow: auto;*/
 }
 .hide {
     display: none;

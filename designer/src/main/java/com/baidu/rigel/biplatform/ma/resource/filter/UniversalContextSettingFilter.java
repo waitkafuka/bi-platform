@@ -88,6 +88,7 @@ public class UniversalContextSettingFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request; 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
+            LOG.info("current request url : " + httpRequest.getRequestURI());
             request.setCharacterEncoding("utf-8");
             response.setCharacterEncoding("utf-8");
             String sessionId = null;
@@ -98,10 +99,12 @@ public class UniversalContextSettingFilter implements Filter {
                 productLine = getProductLine(cookies);
                 sessionId = getSessionId(cookies);
             }
+            LOG.info("productLine in cookie is " + productLine + " and sessionId is " + sessionId);
             if (StringUtils.isEmpty(productLine) && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
                 productLine = decryptProductLIne(httpRequest, httpResponse);
                 sessionId = generateSessionId(httpResponse);
             }
+            LOG.info("productLine in token is " + productLine + " and sessionId is " + sessionId);
             if (httpRequest.getRequestURI().endsWith("index.html") && StringUtils.isEmpty(productLine)) {
                 httpResponse.sendRedirect("home.html");
             }

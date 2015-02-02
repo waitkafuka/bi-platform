@@ -19,15 +19,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.Md5Util;
-import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.store.meta.StoreMeta;
 
 /**
@@ -69,6 +66,11 @@ public class Node extends StoreMeta implements Serializable {
     private int port;
     
     /**
+     * 所属集群
+     */
+    private String clusterName;
+    
+    /**
      * 索引服务路径根目录
      */
     @Value("${indexServer.indexBaseDir}")
@@ -80,20 +82,16 @@ public class Node extends StoreMeta implements Serializable {
     @Value("${indexServer.blockCapacity}")
     private int blockCapacity;
     
-    private int currBlockUsed;
-    /**
-     * 所属集群
-     */
-    private String clusterName;
-    /**
-     * 节点上的IndexShard列表
-     */
-    private Set<IndexShard> usedIndexShardList;
-    
     /**
      * 每个IndexShard占物理空间上限
      */
     private int blockSize;
+    
+    /**
+     * 已有的分片数
+     */
+    private int currBlockUsed;
+    
     
     /**
      * NodeState 节点状态
@@ -207,29 +205,6 @@ public class Node extends StoreMeta implements Serializable {
     }
     
     /**
-     * getUsedIndexShardList
-     * 
-     * @return List<IndexShard>
-     */
-    public Set<IndexShard> getUsedIndexShardList() {
-        if (this.usedIndexShardList == null) {
-            this.usedIndexShardList = new HashSet<IndexShard>();
-        }
-        return usedIndexShardList;
-    }
-    
-    /**
-     * 
-     * setUsedIndexShardList
-     * 
-     * @param usedIndexShardList
-     *            usedIndexShardList
-     */
-    public void setUsedIndexShardList(Set<IndexShard> usedIndexShardList) {
-        this.usedIndexShardList = usedIndexShardList;
-    }
-    
-    /**
      * getBlockSize
      * 
      * @return int
@@ -253,10 +228,7 @@ public class Node extends StoreMeta implements Serializable {
      * 
      * @return the currBlockUsed
      */
-    public int getCurrBlockUsed() {
-        if (this.usedIndexShardList != null) {
-            this.currBlockUsed = this.usedIndexShardList.size();
-        }
+    public int getCurrBlockUsed() {        
         return currBlockUsed;
     }
     
@@ -300,10 +272,6 @@ public class Node extends StoreMeta implements Serializable {
         // 机器节点以所在的集群名称为storeKey
         StringBuffer sb = new StringBuffer();
         sb.append(this.clusterName);
-        // sb.append(TesseractConstant.STR_SPLITTER);
-        // sb.append(this.address);
-        // sb.append(TesseractConstant.STR_SPLITTER);
-        // sb.append(this.port);
         return Md5Util.encode(sb.toString());
     }
     
@@ -390,6 +358,10 @@ public class Node extends StoreMeta implements Serializable {
         return blockCapacity;
     }
     
+    /**
+     * 获取节点镜像路径
+     * @return String
+     */
     public String getImageFilePath() {
         StringBuilder sb = new StringBuilder();
         sb.append(this.imageDir);
@@ -399,56 +371,65 @@ public class Node extends StoreMeta implements Serializable {
         return sb.toString();
     }
     
-//    public boolean isSame(Node node) {
-//        if (node != null && !StringUtils.isEmpty(node.getAddress()) && node.getPort() > 0
-//                && !StringUtils.isEmpty(this.address) && this.port > 0) {
-//            if (this.address.equals(node.getAddress()) && this.port == node.getPort()) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-
-    /* (non-Javadoc)
-     * @see java.lang.Object#hashCode()
+    /**
+     * 获取节点KEY
+     * @return
      */
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((address == null) ? 0 : address.hashCode());
-        result = prime * result + port;
-        return result;
+    public String getNodeKey(){
+    	StringBuffer sb=new StringBuffer();
+    	sb.append("NODEKEY_"+this.clusterName+"_"+this.address+"_"+this.port);
+    	return sb.toString();
+    	
     }
 
-    /* (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Node other = (Node) obj;
-        if (address == null) {
-            if (other.address != null) {
-                return false;
-            }
-        } else if (!address.equals(other.address)) {
-            return false;
-        }
-        if (port != other.port) {
-            return false;
-        }
-        return true;
-    }
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((address == null) ? 0 : address.hashCode());
+		result = prime * result
+				+ ((clusterName == null) ? 0 : clusterName.hashCode());
+		result = prime * result + port;
+		return result;
+	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Node)) {
+			return false;
+		}
+		Node other = (Node) obj;
+		if (address == null) {
+			if (other.address != null) {
+				return false;
+			}
+		} else if (!address.equals(other.address)) {
+			return false;
+		}
+		if (clusterName == null) {
+			if (other.clusterName != null) {
+				return false;
+			}
+		} else if (!clusterName.equals(other.clusterName)) {
+			return false;
+		}
+		if (port != other.port) {
+			return false;
+		}
+		return true;
+	}
     
     
     

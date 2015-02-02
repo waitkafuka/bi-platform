@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -200,18 +201,6 @@ public class IndexMeta extends StoreMeta implements Serializable {
     @Override
     public String getStoreKey() {
         StringBuffer sb = new StringBuffer();
-        // if (this.clusterName != null && this.productLine != null &&
-        // this.dataSourceInfo != null
-        // && this.dataSourceInfo.getDataSourceKey() != null &&
-        // !("").equals(this.clusterName)
-        // && !this.productLine.equals("") &&
-        // !("").equals(this.dataSourceInfo.getDataSourceKey())) {
-        // sb.append(this.clusterName);
-        // sb.append(INDEX_META_KEY_SPLITTER);
-        // sb.append(this.productLine);
-        // sb.append(INDEX_META_KEY_SPLITTER);
-        // sb.append(this.dataSourceInfo.getDataSourceKey());
-        // }
         if (this.dataSourceInfo != null
             && !StringUtils.isEmpty(this.dataSourceInfo.getDataSourceKey())) {
             sb.append(this.dataSourceInfo.getDataSourceKey());
@@ -356,26 +345,6 @@ public class IndexMeta extends StoreMeta implements Serializable {
         this.idxShardList = idxShardList;
     }
     
-    // /**
-    // * getter method for property idxShardRule
-    // *
-    // * @return the idxShardRule
-    // */
-    // public Set<IndexShardRule> getIdxShardRule() {
-    // return idxShardRule;
-    // }
-    //
-    // /**
-    // * setter method for property idxShardRule
-    // *
-    // * @param idxShardRule
-    // * the idxShardRule to set
-    // */
-    // public void setIdxShardRule(Set<IndexShardRule> idxShardRule) {
-    // this.idxShardRule = idxShardRule;
-    // }
-    
-    
     
    
     /**
@@ -392,6 +361,26 @@ public class IndexMeta extends StoreMeta implements Serializable {
             }
         }
         return factTable;
+    }
+    
+    /**
+     * 获取索引元数据所在目录前缀
+     * @return String
+     */
+    public String getIndexMetaFileDirPath(){
+    	StringBuffer sb=new StringBuffer();
+    	if(this.getDataSourceInfo()!=null && StringUtils.isNotEmpty(this.getDataSourceInfo().getDataSourceKey())
+    			&& StringUtils.isNotEmpty(this.getFacttableName()) 
+    			&& StringUtils.isNotEmpty(this.getIndexMetaId())){
+    		sb.append(this.getDataSourceInfo().getDataSourceKey() + File.separator);
+    		sb.append(this.getFacttableName() + File.separator);
+    		sb.append(this.getIndexMetaId() + File.separator);
+    		
+    	}else{
+    		throw new IllegalArgumentException();
+    	}
+    	
+    	return sb.toString();
     }
     
     /**

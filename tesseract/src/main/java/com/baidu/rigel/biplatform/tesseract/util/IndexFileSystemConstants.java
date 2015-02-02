@@ -51,5 +51,18 @@ public class IndexFileSystemConstants {
 	 * MOD_KEY_END
 	 */
 	public static final String MOD_KEY_END = "end";
-    
+	
+	/**
+	 * 索引元数据本地镜像文件后缀
+	 */
+	public static final String INDEX_META_IMAGE_FILE_SAVED=".timg";	
+	/**
+	 * 索引元数据本地镜像临时文件后缀
+	 */
+	public static final String INDEX_META_IMAGE_FILE_NEW=".new";
+
+	/**
+	 * 索引元数据本地镜像备份文件后缀
+	 */
+	public static final String INDEX_META_IMAGE_FILE_BAK=".bak";
 }

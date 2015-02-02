@@ -171,11 +171,12 @@
     overflow: auto;
     min-height: 200px;
     position: relative;
-    /*border-left: 2px solid #cccccc;*/
-    /*border-right: 2px solid #cccccc;*/
-    /*border-bottom: 2px solid #cccccc;*/
     border: 2px solid #cccccc;
     width: 99.5%;
+
+}
+.report {
+    background-image: url(../img/grid.png);
 }
 .canvas .report.active {
     border: 2px solid #65b0fa;
@@ -798,4 +799,19 @@
 /* 下拉框皮肤样式 */
 .select-skin option{
     height: 20px;
+}
+
+/* 参考线整体样式 */
+.j-guide-line {
+    display: none;
+}
+
+/* 背景参考线 */
+.di-o_o-body {
+    background-image: url(../img/grid.png);
+}
+
+/* 配置端设置背景为白色 */
+#body-white {
+    background-color: #FFF;
 }

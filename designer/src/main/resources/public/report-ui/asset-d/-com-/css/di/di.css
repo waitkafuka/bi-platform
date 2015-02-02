@@ -9,12 +9,6 @@
 /**
  * 标记且功能性css，在console会起标记作用
  */
-.di-o_o-body {
-    position: relative;
-    padding: 10px;
-    font-size: 12px;
-    min-height: 400px;
-}
 .di-o_o-block {
     position: relative;
     margin: 0 10px 20px 0;
@@ -121,4 +115,11 @@
     clear: both;
     overflow: hidden;
     height: 0px;
+}
+.canvas .report {
+    background-color: #FFF;
+}
+/* 皮肤对应的背景色 */
+.ecui-loaded {
+    background-color: #FFF;
 }

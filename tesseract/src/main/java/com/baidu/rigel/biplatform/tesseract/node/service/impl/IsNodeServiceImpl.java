@@ -24,6 +24,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,50 +72,40 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
         return result;
     }
     
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#
-     * assignFreeNodeForReplica(int,
-     * com.baidu.rigel.biplatform.tesseract.node.meta.Node)
-     */
-    @Override
-    public List<Node> assignFreeNodeForReplica(int blockCount, Node node) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][node:" + node + "]"));
-        List<Node> currentNodeList = getNodeListByClusterName(node.getClusterName());
-        sortNodeListByFreeBlockCount(currentNodeList);
-        List<Node> result = new ArrayList<Node>();
-        if (blockCount < 1) {
-            return new ArrayList<Node>();
-        }
-        for (Node currNode : currentNodeList) {
-            if (currNode.getNodeState().equals(NodeState.NODE_AVAILABLE)
-                    && !currNode.equals(node) && currNode.getFreeBlockNum() > 0) {
-                result.add(currNode);
-                if (result.size() == blockCount) {
-                    break;
-                }
-            }
-        }
-        if (result.size() > 0) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
-                "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][node:" + node + "]",
-                "assign node success,node count:" + result.size()));
-        } else {
-            // 没有合适的分片，把本机分给它
-            // for (Node currNode : currentNodeList) {
-            // if (currNode.equals(node)) {
-            // result.add(currNode);
-            // }
-            // }
-        }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
-            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][node:" + node + "]"));
-        return result;
-    }
-    
-    @Override
+    /* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#assignFreeNodeForReplica(int, java.lang.String, java.lang.String)
+	 */
+	@Override
+	public Map<String,Node> assignFreeNodeForReplica(int blockCount, String nodeKey,
+			String clusterName) {
+		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
+	            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]"));
+	        List<Node> currentNodeList = getNodeListByClusterName(clusterName);
+	        sortNodeListByFreeBlockCount(currentNodeList);
+	        Map<String,Node> result = new HashMap<String,Node>();
+	        if (blockCount < 1) {
+	            return new HashMap<String,Node>();
+	        }
+	        for (Node currNode : currentNodeList) {
+	            if (currNode.getNodeState().equals(NodeState.NODE_AVAILABLE)
+	                    && !currNode.getNodeKey().equals(nodeKey) && currNode.getFreeBlockNum() > 0) {
+	                result.put(currNode.getNodeKey(),currNode);
+	                if (result.size() == blockCount) {
+	                    break;
+	                }
+	            }
+	        }
+	        if (result.size() > 0) {
+	            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
+	                "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]",
+	                "assign node success,node count:" + result.size()));
+	        }
+	        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
+	            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]"));
+	        return result;
+	}
+
+	@Override
     public Map<Node, Integer> assignFreeNodeByNodeList(List<Node> existNodeList, int blockCount,
         String clusterName) {
         if (existNodeList == null || existNodeList.size() == 0) {
@@ -277,27 +269,107 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
     
     /*
      * (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#getNodeMapByClusterName(java.lang.String)
+     */
+    @Override
+    public Map<String,Node> getNodeMapByClusterName(String clusterName,boolean isAvailable){
+    	List<Node> resultList = getNodeListByClusterName(clusterName);
+    	Map<String,Node> resultMap=new HashMap<String,Node>();
+    	if (resultList == null) {
+            LOGGER.info("Can not find any node for Cluster:[" + clusterName + "]");
+        }
+        Iterator<Node> it = resultList.iterator();
+        while (it.hasNext()) {
+            Node node = it.next();
+            if(isAvailable && node.getNodeState().equals(NodeState.NODE_AVAILABLE) || !isAvailable){
+            	resultMap.put(node.getNodeKey(), node);
+            }
+            
+        }
+        
+        return resultMap;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#getNodeMapByNodeKey(java.lang.String, java.util.List)
+     */
+    @Override
+    public Map<String,Node> getNodeMapByNodeKey(String clusterName,List<String> nodeKeyList, boolean isAvailable){
+    	//s1.get all node info of this cluster
+    	Map<String,Node> clusterNodeMap=getNodeMapByClusterName(clusterName, isAvailable);
+    	//s2.init resultset
+    	Map<String,Node> result=new HashMap<String,Node> ();    	
+    	//s3.get proper result depend on params
+    	if(MapUtils.isNotEmpty(clusterNodeMap) && CollectionUtils.isNotEmpty(nodeKeyList)){
+    		for(String nodeKey:nodeKeyList){
+    			if(clusterNodeMap.containsKey(nodeKey)){
+    				result.put(nodeKey, clusterNodeMap.get(nodeKey));
+    			}else {
+    				LOGGER.info("Can not find any node for Cluster:[" + clusterName + "] with nodeKey:["+nodeKey+"]");
+    			}
+    		}
+    	}else {
+    		LOGGER.info("Can not find any node for Cluster:[" + clusterName + "] with nodeKeyList:["+nodeKeyList+"]");
+    	}
+    	
+    	return result;
+    }
+    
+    
+    
+    /* (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService#getNodeByNodeKey(java.lang.String, java.lang.String, boolean)
+	 */
+	@Override
+	public Node getNodeByNodeKey(String clusterName, String nodeKey,boolean isAvailable) {
+		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
+				"getNodeByNodeKey", "[clusterName:" + clusterName
+						+ "][nodeKey:" + nodeKey + "][isAvailable:"
+						+ isAvailable + "]"));
+
+		if(StringUtils.isEmpty(nodeKey) || StringUtils.isEmpty(clusterName)){
+			LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
+					"getNodeByNodeKey", "[clusterName:" + clusterName
+							+ "][nodeKey:" + nodeKey + "][isAvailable:"
+							+ isAvailable + "]","param illegal"));
+			return null;
+		}
+		List<String> nodeKeyList=new ArrayList<String>();
+		nodeKeyList.add(nodeKey);
+		Map<String,Node> nodeMap=getNodeMapByNodeKey(clusterName,nodeKeyList,isAvailable);
+		if(MapUtils.isNotEmpty(nodeMap) && nodeMap.containsKey(nodeKey)){
+			return nodeMap.get(nodeKey);
+		}
+		return null;
+	}
+
+	/*
+     * (non-Javadoc)
      * 
      * @see com.baidu.rigel.biplatform.tesseract.node.service.ISNodeService#
      * getAvailableNodeListByIndexShard
      * (com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard)
      */
     @Override
-    public List<Node> getAvailableNodeListByIndexShard(IndexShard idxShard) {
+    public List<Node> getAvailableNodeListByIndexShard(IndexShard idxShard,String clusterName) {
         if (idxShard == null
-                || (idxShard.getNode() == null && (idxShard.getReplicaNodeList() == null || idxShard
-                .getReplicaNodeList().size() == 0))) {
+                || StringUtils.isEmpty(idxShard.getNodeKey()) && CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList())) {
             throw new IllegalArgumentException();
         }
-        List<Node> currNodeList = new ArrayList<Node>();
-        currNodeList.add(idxShard.getNode());
-        currNodeList.addAll(idxShard.getReplicaNodeList());
+        List<String> nodeKeyList=new ArrayList<String>();
+        nodeKeyList.add(idxShard.getNodeKey());
+        nodeKeyList.addAll(idxShard.getReplicaNodeKeyList());
         
-        List<Node> availableNodeList = getAvailableNodeListByClusterName(idxShard.getNode()
-            .getClusterName());
-        currNodeList.retainAll(availableNodeList);
+        Map<String,Node> nodeMap=getNodeMapByNodeKey(clusterName,nodeKeyList,Boolean.TRUE);
         
-        return currNodeList;
+        
+        List<Node> resultNodeList = new ArrayList<Node>();
+        if(MapUtils.isNotEmpty(nodeMap)){
+        	 resultNodeList.addAll(nodeMap.values());
+        }       
+        
+        return resultNodeList;
     }
     
     /*
@@ -308,13 +380,12 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
      * (com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard)
      */
     @Override
-    public Node getFreeSearchNodeByIndexShard(IndexShard idxShard) {
+    public Node getFreeSearchNodeByIndexShard(IndexShard idxShard,String clusterName) {
         if (idxShard == null
-                || (idxShard.getNode() == null && (idxShard.getReplicaNodeList() == null || idxShard
-                .getReplicaNodeList().size() == 0))) {
+                || StringUtils.isEmpty(idxShard.getNodeKey()) && CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList())) {
             throw new IllegalArgumentException();
         }
-        List<Node> currNodeList = getAvailableNodeListByIndexShard(idxShard);
+        List<Node> currNodeList = getAvailableNodeListByIndexShard(idxShard,clusterName);
         int minRequestCount = 0;
         Node result = null;
         
@@ -403,13 +474,9 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
         if (nodeInfoByteArr != null) {
             localNodeInfo = (Node) SerializationUtils.deserialize(nodeInfoByteArr);
             // IP和端口都有可能发生变化，所以从本地镜像不读取这些
-            // node.setAddress(localNodeInfo.getAddress());
-            // node.setPort(localNodeInfo.getPort());
             node.setBlockSize(localNodeInfo.getBlockSize());
             node.setClusterName(localNodeInfo.getClusterName());
-            node.setCurrBlockUsed(localNodeInfo.getCurrBlockUsed());
-            node.setUsedIndexShardList(localNodeInfo.getUsedIndexShardList());
-            
+            node.setCurrBlockUsed(localNodeInfo.getCurrBlockUsed());            
         }
         
         // 更新节点信息
