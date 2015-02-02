@@ -388,7 +388,7 @@ define([
                 var activeSilkroadCompId = that.getActiveCompId();
                 that.model.getCompAxis(activeSilkroadCompId, handleSelectedChange);
                 function handleSelectedChange(data) {
-                    if (data.xAxis.length <= 0) {
+                    if (data.xAxis === null || data.xAxis.length <= 0) {
                         if ('CAL_SELECT' === selType){
                             $target.val('DOUBLE_CAL_SELECT');
                         } else {
@@ -1241,7 +1241,7 @@ define([
                                     var rangeEnd = $this.find('[name="endDateSetting"]').val();
                                     // 如果设置range时间时，rangeend如果大于rangestart则不能设置。
                                     if (rangeStart !== undefined && rangeEnd !== undefined) {
-                                        if (rangeEnd > rangeStart) {
+                                        if (rangeEnd < rangeStart) {
                                             dialog.alert("设置的默认结束时间应小于默认开始时间");
                                             return ;
                                         }
