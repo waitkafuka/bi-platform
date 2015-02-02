@@ -159,6 +159,47 @@ public class FileUtils {
     }
     
     /**
+     * 从原文件读取内容，并写入新文件，在执行此方法前，已对原文件和目标文件是否存在进行了判断
+     * 
+     * @param oldFile
+     *            原文件
+     * @param newFile
+     *            新文件
+     * @return
+     * @throws IOException
+     */
+    public static boolean copyFile(File oldFile, File newFile) {
+        FileInputStream fileInputStream = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileInputStream = new FileInputStream(oldFile);
+            fileOutputStream = new FileOutputStream(newFile);
+            byte[] buf = new byte[1024];
+            int len = 0;
+            // 读取原文件内容，然后写入新文件
+            while ((len = fileInputStream.read(buf)) != -1) {
+                fileOutputStream.write(buf, 0, len);
+                fileOutputStream.flush();
+            }
+            return true;
+        } catch (IOException e) {
+        	LOGGER.error(e.getMessage(), e);
+            return false;
+        } finally {
+            try {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            } catch (IOException e) {
+            	LOGGER.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
      * 复制整个文件夹内容
      * 
      * @param oldPath
@@ -172,9 +213,12 @@ public class FileUtils {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "copyFolder",
             "[oldPath:" + oldPath + "][newPath:+" + newPath + "]"));
         try {
-            (new File(newPath)).mkdirs(); // 如果文件夹不存在 则建立新文件夹
-            File a = new File(oldPath);
-            String[] file = a.list();
+            
+            File newPathFile=new File(newPath);
+            newPathFile.mkdirs();
+            
+            File oldPathFile = new File(oldPath);
+            String[] file = oldPathFile.list();
             File temp = null;
             for (int i = 0; i < file.length; i++) {
                 if (oldPath.endsWith(File.separator)) {
@@ -294,7 +338,7 @@ public class FileUtils {
                     "filePath: " + filePath + " is a directory"));
                 return result;
             }
-            int pos = filePath.lastIndexOf("/");
+            int pos = filePath.lastIndexOf(File.separator);
             // 路径包括文件名和文件夹名，先创建文件夹，之后创建文件
             String dir = filePath.substring(0, pos);
             File dirFile = new File(dir);
@@ -679,7 +723,7 @@ public class FileUtils {
      */
     public static boolean isEmptyDir(File dir){
     	boolean result=false;
-    	if(dir!=null && dir.exists() && dir.isDirectory() && !ArrayUtils.isEmpty(dir.listFiles())){
+    	if(dir==null || !dir.exists() || !dir.isDirectory() || ArrayUtils.isEmpty(dir.listFiles())){
     		result=true;
     	}
     	return result;

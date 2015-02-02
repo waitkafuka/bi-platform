@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
+import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
+import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -25,6 +27,9 @@ public class IndexMetaWriteImageListener implements
 		ApplicationListener<IndexMetaWriteImageEvent> {
 	@Resource
 	private IndexMetaService idxMetaService; 
+	
+	@Resource
+	private IsNodeService isNodeService;
 	/**
      * LOGGER
      */
@@ -43,10 +48,12 @@ public class IndexMetaWriteImageListener implements
 			throw new IllegalArgumentException();
 		}else {
 			IndexMeta idxMeta=event.getIdxMeta();
-			File idxMetaFileDir=new File(idxMeta.getIndexMetaFileDirPath());
+			Node currNode=this.isNodeService.getCurrentNode();
+			String idxMetaFileBase=currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath();
+			File idxMetaFileDir=new File(idxMetaFileBase);
 			if(!FileUtils.isEmptyDir(idxMetaFileDir)){
 				for(IndexShard idxShard:idxMeta.getIdxShardList()){
-					File shardFile=new File(idxMeta.getIndexMetaFileDirPath()+idxShard.getShardName());
+					File shardFile=new File(idxMetaFileBase+idxShard.getShardName());
 					if(FileUtils.isEmptyDir(shardFile)){
 						idxMeta.getIdxShardList().remove(idxShard);
 					}
