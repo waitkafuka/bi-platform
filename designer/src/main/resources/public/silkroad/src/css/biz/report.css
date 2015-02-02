@@ -810,3 +810,8 @@
 .di-o_o-body {
     background-image: url(../img/grid.png);
 }
+
+/* 配置端设置背景为白色 */
+#body-white {
+    background-color: #FFF;
+}
