@@ -125,4 +125,28 @@ public interface IndexMetaService {
      */
     List<IndexMeta> getIndexMetasByDataSourceKey(String dataSourceKey);
     
+    /**
+     * saveIndexMetaLocally 写索引元数据到本地镜像
+     * @param idxMeta
+     * @return
+     * @throws Exception
+     */
+    boolean saveIndexMetaLocally(IndexMeta idxMeta) throws Exception;
+    
+    /**
+     * loadIndexMetasLocalImage 从本地镜像中读取索引元数据信息
+     * @param idxBaseDir
+     * @param currNodeKey
+     * @param clusterName
+     * @return
+     */
+    List<IndexMeta> loadIndexMetasLocalImage(String idxBaseDir,String currNodeKey,String clusterName);
+    
+    /**
+     * recoverLocalIndexMetaWithCluster
+     * @param idxMetaList 待恢复的idxMeta列表
+     * @param clusterName 集群名称
+     */
+    void recoverLocalIndexMetaWithCluster(List<IndexMeta> idxMetaList,String clusterName);
+    
 }

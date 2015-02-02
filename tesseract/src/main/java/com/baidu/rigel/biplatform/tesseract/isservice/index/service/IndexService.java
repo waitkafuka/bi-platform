@@ -21,12 +21,7 @@ import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
-import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexMetaIsNullException;
-import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
-import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
-import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistException;
 
 /**
  * 
@@ -36,44 +31,6 @@ import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistExcepti
  *
  */
 public interface IndexService {
-	
-	/**
-	 * doIndexByIndexAction
-	 * @param indexMeta 索引元数据
-	 * @param idxAction 索引动作
-	 * @param dataMap 修订数据时，提供修订的起止范围
-	 * @throws Exception 有可能抛出异常
-	 */
-	void doIndexByIndexAction(IndexMeta indexMeta,IndexAction idxAction,Map<String, BigDecimal> dataMap) throws Exception;
-    
-    /**
-     * 
-     * doIndex
-     * 
-     * @param idxMeta
-     *            索引元数据
-     * @param idxAction
-     *            索引动作
-     * 
-     * @return boolean
-     * @throws IndexMetaIsNullException
-     *             可能抛出的异常
-     * @throws IllegalArgumentException
-     *             可能抛出的异常
-     * @throws DataSourceException
-     *             可能抛出的异常
-     * @throws InstantiationException
-     *             可能抛出的异常
-     * @throws IllegalAccessException
-     *             可能抛出的异常
-     * @throws HandlerRegistException
-     *             可能抛出的异常
-     * @throws InterruptedException
-     *             可能抛出的异常
-     */
-    boolean doIndex(IndexMeta idxMeta, IndexAction idxAction) throws IndexMetaIsNullException,
-        IllegalArgumentException, DataSourceException, InstantiationException,
-        IllegalAccessException, HandlerRegistException, InterruptedException, IndexAndSearchException;
     
     /**
      * 

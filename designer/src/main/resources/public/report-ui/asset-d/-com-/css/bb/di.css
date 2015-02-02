@@ -131,3 +131,7 @@
 .canvas .report {
     background-color: #F0F4F7;
 }
+/* 皮肤对应的背景色 */
+.ecui-loaded {
+    background-color: #F0F4F7;
+}

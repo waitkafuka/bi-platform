@@ -68,18 +68,18 @@ define([
                 }
                 this.model.getSkinType(reportId, type);
                 // 更换link里面的路径
-                $('.link-skin').attr(
-                    'href', 'asset/'
-                    + type
-                    + '/css/-di-product-debug.css');
-                $('.skin-menu').hide();
-
-                // 更换线上link里面的路径
 //                $('.link-skin').attr(
 //                    'href', 'asset/'
-//                        + type
-//                        + '/css/-di-product-min.css');
+//                    + type
+//                    + '/css/-di-product-debug.css');
 //                $('.skin-menu').hide();
+
+                // 更换线上link里面的路径
+                $('.link-skin').attr(
+                    'href', 'asset/'
+                        + type
+                        + '/css/-di-product-min.css');
+                $('.skin-menu').hide();
             },
 
             /**
