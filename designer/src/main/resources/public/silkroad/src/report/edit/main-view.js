@@ -34,8 +34,8 @@ define([
                 'click .j-global-para': 'setglobalbtn',
                 'click .j-global-component': 'shiftMenu',
                 'click .j-button-skin': 'shiftMenu',
-                'click .j-skin-btn': 'chanceTheme',
-                'click .j-button-line': 'referenceLine'
+                'click .j-skin-btn': 'chanceTheme'
+//                'click .j-button-line': 'referenceLine'
             },
 
             /**

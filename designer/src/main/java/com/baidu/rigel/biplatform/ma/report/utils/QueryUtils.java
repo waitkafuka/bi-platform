@@ -245,9 +245,11 @@ public final class QueryUtils {
                     List<String> values = Lists.newArrayList();
                     if (valueObj instanceof String[]) {
                         values = Lists.newArrayList();
-                        CollectionUtils.addAll(values, (String[]) valueObj);
+                        String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
+                        CollectionUtils.addAll(values, (String[]) tmp);
                     } else {
-                        values.add(valueObj.toString());
+                        String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
+                        values.add(tmp);
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
@@ -327,6 +329,23 @@ public final class QueryUtils {
         return rs;
     }
     
+    private static String[] resetValues(String dimName, String... valueObj) {
+        if (valueObj == null) {
+            return null;
+        }
+        String[] rs = new String[valueObj.length];
+        int i = 0;
+        for (String str : valueObj) {
+            if (!MetaNameUtil.isUniqueName(str)) {
+                rs[i] = "[" + dimName + "].[" + str + "]";
+            } else {
+                rs[i] = str;
+            }
+            ++i;
+        }
+        return rs;
+    }
+
     /**
      * 通过查询
      * 

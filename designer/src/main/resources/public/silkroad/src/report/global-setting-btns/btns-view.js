@@ -158,13 +158,13 @@ define([
                     picName: 'skin',
                     title: '换肤设置',
                     className: 'button-skin'
-                },
-                {
-                    id: 'reference-line',
-                    picName: 'line',
-                    title: '参考线设置',
-                    className: 'button-line'
                 }
+//                {
+//                    id: 'reference-line',
+//                    picName: 'line',
+//                    title: '参考线设置',
+//                    className: 'button-line'
+//                }
             ],
 
             /**
