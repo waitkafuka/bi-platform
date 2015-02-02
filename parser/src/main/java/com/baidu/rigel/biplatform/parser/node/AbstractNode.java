@@ -89,16 +89,18 @@ public abstract class AbstractNode implements Node {
         if(CollectionUtils.isNotEmpty(nodes)) {
             List<BigDecimal> multiResults = null;
             BigDecimal singleResult = null;
+            ComputeResult result = null;
             for(Node node : nodes) {
-                if(node.getResult(context).getResultType().equals(ResultType.SINGLE)) {
-                    SingleComputeResult single = (SingleComputeResult) node.getResult(context);
+                result = node.getResult(context);
+                if(result.getResultType().equals(ResultType.SINGLE)) {
+                    SingleComputeResult single = (SingleComputeResult) result;
                     if(singleResult == null) {
                         singleResult = single.getData();
                     } else {
                         singleResult = computeData(singleResult, single.getData());
                     }
                 } else {
-                    ListComputeResult listResult = (ListComputeResult) node.getResult(context);
+                    ListComputeResult listResult = (ListComputeResult) result;
                     if (CollectionUtils.isEmpty(multiResults)) {
                         multiResults = new ArrayList<BigDecimal>(listResult.getData());
                     } else if(CollectionUtils.isNotEmpty(listResult.getData())){

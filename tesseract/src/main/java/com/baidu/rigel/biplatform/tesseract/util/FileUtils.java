@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
@@ -30,6 +31,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,6 +159,47 @@ public class FileUtils {
     }
     
     /**
+     * 从原文件读取内容，并写入新文件，在执行此方法前，已对原文件和目标文件是否存在进行了判断
+     * 
+     * @param oldFile
+     *            原文件
+     * @param newFile
+     *            新文件
+     * @return
+     * @throws IOException
+     */
+    public static boolean copyFile(File oldFile, File newFile) {
+        FileInputStream fileInputStream = null;
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileInputStream = new FileInputStream(oldFile);
+            fileOutputStream = new FileOutputStream(newFile);
+            byte[] buf = new byte[1024];
+            int len = 0;
+            // 读取原文件内容，然后写入新文件
+            while ((len = fileInputStream.read(buf)) != -1) {
+                fileOutputStream.write(buf, 0, len);
+                fileOutputStream.flush();
+            }
+            return true;
+        } catch (IOException e) {
+        	LOGGER.error(e.getMessage(), e);
+            return false;
+        } finally {
+            try {
+                if (fileInputStream != null) {
+                    fileInputStream.close();
+                }
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            } catch (IOException e) {
+            	LOGGER.error(e.getMessage(), e);
+            }
+        }
+    }
+    
+    /**
      * 复制整个文件夹内容
      * 
      * @param oldPath
@@ -170,9 +213,12 @@ public class FileUtils {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "copyFolder",
             "[oldPath:" + oldPath + "][newPath:+" + newPath + "]"));
         try {
-            (new File(newPath)).mkdirs(); // 如果文件夹不存在 则建立新文件夹
-            File a = new File(oldPath);
-            String[] file = a.list();
+            
+            File newPathFile=new File(newPath);
+            newPathFile.mkdirs();
+            
+            File oldPathFile = new File(oldPath);
+            String[] file = oldPathFile.list();
             File temp = null;
             for (int i = 0; i < file.length; i++) {
                 if (oldPath.endsWith(File.separator)) {
@@ -292,7 +338,7 @@ public class FileUtils {
                     "filePath: " + filePath + " is a directory"));
                 return result;
             }
-            int pos = filePath.lastIndexOf("/");
+            int pos = filePath.lastIndexOf(File.separator);
             // 路径包括文件名和文件夹名，先创建文件夹，之后创建文件
             String dir = filePath.substring(0, pos);
             File dirFile = new File(dir);
@@ -668,6 +714,62 @@ public class FileUtils {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "doUncompressFile",
             "[inFileName:" + inFileName + "]"));
         return decompressedFileName;
+    }
+    
+    /**
+     * 判断当前dir是否为空目录
+     * @param dir
+     * @return boolean
+     */
+    public static boolean isEmptyDir(File dir){
+    	boolean result=false;
+    	if(dir==null || !dir.exists() || !dir.isDirectory() || ArrayUtils.isEmpty(dir.listFiles())){
+    		result=true;
+    	}
+    	return result;
+    }
+    
+    /**
+     * 判断给定的文件后缀在当前文件目录下是否存在
+     * @param dir 文件目录
+     * @param fileSuffix 文件后缀
+     * @return boolean
+     */
+    public static boolean isExistGivingFileSuffix(File dir,String fileSuffix){
+    	boolean result=false;
+    	if(!isEmptyDir(dir) && !StringUtils.isEmpty(fileSuffix)){
+    		File[] files=dir.listFiles(new LocalImageFilenameFilter(fileSuffix));
+    		if(!ArrayUtils.isEmpty(files)){
+    			result=true;
+    		}
+    	}
+    	
+    	return result;
+    }
+    
+    public static class LocalImageFilenameFilter implements FilenameFilter{
+    	
+    	private String fileSuffix;
+    	
+		public LocalImageFilenameFilter(String fileSuffix) {
+			super();
+			this.fileSuffix = fileSuffix;
+		}
+
+		/* (non-Javadoc)
+		 * @see java.io.FilenameFilter#accept(java.io.File, java.lang.String)
+		 */
+		@Override
+		public boolean accept(File dir, String name) {
+			if(name.indexOf(fileSuffix)==-1){
+				return false;
+			}
+			if(name.lastIndexOf(fileSuffix) == name.indexOf(fileSuffix)){
+				return true;
+			}
+			return false;
+		}
+    	
     }
     
 }

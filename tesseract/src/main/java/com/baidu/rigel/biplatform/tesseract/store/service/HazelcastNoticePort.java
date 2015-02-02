@@ -26,6 +26,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexMetaWriteImageEvent;
 import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexUpdateEvent;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.hazelcast.core.Message;
@@ -59,6 +60,8 @@ public class HazelcastNoticePort implements ApplicationContextAware, MessageList
         
         if (message.getMessageObject() instanceof IndexUpdateEvent) {
             event = (IndexUpdateEvent) message.getMessageObject();
+        }else if(message.getMessageObject() instanceof IndexMetaWriteImageEvent){
+        	event = (IndexMetaWriteImageEvent) message.getMessageObject();
         }
         
         context.publishEvent(event);

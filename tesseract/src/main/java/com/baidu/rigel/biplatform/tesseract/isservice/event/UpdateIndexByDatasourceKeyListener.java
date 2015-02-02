@@ -78,8 +78,6 @@ public class UpdateIndexByDatasourceKeyListener implements
             }
         }
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-            "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event));
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_ON_LISTENER_END,
             "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event));
