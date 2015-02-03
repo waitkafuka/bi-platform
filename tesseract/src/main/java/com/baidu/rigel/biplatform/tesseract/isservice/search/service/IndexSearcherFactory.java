@@ -60,6 +60,11 @@ public class IndexSearcherFactory {
     private static IndexSearcherFactory INSTANCE = new IndexSearcherFactory();
     
     /**
+     * 线程池
+     */
+    private static ExecutorService EXECUTOR_POOL=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
+    
+    /**
      * getInstance
      * 
      * @return IndexSearcherFactory
@@ -85,8 +90,7 @@ public class IndexSearcherFactory {
          */
         @Override
         public IndexSearcher newSearcher(IndexReader reader) throws IOException {
-            ExecutorService pool = Executors.newCachedThreadPool();
-            return new IndexSearcher(reader, pool);
+            return new IndexSearcher(reader, EXECUTOR_POOL);
         }
         
     }

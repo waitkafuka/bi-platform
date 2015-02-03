@@ -258,7 +258,6 @@
 .ui-table-head-tips {
     width: 15px;
     height: 15px;
-    margin-left: 2px;
     background: #8A8C8C;
     border-radius: 8px;
     line-height: 15px;
@@ -318,4 +317,7 @@
     border-right: 2px dashed #ccc;
     display: none;
     cursor: col-resize;
+}
+.ui-table-head-th-content span {
+    margin-right: 7px;
 }

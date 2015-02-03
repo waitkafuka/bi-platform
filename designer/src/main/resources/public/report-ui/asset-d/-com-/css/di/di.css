@@ -119,7 +119,9 @@
 .canvas .report {
     background-color: #FFF;
 }
-/* 皮肤对应的背景色 */
+/* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #FFF;
+    font-family: '微软雅黑', '宋体';
+    font-size: 12px;
 }
