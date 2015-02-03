@@ -729,9 +729,9 @@
 
         html.push(
             '<td ',
-            attrStr.join(' '), ' ',
-            ' style="', styleStr.join(' '),
-            '" class="', classStr.join(' '),
+                attrStr.join(' '), ' ',
+                ' style="', styleStr.join(' '),
+                '" class="', classStr.join(' '),
             '">',
             innerStr,
             '</td>'

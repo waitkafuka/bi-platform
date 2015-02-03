@@ -1973,6 +1973,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-head {
     border: 1px solid #E6E6E6;
     height: 30px;
+    user-select: none;
 }
 .ui-table-locked-head {
     border: 1px solid #E6E6E6;
@@ -2027,10 +2028,10 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     margin: 0 10px 0 10px;
 }
 .ui-plane-table-hcell-bag{
-	margin: 0 20px 0 20px;
+    margin: 0 20px 0 20px;
 }
 .ui-plane-table-hcell-bag-lastcolumn{
-	padding: 0 33px 0 0;
+    padding: 0 33px 0 0;
 }
 .ui-table-rowhcell {
     text-align: center;
@@ -2248,6 +2249,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     color: #E7F9FE;
     position: absolute;
     right: 0;
+    padding-right: 12px;
     top: 7px;
 }
 .ui-table-hcell-sort-asc {
@@ -2259,6 +2261,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     color: #E7F9FE;
     position: absolute;
     right: 0;
+    padding-right: 12px;
     top: 7px;
 }
 .ui-table-hcell-sort,
@@ -2271,6 +2274,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     color: #E7F9FE;
     position: absolute;
     right: 0;
+    padding-right: 12px;
     top: 7px;
 }
 .ui-table-heade-th-content span {
@@ -2282,8 +2286,8 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 
 .ui-table-head-drag {
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
     width: 10px;
     height: 100%;
 }
@@ -3306,9 +3310,11 @@ li {
 .canvas .report {
     background-color: #FFF;
 }
-/* 皮肤对应的背景色 */
+/* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #FFF;
+    font-family: '微软雅黑', '宋体';
+    font-size: 12px;
 }
 /**
  * di-ui.css

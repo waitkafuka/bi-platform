@@ -256,9 +256,21 @@ _eFill       - 用于控制中部宽度的单元格
                 (this.$$paddingRight =
                     this._nRight < cols.length ? this.$$mainWidth - cols[this._nRight].$$pos : 0);
         // TODO:如果当前表格宽度小于外围div宽度，那么重设表格宽度
-        if (this.$$paddingLeft + this.$$mainWidth < this.$$width) {
-            this.$$mainWidth = this.$$width - this.$$paddingLeft;
+
+        var testWidth = this.$$width;
+        var vsWidth = this._uVScrollbar ? this._uVScrollbar.getWidth() : 0;
+        var hsHeight = this._uHScrollbar ? this._uHScrollbar.getHeight() : 0;
+        var innerHeight = this.getHeight() - this.$getBasicHeight() - hsHeight;
+
+        if (this.$$mainHeight > innerHeight) { // show v scrollbar
+            testWidth -= vsWidth;
         }
+
+        if (this.$$paddingLeft + this.$$mainWidth < testWidth) {
+            this.$$mainWidth = testWidth - this.$$paddingLeft;
+        }
+
+
         // console.log('=================== locked-table $cache 1] ' + ((new Date()).getTime() - ddd));
         // var ddd = new Date();
 
@@ -563,9 +575,10 @@ _eFill       - 用于控制中部宽度的单元格
 
         if (headEl) {
             attachEvent(headEl, 'mouseover', headMouseOver);
-//            attachEvent(mainEl, 'mouseout', function () {
-//                setStyle(dragLineEl, 'display', 'none');
-//            });
+            attachEvent(headEl, 'mouseout', function () {
+                //setStyle(dragLineEl, 'display', 'none');
+                console.log('懂了');
+            });
 
             // 监听虚线的mousedown事件，当mousedown时，注册document事件
             attachEvent(dragLineEl, 'mousedown', dragLineMouseDown);
@@ -579,7 +592,7 @@ _eFill       - 用于控制中部宽度的单元格
                 curHeadTh = dom.getParent(target);
                 oldPosLeft = dom.getPosition(target).left;
                 // FIXME:这点的实现着实不好，抽时间赶紧改了
-                setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 8) + 'px');
+                setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 9) + 'px');
                 setStyle(dragLineEl, 'top', 0 + 'px');
                 setStyle(dragLineEl, 'display', 'block');
             }
@@ -609,11 +622,10 @@ _eFill       - 用于控制中部宽度的单元格
         function dragLineMouseUp() {
             detachEvent(document, 'mousemove', dragLineMouseMove);
             detachEvent(document, 'mouseup', dragLineMouseUp);
-            // 宽度好像多出几个像素
             difLeft = dom.getPosition(dragLineEl).left - oldPosLeft;
             setStyle(dragLineEl, 'display', 'none');
             if (dragLineEl.releaseCapture) {
-                dragLineEl.releaseCapture(); //释放捕获
+                dragLineEl.releaseCapture(); // 释放捕获
             }
             resetTableWidth();
             // oTargetTh.style.width = (parseInt(oTargetTh.style.width) + newWidth) + 'px';

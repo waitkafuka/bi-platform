@@ -77,9 +77,6 @@ public class InitMiniCubeListener implements ApplicationListener<InitMiniCubeEve
             }
         }
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-            "InitMiniCubeListener.onApplicationEvent", event));
-        
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_ON_LISTENER_END,
             "InitMiniCubeListener.onApplicationEvent", event));
         
