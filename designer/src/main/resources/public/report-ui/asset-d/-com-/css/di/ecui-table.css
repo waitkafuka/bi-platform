@@ -10,6 +10,7 @@
 .ui-table-head {
     border: 1px solid #E6E6E6;
     height: 30px;
+    user-select: none;
 }
 .ui-table-locked-head {
     border: 1px solid #E6E6E6;
