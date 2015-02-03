@@ -579,7 +579,7 @@ _eFill       - 用于控制中部宽度的单元格
                 curHeadTh = dom.getParent(target);
                 oldPosLeft = dom.getPosition(target).left;
                 // FIXME:这点的实现着实不好，抽时间赶紧改了
-                setStyle(dragLineEl, 'left',  (dom.getPosition(target).left - mainElLeft + 8)  + 'px');
+                setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 8) + 'px');
                 setStyle(dragLineEl, 'top', 0 + 'px');
                 setStyle(dragLineEl, 'display', 'block');
             }
