@@ -536,7 +536,7 @@ _eFill       - 用于控制中部宽度的单元格
         // ddd = new Date();
 
         UI_TABLE_CLASS.init.call(this);
-        //this.headDrag.call(this);
+        this.headDrag.call(this);
     };
     /**
      * 为表格添加可供拖拽的虚线，顺便绑定拖拽事件
@@ -554,8 +554,8 @@ _eFill       - 用于控制中部宽度的单元格
             disX = 0, // 这个距离是鼠标点击虚线时的位置，距离虚线左侧的距离
             curHeadTh,
             difLeft, // 虚线移动的距离
-            oldPosLeft;
-
+            oldPosLeft, // 表格元素居左的问题
+            mainElLeft = dom.getPosition(mainEl).left;
 
         // 为表格添加虚线元素
         setStyle(dragLineEl, 'height', this.$$height + 'px');
@@ -563,6 +563,10 @@ _eFill       - 用于控制中部宽度的单元格
 
         if (headEl) {
             attachEvent(headEl, 'mouseover', headMouseOver);
+//            attachEvent(mainEl, 'mouseout', function () {
+//                setStyle(dragLineEl, 'display', 'none');
+//            });
+
             // 监听虚线的mousedown事件，当mousedown时，注册document事件
             attachEvent(dragLineEl, 'mousedown', dragLineMouseDown);
         }
@@ -573,8 +577,9 @@ _eFill       - 用于控制中部宽度的单元格
 
             if (hasClass(target, 'ui-table-head-drag')) {
                 curHeadTh = dom.getParent(target);
-                oldPosLeft = (dom.getPosition(target).left - 6);
-                setStyle(dragLineEl, 'left', oldPosLeft + 'px');
+                oldPosLeft = dom.getPosition(target).left;
+                // FIXME:这点的实现着实不好，抽时间赶紧改了
+                setStyle(dragLineEl, 'left',  (dom.getPosition(target).left - mainElLeft + 8)  + 'px');
                 setStyle(dragLineEl, 'top', 0 + 'px');
                 setStyle(dragLineEl, 'display', 'block');
             }

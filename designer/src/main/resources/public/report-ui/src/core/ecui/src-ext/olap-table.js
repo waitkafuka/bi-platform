@@ -603,11 +603,12 @@
         ) {
         var type = this.getType();
         var classStr = [type + '-hcell'];
-        var classSortStr = type + '-hcell-sort-' + colDefItem.orderby;
+        var classSortStr;
         var styleStr = [];
         var attrStr = [];
         var span = [];
-        var innerStr;
+        var innerStr = '';
+        var tooltipStr = '';
 
         wrap = objWrap(wrap);
 
@@ -620,11 +621,10 @@
         // TODO:把排序样式放在th里面的span里面
         if (colDefItem && colDefItem.orderby) {
             classSortStr = type + '-hcell-sort-' + colDefItem.orderby;
-            // classStr.push(type + '-hcell-sort-' + colDefItem.orderby);
             attrStr.push('data-orderby="' + colDefItem.orderby + '"');
         }
         if (colDefItem && colDefItem.toolTip) {
-            attrStr.push('title="' + colDefItem.toolTip + '"');
+            tooltipStr = 'title="' + colDefItem.toolTip + '"';
         }
         classStr.push(type + '-olap-ind-describe');
         attrStr.push('data-cell-pos="' + x + '-' + y + '"');
@@ -633,31 +633,27 @@
             attrStr.push('uniqueName="' + colDefItem.uniqueName + '"');
         }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
-        innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr);
+        innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr); // 列头文本
         //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
         //不然文本过多的话会显示不全
         // TODO:如果是最后一个，就不加drag
-        var useBag = dom.ieVersion < 8;
-        var strTableHeaderTips = (innerStr === '')
+        // var useBag = dom.ieVersion < 8;
+        var strThContent = (innerStr === '')
             ? ''
             : (
-            '<div class="' + type + '-heade-th-content">'
-            + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
-            + '<span class="'+ classSortStr + '"></span>'
-            + '<span class="'+ type + '-head-tips" title="' + innerStr + '">?</span>'
-            + '</div>'
-            + '<span class="' + type + '-head-drag"></span>'
+                '<div class="' + type + '-head-th-content">'
+                + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
+                + '<span class="'+ classSortStr + '"></span>'
+                + '<span class="'+ type + '-head-tips" ' + tooltipStr + '">?</span>'
+                + '</div>'
+                + '<span class="' + type + '-head-drag"></span>'
             );
         html.push(
-            '<th ',
-            span.join(' '), ' ',
-            attrStr.join(' '), ' ',
-            ' class="', classStr.join(' '),
-            '" style="', styleStr.join(' '),
+            '<th ', span.join(' '), ' ', attrStr.join(' '), ' ',
+                ' class="', classStr.join(' '),
+                '" style="', styleStr.join(' '),
             '">',
-            useBag ? ('<div class="' + type + '-hcell-bag">') : '',
-            useBag ? '</div>' : '',
-            strTableHeaderTips,
+            strThContent,
             '</th>'
         );
     };
