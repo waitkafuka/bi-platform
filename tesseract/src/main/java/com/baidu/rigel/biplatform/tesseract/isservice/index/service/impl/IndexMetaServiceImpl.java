@@ -726,9 +726,9 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             List<IndexMeta> idxMetaList=new ArrayList<IndexMeta>();
             idxMetaList.add(idxMeta);
             
-            if (idxMetaList != null && idxMetaList.size() > 0 && !CollectionUtils.isEmpty(idxMeta.getIdxShardList())) {
-                shardId = getIndexShardListFromIndexMetaListOrderbyShardId(idxMetaList).get(0)
-                    .getShardId();
+            if (idxMetaList != null && idxMetaList.size() > 0 && !CollectionUtils.isEmpty(idxMeta.getIdxShardList())) {               
+                List<IndexShard> tmpList= getIndexShardListFromIndexMetaListOrderbyShardId(idxMetaList);
+                shardId=tmpList.get(tmpList.size()-1).getShardId();
                 shardId++;
             }
             
