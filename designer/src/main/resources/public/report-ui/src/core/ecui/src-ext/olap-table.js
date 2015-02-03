@@ -634,8 +634,8 @@
         }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr); // 列头文本
-        //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
-        //不然文本过多的话会显示不全
+        // 如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
+        // 不然文本过多的话会显示不全
         // TODO:如果是最后一个，就不加drag
         // var useBag = dom.ieVersion < 8;
         var strThContent = (innerStr === '')
