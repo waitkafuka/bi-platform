@@ -47,6 +47,7 @@
 }
 .ui-table-hcell,
 .ui-table-rowhcell {
+    position: relative;
     color: #000;
     height: 30px;
     line-height: 30px;

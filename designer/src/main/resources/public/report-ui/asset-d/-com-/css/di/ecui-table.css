@@ -43,6 +43,7 @@
 }
 .ui-table-hcell,
 .ui-table-rowhcell {
+    position: relative;
     background: #F6F6F6;
     border-right: 1px solid #E6E6E6;
     border-bottom: 1px solid #E6E6E6;
