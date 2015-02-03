@@ -156,7 +156,9 @@ public class QueryServiceImpl implements QueryService {
         QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel, dataSourceInfo, cube, queryContext, preSplitStrategy);
         DataModel result = null;
         // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
-        if (splitResult != null && !splitResult.getCompileContexts().isEmpty()) {
+        // TODO 怀疑这里有逻辑错误
+        if (splitResult != null 
+            && (!splitResult.getCompileContexts().isEmpty() || !splitResult.getConditionQueryContext().isEmpty())) {
             DataSourceInfo dsInfo = dataSourceInfo;
             Cube finalCube = cube;
             // TODO 抛出到其它节点去,后续需要修改成调用其它节点的方法
