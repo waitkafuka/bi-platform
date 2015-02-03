@@ -10,17 +10,20 @@
 .ui-table-head {
     border-top: 1px solid #CCC;
     border-bottom: 1px solid #CCC;
-    border-right: 1px solid #CCC;
+    border-right: 1px solid #e7f9fe;
     height: 30px;
     user-select: none;
 }
 .ui-table-locked-head {
-    border: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
+    border-top: 1px solid #CCC;
+    border-left: 1px solid #CCC;
+    border-right: 1px solid #E7F9FE;
     height: 30px;
     overflow: hidden;
 }
 .ui-table-layout {
-    border-right: 1px solid #CCC;
+    border-right: 1px solid #FFF;
 }
 .ui-table-locked-layout {
     border-left: 1px solid #CCC;
@@ -148,15 +151,17 @@
 }
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
-    width: 16px;
-    background: #F0F0F0;
-    padding: 16px 0;
+    width: 6px;
+    background: #FFF;
+    padding: 30px 0 0 0;
+    border-right: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
     padding: 0;
     margin: 0;
-    background-color: #E6F1FB;
+    background-color: #e7f9fe;
 }
 .ui-table .ui-vscrollbar .ui-button-hover {
     padding: 0;
@@ -169,36 +174,42 @@
     -ms-border-radius: 0;
 }
 .ui-table .ui-vscrollbar-prev {
-    width: 14px;
+    width: 6px;
     height: 14px;
     border: 0;
-    background: url(img/icon2.png) -59px -66px no-repeat;
+    background: #E7F9FE;
     overflow: hidden;
-    border: 1px solid #A2BCC7;
+    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #CCC;
+    border-top: 1px solid #CCC;
+    border-radius: 0;
 }
 .ui-table .ui-vscrollbar-next {
-    width: 14px;
+    width: 6px;
     height: 14px;
     border: 0;
     background: url(img/icon2.png) -59px -84px no-repeat;
     overflow: hidden;
     border: 1px solid #A2BCC7;
+    display: none;
 }
 .ui-table .ui-vscrollbar .ui-scrollbar-thumb {
-    width: 16px;
-    border: 1px solid #A2BCC7;
+    width: 6px;
+    background: #b5b5b5;
+    border-radius: 4px;
 }
 /* 表格横向滚动条 */
 .ui-table .ui-hscrollbar {
-    height: 16px;
+    height: 8px;
     background: #F0F0F0;
-    padding: 0 16px;
+    padding: 0;
 }
 .ui-table .ui-hscrollbar .ui-button {
     cursor: default;
     padding: 0;
     margin: 0;
-    background-color: #E6F1FB;
+    background-color: #b5b5b5;
+    border-radius: 4px;
 }
 .ui-table .ui-hscrollbar .ui-button-hover {
     padding: 0;
@@ -211,22 +222,22 @@
     -ms-border-radius: 0;
 }
 .ui-table .ui-hscrollbar-prev {
-    width: 14px;
-    height: 14px;
-    background: url(img/icon2.png) -42px -84px no-repeat;
+    width: 0;
+    height: 8px;
     overflow: hidden;
-    border: 1px solid #A2BCC7;
+    display: none;
 }
 .ui-table .ui-hscrollbar-next {
     width: 14px;
-    height: 14px;
+    height: 8px;
     background: url(img/icon2.png) -42px -66px no-repeat;
     overflow: hidden;
     border: 1px solid #A2BCC7;
+    display: none;
 }
 .ui-table .ui-hscrollbar .ui-scrollbar-thumb {
-    height: 16px;
-    border: 1px solid #A2BCC7;
+    height: 8px;
+    border: 1px solid #b5b5b5;
 }
 /*条件格式*/
 .ui-table-condfmt-arr {
@@ -264,6 +275,7 @@
     line-height: 15px;
     color: #E7F9FE;
     display: inline-block;
+    text-align: center;
 }
 .ui-table-heade-th-content {
     text-align: center;
@@ -318,6 +330,9 @@
     border-right: 2px dashed #ccc;
     display: none;
     cursor: col-resize;
+}
+.ui-table-head-th-content {
+    text-align: left;
 }
 .ui-table-head-th-content span {
     margin-right: 7px;
