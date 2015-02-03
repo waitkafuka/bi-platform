@@ -205,11 +205,10 @@
     box-shadow: 0px 0px 5px 3px #FA5C10;
 }
 .shell-component .con-edit-btns {
-    /*border: 1px solid rgba(0, 119, 119, 0.17);*/
     white-space: nowrap;
-    height: 20px;
-    overflow: hidden;
     width: 100%;
+    padding-top: 22px;
+    overflow: hidden;
 }
 .con-edit-btns .fold {
     cursor: pointer;
@@ -815,14 +814,6 @@
 }
 .shell-component .con-edit-btns span{
     /*border: 1px solid rgba(0, 119, 119, 0.17);*/
+    display: none;
     float: right;
 }
-/*border: 1px solid rgba(0, 119, 119, 0.17); */
-/* position: absolute; */
-/* top: -1px; */
-/* right: 0; */
-/*white-space: nowrap;*/
-/*height: 20px;*/
-/*overflow: hidden;*/
-/*width: 100%;*/
-/*float: left;*/

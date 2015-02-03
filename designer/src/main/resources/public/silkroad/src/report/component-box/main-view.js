@@ -148,7 +148,7 @@ define([
                 $compElement.mouseover(function () {
                     // 操作区在鼠标移出当前组件时出现
                     $(this).find('.con-edit-btns').children().show();
-                    $(this).css('padding-top', '0');
+                    $(this).find('.con-edit-btns').css('padding-top', '0');
                     // 参考线在鼠标移出当前组件时出现
                     $(this).find('.j-guide-line').show();
                 });
@@ -164,7 +164,7 @@ define([
                 $compElement.mouseout(function () {
                     // 操作区在鼠标移出当前组件时消失
                     $(this).find('.con-edit-btns').children().hide();
-                    $(this).css('padding-top', '20px');
+                    $(this).find('.con-edit-btns').css('padding-top', '22px');
                     // 参考线在鼠标移出当前组件时消失
                     $(this).find('.j-guide-line').hide();
                 });
