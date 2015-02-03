@@ -2228,7 +2228,6 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-head-tips {
     width: 15px;
     height: 15px;
-    margin-left: 2px;
     background: #8A8C8C;
     border-radius: 8px;
     line-height: 15px;
@@ -2288,6 +2287,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     border-right: 2px dashed #ccc;
     display: none;
     cursor: col-resize;
+}
+.ui-table-head-th-content span {
+    margin-right: 7px;
 }
 /** 
  * Pager
@@ -3313,9 +3315,11 @@ li {
 .canvas .report {
     background-color: #F0F4F7;
 }
-/* 皮肤对应的背景色 */
+/* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #F0F4F7;
+    font-family: '微软雅黑', '宋体';
+    font-size: 12px;
 }
 /**
  * di-ui.css
