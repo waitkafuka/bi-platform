@@ -64,10 +64,10 @@
     margin: 0 10px 0 10px;
 }
 .ui-plane-table-hcell-bag{
-	margin: 0 20px 0 20px;
+    margin: 0 20px 0 20px;
 }
 .ui-plane-table-hcell-bag-lastcolumn{
-	padding: 0 33px 0 0;
+    padding: 0 33px 0 0;
 }
 .ui-table-rowhcell {
     text-align: center;
@@ -285,6 +285,7 @@
     color: #E7F9FE;
     position: absolute;
     right: 0;
+    padding-right: 12px;
     top: 7px;
 }
 .ui-table-hcell-sort-asc {
@@ -296,6 +297,7 @@
     color: #E7F9FE;
     position: absolute;
     right: 0;
+    padding-right: 12px;
     top: 7px;
 }
 .ui-table-hcell-sort,
@@ -308,6 +310,7 @@
     color: #E7F9FE;
     position: absolute;
     right: 0;
+    padding-right: 12px;
     top: 7px;
 }
 .ui-table-heade-th-content span {
@@ -319,8 +322,8 @@
 
 .ui-table-head-drag {
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
     width: 10px;
     height: 100%;
 }
