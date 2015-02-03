@@ -380,7 +380,7 @@ define([
              * @public
              */
             addEditBtns: function ($component) {
-                $component.append(editBtnsTemplate.render());
+                $component.prepend(editBtnsTemplate.render());
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {
                     if ($($component[i]).attr('data-component-type') == 'TEXT') {
@@ -476,7 +476,7 @@ define([
             },
 
             /**
-             * 初始化报表的高度
+             * 初始化报表的高度(计算报表的高度)
              *
              * @public
              */

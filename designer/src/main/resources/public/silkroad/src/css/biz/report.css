@@ -206,12 +206,10 @@
 }
 .shell-component .con-edit-btns {
     /*border: 1px solid rgba(0, 119, 119, 0.17);*/
-    position: absolute;
-    top: -1px;
-    right: 0;
     white-space: nowrap;
     height: 20px;
     overflow: hidden;
+    width: 100%;
 }
 .con-edit-btns .fold {
     cursor: pointer;
@@ -815,3 +813,16 @@
 #body-white {
     background-color: #FFF;
 }
+.shell-component .con-edit-btns span{
+    /*border: 1px solid rgba(0, 119, 119, 0.17);*/
+    float: right;
+}
+/*border: 1px solid rgba(0, 119, 119, 0.17); */
+/* position: absolute; */
+/* top: -1px; */
+/* right: 0; */
+/*white-space: nowrap;*/
+/*height: 20px;*/
+/*overflow: hidden;*/
+/*width: 100%;*/
+/*float: left;*/
