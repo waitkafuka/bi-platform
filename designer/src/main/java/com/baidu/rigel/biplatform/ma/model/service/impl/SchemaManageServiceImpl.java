@@ -625,6 +625,8 @@ public class SchemaManageServiceImpl implements SchemaManageService {
                 if (StringUtils.isEmpty(timeOut)) {
                     timeOut = "30000";
                 }
+                m.setType(MeasureType.CALLBACK);
+                m.setAggregator(Aggregator.CALCULATED);
                 m.setSocketTimeOut(Long.valueOf(timeOut));
                 m.setCube(cube);
                 cube.getMeasures().put(m.getId(), m);
