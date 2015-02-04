@@ -163,4 +163,5 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.ui/olap-meta-config.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-product/di.product.display.ui/layout-page.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/app-link.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/esui-range-calendar.js" type="text/javascript"><\/script>' );
 })();
