@@ -26,26 +26,7 @@ define([
         'report/edit/canvas/norm-info-depict-template',
         'report/edit/canvas/filter-blank-line-template'
     ],
-    function (
-        template,
-        dialog,
-        Constant,
-        EditCompModel,
-        compSettingDefaultTemplate,
-        compSettingTimeTemplate,
-        compSettingLITEOLAPTemplate,
-        compSettingChartTemplate,
-        vuiSettingSelectTemplate,
-        defaultSelectedTimeSettingTemplate,
-        defaultSelectedRangeTimeSettingTemplate,
-        dataFormatSettingTemplate,
-        topnSettingTemplate,
-        compRelationEventSettingTemplate,
-        FloatWindow,
-        indMenuTemplate,
-        normInfoDepictTemplate,
-        filterBlankLineTemplate
-    ) {
+    function (template, dialog, Constant, EditCompModel, compSettingDefaultTemplate, compSettingTimeTemplate, compSettingLITEOLAPTemplate, compSettingChartTemplate, vuiSettingSelectTemplate, defaultSelectedTimeSettingTemplate, defaultSelectedRangeTimeSettingTemplate, dataFormatSettingTemplate, topnSettingTemplate, compRelationEventSettingTemplate, FloatWindow, indMenuTemplate, normInfoDepictTemplate, filterBlankLineTemplate) {
 
         return Backbone.View.extend({
             events: {
@@ -118,6 +99,7 @@ define([
                         eventRelationChange($eventOutParam);
                     });
                 }
+
                 function eventRelationChange($eventOutParam) {
                     var val = $eventOutParam.val();
                     var dimGroup = $eventOutParam.find('option:selected').attr('dimGroup');
@@ -130,6 +112,7 @@ define([
                         $('.j-comp-relation-event-out-param-level').show();
                     }
                 }
+
                 // 打开弹出框
                 function openDialog(data) {
                     if (!data.xAxis || !data.yAxis) {
@@ -162,7 +145,7 @@ define([
                             buttons: [
                                 {
                                     text: '提交',
-                                    click: function() {
+                                    click: function () {
                                         saveCompRelation($(this));
                                     }
                                 },
@@ -203,7 +186,7 @@ define([
                         compIdArry.push(idObj);
                     });
                     // 循环遍历组件，往reportJson中添加关联关系
-                    for (var x = 0, xLen = compIdArry.length; x < xLen; x ++) {
+                    for (var x = 0, xLen = compIdArry.length; x < xLen; x++) {
                         // 获取被关联组件的json配置信息
                         var curEntity = $.getTargetElement(compIdArry[x].id, entityDefs);
                         var intTemp = {
@@ -240,7 +223,7 @@ define([
                             if (compIdArry[x].checked) {
                                 curEntity.interactions.push(intTemp);
                             }
-                         }
+                        }
                         // 如果不存在事件关联
                         else {
                             curEntity.interactions = [];
@@ -263,6 +246,7 @@ define([
                         }
                     );
                 }
+
                 // 添加缩略图
                 function appendThumbnail($this) {
                     var tW = $this.width();
@@ -295,7 +279,7 @@ define([
                     // 如果不是当前组件的缩略图，可以勾选
                     if (clzType === 'COMPONENT') {
                         // 如果此组件，已经被当前编辑状态的组件所关联，那么将不能设定关联关系
-                        if  (activeSilkroadCompId !== compId && !$.isInArray(reportCompId, activeCompRealtionIds)) {
+                        if (activeSilkroadCompId !== compId && !$.isInArray(reportCompId, activeCompRealtionIds)) {
                             var curCompInteraIds;
                             if (curEntity) {
                                 curCompInteraIds = $.getEntityInteractionsId(curEntity);
@@ -303,7 +287,7 @@ define([
                                     checkedStr = ' checked=checked';
                                 }
                             }
-                            chkStr = '<input type="checkbox" name="comp-thumbnail" '+ checkedStr + ' value="' + compId + '" />';
+                            chkStr = '<input type="checkbox" name="comp-thumbnail" ' + checkedStr + ' value="' + compId + '" />';
                         }
                         var $Div = $(
                             ['<div class="comp-thumbnail">',
@@ -340,17 +324,17 @@ define([
                 var $target = $(event.target);
                 var selType = $target.val();
                 var entityDefs = this.model.canvasModel.reportJson.entityDefs;
-                var compId =  $target.attr('data-comp-id');
+                var compId = $target.attr('data-comp-id');
                 // 先析构组件
                 this.canvasView._component.dispose();
                 // TODO:添加维度为空时，限制
                 // 修改entity中下拉框类型
-                for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
+                for (var i = 0, iLen = entityDefs.length; i < iLen; i++) {
                     if (
-                            compId === entityDefs[i].compId
-                            &&
-                            (
-                                entityDefs[i].clzKey === 'ECUI_SELECT' || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                        compId === entityDefs[i].compId
+                        &&
+                        (
+                            entityDefs[i].clzKey === 'ECUI_SELECT' || entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
                             )
                         ) {
                         entityDefs[i].clzKey = selType;
@@ -361,7 +345,7 @@ define([
                 var selects = this.canvasView.model.$reportVm
                     .find('[data-component-type=SELECT]');
                 selects.each(function () {
-                    var  $this = $(this);
+                    var $this = $(this);
                     if ($this.attr('data-comp-id') === compId) {
                         $this.attr('data-mold', selType);
                     }
@@ -384,35 +368,35 @@ define([
                 var $target = $(event.target);
                 var selType = $target.val();
                 var entityDefs = this.model.canvasModel.reportJson.entityDefs;
-                var compId =  $target.attr('data-comp-id');
+                var compId = $target.attr('data-comp-id');
                 var activeSilkroadCompId = that.getActiveCompId();
                 that.model.getCompAxis(activeSilkroadCompId, handleSelectedChange);
                 function handleSelectedChange(data) {
                     if (data.xAxis === null || data.xAxis.length <= 0) {
-                        if ('CAL_SELECT' === selType){
+                        if ('CAL_SELECT' === selType) {
                             $target.val('DOUBLE_CAL_SELECT');
                         } else {
                             $target.val('CAL_SELECT');
                         }
                         dialog.alert('请选维度');
-                        return ;
+                        return;
                     }
                     // 先析构组件
                     that.canvasView._component.dispose();
 
                     // 修改entity中下拉框类型,设置可拖拽面板中的属性值
-                    for (var i = 0,iLen = entityDefs.length; i < iLen; i ++) {
+                    for (var i = 0, iLen = entityDefs.length; i < iLen; i++) {
                         if (compId === entityDefs[i].compId) {
                             //entityDefs[i].clzKey = selType;
                             // 获取组件的配置信息
                             var compType = $target.attr('data-comp-type');
                             var compData = that.model.canvasModel.compBoxModel.getComponentData(compType);
-                            if('CAL_SELECT' === selType){
+                            if ('CAL_SELECT' === selType) {
                                 entityDefs[i].clzKey = compData.entityDescription.clzKey;
-                                entityDefs[i].dataSetOpt = compData.entityDescription.dataSetOpt;
-                            } else if('DOUBLE_CAL_SELECT' === selType){
+                            } else if ('DOUBLE_CAL_SELECT' === selType) {
                                 entityDefs[i].clzKey = compData.entityDescriptionRangeCalendar.clzKey;
-                                entityDefs[i].dataSetOpt = compData.entityDescriptionRangeCalendar.dataSetOpt;
+                                entityDefs[i].dataSetOpt.rangeTimeTypeOpt =
+                                    compData.entityDescriptionRangeCalendar.dataSetOpt.rangeTimeTypeOpt;
                             }
 
                         }
@@ -422,7 +406,7 @@ define([
                     var selects = that.canvasView.model.$reportVm
                         .find('[data-component-type=TIME_COMP]');
                     selects.each(function () {
-                        var  $this = $(this);
+                        var $this = $(this);
                         if ($this.attr('data-comp-id') === compId) {
                             $this.attr('data-mold', selType);
                         }
@@ -506,13 +490,13 @@ define([
                 switch (type) {
                     case 'TIME_COMP' :
                         template = compSettingTimeTemplate;
-                        break ;
+                        break;
                     case 'LITEOLAP' :
                         template = compSettingLITEOLAPTemplate;
-                        break ;
+                        break;
                     case 'CHART' :
                         template = compSettingChartTemplate;
-                        break ;
+                        break;
                     case 'SELECT' :
                         template = vuiSettingSelectTemplate;
                         break;
@@ -541,10 +525,10 @@ define([
                 switch (type) {
                     case 'TIME_COMP' :
                         selector = tStr;
-                        break ;
+                        break;
                     case 'LITEOLAP' :
                         selector = dStr;
-                        break ;
+                        break;
                     default :
                         selector = dStr;
                         break;
@@ -645,7 +629,7 @@ define([
                         // 重新渲染报表
                         that.canvasView.showReport();
                         // 还原指标和维度的可互拖
-                        if(that.$el.find('[data-id=' + oLapElementId + ']').length == 0) {
+                        if (that.$el.find('[data-id=' + oLapElementId + ']').length == 0) {
                             var str = ' .j-root-line[data-id=' + oLapElementId + ']';
                             $('.j-con-org-ind' + str).addClass('j-can-to-dim');
                             $('.j-con-org-dim' + str).addClass('j-can-to-ind');
@@ -666,7 +650,7 @@ define([
             afterDeleteCompAxis: function (option) {
                 // 容错
                 if (option.compType === undefined) {
-                    return ;
+                    return;
                 }
 
                 var compType = this._switchCompTypeWord(option.compType);
@@ -713,7 +697,7 @@ define([
 
                 // 分别删除
                 var list = json.dataSetOpt.timeTypeList;
-                for (var i = 0,len = list.length; i < len; i++) {
+                for (var i = 0, len = list.length; i < len; i++) {
                     if (letter == list[i].value) {
                         list.splice(i, 1);
                         break;
@@ -773,7 +757,7 @@ define([
                 oLapElemenType = ui.draggable.parents(selector);
                 oLapElemenType = oLapElemenType.length ? 'ind' : 'dim';
                 // 添加指标（维度）项到XY
-                if (!that._addDimOrIndDomToXY($item, oLapElemenType, compType)){
+                if (!that._addDimOrIndDomToXY($item, oLapElemenType, compType)) {
                     return;
                 }
 
@@ -853,7 +837,7 @@ define([
                     chartTypes[key] = false;
                 }
                 chartTypes[oldChartType] = true;
-                if(!that.chartList) {
+                if (!that.chartList) {
                     that.chartList = new FloatWindow({
                         direction: 'vertical',
                         content: indMenuTemplate.render(chartTypes)
@@ -865,7 +849,7 @@ define([
                 // FIXME:这块的实现不是很好，需要修改
                 $('.comp-setting-charticons span').unbind();
                 $('.comp-setting-charticons span').click(function () {
-                    var $this =  $(this);
+                    var $this = $(this);
                     var selectedChartType = $this.attr('chart-type');
                     // 如果是饼图的话，比较麻烦，不能同时选择两个饼图
                     var $chartTypes = $target.parent().siblings('div');
@@ -936,10 +920,10 @@ define([
              * @param {$HTMLElement} option.$item 数据项dom
              * @public
              */
-            afterAddCompAxis: function(option) {
+            afterAddCompAxis: function (option) {
                 // 容错
                 if (option.compType === undefined) {
-                    return ;
+                    return;
                 }
                 var compType = this._switchCompTypeWord(option.compType);
                 this['afterAdd' + compType + 'CompAxis'](option);
@@ -977,7 +961,7 @@ define([
              * @param {$HTMLElement} option.$item 数据项dom
              * @public
              */
-            afterAddChartCompAxis: function (option){
+            afterAddChartCompAxis: function (option) {
                 var that = this;
                 var $compSetting = that.$el.find('.j-comp-setting');
                 var isXYS = 'xys'.indexOf(option.axisType) > -1;
@@ -998,7 +982,7 @@ define([
              * @param {$HTMLElement} option.$item 数据项dom
              * @public
              */
-            afterAddSelectCompAxis: function (option){
+            afterAddSelectCompAxis: function (option) {
                 var compId = this.getActiveCompId();
                 var editCompModel = this.canvasView.editCompView.model;
                 var json = editCompModel.getCompDataById(compId)[0];
@@ -1017,7 +1001,7 @@ define([
              * @param {$HTMLElement} option.$item 数据项dom
              * @public
              */
-            afterAddTableCompAxis: function (option){
+            afterAddTableCompAxis: function (option) {
             },
 
             /**
@@ -1167,11 +1151,11 @@ define([
                 var compBoxModel = that.model.canvasModel.compBoxModel;
                 var compId = that.getActiveCompId();
                 var compData = that.model.getCompDataById(compId);
-                if (compData[0].clzKey === 'RANGE_CALENDAR'){
+                if (compData[0].clzKey === 'RANGE_CALENDAR') {
                     var compBoxModel = that.model.canvasModel.compBoxModel;
                     // 可做逻辑拆分，将部分代码拆分到model中
                     var renderTemplateData = null;
-                    if (compData[0].dataSetOpt.rangeTimeTypeOpt !== undefined){
+                    if (compData[0].dataSetOpt.rangeTimeTypeOpt !== undefined) {
                         renderTemplateData = {
                             start: compData[0].dataSetOpt.rangeTimeTypeOpt.startDateOpt,
                             end: compData[0].dataSetOpt.rangeTimeTypeOpt.endDateOpt
@@ -1200,7 +1184,7 @@ define([
                  * @param {$HTMLElement} $dialog 弹框内容区
                  * @return {Object} 配置参数
                  */
-                function getDataFromForm ($dialog) {
+                function getDataFromForm($dialog) {
                     var arr = [];
                     var $item = $dialog.find('.j-item');
                     $item.each(function () {
@@ -1245,7 +1229,7 @@ define([
                                     if (rangeStart !== undefined && rangeEnd !== undefined) {
                                         if (rangeEnd < rangeStart) {
                                             dialog.alert("设置的默认结束时间应小于默认开始时间");
-                                            return ;
+                                            return;
                                         }
                                     }
                                     // 提取表单数据
@@ -1324,6 +1308,7 @@ define([
                         $('.norm-empty-prompt').show();
                     }
                 }
+
                 /**
                  * 保存数据格式
                  */
@@ -1374,7 +1359,7 @@ define([
                             buttons: [
                                 {
                                     text: '提交',
-                                    click: function() {
+                                    click: function () {
                                         saveTopnFormInfo($(this));
                                     }
                                 },
@@ -1388,6 +1373,7 @@ define([
                         }
                     });
                 }
+
                 /**
                  * 保存数据格式
                  */
@@ -1442,7 +1428,7 @@ define([
                                 buttons: [
                                     {
                                         text: '提交',
-                                        click: function() {
+                                        click: function () {
                                             saveNormInfoDepict($(this));
                                         }
                                     },
@@ -1460,6 +1446,7 @@ define([
                         $('.norm-empty-prompt').show();
                     }
                 }
+
                 /**
                  * 保存数据格式
                  */
@@ -1511,7 +1498,7 @@ define([
                             buttons: [
                                 {
                                     text: '提交',
-                                    click: function() {
+                                    click: function () {
                                         saveFilterBlankLine($(this));
                                     }
                                 },
@@ -1525,6 +1512,7 @@ define([
                         }
                     });
                 }
+
                 /**
                  * 保存数据格式
                  */
@@ -1569,7 +1557,7 @@ define([
          * @param {$Htmlelement} $compSetting 点击事件（报表组件上的编辑按钮）
          * @private
          */
-        function processCand (option, $compSetting) {
+        function processCand(option, $compSetting) {
             var oLapElementId = option.oLapElementId;
             var selector = '[data-id=' + oLapElementId + ']';
             // 数据项
@@ -1591,7 +1579,7 @@ define([
             else if ($items.length == 2) {
                 // 移除删除图标
                 var $delete = $items.eq(1).find('.j-delete');
-                if ($delete.length == 1 ) {
+                if ($delete.length == 1) {
                     $delete.remove();
                 }
             }
@@ -1603,7 +1591,7 @@ define([
          * @return {number} result 0:单个 1:组合
          * @private
          */
-        function chartTypeSubsidiary (type) {
+        function chartTypeSubsidiary(type) {
             var singleChart = Constant.SINGLE_CHART;
             var combinationChart = Constant.COMBINATION_CHART;
             if ($.isInArray(type, singleChart)) {
@@ -1614,5 +1602,4 @@ define([
             }
         }
     }
-
 );
