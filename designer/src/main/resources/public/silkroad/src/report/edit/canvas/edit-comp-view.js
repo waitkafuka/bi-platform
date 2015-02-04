@@ -409,8 +409,10 @@ define([
                             var compData = that.model.canvasModel.compBoxModel.getComponentData(compType);
                             if('CAL_SELECT' === selType){
                                 entityDefs[i].clzKey = compData.entityDescription.clzKey;
+                                entityDefs[i].dataSetOpt = compData.entityDescription.dataSetOpt;
                             } else if('DOUBLE_CAL_SELECT' === selType){
                                 entityDefs[i].clzKey = compData.entityDescriptionRangeCalendar.clzKey;
+                                entityDefs[i].dataSetOpt = compData.entityDescriptionRangeCalendar.dataSetOpt;
                             }
 
                         }

@@ -32,6 +32,12 @@ define(
             clzType: "VUI",
             "name": "dim_time^_^the_date", // name在report-ui里面会根据dateKey里面的内容改变
             "dateKey": {},
+            "dataSetOpt": {
+                "rangeTimeTypeOpt": {
+                    startDateOpt: 0,
+                    endDateOpt: 0
+                }
+            },
             "clzKey": "RANGE_CALENDAR"
         };
         var rangeConfig = {
