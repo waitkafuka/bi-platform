@@ -12,6 +12,7 @@
     border-bottom: 1px solid #CCC;
     border-right: 1px solid #e7f9fe;
     height: 30px;
+    user-select: none;
 }
 .ui-table-locked-head {
     border-bottom: 1px solid #CCC;
@@ -90,7 +91,7 @@
     background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
-    background: #FFF;
+    /*background: #FFF;*/
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
@@ -335,4 +336,8 @@
 }
 .ui-table-head-th-content span {
     margin-right: 7px;
+}
+
+.ui-table-expand-background {
+    background-color: #F6F6F5;
 }
