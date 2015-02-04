@@ -6915,7 +6915,7 @@ define(
             customElementPrefix: 'esui',
             instanceAttr: 'data-ctrl-id',
             viewContextAttr: 'data-ctrl-view-context',
-            uiClassPrefix: 'ui',
+            uiClassPrefix: 'esui-ui',
             skinClassPrefix: 'skin',
             stateClassPrefix: 'state'
         };
