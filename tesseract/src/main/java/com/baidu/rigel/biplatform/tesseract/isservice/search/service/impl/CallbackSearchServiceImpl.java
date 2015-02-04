@@ -68,6 +68,7 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
+import com.google.common.collect.Lists;
 
 /**
  * SearchService 实现类，用来连接外部的查询API。
@@ -157,7 +158,10 @@ public class CallbackSearchServiceImpl {
 
                 @Override
                 public void accept(MiniCubeMeasure m) {
-                    merged.putAll(((CallbackMeasure) m).getCallbackParams());
+                    if (((CallbackMeasure) m).getCallbackParams() != null 
+                        && !((CallbackMeasure) m).getCallbackParams().isEmpty()) {
+                        merged.putAll(((CallbackMeasure) m).getCallbackParams());
+                    }
                 }
             });
 			return CallbackServiceInvoker.invokeCallback(group.getKey(), merged, 
@@ -254,11 +258,15 @@ public class CallbackSearchServiceImpl {
             latch.await(callbackTimeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e1) {
             // Ignore
+            LOGGER.error(e1.getMessage(), e1);
         }
         
         // Package result
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
-        LinkedList<ResultRecord> resultList = packageResultRecords(query, sqlQuery, response);
+        LinkedList<ResultRecord> resultList = Lists.newLinkedList();
+        if (!response.isEmpty()) {
+            packageResultRecords(query, sqlQuery, response);
+        }
         TesseractResultSet result = new SearchResultSet(AggregateCompute.aggregate(resultList, query));
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));

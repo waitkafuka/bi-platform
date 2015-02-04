@@ -211,15 +211,15 @@
 /* 下载按钮 */
 .ui-download-btn {
     border: 1px solid #F0F4F7;
-    background-color: #F0F4F7;
+    background-color: rgba(255, 255, 255, 0);
     color: #3C78A2;
     padding: 0;
 }
 .ui-download-btn-hover {
-    background-color: #F0F4F7;
+    background-color: rgba(255, 255, 255, 0);
 }
 .ui-download-btn-active {
-    background-color: #F0F4F7;
+    background-color: rgba(255, 255, 255, 0);
 }
 .ui-download-btn .ui-button-inner {
     padding: 2px 0px 4px 3px;
@@ -231,12 +231,10 @@
     border-radius: 1px;
 }
 .ui-download-btn-hover .ui-button-inner {
-    background-color: #F0F4F7;
-    border-top: 1px solid #F0F4F7;
+    background-color: rgba(255, 255, 255, 0);
 }
 .ui-download-btn-active .ui-button-inner {
-    border-top: 1px solid F0F4F7;
-    background-color: F0F4F7;
+    background-color: rgba(255, 255, 255, 0);
 }
 .ui-download-btn .ui-button-left {
     background: url(img/download.png) no-repeat;

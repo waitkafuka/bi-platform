@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -124,6 +125,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                     it.remove();
                 }
             }
+            // 处理计算列
             Map<Condition, Set<String>> conditions = ConditionUtil.simpleMergeContexsCondition(result.getCompileContexts().values());
             if(CollectionUtils.isNotEmpty(callbackMeasureName)) {
                 conditions.put(CallbackCondition.getInstance(), callbackMeasureName);
@@ -135,7 +137,14 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                     // 是否需要清理，到时候在讨论
                     context.getQueryMeasures().clear();
                     for(String var : vars) {
-                        MiniCubeMeasure measure = (MiniCubeMeasure) cube.getMeasures().get(PlaceHolderUtils.getKeyFromPlaceHolder(var));
+                        MiniCubeMeasure measure = null;
+                        // TODO 容错处理 对于callback维度这里时uniqueName，需要找小明确认原因
+                        if (!Pattern.matches("^\\$\\{[^\\}]+\\}$", var)) {
+                            String name = MetaNameUtil.parseUnique2NameArray(var)[1];
+                            measure = (MiniCubeMeasure) cube.getMeasures().get(name);
+                        } else {
+                            measure = (MiniCubeMeasure) cube.getMeasures().get(PlaceHolderUtils.getKeyFromPlaceHolder(var));
+                        }
                         if(measure == null) {
                             throw new IllegalSplitResultException(result, "can not get measure:" + var + " from cube", "SPILT_QUESTION");
                         }

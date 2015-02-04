@@ -585,7 +585,9 @@ public class SchemaManageServiceImpl implements SchemaManageService {
         if (extendMeasure == null) {
             return null;
         }
-        extendMeasure.getCals().stream().forEach(cal -> {
+        extendMeasure.getCals().stream().filter(cal -> {
+            return !StringUtils.isEmpty(cal.getName()) && !StringUtils.isEmpty(cal.getFormula());
+        }).forEach(cal -> {
             if (StringUtils.isEmpty(cal.getId())) {
                 ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(cal.getCaption());
                 m.setAggregator(Aggregator.SUM);
@@ -625,6 +627,8 @@ public class SchemaManageServiceImpl implements SchemaManageService {
                 if (StringUtils.isEmpty(timeOut)) {
                     timeOut = "30000";
                 }
+                m.setType(MeasureType.CALLBACK);
+                m.setAggregator(Aggregator.CALCULATED);
                 m.setSocketTimeOut(Long.valueOf(timeOut));
                 m.setCube(cube);
                 cube.getMeasures().put(m.getId(), m);
