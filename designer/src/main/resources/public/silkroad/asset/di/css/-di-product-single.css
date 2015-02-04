@@ -2298,6 +2298,10 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     display: none;
     cursor: col-resize;
 }
+
+.ui-table-expand-background {
+    /*background-color: #F6F6F5;*/
+}
 /** 
  * Pager
  */ 
