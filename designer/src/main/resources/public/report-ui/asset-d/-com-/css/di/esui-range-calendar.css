@@ -251,12 +251,12 @@ button.skin-spring-button {
     *height: 32px;
 }
 .skin-spring-add-button {
-    background: url(../img/esesui-ui-button-plus.gif) no-repeat scroll 9px center #65b445;
-    background: url(../img/esesui-ui-button-plus.gif), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#6cbb4c), to(#519c30));
-    background: url(../img/esesui-ui-button-plus.gif), -webkit-linear-gradient(top, #6cbb4c, #519c30);
-    background: url(../img/esesui-ui-button-plus.gif), -moz-linear-gradient(top, #6cbb4c, #519c30);
-    background: url(../img/esesui-ui-button-plus.gif), -ms-linear-gradient(top, #6cbb4c, #519c30);
-    background: url(../img/esesui-ui-button-plus.gif), -o-linear-gradient(top, #6cbb4c, #519c30);
+    background: url(img/esesui-ui-button-plus.gif) no-repeat scroll 9px center #65b445;
+    background: url(img/esesui-ui-button-plus.gif), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#6cbb4c), to(#519c30));
+    background: url(img/esesui-ui-button-plus.gif), -webkit-linear-gradient(top, #6cbb4c, #519c30);
+    background: url(img/esesui-ui-button-plus.gif), -moz-linear-gradient(top, #6cbb4c, #519c30);
+    background: url(img/esesui-ui-button-plus.gif), -ms-linear-gradient(top, #6cbb4c, #519c30);
+    background: url(img/esesui-ui-button-plus.gif), -o-linear-gradient(top, #6cbb4c, #519c30);
     background-repeat: no-repeat, no-repeat;
     background-position: 9px center, 0 0;
     padding: 0 13px 0 27px;
@@ -274,12 +274,12 @@ button.skin-spring-button {
     background: -o-linear-gradient(top, #519c30, #6cbb4c);
 }
 .skin-spring-add-button:active {
-    background: url(../img/esesui-ui-button-plus.gif) no-repeat scroll 9px center #65b445;
-    background: url(../img/esesui-ui-button-plus.gif), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#519c30), to(#6cbb4c));
-    background: url(../img/esesui-ui-button-plus.gif), -webkit-linear-gradient(top, #519c30, #6cbb4c);
-    background: url(../img/esesui-ui-button-plus.gif), -moz-linear-gradient(top, #519c30, #6cbb4c);
-    background: url(../img/esesui-ui-button-plus.gif), -ms-linear-gradient(top, #519c30, #6cbb4c);
-    background: url(../img/esesui-ui-button-plus.gif), -o-linear-gradient(top, #519c30, #6cbb4c);
+    background: url(img/esesui-ui-button-plus.gif) no-repeat scroll 9px center #65b445;
+    background: url(img/esesui-ui-button-plus.gif), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#519c30), to(#6cbb4c));
+    background: url(img/esesui-ui-button-plus.gif), -webkit-linear-gradient(top, #519c30, #6cbb4c);
+    background: url(img/esesui-ui-button-plus.gif), -moz-linear-gradient(top, #519c30, #6cbb4c);
+    background: url(img/esesui-ui-button-plus.gif), -ms-linear-gradient(top, #519c30, #6cbb4c);
+    background: url(img/esesui-ui-button-plus.gif), -o-linear-gradient(top, #519c30, #6cbb4c);
     background-repeat: no-repeat, no-repeat;
     background-position: 9px center, 0 0;
 }
@@ -289,30 +289,30 @@ button.skin-spring-button {
 }
 /** 下载系列 */
 .skin-download-button {
-    background: url(../img/esesui-ui-btn-download.png) no-repeat scroll 40px center #65b445;
-    background: url(../img/esesui-ui-btn-download.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-btn-download.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-btn-download.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-btn-download.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-btn-download.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-btn-download.png) no-repeat scroll 40px center #65b445;
+    background: url(img/esesui-ui-btn-download.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-btn-download.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-btn-download.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-btn-download.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-btn-download.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: 40px center, 0 0;
     padding-left: 12px;
     padding-right: 25px;
 }
 .skin-download-button:active {
-    background: url(../img/esesui-ui-btn-download.png) no-repeat scroll 40px center #65b445;
-    background: url(../img/esesui-ui-btn-download.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f6f6f6), to(#ffffff));
-    background: url(../img/esesui-ui-btn-download.png), -webkit-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-btn-download.png), -moz-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-btn-download.png), -ms-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-btn-download.png), -o-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-btn-download.png) no-repeat scroll 40px center #65b445;
+    background: url(img/esesui-ui-btn-download.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f6f6f6), to(#ffffff));
+    background: url(img/esesui-ui-btn-download.png), -webkit-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-btn-download.png), -moz-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-btn-download.png), -ms-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-btn-download.png), -o-linear-gradient(top, #f6f6f6, #ffffff);
     background-repeat: no-repeat, no-repeat;
     background-position: 40px center, 0 0;
 }
 /** 关闭layer按钮 */
 .skin-layerClose-button {
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: repeat;
     background-position: -37px -88px;
     background-color: transparent;
@@ -326,7 +326,7 @@ button.skin-spring-button {
     padding: 0;
 }
 .skin-layerClose-button:active {
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: repeat;
     background-position: -37px -88px;
     background-color: transparent;
@@ -406,12 +406,12 @@ button.skin-link-button:hover {
     height: 16px;
     margin-top: 3px;
     width: 16px;
-    background: url(../img/esesui-ui-cal.png) no-repeat scroll left 0px #f3f3f3;
-    background: url(../img/esesui-ui-cal.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-cal.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-cal.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-cal.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-cal.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-cal.png) no-repeat scroll left 0px #f3f3f3;
+    background: url(img/esesui-ui-cal.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-cal.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-cal.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-cal.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-cal.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: left 0px, 0 0;
 }
@@ -438,7 +438,7 @@ button.skin-link-button:hover {
     margin-top: 5px;
 }
 .esui-ui-calendar-validity-label-invalid {
-    background-image: url(../img/esesui-ui-icon-alert.png);
+    background-image: url(img/esesui-ui-icon-alert.png);
     background-repeat: no-repeat;
     background-position: 15px center;
     background-color: #fedbdc;
@@ -454,12 +454,12 @@ button.skin-link-button:hover {
  * @author dbear
  */
 .esui-ui-commandmenu {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #ffffff;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #ffffff;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -6px, 0 0;
     border: 1px solid #D8D8D8;
@@ -476,34 +476,34 @@ button.skin-link-button:hover {
 }
 .esui-ui-commandmenu:hover,
 .esui-ui-commandmenu:focus {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #f3f3f3;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #f3f3f3;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -36px, 0 0;
 }
 .esui-ui-commandmenu:active {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #f3f3f3;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f6f6f6), to(#ffffff));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #f3f3f3;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f6f6f6), to(#ffffff));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #f6f6f6, #ffffff);
     background-repeat: no-repeat, no-repeat;
     background-position: right -36px, 0 0;
 }
 .esui-ui-commandmenu-active,
 .esui-ui-commandmenu-active:hover,
 .esui-ui-commandmenu-active:focus {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -69px #f3f3f3;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -69px #f3f3f3;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -69px, 0 0;
 }
@@ -556,12 +556,12 @@ button.skin-link-button:hover {
 .esui-ui-commandmenu-disabled:hover,
 .esui-ui-commandmenu-disabled:focus,
 .esui-ui-commandmenu-disabled:active {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #ffffff;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #ffffff;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -6px, 0 0;
 }
@@ -601,7 +601,7 @@ button.skin-link-button:hover {
     z-index: 1203;
 }
 .esui-ui-dialog-head {
-    background-image: url(../img/esesui-ui-dialog-head-bg.png);
+    background-image: url(img/esesui-ui-dialog-head-bg.png);
     background-repeat: repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -619,7 +619,7 @@ button.skin-link-button:hover {
     user-select: none;
 }
 .esui-ui-dialog-close-icon {
-    background-image: url(../img/esesui-ui-dialog-head-close.png);
+    background-image: url(img/esesui-ui-dialog-head-close.png);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -700,7 +700,7 @@ button.skin-link-button:hover {
 }
 .skin-alert-dialog .esui-ui-dialog-icon-warning,
 .skin-confirm-dialog .esui-ui-dialog-icon-warning {
-    background-image: url(../img/esesui-ui-dialog-notice.png);
+    background-image: url(img/esesui-ui-dialog-notice.png);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -713,7 +713,7 @@ button.skin-link-button:hover {
 }
 .skin-alert-dialog .esui-ui-dialog-icon-confirm,
 .skin-confirm-dialog .esui-ui-dialog-icon-confirm {
-    background-image: url(../img/esesui-ui-dialog-question.png);
+    background-image: url(img/esesui-ui-dialog-question.png);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -762,7 +762,7 @@ button.skin-link-button:hover {
 }
 .esui-ui-monthview-head .esui-ui-monthview-month-forward,
 .esui-ui-monthview-head .esui-ui-monthview-month-back {
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: repeat;
     background-position: 0px -200px;
     background-color: transparent;
@@ -774,7 +774,7 @@ button.skin-link-button:hover {
 }
 .esui-ui-monthview-head .esui-ui-monthview-month-forward:active,
 .esui-ui-monthview-head .esui-ui-monthview-month-back:active {
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: repeat;
     background-position: 0px -200px;
     background-color: transparent;
@@ -882,7 +882,7 @@ button.skin-link-button:hover {
 }
 .esui-ui-monthview-disabled .esui-ui-monthview-month-forward:active,
 .esui-ui-monthview-disabled .esui-ui-monthview-month-back:active {
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: repeat;
     background-position: 0px -240px;
     background-color: transparent;
@@ -1084,12 +1084,12 @@ button.skin-link-button:hover {
     margin-top: 3px;
     margin-right: 5px;
     width: 16px;
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px #f3f3f3;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px #f3f3f3;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: left -9px, 0 0;
 }
@@ -1190,7 +1190,7 @@ button.skin-link-button:hover {
     margin-top: 5px;
 }
 .esui-ui-rangecalendar-validity-label-invalid {
-    background-image: url(../img/esesui-ui-icon-alert.png);
+    background-image: url(img/esesui-ui-icon-alert.png);
     background-repeat: no-repeat;
     background-position: 15px center;
     background-color: #fedbdc;
@@ -1392,7 +1392,7 @@ button.skin-link-button:hover {
     margin-top: 5px;
 }
 .esui-ui-region-validity-label-invalid {
-    background-image: url(../img/esesui-ui-icon-alert.png);
+    background-image: url(img/esesui-ui-icon-alert.png);
     background-repeat: no-repeat;
     background-position: 15px center;
     background-color: #fedbdc;
@@ -1632,12 +1632,12 @@ button.skin-link-button:hover {
  * @author dbear
  */
 .esui-ui-select {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #ffffff;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #ffffff;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -6px, 0 0;
     overflow: hidden;
@@ -1657,34 +1657,34 @@ button.skin-link-button:hover {
 }
 .esui-ui-select:hover,
 .esui-ui-select:focus {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #ffffff;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #ffffff;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -36px, 0 0;
 }
 .esui-ui-select:active {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #ffffff;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f6f6f6), to(#ffffff));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #f6f6f6, #ffffff);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -36px #ffffff;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#f6f6f6), to(#ffffff));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #f6f6f6, #ffffff);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #f6f6f6, #ffffff);
     background-repeat: no-repeat, no-repeat;
     background-position: right -36px, 0 0;
 }
 .esui-ui-select-active,
 .esui-ui-select-active:hover,
 .esui-ui-select-active:focus {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -67px #ffffff;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -67px #ffffff;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -67px, 0 0;
 }
@@ -1745,12 +1745,12 @@ button.skin-link-button:hover {
 .esui-ui-select-read-only:hover,
 .esui-ui-select-disabled:focus,
 .esui-ui-select-read-only:focus {
-    background: url(../img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #f3f3f3;
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(../img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(../img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll right -6px #f3f3f3;
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
+    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
     background-repeat: no-repeat, no-repeat;
     background-position: right -6px, 0 0;
 }
@@ -1763,7 +1763,7 @@ button.skin-link-button:hover {
     margin-top: 5px;
 }
 .esui-ui-select-validity-label-invalid {
-    background-image: url(../img/esesui-ui-icon-alert.png);
+    background-image: url(img/esesui-ui-icon-alert.png);
     background-repeat: no-repeat;
     background-position: 15px center;
     background-color: #fedbdc;
@@ -1827,21 +1827,21 @@ button.skin-link-button:hover {
     width: 5px;
     height: 9px;
     font-size: 0;
-    background: url(../img/esesui-ui.png) -54px -88px;
+    background: url(img/esesui-ui.png) -54px -88px;
     position: absolute;
     bottom: 50%;
     _bottom: 5px;
     left: 50%;
 }
 .esui-ui-sidebar-minibar-hover .esui-ui-sidebar-minibar-arrow {
-    background: url(../img/esesui-ui.png) -64px -88px;
+    background: url(img/esesui-ui.png) -64px -88px;
 }
 .esui-ui-sidebar-minibar-hover .esui-ui-sidebar-minibar-text {
     color: #03c;
 }
 .esui-ui-sidebar-head {
     border-bottom: 1px solid #ccc;
-    background: url(../img/esesui-ui.png) 0 -260px;
+    background: url(img/esesui-ui.png) 0 -260px;
     line-height: 34px;
     padding-left: 8px;
     -moz-border-radius: 5px 5px 0 0;
@@ -1861,7 +1861,7 @@ button.skin-link-button:hover {
 .skin-fixed-button {
     height: 13px !important;
     width: 14px;
-    background: url(../img/esesui-ui.png);
+    background: url(img/esesui-ui.png);
     font-size: 0;
     border: 1px solid #aeaeae;
     position: absolute;
@@ -1922,41 +1922,41 @@ button.skin-link-button:hover {
     border: 0;
     padding: 0;
     text-indent: -5000px;
-    background: transparent url(../img/search.png) no-repeat 50% -25px;
+    background: transparent url(img/search.png) no-repeat 50% -25px;
 }
 .esui-ui-searchbox .esui-ui-button:active {
     border: 0;
-    background: transparent url(../img/search.png) no-repeat 50% 0;
+    background: transparent url(img/search.png) no-repeat 50% 0;
 }
 .esui-ui-searchbox .esui-ui-button-disabled:hover {
     cursor: default;
 }
 .esui-ui-searchbox .esui-ui-button-disabled:active {
-    background: transparent url(../img/search.png) no-repeat 50% 0;
+    background: transparent url(img/search.png) no-repeat 50% 0;
 }
 .esui-ui-searchbox-fit-width .esui-ui-textbox {
     width: 100% !important;
 }
 .esui-ui-searchbox-focus .esui-ui-button {
-    background: transparent url(../img/search.png) no-repeat 50% 0;
+    background: transparent url(img/search.png) no-repeat 50% 0;
 }
 .esui-ui-searchbox-clear .esui-ui-button {
-    background: transparent url(../img/esesui-ui-btn-clear.png) no-repeat 50%;
+    background: transparent url(img/esesui-ui-btn-clear.png) no-repeat 50%;
 }
 .esui-ui-searchbox-clear .esui-ui-button:hover {
-    background: transparent url(../img/esesui-ui-btn-clear-hover.png) no-repeat 50%;
+    background: transparent url(img/esesui-ui-btn-clear-hover.png) no-repeat 50%;
 }
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .esui-ui-searchbox .esui-ui-button {
-        background-image: url(../img/search@2x.png);
+        background-image: url(img/search@2x.png);
         background-size: 15px 50px;
     }
     .esui-ui-searchbox .esui-ui-button:active {
-        background-image: url(../img/search@2x.png);
+        background-image: url(img/search@2x.png);
         background-size: 15px 50px;
     }
     .esui-ui-searchbox-focus .esui-ui-button {
-        background-image: url(../img/search@2x.png);
+        background-image: url(img/search@2x.png);
         background-size: 15px 50px;
     }
 }
@@ -2140,7 +2140,7 @@ button.skin-link-button:hover {
 }
 /* 表头单元格排序标识 */
 .esui-ui-table-hsort {
-    background: url(../img/esesui-ui.png) -40px -250px;
+    background: url(img/esesui-ui.png) -40px -250px;
     margin: 2px 0 0 2px;
     height: 10px;
     width: 7px;
@@ -2260,7 +2260,7 @@ button.skin-link-button:hover {
     right: 2px;
     cursor: pointer;
     position: absolute;
-    background: url(../img/esesui-ui.png) -116px -90px;
+    background: url(img/esesui-ui.png) -116px -90px;
 }
 .esui-ui-table-cell-align-right .esui-ui-table-cell-editentry {
     left: 2px;
@@ -2277,7 +2277,7 @@ button.skin-link-button:hover {
     width: 11px;
     height: 11px;
     margin: 0 auto;
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: no-repeat;
     border: 1px solid #a8adb6;
     cursor: pointer;
@@ -2483,7 +2483,7 @@ button.skin-link-button:hover {
     margin-top: 5px;
 }
 .esui-ui-textline-validity-label-invalid {
-    background-image: url(../img/esesui-ui-icon-alert.png);
+    background-image: url(img/esesui-ui-icon-alert.png);
     background-repeat: no-repeat;
     background-position: 15px center;
     background-color: #fedbdc;
@@ -2528,7 +2528,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-tl .esui-ui-tip-arrow-1 {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -24px -12px;
     background-color: transparent;
@@ -2539,7 +2539,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-tr {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -36px -12px;
     background-color: transparent;
@@ -2550,7 +2550,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-bl {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -12px -12px;
     background-color: transparent;
@@ -2561,7 +2561,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-br {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: 0px -12px;
     background-color: transparent;
@@ -2572,7 +2572,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-lt {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -26px 0px;
     background-color: transparent;
@@ -2583,7 +2583,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-lb {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -39px 0;
     background-color: transparent;
@@ -2594,7 +2594,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-rt {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -2605,7 +2605,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tip-arrow-rb {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -13px 0;
     background-color: transparent;
@@ -2617,7 +2617,7 @@ esui-ui .-tip-title {
 .esui-ui-tip {
     width: 14px;
     height: 14px;
-    background-image: url(../img/esesui-ui.png);
+    background-image: url(img/esesui-ui.png);
     background-repeat: no-repeat;
     background-position: -101px -89px;
     background-color: transparent;
@@ -2671,7 +2671,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-tl {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -24px -12px;
     background-color: transparent;
@@ -2682,7 +2682,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-tr {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -36px -12px;
     background-color: transparent;
@@ -2693,7 +2693,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-bl {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -12px -12px;
     background-color: transparent;
@@ -2704,7 +2704,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-br {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: 0px -12px;
     background-color: transparent;
@@ -2715,7 +2715,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-lt {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -26px 0px;
     background-color: transparent;
@@ -2726,7 +2726,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-lb {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -39px 0;
     background-color: transparent;
@@ -2737,7 +2737,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-rt {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -2748,7 +2748,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-rb {
     display: block;
-    background-image: url(../img/esesui-ui_transparent.gif);
+    background-image: url(img/esesui-ui_transparent.gif);
     background-repeat: no-repeat;
     background-position: -13px 0;
     background-color: transparent;
@@ -2904,13 +2904,13 @@ esui-ui .-tip-title {
     width: 14px;
     height: 14px;
     overflow: hidden;
-    background-image: url(../img/esesui-ui-open-icon.png);
+    background-image: url(img/esesui-ui-open-icon.png);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
 }
 .esui-ui-tree-node-indicator-expanded {
-    background-image: url(../img/esesui-ui-close-icon.png);
+    background-image: url(img/esesui-ui-close-icon.png);
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -2946,7 +2946,7 @@ esui-ui .-tip-title {
     display: block;
 }
 .skin-folder-tree-node-indicator {
-    background-image: url(../img/esesui-ui-folder.png);
+    background-image: url(img/esesui-ui-folder.png);
     background-repeat: no-repeat;
     background-position: 0 -6px;
     background-color: transparent;
