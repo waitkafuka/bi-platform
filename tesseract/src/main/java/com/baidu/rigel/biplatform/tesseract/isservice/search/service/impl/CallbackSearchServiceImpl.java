@@ -230,8 +230,8 @@ public class CallbackSearchServiceImpl {
                     f.addCallback(new ListenableFutureCallback<CallbackResponse>() {
                         @Override
                         public void onSuccess(CallbackResponse result) {
-                            response.put(ce, result);
                             latch.countDown();
+                            response.put(ce, result);
                         }
                         
                         @Override
