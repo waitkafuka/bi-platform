@@ -102,8 +102,7 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         SearchRequestMessage searchReqeustMessage = (SearchRequestMessage) msg;
         
         String idxPath = searchReqeustMessage.getIdxPath();
-        SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(
-            idxPath);
+        SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath,true);
         IndexSearcher is = null;
         is = searcherManager.acquire();
         

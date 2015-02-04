@@ -105,9 +105,12 @@ public class IndexSearcherFactory {
      * @throws IOException
      *             可能抛出异常
      */
-    public synchronized SearcherManager getSearcherManager(String idxPath) throws IOException {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-            "getSearcherManager", idxPath));
+    public synchronized SearcherManager getSearcherManager(String idxPath,boolean isLog) throws IOException {
+		if (!isLog) {
+			LOGGER.info(String.format(
+					LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
+					"getSearcherManager", idxPath));
+		}
         SearcherManager searcherManager = null;
         if (StringUtils.isEmpty(idxPath)) {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
@@ -128,8 +131,11 @@ public class IndexSearcherFactory {
             }
             
         }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "getSearcherManager",
-            idxPath));
+		if (!isLog) {
+			LOGGER.info(String.format(
+					LogInfoConstants.INFO_PATTERN_FUNCTION_END,
+					"getSearcherManager", idxPath));
+		}
         return searcherManager;
     }
     
@@ -149,7 +155,7 @@ public class IndexSearcherFactory {
                 "refreshSearchManager", idxPath));
             throw new IllegalArgumentException();
         }
-        SearcherManager searcherManager = getSearcherManager(idxPath);
+        SearcherManager searcherManager = getSearcherManager(idxPath,true);
         if (searcherManager != null) {
             searcherManager.maybeRefresh();
         }

@@ -272,7 +272,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
     
     private Query existInIndex(ResultRecord currRecord,String idxPath,String queryField) throws Exception{    	
     	Query result=null;
-		SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath);
+		SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath,false);
 	    IndexSearcher is = null;
 	    is = searcherManager.acquire();
 	    Query query=new TermQuery(new Term(queryField,currRecord.getField(queryField).toString()));
