@@ -97,7 +97,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
             "ClusterNodeCheckThread"));
         while (true) {
             // get lock
-            Lock lock = this.storeManger.getClusterLock();
+            
             try {
                 Node node = this.applicationContext.getBean(Node.class);
                 Node udpateNode = this.isNodeService.getNodeByCurrNode(node);
@@ -113,7 +113,11 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
                 this.isNodeService.saveNodeImage(udpateNode);
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                     "update localImage", "success"));
+                udpateNode=null;
+                node=null;
                 // check others
+                
+                Lock lock = this.storeManger.getClusterLock();
                 if (lock.tryLock(this.getLockTimeOut, TimeUnit.SECONDS)) {
                     LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                         "Get Lock", "Success"));
@@ -122,7 +126,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
                         "Locked", "Success"));
                     try {
                         
-                        this.isNodeService.markClusterBadNode(node);
+                        this.isNodeService.markClusterBadNode();
                         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                             "markClusterBadNode", "Success"));
                     } finally {

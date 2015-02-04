@@ -409,23 +409,19 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
      * markClusterBadNode(com.baidu.rigel.biplatform.tesseract.node.meta.Node)
      */
     @Override
-    public void markClusterBadNode(Node node) {
+    public void markClusterBadNode() {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "markClusterBadNode", "[no param]"));
-        if (node == null || StringUtils.isEmpty(node.getClusterName())) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-                "markClusterBadNode", "[no param]"));
-            throw new IllegalArgumentException();
-        }
-        List<Node> nodeList = this.getNodeListByClusterName(node.getClusterName());
+        Node currNode=this.getCurrentNode();
+        List<Node> nodeList = this.getNodeListByClusterName(currNode.getClusterName());
         long currTime = System.currentTimeMillis();
         if (nodeList != null) {
-            for (Node currNode : nodeList) {
-                if (currNode.getNodeState().equals(NodeState.NODE_AVAILABLE)
-                        && ((currTime - currNode.getLastStateUpdateTime()) > this.nodeStateUpdateMaxIntervalTime)) {
-                    currNode.setNodeState(NodeState.NODE_UNAVAILABLE);
-                    currNode.setLastStateUpdateTime(currTime);
-                    this.saveOrUpdateNodeInfo(currNode);
+            for (Node curr : nodeList) {
+                if (curr.getNodeState().equals(NodeState.NODE_AVAILABLE)
+                        && ((currTime - curr.getLastStateUpdateTime()) > this.nodeStateUpdateMaxIntervalTime)) {
+                	curr.setNodeState(NodeState.NODE_UNAVAILABLE);
+                	curr.setLastStateUpdateTime(currTime);
+                    this.saveOrUpdateNodeInfo(curr);
                 }
             }
         }

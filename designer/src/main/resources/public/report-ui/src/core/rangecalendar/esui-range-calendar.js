@@ -15965,7 +15965,8 @@ define(
                     getValue: function () {
                         return {
                             begin: m(this.now).startOf('month').toDate(),
-                            end: m(this.now).toDate()
+                            end: m(this.now).subtract('days', 1).toDate()
+
                         };
                     }
                 },
