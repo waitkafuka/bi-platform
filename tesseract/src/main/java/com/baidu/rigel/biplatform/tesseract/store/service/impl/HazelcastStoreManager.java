@@ -30,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -58,7 +59,7 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 
 // TODO 需要通过factory返回StoryManager的实例，不要直接用Spring的注解 --Add by xiaoming.chen
 @Service("hazelcastStoreManager")
-public class HazelcastStoreManager implements StoreManager {
+public class HazelcastStoreManager implements StoreManager,InitializingBean {
     
     public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
 
@@ -142,6 +143,13 @@ public class HazelcastStoreManager implements StoreManager {
         this.cacheManager = new HazelcastCacheManager(this.hazelcast);
     }
     
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.hazelcast.getTopic("topics").addMessageListener(hazelcastNoticePort);
+        IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
+        queue.addItemListener(hazelcastQueueItemListener,true);
+    }
+    
     private Properties loadConf(String location) throws IOException {
         if(StringUtils.isBlank(location)) {
             location = "config/application.properties";
@@ -201,7 +209,6 @@ public class HazelcastStoreManager implements StoreManager {
             throw new IllegalArgumentException();
         }
         IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
-        queue.addItemListener(hazelcastQueueItemListener,true);
         try {
             queue.put(event);
         } catch (InterruptedException e) {
@@ -244,8 +251,7 @@ public class HazelcastStoreManager implements StoreManager {
             throw new IllegalArgumentException();
         }
         ITopic<Object> topics = this.hazelcast.getTopic("topics");
-        topics.addMessageListener(hazelcastNoticePort);
-
+        
         topics.publish(event);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "postEvent",
