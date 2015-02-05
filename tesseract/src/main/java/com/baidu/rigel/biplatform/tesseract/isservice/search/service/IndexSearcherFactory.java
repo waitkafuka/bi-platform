@@ -106,7 +106,7 @@ public class IndexSearcherFactory {
      *             可能抛出异常
      */
     public synchronized SearcherManager getSearcherManager(String idxPath,boolean isLog) throws IOException {
-		if (!isLog) {
+		if (isLog) {
 			LOGGER.info(String.format(
 					LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
 					"getSearcherManager", idxPath));
@@ -131,7 +131,7 @@ public class IndexSearcherFactory {
             }
             
         }
-		if (!isLog) {
+		if (isLog) {
 			LOGGER.info(String.format(
 					LogInfoConstants.INFO_PATTERN_FUNCTION_END,
 					"getSearcherManager", idxPath));
