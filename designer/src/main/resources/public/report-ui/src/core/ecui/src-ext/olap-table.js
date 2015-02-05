@@ -518,7 +518,8 @@
                                 colDefine[j],
                                 wrap,
                                 j,
-                                i
+                                i,
+                                rowHeadFields
                             );
                         }
                     }
@@ -532,7 +533,7 @@
                             wrap,
                             j,
                             i,
-                            rowHeadFields[i][0] // TODO:这一块可能有问题，需要监测一下
+                            rowHeadFields // TODO:这一块可能有问题，需要监测一下
                         );
                     }
                     html.push('</tr>')
@@ -664,7 +665,7 @@
      *
      * @protected
      */
-    UI_OLAP_TABLE_CLASS.$renderRowHCell = function(html, colDefItem, wrap, x, y) {
+    UI_OLAP_TABLE_CLASS.$renderRowHCell = function(html, colDefItem, wrap, x, y, rowDefine) {
         var type = this.getType();
         var classStr = [type + '-rowhcell'];
         var styleStr = [];
@@ -676,17 +677,27 @@
 
         span.push(wrap.colspan ? ' colspan="' + wrap.colspan + '" ' : '');
         span.push(wrap.rowspan ? ' rowspan="' + wrap.rowspan + '" ' : '');
-        // 先为左侧添加样式
-        // 根据uniqueName
-        if (wrap) {
-//            if (wrap.expand === true) {
-//                classStr.push(type + '-expand-background');
-//            }
-            // 如果不是第一层级，全部加底色
-            if (wrap.indent >= 1) {
-                classStr.push(type + '-expand-background');
+        // 先为左侧添加背景色
+        // FIXME:实现不是很好,目前只测到两个维度，多个维度时，需要待测
+        if (rowDefine) {
+            var rowDefines = rowDefine[y];
+            var rDefLen = rowDefines.length;
+            if (rDefLen > 1) {
+                if (rowDefines[0].indent >= 1) {
+                    classStr.push(type + '-expand-background');
+                }
+                else {
+                    if (wrap.indent !== 0) {
+                        classStr.push(type + '-expand-background');
+                    }
+                }
             }
-
+            else {
+                // 如果不是第一层级，全部加底色
+                if (rowDefines[0].indent >= 1) {
+                    classStr.push(type + '-expand-background');
+                }
+            }
         }
         if (colDefItem.width) {
             styleStr.push('width:' + colDefItem.width + 'px;');
@@ -714,23 +725,34 @@
      *
      * @protected
      */
-    UI_OLAP_TABLE_CLASS.$renderCell = function(html, colDefItem, rowDefItem, wrap, x, y, rowInfo) {
+    UI_OLAP_TABLE_CLASS.$renderCell = function(html, colDefItem, rowDefItem, wrap, x, y, rowDefine) {
+        console.log('x:' + x + ';y: ' + y);
         var type = this.getType();
         var classStr = [type + '-ccell'];
         var styleStr = [];
         var attrStr = [];
         var innerStr;
-
         wrap = objWrap(wrap);
-        if (rowInfo) {
-//            if (wrap.expand === true) {
-//                classStr.push(type + '-expand-background');
-//            }
-            // 如果不是第一层级，全部加底色
-            if (rowInfo.indent >= 1) {
-                classStr.push(type + '-expand-background');
-            }
+        if (rowDefine) {
+            var rowDefines = rowDefine[y];
+            var rDefLen = rowDefines.length;
+            if (rDefLen > 1) {
+                if (rowDefines[0].indent >= 1) {
+                    classStr.push(type + '-expand-background');
+                }
+                else {
+                    if (rowDefines[rDefLen - 1].expand !== true) {
+                        classStr.push(type + '-expand-background');
+                    }
+                }
 
+            }
+            else {
+                // 如果不是第一层级，全部加底色
+                if (rowDefines[0].indent >= 1) {
+                    classStr.push(type + '-expand-background');
+                }
+            }
         }
         var align = colDefItem.align || this._oStyle.defaultCCellAlign;
         if (align) {

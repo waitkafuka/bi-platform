@@ -575,9 +575,9 @@ _eFill       - 用于控制中部宽度的单元格
 
         if (headEl) {
             attachEvent(headEl, 'mouseover', headMouseOver);
-//            attachEvent(headEl, 'mouseout', function () {
-//                //setStyle(dragLineEl, 'display', 'none');
-//            });
+            attachEvent(headEl, 'mouseout', function () {
+                //setStyle(dragLineEl, 'display', 'none');
+            });
 
             // 监听虚线的mousedown事件，当mousedown时，注册document事件
             attachEvent(dragLineEl, 'mousedown', dragLineMouseDown);
