@@ -28,6 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,15 +209,25 @@ public class CallbackSearchServiceImpl {
         for (String g : groupby) {
             groupbyParams.put(g, new ArrayList<String>());
         }
-        LinkedHashMap<String, List<String>> whereParams = new LinkedHashMap<String, List<String>>(groupby.size());
+        LinkedHashMap<String, List<String>> whereParams = new LinkedHashMap<String, List<String>>();
         for (Expression e : query.getWhere().getAndList()) {
-            List<String> l = e.getQueryValues().stream().map(v -> v.getValue()).collect(Collectors.toList());
+            List<String> l = e.getQueryValues().stream().filter(v -> !StringUtils.isEmpty(v.getValue()))
+                .map(v -> v.getValue() ).collect(Collectors.toList());
             if (groupbyParams.containsKey(e.getProperties())) {
                 // Put it into group by field
                 groupbyParams.get(e.getProperties()).addAll(l);
             } else {
                 // Put it into filter field
-                whereParams.put(e.getProperties(), new ArrayList<String>(l));
+                // TODO 需要小明确认一下为什么构建filter时value为空
+                if (CollectionUtils.isEmpty(l)) {
+                    List<Set<String>> tmp = 
+                            e.getQueryValues().stream().map(v -> v.getLeafValues()).collect(Collectors.toList());
+                    List<String> values = Lists.newArrayList();
+                    tmp.forEach(t -> values.addAll(t));
+                    whereParams.put(e.getProperties(), values);
+                } else {
+                    whereParams.put(e.getProperties(), new ArrayList<String>(l));
+                }
             }
         }
         
