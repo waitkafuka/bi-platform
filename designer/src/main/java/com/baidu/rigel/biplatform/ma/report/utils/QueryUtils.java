@@ -789,10 +789,12 @@ public final class QueryUtils {
                     throw new RuntimeException("必要参数未赋值");
                 }
                 rs.put(param.getElementId(), param.getDefaultValue());
+                rs.put(param.getName(), param.getDefaultValue());
             } else if (!StringUtils.isEmpty(requestParams.get(param.getName()))) {
                 rs.put(param.getElementId(), requestParams.get(param.getName()).split(","));
             } else if (!StringUtils.isEmpty(param.getDefaultValue())) {
                 rs.put(param.getElementId(), param.getDefaultValue());
+                rs.put(param.getName(), param.getDefaultValue());
             }
         });
         rs.putAll(requestParams);
