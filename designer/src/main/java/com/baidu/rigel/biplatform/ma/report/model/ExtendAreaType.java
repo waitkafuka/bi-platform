@@ -80,6 +80,11 @@ public enum ExtendAreaType {
     TEXT,
     
     /**
+     * 
+     */
+    H_BUTTON,
+    
+    /**
      * LiteOlap组件
      */
     LITEOLAP;
