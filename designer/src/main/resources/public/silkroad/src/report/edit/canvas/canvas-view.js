@@ -89,7 +89,7 @@ define([
                 var compBoxModel = that.compBoxView.model;
                 var acceptAbleClass = 'active';
                 var acceptDisableClass = 'disable';
-
+                var entityDefs = that.model.reportJson.entityDefs;
 
                 // 定义可接收从组件箱拖出的东西
                 $('.j-report', that.el).droppable({
@@ -102,8 +102,14 @@ define([
                     tolerance: 'intersect',
                     drop: function (event, ui) {
                         var $report = $(this);
+                        var compType = ui.helper.attr('data-component-type');
+                        if (compType === 'H_BUTTON') {
+                            if (isHaveConfirmEntity(compType, entityDefs)){
+                                return;
+                            }
+                        }
+                        // TODO:修改reportJson中提交方式
                         var $realComp = ui.helper.clone().html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
-                        var compType = $realComp.attr('data-component-type');
                         var compData = compBoxModel.getComponentData(compType);
                         $realComp.removeClass(compData.iconClass + ' active');
                         $realComp.addClass(compData.renderClass);
@@ -118,7 +124,7 @@ define([
                         // 越界拉回
                         var leftPosition = parseInt($realComp.css('left'));
                         var reportWidth = $report.width();
-                        if (leftPosition/1 + defaultWidth/1 > reportWidth) {
+                        if (leftPosition / 1 + defaultWidth / 1 > reportWidth) {
                             $realComp.css('left', (reportWidth - defaultWidth - 3) + 'px');
                         }
                         if (parseInt($realComp.css('left')) < 2) {
@@ -141,6 +147,19 @@ define([
                         ui.helper.html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
                     }
                 });
+                // 判断json中是否已经有查询按钮
+                function isHaveConfirmEntity (clzKey, entitys) {
+                    var result = false;
+                    for (var i = 0; i < entitys.length; i++) {
+                        if (entitys[i].clzKey === clzKey) {
+                            // FIXME:用这种方式判断，我自己都要吐槽了
+                            if (entitys[i].dataOpt && entitys[i].dataOpt.text === '查询') {
+                                result = true;
+                            }
+                        }
+                    }
+                    return result;
+                }
             },
 
             /**
@@ -226,6 +245,7 @@ define([
                         return $realComp.clone();
                     },
                     function () {
+                        var compType = $realComp.attr('data-component-type');
                         that.$el.find('[data-o_o-di="snpt"]').append($realComp);
                         that.initDrag($realComp);
                         that.initResize($realComp);
@@ -237,7 +257,7 @@ define([
                             'height': 'auto'
                         });
                         //.find('.j-fold').html('－');
-                        if ($realComp.attr('data-component-type') === 'TEXT') {
+                        if (compType === 'TEXT' || compType === 'H_BUTTON') {
                             that.showReport(true);
                         }
                     }
@@ -319,6 +339,7 @@ define([
                 that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 50, 50);
+                that.dragWidthHeight($component, 'H_BUTTON', 50, 50);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
@@ -383,7 +404,11 @@ define([
                 $component.prepend(editBtnsTemplate.render());
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {
-                    if ($($component[i]).attr('data-component-type') == 'TEXT') {
+                    var compType = $($component[i]).attr('data-component-type');
+                    if (
+                        compType === 'TEXT'
+                        || compType === 'H_BUTTON'
+                    ) {
                         $($component[i]).find('.j-setting').remove();
                     }
                 }

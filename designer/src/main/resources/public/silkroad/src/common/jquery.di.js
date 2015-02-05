@@ -195,4 +195,20 @@ $.uniqueArray = function (arry) {
     return target;
 };
 
+/**
+ * 在entitys中是否已经存在某一个entity
+ *
+ * @param {string} clzKey 组件实例的clzKey
+ * @param {Array} entitys 组件实例数组
+ */
+$.isHaveEntity = function (clzKey, entitys) {
+    var result = false;
+    for (var i = 0; i < entitys.length; i++) {
+        if (entitys[i].clzKey === clzKey) {
+            result = true;
+        }
+    }
+    return result;
+};
+
 

@@ -485,8 +485,10 @@ $namespace('di.shared.ui');
                 options[dateKey] = JSON.stringify(dataValue);
             }
             else {
-                name = input.$di('getDef').name;
-                options[input.$di('getDef').dimId] = that.$di('getValue')[name].join(',');
+                if (clzKey !== 'H_BUTTON') {
+                    name = input.$di('getDef').name;
+                    options[input.$di('getDef').dimId] = that.$di('getValue')[name].join(',');
+                }
             }
         }
         if (dateName) {

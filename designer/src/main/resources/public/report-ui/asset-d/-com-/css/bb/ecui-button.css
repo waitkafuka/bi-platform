@@ -5,8 +5,8 @@
     display: inline-block;
     font-size: 12px;
     line-height: 18px;
-    padding: 2px 15px;
-    margin-right: 6px;
+    padding: 2px 0;
+    /*margin-right: 6px;*/
     overflow: hidden;
     cursor: pointer;
     text-decoration: none;
@@ -27,6 +27,7 @@
     background: #2584DA;
     border: 1px solid #2070BB;
     color: white;
+    width: 96%;
 }
 .ui-button-hover {
     /*background-position: 0px -127px;*/
