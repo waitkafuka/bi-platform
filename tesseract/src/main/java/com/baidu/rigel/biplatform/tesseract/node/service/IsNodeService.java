@@ -120,11 +120,11 @@ public interface IsNodeService {
     
     /**
      * 
-     * 标记与node同一集群中的节点是否为bad结点
+     * 标记同一集群中的其它节点是否为bad结点
      * 
-     * @param node
+     *
      */
-    void markClusterBadNode(Node node);
+    void markClusterBadNode();
     
     /**
      * 

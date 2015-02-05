@@ -78,7 +78,7 @@ define([
                 $('.link-skin').attr(
                     'href', 'asset/'
                         + type
-                        + '/css/-di-product-debug.css');
+                        + '/css/-di-product-min.css');
                 $('.skin-menu').hide();
             },
 

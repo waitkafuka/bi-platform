@@ -52,12 +52,14 @@ public class IndexMetaWriteImageListener implements
 			String idxMetaFileBase=currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath();
 			File idxMetaFileDir=new File(idxMetaFileBase);
 			if(!FileUtils.isEmptyDir(idxMetaFileDir)){
-				for(IndexShard idxShard:idxMeta.getIdxShardList()){
+				for(int i=0;i<idxMeta.getIdxShardList().size();i++){
+					IndexShard idxShard=idxMeta.getIdxShardList().get(i);
 					File shardFile=new File(idxMetaFileBase+idxShard.getShardName());
 					if(FileUtils.isEmptyDir(shardFile)){
-						idxMeta.getIdxShardList().remove(idxShard);
+						idxMeta.getIdxShardList().remove(i);
 					}
 				}
+				
 				try {
 					this.idxMetaService.saveIndexMetaLocally(idxMeta);
 				} catch (Exception e) {

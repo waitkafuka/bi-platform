@@ -55,55 +55,6 @@ $namespace('di.shared.vui');
      */
     function constructor(options) {
         var me = this;
-//        var calendarId = 'range-cal-' + (new Date()).getTime();
-//        var html = "<input type='text' readonly='readonly' "
-//            + "style='width: 250px' "
-//            + "id='" + calendarId + "'"
-//            + "/>";
-//        options.el.innerHTML = html;
-//        var rangeCal = new Kalendae.Input(calendarId, {
-//            direction:'past',
-//            months: 2,
-//            mode: 'range'
-//        });
-//        options.vuiType = 'Range_Calendar';
-//        rangeCal.subscribe('change', function (date, action) {
-//            // 判断如果没有选择时间范围，不做任何事情
-//            if (this.getSelected().indexOf(' - ') > 0) {
-//                me.currentDate = this.getSelected();
-//                me.notify('calChangeDate', me.currentDate);
-//            }
-//        });
-
-//        var calendarId = 'range-cal-' + (new Date()).getTime();
-//        var html = '<div id="' + calendarId + '"></div>';
-//        options.el.innerHTML = html;
-//
-//        var cal = esui.create(
-//            'RangeCalendar',
-//            {
-//                "type": "RangeCalendar",
-//                "name": calendarId,
-//                "id": calendarId,
-//                "value": "",
-//                "endlessCheck": "true",
-//                "isEndless": "false",
-//                "range": "2011-03-02 00:00:00,2015-04-02 23:59:59",
-//                "showedShortCut": "昨天,最近7天,上周",
-//                "extensions": [],
-//                "renderOptions": {},
-//                "main": document.getElementById(calendarId)
-//            }
-//        );
-//        cal.render();
-//        cal.on('change', function (event) {
-//            console.log(event.begin);
-//            console.log(event.end);
-//            me.currentDate = event.begin + ' - ' + event.end;
-//            me.notify('calChangeDate', event.begin + ' - ' + event.end);
-//        });
-//        this.rangeCal = cal;
-//        this.calendarId = calendarId;
         this.renderCalendar(options);
     };
 
@@ -212,7 +163,19 @@ $namespace('di.shared.vui');
     RANGE_CALENDAR_CLASS.getValue = function () {
         if (this.currentDate === undefined) {
             // 设置默认值
-            return null;
+            var defStart = Kalendae.moment().subtract({d:1}).format('YYYY-MM-DD');
+            var defEnd = Kalendae.moment().subtract({d:1}).format('YYYY-MM-DD');
+            var setting = {
+                begin: new Date(defStart),
+                end: new Date(defEnd)
+            };
+            this.rangeCal.setRawValue(setting);
+            this.rangeCal.render();
+            return {
+                start: defStart,
+                end: defEnd,
+                granularity: 'D'
+            };
         }
         var saveDataObj = this.convertInputValue2SaveData(this.currentDate);
         var data = {
