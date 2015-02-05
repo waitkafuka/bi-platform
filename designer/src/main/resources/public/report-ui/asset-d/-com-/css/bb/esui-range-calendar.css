@@ -1100,7 +1100,7 @@ button.skin-link-button:hover {
   background-position: left -9px, 0 0;
 }
 .esui-ui-rangecalendar-layer {
-    background: #FFF;
+    background: #F0F4F7;
     border: 1px solid #CCC;
     width: 420px;
 }
@@ -1172,9 +1172,11 @@ button.skin-link-button:hover {
 .esui-ui-rangecalendar-layer .esui-ui-rangecalendar-foot {
   clear: both;
   padding: 4px 0 4px 4px;
+  float: right;
 }
 .esui-ui-rangecalendar-layer .esui-ui-rangecalendar-foot .esui-ui-button {
   margin-right: 5px;
+  float: left;
 }
 .esui-ui-rangecalendar-layer-hidden {
   display: none;
