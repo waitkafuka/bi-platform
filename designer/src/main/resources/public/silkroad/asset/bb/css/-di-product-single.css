@@ -5,8 +5,8 @@
     display: inline-block;
     font-size: 12px;
     line-height: 18px;
-    padding: 2px 15px;
-    margin-right: 6px;
+    padding: 2px 0;
+    /*margin-right: 6px;*/
     overflow: hidden;
     cursor: pointer;
     text-decoration: none;
@@ -27,6 +27,7 @@
     background: #2584DA;
     border: 1px solid #2070BB;
     color: white;
+    width: 96%;
 }
 .ui-button-hover {
     /*background-position: 0px -127px;*/
@@ -4637,13 +4638,11 @@ button.skin-link-button:hover {
 }
 .esui-ui-monthview-head .esui-ui-monthview-month-forward,
 .esui-ui-monthview-head .esui-ui-monthview-month-back {
-  background-image: url(img/esesui-ui.png);
   background-repeat: repeat;
   background-position: 0px -200px;
   background-color: transparent;
   font-size: 1px;
   height: 20px;
-  width: 20px;
   padding: 0;
   float: left;
 }
@@ -4713,6 +4712,15 @@ button.skin-link-button:hover {
   background: #fff;
   color: #b7b7b7
 }
+
+ /* 周末日历变红 */
+.esui-ui-monthview-month-main tbody tr td:nth-child(7){
+    color: red;
+}
+.esui-ui-monthview-month-main tbody tr td:nth-child(6){
+    color: red;
+}
+
 .esui-ui-monthview-month-item-disabled {
   background: #FFF;
   color: #b7b7b7;
@@ -6939,6 +6947,4 @@ ol {
   border-bottom: 12px solid #44ba0f;
   border-top: 12px solid #44ba0f;
 }
-
-
 /* url(img/download.png) no-repeat */
