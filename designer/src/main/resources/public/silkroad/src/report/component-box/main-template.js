@@ -22,6 +22,8 @@ define(['template'], function (template) {
         $out+=$escape(item.type);
         $out+='" data-mold="';
         $out+=$escape(item.mold);
+        $out+='" data-default-value="';
+        $out+=$escape(item.defaultValue);
         $out+='">\n            <img src="src/css/img/global-menu/comp-menu-';
         $out+=$escape(item.iconClass);
         $out+='.png"/>\n            ';

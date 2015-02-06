@@ -837,6 +837,15 @@ button.skin-link-button:hover {
   background: #fff;
   color: #b7b7b7
 }
+
+ /* 周末日历变红 */
+.esui-ui-monthview-month-main tbody tr td:nth-child(7){
+    color: red;
+}
+.esui-ui-monthview-month-main tbody tr td:nth-child(6){
+    color: red;
+}
+
 .esui-ui-monthview-month-item-disabled {
   background: #FFF;
   color: #b7b7b7;
@@ -3063,6 +3072,4 @@ ol {
   border-bottom: 12px solid #44ba0f;
   border-top: 12px solid #44ba0f;
 }
-
-
 /* url(img/download.png) no-repeat */
