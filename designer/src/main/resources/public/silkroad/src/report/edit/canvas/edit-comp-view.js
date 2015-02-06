@@ -351,10 +351,31 @@ define([
                     }
                 });
 
+                // 修改reportVm中对应组件div的data-default-value属性
+                var defaults = this.canvasView.model.$reportVm
+                    .find('[data-component-type=SELECT]');
+                defaults.each(function () {
+                    var $this = $(this);
+                    if ($this.attr('data-comp-id') === compId) {
+                        $this.attr('data-mold', selType);
+                        if (selType == 'ECUI_SELECT') {
+                            var $checkbox = $target.parent().find('.select-default');
+                            var $checked = $checkbox.find('.select-default-value');
+                            $checkbox.show();
+                            $(this).attr('data-default-value', $checked[0].checked);
+                        }
+                        else {
+                            $(this).removeAttr('data-default-value');
+                            $target.parent().find('.select-default').hide();
+                        }
+                    }
+                });
+
                 // 保存vm与json，保存成功后展示报表
                 this.model.canvasModel.saveJsonVm(
                     this.canvasView.showReport.call(this.canvasView)
                 );
+
             },
             /**
              * 日历下拉框类型改变
@@ -594,6 +615,12 @@ define([
             deleteCompAxis: function (event) {
                 var that = this;
                 var $target = $(event.target);
+                // 还原默认值
+                var $seldefault = $target.parent().parent();
+                if ($seldefault.parent().attr('data-comp-type') == 'SELECT') {
+                    $seldefault.next().find('.select-default-name').text('全部');
+                    $seldefault.next().find('.select-default-value').val('全部');
+                }
                 var data = {};
                 var selector;
                 var attr;
@@ -737,6 +764,10 @@ define([
                 var compId = $root.attr('data-comp-id');
                 var compType = $root.attr('data-comp-type');
                 var $item = $draggedUi.clone().attr('style', '');
+                // 默认值选择
+                var $selectDefault = $('.select-default');
+                var $selectValue = $('.select-default-value');
+                var $selectName = $('.select-default-name');
                 if (compType === 'SELECT' && $('.data-axis-line .item').length >= 1) {
                     alert('只能拖一个维度或者维度组');
                     return;
@@ -782,6 +813,16 @@ define([
                         axisType: data.axisType,
                         $item: $item
                     });
+                    // 判断为下拉框的话更改默认设置
+                    if (compType == 'SELECT') {
+                        if ($selectDefault.is(':visible')) {
+                            var all = $selectName.text();
+                            var dimname = $acceptUi.find('span').eq(1).text().split('（')[0];;
+                            $selectValue.val(all + '（' + dimname + ' ）');
+                            $selectName.text(all + '（' + dimname + ' ）');
+                            console.log('显示');
+                        }
+                    }
                     // 刷新报表展示
                     that.canvasView.showReport();
                     // 调整画布大小

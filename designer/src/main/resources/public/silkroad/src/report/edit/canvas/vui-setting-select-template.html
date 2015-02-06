@@ -21,6 +21,18 @@
                 多选
             </option>
         </select>
+
+        <!-- 单选下拉框默认值 -->
+        <div class="select-default" style="display: inline-block;">
+            <span>&nbsp;&nbsp;下拉框默认值：</span>
+            <span class="select-default-name">
+                全部
+                {{each xAxis as item}}
+                    （{{item.caption}}）
+                {{/each}}
+            </span>
+            <input class="select-default-value j-select-default" style="vertical-align: bottom;" type="checkbox" data-comp-id="{{compId}}" value="全部（{{each xAxis as item}}{{item.caption}}{{/each}}）" />
+        </div>
         <!--<span>下拉框皮肤：</span>-->
         <!--<select class="select-skin" data-comp-id="{{compId}}">-->
             <!--<option value="classics" {{if $data.compSkin && $data.compSkin==="classics"}} selected="selected"{{/if}}>-->
