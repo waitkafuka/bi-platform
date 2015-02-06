@@ -11216,7 +11216,7 @@ define(
             layer.style.left = '-5000px';
             // 如果对层宽度有要求，则先设置好最小宽度
             if (options.strictWidth) {
-                layer.style.minWidth = targetOffset.width + 'px';
+                layer.style.minWidth = 58 + 'px';
             }
             // IE7下，如果浮层隐藏着反而会影响offset的获取，
             // 但浮层显示出来又可能造成滚动条出现，
@@ -12374,19 +12374,28 @@ define(
         SelectLayer.prototype.render = function (element) {
             var html = '';
 
-            for (var i = 0; i < this.control.datasource.length; i++) {
-                var item = this.control.datasource[i];
-                var classes = this.control.helper.getPartClasses('item');
-                if (item.disabled) {
-                    classes.push.apply(
-                        classes,
-                        this.control.helper.getPartClasses('item-disabled')
-                    );
+            if (this.control.childName === 'yearSel') {
+                var dataIndex = this.control.datasource.length - 1;
+                for (var i = 0; i < this.control.datasource.length; i++) {
+                    var item = this.control.datasource[dataIndex];
+                    var classes = this.control.helper.getPartClasses('item');
+
+                    html += '<li data-index="' + dataIndex + '" '
+                        + 'class="' + classes.join(' ') + '">';
+                    html += this.control.getItemHTML(item);
+                    html += '</li>';
+                    dataIndex--;
                 }
-                html += '<li data-index="' + i + '" '
-                    + 'class="' + classes.join(' ') + '">';
-                html += this.control.getItemHTML(item);
-                html += '</li>';
+            } else {
+                for (var i = 0; i < this.control.datasource.length; i++) {
+                    var item = this.control.datasource[i];
+                    var classes = this.control.helper.getPartClasses('item');
+
+                    html += '<li data-index="' + i + '" '
+                        + 'class="' + classes.join(' ') + '">';
+                    html += this.control.getItemHTML(item);
+                    html += '</li>';
+                }
             }
 
             element.innerHTML = html;
@@ -12400,13 +12409,26 @@ define(
             var classes = this.control.helper.getPartClasses('item-selected');
 
             var items = lib.getChildren(element);
-            for (var i = items.length - 1; i >= 0; i--) {
-                var item = items[i];
-                if (i === this.control.selectedIndex) {
-                    lib.addClasses(item, classes);
+            if (this.control.childName === 'yearSel') {
+                for (var i = items.length - 1; i >= 0; i--) {
+                    var item = items[i];
+                    var index = this.control.selectedIndex;
+                    index = 32 - index;
+                    if (i === index) {
+                        lib.addClasses(item, classes);
+                    }
+                    else {
+                        lib.removeClasses(item, classes);
+                    }
                 }
-                else {
-                    lib.removeClasses(item, classes);
+            } else {
+                for (var i = items.length - 1; i >= 0; i--) {
+                    var item = items[i];
+                    if (i === this.control.selectedIndex) {
+                        lib.addClasses(item, classes);
+                    } else {
+                        lib.removeClasses(item, classes);
+                    }
                 }
             }
         };
