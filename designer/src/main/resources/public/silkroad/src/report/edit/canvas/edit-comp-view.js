@@ -354,14 +354,14 @@ define([
                 // 修改reportVm中对应组件div的data-default-value属性
                 var defaults = this.canvasView.model.$reportVm
                     .find('[data-component-type=SELECT]');
+                var $checkbox = $target.parent().find('.select-default');
+                var $checked = $checkbox.find('.select-default-value');
                 defaults.each(function () {
                     var $this = $(this);
                     if ($this.attr('data-comp-id') === compId) {
                         $this.attr('data-mold', selType);
                         if (selType == 'ECUI_SELECT') {
-                            var $checkbox = $target.parent().find('.select-default');
-                            var $checked = $checkbox.find('.select-default-value');
-                            $checkbox.show();
+                            $checkbox.css('display', 'inline-block');
                             $(this).attr('data-default-value', $checked[0].checked);
                         }
                         else {
@@ -475,8 +475,10 @@ define([
                 var reportCompId = $shell.attr('report-comp-id');
                 var compType = $shell.attr('data-component-type');
                 var compMold = $shell.attr('data-mold');
+                var compAll = $shell.attr('data-default-value');
                 that.model.compId = compId;
                 that.model.compType = compType;
+                that.model.compAll = compAll;
 
                 // 需要先处理一下之前可能存在的编辑条与active状态
                 that.hideEditBar();
@@ -486,6 +488,7 @@ define([
                     data.compId = compId;
                     var template = that._adapterEditCompTemplate(compType);
                     data.compType = compType;
+                    data.compAll = compAll;
                     data.reportCompId = reportCompId;
                     compMold && (data.compMold = compMold);
                     var html = template.render(data);

@@ -30,19 +30,49 @@ define(['template'], function (template) {
         if($data.compMold && $data.compMold==="ECUI_MULTI_SELECT"){
         $out+=' selected="selected"';
         }
-        $out+='>\n                多选\n            </option>\n        </select>\n\n        <!-- 单选下拉框默认值 -->\n        <div class="select-default" style="display: inline-block;">\n            <span>&nbsp;&nbsp;下拉框默认值：</span>\n            <span class="select-default-name">\n                全部\n                ';
+        $out+='>\n                多选\n            </option>\n        </select>\n\n        <!-- 单选下拉框默认值 -->\n        ';
+        if($data.compMold && $data.compMold==="ECUI_SELECT"){
+        $out+='\n        <div class="select-default" style="display: inline-block;">\n            <span>&nbsp;&nbsp;下拉框默认值：</span>\n            <span class="select-default-name">\n                全部\n                ';
         $each(xAxis,function(item,$index){
         $out+='\n                    （';
         $out+=$escape(item.caption);
         $out+='）\n                ';
         });
-        $out+='\n            </span>\n            <input class="select-default-value j-select-default" style="vertical-align: bottom;" type="checkbox" data-comp-id="';
+        $out+='\n            </span>\n            <input class="select-default-value j-select-default"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
         $out+=$escape(compId);
-        $out+='" value="全部（';
+        $out+='"\n                value="全部（';
         $each(xAxis,function(item,$index){
         $out+=$escape(item.caption);
         });
-        $out+='）" />\n        </div>\n        <!--<span>下拉框皮肤：</span>-->\n        <!--<select class="select-skin" data-comp-id="';
+        $out+='）"\n                ';
+        if($data.compAll==="true"){
+        $out+='\n                checked="checked"\n                ';
+        }else{
+        $out+='\n                ';
+        }
+        $out+='\n            />\n        </div>\n        ';
+        }else{
+        $out+='\n        <div class="select-default" style="display: none;">\n            <span>&nbsp;&nbsp;下拉框默认值：</span>\n            <span class="select-default-name">\n                全部\n                ';
+        $each(xAxis,function(item,$index){
+        $out+='\n                    （';
+        $out+=$escape(item.caption);
+        $out+='）\n                ';
+        });
+        $out+='\n            </span>\n            <input class="select-default-value j-select-default"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
+        $out+=$escape(compId);
+        $out+='"\n                value="全部（';
+        $each(xAxis,function(item,$index){
+        $out+=$escape(item.caption);
+        });
+        $out+='）"\n                ';
+        if($data.compAll==="true"){
+        $out+='\n                    checked="checked"\n                    ';
+        }else{
+        $out+='\n                ';
+        }
+        $out+='\n            />\n        </div>\n        ';
+        }
+        $out+='\n        <!--<span>下拉框皮肤：</span>-->\n        <!--<select class="select-skin" data-comp-id="';
         $out+=$escape(compId);
         $out+='">-->\n            <!--<option value="classics" ';
         if($data.compSkin && $data.compSkin==="classics"){
