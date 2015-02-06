@@ -586,7 +586,7 @@ public class SchemaManageServiceImpl implements SchemaManageService {
             return null;
         }
         extendMeasure.getCals().stream().filter(cal -> {
-            return !StringUtils.isEmpty(cal.getName()) && !StringUtils.isEmpty(cal.getFormula());
+            return !StringUtils.isEmpty(cal.getCaption()) && !StringUtils.isEmpty(cal.getFormula());
         }).forEach(cal -> {
             if (StringUtils.isEmpty(cal.getId())) {
                 ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(cal.getCaption());

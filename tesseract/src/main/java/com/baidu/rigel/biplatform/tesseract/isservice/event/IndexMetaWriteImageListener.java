@@ -1,6 +1,7 @@
 package com.baidu.rigel.biplatform.tesseract.isservice.event;
 
 import java.io.File;
+import java.util.Iterator;
 
 import javax.annotation.Resource;
 
@@ -51,12 +52,13 @@ public class IndexMetaWriteImageListener implements
 			Node currNode=this.isNodeService.getCurrentNode();
 			String idxMetaFileBase=currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath();
 			File idxMetaFileDir=new File(idxMetaFileBase);
-			if(!FileUtils.isEmptyDir(idxMetaFileDir)){
-				for(int i=0;i<idxMeta.getIdxShardList().size();i++){
-					IndexShard idxShard=idxMeta.getIdxShardList().get(i);
+			if(!FileUtils.isEmptyDir(idxMetaFileDir)){				
+				Iterator<IndexShard> it=idxMeta.getIdxShardList().iterator();				
+				while(it.hasNext()){
+					IndexShard idxShard=it.next();
 					File shardFile=new File(idxMetaFileBase+idxShard.getShardName());
 					if(FileUtils.isEmptyDir(shardFile)){
-						idxMeta.getIdxShardList().remove(i);
+						it.remove();
 					}
 				}
 				

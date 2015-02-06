@@ -59,7 +59,8 @@ define(function () {
         TEXT: '-vu-form-text',
         MULTISELECT: '-vu-form-multiselect',
         CHART: '-vu-chart',
-        TABLE: '-vu-table'
+        TABLE: '-vu-table',
+        H_BUTTON: '-vu-confirm'
     };
 
     return {

@@ -14101,7 +14101,7 @@ define(
         function goToNextMonth(monthView) {
             var nowDate = new Date(monthView.year, monthView.month, 1);
             var newDate = m(nowDate).add('month', 1);
-            repaintMonthView(monthView, newDate.year(), newDate.month());
+            //repaintMonthView(monthView, newDate.year(), newDate.month());
         }
 
         /**
@@ -14113,7 +14113,7 @@ define(
         function goToPrevMonth(monthView) {
             var nowDate = new Date(monthView.year, monthView.month, 1);
             var newDate = m(nowDate).subtract('month', 1);
-            repaintMonthView(monthView, newDate.year(), newDate.month());
+            //repaintMonthView(monthView, newDate.year(), newDate.month());
         }
 
         /**
@@ -15487,12 +15487,12 @@ define(
         function getCalendarHtml(calendar, type) {
             var endlessCheckDOM = '';
             // 可以无限
-            if (calendar.endlessCheck && type === 'end') {
-                endlessCheckDOM = ''
-                    + '<input type="checkbox" title="不限结束" '
-                    + 'data-ui-type="CheckBox" '
-                    + 'data-ui-child-name="endlessCheck" />';
-            }
+//            if (calendar.endlessCheck && type === 'end') {
+//                endlessCheckDOM = ''
+//                    + '<input type="checkbox" title="不限结束" '
+//                    + 'data-ui-type="CheckBox" '
+//                    + 'data-ui-child-name="endlessCheck" />';
+//            }
             var tpl = ''
                 + '<div class="${frameClass}">'
                 +   '<div class="${labelClass}">'

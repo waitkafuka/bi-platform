@@ -78,7 +78,7 @@ $namespace('di.shared.vui');
                 "name": calendarId,
                 "id": calendarId,
                 "value": "",
-                "endlessCheck": "true",
+                "endlessCheck": "false",
                 "isEndless": "false",
                 "showedShortCut": "昨天,最近7天,上周",
                 "extensions": [],

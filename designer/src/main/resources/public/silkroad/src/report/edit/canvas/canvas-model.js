@@ -192,13 +192,25 @@ define(
             addCompDataToJson: function (compData, compType, serverData) {
                 var reportJson = this.reportJson;
                 var compRenderData;
-
+                var isAddConfirm = false;
+                var isHaveConfirm = false;
+                var entityDefs = reportJson.entityDefs;
+                for (var i = 0; i < entityDefs.length; i ++) {
+                    if (entityDefs[i].clzType === 'COMPONENT' && entityDefs[i].clzType === 'DI_FORM') {
+                        if (entityDefs[i].vuiRef  && entityDefs[i].vuiRef.confirm) {
+                            isHaveConfirm = true;
+                        }
+                    }
+                }
                 // 组件的json配置信息
                 compRenderData = compData.processRenderData({
                     rootId: rootId,
                     serverData: serverData
                 });
-
+                // 当新添加组件时，如果有查询按钮，就修改提交模式为confirm
+                if (isHaveConfirm && compRenderData.dataOpt) {
+                    compRenderData.dataOpt.submitMode = 'CONFIRM';
+                }
                 // 添加compId，方便删除组件
                 // TODO:重构
                 if ($.isArray(compRenderData)) {
@@ -209,10 +221,7 @@ define(
                 else {
                     compRenderData.compId = serverData.id;
                 }
-
-                var entityDefs = reportJson.entityDefs;
                 // 如果是vui，需要向form中添加配置
-
                 if (
                     compData.entityDescription
                     && !$.isArray(compData.entityDescription)
@@ -220,9 +229,25 @@ define(
                 ) {
                     formJson = this._getFormJson();
                     // 址引用，直接赋值可以生效
-                    formJson.vuiRef.input.push(compRenderData.id);
-                }
+                    if (compData.entityDescription.clzKey === 'H_BUTTON') {
+                        formJson.vuiRef.confirm = compRenderData.id;
+                        isAddConfirm = true;
+                    }
+                    else {
+                        formJson.vuiRef.input.push(compRenderData.id);
+                    }
 
+                }
+                // 如果添加的是查询按钮，需要把所有查询方式替换成CONFIRM，因为默认都是IMMEDIATE
+                if (isAddConfirm) {
+                    for (var i = 0; i < entityDefs.length; i ++) {
+                        if (entityDefs[i].clzType === 'COMPONENT') {
+                            if (entityDefs[i].dataOpt && entityDefs[i].dataOpt.submitMode) {
+                                entityDefs[i].dataOpt.submitMode = 'CONFIRM';
+                            }
+                        }
+                    }
+                }
                 this.reportJson.entityDefs = entityDefs.concat(compRenderData);
             },
 
@@ -257,6 +282,7 @@ define(
             _deleteComp: function (compId, reportCompId, success) {
                 var that = this;
                 var isDeleteVUI = false;
+                var isDeleteConfirm = false;
                 success = success || new Function();
                 // 移除vm中的东西
                 var selector = '[data-comp-id=' + compId + ']';
@@ -280,6 +306,21 @@ define(
                             that._deleteCompFromForm(arr[i].id);
                             isDeleteVUI = true;
                         }
+                        if (
+                            arr[i].clzType == 'VUI'
+                            &&
+                            (
+                                arr[i].clzKey === 'H_BUTTON'
+                                && arr[i].dataOpt
+                                && arr[i].dataOpt.text === '查询'
+                            )
+                        ) {
+                            var formJson = that._getFormJson();
+                            formJson.vuiRef.confirm = null;
+                            delete formJson.vuiRef.confirm;
+                            isDeleteVUI = true;
+                            isDeleteConfirm = true;
+                        }
                         arr.splice(i, 1);
                         // 某些组件的数据项可能是一组而并非一个，比如table
                         i--;
@@ -299,6 +340,16 @@ define(
                                 }
                             }
 
+                        }
+                    }
+                }
+
+                if (isDeleteConfirm) {
+                    for (var i = 0; i < arr.length; i++) {
+                        if (arr[i].clzType === 'COMPONENT') {
+                            if (arr[i].dataOpt && arr[i].dataOpt.submitMode) {
+                                arr[i].dataOpt.submitMode = 'IMMEDIATE';
+                            }
                         }
                     }
                 }

@@ -396,7 +396,8 @@ define([
                     if (data.xAxis === null || data.xAxis.length <= 0) {
                         if ('CAL_SELECT' === selType) {
                             $target.val('DOUBLE_CAL_SELECT');
-                        } else {
+                        }
+                        else {
                             $target.val('CAL_SELECT');
                         }
                         dialog.alert('请选维度');
