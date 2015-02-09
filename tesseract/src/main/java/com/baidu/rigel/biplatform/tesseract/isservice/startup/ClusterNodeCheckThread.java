@@ -18,7 +18,6 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.startup;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
@@ -74,6 +73,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     @Value("${cluster.checkInterval}")
     private int checkInterval;
     
+    
     /**
      * Constructor by no param
      */
@@ -82,8 +82,10 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     }
     
     public void start() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> run());
+//        ExecutorService executor = Executors.newSingleThreadExecutor();
+//        executor.execute(() -> run());
+        Executors.newScheduledThreadPool(1)
+            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
     }
     
     /*
@@ -95,54 +97,56 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     public void run() {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_START,
             "ClusterNodeCheckThread"));
-        while (true) {
+//        while (true) {
             // get lock
+        Node node;
+        Node udpateNode;
+        try {
+            node = this.applicationContext.getBean(Node.class);
+            udpateNode = this.isNodeService.getNodeByCurrNode(node);
             
-            try {
-                Node node = this.applicationContext.getBean(Node.class);
-                Node udpateNode = this.isNodeService.getNodeByCurrNode(node);
-                // update self state
+            // update self state
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
+                "update self state", "begin"));
+            udpateNode.setNodeState(NodeState.NODE_AVAILABLE);
+            udpateNode.setLastStateUpdateTime(System.currentTimeMillis());
+            this.isNodeService.saveOrUpdateNodeInfo(udpateNode);
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
+                "update self state", "end"));
+            // save node image
+            this.isNodeService.saveNodeImage(udpateNode);
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
+                "update localImage", "success"));
+            udpateNode=null;
+            node=null;
+            // check others
+            
+            Lock lock = this.storeManger.getClusterLock();
+            if (lock.tryLock(this.getLockTimeOut, TimeUnit.SECONDS)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                    "update self state", "begin"));
-                udpateNode.setNodeState(NodeState.NODE_AVAILABLE);
-                udpateNode.setLastStateUpdateTime(System.currentTimeMillis());
-                this.isNodeService.saveOrUpdateNodeInfo(udpateNode);
+                    "Get Lock", "Success"));
+                lock.lock();
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                    "update self state", "end"));
-                // save node image
-                this.isNodeService.saveNodeImage(udpateNode);
-                LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                    "update localImage", "success"));
-                udpateNode=null;
-                node=null;
-                // check others
-                
-                Lock lock = this.storeManger.getClusterLock();
-                if (lock.tryLock(this.getLockTimeOut, TimeUnit.SECONDS)) {
+                    "Locked", "Success"));
+                try {
+                    
+                    this.isNodeService.markClusterBadNode();
                     LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                        "Get Lock", "Success"));
-                    lock.lock();
-                    LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                        "Locked", "Success"));
-                    try {
-                        
-                        this.isNodeService.markClusterBadNode();
-                        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                            "markClusterBadNode", "Success"));
-                    } finally {
-                        lock.unlock();
-                    }
+                        "markClusterBadNode", "Success"));
+                } finally {
+                    lock.unlock();
                 }
-                
-                LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                    "wait & sleep", "sleep " + this.checkInterval));
-                Thread.sleep(this.checkInterval);
-                
-            } catch (Exception e) {
-                LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_EXCEPTION,
-                    "ClusterNodeCheckThread"), e);
             }
+            
+            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
+                "wait & sleep", "sleep " + this.checkInterval));
+//                Thread.sleep(this.checkInterval);
+            
+        } catch (Exception e) {
+            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_EXCEPTION,
+                "ClusterNodeCheckThread"), e);
         }
+//        }
         
     }
     
