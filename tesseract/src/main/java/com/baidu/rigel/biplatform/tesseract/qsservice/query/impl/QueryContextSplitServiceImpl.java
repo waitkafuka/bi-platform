@@ -132,14 +132,13 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
             }
             if(MapUtils.isNotEmpty(conditions)) {
                 conditions.forEach((con, vars) -> {
-                    // TODO 这里先这么写，无法执行，等雨学提交代码再修改
-                    QueryContext context = con.processCondition(ParseCoditionUtils.decorateQueryContext(DeepcopyUtils.deepCopy(queryContext), question, cube, dsInfo, queryContextBuilder));
-                    // 是否需要清理，到时候在讨论
+                    QueryContext context = con.processCondition(
+                            ParseCoditionUtils.decorateQueryContext(DeepcopyUtils.deepCopy(queryContext), 
+                            question, cube, dsInfo, queryContextBuilder));
                     context.getQueryMeasures().clear();
                     for(String var : vars) {
                         MiniCubeMeasure measure = null;
-                        // TODO 容错处理 对于callback维度这里时uniqueName，需要找小明确认原因
-                        if (!Pattern.matches("^\\$\\{[^\\}]+\\}$", var)) {
+                        if (MetaNameUtil.isUniqueName(var)) {
                             String name = MetaNameUtil.parseUnique2NameArray(var)[1];
                             measure = (MiniCubeMeasure) cube.getMeasures().get(name);
                         } else {

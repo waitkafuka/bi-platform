@@ -218,7 +218,6 @@ public class CallbackSearchServiceImpl {
                 groupbyParams.get(e.getProperties()).addAll(l);
             } else {
                 // Put it into filter field
-                // TODO 需要小明确认一下为什么构建filter时value为空
                 if (CollectionUtils.isEmpty(l)) {
                     List<Set<String>> tmp = 
                             e.getQueryValues().stream().map(v -> v.getLeafValues()).collect(Collectors.toList());
