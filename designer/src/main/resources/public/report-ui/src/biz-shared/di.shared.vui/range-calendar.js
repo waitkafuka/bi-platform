@@ -78,14 +78,15 @@ $namespace('di.shared.vui');
                 "name": calendarId,
                 "id": calendarId,
                 "value": "",
-                "endlessCheck": "true",
-                "isEndless": "false",
+                "endlessCheck": false,
+                "isEndless": false,
                 "showedShortCut": "昨天,最近7天,上周",
                 "extensions": [],
                 "renderOptions": {},
                 "main": document.getElementById(calendarId)
             }
         );
+        esui.config({ uiClassPrefix: 'esui-ui' });
         // 设置可选择的范围，结束时间为昨天以后可以选择
         cal.range.end = new Date(Kalendae.moment().subtract({d:1}).format('YYYY-MM-DD'));
         // 设置默认选择的范围，昨天

@@ -1,4 +1,4 @@
-(function (_global) {
+(function(_global){
 
     /**
      * almond 0.2.5 Copyright (c) 2011-2012, The Dojo Foundation All Rights Reserved.
@@ -346,8 +346,7 @@
             }
 
             //Support require(['a'])
-            callback = callback || function () {
-            };
+            callback = callback || function () {};
 
             //If relName is a function, it is an errback handler,
             //so remove it.
@@ -407,7 +406,7 @@
         };
     }());
 
-    define('underscore', ['require', 'exports', 'module'], function (require, exports, module) {
+    define('underscore', ['require','exports','module'],function(require, exports, module) {
 
 
 //     Underscore.js 1.7.0
@@ -415,7 +414,7 @@
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
 //     Underscore may be freely distributed under the MIT license.
 
-        (function () {
+        (function() {
 
             // Baseline setup
             // --------------
@@ -431,21 +430,21 @@
 
             // Create quick reference variables for speed access to core prototypes.
             var
-                push = ArrayProto.push,
-                slice = ArrayProto.slice,
-                concat = ArrayProto.concat,
-                toString = ObjProto.toString,
-                hasOwnProperty = ObjProto.hasOwnProperty;
+                push             = ArrayProto.push,
+                slice            = ArrayProto.slice,
+                concat           = ArrayProto.concat,
+                toString         = ObjProto.toString,
+                hasOwnProperty   = ObjProto.hasOwnProperty;
 
             // All **ECMAScript 5** native function implementations that we hope to use
             // are declared here.
             var
-                nativeIsArray = Array.isArray,
-                nativeKeys = Object.keys,
-                nativeBind = FuncProto.bind;
+                nativeIsArray      = Array.isArray,
+                nativeKeys         = Object.keys,
+                nativeBind         = FuncProto.bind;
 
             // Create a safe reference to the Underscore object for use below.
-            var _ = function (obj) {
+            var _ = function(obj) {
                 if (obj instanceof _) return obj;
                 if (!(this instanceof _)) return new _(obj);
                 this._wrapped = obj;
@@ -469,27 +468,23 @@
             // Internal function that returns an efficient (for current engines) version
             // of the passed-in callback, to be repeatedly applied in other Underscore
             // functions.
-            var createCallback = function (func, context, argCount) {
+            var createCallback = function(func, context, argCount) {
                 if (context === void 0) return func;
                 switch (argCount == null ? 3 : argCount) {
-                    case 1:
-                        return function (value) {
-                            return func.call(context, value);
-                        };
-                    case 2:
-                        return function (value, other) {
-                            return func.call(context, value, other);
-                        };
-                    case 3:
-                        return function (value, index, collection) {
-                            return func.call(context, value, index, collection);
-                        };
-                    case 4:
-                        return function (accumulator, value, index, collection) {
-                            return func.call(context, accumulator, value, index, collection);
-                        };
+                    case 1: return function(value) {
+                        return func.call(context, value);
+                    };
+                    case 2: return function(value, other) {
+                        return func.call(context, value, other);
+                    };
+                    case 3: return function(value, index, collection) {
+                        return func.call(context, value, index, collection);
+                    };
+                    case 4: return function(accumulator, value, index, collection) {
+                        return func.call(context, accumulator, value, index, collection);
+                    };
                 }
-                return function () {
+                return function() {
                     return func.apply(context, arguments);
                 };
             };
@@ -497,7 +492,7 @@
             // A mostly-internal function to generate callbacks that can be applied
             // to each element in a collection, returning the desired result — either
             // identity, an arbitrary callback, a property matcher, or a property accessor.
-            _.iteratee = function (value, context, argCount) {
+            _.iteratee = function(value, context, argCount) {
                 if (value == null) return _.identity;
                 if (_.isFunction(value)) return createCallback(value, context, argCount);
                 if (_.isObject(value)) return _.matches(value);
@@ -510,7 +505,7 @@
             // The cornerstone, an `each` implementation, aka `forEach`.
             // Handles raw objects in addition to array-likes. Treats all
             // sparse array-likes as if they were dense.
-            _.each = _.forEach = function (obj, iteratee, context) {
+            _.each = _.forEach = function(obj, iteratee, context) {
                 if (obj == null) return obj;
                 iteratee = createCallback(iteratee, context);
                 var i, length = obj.length;
@@ -528,7 +523,7 @@
             };
 
             // Return the results of applying the iteratee to each element.
-            _.map = _.collect = function (obj, iteratee, context) {
+            _.map = _.collect = function(obj, iteratee, context) {
                 if (obj == null) return [];
                 iteratee = _.iteratee(iteratee, context);
                 var keys = obj.length !== +obj.length && _.keys(obj),
@@ -546,7 +541,7 @@
 
             // **Reduce** builds up a single result from a list of values, aka `inject`,
             // or `foldl`.
-            _.reduce = _.foldl = _.inject = function (obj, iteratee, memo, context) {
+            _.reduce = _.foldl = _.inject = function(obj, iteratee, memo, context) {
                 if (obj == null) obj = [];
                 iteratee = createCallback(iteratee, context, 4);
                 var keys = obj.length !== +obj.length && _.keys(obj),
@@ -564,10 +559,10 @@
             };
 
             // The right-associative version of reduce, also known as `foldr`.
-            _.reduceRight = _.foldr = function (obj, iteratee, memo, context) {
+            _.reduceRight = _.foldr = function(obj, iteratee, memo, context) {
                 if (obj == null) obj = [];
                 iteratee = createCallback(iteratee, context, 4);
-                var keys = obj.length !== +obj.length && _.keys(obj),
+                var keys = obj.length !== + obj.length && _.keys(obj),
                     index = (keys || obj).length,
                     currentKey;
                 if (arguments.length < 3) {
@@ -582,10 +577,10 @@
             };
 
             // Return the first value which passes a truth test. Aliased as `detect`.
-            _.find = _.detect = function (obj, predicate, context) {
+            _.find = _.detect = function(obj, predicate, context) {
                 var result;
                 predicate = _.iteratee(predicate, context);
-                _.some(obj, function (value, index, list) {
+                _.some(obj, function(value, index, list) {
                     if (predicate(value, index, list)) {
                         result = value;
                         return true;
@@ -596,24 +591,24 @@
 
             // Return all the elements that pass a truth test.
             // Aliased as `select`.
-            _.filter = _.select = function (obj, predicate, context) {
+            _.filter = _.select = function(obj, predicate, context) {
                 var results = [];
                 if (obj == null) return results;
                 predicate = _.iteratee(predicate, context);
-                _.each(obj, function (value, index, list) {
+                _.each(obj, function(value, index, list) {
                     if (predicate(value, index, list)) results.push(value);
                 });
                 return results;
             };
 
             // Return all the elements for which a truth test fails.
-            _.reject = function (obj, predicate, context) {
+            _.reject = function(obj, predicate, context) {
                 return _.filter(obj, _.negate(_.iteratee(predicate)), context);
             };
 
             // Determine whether all of the elements match a truth test.
             // Aliased as `all`.
-            _.every = _.all = function (obj, predicate, context) {
+            _.every = _.all = function(obj, predicate, context) {
                 if (obj == null) return true;
                 predicate = _.iteratee(predicate, context);
                 var keys = obj.length !== +obj.length && _.keys(obj),
@@ -628,7 +623,7 @@
 
             // Determine if at least one element in the object matches a truth test.
             // Aliased as `any`.
-            _.some = _.any = function (obj, predicate, context) {
+            _.some = _.any = function(obj, predicate, context) {
                 if (obj == null) return false;
                 predicate = _.iteratee(predicate, context);
                 var keys = obj.length !== +obj.length && _.keys(obj),
@@ -643,40 +638,40 @@
 
             // Determine if the array or object contains a given value (using `===`).
             // Aliased as `include`.
-            _.contains = _.include = function (obj, target) {
+            _.contains = _.include = function(obj, target) {
                 if (obj == null) return false;
                 if (obj.length !== +obj.length) obj = _.values(obj);
                 return _.indexOf(obj, target) >= 0;
             };
 
             // Invoke a method (with arguments) on every item in a collection.
-            _.invoke = function (obj, method) {
+            _.invoke = function(obj, method) {
                 var args = slice.call(arguments, 2);
                 var isFunc = _.isFunction(method);
-                return _.map(obj, function (value) {
+                return _.map(obj, function(value) {
                     return (isFunc ? method : value[method]).apply(value, args);
                 });
             };
 
             // Convenience version of a common use case of `map`: fetching a property.
-            _.pluck = function (obj, key) {
+            _.pluck = function(obj, key) {
                 return _.map(obj, _.property(key));
             };
 
             // Convenience version of a common use case of `filter`: selecting only objects
             // containing specific `key:value` pairs.
-            _.where = function (obj, attrs) {
+            _.where = function(obj, attrs) {
                 return _.filter(obj, _.matches(attrs));
             };
 
             // Convenience version of a common use case of `find`: getting the first object
             // containing specific `key:value` pairs.
-            _.findWhere = function (obj, attrs) {
+            _.findWhere = function(obj, attrs) {
                 return _.find(obj, _.matches(attrs));
             };
 
             // Return the maximum element (or element-based computation).
-            _.max = function (obj, iteratee, context) {
+            _.max = function(obj, iteratee, context) {
                 var result = -Infinity, lastComputed = -Infinity,
                     value, computed;
                 if (iteratee == null && obj != null) {
@@ -689,7 +684,7 @@
                     }
                 } else {
                     iteratee = _.iteratee(iteratee, context);
-                    _.each(obj, function (value, index, list) {
+                    _.each(obj, function(value, index, list) {
                         computed = iteratee(value, index, list);
                         if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
                             result = value;
@@ -701,7 +696,7 @@
             };
 
             // Return the minimum element (or element-based computation).
-            _.min = function (obj, iteratee, context) {
+            _.min = function(obj, iteratee, context) {
                 var result = Infinity, lastComputed = Infinity,
                     value, computed;
                 if (iteratee == null && obj != null) {
@@ -714,7 +709,7 @@
                     }
                 } else {
                     iteratee = _.iteratee(iteratee, context);
-                    _.each(obj, function (value, index, list) {
+                    _.each(obj, function(value, index, list) {
                         computed = iteratee(value, index, list);
                         if (computed < lastComputed || computed === Infinity && result === Infinity) {
                             result = value;
@@ -727,7 +722,7 @@
 
             // Shuffle a collection, using the modern version of the
             // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
-            _.shuffle = function (obj) {
+            _.shuffle = function(obj) {
                 var set = obj && obj.length === +obj.length ? obj : _.values(obj);
                 var length = set.length;
                 var shuffled = Array(length);
@@ -742,7 +737,7 @@
             // Sample **n** random values from a collection.
             // If **n** is not specified, returns a single random element.
             // The internal `guard` argument allows it to work with `map`.
-            _.sample = function (obj, n, guard) {
+            _.sample = function(obj, n, guard) {
                 if (n == null || guard) {
                     if (obj.length !== +obj.length) obj = _.values(obj);
                     return obj[_.random(obj.length - 1)];
@@ -751,15 +746,15 @@
             };
 
             // Sort the object's values by a criterion produced by an iteratee.
-            _.sortBy = function (obj, iteratee, context) {
+            _.sortBy = function(obj, iteratee, context) {
                 iteratee = _.iteratee(iteratee, context);
-                return _.pluck(_.map(obj, function (value, index, list) {
+                return _.pluck(_.map(obj, function(value, index, list) {
                     return {
                         value: value,
                         index: index,
                         criteria: iteratee(value, index, list)
                     };
-                }).sort(function (left, right) {
+                }).sort(function(left, right) {
                     var a = left.criteria;
                     var b = right.criteria;
                     if (a !== b) {
@@ -771,11 +766,11 @@
             };
 
             // An internal function used for aggregate "group by" operations.
-            var group = function (behavior) {
-                return function (obj, iteratee, context) {
+            var group = function(behavior) {
+                return function(obj, iteratee, context) {
                     var result = {};
                     iteratee = _.iteratee(iteratee, context);
-                    _.each(obj, function (value, index) {
+                    _.each(obj, function(value, index) {
                         var key = iteratee(value, index, obj);
                         behavior(result, value, key);
                     });
@@ -785,26 +780,26 @@
 
             // Groups the object's values by a criterion. Pass either a string attribute
             // to group by, or a function that returns the criterion.
-            _.groupBy = group(function (result, value, key) {
+            _.groupBy = group(function(result, value, key) {
                 if (_.has(result, key)) result[key].push(value); else result[key] = [value];
             });
 
             // Indexes the object's values by a criterion, similar to `groupBy`, but for
             // when you know that your index values will be unique.
-            _.indexBy = group(function (result, value, key) {
+            _.indexBy = group(function(result, value, key) {
                 result[key] = value;
             });
 
             // Counts instances of an object that group by a certain criterion. Pass
             // either a string attribute to count by, or a function that returns the
             // criterion.
-            _.countBy = group(function (result, value, key) {
+            _.countBy = group(function(result, value, key) {
                 if (_.has(result, key)) result[key]++; else result[key] = 1;
             });
 
             // Use a comparator function to figure out the smallest index at which
             // an object should be inserted so as to maintain order. Uses binary search.
-            _.sortedIndex = function (array, obj, iteratee, context) {
+            _.sortedIndex = function(array, obj, iteratee, context) {
                 iteratee = _.iteratee(iteratee, context, 1);
                 var value = iteratee(obj);
                 var low = 0, high = array.length;
@@ -816,7 +811,7 @@
             };
 
             // Safely create a real, live array from anything iterable.
-            _.toArray = function (obj) {
+            _.toArray = function(obj) {
                 if (!obj) return [];
                 if (_.isArray(obj)) return slice.call(obj);
                 if (obj.length === +obj.length) return _.map(obj, _.identity);
@@ -824,17 +819,17 @@
             };
 
             // Return the number of elements in an object.
-            _.size = function (obj) {
+            _.size = function(obj) {
                 if (obj == null) return 0;
                 return obj.length === +obj.length ? obj.length : _.keys(obj).length;
             };
 
             // Split a collection into two arrays: one whose elements all satisfy the given
             // predicate, and one whose elements all do not satisfy the predicate.
-            _.partition = function (obj, predicate, context) {
+            _.partition = function(obj, predicate, context) {
                 predicate = _.iteratee(predicate, context);
                 var pass = [], fail = [];
-                _.each(obj, function (value, key, obj) {
+                _.each(obj, function(value, key, obj) {
                     (predicate(value, key, obj) ? pass : fail).push(value);
                 });
                 return [pass, fail];
@@ -846,7 +841,7 @@
             // Get the first element of an array. Passing **n** will return the first N
             // values in the array. Aliased as `head` and `take`. The **guard** check
             // allows it to work with `_.map`.
-            _.first = _.head = _.take = function (array, n, guard) {
+            _.first = _.head = _.take = function(array, n, guard) {
                 if (array == null) return void 0;
                 if (n == null || guard) return array[0];
                 if (n < 0) return [];
@@ -857,13 +852,13 @@
             // the arguments object. Passing **n** will return all the values in
             // the array, excluding the last N. The **guard** check allows it to work with
             // `_.map`.
-            _.initial = function (array, n, guard) {
+            _.initial = function(array, n, guard) {
                 return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
             };
 
             // Get the last element of an array. Passing **n** will return the last N
             // values in the array. The **guard** check allows it to work with `_.map`.
-            _.last = function (array, n, guard) {
+            _.last = function(array, n, guard) {
                 if (array == null) return void 0;
                 if (n == null || guard) return array[array.length - 1];
                 return slice.call(array, Math.max(array.length - n, 0));
@@ -873,17 +868,17 @@
             // Especially useful on the arguments object. Passing an **n** will return
             // the rest N values in the array. The **guard**
             // check allows it to work with `_.map`.
-            _.rest = _.tail = _.drop = function (array, n, guard) {
+            _.rest = _.tail = _.drop = function(array, n, guard) {
                 return slice.call(array, n == null || guard ? 1 : n);
             };
 
             // Trim out all falsy values from an array.
-            _.compact = function (array) {
+            _.compact = function(array) {
                 return _.filter(array, _.identity);
             };
 
             // Internal implementation of a recursive `flatten` function.
-            var flatten = function (input, shallow, strict, output) {
+            var flatten = function(input, shallow, strict, output) {
                 if (shallow && _.every(input, _.isArray)) {
                     return concat.apply(output, input);
                 }
@@ -901,19 +896,19 @@
             };
 
             // Flatten out an array, either recursively (by default), or just one level.
-            _.flatten = function (array, shallow) {
+            _.flatten = function(array, shallow) {
                 return flatten(array, shallow, false, []);
             };
 
             // Return a version of the array that does not contain the specified value(s).
-            _.without = function (array) {
+            _.without = function(array) {
                 return _.difference(array, slice.call(arguments, 1));
             };
 
             // Produce a duplicate-free version of the array. If the array has already
             // been sorted, you have the option of using a faster algorithm.
             // Aliased as `unique`.
-            _.uniq = _.unique = function (array, isSorted, iteratee, context) {
+            _.uniq = _.unique = function(array, isSorted, iteratee, context) {
                 if (array == null) return [];
                 if (!_.isBoolean(isSorted)) {
                     context = iteratee;
@@ -943,13 +938,13 @@
 
             // Produce an array that contains the union: each distinct element from all of
             // the passed-in arrays.
-            _.union = function () {
+            _.union = function() {
                 return _.uniq(flatten(arguments, true, true, []));
             };
 
             // Produce an array that contains every item shared between all the
             // passed-in arrays.
-            _.intersection = function (array) {
+            _.intersection = function(array) {
                 if (array == null) return [];
                 var result = [];
                 var argsLength = arguments.length;
@@ -966,16 +961,16 @@
 
             // Take the difference between one array and a number of other arrays.
             // Only the elements present in just the first array will remain.
-            _.difference = function (array) {
+            _.difference = function(array) {
                 var rest = flatten(slice.call(arguments, 1), true, true, []);
-                return _.filter(array, function (value) {
+                return _.filter(array, function(value){
                     return !_.contains(rest, value);
                 });
             };
 
             // Zip together multiple lists into a single array -- elements that share
             // an index go together.
-            _.zip = function (array) {
+            _.zip = function(array) {
                 if (array == null) return [];
                 var length = _.max(arguments, 'length').length;
                 var results = Array(length);
@@ -988,7 +983,7 @@
             // Converts lists into objects. Pass either a single array of `[key, value]`
             // pairs, or two parallel arrays of the same length -- one of keys, and one of
             // the corresponding values.
-            _.object = function (list, values) {
+            _.object = function(list, values) {
                 if (list == null) return {};
                 var result = {};
                 for (var i = 0, length = list.length; i < length; i++) {
@@ -1005,7 +1000,7 @@
             // or -1 if the item is not included in the array.
             // If the array is large and already in sort order, pass `true`
             // for **isSorted** to use binary search.
-            _.indexOf = function (array, item, isSorted) {
+            _.indexOf = function(array, item, isSorted) {
                 if (array == null) return -1;
                 var i = 0, length = array.length;
                 if (isSorted) {
@@ -1020,7 +1015,7 @@
                 return -1;
             };
 
-            _.lastIndexOf = function (array, item, from) {
+            _.lastIndexOf = function(array, item, from) {
                 if (array == null) return -1;
                 var idx = array.length;
                 if (typeof from == 'number') {
@@ -1033,7 +1028,7 @@
             // Generate an integer Array containing an arithmetic progression. A port of
             // the native Python `range()` function. See
             // [the Python documentation](http://docs.python.org/library/functions.html#range).
-            _.range = function (start, stop, step) {
+            _.range = function(start, stop, step) {
                 if (arguments.length <= 1) {
                     stop = start || 0;
                     start = 0;
@@ -1054,18 +1049,17 @@
             // ------------------
 
             // Reusable constructor function for prototype setting.
-            var Ctor = function () {
-            };
+            var Ctor = function(){};
 
             // Create a function bound to a given object (assigning `this`, and arguments,
             // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
             // available.
-            _.bind = function (func, context) {
+            _.bind = function(func, context) {
                 var args, bound;
                 if (nativeBind && func.bind === nativeBind) return nativeBind.apply(func, slice.call(arguments, 1));
                 if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
                 args = slice.call(arguments, 2);
-                bound = function () {
+                bound = function() {
                     if (!(this instanceof bound)) return func.apply(context, args.concat(slice.call(arguments)));
                     Ctor.prototype = func.prototype;
                     var self = new Ctor;
@@ -1080,9 +1074,9 @@
             // Partially apply a function by creating a version that has had some of its
             // arguments pre-filled, without changing its dynamic `this` context. _ acts
             // as a placeholder, allowing any combination of arguments to be pre-filled.
-            _.partial = function (func) {
+            _.partial = function(func) {
                 var boundArgs = slice.call(arguments, 1);
-                return function () {
+                return function() {
                     var position = 0;
                     var args = boundArgs.slice();
                     for (var i = 0, length = args.length; i < length; i++) {
@@ -1096,7 +1090,7 @@
             // Bind a number of an object's methods to that object. Remaining arguments
             // are the method names to be bound. Useful for ensuring that all callbacks
             // defined on an object belong to it.
-            _.bindAll = function (obj) {
+            _.bindAll = function(obj) {
                 var i, length = arguments.length, key;
                 if (length <= 1) throw new Error('bindAll must be passed function names');
                 for (i = 1; i < length; i++) {
@@ -1107,8 +1101,8 @@
             };
 
             // Memoize an expensive function by storing its results.
-            _.memoize = function (func, hasher) {
-                var memoize = function (key) {
+            _.memoize = function(func, hasher) {
+                var memoize = function(key) {
                     var cache = memoize.cache;
                     var address = hasher ? hasher.apply(this, arguments) : key;
                     if (!_.has(cache, address)) cache[address] = func.apply(this, arguments);
@@ -1120,16 +1114,16 @@
 
             // Delays a function for the given number of milliseconds, and then calls
             // it with the arguments supplied.
-            _.delay = function (func, wait) {
+            _.delay = function(func, wait) {
                 var args = slice.call(arguments, 2);
-                return setTimeout(function () {
+                return setTimeout(function(){
                     return func.apply(null, args);
                 }, wait);
             };
 
             // Defers a function, scheduling it to run after the current call stack has
             // cleared.
-            _.defer = function (func) {
+            _.defer = function(func) {
                 return _.delay.apply(_, [func, 1].concat(slice.call(arguments, 1)));
             };
 
@@ -1138,18 +1132,18 @@
             // as much as it can, without ever going more than once per `wait` duration;
             // but if you'd like to disable the execution on the leading edge, pass
             // `{leading: false}`. To disable execution on the trailing edge, ditto.
-            _.throttle = function (func, wait, options) {
+            _.throttle = function(func, wait, options) {
                 var context, args, result;
                 var timeout = null;
                 var previous = 0;
                 if (!options) options = {};
-                var later = function () {
+                var later = function() {
                     previous = options.leading === false ? 0 : _.now();
                     timeout = null;
                     result = func.apply(context, args);
                     if (!timeout) context = args = null;
                 };
-                return function () {
+                return function() {
                     var now = _.now();
                     if (!previous && options.leading === false) previous = now;
                     var remaining = wait - (now - previous);
@@ -1172,10 +1166,10 @@
             // be triggered. The function will be called after it stops being called for
             // N milliseconds. If `immediate` is passed, trigger the function on the
             // leading edge, instead of the trailing.
-            _.debounce = function (func, wait, immediate) {
+            _.debounce = function(func, wait, immediate) {
                 var timeout, args, context, timestamp, result;
 
-                var later = function () {
+                var later = function() {
                     var last = _.now() - timestamp;
 
                     if (last < wait && last > 0) {
@@ -1189,7 +1183,7 @@
                     }
                 };
 
-                return function () {
+                return function() {
                     context = this;
                     args = arguments;
                     timestamp = _.now();
@@ -1207,23 +1201,23 @@
             // Returns the first function passed as an argument to the second,
             // allowing you to adjust arguments, run code before and after, and
             // conditionally execute the original function.
-            _.wrap = function (func, wrapper) {
+            _.wrap = function(func, wrapper) {
                 return _.partial(wrapper, func);
             };
 
             // Returns a negated version of the passed-in predicate.
-            _.negate = function (predicate) {
-                return function () {
+            _.negate = function(predicate) {
+                return function() {
                     return !predicate.apply(this, arguments);
                 };
             };
 
             // Returns a function that is the composition of a list of functions, each
             // consuming the return value of the function that follows.
-            _.compose = function () {
+            _.compose = function() {
                 var args = arguments;
                 var start = args.length - 1;
-                return function () {
+                return function() {
                     var i = start;
                     var result = args[start].apply(this, arguments);
                     while (i--) result = args[i].call(this, result);
@@ -1232,8 +1226,8 @@
             };
 
             // Returns a function that will only be executed after being called N times.
-            _.after = function (times, func) {
-                return function () {
+            _.after = function(times, func) {
+                return function() {
                     if (--times < 1) {
                         return func.apply(this, arguments);
                     }
@@ -1241,9 +1235,9 @@
             };
 
             // Returns a function that will only be executed before being called N times.
-            _.before = function (times, func) {
+            _.before = function(times, func) {
                 var memo;
-                return function () {
+                return function() {
                     if (--times > 0) {
                         memo = func.apply(this, arguments);
                     } else {
@@ -1262,7 +1256,7 @@
 
             // Retrieve the names of an object's properties.
             // Delegates to **ECMAScript 5**'s native `Object.keys`
-            _.keys = function (obj) {
+            _.keys = function(obj) {
                 if (!_.isObject(obj)) return [];
                 if (nativeKeys) return nativeKeys(obj);
                 var keys = [];
@@ -1271,7 +1265,7 @@
             };
 
             // Retrieve the values of an object's properties.
-            _.values = function (obj) {
+            _.values = function(obj) {
                 var keys = _.keys(obj);
                 var length = keys.length;
                 var values = Array(length);
@@ -1282,7 +1276,7 @@
             };
 
             // Convert an object into a list of `[key, value]` pairs.
-            _.pairs = function (obj) {
+            _.pairs = function(obj) {
                 var keys = _.keys(obj);
                 var length = keys.length;
                 var pairs = Array(length);
@@ -1293,7 +1287,7 @@
             };
 
             // Invert the keys and values of an object. The values must be serializable.
-            _.invert = function (obj) {
+            _.invert = function(obj) {
                 var result = {};
                 var keys = _.keys(obj);
                 for (var i = 0, length = keys.length; i < length; i++) {
@@ -1304,7 +1298,7 @@
 
             // Return a sorted list of the function names available on the object.
             // Aliased as `methods`
-            _.functions = _.methods = function (obj) {
+            _.functions = _.methods = function(obj) {
                 var names = [];
                 for (var key in obj) {
                     if (_.isFunction(obj[key])) names.push(key);
@@ -1313,7 +1307,7 @@
             };
 
             // Extend a given object with all the properties in passed-in object(s).
-            _.extend = function (obj) {
+            _.extend = function(obj) {
                 if (!_.isObject(obj)) return obj;
                 var source, prop;
                 for (var i = 1, length = arguments.length; i < length; i++) {
@@ -1328,7 +1322,7 @@
             };
 
             // Return a copy of the object only containing the whitelisted properties.
-            _.pick = function (obj, iteratee, context) {
+            _.pick = function(obj, iteratee, context) {
                 var result = {}, key;
                 if (obj == null) return result;
                 if (_.isFunction(iteratee)) {
@@ -1349,12 +1343,12 @@
             };
 
             // Return a copy of the object without the blacklisted properties.
-            _.omit = function (obj, iteratee, context) {
+            _.omit = function(obj, iteratee, context) {
                 if (_.isFunction(iteratee)) {
                     iteratee = _.negate(iteratee);
                 } else {
                     var keys = _.map(concat.apply([], slice.call(arguments, 1)), String);
-                    iteratee = function (value, key) {
+                    iteratee = function(value, key) {
                         return !_.contains(keys, key);
                     };
                 }
@@ -1362,7 +1356,7 @@
             };
 
             // Fill in a given object with default properties.
-            _.defaults = function (obj) {
+            _.defaults = function(obj) {
                 if (!_.isObject(obj)) return obj;
                 for (var i = 1, length = arguments.length; i < length; i++) {
                     var source = arguments[i];
@@ -1374,7 +1368,7 @@
             };
 
             // Create a (shallow-cloned) duplicate of an object.
-            _.clone = function (obj) {
+            _.clone = function(obj) {
                 if (!_.isObject(obj)) return obj;
                 return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
             };
@@ -1382,13 +1376,13 @@
             // Invokes interceptor with the obj, and then returns obj.
             // The primary purpose of this method is to "tap into" a method chain, in
             // order to perform operations on intermediate results within the chain.
-            _.tap = function (obj, interceptor) {
+            _.tap = function(obj, interceptor) {
                 interceptor(obj);
                 return obj;
             };
 
             // Internal recursive comparison function for `isEqual`.
-            var eq = function (a, b, aStack, bStack) {
+            var eq = function(a, b, aStack, bStack) {
                 // Identical objects are equal. `0 === -0`, but they aren't identical.
                 // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
                 if (a === b) return a !== 0 || 1 / a === 1 / b;
@@ -1436,8 +1430,9 @@
                 if (
                     aCtor !== bCtor &&
                     // Handle Object.create(x) cases
-                    'constructor' in a && 'constructor' in b && !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
-                    _.isFunction(bCtor) && bCtor instanceof bCtor)
+                    'constructor' in a && 'constructor' in b &&
+                    !(_.isFunction(aCtor) && aCtor instanceof aCtor &&
+                        _.isFunction(bCtor) && bCtor instanceof bCtor)
                     ) {
                     return false;
                 }
@@ -1477,13 +1472,13 @@
             };
 
             // Perform a deep comparison to check if two objects are equal.
-            _.isEqual = function (a, b) {
+            _.isEqual = function(a, b) {
                 return eq(a, b, [], []);
             };
 
             // Is a given array, string, or object empty?
             // An "empty" object has no enumerable own-properties.
-            _.isEmpty = function (obj) {
+            _.isEmpty = function(obj) {
                 if (obj == null) return true;
                 if (_.isArray(obj) || _.isString(obj) || _.isArguments(obj)) return obj.length === 0;
                 for (var key in obj) if (_.has(obj, key)) return false;
@@ -1491,25 +1486,25 @@
             };
 
             // Is a given value a DOM element?
-            _.isElement = function (obj) {
+            _.isElement = function(obj) {
                 return !!(obj && obj.nodeType === 1);
             };
 
             // Is a given value an array?
             // Delegates to ECMA5's native Array.isArray
-            _.isArray = nativeIsArray || function (obj) {
+            _.isArray = nativeIsArray || function(obj) {
                 return toString.call(obj) === '[object Array]';
             };
 
             // Is a given variable an object?
-            _.isObject = function (obj) {
+            _.isObject = function(obj) {
                 var type = typeof obj;
                 return type === 'function' || type === 'object' && !!obj;
             };
 
             // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp.
-            _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function (name) {
-                _['is' + name] = function (obj) {
+            _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp'], function(name) {
+                _['is' + name] = function(obj) {
                     return toString.call(obj) === '[object ' + name + ']';
                 };
             });
@@ -1517,46 +1512,46 @@
             // Define a fallback version of the method in browsers (ahem, IE), where
             // there isn't any inspectable "Arguments" type.
             if (!_.isArguments(arguments)) {
-                _.isArguments = function (obj) {
+                _.isArguments = function(obj) {
                     return _.has(obj, 'callee');
                 };
             }
 
             // Optimize `isFunction` if appropriate. Work around an IE 11 bug.
             if (typeof /./ !== 'function') {
-                _.isFunction = function (obj) {
+                _.isFunction = function(obj) {
                     return typeof obj == 'function' || false;
                 };
             }
 
             // Is a given object a finite number?
-            _.isFinite = function (obj) {
+            _.isFinite = function(obj) {
                 return isFinite(obj) && !isNaN(parseFloat(obj));
             };
 
             // Is the given value `NaN`? (NaN is the only number which does not equal itself).
-            _.isNaN = function (obj) {
+            _.isNaN = function(obj) {
                 return _.isNumber(obj) && obj !== +obj;
             };
 
             // Is a given value a boolean?
-            _.isBoolean = function (obj) {
+            _.isBoolean = function(obj) {
                 return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
             };
 
             // Is a given value equal to null?
-            _.isNull = function (obj) {
+            _.isNull = function(obj) {
                 return obj === null;
             };
 
             // Is a given variable undefined?
-            _.isUndefined = function (obj) {
+            _.isUndefined = function(obj) {
                 return obj === void 0;
             };
 
             // Shortcut function for checking if an object has a given property directly
             // on itself (in other words, not on a prototype).
-            _.has = function (obj, key) {
+            _.has = function(obj, key) {
                 return obj != null && hasOwnProperty.call(obj, key);
             };
 
@@ -1565,35 +1560,34 @@
 
             // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
             // previous owner. Returns a reference to the Underscore object.
-            _.noConflict = function () {
+            _.noConflict = function() {
                 root._ = previousUnderscore;
                 return this;
             };
 
             // Keep the identity function around for default iteratees.
-            _.identity = function (value) {
+            _.identity = function(value) {
                 return value;
             };
 
-            _.constant = function (value) {
-                return function () {
+            _.constant = function(value) {
+                return function() {
                     return value;
                 };
             };
 
-            _.noop = function () {
-            };
+            _.noop = function(){};
 
-            _.property = function (key) {
-                return function (obj) {
+            _.property = function(key) {
+                return function(obj) {
                     return obj[key];
                 };
             };
 
             // Returns a predicate for checking whether an object has a given set of `key:value` pairs.
-            _.matches = function (attrs) {
+            _.matches = function(attrs) {
                 var pairs = _.pairs(attrs), length = pairs.length;
-                return function (obj) {
+                return function(obj) {
                     if (obj == null) return !length;
                     obj = new Object(obj);
                     for (var i = 0; i < length; i++) {
@@ -1605,7 +1599,7 @@
             };
 
             // Run a function **n** times.
-            _.times = function (n, iteratee, context) {
+            _.times = function(n, iteratee, context) {
                 var accum = Array(Math.max(0, n));
                 iteratee = createCallback(iteratee, context, 1);
                 for (var i = 0; i < n; i++) accum[i] = iteratee(i);
@@ -1613,7 +1607,7 @@
             };
 
             // Return a random integer between min and max (inclusive).
-            _.random = function (min, max) {
+            _.random = function(min, max) {
                 if (max == null) {
                     max = min;
                     min = 0;
@@ -1622,7 +1616,7 @@
             };
 
             // A (possibly faster) way to get the current timestamp as an integer.
-            _.now = Date.now || function () {
+            _.now = Date.now || function() {
                 return new Date().getTime();
             };
 
@@ -1638,15 +1632,15 @@
             var unescapeMap = _.invert(escapeMap);
 
             // Functions for escaping and unescaping strings to/from HTML interpolation.
-            var createEscaper = function (map) {
-                var escaper = function (match) {
+            var createEscaper = function(map) {
+                var escaper = function(match) {
                     return map[match];
                 };
                 // Regexes for identifying a key that needs to be escaped
                 var source = '(?:' + _.keys(map).join('|') + ')';
                 var testRegexp = RegExp(source);
                 var replaceRegexp = RegExp(source, 'g');
-                return function (string) {
+                return function(string) {
                     string = string == null ? '' : '' + string;
                     return testRegexp.test(string) ? string.replace(replaceRegexp, escaper) : string;
                 };
@@ -1656,7 +1650,7 @@
 
             // If the value of the named `property` is a function then invoke it with the
             // `object` as context; otherwise, return it.
-            _.result = function (object, property) {
+            _.result = function(object, property) {
                 if (object == null) return void 0;
                 var value = object[property];
                 return _.isFunction(value) ? object[property]() : value;
@@ -1665,7 +1659,7 @@
             // Generate a unique integer id (unique within the entire client session).
             // Useful for temporary DOM ids.
             var idCounter = 0;
-            _.uniqueId = function (prefix) {
+            _.uniqueId = function(prefix) {
                 var id = ++idCounter + '';
                 return prefix ? prefix + id : id;
             };
@@ -1673,9 +1667,9 @@
             // By default, Underscore uses ERB-style template delimiters, change the
             // following template settings to use alternative delimiters.
             _.templateSettings = {
-                evaluate: /<%([\s\S]+?)%>/g,
-                interpolate: /<%=([\s\S]+?)%>/g,
-                escape: /<%-([\s\S]+?)%>/g
+                evaluate    : /<%([\s\S]+?)%>/g,
+                interpolate : /<%=([\s\S]+?)%>/g,
+                escape      : /<%-([\s\S]+?)%>/g
             };
 
             // When customizing `templateSettings`, if you don't want to define an
@@ -1686,17 +1680,17 @@
             // Certain characters need to be escaped so that they can be put into a
             // string literal.
             var escapes = {
-                "'": "'",
-                '\\': '\\',
-                '\r': 'r',
-                '\n': 'n',
+                "'":      "'",
+                '\\':     '\\',
+                '\r':     'r',
+                '\n':     'n',
                 '\u2028': 'u2028',
                 '\u2029': 'u2029'
             };
 
             var escaper = /\\|'|\r|\n|\u2028|\u2029/g;
 
-            var escapeChar = function (match) {
+            var escapeChar = function(match) {
                 return '\\' + escapes[match];
             };
 
@@ -1704,7 +1698,7 @@
             // Underscore templating handles arbitrary delimiters, preserves whitespace,
             // and correctly escapes quotes within interpolated code.
             // NB: `oldSettings` only exists for backwards compatibility.
-            _.template = function (text, settings, oldSettings) {
+            _.template = function(text, settings, oldSettings) {
                 if (!settings && oldSettings) settings = oldSettings;
                 settings = _.defaults({}, settings, _.templateSettings);
 
@@ -1718,7 +1712,7 @@
                 // Compile the template source, escaping string literals appropriately.
                 var index = 0;
                 var source = "__p+='";
-                text.replace(matcher, function (match, escape, interpolate, evaluate, offset) {
+                text.replace(matcher, function(match, escape, interpolate, evaluate, offset) {
                     source += text.slice(index, offset).replace(escaper, escapeChar);
                     index = offset + match.length;
 
@@ -1749,7 +1743,7 @@
                     throw e;
                 }
 
-                var template = function (data) {
+                var template = function(data) {
                     return render.call(this, data, _);
                 };
 
@@ -1761,7 +1755,7 @@
             };
 
             // Add a "chain" function. Start chaining a wrapped Underscore object.
-            _.chain = function (obj) {
+            _.chain = function(obj) {
                 var instance = _(obj);
                 instance._chain = true;
                 return instance;
@@ -1774,15 +1768,15 @@
             // underscore functions. Wrapped objects may be chained.
 
             // Helper function to continue chaining intermediate results.
-            var result = function (obj) {
+            var result = function(obj) {
                 return this._chain ? _(obj).chain() : obj;
             };
 
             // Add your own custom functions to the Underscore object.
-            _.mixin = function (obj) {
-                _.each(_.functions(obj), function (name) {
+            _.mixin = function(obj) {
+                _.each(_.functions(obj), function(name) {
                     var func = _[name] = obj[name];
-                    _.prototype[name] = function () {
+                    _.prototype[name] = function() {
                         var args = [this._wrapped];
                         push.apply(args, arguments);
                         return result.call(this, func.apply(_, args));
@@ -1794,9 +1788,9 @@
             _.mixin(_);
 
             // Add all mutator Array functions to the wrapper.
-            _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function (name) {
+            _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function(name) {
                 var method = ArrayProto[name];
-                _.prototype[name] = function () {
+                _.prototype[name] = function() {
                     var obj = this._wrapped;
                     method.apply(obj, arguments);
                     if ((name === 'shift' || name === 'splice') && obj.length === 0) delete obj[0];
@@ -1805,15 +1799,15 @@
             });
 
             // Add all accessor Array functions to the wrapper.
-            _.each(['concat', 'join', 'slice'], function (name) {
+            _.each(['concat', 'join', 'slice'], function(name) {
                 var method = ArrayProto[name];
-                _.prototype[name] = function () {
+                _.prototype[name] = function() {
                     return result.call(this, method.apply(this._wrapped, arguments));
                 };
             });
 
             // Extracts the result from a wrapped and chained object.
-            _.prototype.value = function () {
+            _.prototype.value = function() {
                 return this._wrapped;
             };
 
@@ -1825,7 +1819,7 @@
             // an AMD load request. Those cases could generate an error when an
             // anonymous define() is called outside of a loader request.
             if (typeof define === 'function' && define.amd) {
-                define('underscore', [], function () {
+                define('underscore', [], function() {
                     return _;
                 });
             }
@@ -1833,8 +1827,7 @@
 
 
     });
-    define("underscore/underscore", function () {
-    });
+    define("underscore/underscore", function(){});
 
     /**
      * ESUI (Enterprise Simple UI library)
@@ -1845,7 +1838,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/string', ['require', 'underscore'], function (require) {
+        'esui/lib/string',['require','underscore'],function (require) {
             var u = require('underscore');
             /**
              * @override lib
@@ -1973,7 +1966,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/dom', ['require', 'underscore', './string'], function (require) {
+        'esui/lib/dom',['require','underscore','./string'],function (require) {
             var u = require('underscore');
             var string = require('./string');
 
@@ -2285,7 +2278,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/attribute', ['require', './dom'], function (require) {
+        'esui/lib/attribute',['require','./dom'],function (require) {
             var dom = require('./dom');
 
             /**
@@ -2411,7 +2404,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/class', ['require', 'underscore', './dom'], function (require) {
+        'esui/lib/class',['require','underscore','./dom'],function (require) {
             var u = require('underscore');
             var dom = require('./dom');
 
@@ -2737,40 +2730,40 @@
         // getter and setter names
             proxyGettersAndSetters = 'Date|Hours|Minutes|Seconds|Milliseconds'.split('|'),
             unitMillisecondFactors = {
-                'Milliseconds': 1,
-                'Seconds': 1e3,
-                'Minutes': 6e4,
-                'Hours': 36e5,
-                'Days': 864e5,
-                'Months': 2592e6,
-                'Years': 31536e6
+                'Milliseconds' : 1,
+                'Seconds' : 1e3,
+                'Minutes' : 6e4,
+                'Hours' : 36e5,
+                'Days' : 864e5,
+                'Months' : 2592e6,
+                'Years' : 31536e6
             },
 
             unitAliases = {
-                ms: 'millisecond',
-                s: 'second',
-                m: 'minute',
-                h: 'hour',
-                d: 'day',
-                D: 'date',
-                w: 'week',
-                W: 'isoWeek',
-                M: 'month',
-                Q: 'quarter',
-                y: 'year',
-                DDD: 'dayOfYear',
-                e: 'weekday',
-                E: 'isoWeekday',
+                ms : 'millisecond',
+                s : 'second',
+                m : 'minute',
+                h : 'hour',
+                d : 'day',
+                D : 'date',
+                w : 'week',
+                W : 'isoWeek',
+                M : 'month',
+                Q : 'quarter',
+                y : 'year',
+                DDD : 'dayOfYear',
+                e : 'weekday',
+                E : 'isoWeekday',
                 gg: 'weekYear',
                 GG: 'isoWeekYear'
             },
 
             camelFunctions = {
-                dayofyear: 'dayOfYear',
-                isoweekday: 'isoWeekday',
-                isoweek: 'isoWeek',
-                weekyear: 'weekYear',
-                isoweekyear: 'isoWeekYear'
+                dayofyear : 'dayOfYear',
+                isoweekday : 'isoWeekday',
+                isoweek : 'isoWeek',
+                weekyear : 'weekYear',
+                isoweekyear : 'isoWeekYear'
             },
 
         // format function strings
@@ -2790,107 +2783,107 @@
             paddedTokens = 'M D H h m s w W'.split(' '),
 
             formatTokenFunctions = {
-                M: function () {
+                M    : function () {
                     return this.month() + 1;
                 },
-                MMM: function (format) {
+                MMM  : function (format) {
                     return this.localeData().monthsShort(this, format);
                 },
-                MMMM: function (format) {
+                MMMM : function (format) {
                     return this.localeData().months(this, format);
                 },
-                D: function () {
+                D    : function () {
                     return this.date();
                 },
-                DDD: function () {
+                DDD  : function () {
                     return this.dayOfYear();
                 },
-                d: function () {
+                d    : function () {
                     return this.day();
                 },
-                dd: function (format) {
+                dd   : function (format) {
                     return this.localeData().weekdaysMin(this, format);
                 },
-                ddd: function (format) {
+                ddd  : function (format) {
                     return this.localeData().weekdaysShort(this, format);
                 },
-                dddd: function (format) {
+                dddd : function (format) {
                     return this.localeData().weekdays(this, format);
                 },
-                w: function () {
+                w    : function () {
                     return this.week();
                 },
-                W: function () {
+                W    : function () {
                     return this.isoWeek();
                 },
-                YY: function () {
+                YY   : function () {
                     return leftZeroFill(this.year() % 100, 2);
                 },
-                YYYY: function () {
+                YYYY : function () {
                     return leftZeroFill(this.year(), 4);
                 },
-                YYYYY: function () {
+                YYYYY : function () {
                     return leftZeroFill(this.year(), 5);
                 },
-                YYYYYY: function () {
+                YYYYYY : function () {
                     var y = this.year(), sign = y >= 0 ? '+' : '-';
                     return sign + leftZeroFill(Math.abs(y), 6);
                 },
-                gg: function () {
+                gg   : function () {
                     return leftZeroFill(this.weekYear() % 100, 2);
                 },
-                gggg: function () {
+                gggg : function () {
                     return leftZeroFill(this.weekYear(), 4);
                 },
-                ggggg: function () {
+                ggggg : function () {
                     return leftZeroFill(this.weekYear(), 5);
                 },
-                GG: function () {
+                GG   : function () {
                     return leftZeroFill(this.isoWeekYear() % 100, 2);
                 },
-                GGGG: function () {
+                GGGG : function () {
                     return leftZeroFill(this.isoWeekYear(), 4);
                 },
-                GGGGG: function () {
+                GGGGG : function () {
                     return leftZeroFill(this.isoWeekYear(), 5);
                 },
-                e: function () {
+                e : function () {
                     return this.weekday();
                 },
-                E: function () {
+                E : function () {
                     return this.isoWeekday();
                 },
-                a: function () {
+                a    : function () {
                     return this.localeData().meridiem(this.hours(), this.minutes(), true);
                 },
-                A: function () {
+                A    : function () {
                     return this.localeData().meridiem(this.hours(), this.minutes(), false);
                 },
-                H: function () {
+                H    : function () {
                     return this.hours();
                 },
-                h: function () {
+                h    : function () {
                     return this.hours() % 12 || 12;
                 },
-                m: function () {
+                m    : function () {
                     return this.minutes();
                 },
-                s: function () {
+                s    : function () {
                     return this.seconds();
                 },
-                S: function () {
+                S    : function () {
                     return toInt(this.milliseconds() / 100);
                 },
-                SS: function () {
+                SS   : function () {
                     return leftZeroFill(toInt(this.milliseconds() / 10), 2);
                 },
-                SSS: function () {
+                SSS  : function () {
                     return leftZeroFill(this.milliseconds(), 3);
                 },
-                SSSS: function () {
+                SSSS : function () {
                     return leftZeroFill(this.milliseconds(), 3);
                 },
-                Z: function () {
+                Z    : function () {
                     var a = this.utcOffset(),
                         b = '+';
                     if (a < 0) {
@@ -2899,7 +2892,7 @@
                     }
                     return b + leftZeroFill(toInt(a / 60), 2) + ':' + leftZeroFill(toInt(a) % 60, 2);
                 },
-                ZZ: function () {
+                ZZ   : function () {
                     var a = this.utcOffset(),
                         b = '+';
                     if (a < 0) {
@@ -2908,19 +2901,19 @@
                     }
                     return b + leftZeroFill(toInt(a / 60), 2) + leftZeroFill(toInt(a) % 60, 2);
                 },
-                z: function () {
+                z : function () {
                     return this.zoneAbbr();
                 },
-                zz: function () {
+                zz : function () {
                     return this.zoneName();
                 },
-                x: function () {
+                x    : function () {
                     return this.valueOf();
                 },
-                X: function () {
+                X    : function () {
                     return this.unix();
                 },
-                Q: function () {
+                Q : function () {
                     return this.quarter();
                 }
             },
@@ -2935,12 +2928,9 @@
         // default.
         function dfl(a, b, c) {
             switch (arguments.length) {
-                case 2:
-                    return a != null ? a : b;
-                case 3:
-                    return a != null ? a : b != null ? b : c;
-                default:
-                    throw new Error('Implement me');
+                case 2: return a != null ? a : b;
+                case 3: return a != null ? a : b != null ? b : c;
+                default: throw new Error('Implement me');
             }
         }
 
@@ -2952,15 +2942,15 @@
             // We need to deep clone this object, and es5 standard is not very
             // helpful.
             return {
-                empty: false,
-                unusedTokens: [],
-                unusedInput: [],
-                overflow: -2,
-                charsLeftOver: 0,
-                nullInput: false,
-                invalidMonth: null,
-                invalidFormat: false,
-                userInvalidated: false,
+                empty : false,
+                unusedTokens : [],
+                unusedInput : [],
+                overflow : -2,
+                charsLeftOver : 0,
+                nullInput : false,
+                invalidMonth : null,
+                invalidFormat : false,
+                userInvalidated : false,
                 iso: false
             };
         }
@@ -2995,7 +2985,6 @@
                 return leftZeroFill(func.call(this, a), count);
             };
         }
-
         function ordinalizeToken(func, period) {
             return function (a) {
                 return this.localeData().ordinal(func.call(this, a), period);
@@ -3241,10 +3230,8 @@
                 var dur, tmp;
                 //invert the arguments, but complain about it
                 if (period !== null && !isNaN(+period)) {
-                    deprecateSimple(name, 'moment().' + name + '(period, number) is deprecated. Please use moment().' + name + '(number, period).');
-                    tmp = val;
-                    val = period;
-                    period = tmp;
+                    deprecateSimple(name, 'moment().' + name  + '(period, number) is deprecated. Please use moment().' + name + '(number, period).');
+                    tmp = val; val = period; period = tmp;
                 }
 
                 val = typeof val === 'string' ? +val : val;
@@ -3423,7 +3410,12 @@
         function isValid(m) {
             if (m._isValid == null) {
                 m._isValid = !isNaN(m._d.getTime()) &&
-                    m._pf.overflow < 0 && !m._pf.empty && !m._pf.invalidMonth && !m._pf.nullInput && !m._pf.invalidFormat && !m._pf.userInvalidated;
+                    m._pf.overflow < 0 &&
+                    !m._pf.empty &&
+                    !m._pf.invalidMonth &&
+                    !m._pf.nullInput &&
+                    !m._pf.invalidFormat &&
+                    !m._pf.userInvalidated;
 
                 if (m._strict) {
                     m._isValid = m._isValid &&
@@ -3474,8 +3466,7 @@
                     require('./locale/' + name);
                     // because defineLocale currently also sets the global locale, we want to undo that for lazy loaded locales
                     moment.locale(oldLocale);
-                } catch (e) {
-                }
+                } catch (e) { }
             }
             return locales[name];
         }
@@ -3504,7 +3495,7 @@
 
         extend(Locale.prototype, {
 
-            set: function (config) {
+            set : function (config) {
                 var prop, i;
                 for (i in config) {
                     prop = config[i];
@@ -3519,17 +3510,17 @@
                 this._ordinalParseLenient = new RegExp(this._ordinalParse.source + '|' + /\d{1,2}/.source);
             },
 
-            _months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
-            months: function (m) {
+            _months : 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),
+            months : function (m) {
                 return this._months[m.month()];
             },
 
-            _monthsShort: 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),
-            monthsShort: function (m) {
+            _monthsShort : 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),
+            monthsShort : function (m) {
                 return this._monthsShort[m.month()];
             },
 
-            monthsParse: function (monthName, format, strict) {
+            monthsParse : function (monthName, format, strict) {
                 var i, mom, regex;
 
                 if (!this._monthsParse) {
@@ -3560,22 +3551,22 @@
                 }
             },
 
-            _weekdays: 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),
-            weekdays: function (m) {
+            _weekdays : 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),
+            weekdays : function (m) {
                 return this._weekdays[m.day()];
             },
 
-            _weekdaysShort: 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
-            weekdaysShort: function (m) {
+            _weekdaysShort : 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),
+            weekdaysShort : function (m) {
                 return this._weekdaysShort[m.day()];
             },
 
-            _weekdaysMin: 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
-            weekdaysMin: function (m) {
+            _weekdaysMin : 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),
+            weekdaysMin : function (m) {
                 return this._weekdaysMin[m.day()];
             },
 
-            weekdaysParse: function (weekdayName) {
+            weekdaysParse : function (weekdayName) {
                 var i, mom, regex;
 
                 if (!this._weekdaysParse) {
@@ -3596,15 +3587,15 @@
                 }
             },
 
-            _longDateFormat: {
-                LTS: 'h:mm:ss A',
-                LT: 'h:mm A',
-                L: 'MM/DD/YYYY',
-                LL: 'MMMM D, YYYY',
-                LLL: 'MMMM D, YYYY LT',
-                LLLL: 'dddd, MMMM D, YYYY LT'
+            _longDateFormat : {
+                LTS : 'h:mm:ss A',
+                LT : 'h:mm A',
+                L : 'MM/DD/YYYY',
+                LL : 'MMMM D, YYYY',
+                LLL : 'MMMM D, YYYY LT',
+                LLLL : 'dddd, MMMM D, YYYY LT'
             },
-            longDateFormat: function (key) {
+            longDateFormat : function (key) {
                 var output = this._longDateFormat[key];
                 if (!output && this._longDateFormat[key.toUpperCase()]) {
                     output = this._longDateFormat[key.toUpperCase()].replace(/MMMM|MM|DD|dddd/g, function (val) {
@@ -3615,14 +3606,14 @@
                 return output;
             },
 
-            isPM: function (input) {
+            isPM : function (input) {
                 // IE8 Quirks Mode & IE7 Standards Mode do not allow accessing strings like arrays
                 // Using charAt should be more compatible.
                 return ((input + '').toLowerCase().charAt(0) === 'p');
             },
 
-            _meridiemParse: /[ap]\.?m?\.?/i,
-            meridiem: function (hours, minutes, isLower) {
+            _meridiemParse : /[ap]\.?m?\.?/i,
+            meridiem : function (hours, minutes, isLower) {
                 if (hours > 11) {
                     return isLower ? 'pm' : 'PM';
                 } else {
@@ -3631,75 +3622,75 @@
             },
 
 
-            _calendar: {
-                sameDay: '[Today at] LT',
-                nextDay: '[Tomorrow at] LT',
-                nextWeek: 'dddd [at] LT',
-                lastDay: '[Yesterday at] LT',
-                lastWeek: '[Last] dddd [at] LT',
-                sameElse: 'L'
+            _calendar : {
+                sameDay : '[Today at] LT',
+                nextDay : '[Tomorrow at] LT',
+                nextWeek : 'dddd [at] LT',
+                lastDay : '[Yesterday at] LT',
+                lastWeek : '[Last] dddd [at] LT',
+                sameElse : 'L'
             },
-            calendar: function (key, mom, now) {
+            calendar : function (key, mom, now) {
                 var output = this._calendar[key];
                 return typeof output === 'function' ? output.apply(mom, [now]) : output;
             },
 
-            _relativeTime: {
-                future: 'in %s',
-                past: '%s ago',
-                s: 'a few seconds',
-                m: 'a minute',
-                mm: '%d minutes',
-                h: 'an hour',
-                hh: '%d hours',
-                d: 'a day',
-                dd: '%d days',
-                M: 'a month',
-                MM: '%d months',
-                y: 'a year',
-                yy: '%d years'
+            _relativeTime : {
+                future : 'in %s',
+                past : '%s ago',
+                s : 'a few seconds',
+                m : 'a minute',
+                mm : '%d minutes',
+                h : 'an hour',
+                hh : '%d hours',
+                d : 'a day',
+                dd : '%d days',
+                M : 'a month',
+                MM : '%d months',
+                y : 'a year',
+                yy : '%d years'
             },
 
-            relativeTime: function (number, withoutSuffix, string, isFuture) {
+            relativeTime : function (number, withoutSuffix, string, isFuture) {
                 var output = this._relativeTime[string];
                 return (typeof output === 'function') ?
                     output(number, withoutSuffix, string, isFuture) :
                     output.replace(/%d/i, number);
             },
 
-            pastFuture: function (diff, output) {
+            pastFuture : function (diff, output) {
                 var format = this._relativeTime[diff > 0 ? 'future' : 'past'];
                 return typeof format === 'function' ? format(output) : format.replace(/%s/i, output);
             },
 
-            ordinal: function (number) {
+            ordinal : function (number) {
                 return this._ordinal.replace('%d', number);
             },
-            _ordinal: '%d',
-            _ordinalParse: /\d{1,2}/,
+            _ordinal : '%d',
+            _ordinalParse : /\d{1,2}/,
 
-            preparse: function (string) {
+            preparse : function (string) {
                 return string;
             },
 
-            postformat: function (string) {
+            postformat : function (string) {
                 return string;
             },
 
-            week: function (mom) {
+            week : function (mom) {
                 return weekOfYear(mom, this._week.dow, this._week.doy).week;
             },
 
-            _week: {
-                dow: 0, // Sunday is the first day of the week.
-                doy: 6  // The week that contains Jan 1st is the first week of the year.
+            _week : {
+                dow : 0, // Sunday is the first day of the week.
+                doy : 6  // The week that contains Jan 1st is the first week of the year.
             },
 
-            firstDayOfWeek: function () {
+            firstDayOfWeek : function () {
                 return this._week.dow;
             },
 
-            firstDayOfYear: function () {
+            firstDayOfYear : function () {
                 return this._week.doy;
             },
 
@@ -4470,7 +4461,7 @@
 
             return {
                 year: dayOfYear > 0 ? year : year - 1,
-                dayOfYear: dayOfYear > 0 ? dayOfYear : daysInYear(year - 1) + dayOfYear
+                dayOfYear: dayOfYear > 0 ?  dayOfYear : daysInYear(year - 1) + dayOfYear
             };
         }
 
@@ -4689,8 +4680,7 @@
         moment.defaultFormat = isoFormat;
 
         // constant that refers to the ISO standard
-        moment.ISO_8601 = function () {
-        };
+        moment.ISO_8601 = function () {};
 
         // Plugins that add properties should also add the key here (null value),
         // so we can properly clone ourselves.
@@ -4698,8 +4688,7 @@
 
         // This function will be called whenever a moment is mutated.
         // It is intended to keep the offset in sync with the timezone.
-        moment.updateOffset = function () {
-        };
+        moment.updateOffset = function () {};
 
         // This function allows you to set a threshold for relative time strings
         moment.relativeTimeThreshold = function (threshold, limit) {
@@ -4839,27 +4828,27 @@
 
         extend(moment.fn = Moment.prototype, {
 
-            clone: function () {
+            clone : function () {
                 return moment(this);
             },
 
-            valueOf: function () {
+            valueOf : function () {
                 return +this._d - ((this._offset || 0) * 60000);
             },
 
-            unix: function () {
+            unix : function () {
                 return Math.floor(+this / 1000);
             },
 
-            toString: function () {
+            toString : function () {
                 return this.clone().locale('en').format('ddd MMM DD YYYY HH:mm:ss [GMT]ZZ');
             },
 
-            toDate: function () {
+            toDate : function () {
                 return this._offset ? new Date(+this) : this._d;
             },
 
-            toISOString: function () {
+            toISOString : function () {
                 var m = moment(this).utc();
                 if (0 < m.year() && m.year() <= 9999) {
                     if ('function' === typeof Date.prototype.toISOString) {
@@ -4873,7 +4862,7 @@
                 }
             },
 
-            toArray: function () {
+            toArray : function () {
                 var m = this;
                 return [
                     m.year(),
@@ -4886,11 +4875,11 @@
                 ];
             },
 
-            isValid: function () {
+            isValid : function () {
                 return isValid(this);
             },
 
-            isDSTShifted: function () {
+            isDSTShifted : function () {
                 if (this._a) {
                     return this.isValid() && compareArrays(this._a, (this._isUTC ? moment.utc(this._a) : moment(this._a)).toArray()) > 0;
                 }
@@ -4898,7 +4887,7 @@
                 return false;
             },
 
-            parsingFlags: function () {
+            parsingFlags : function () {
                 return extend({}, this._pf);
             },
 
@@ -4906,11 +4895,11 @@
                 return this._pf.overflow;
             },
 
-            utc: function (keepLocalTime) {
+            utc : function (keepLocalTime) {
                 return this.utcOffset(0, keepLocalTime);
             },
 
-            local: function (keepLocalTime) {
+            local : function (keepLocalTime) {
                 if (this._isUTC) {
                     this.utcOffset(0, keepLocalTime);
                     this._isUTC = false;
@@ -4922,16 +4911,16 @@
                 return this;
             },
 
-            format: function (inputString) {
+            format : function (inputString) {
                 var output = formatMoment(this, inputString || moment.defaultFormat);
                 return this.localeData().postformat(output);
             },
 
-            add: createAdder(1, 'add'),
+            add : createAdder(1, 'add'),
 
-            subtract: createAdder(-1, 'subtract'),
+            subtract : createAdder(-1, 'subtract'),
 
-            diff: function (input, units, asFloat) {
+            diff : function (input, units, asFloat) {
                 var that = makeAs(input, this),
                     zoneDiff = (that.utcOffset() - this.utcOffset()) * 6e4,
                     anchor, diff, output, daysAdjust;
@@ -4957,15 +4946,15 @@
                 return asFloat ? output : absRound(output);
             },
 
-            from: function (time, withoutSuffix) {
+            from : function (time, withoutSuffix) {
                 return moment.duration({to: this, from: time}).locale(this.locale()).humanize(!withoutSuffix);
             },
 
-            fromNow: function (withoutSuffix) {
+            fromNow : function (withoutSuffix) {
                 return this.from(moment(), withoutSuffix);
             },
 
-            calendar: function (time) {
+            calendar : function (time) {
                 // We want to compare the start of today, vs this.
                 // Getting start-of-today depends on whether we're locat/utc/offset
                 // or not.
@@ -4981,16 +4970,16 @@
                 return this.format(this.localeData().calendar(format, this, moment(now)));
             },
 
-            isLeapYear: function () {
+            isLeapYear : function () {
                 return isLeapYear(this.year());
             },
 
-            isDST: function () {
+            isDST : function () {
                 return (this.utcOffset() > this.clone().month(0).utcOffset() ||
                     this.utcOffset() > this.clone().month(5).utcOffset());
             },
 
-            day: function (input) {
+            day : function (input) {
                 var day = this._isUTC ? this._d.getUTCDay() : this._d.getDay();
                 if (input != null) {
                     input = parseWeekday(input, this.localeData());
@@ -5000,9 +4989,9 @@
                 }
             },
 
-            month: makeAccessor('Month', true),
+            month : makeAccessor('Month', true),
 
-            startOf: function (units) {
+            startOf : function (units) {
                 units = normalizeUnits(units);
                 // the following switch intentionally omits break keywords
                 // to utilize falling through the cases.
@@ -5109,7 +5098,7 @@
                 }
             ),
 
-            zone: deprecate(
+            zone : deprecate(
                     'moment().zone is deprecated, use moment().utcOffset instead. ' +
                     'https://github.com/moment/moment/issues/1779',
                 function (input, keepLocalTime) {
@@ -5137,7 +5126,7 @@
             // a second time. In case it wants us to change the offset again
             // _changeInProgress == true case, then we have to adjust, because
             // there is no such time in the given timezone.
-            utcOffset: function (input, keepLocalTime) {
+            utcOffset : function (input, keepLocalTime) {
                 var offset = this._offset || 0,
                     localAdjust;
                 if (input != null) {
@@ -5172,27 +5161,27 @@
                 }
             },
 
-            isLocal: function () {
+            isLocal : function () {
                 return !this._isUTC;
             },
 
-            isUtcOffset: function () {
+            isUtcOffset : function () {
                 return this._isUTC;
             },
 
-            isUtc: function () {
+            isUtc : function () {
                 return this._isUTC && this._offset === 0;
             },
 
-            zoneAbbr: function () {
+            zoneAbbr : function () {
                 return this._isUTC ? 'UTC' : '';
             },
 
-            zoneName: function () {
+            zoneName : function () {
                 return this._isUTC ? 'Coordinated Universal Time' : '';
             },
 
-            parseZone: function () {
+            parseZone : function () {
                 if (this._tzm) {
                     this.utcOffset(this._tzm);
                 } else if (typeof this._i === 'string') {
@@ -5201,7 +5190,7 @@
                 return this;
             },
 
-            hasAlignedHourOffset: function (input) {
+            hasAlignedHourOffset : function (input) {
                 if (!input) {
                     input = 0;
                 }
@@ -5212,66 +5201,66 @@
                 return (this.utcOffset() - input) % 60 === 0;
             },
 
-            daysInMonth: function () {
+            daysInMonth : function () {
                 return daysInMonth(this.year(), this.month());
             },
 
-            dayOfYear: function (input) {
+            dayOfYear : function (input) {
                 var dayOfYear = round((moment(this).startOf('day') - moment(this).startOf('year')) / 864e5) + 1;
                 return input == null ? dayOfYear : this.add((input - dayOfYear), 'd');
             },
 
-            quarter: function (input) {
+            quarter : function (input) {
                 return input == null ? Math.ceil((this.month() + 1) / 3) : this.month((input - 1) * 3 + this.month() % 3);
             },
 
-            weekYear: function (input) {
+            weekYear : function (input) {
                 var year = weekOfYear(this, this.localeData()._week.dow, this.localeData()._week.doy).year;
                 return input == null ? year : this.add((input - year), 'y');
             },
 
-            isoWeekYear: function (input) {
+            isoWeekYear : function (input) {
                 var year = weekOfYear(this, 1, 4).year;
                 return input == null ? year : this.add((input - year), 'y');
             },
 
-            week: function (input) {
+            week : function (input) {
                 var week = this.localeData().week(this);
                 return input == null ? week : this.add((input - week) * 7, 'd');
             },
 
-            isoWeek: function (input) {
+            isoWeek : function (input) {
                 var week = weekOfYear(this, 1, 4).week;
                 return input == null ? week : this.add((input - week) * 7, 'd');
             },
 
-            weekday: function (input) {
+            weekday : function (input) {
                 var weekday = (this.day() + 7 - this.localeData()._week.dow) % 7;
                 return input == null ? weekday : this.add(input - weekday, 'd');
             },
 
-            isoWeekday: function (input) {
+            isoWeekday : function (input) {
                 // behaves the same as moment#day except
                 // as a getter, returns 7 instead of 0 (1-7 range instead of 0-6)
                 // as a setter, sunday should belong to the previous week.
                 return input == null ? this.day() || 7 : this.day(this.day() % 7 ? input : input - 7);
             },
 
-            isoWeeksInYear: function () {
+            isoWeeksInYear : function () {
                 return weeksInYear(this.year(), 1, 4);
             },
 
-            weeksInYear: function () {
+            weeksInYear : function () {
                 var weekInfo = this.localeData()._week;
                 return weeksInYear(this.year(), weekInfo.dow, weekInfo.doy);
             },
 
-            get: function (units) {
+            get : function (units) {
                 units = normalizeUnits(units);
                 return this[units]();
             },
 
-            set: function (units, value) {
+            set : function (units, value) {
                 var unit;
                 if (typeof units === 'object') {
                     for (unit in units) {
@@ -5290,7 +5279,7 @@
             // If passed a locale key, it will set the locale for this
             // instance.  Otherwise, it will return the locale configuration
             // variables for this instance.
-            locale: function (key) {
+            locale : function (key) {
                 var newLocaleData;
 
                 if (key === undefined) {
@@ -5304,7 +5293,7 @@
                 }
             },
 
-            lang: deprecate(
+            lang : deprecate(
                 'moment().lang() is deprecated. Instead, use moment().localeData() to get the language configuration. Use moment().locale() to change languages.',
                 function (key) {
                     if (key === undefined) {
@@ -5315,11 +5304,11 @@
                 }
             ),
 
-            localeData: function () {
+            localeData : function () {
                 return this._locale;
             },
 
-            _dateUtcOffset: function () {
+            _dateUtcOffset : function () {
                 // On Firefox.24 Date#getTimezoneOffset returns a floating point.
                 // https://github.com/moment/moment/pull/1871
                 return -Math.round(this._d.getTimezoneOffset() / 15) * 15;
@@ -5401,12 +5390,12 @@
          ************************************/
 
 
-        function daysToYears(days) {
+        function daysToYears (days) {
             // 400 years have 146097 days (taking into account leap year rules)
             return days * 400 / 146097;
         }
 
-        function yearsToDays(years) {
+        function yearsToDays (years) {
             // years * 365 + absRound(years / 4) -
             //     absRound(years / 100) + absRound(years / 400);
             return years * 146097 / 400;
@@ -5414,7 +5403,7 @@
 
         extend(moment.duration.fn = Duration.prototype, {
 
-            _bubble: function () {
+            _bubble : function () {
                 var milliseconds = this._milliseconds,
                     days = this._days,
                     months = this._months,
@@ -5454,7 +5443,7 @@
                 data.years = years;
             },
 
-            abs: function () {
+            abs : function () {
                 this._milliseconds = Math.abs(this._milliseconds);
                 this._days = Math.abs(this._days);
                 this._months = Math.abs(this._months);
@@ -5469,18 +5458,18 @@
                 return this;
             },
 
-            weeks: function () {
+            weeks : function () {
                 return absRound(this.days() / 7);
             },
 
-            valueOf: function () {
+            valueOf : function () {
                 return this._milliseconds +
                     this._days * 864e5 +
                     (this._months % 12) * 2592e6 +
                     toInt(this._months / 12) * 31536e6;
             },
 
-            humanize: function (withSuffix) {
+            humanize : function (withSuffix) {
                 var output = relativeTime(this, !withSuffix, this.localeData());
 
                 if (withSuffix) {
@@ -5490,7 +5479,7 @@
                 return this.localeData().postformat(output);
             },
 
-            add: function (input, val) {
+            add : function (input, val) {
                 // supports only 2.0-style add(1, 's') or add(moment)
                 var dur = moment.duration(input, val);
 
@@ -5503,7 +5492,7 @@
                 return this;
             },
 
-            subtract: function (input, val) {
+            subtract : function (input, val) {
                 var dur = moment.duration(input, val);
 
                 this._milliseconds -= dur._milliseconds;
@@ -5515,12 +5504,12 @@
                 return this;
             },
 
-            get: function (units) {
+            get : function (units) {
                 units = normalizeUnits(units);
                 return this[units.toLowerCase() + 's']();
             },
 
-            as: function (units) {
+            as : function (units) {
                 var days, months;
                 units = normalizeUnits(units);
 
@@ -5532,29 +5521,22 @@
                     // handle milliseconds separately because of floating point math errors (issue #1867)
                     days = this._days + Math.round(yearsToDays(this._months / 12));
                     switch (units) {
-                        case 'week':
-                            return days / 7 + this._milliseconds / 6048e5;
-                        case 'day':
-                            return days + this._milliseconds / 864e5;
-                        case 'hour':
-                            return days * 24 + this._milliseconds / 36e5;
-                        case 'minute':
-                            return days * 24 * 60 + this._milliseconds / 6e4;
-                        case 'second':
-                            return days * 24 * 60 * 60 + this._milliseconds / 1000;
+                        case 'week': return days / 7 + this._milliseconds / 6048e5;
+                        case 'day': return days + this._milliseconds / 864e5;
+                        case 'hour': return days * 24 + this._milliseconds / 36e5;
+                        case 'minute': return days * 24 * 60 + this._milliseconds / 6e4;
+                        case 'second': return days * 24 * 60 * 60 + this._milliseconds / 1000;
                         // Math.floor prevents floating point math errors here
-                        case 'millisecond':
-                            return Math.floor(days * 24 * 60 * 60 * 1000) + this._milliseconds;
-                        default:
-                            throw new Error('Unknown unit ' + units);
+                        case 'millisecond': return Math.floor(days * 24 * 60 * 60 * 1000) + this._milliseconds;
+                        default: throw new Error('Unknown unit ' + units);
                     }
                 }
             },
 
-            lang: moment.fn.lang,
-            locale: moment.fn.locale,
+            lang : moment.fn.lang,
+            locale : moment.fn.locale,
 
-            toIsoString: deprecate(
+            toIsoString : deprecate(
                     'toIsoString() is deprecated. Please use toISOString() instead ' +
                     '(notice the capitals)',
                 function () {
@@ -5562,7 +5544,7 @@
                 }
             ),
 
-            toISOString: function () {
+            toISOString : function () {
                 // inspired by https://github.com/dordille/moment-isoduration/blob/master/moment.isoduration.js
                 var years = Math.abs(this.years()),
                     months = Math.abs(this.months()),
@@ -5588,11 +5570,11 @@
                     (seconds ? seconds + 'S' : '');
             },
 
-            localeData: function () {
+            localeData : function () {
                 return this._locale;
             },
 
-            toJSON: function () {
+            toJSON : function () {
                 return this.toISOString();
             }
         });
@@ -5644,7 +5626,7 @@
             // Set default locale, other locale will inherit from English.
         moment.locale('en', {
             ordinalParse: /\d{1,2}(th|st|nd|rd)/,
-            ordinal: function (number) {
+            ordinal : function (number) {
                 var b = number % 10,
                     output = (toInt(number % 100 / 10) === 1) ? 'th' :
                         (b === 1) ? 'st' :
@@ -5681,7 +5663,7 @@
         if (hasModule) {
             module.exports = moment;
         } else if (typeof define === 'function' && define.amd) {
-            define('moment/moment', ['require', 'exports', 'module'], function (require, exports, module) {
+            define('moment/moment',['require','exports','module'],function (require, exports, module) {
                 if (module.config && module.config() && module.config().noGlobal === true) {
                     // release the global variable
                     globalScope.moment = oldGlobalMoment;
@@ -5695,9 +5677,7 @@
         }
     }).call(this);
 
-    define('moment', ['moment/moment'], function (main) {
-        return main;
-    });
+    define('moment', ['moment/moment'], function (main) { return main; });
 
     /**
      * ESUI (Enterprise Simple UI library)
@@ -5708,7 +5688,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/date', ['require', 'moment'], function (require) {
+        'esui/lib/date',['require','moment'],function (require) {
             var moment = require('moment');
 
             /**
@@ -5786,7 +5766,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/page', ['require'], function (require) {
+        'esui/lib/page',['require'],function (require) {
             var documentElement = document.documentElement;
             var body = document.body;
             var viewRoot = document.compatMode === 'BackCompat'
@@ -5905,7 +5885,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/event', ['require', './dom', './page'], function (require) {
+        'esui/lib/event',['require','./dom','./page'],function (require) {
             var dom = require('./dom');
             var page = require('./page').page;
 
@@ -6041,7 +6021,7 @@
      * @author otakustay
      */
     define(
-        'esui/lib/lang', ['require', 'underscore'], function (require) {
+        'esui/lib/lang',['require','underscore'],function (require) {
             var u = require('underscore');
 
             /**
@@ -6069,8 +6049,7 @@
              * @return {Function} 返回`subClass`构造器
              */
             lib.inherits = function (subClass, superClass) {
-                var Empty = function () {
-                };
+                var Empty = function () {};
                 Empty.prototype = superClass.prototype;
                 var selfPrototype = subClass.prototype;
                 var proto = subClass.prototype = new Empty();
@@ -6237,7 +6216,7 @@
      * @author otakustay, firede(firede@firede.us), erik
      */
     define(
-        'esui/lib', ['require', 'underscore', './lib/attribute', './lib/class', './lib/date', './lib/dom', './lib/event', './lib/lang', './lib/page', './lib/string'], function (require) {
+        'esui/lib',['require','underscore','./lib/attribute','./lib/class','./lib/date','./lib/dom','./lib/event','./lib/lang','./lib/page','./lib/string'],function (require) {
             /**
              * 工具对象
              *
@@ -6281,7 +6260,7 @@
      * @author otakustay
      */
     define(
-        'esui/ControlCollection', ['require', 'underscore'], function (require) {
+        'esui/ControlCollection',['require','underscore'],function (require) {
             var u = require('underscore');
 
             /**
@@ -6440,7 +6419,7 @@
      * @author otakustay
      */
     define(
-        'esui/SafeWrapper', ['require', 'underscore'], function (require) {
+        'esui/SafeWrapper',['require','underscore'],function (require) {
             var u = require('underscore');
 
             /**
@@ -6511,8 +6490,7 @@
                     'initChildren', 'disposeChildren'
                 ],
                 function (method) {
-                    SafeWrapper.prototype[method] = function () {
-                    };
+                    SafeWrapper.prototype[method] = function () {};
                 }
             );
 
@@ -6583,7 +6561,7 @@
      * @author DBear, errorrik, otakustay
      */
     define(
-        'esui/ViewContext', ['require', './ControlCollection', './lib', './lib', './SafeWrapper'], function (require) {
+        'esui/ViewContext',['require','./ControlCollection','./lib','./lib','./SafeWrapper'],function (require) {
             var ControlCollection = require('./ControlCollection');
 
             /**
@@ -6727,7 +6705,7 @@
              * @param {string} id 视图环境id
              * @static
              */
-            ViewContext.get = function (id) {
+            ViewContext.get = function ( id ) {
                 return pool[id] || null;
             };
 
@@ -6893,7 +6871,7 @@
      * @author erik
      */
     define(
-        'esui/main', ['require', './lib', './ViewContext', './ControlCollection'], function (require) {
+        'esui/main',['require','./lib','./ViewContext','./ControlCollection'],function (require) {
             var lib = require('./lib');
 
             /**
@@ -6937,7 +6915,7 @@
                 customElementPrefix: 'esui',
                 instanceAttr: 'data-ctrl-id',
                 viewContextAttr: 'data-ctrl-view-context',
-                uiClassPrefix: 'esui-ui',
+                uiClassPrefix: 'ui',
                 skinClassPrefix: 'skin',
                 stateClassPrefix: 'state'
             };
@@ -7322,9 +7300,7 @@
                             /* jshint ignore:start */
                             typeFromCustomElement = nodeName.replace(
                                 /-(\S)/g,
-                                function (match, ch) {
-                                    return ch.toUpperCase();
-                                }
+                                function (match, ch) { return ch.toUpperCase(); }
                             );
                             /* jshint ignore:end */
                             typeFromCustomElement = typeFromCustomElement.slice(customElementPrefix.length);
@@ -7486,9 +7462,7 @@
                 ruleClasses.push({ type: ruleClass, priority: priority });
                 // 能有几个规则，这里就不优化为插入排序了
                 ruleClasses.sort(
-                    function (x, y) {
-                        return x.priority - y.priority;
-                    });
+                    function (x, y) { return x.priority - y.priority; });
             };
 
             /**
@@ -7513,9 +7487,7 @@
         }
     );
 
-    define('esui', ['esui/main'], function (main) {
-        return main;
-    });
+    define('esui', ['esui/main'], function (main) { return main; });
 
     /**
      * ESUI (Enterprise Simple UI)
@@ -7526,7 +7498,7 @@
      * @author otakustay
      */
     define(
-        'esui/painters', ['require', 'underscore', './lib'], function (require) {
+        'esui/painters',['require','underscore','./lib'],function (require) {
             var u = require('underscore');
             var lib = require('./lib');
 
@@ -7804,7 +7776,7 @@
                                 '"' + propertyNames.join('", "') + '"';
                             var error = new Error(
                                     'Failed to paint [' + paintingPropertyNames + '] '
-                                    + 'for control "' + (this.id || 'anonymous') + '" '
+                                    + 'for control "' + (this.id || 'anonymous')+ '" '
                                     + 'of type ' + this.type + ' '
                                     + 'because: ' + ex.message
                             );
@@ -7839,7 +7811,7 @@
      * @author otakustay
      */
     define(
-        'esui/helper/children', ['require', 'underscore', '../main'], function (require) {
+        'esui/helper/children',['require','underscore','../main'],function (require) {
             var u = require('underscore');
             var ui = require('../main');
 
@@ -7916,7 +7888,7 @@
      * @author otakustay
      */
     define(
-        'esui/helper/dom', ['require', 'underscore', '../lib', '../main'], function (require) {
+        'esui/helper/dom',['require','underscore','../lib','../main'],function (require) {
             /**
              * 获取控件用于生成css class的类型
              *
@@ -8174,7 +8146,7 @@
                         this.control.viewContext && this.control.viewContext.id;
                 }
                 var prefix = this.control.domIDPrefix
-                    ? this.control.domIDPrefix + '-'
+                    ? this.control.domIDPrefix+ '-'
                     : '';
                 return 'ctrl-' + prefix + this.control.id + part;
             };
@@ -8343,7 +8315,7 @@
      * @author otakustay
      */
     define(
-        'mini-event/lib', ['require'], function (require) {
+        'mini-event/lib',['require'],function (require) {
             /**
              * 工具库模块
              *
@@ -8392,7 +8364,7 @@
      * @author otakustay
      */
     define(
-        'mini-event/EventQueue', ['require', './lib'], function (require) {
+        'mini-event/EventQueue',['require','./lib'],function (require) {
             var lib = require('./lib');
 
             /**
@@ -8581,13 +8553,12 @@
      * @author otakustay
      */
     define(
-        'mini-event/Event', ['require', './lib'], function (require) {
+        'mini-event/Event',['require','./lib'],function (require) {
             var lib = require('./lib');
 
             function returnTrue() {
                 return true;
             }
-
             function returnFalse() {
                 return false;
             }
@@ -8870,7 +8841,7 @@
      * @author otakustay
      */
     define(
-        'mini-event/main', ['require', './Event'], function (require) {
+        'mini-event/main',['require','./Event'],function (require) {
             var Event = require('./Event');
 
             /**
@@ -8910,9 +8881,7 @@
         }
     );
 
-    define('mini-event', ['mini-event/main'], function (main) {
-        return main;
-    });
+    define('mini-event', ['mini-event/main'], function (main) { return main; });
 
     /**
      * ESUI (Enterprise Simple UI)
@@ -8923,7 +8892,7 @@
      * @author otakustay
      */
     define(
-        'esui/helper/event', ['require', 'underscore', 'mini-event/EventQueue', '../lib', 'mini-event'], function (require) {
+        'esui/helper/event',['require','underscore','mini-event/EventQueue','../lib','mini-event'],function (require) {
             var DOM_EVENTS_KEY = '_esuiDOMEvent';
             var globalEvents = {
                 window: {},
@@ -8995,9 +8964,7 @@
                         currentTarget: e.currentTarget
                     };
                     timer = setTimeout(
-                        function () {
-                            fn.call(self, e);
-                        },
+                        function () { fn.call(self, e); },
                         interval
                     );
                 };
@@ -9279,7 +9246,7 @@
      * @author otakustay
      */
     define(
-        'esui/helper/html', ['require'], function (require) {
+        'esui/helper/html',['require'],function (require) {
             /**
              * @override Helper
              */
@@ -9344,7 +9311,7 @@
      * @author otakustay
      */
     define(
-        'esui/helper/life', ['require', 'underscore', '../main'], function (require) {
+        'esui/helper/life',['require','underscore','../main'],function (require) {
             /**
              * LifeCycle枚举
              *
@@ -9504,7 +9471,7 @@
      * @author otakustay
      */
     define(
-        'esui/helper/template', ['require', 'underscore'], function (require) {
+        'esui/helper/template',['require','underscore'],function (require) {
             var u = require('underscore');
 
             var FILTERS = {
@@ -9681,7 +9648,7 @@
      * @author otakustay
      */
     define(
-        'esui/Helper', ['require', 'underscore', './helper/children', './helper/dom', './helper/event', './helper/html', './helper/life', './helper/template'], function (require) {
+        'esui/Helper',['require','underscore','./helper/children','./helper/dom','./helper/event','./helper/html','./helper/life','./helper/template'],function (require) {
             var u = require('underscore');
 
             /**
@@ -9717,7 +9684,7 @@
      * @author otakustay
      */
     define(
-        'mini-event/EventTarget', ['require', './lib', './Event', './EventQueue'], function (require) {
+        'mini-event/EventTarget',['require','./lib','./Event','./EventQueue'],function (require) {
             var lib = require('./lib');
             var Event = require('./Event');
             var EventQueue = require('./EventQueue');
@@ -9920,7 +9887,7 @@
      * @author erik, otakustay
      */
     define(
-        'esui/Control', ['require', './lib', 'underscore', './main', './Helper', './SafeWrapper', 'mini-event/EventTarget'], function (require) {
+        'esui/Control',['require','./lib','underscore','./main','./Helper','./SafeWrapper','mini-event/EventTarget'],function (require) {
             var lib = require('./lib');
             var u = require('underscore');
             var ui = require('./main');
@@ -10079,9 +10046,7 @@
 
                     var name = this.type.replace(
                         /([A-Z])/g,
-                        function (match, ch) {
-                            return '-' + ch.toLowerCase();
-                        }
+                        function (match, ch) { return '-' + ch.toLowerCase(); }
                     );
                     return document.createElement(ui.getConfig('customElementPrefix') + '-' + name.slice(1));
                 },
@@ -10496,9 +10461,7 @@
                         var properties = {};
                         var statePropertyName = state.replace(
                             /-(\w)/,
-                            function (m, c) {
-                                return c.toUpperCase();
-                            }
+                            function (m, c) { return c.toUpperCase(); }
                         );
                         properties[statePropertyName] = true;
                         this.setProperties(properties);
@@ -10523,9 +10486,7 @@
                         var properties = {};
                         var statePropertyName = state.replace(
                             /-(\w)/,
-                            function (m, c) {
-                                return c.toUpperCase();
-                            }
+                            function (m, c) { return c.toUpperCase(); }
                         );
                         properties[statePropertyName] = false;
                         this.setProperties(properties);
@@ -10684,7 +10645,7 @@
      * @author dbear, otakustay
      */
     define(
-        'esui/Button', ['require', 'underscore', './lib', './painters', './Control', './main'], function (require) {
+        'esui/Button',['require','underscore','./lib','./painters','./Control','./main'],function (require) {
             var u = require('underscore');
             var lib = require('./lib');
             var paint = require('./painters');
@@ -10874,7 +10835,7 @@
      * @author otakustay
      */
     define(
-        'esui/Layer', ['require', 'underscore', './lib', './main', 'mini-event/EventTarget'], function (require) {
+        'esui/Layer',['require','underscore','./lib','./main','mini-event/EventTarget'],function(require) {
             var u = require('underscore');
             var lib = require('./lib');
             var ui = require('./main');
@@ -10958,9 +10919,7 @@
                 this.control.helper.addDOMEvent(
                     element,
                     eventName,
-                    function (e) {
-                        e.stopPropagation();
-                    }
+                    function (e) { e.stopPropagation(); }
                 );
             };
 
@@ -11057,9 +11016,7 @@
                     this.control.helper.addDOMEvent(
                         element,
                         'mousedown',
-                        function (e) {
-                            e.stopPropagation();
-                        }
+                        function (e) { e.stopPropagation(); }
                     );
 
                     this.syncState(element);
@@ -11259,7 +11216,7 @@
                 layer.style.left = '-5000px';
                 // 如果对层宽度有要求，则先设置好最小宽度
                 if (options.strictWidth) {
-                    layer.style.minWidth = 58 + 'px';
+                    layer.style.minWidth = targetOffset.width + 'px';
                 }
                 // IE7下，如果浮层隐藏着反而会影响offset的获取，
                 // 但浮层显示出来又可能造成滚动条出现，
@@ -11409,7 +11366,7 @@
      * @author erik, otakustay
      */
     define(
-        'esui/controlHelper', ['require', './lib', './Helper', './painters', 'underscore', './Layer'], function (require) {
+        'esui/controlHelper',['require','./lib','./Helper','./painters','underscore','./Layer'],function (require) {
             var lib = require('./lib');
             var Helper = require('./Helper');
 
@@ -11543,8 +11500,8 @@
         // 你说为啥要有这么个控件？因为有2货喜欢在验证提示里放别的控件！
         // 你说为啥这东西不继承`Label`？因为有2货要往里放控件！
         // 你说为啥名字不叫`ValidityLabel`？CSS样式里看到`validitylabel`多丑！
-        'esui/Validity', ['require', 'underscore', './lib', './Control', './Helper', './painters', './main'], function (require) {
-            var u = require('underscore');
+        'esui/Validity',['require','underscore','./lib','./Control','./Helper','./painters','./main'],function (require) {
+            var u  = require('underscore');
             var lib = require('./lib');
             var Control = require('./Control');
             var Helper = require('./Helper');
@@ -11783,7 +11740,7 @@
      * @author DBear
      */
     define(
-        'esui/validator/Validity', ['require', 'underscore'], function (require) {
+        'esui/validator/Validity',['require','underscore'],function (require) {
             var u = require('underscore');
 
             /**
@@ -11918,7 +11875,7 @@
      * @author erik, otakustay
      */
     define(
-        'esui/InputControl', ['require', './lib', './controlHelper', './Control', './Validity', './validator/Validity', './main'], function (require) {
+        'esui/InputControl',['require','./lib','./controlHelper','./Control','./Validity','./validator/Validity','./main'],function (require) {
             var lib = require('./lib');
             var helper = require('./controlHelper');
             var Control = require('./Control');
@@ -12372,7 +12329,7 @@
      * @author otakustay
      */
     define(
-        'esui/Select', ['require', 'underscore', './lib', './InputControl', './Layer', './painters', './main'], function (require) {
+        'esui/Select',['require','underscore','./lib','./InputControl','./Layer','./painters','./main'],function (require) {
             var u = require('underscore');
             var lib = require('./lib');
             var InputControl = require('./InputControl');
@@ -12416,6 +12373,7 @@
 
             SelectLayer.prototype.render = function (element) {
                 var html = '';
+
                 if (this.control.childName === 'yearSel') {
                     var dataIndex = this.control.datasource.length - 1;
                     for (var i = 0; i < this.control.datasource.length; i++) {
@@ -12439,6 +12397,7 @@
                         html += '</li>';
                     }
                 }
+
                 element.innerHTML = html;
             };
 
@@ -12953,7 +12912,7 @@
      * @author otakustay
      */
     define(
-        'esui/Panel', ['require', 'underscore', './lib', './Control', './painters', './main', './main'], function (require) {
+        'esui/Panel',['require','underscore','./lib','./Control','./painters','./main','./main'],function (require) {
             var u = require('underscore');
             var lib = require('./lib');
             var Control = require('./Control');
@@ -13191,7 +13150,7 @@
      */
 
     define(
-        'esui/MonthView', ['require', './Button', './Select', './Panel', './lib', './controlHelper', './Control', './main', 'moment'], function (require) {
+        'esui/MonthView',['require','./Button','./Select','./Panel','./lib','./controlHelper','./Control','./main','moment'],function (require) {
             require('./Button');
             require('./Select');
             require('./Panel');
@@ -13308,10 +13267,14 @@
                         monthSelId: monthView.helper.getId('monthSel'),
                         monthMainId: monthView.helper.getId('monthMain'),
                         monthMainClass: monthView.helper.getPartClassName('month'),
-                        monthBackClass: monthView.helper.getPartClassName('month-back'),
-                        monthForClass: monthView.helper.getPartClassName('month-forward'),
-                        yearSelectClass: monthView.helper.getPartClassName('year-select'),
-                        monthSelectClass: monthView.helper.getPartClassName('month-select')
+                        monthBackClass:
+                            monthView.helper.getPartClassName('month-back'),
+                        monthForClass:
+                            monthView.helper.getPartClassName('month-forward'),
+                        yearSelectClass:
+                            monthView.helper.getPartClassName('year-select'),
+                        monthSelectClass:
+                            monthView.helper.getPartClassName('month-select')
                     }
                 );
             }
@@ -13342,7 +13305,8 @@
                     lib.format(
                         tplHead,
                         {
-                            className: monthView.helper.getPartClassName('month-main')
+                            className:
+                                monthView.helper.getPartClassName('month-main')
                         }
                     )
                 );
@@ -13517,7 +13481,7 @@
                         return;
                     }
                     // 点击行批量选中
-                    else if (this.mode === 'multi') {
+                    else if (this.mode === 'multi'){
                         if (lib.hasClass(tar, rowSelectClasses[0])) {
                             selectByTagClick(this, tar);
                             return;
@@ -13573,7 +13537,7 @@
                 var disabledClasses =
                     helper.getPartClasses(monthView, 'month-item-disabled');
                 // 既不是范围外的，又不是虚拟的
-                if (!lib.hasClass(dateItem, virtualClasses[0])
+                if(!lib.hasClass(dateItem, virtualClasses[0])
                     && !lib.hasClass(dateItem, disabledClasses[0])) {
                     return 1;
                 }
@@ -13858,7 +13822,7 @@
                 for (var i = 0; i < rowTagNum; i++) {
                     var rowTag = lib.g(rowTagId + '-' + i);
                     if (lib.hasClass(rowTag, rowSelectedClasses[0])) {
-                        selectedRowNum++;
+                        selectedRowNum ++;
                     }
                 }
 
@@ -13909,9 +13873,7 @@
                         selectedDates.push(monthView.viewValue[key].value);
                     }
                 }
-                selectedDates.sort(function (a, b) {
-                    return a - b;
-                });
+                selectedDates.sort(function(a, b) { return a - b; });
                 monthView.rawValue = selectedDates;
                 monthView.fire('change');
             }
@@ -14111,7 +14073,8 @@
                 // 如果year选择的数据没改变，
                 // 但可能还是需要重回日历，
                 // 因此要手动触发year的change
-                if (lastYear === me.year) {
+                // 3.1.0 beta6 bug：lastYear为string，me.year为number
+                if (+lastYear === me.year) {
                     yearSelect.fire('change');
                 }
 
@@ -14161,7 +14124,6 @@
             function goToNextMonth(monthView) {
                 var nowDate = new Date(monthView.year, monthView.month, 1);
                 var newDate = m(nowDate).add('month', 1);
-
                 repaintMonthView(monthView, newDate.year(), newDate.month());
             }
 
@@ -14296,7 +14258,7 @@
                 }
 
                 dateStr = dateStr + '';
-                var dateAndHour = dateStr.split(' ');
+                var dateAndHour =  dateStr.split(' ');
                 var date = parse(dateAndHour[0]);
                 if (dateAndHour[1]) {
                     var clock = dateAndHour[1].split(':');
@@ -14693,17 +14655,17 @@
                     else {
                         var dateStrs = [];
                         var oneDay = 86400000;
-                        for (var i = 0; i < rawValue.length; i++) {
+                        for (var i = 0; i < rawValue.length; i ++) {
                             if (i === 0) {
                                 dateStrs.push(
                                     lib.date.format(rawValue[i], this.paramFormat)
                                 );
                             }
                             else {
-                                if ((rawValue[i] - rawValue[i - 1]) > oneDay) {
+                                if ((rawValue[i] - rawValue[i-1]) > oneDay) {
                                     dateStrs.push(
                                         lib.date.format(
-                                            rawValue[i - 1], this.paramFormat
+                                            rawValue[i-1], this.paramFormat
                                         )
                                     );
                                     dateStrs.push(
@@ -14759,7 +14721,7 @@
      * @author otakustay
      */
     define(
-        'esui/CheckBox', ['require', 'underscore', './lib', './InputControl', './painters', './main'], function (require) {
+        'esui/CheckBox',['require','underscore','./lib','./InputControl','./painters','./main'],function (require) {
             var u = require('underscore');
             var lib = require('./lib');
             var InputControl = require('./InputControl');
@@ -15038,7 +15000,7 @@
                  *
                  * @param {boolean} checked 状态
                  */
-                setChecked: function (checked) {
+                setChecked: function ( checked ) {
                     this.setProperties({ checked: checked });
                 },
 
@@ -15058,7 +15020,7 @@
                 }
             };
 
-            lib.inherits(CheckBox, InputControl);
+            lib.inherits( CheckBox, InputControl );
             require('./main').register(CheckBox);
             return CheckBox;
         }
@@ -15073,7 +15035,7 @@
      * @author erik, otakustay
      */
     define(
-        'esui/Label', ['require', 'underscore', './lib', './Control', './painters', './main'], function (require) {
+        'esui/Label',['require','underscore','./lib','./Control','./painters','./main'],function (require) {
             var u = require('underscore');
             var lib = require('./lib');
             var Control = require('./Control');
@@ -15269,7 +15231,7 @@
      */
 
     define(
-        'esui/RangeCalendar', ['require', './Button', './MonthView', './CheckBox', './Label', './lib', './InputControl', './controlHelper', './Layer', './main', 'moment', 'underscore'], function (require) {
+        'esui/RangeCalendar',['require','./Button','./MonthView','./CheckBox','./Label','./lib','./InputControl','./controlHelper','./Layer','./main','moment','underscore'],function (require) {
             require('./Button');
             require('./MonthView');
             require('./CheckBox');
@@ -15414,13 +15376,13 @@
                     + '<div class="${shortCutClass}" id="${shortcutId}">'
                     + '${shortCut}</div>'
                     + '<div class="${bodyClass}">'
-                    + '${beginCalendar}${endCalendar}'
+                    +   '${beginCalendar}${endCalendar}'
                     + '</div>'
                     + '<div class="${footClass}">'
-                    + '<div class="${okBtnClass}"'
-                    + ' data-ui="type:Button;childName:okBtn;">确定</div>'
-                    + '<div class="${cancelBtnClass}"'
-                    + ' data-ui="type:Button;childName:cancelBtn;">取消</div>'
+                    +   '<div class="${okBtnClass}"'
+                    +   ' data-ui="type:Button;childName:okBtn;">确定</div>'
+                    +   '<div class="${cancelBtnClass}"'
+                    +   ' data-ui="type:Button;childName:cancelBtn;">取消</div>'
                     + '</div>'
                     + '<div data-ui="type:Button;childName:'
                     + 'closeBtn;skin:layerClose;height:12;"></div>';
@@ -15548,22 +15510,22 @@
             function getCalendarHtml(calendar, type) {
                 var endlessCheckDOM = '';
                 // 可以无限
-//            if (calendar.endlessCheck && type === 'end') {
-//                endlessCheckDOM = ''
-//                    + '<input type="checkbox" title="不限结束" '
-//                    + 'data-ui-type="CheckBox" '
-//                    + 'data-ui-child-name="endlessCheck" />';
-//            }
+                if (calendar.endlessCheck && type === 'end') {
+                    endlessCheckDOM = ''
+                        + '<input type="checkbox" title="不限结束" '
+                        + 'data-ui-type="CheckBox" '
+                        + 'data-ui-child-name="endlessCheck" />';
+                }
                 var tpl = ''
                     + '<div class="${frameClass}">'
-                    + '<div class="${labelClass}">'
-                    + '<h3>${labelTitle}</h3>'
-                    + endlessCheckDOM
-                    + '</div>'
-                    + '<div class="${calClass}">'
-                    + '<div data-ui="type:MonthView;'
-                    + 'childName:${calName}"></div>'
-                    + '</div>'
+                    +   '<div class="${labelClass}">'
+                    +     '<h3>${labelTitle}</h3>'
+                    +     endlessCheckDOM
+                    +   '</div>'
+                    +   '<div class="${calClass}">'
+                    +     '<div data-ui="type:MonthView;'
+                    +     'childName:${calName}"></div>'
+                    +   '</div>'
                     + '</div>';
 
                 return lib.format(tpl, {
@@ -15879,18 +15841,18 @@
              * @param {string} value 目标日期字符串 ‘YYYY-MM-DD,YYYY-MM-DD’
              * @return {{begin:Date,end:Date}=}
              */
-            RangeCalendar.prototype.convertToRaw = function (value) {
+            RangeCalendar.prototype.convertToRaw = function(value) {
                 var strDates = value.split(',');
                 // 可能会只输入一个，默认当做begin，再塞一个默认的end
                 if (strDates.length === 1) {
                     strDates.push('2046-11-04');
                 }
                 // 第一个是空的
-                else if (strDates[0] === '') {
+                else if (strDates[0] === ''){
                     strDates[0] = '1983-09-03';
                 }
                 // 第二个是空的
-                else if (strDates[1] === '') {
+                else if (strDates[1] === ''){
                     strDates[1] = '2046-11-04';
                 }
 
@@ -16026,8 +15988,7 @@
                         getValue: function () {
                             return {
                                 begin: m(this.now).startOf('month').toDate(),
-                                end: m(this.now).subtract('days', 1).toDate()
-
+                                end: m(this.now).toDate()
                             };
                         }
                     },
@@ -16223,7 +16184,7 @@
                             // 还要支持只设置begin或只设置end的情况
                             if (!range.begin) {
                                 // 设置一个特别远古的年
-                                range.begin = new Date(2000, 8, 3);
+                                range.begin = new Date(1983, 8, 3);
                             }
                             else if (!range.end) {
                                 // 设置一个特别未来的年
@@ -16332,7 +16293,7 @@
                     }
                 }
 
-                function changeHighlightState(monthView, date, highlight) {
+                function changeHighlightState (monthView, date, highlight) {
                     var dateItem = monthView.getDateItemHTML(date);
                     if (highlight) {
                         monthView.helper.addPartClasses('month-item-highlight', dateItem);
