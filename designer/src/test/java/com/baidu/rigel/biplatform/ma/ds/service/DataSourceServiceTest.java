@@ -326,7 +326,7 @@ public class DataSourceServiceTest {
      */
     @Test
     public void testSaveOrUpdateDsWithValidConn() throws Exception {
-        Mockito.doReturn(new String[] { "test", "abcdefg" }).when(fileService).ls("null/null");
+        Mockito.doReturn(new String[] {"test", "abcdefg"}).when(fileService).ls("null/null");
         DataSourceDefine ds = new DataSourceDefine();
         ds.setProductLine("test");
         ds.setName("test");

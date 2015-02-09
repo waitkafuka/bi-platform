@@ -29,7 +29,14 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
  * @author zhongyi
  *
  */
-public class ItemUtils {
+public final class ItemUtils {
+    
+    /**
+     * 构造函数
+     */
+    private ItemUtils() {
+        
+    }
     
     /**
      * item是否是时间维度

@@ -161,9 +161,6 @@ $namespace('di.shared.ui');
                 ['sync.result.MEASURE_DES', this.$setMeasureDes4Table, this]
             ); 
         }
-        
-
-
         model.init();
 
         table.onexpand = bind(this.$handleExpand, this);
@@ -195,7 +192,7 @@ $namespace('di.shared.ui');
                 offlineDownloadBtn
             ],
             'init'
-        )
+        );
         breadcrumb && breadcrumb.hide();
 
         this.$di('getEl').style.display = 'none';
@@ -214,7 +211,7 @@ $namespace('di.shared.ui');
                 this._uOfflineDownloadBtn
             ],
             'dispose'
-        )
+        );
         DI_TABLE.superClass.dispose.call(this);
     };
 
@@ -316,13 +313,13 @@ $namespace('di.shared.ui');
             var paramArr = [];
                 for (var j = 0; j < this._uTable._aColDefine.length; j++) {
                     if(this._uTable._aColDefine[j] && this._uTable._aColDefine[j].uniqueName){
-                       paramArr.push('colUniqueNames='+this._uTable._aColDefine[j].uniqueName); 
+                       paramArr.push('colUniqueNames=' + this._uTable._aColDefine[j].uniqueName);
                     }
                 };
             this.$sync(
                 this.getModel(),
                 'MEASURE_DES',
-                { colUniqueNamesArr: paramArr},
+                { colUniqueNamesArr: paramArr },
                 null,
                 null,
                 { 
@@ -578,7 +575,9 @@ $namespace('di.shared.ui');
         this.$di(
             'dispatchEvent', 
             'rowclick',
-            [{ uniqueName: rowDefItem.uniqueName }]
+            [{
+                uniqueName: rowDefItem.uniqueName
+            }]
         );
     };
 
@@ -648,10 +647,33 @@ $namespace('di.shared.ui');
          *
          * @event
          */
+        var outParam = this.$di('getDef').outParam;
+        var params = {};
+        if (outParam) {
+            // 整理后端需要的数据格式
+            // {
+            //      6e72140667f37b984d9764f5aca6b6cb:[dim_trade_trade_l1].[广播通信]
+            //      6e72140667f37b984d9764f5aca6b6cb_level:0
+            // }
+            var uniqueName = options.args.param.uniqueName;
+            uniqueName = uniqueName.replace(/{/g, '');
+            var uniqueNames = uniqueName.split('}');
+            for (var i = 0, iLen = uniqueNames.length; i < iLen - 1 ; i ++) {
+                var tempName = uniqueNames[i].split('.')[0];
+                tempName = tempName.replace('[', '').replace(']', '');
+                if (outParam.dimName === tempName) {
+                    params[outParam.dimId] = uniqueNames[i];
+                    params[outParam.dimId + '_level'] = outParam.level;
+                }
+            }
+        }
+        else {
+            params.uniqueName = options.args.param.uniqueName;
+        }
         this.$di(
             'dispatchEvent',
             options.args.eventName,
-            [{ uniqueName: options.args.param.uniqueName }]
+            [params]
         );
     };
 

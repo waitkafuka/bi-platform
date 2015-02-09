@@ -30,8 +30,6 @@ import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
-import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
-import com.baidu.rigel.biplatform.ma.resource.BaseResource;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 
 /**
@@ -43,7 +41,7 @@ import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
  */
 @RestController
 @RequestMapping("/silkroad/login")
-public class LoginController extends BaseResource {
+public class LoginController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
@@ -64,9 +62,13 @@ public class LoginController extends BaseResource {
     @RequestMapping(method = { RequestMethod.POST })
     @ResponseBody
     public ResponseResult login(HttpServletRequest request, HttpServletResponse response) {
-        ResponseResult rs = new ResponseResult();
+        ResponseResult rs = checkValidateCode(request);
+        if (rs.getStatus() == ResponseResult.FAILED) {
+            return rs;
+        }
         // 获取用户登录信息
         String productLine = request.getParameter("name");
+        LOG.info("login user info : user = " + productLine);
         String pwd = request.getParameter("pwd");
         // modify by jiangyichao at 2014-09-12 加密产品线
         String productLineEncrypt = productLine;
@@ -81,14 +83,14 @@ public class LoginController extends BaseResource {
             // 加密过程发生异常
             LOG.warn(e.getMessage(), e);
             rs.setStatus(1);
-            rs.setStatusInfo("user's message encrypt happen exception ");
+            rs.setStatusInfo("认证密钥错误 ");
             return rs;
         }
         // 使用未加密的用户名和加密后的密码查询用户
         ProductlineInfo user = userManageService.queryUser(productLine, pwdEncrypt);
         if (user == null) {
             rs.setStatus(1);
-            rs.setStatusInfo("user's name or password is wrong, please check");
+            rs.setStatusInfo("用户名或密码错误");
             return rs;
         }
         response.addHeader("Access-Control-Allow-Origin", "*");      
@@ -98,10 +100,11 @@ public class LoginController extends BaseResource {
         response.addCookie(productLineCookie);
 
         // 在请求中添加sessionId的cookie信息
-        String sessionId = UuidGeneratorUtils.generate();
-        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
-        sessionIdCookie.setPath(Constants.COOKIE_PATH);
-        response.addCookie(sessionIdCookie);
+//        String sessionId = UuidGeneratorUtils.generate();
+//        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
+//        sessionIdCookie.setPath(Constants.COOKIE_PATH);
+//        response.addCookie(sessionIdCookie);
+//        response.addHeader(Constants.COOKIE_PATH, sessionId);
         LOG.info("user [" + productLine + "] login bi-platform successfully");
         rs.setStatus(0);
         rs.setStatusInfo("successfully");

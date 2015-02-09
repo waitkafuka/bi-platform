@@ -15,16 +15,13 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.index.service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
-import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexMetaIsNullException;
-import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
-import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
-import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistException;
 
 /**
  * 
@@ -34,34 +31,6 @@ import com.baidu.rigel.biplatform.tesseract.netty.exception.HandlerRegistExcepti
  *
  */
 public interface IndexService {
-    
-    /**
-     * 
-     * doIndex
-     * 
-     * @param idxMeta
-     *            索引元数据
-     * @param idxAction
-     *            索引动作
-     * @return boolean
-     * @throws IndexMetaIsNullException
-     *             可能抛出的异常
-     * @throws IllegalArgumentException
-     *             可能抛出的异常
-     * @throws DataSourceException
-     *             可能抛出的异常
-     * @throws InstantiationException
-     *             可能抛出的异常
-     * @throws IllegalAccessException
-     *             可能抛出的异常
-     * @throws HandlerRegistException
-     *             可能抛出的异常
-     * @throws InterruptedException
-     *             可能抛出的异常
-     */
-    boolean doIndex(IndexMeta idxMeta, IndexAction idxAction) throws IndexMetaIsNullException,
-        IllegalArgumentException, DataSourceException, InstantiationException,
-        IllegalAccessException, HandlerRegistException, InterruptedException, IndexAndSearchException;
     
     /**
      * 
@@ -84,8 +53,9 @@ public interface IndexService {
     /**
      * updateIndexByDataSourceKey 跟据数据源、事实表增量更新索引数据
      * @param dataSourceKey 数据源信息
-     * @param dataSetNames 事实表信息
+     * @param factTableNames 事实表信息
+     * @param dataSetMap 待修订的事实表及起始ID信息
      * @throws IndexAndSearchException
      */
-    void updateIndexByDataSourceKey(String dataSourceKey, String[] dataSetNames) throws IndexAndSearchException;
+    void updateIndexByDataSourceKey(String dataSourceKey,String[] factTableNames, Map<String,Map<String,BigDecimal>> dataSetMap) throws IndexAndSearchException;
 }

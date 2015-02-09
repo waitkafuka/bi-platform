@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.ma.resource.view.dimdetail;
 
 import java.io.Serializable;
 
-import com.baidu.rigel.biplatform.ma.resource.view.dimdetail.DateLevel;
 
 /**
  * 

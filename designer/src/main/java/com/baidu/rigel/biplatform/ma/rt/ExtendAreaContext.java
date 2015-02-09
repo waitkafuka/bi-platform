@@ -37,314 +37,353 @@ import com.google.common.collect.Sets;
  *
  */
 public class ExtendAreaContext implements Serializable {
-	
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 4565865318696020689L;
+    
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 4565865318696020689L;
 
-	/**
-	 * 区域id
-	 */
-	private String areaId;
-	
-	/**
-	 * 区域类型
-	 */
-	private ExtendAreaType areaType;
-	
-	/**
-	 * 格式化信息
-	 */
-	private FormatModel formatModel;
+    /**
+     * 区域id
+     */
+    private String areaId;
+    
+    /**
+     * 区域类型
+     */
+    private ExtendAreaType areaType;
+    
+    /**
+     * 格式化信息
+     */
+    private FormatModel formatModel;
 
-	/**
-	 * 面包屑路径
-	 */
-	private Map<String, String> curBreadCrumPath;
-	
-	/**
-	 * 当前操作下钻条目
-	 */
-	private String drillItemValue;
-	
-	/**
-	 * 报表id
-	 */
-	private String reportId;
-	
-	/**
-	 * 当前上下文包含的参数信息
-	 */
-	private Map<String, Object> params = Maps.newConcurrentMap();
-	
-	/**
-	 * 区域x轴对应的查询条目
-	 */
-	private LinkedHashMap<Item, Object> x = Maps.newLinkedHashMap();
-	
-	/**
-	 * 区域y轴对应的查询条目
-	 */
-	private LinkedHashMap<Item, Object> y = Maps.newLinkedHashMap();
-	
-	/**
-	 * 区域过滤轴对应的查询条目
-	 */
-	private LinkedHashMap<Item, Object> s = Maps.newLinkedHashMap();
-	
-	/**
-	 * 区域备选维度轴对应的条目信息
-	 */
-	private Set<Item> canDim = Sets.newLinkedHashSet();
-	
-	/**
-	 * 区域备选指标轴对应的条目
-	 */
-	private Set<Item> canInd = Sets.newLinkedHashSet();
-	
-	/**
-	 * 查询请求历史纪录
-	 */
-	private LinkedList<ResultSet> queryStatus = Lists.newLinkedList();
-	
-	/**
-	 * 区域默认使用的数据源列表
-	 */
-	private DataSourceInfo defaultDsInfo;
-	
-	/**
-	 * 备用条目、数据源信息对应关系，后续跨库查询使用
-	 */
-	private Map<Item, DataSourceInfo> dsInfo;
-	
-	/**
-	 * 依据扩展区域定义生成的cube，在运行时，此cube不会发生变化
-	 */
-	private Cube cubeDefine;
+    /**
+     * 面包屑路径
+     */
+    private Map<String, String> curBreadCrumPath;
+    
+    /**
+     * 当前操作下钻条目
+     */
+    private String drillItemValue;
+    
+    /**
+     * 报表id
+     */
+    private String reportId;
+    
+    /**
+     * 当前上下文包含的参数信息
+     */
+    private Map<String, Object> params = Maps.newConcurrentMap();
+    
+    /**
+     * 区域x轴对应的查询条目
+     */
+    private LinkedHashMap<Item, Object> x = Maps.newLinkedHashMap();
+    
+    /**
+     * 区域y轴对应的查询条目
+     */
+    private LinkedHashMap<Item, Object> y = Maps.newLinkedHashMap();
+    
+    /**
+     * 区域过滤轴对应的查询条目
+     */
+    private LinkedHashMap<Item, Object> s = Maps.newLinkedHashMap();
+    
+    /**
+     * 区域备选维度轴对应的条目信息
+     */
+    private Set<Item> canDim = Sets.newLinkedHashSet();
+    
+    /**
+     * 区域备选指标轴对应的条目
+     */
+    private Set<Item> canInd = Sets.newLinkedHashSet();
+    
+    /**
+     * 
+     */
+    private Map<String, Item> selectDims = Maps.newHashMap();
+    
+    /**
+     * 
+     */
+    private Map<String, Item> selectMeasures = Maps.newHashMap();
+    
+    /**
+     * 查询请求历史纪录
+     */
+    private LinkedList<ResultSet> queryStatus = Lists.newLinkedList();
+    
+    /**
+     * 区域默认使用的数据源列表
+     */
+    private DataSourceInfo defaultDsInfo;
+    
+    /**
+     * 备用条目、数据源信息对应关系，后续跨库查询使用
+     */
+    private Map<Item, DataSourceInfo> dsInfo;
+    
+    /**
+     * 依据扩展区域定义生成的cube，在运行时，此cube不会发生变化
+     */
+    private Cube cubeDefine;
 
-	/**
-	 * @return the areaId
-	 */
-	public String getAreaId() {
-		return areaId;
-	}
+    /**
+     * @return the areaId
+     */
+    public String getAreaId() {
+        return areaId;
+    }
 
-	/**
-	 * @param areaId the areaId to set
-	 */
-	public void setAreaId(String areaId) {
-		this.areaId = areaId;
-	}
+    /**
+     * @param areaId the areaId to set
+     */
+    public void setAreaId(String areaId) {
+        this.areaId = areaId;
+    }
 
-	/**
-	 * @return the areaType
-	 */
-	public ExtendAreaType getAreaType() {
-		return areaType;
-	}
+    /**
+     * @return the areaType
+     */
+    public ExtendAreaType getAreaType() {
+        return areaType;
+    }
 
-	/**
-	 * @param areaType the areaType to set
-	 */
-	public void setAreaType(ExtendAreaType areaType) {
-		this.areaType = areaType;
-	}
+    /**
+     * @param areaType the areaType to set
+     */
+    public void setAreaType(ExtendAreaType areaType) {
+        this.areaType = areaType;
+    }
 
-	/**
-	 * @return the formatModel
-	 */
-	public FormatModel getFormatModel() {
-		return formatModel;
-	}
+    /**
+     * @return the formatModel
+     */
+    public FormatModel getFormatModel() {
+        return formatModel;
+    }
 
-	/**
-	 * @param formatModel the formatModel to set
-	 */
-	public void setFormatModel(FormatModel formatModel) {
-		this.formatModel = formatModel;
-	}
+    /**
+     * @param formatModel the formatModel to set
+     */
+    public void setFormatModel(FormatModel formatModel) {
+        this.formatModel = formatModel;
+    }
 
-	/**
-	 * @return the curBreadCrumPath
-	 */
-	public Map<String, String> getCurBreadCrumPath() {
-		return curBreadCrumPath;
-	}
+    /**
+     * @return the curBreadCrumPath
+     */
+    public Map<String, String> getCurBreadCrumPath() {
+        return curBreadCrumPath;
+    }
 
-	/**
-	 * @param curBreadCrumPath the curBreadCrumPath to set
-	 */
-	public void setCurBreadCrumPath(Map<String, String> curBreadCrumPath) {
-		this.curBreadCrumPath = curBreadCrumPath;
-	}
+    /**
+     * @param curBreadCrumPath the curBreadCrumPath to set
+     */
+    public void setCurBreadCrumPath(Map<String, String> curBreadCrumPath) {
+        this.curBreadCrumPath = curBreadCrumPath;
+    }
 
-	/**
-	 * @return the drillItemValue
-	 */
-	public String getDrillItemValue() {
-		return drillItemValue;
-	}
+    /**
+     * @return the drillItemValue
+     */
+    public String getDrillItemValue() {
+        return drillItemValue;
+    }
 
-	/**
-	 * @param drillItemValue the drillItemValue to set
-	 */
-	public void setDrillItemValue(String drillItemValue) {
-		this.drillItemValue = drillItemValue;
-	}
+    /**
+     * @param drillItemValue the drillItemValue to set
+     */
+    public void setDrillItemValue(String drillItemValue) {
+        this.drillItemValue = drillItemValue;
+    }
 
-	/**
-	 * @return the reportId
-	 */
-	public String getReportId() {
-		return reportId;
-	}
+    /**
+     * @return the reportId
+     */
+    public String getReportId() {
+        return reportId;
+    }
 
-	/**
-	 * @param reportId the reportId to set
-	 */
-	public void setReportId(String reportId) {
-		this.reportId = reportId;
-	}
+    /**
+     * @param reportId the reportId to set
+     */
+    public void setReportId(String reportId) {
+        this.reportId = reportId;
+    }
 
-	/**
-	 * @return the params
-	 */
-	public Map<String, Object> getParams() {
-		return params;
-	}
+    /**
+     * @return the params
+     */
+    public Map<String, Object> getParams() {
+        return params;
+    }
 
-	/**
-	 * @param params the params to set
-	 */
-	public void setParams(Map<String, Object> params) {
-		this.params = params;
-	}
+    /**
+     * @param params the params to set
+     */
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
+    }
 
-	/**
-	 * @return the x
-	 */
-	public LinkedHashMap<Item, Object> getX() {
-		return x;
-	}
+    /**
+     * @return the x
+     */
+    public LinkedHashMap<Item, Object> getX() {
+        return x;
+    }
 
-	/**
-	 * @param x the x to set
-	 */
-	public void setX(LinkedHashMap<Item, Object> x) {
-		this.x = x;
-	}
+    /**
+     * @param x the x to set
+     */
+    public void setX(LinkedHashMap<Item, Object> x) {
+        this.x = x;
+    }
 
-	/**
-	 * @return the y
-	 */
-	public LinkedHashMap<Item, Object> getY() {
-		return y;
-	}
+    /**
+     * @return the y
+     */
+    public LinkedHashMap<Item, Object> getY() {
+        return y;
+    }
 
-	/**
-	 * @param y the y to set
-	 */
-	public void setY(LinkedHashMap<Item, Object> y) {
-		this.y = y;
-	}
+    /**
+     * @param y the y to set
+     */
+    public void setY(LinkedHashMap<Item, Object> y) {
+        this.y = y;
+    }
 
-	/**
-	 * @return the s
-	 */
-	public LinkedHashMap<Item, Object> getS() {
-		return s;
-	}
+    /**
+     * @return the s
+     */
+    public LinkedHashMap<Item, Object> getS() {
+        return s;
+    }
 
-	/**
-	 * @param s the s to set
-	 */
-	public void setS(LinkedHashMap<Item, Object> s) {
-		this.s = s;
-	}
+    /**
+     * @param s the s to set
+     */
+    public void setS(LinkedHashMap<Item, Object> s) {
+        this.s = s;
+    }
 
-	/**
-	 * @return the canDim
-	 */
-	public Set<Item> getCanDim() {
-		return canDim;
-	}
+    /**
+     * @return the canDim
+     */
+    public Set<Item> getCanDim() {
+        return canDim;
+    }
 
-	/**
-	 * @param canDim the canDim to set
-	 */
-	public void setCanDim(Set<Item> canDim) {
-		this.canDim = canDim;
-	}
+    /**
+     * @param canDim the canDim to set
+     */
+    public void setCanDim(Set<Item> canDim) {
+        this.canDim = canDim;
+    }
 
-	/**
-	 * @return the canInd
-	 */
-	public Set<Item> getCanInd() {
-		return canInd;
-	}
+    /**
+     * @return the canInd
+     */
+    public Set<Item> getCanInd() {
+        return canInd;
+    }
 
-	/**
-	 * @param canInd the canInd to set
-	 */
-	public void setCanInd(Set<Item> canInd) {
-		this.canInd = canInd;
-	}
+    /**
+     * @param canInd the canInd to set
+     */
+    public void setCanInd(Set<Item> canInd) {
+        this.canInd = canInd;
+    }
 
-	/**
-	 * @return the queryStatus
-	 */
-	public LinkedList<ResultSet> getQueryStatus() {
-		return queryStatus;
-	}
+    /**
+     * @return the queryStatus
+     */
+    public LinkedList<ResultSet> getQueryStatus() {
+        return queryStatus;
+    }
 
-	/**
-	 * @param queryStatus the queryStatus to set
-	 */
-	public void setQueryStatus(LinkedList<ResultSet> queryStatus) {
-		this.queryStatus = queryStatus;
-	}
+    /**
+     * @param queryStatus the queryStatus to set
+     */
+    public void setQueryStatus(LinkedList<ResultSet> queryStatus) {
+        this.queryStatus = queryStatus;
+    }
 
-	/**
-	 * @return the defaultDsInfo
-	 */
-	public DataSourceInfo getDefaultDsInfo() {
-		return defaultDsInfo;
-	}
+    /**
+     * @return the defaultDsInfo
+     */
+    public DataSourceInfo getDefaultDsInfo() {
+        return defaultDsInfo;
+    }
 
-	/**
-	 * @param defaultDsInfo the defaultDsInfo to set
-	 */
-	public void setDefaultDsInfo(DataSourceInfo defaultDsInfo) {
-		this.defaultDsInfo = defaultDsInfo;
-	}
+    /**
+     * @param defaultDsInfo the defaultDsInfo to set
+     */
+    public void setDefaultDsInfo(DataSourceInfo defaultDsInfo) {
+        this.defaultDsInfo = defaultDsInfo;
+    }
 
-	/**
-	 * @return the dsInfo
-	 */
-	public Map<Item, DataSourceInfo> getDsInfo() {
-		return dsInfo;
-	}
+    /**
+     * @return the dsInfo
+     */
+    public Map<Item, DataSourceInfo> getDsInfo() {
+        return dsInfo;
+    }
 
-	/**
-	 * @param dsInfo the dsInfo to set
-	 */
-	public void setDsInfo(Map<Item, DataSourceInfo> dsInfo) {
-		this.dsInfo = dsInfo;
-	}
+    /**
+     * @param dsInfo the dsInfo to set
+     */
+    public void setDsInfo(Map<Item, DataSourceInfo> dsInfo) {
+        this.dsInfo = dsInfo;
+    }
 
-	/**
-	 * @return the cubeDefine
-	 */
-	public Cube getCubeDefine() {
-		return cubeDefine;
-	}
+    /**
+     * @return the cubeDefine
+     */
+    public Cube getCubeDefine() {
+        return cubeDefine;
+    }
 
-	/**
-	 * @param cubeDefine the cubeDefine to set
-	 */
-	public void setCubeDefine(Cube cubeDefine) {
-		this.cubeDefine = cubeDefine;
-	}
-	
+    /**
+     * @param cubeDefine the cubeDefine to set
+     */
+    public void setCubeDefine(Cube cubeDefine) {
+        this.cubeDefine = cubeDefine;
+    }
+
+    /**
+     * @return the selectDims
+     */
+    public Map<String, Item> getSelectDims() {
+        return selectDims;
+    }
+
+    /**
+     * @param selectDims the selectDims to set
+     */
+    public void setSelectDims(Map<String, Item> selectDims) {
+        this.selectDims = selectDims;
+    }
+
+    /**
+     * @return the selectMeasures
+     */
+    public Map<String, Item> getSelectMeasures() {
+        return selectMeasures;
+    }
+
+    /**
+     * @param selectMeasures the selectMeasures to set
+     */
+    public void setSelectMeasures(Map<String, Item> selectMeasures) {
+        this.selectMeasures = selectMeasures;
+    }
+
+    
 }

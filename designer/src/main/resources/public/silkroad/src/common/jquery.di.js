@@ -117,3 +117,98 @@ $.isObjectEmpty = function (obj) {
     }
     return flag;
 };
+
+// 获取到含有当前id的组件实例
+// TODO:写注释
+$.getTargetElement = function (id, entityArray) {
+    var target;
+    for (var i = 0, iLen = entityArray.length; i < iLen; i ++) {
+        if (entityArray[i].clzType === 'COMPONENT' && entityArray[i].compId === id) {
+            target = entityArray[i];
+            break;
+        }
+    }
+    return target;
+};
+
+// 获取到含有当前id的组件实例的clzType
+$.getTargetElementClzType = function (id, entityArray) {
+    return $.getTargetElement(id, entityArray).clzType;
+};
+
+// 判断当前实例中是否已有事件关联:如果返回-1，说明没有关联
+// TODO:写注释
+$.hasRelation = function (id, entity) {
+    var result = -1;
+    if (entity.interactions) {
+        interactionsLoop:
+        for (var i = 0, iLen = entity.interactions.length; i < iLen; i ++) {
+            var interaction = entity.interactions[i];
+            if (interaction.event) {
+                if (entity.interactions[i].event.rid === id) {
+                    result = i;
+                    break;
+                }
+            }
+            else if (interaction.events) {
+                for (var j = 0, jLen = interaction.events.length; j < jLen; j ++) {
+                    if (interaction.events[j].rid === id) {
+                        result = i;
+                        break interactionsLoop;
+                    }
+                }
+            }
+        }
+    }
+    return result;
+};
+
+// 判断当前实例中是否已有事件关联
+// TODO:写注释
+$.getEntityInteractionsId = function (entity) {
+    var result = [];
+    if (entity.interactions) {
+        for (var i = 0, iLen = entity.interactions.length; i < iLen; i ++) {
+            var interaction = entity.interactions[i];
+            if (interaction.event) {
+                result.push(entity.interactions[i].event.rid);
+            }
+            else if (interaction.events) {
+                for (var j = 0, jLen = interaction.events.length; j < jLen; j ++) {
+                    result.push(interaction.events[j].rid);
+                }
+            }
+        }
+    }
+    return $.uniqueArray(result);
+};
+
+$.uniqueArray = function (arry) {
+    var target = [];
+    var records = {};
+    for (var i = 0; i < arry.length; i++) {
+        if (!records[arry[i]]) {
+            records[arry[i]] = true;
+            target.push(arry[i]);
+        }
+    }
+    return target;
+};
+
+/**
+ * 在entitys中是否已经存在某一个entity
+ *
+ * @param {string} clzKey 组件实例的clzKey
+ * @param {Array} entitys 组件实例数组
+ */
+$.isHaveEntity = function (clzKey, entitys) {
+    var result = false;
+    for (var i = 0; i < entitys.length; i++) {
+        if (entitys[i].clzKey === clzKey) {
+            result = true;
+        }
+    }
+    return result;
+};
+
+

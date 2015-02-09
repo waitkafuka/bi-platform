@@ -25,6 +25,25 @@ define(['template'], function (template) {
         $out+='\r\n        </span>\r\n    </div>\r\n    ';
         }
         });
+        $out+='\r\n    ';
+        $each(indList.data,function($value,$index){
+        $out+=' ';
+        if($value.type == "CALLBACK"){
+        $out+='\r\n    <div class="item c-m hover-bg j-root-line j-org-ind j-olap-element" data-id="';
+        $out+=$escape($value.id);
+        $out+='">\r\n        <span class="item-text ellipsis j-item-text" title="';
+        $out+=$escape($value.tag);
+        $out+='（';
+        $out+=$escape($value.name);
+        $out+='）">\r\n            ';
+        $out+=$escape($value.caption);
+        $out+='（';
+        $out+=$escape($value.name);
+        $out+='）\r\n        </span>\r\n        <span class="icon-letter collect j-method-type" title="点击设置指标汇总方式">\r\n            ';
+        $out+=$escape(indList.map[$value.aggregator]);
+        $out+='\r\n        </span>\r\n    </div>\r\n    ';
+        }
+        });
         $out+='\r\n</div>\r\n';
         $each(indList.data,function($value,$index){
         if($value.type == "CAL" || $value.type == "RR" || $value.type == "SR"){

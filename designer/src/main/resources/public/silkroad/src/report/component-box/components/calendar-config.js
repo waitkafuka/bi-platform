@@ -11,7 +11,7 @@ define(
     function (
         Constant,
         CalendarVmTemplate
-    ) {
+        ) {
         // 日历id后缀
         var calendarIdSuffix = Constant.COMPONENT_ID_SUFFIX.CALENDAR;
 
@@ -28,7 +28,22 @@ define(
             "dateKey": {},
             "clzKey": "X_CALENDAR"
         };
-
+        var entityDescriptionRangeCalendar = {
+            clzType: "VUI",
+            "name": "dim_time^_^the_date", // name在report-ui里面会根据dateKey里面的内容改变
+            "dateKey": {},
+            "dataSetOpt": {
+                "rangeTimeTypeOpt": {
+                    startDateOpt: 0,
+                    endDateOpt: 0
+                }
+            },
+            "clzKey": "RANGE_CALENDAR"
+        };
+        var rangeConfig = {
+            start: 0,
+            end: 0
+        };
         // 那些个外在的配置项
         var timeTypeConfig = {
             timeTypeList: {
@@ -161,6 +176,7 @@ define(
         function switchConfig(data) {
             var resTimeType = [];
             var resTimeTypeOpt = {};
+            var rangeTimeTypeOpt = {};
             var timeTypeList = timeTypeConfig.timeTypeList;
             var timeTypeOpt = timeTypeConfig.timeTypeOpt;
 
@@ -171,12 +187,18 @@ define(
                 // 匹配timeTypeOpt
                 var opt = timeTypeOpt[type];
                 opt.date = data[i].date;
+                // 设置date range的情况
+                if (data[i].startDateOpt !== undefined && data[i].endDateOpt !== undefined){
+                    rangeTimeTypeOpt.startDateOpt = data[i].startDateOpt;
+                    rangeTimeTypeOpt.endDateOpt = data[i].endDateOpt;
+                }
                 resTimeTypeOpt[type] = $.extend(true, {}, opt);
             }
 
             return {
                 timeTypeList: resTimeType,
-                timeTypeOpt: resTimeTypeOpt
+                timeTypeOpt: resTimeTypeOpt,
+                rangeTimeTypeOpt: rangeTimeTypeOpt
             }
         }
 
@@ -244,7 +266,7 @@ define(
             caption: '日历',
             iconClass: 'calendar',
             defaultWidth: 500,
-            defaultHeight: 27,
+            defaultHeight: 47,
             vm: {
                 render: function (data) {
                     return CalendarVmTemplate.render({
@@ -253,7 +275,9 @@ define(
                 }
             },
             entityDescription: entityDescription,
+            entityDescriptionRangeCalendar: entityDescriptionRangeCalendar,
             processRenderData: processRenderData,
+            rangeConfig: rangeConfig,
             switchConfig: switchConfig,
             deSwitchConfig: deSwitchConfig,
             timeTypeConfig: timeTypeConfig,

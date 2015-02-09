@@ -23,12 +23,14 @@
     <!-- 
         Default cache configuration
      -->
-    <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">  
-	    <property name="caches">  
-	        <set>  
-	            <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" p:name="bi_platform"/>
-	        </set>  
-	    </property>  
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<bean
+					class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
+					p:name="bi_platform" />
+			</set>
+		</property>
 	</bean>  
 	
  </beans>

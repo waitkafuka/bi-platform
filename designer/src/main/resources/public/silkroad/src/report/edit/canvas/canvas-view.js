@@ -29,12 +29,16 @@ define([
                 'click .j-con-edit-btns .j-setting': 'initCompConfigBar',
                 'click .j-con-edit-btns .j-delete': 'deleteComp',
                 'click .j-button-save-report': 'saveReport',
+                'click .j-button-close-report': 'closeReport',
                 'click .j-button-publish-report': 'publishReport',
+                'click .j-button-preview-report': 'previewReport',
                 'click .j-comp-div': 'focusText',
                 'blur .j-comp-text': 'blurText',
-                'keydown .j-comp-text': 'keyDownText'
+                'keydown .j-comp-text': 'keyDownText',
+                'change .j-select-default': 'changeSelectDefault'
             },
-
+            /* 判断是否保存的变量 */
+            savestate: 0,
             /**
              * 构造函数
              *
@@ -86,7 +90,7 @@ define([
                 var compBoxModel = that.compBoxView.model;
                 var acceptAbleClass = 'active';
                 var acceptDisableClass = 'disable';
-
+                var entityDefs = that.model.reportJson.entityDefs;
 
                 // 定义可接收从组件箱拖出的东西
                 $('.j-report', that.el).droppable({
@@ -99,8 +103,14 @@ define([
                     tolerance: 'intersect',
                     drop: function (event, ui) {
                         var $report = $(this);
+                        var compType = ui.helper.attr('data-component-type');
+                        if (compType === 'H_BUTTON') {
+                            if (isHaveConfirmEntity(compType, entityDefs)){
+                                return;
+                            }
+                        }
+                        // TODO:修改reportJson中提交方式
                         var $realComp = ui.helper.clone().html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
-                        var compType = $realComp.attr('data-component-type');
                         var compData = compBoxModel.getComponentData(compType);
                         $realComp.removeClass(compData.iconClass + ' active');
                         $realComp.addClass(compData.renderClass);
@@ -115,7 +125,7 @@ define([
                         // 越界拉回
                         var leftPosition = parseInt($realComp.css('left'));
                         var reportWidth = $report.width();
-                        if (leftPosition/1 + defaultWidth/1 > reportWidth) {
+                        if (leftPosition / 1 + defaultWidth / 1 > reportWidth) {
                             $realComp.css('left', (reportWidth - defaultWidth - 3) + 'px');
                         }
                         if (parseInt($realComp.css('left')) < 2) {
@@ -138,6 +148,19 @@ define([
                         ui.helper.html('<div class="ta-c">组件占位，配置数据后展示组件</div>');
                     }
                 });
+                // 判断json中是否已经有查询按钮
+                function isHaveConfirmEntity (clzKey, entitys) {
+                    var result = false;
+                    for (var i = 0; i < entitys.length; i++) {
+                        if (entitys[i].clzKey === clzKey) {
+                            // FIXME:用这种方式判断，我自己都要吐槽了
+                            if (entitys[i].dataOpt && entitys[i].dataOpt.text === '查询') {
+                                result = true;
+                            }
+                        }
+                    }
+                    return result;
+                }
             },
 
             /**
@@ -213,25 +236,29 @@ define([
              */
             addComp: function (compData, compType, $realComp) {
                 var that = this;
-
                 that.model.addComp(
                     compData,
                     compType,
                     // 创建组件的外壳
-                    function (id) {
-                        $realComp.attr('data-comp-id', id);
+                    function (dataCompId, reportCompId) {
+                        $realComp.attr('data-comp-id', dataCompId);
+                        $realComp.attr('report-comp-id', reportCompId);
                         return $realComp.clone();
                     },
                     function () {
+                        var compType = $realComp.attr('data-component-type');
                         that.$el.find('[data-o_o-di="snpt"]').append($realComp);
                         that.initDrag($realComp);
                         that.initResize($realComp);
                         that.addEditBtns($realComp);
+                        that.removeGuides($realComp);
+                        that.addGuides($realComp);
                         $realComp.find('.j-con-edit-btns').css({
                             'width': 'auto',
                             'height': 'auto'
-                        }).find('.j-fold').html('－');
-                        if ($realComp.attr('data-component-type') === 'TEXT') {
+                        });
+                        //.find('.j-fold').html('－');
+                        if (compType === 'TEXT' || compType === 'H_BUTTON') {
                             that.showReport(true);
                         }
                     }
@@ -249,8 +276,8 @@ define([
                 var $target = $(event.target);
                 var $comp = $target.parents('.j-component-item');
                 var compId = $comp.attr('data-comp-id');
-
-                this.model.deleteComp(compId, function () {
+                var reportCompId = $comp.attr('report-comp-id');
+                this.model.deleteComp(compId, reportCompId, function () {
                     $comp.remove();
                     that.editCompView.hideEditBar();
                     // 刷新报表展示
@@ -308,11 +335,16 @@ define([
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
                 // 固定单选下拉框的高度
-                that.dragWidthHeight($component, 'SELECT', 27, 27);
+                that.dragWidthHeight($component, 'SELECT', 47, 47);
                 // 固定多选下拉框的高度
-                that.dragWidthHeight($component, 'MULTISELECT', 27, 27);
+                that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 30, 30);
+                that.dragWidthHeight($component, 'TEXT', 50, 50);
+                that.dragWidthHeight($component, 'H_BUTTON', 50, 50);
+                // 删除参考线-避免重复渲染产生多余的参考线
+                that.removeGuides($component);
+                // 调整后添加参考线
+                that.addGuides($component);
             },
 
             /**
@@ -370,14 +402,19 @@ define([
              * @public
              */
             addEditBtns: function ($component) {
-                $component.append(editBtnsTemplate.render());
+                $component.prepend(editBtnsTemplate.render());
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {
-                    if ($($component[i]).attr('data-component-type') == 'TEXT') {
+                    var compType = $($component[i]).attr('data-component-type');
+                    if (
+                        compType === 'TEXT'
+                        || compType === 'H_BUTTON'
+                    ) {
                         $($component[i]).find('.j-setting').remove();
                     }
                 }
-                $component.find('.j-fold').click(function () {
+                /**
+                 $component.find('.j-fold').click(function () {
                     var $conBtn = $(this).parent();
                     if ($conBtn.width() < 20) {
                         $conBtn.width('auto');
@@ -390,6 +427,7 @@ define([
                         $(this).html('+');
                     }
                 });
+                 **/
             },
 
             /**
@@ -401,6 +439,33 @@ define([
                 this.model.saveReport(function () {
                     dialog.success('报表保存成功。');
                 });
+                this.savestate = 1;
+            },
+
+            /**
+             * 关闭报表
+             *
+             * @public
+             */
+            closeReport: function () {
+                if (this.savestate == 0) {
+                    dialog.warning('您未进行保存，请保存后关闭。');
+                }
+                else {
+                    this._destroyPanel();
+                    require(['report/list/main-view'], function (ReportListView) {
+                        new ReportListView({el: $('.j-main')});
+                    });
+                }
+            },
+
+            /**
+             * 调用面板模块销毁方法
+             * @private
+             */
+            _destroyPanel: function () {
+                window.dataInsight && window.dataInsight.main
+                && window.dataInsight.main.destroy();
             },
 
             /**
@@ -409,7 +474,21 @@ define([
              * @public
              */
             publishReport: function () {
-                this.reportView.publishReport('POST');
+                if (this.savestate == 0) {
+                    dialog.warning('您未进行保存，请保存后发布。');
+                }
+                else {
+                    this.reportView.publishReport('POST');
+                }
+            },
+
+            /**
+             * 预览报表
+             *
+             * @public
+             */
+            previewReport: function () {
+                this.reportView.previewReport('POST');
             },
 
             /**
@@ -423,7 +502,7 @@ define([
             },
 
             /**
-             * 初始化报表的高度
+             * 初始化报表的高度(计算报表的高度)
              *
              * @public
              */
@@ -478,7 +557,6 @@ define([
                     rptHtml: that.model.$reportVm.prop('outerHTML'),
                     rptJson: that.model.reportJson
                 };
-
                 that._firstShowReport = false;
                 if (that._component === undefined) {
                     require(
@@ -505,6 +583,27 @@ define([
                     that.editCompView.activeComp();
                     that.initSnptHeight();
                 }, 2000);
+            },
+
+            /**
+             * 添加默认值
+             *
+             * @param {event} event 事件焦点（下拉框多选框）
+             * @public
+             */
+            changeSelectDefault: function (event) {
+                var that = this;
+                var $target = $(event.target);
+                var $nowComp = $target.parent().parent().parent();
+                var compId = $nowComp.attr('data-comp-id');
+                var $comp = that.$el.find('.report').find('.component-item');
+                var checked = $target[0].checked;
+                $comp.each(function () {
+                    var $this = $(this);
+                    if ($this.attr('data-comp-id') == compId) {
+                        $this.attr('data-default-value', checked);
+                    }
+                });
             }
         });
     }

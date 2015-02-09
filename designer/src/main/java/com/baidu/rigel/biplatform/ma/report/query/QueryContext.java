@@ -101,7 +101,7 @@ public class QueryContext implements Serializable {
             this.params = new ConcurrentHashMap<String, Object>();
         }
         if (StringUtils.isNotEmpty(id) && value != null) {
-        		this.params.put(id, value);
+            this.params.put(id, value);
         }
     }
     
@@ -127,8 +127,8 @@ public class QueryContext implements Serializable {
         }
     }
 
-	public void removeParam(String id) {
-		this.getParams().remove(id);
-	}
+    public void removeParam(String id) {
+        this.getParams().remove(id);
+    }
     
 }

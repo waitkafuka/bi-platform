@@ -79,6 +79,8 @@ public class QueryAction implements Serializable {
     private boolean chartQuery;
     
     private MeasureOrderDesc measureOrderDesc;
+
+    private boolean filterBlank = false;
     
     
     /**
@@ -220,69 +222,97 @@ public class QueryAction implements Serializable {
     }
     
     /**
-	 * @return the measureOrderDesc
-	 */
-	public MeasureOrderDesc getMeasureOrderDesc() {
-		return measureOrderDesc;
-	}
+     * @return the measureOrderDesc
+     */
+    public MeasureOrderDesc getMeasureOrderDesc() {
+        return measureOrderDesc;
+    }
 
-	/**
-	 * @param measureOrderDesc the measureOrderDesc to set
-	 */
-	public void setMeasureOrderDesc(MeasureOrderDesc measureOrderDesc) {
-		this.measureOrderDesc = measureOrderDesc;
-	}
+    /**
+     * @param measureOrderDesc the measureOrderDesc to set
+     */
+    public void setMeasureOrderDesc(MeasureOrderDesc measureOrderDesc) {
+        this.measureOrderDesc = measureOrderDesc;
+    }
 
 
-	/**
+    /**
      * 
      * @author david.wang
      *
      */
     public static class MeasureOrderDesc implements Serializable {
-    	
-    		/**
-		 * 
-		 */
-		private static final long serialVersionUID = -1589055019481416885L;
-			
-		private final String name;
-    		private final String orderType;
-    		private final int recordSize;
-    		
-    		/**
-    		 * 
-    		 * @param name
-    		 * @param orderType
-    		 * @param recordSize
-    		 */
-		public MeasureOrderDesc(String name, String orderType, int recordSize) {
-			super();
-			this.name = name;
-			this.orderType = orderType;
-			this.recordSize = recordSize;
-		}
+        
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -1589055019481416885L;
+        
+        /**
+         * name
+         */
+        private final String name;
+        
+        /**
+         * orderType
+         */
+        private final String orderType;
+        
+        /**
+         * recordSize
+         */
+        private final int recordSize;
+            
+        /**
+         * 
+         * @param name
+         * @param orderType
+         * @param recordSize
+         */
+        public MeasureOrderDesc(String name, String orderType, int recordSize) {
+            super();
+            this.name = name;
+            this.orderType = orderType;
+            this.recordSize = recordSize;
+        }
 
-		/**
-		 * @return the name
-		 */
-		public String getName() {
-			return name;
-		}
+        /**
+         * @return the name
+         */
+        public String getName() {
+            return name;
+        }
 
-		/**
-		 * @return the orderType
-		 */
-		public String getOrderType() {
-			return orderType;
-		}
+        /**
+         * @return the orderType
+         */
+        public String getOrderType() {
+            return orderType;
+        }
 
-		/**
-		 * @return the recordSize
-		 */
-		public int getRecordSize() {
-			return recordSize;
-		}
-    		
+        /**
+         * @return the recordSize
+         */
+        public int getRecordSize() {
+            return recordSize;
+        }
+            
     }
+
+    /**
+     * 
+     * @param filterBlank
+     */
+    public void setFilterBlank(boolean filterBlank) {
+        this.filterBlank  = filterBlank;
+    }
+
+    /**
+     * @return the filterBlank
+     */
+    public boolean isFilterBlank() {
+        return filterBlank;
+    }
+    
+    
 }

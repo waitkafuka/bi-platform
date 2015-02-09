@@ -20,11 +20,15 @@ package com.baidu.rigel.biplatform.tesseract.model;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.baidu.rigel.biplatform.ac.annotation.GsonIgnore;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 
 /**
  * 维值树
@@ -286,19 +290,34 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
         this.hasChildren = hasChildren;
     }
 
-	/**
-	 * @return the isSummary
-	 */
-	public boolean isSummary() {
-		return isSummary;
-	}
+    /**
+     * @return the isSummary
+     */
+    public boolean isSummary() {
+        return isSummary;
+    }
 
-	/**
-	 * @param isSummary the isSummary to set
-	 */
-	public void setSummary(boolean isSummary) {
-		this.isSummary = isSummary;
-	}
+    /**
+     * @param isSummary the isSummary to set
+     */
+    public void setSummary(boolean isSummary) {
+        this.isSummary = isSummary;
+    }
 
-
+    public void sort(SortType sortType) {
+        if(CollectionUtils.isNotEmpty(this.children)) {
+            if(sortType == SortType.DESC) {
+                Collections.sort(this.children, (o1, o2) -> {
+                    return o2.getName().compareTo(o1.getName());
+                });
+            } else {
+                Collections.sort(this.children, (o1, o2) -> {
+                    return o1.getName().compareTo(o2.getName());
+                });
+            }
+            this.children.forEach(o -> {
+               o.sort(sortType); 
+            });
+        }
+    }
 }

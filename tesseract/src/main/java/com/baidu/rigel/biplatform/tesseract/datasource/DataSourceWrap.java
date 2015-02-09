@@ -31,6 +31,35 @@ public interface DataSourceWrap {
      * 返回数据源类型
      * @return 数据源类型
      */
-    public DataSourceType getDataSourceType();
+    DataSourceType getDataSourceType();
+    
+    
+    /** 
+     * 获取数据源的失败次数
+     * getFailCount
+     * @return
+     */
+    int getFailCount();
+    
+    
+    /** 
+     * 数据源的错误次数加1
+     * increaseFailCount
+     */
+    void increaseFailCount();
+    
+    
+    /** 
+     * 重置数据源的失败次数
+     * resetFailCount
+     */
+    void resetFailCount();
+    
+    
+    /** 
+     * getFailTime
+     * @return
+     */
+    long getFailTime();
     
 }

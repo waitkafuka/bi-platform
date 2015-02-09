@@ -69,6 +69,17 @@ define(function () {
     }
 
     /**
+     * 更换皮肤提交基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 更换皮肤提交基本路径
+     */
+    function getSkinType(reportId) {
+        return getReportsBaseUrl(reportId);
+    }
+
+    /**
      * 获取cube的基本路径
      *
      * @param {string} reportId 数据源id
@@ -81,6 +92,28 @@ define(function () {
             + getReportsBaseUrl(reportId)
             + '/cubes/'
             + cubeId;
+    }
+
+    /**
+     * 参数维度提交基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 参数维度获取的基本路径
+     */
+    function getParameterDimData(reportId) {
+        return getReportsBaseUrl(reportId);
+    }
+
+    /**
+     * 参数维度获取基本路径
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} 参数维度获取的基本路径
+     */
+    function getParameterDim(reportId) {
+        return getReportsBaseUrl(reportId);
     }
 
     /**
@@ -461,6 +494,16 @@ define(function () {
         return getReportsBaseUrl(reportId) + '/publish';
     };
 
+    /**
+     * 报表新建（编辑）-edit-canvas
+     * 预览报表
+     *
+     * @param {string} reportId 报表id
+     */
+    Url.previewReport = function (reportId) {
+        return getReportsBaseUrl(reportId) + '/preview';
+    };
+
 
     Url.getPublishInfo = function (reportId) {
         return getReportsBaseUrl(reportId) + '/publish_info';
@@ -789,6 +832,43 @@ define(function () {
     Url.getFilterBlankLine = function (reportId, compId) {
         return getExtendAreaBaseUrl(reportId, compId)
             + '/othersetting';
+    };
+
+    /**
+     * 参数维度获取
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.getParameterDim = function (reportId) {
+        return getParameterDim(reportId)
+            + '/params';
+    };
+
+    /**
+     * 参数维度提交
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.getParameterDimData = function (reportId) {
+        return getParameterDimData(reportId)
+            + '/params';
+    };
+
+    /**
+     * 更换皮肤
+     *
+     * @param {string} reportId 报表id
+     * @param {string} type 皮肤类型
+     * @public
+     * @return {string} url
+     */
+    Url.getSkinType = function (reportId, type) {
+        return getSkinType(reportId)
+            + '/theme/' + type;
     };
 
     return Url;

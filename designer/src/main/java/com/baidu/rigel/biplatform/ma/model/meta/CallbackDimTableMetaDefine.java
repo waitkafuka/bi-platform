@@ -29,11 +29,6 @@ import com.google.common.collect.Maps;
 public class CallbackDimTableMetaDefine extends DimTableMetaDefine implements Serializable {
     
     /**
-     * 序列化id
-     */
-    private static final long serialVersionUID = 7946501110609325060L;
-    
-    /**
      * 刷新时间间隔配置key
      */
     public static final String REF_INTERNAL_KEY = "refresh_internal";
@@ -42,6 +37,11 @@ public class CallbackDimTableMetaDefine extends DimTableMetaDefine implements Se
      * 是否启用刷新配置key
      */
     public static final String REFRESH_KEY = "refresh";
+    
+    /**
+     * 序列化id
+     */
+    private static final long serialVersionUID = 7946501110609325060L;
     
     /**
      * 回调维度的rest请求URL

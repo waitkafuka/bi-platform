@@ -31,7 +31,14 @@ import com.google.common.collect.Lists;
  * @author zhongyi
  *
  */
-public class ExtendAreaUtils {
+public final class ExtendAreaUtils {
+    
+    /**
+     * 构造函数
+     */
+    private ExtendAreaUtils() {
+        
+    }
     
     /**
      * 生成区域列表

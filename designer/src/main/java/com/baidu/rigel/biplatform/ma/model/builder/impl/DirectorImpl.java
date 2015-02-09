@@ -33,7 +33,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
@@ -41,6 +44,7 @@ import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
@@ -49,6 +53,8 @@ import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+
 
 
 /**
@@ -204,23 +210,23 @@ public class DirectorImpl implements Director {
      * @param cube
      */
     private void resetMeasures(Map<String, Dimension> dims, Map<String, Dimension> oriDims, MiniCube cube) {
-		Iterator<String> it = cube.getMeasures().keySet().iterator();
-		final Map<String, Dimension> tmp = Maps.newHashMap();
-		oriDims.values().forEach(dim -> {
-			if (dim.getType() != DimensionType.GROUP_DIMENSION && dim.getTableName().equals(cube.getSource())) {
-				tmp.put(dim.getPrimaryKey(), dim);
-			}
-		});
-		while (it.hasNext()) {
-			Measure m = cube.getMeasures().get(it.next());
-			if (tmp.containsKey(m.getName())) {
-				Dimension dim = tmp.get(m.getName());
-				dims.put(dim.getId(), dim);
-			}
-		}
-	}
+        Iterator<String> it = cube.getMeasures().keySet().iterator();
+        final Map<String, Dimension> tmp = Maps.newHashMap();
+        oriDims.values().forEach(dim -> {
+            if (dim.getType() != DimensionType.GROUP_DIMENSION && dim.getTableName().equals(cube.getSource())) {
+                tmp.put(dim.getPrimaryKey(), dim);
+            }
+        });
+        while (it.hasNext()) {
+            Measure m = cube.getMeasures().get(it.next());
+            if (tmp.containsKey(m.getName())) {
+                Dimension dim = tmp.get(m.getName());
+                dims.put(dim.getId(), dim);
+            }
+        }
+    }
 
-	/**
+    /**
      * 
      * modify {@link Dimension} group define
      * @param dims -- the newest dimensions which update through star model
@@ -280,12 +286,12 @@ public class DirectorImpl implements Director {
      * 
      */
     private Map<String, Dimension> addOrReplaceDims(Map<String, Dimension> oriDims, List<Dimension> buildDims) {
-	    	Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
+        Map<String, Dimension> dims = new LinkedHashMap<String, Dimension>();
 //        if (oriDims.isEmpty()) {
-//    		buildDims.forEach(dim -> {
-//    			oriDims.put(dim.getId(), dim);
-//    		});
-//        		return dims;
+//            buildDims.forEach(dim -> {
+//                oriDims.put(dim.getId(), dim);
+//            });
+//                return dims;
 //        }
         final Map<String, Dimension> dimIdents = new LinkedHashMap<String, Dimension>();
         oriDims.values().forEach(dim -> {
@@ -295,7 +301,8 @@ public class DirectorImpl implements Director {
             String dimIdent = buildDimIdent(dim);
             if (dimIdents.containsKey(dimIdent)) {
                 Dimension tmp = dimIdents.get(dimIdent);
-                dims.put(tmp.getId(), tmp);
+                ((MiniCubeDimension) dim).setId(tmp.getId());
+                dims.put(tmp.getId(), dim);
             } else {
                 dims.put(dim.getId(), dim);
             }
@@ -314,7 +321,7 @@ public class DirectorImpl implements Director {
         String ident = dim.getTableName();
         Level level = dim.getLevels().values().toArray(new Level[0])[0];
         if (level instanceof MiniCubeLevel) {
-        		return ident + "_" + ((MiniCubeLevel) level).getSource();
+            return ident + "_" + ((MiniCubeLevel) level).getSource();
         }
         return ident + "_" + ((CallbackLevel) level).getCallbackUrl();
     }
@@ -345,7 +352,7 @@ public class DirectorImpl implements Director {
         oriMeasures.values().stream()
                 .filter(oriMeasure -> { 
                     return !refCol.contains(oriMeasure.getDefine())
-                    		&& !StringUtils.isEmpty(oriMeasure.getName());
+                            && !StringUtils.isEmpty(oriMeasure.getName());
                 }).map(oriMeasure -> {
                     return oriMeasure.getName() + "&&" + oriMeasure.getId();
                 }).distinct().forEach(str -> {
@@ -367,10 +374,51 @@ public class DirectorImpl implements Director {
                     }
                 }
             });
+        // 同环比、计算列处理
+        oriCube.getMeasures().forEach((k, v) -> {
+            if (v instanceof CallbackMeasure) {
+                newMeasures.put(v.getId(), v);
+            }
+            if (v.getType() == MeasureType.CAL || v.getType() == MeasureType.SR || v.getType() == MeasureType.RR) {
+                ExtendMinicubeMeasure m = (ExtendMinicubeMeasure) v;
+                if (checkRefMeasuer(m.getRefIndNames(), newMeasures)) {
+                    newMeasures.put(v.getId(), v);
+                }
+            }
+        });
         
         return newMeasures;
     }
     
+    /**
+     * 
+     * @param newMeasures 
+     * @param refNames 
+     * @return
+     */
+    private boolean checkRefMeasuer(Set<String> refNames, Map<String, Measure> newMeasures) {
+        boolean rs = true;
+        if (refNames == null || refNames.size() == 0) {
+            return rs;
+        }
+        String[] measuerNames = newMeasures.values().stream().map(m -> {
+            return m.getName();
+        }).toArray(String[] :: new);
+        List<String> tmp = Lists.newArrayList();
+        Collections.addAll(tmp, measuerNames);
+        for (String ref : refNames) {
+            if (!tmp.contains(ref)) {
+                return false;
+            }
+        }
+//        for (String str : refNames) {
+//            if (refNames.contains(entry.getKey()) || refNames.contains(entry.getValue().getName())) {
+//                continue;
+//            }
+//        }
+        return rs;
+    }
+
     /**
      * 
      * {@inheritDoc}

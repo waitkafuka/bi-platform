@@ -2,7 +2,9 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,compId=$data.compId,compType=$data.compType,$each=$utils.$each,xAxis=$data.xAxis,item=$data.item,$index=$data.$index,yAxis=$data.yAxis,sAxis=$data.sAxis,candInds=$data.candInds,candDims=$data.candDims,$out='';$out+='<div class="con-comp-setting-type1 j-comp-setting" data-comp-id="';
+        var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,reportCompId=$data.reportCompId,compId=$data.compId,compType=$data.compType,$each=$utils.$each,xAxis=$data.xAxis,item=$data.item,$index=$data.$index,yAxis=$data.yAxis,sAxis=$data.sAxis,candInds=$data.candInds,candDims=$data.candDims,$out='';$out+='<div class="con-comp-setting-type1 j-comp-setting" report-comp-id="';
+        $out+=$escape(reportCompId);
+        $out+='" data-comp-id="';
         $out+=$escape(compId);
         $out+='" data-comp-type="';
         $out+=$escape(compType);
@@ -119,7 +121,7 @@ define(['template'], function (template) {
         }
         $out+='-->\r\n        <!--</div>-->\r\n        <!--';
         });
-        $out+='-->\r\n    <!--</div>-->\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\r\n        <span class="letter">设置:</span>\r\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\r\n        <span class="icon-letter icon-letter-btn j-set-topn">TOPN</span>\r\n    </div>\r\n</div>';
+        $out+='-->\r\n    <!--</div>-->\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line">\r\n        <span class="letter">设置:</span>\r\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\r\n        <span class="icon-letter icon-letter-btn j-set-topn">TOPN</span>\r\n        <span class="icon-letter icon-letter-btn j-set-relation">关联</span>\r\n    </div>\r\n</div>';
         return $out;
     }
     return { render: anonymous };

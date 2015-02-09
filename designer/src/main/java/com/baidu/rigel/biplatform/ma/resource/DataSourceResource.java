@@ -29,9 +29,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
+import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
+import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
+import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
@@ -154,7 +158,7 @@ public class DataSourceResource extends BaseResource {
                 rs.setStatus(1);
                 rs.setStatusInfo("未能找到对于数据源定义，id : " + id);
             } else {
-                define.setDbPwd(define.getDbPwd());//AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
+                define.setDbPwd(define.getDbPwd()); // AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
                 rs.setData(define);
@@ -188,7 +192,6 @@ public class DataSourceResource extends BaseResource {
         String productLine = ContextManager.getProductLine();
         assignNewValue(productLine, request, define);
         try {
-	        	define.setDbPwd(AesUtil.getInstance().encrypt(define.getDbPwd(), securityKey));
             define = dsService.saveOrUpdateDataSource(define, securityKey);
             rs.setStatus(0);
             rs.setStatusInfo("successfully");
@@ -233,6 +236,10 @@ public class DataSourceResource extends BaseResource {
                 assignNewValue(productLine, request, define);
                 define.setDbPwd(define.getDbPwd());
                 dsService.saveOrUpdateDataSource(define, securityKey);
+                Map<String, String> params = Maps.newHashMap();
+                DataSourceInfo info = DataSourceDefineUtil.parseToDataSourceInfo(define, securityKey);
+                params.put("dataSourceInfo", AnswerCoreConstant.GSON.toJson(info));
+                HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "datasource/update", params);
                 logger.info("successfully update datasource with id " + id);
                 rs.setStatus(0);
                 rs.setStatusInfo("successfully");
@@ -242,7 +249,7 @@ public class DataSourceResource extends BaseResource {
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             rs.setStatus(1);
-            rs.setStatusInfo("error : " + e.getMessage());
+            rs.setStatusInfo("error : 数据更新出错");
         }
         return rs;
     }
@@ -292,28 +299,30 @@ public class DataSourceResource extends BaseResource {
                 rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表 " + id);
                 logger.warn("the database with id " + id + " is using");
             } else {
-            		List<String> refReport = reportDesignModelService.lsReportWithDsId(id);
-            		if (refReport != null && refReport.size() > 0) {
-            			 rs.setStatus(1);
-                     rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表: " + makeString(refReport));
-                     return rs;
-            		} else {
-            			boolean result = dsService.removeDataSource(id);
-            			rs.setStatus(0);
-            			rs.setStatusInfo(String.valueOf(result));
-            		}
+                List<String> refReport = reportDesignModelService.lsReportWithDsId(id);
+                if (refReport != null && refReport.size() > 0) {
+                    rs.setStatus(1);
+                    rs.setStatusInfo("数据源正在被使用，请先删除引用该数据源的报表: " + makeString(refReport));
+                    return rs;
+                } else {
+                    boolean result = dsService.removeDataSource(id);
+                    Map<String, String> params = Maps.newHashMap();
+                    HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/datasource/destroy/" + id, params);
+                    rs.setStatus(0);
+                    rs.setStatusInfo(String.valueOf(result));
+                }
             }
         } catch (DataSourceOperationException e) {
             rs.setStatus(1);
-            rs.setStatusInfo(e.getMessage());
+            rs.setStatusInfo("删除数据出错");
             logger.error(e.getMessage(), e);
         }
         return rs;
     }
 
-	private String makeString(List<String> refReport) {
-		StringBuilder rs = new StringBuilder();
-		refReport.forEach(str -> rs.append(str + " "));
-		return rs.toString();
-	}
+    private String makeString(List<String> refReport) {
+        StringBuilder rs = new StringBuilder();
+        refReport.forEach(str -> rs.append(str + " "));
+        return rs.toString();
+    }
 }

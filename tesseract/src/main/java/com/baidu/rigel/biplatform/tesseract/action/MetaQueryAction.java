@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.tesseract.action;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,7 +71,7 @@ import com.google.gson.reflect.TypeToken;
 @RestController
 public class MetaQueryAction {
     
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static Logger LOG = LoggerFactory.getLogger(MetaQueryAction.class);
 
     @Resource
     private MetaDataService metaDataService;
@@ -82,7 +83,7 @@ public class MetaQueryAction {
     private DataSourcePoolService dataSourcePoolService;
 
     @RequestMapping(value = "/meta/getMembers", method = RequestMethod.POST)
-    @ResponseBody
+//    @ResponseBody
     public ResponseResult getMembers(@RequestBody String requestJson) {
         // 将请求信息全部JSON化，需要
         if (StringUtils.isBlank(requestJson)) {
@@ -152,7 +153,7 @@ public class MetaQueryAction {
     }
 
     @RequestMapping(value = "/meta/getChildren", method = RequestMethod.POST)
-    @ResponseBody
+//    @ResponseBody
     public ResponseResult getChildren(@RequestBody String requestJson) {
         // 将请求信息全部JSON化，需要
         if (StringUtils.isBlank(requestJson)) {
@@ -222,9 +223,9 @@ public class MetaQueryAction {
     }
 
     @RequestMapping(value = "/query", method = RequestMethod.POST)
-    @ResponseBody
+//    @ResponseBody
     public ResponseResult query(@RequestBody String requestJson) {
-    	long current = System.currentTimeMillis();
+        long current = System.currentTimeMillis();
         // 将请求信息全部JSON化，需要
         if (StringUtils.isBlank(requestJson)) {
             return ResponseResultUtils.getErrorResult("get members question is null", 100);
@@ -263,7 +264,7 @@ public class MetaQueryAction {
             }
 
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
-            logger.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
+            LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             return ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
 
         } catch (JsonSyntaxException e) {
@@ -277,12 +278,12 @@ public class MetaQueryAction {
             e.printStackTrace();
             errorMsg = "unexpected error:" + e.getMessage();
         }
-        logger.error("cost:" + (System.currentTimeMillis() - current) + " error,errorMsg:" + errorMsg);
+        LOG.error("cost:" + (System.currentTimeMillis() - current) + " error,errorMsg:" + errorMsg);
         // 走到这里说明已经出错了，状态码暂时设为100，后续加个状态码表
         return ResponseResultUtils.getErrorResult(errorMsg, 100);
     }
 
-    private Map<String, String> parseRequestJson(String requestJson) {
+    public static Map<String, String> parseRequestJson(String requestJson) {
         String[] requestArray = requestJson.split("&");
         Map<String, String> requestParams = new HashMap<String, String>();
         for (String request : requestArray) {
@@ -291,7 +292,7 @@ public class MetaQueryAction {
             try {
                 value = URLDecoder.decode(value, "utf-8");
             } catch (UnsupportedEncodingException e) {
-                logger.warn("decode value:" + value + " error", e);
+                LOG.warn("decode value:" + value + " error", e);
             }
             requestParams.put(keyValue[0], value);
         }
@@ -391,9 +392,12 @@ public class MetaQueryAction {
 
             String dataSetString = requestParams.get(MiniCubeConnection.DATASET_PARAM_KEY);
             String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
+            String paramsJason=requestParams.get(MiniCubeConnection.PARAMS);
+            
+            Map<String,Map<String,BigDecimal>> params=AnswerCoreConstant.GSON.fromJson(paramsJason,new TypeToken<Map<String,Map<String,BigDecimal>>>() {}.getType());
             DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
             
-            metaDataService.refresh(dataSourceInfo, dataSetString);
+            metaDataService.refresh(dataSourceInfo, dataSetString,params);
             
             return ResponseResultUtils.getCorrectResult("success", "refresh success.");
         } catch (JsonSyntaxException e) {

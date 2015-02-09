@@ -22,12 +22,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -94,6 +99,12 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Resource
     private DataSourcePoolService dataSourcePoolService;
+    
+    @Autowired
+    private TaskExecutor taskExecutor;
+    
+    
+    private ExecutorCompletionService<TesseractResultSet> completionService;
 
     /**
      * Constructor by no param
@@ -111,6 +122,9 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public TesseractResultSet query(QueryRequest query) throws IndexAndSearchException {
+    	if(completionService == null) {
+            completionService = new ExecutorCompletionService<>(taskExecutor);
+        }
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard
@@ -163,9 +177,9 @@ public class SearchIndexServiceImpl implements SearchService {
             long limitSize = 0;
             if (query.getLimit() != null) {
                 limitStart = query.getLimit().getStart();
-				if (query.getLimit().getSize() > 0) {
-					limitSize = query.getLimit().getSize();
-				}
+                if (query.getLimit().getSize() > 0) {
+                    limitSize = query.getLimit().getSize();
+                }
                 
             }
             TesseractResultSet currResult =
@@ -182,23 +196,40 @@ public class SearchIndexServiceImpl implements SearchService {
 
             List<TesseractResultSet> idxShardResultSetList = new ArrayList<TesseractResultSet>();
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
-                TesseractResultSet curr = null;
-                Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard);
-                searchNode.searchRequestCountAdd();
-                this.isNodeService.saveOrUpdateNodeInfo(searchNode);
+                this.completionService.submit(new Callable<TesseractResultSet>() {
+                    
+                    @Override
+                    public TesseractResultSet call() throws Exception {
+                        try {
+                            long current = System.currentTimeMillis();
+                            Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
+                            searchNode.searchRequestCountAdd();
+                            isNodeService.saveOrUpdateNodeInfo(searchNode);
+                            LOGGER.info("begin search in shard:{}", idxShard);
+                            TesseractResultSet result = (TesseractResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();
+                            searchNode.searchrequestCountSub();
+                            isNodeService.saveOrUpdateNodeInfo(searchNode);
+                            LOGGER.info("compelete search in shard:{},take:{} ms",idxShard, System.currentTimeMillis() - current);
+                            return result;
+                        } catch (Exception e) {
+                            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                                    IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
+                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
+                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION);
+                        }
+                        
+                    }
+                });
+            }
+            for(int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
                 try {
-                    curr = (TesseractResultSet) this.isClient.search(query, idxShard, searchNode).getMessageBody();
-                    idxShardResultSetList.add(curr);
-                    searchNode.searchrequestCountSub();
-                    this.isNodeService.saveOrUpdateNodeInfo(searchNode);
-
-                } catch (Exception e) {
+                    idxShardResultSetList.add(completionService.take().get());
+                } catch (InterruptedException | ExecutionException e) {
                     throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                             IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
                             IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
                             IndexAndSearchExceptionType.NETWORK_EXCEPTION);
                 }
-
             }
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                     "merging result from multiple index"));
@@ -214,19 +245,7 @@ public class SearchIndexServiceImpl implements SearchService {
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                 "merging final result"));
-        if (query.getGroupBy() != null && CollectionUtils.isNotEmpty(query.getGroupBy().getGroups())) {
-            try {
-                result = QueryRequestUtil.processGroupBy(result, query);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
-                LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query
-                        + "]", e));
-                throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                        IndexAndSearchException.QUERYEXCEPTION_MESSAGE, IndexAndSearchExceptionType.SEARCH_EXCEPTION),
-                        e, IndexAndSearchExceptionType.SEARCH_EXCEPTION);
-            }
-
-        }
+        
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
@@ -277,15 +296,15 @@ public class SearchIndexServiceImpl implements SearchService {
                 }
             }
             
-            if(query.getWhere()!=null && query.getWhere().getAndList()!=null){
-            	for(Expression ex:query.getWhere().getAndList()){
-            		if(!idxSelect.contains(ex.getProperties())){
-            			result=false;
-            			break;
-            		}else{
-            			result=true;
-            		}
-            	}
+            if(query.getWhere()!=null && query.getWhere().getAndList()!=null && result){
+                for(Expression ex:query.getWhere().getAndList()){
+                    if(!idxSelect.contains(ex.getProperties())){
+                        result=false;
+                        break;
+                    }else{
+                        result=true;
+                    }
+                }
             }
             
         }

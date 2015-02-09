@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>product测试页面</title>
-    <link type="text/css" rel="stylesheet" href="src/css/all.css"/>
-    <link rel="stylesheet" href="/silkroad/asset/css/-di-product-min.css"/>
+    <link rel="stylesheet" href="/silkroad/asset/bb/css/-di-product-debug.css"/>
 </head>
 <body>
 <input type="button" value="更新" id="btnUpdate" style="float:left;z-index: 1000; position: absolute"/>
@@ -15,26 +14,27 @@
         <div class="di-o_o-body" data-o_o-di="snpt1">
         </div>
     </div>
+    <script src="/silkroad/asset/bb/-di-product-debug.js"></script>
     <script type="text/javascript" src="../../../../dep/require-2.1.11.js"></script>
-    <script src="/silkroad/asset/-di-product-min.js"></script>
     <script type="text/javascript">
     // FE 开发的测试配置,上线版通过压缩工具删除
     require.config({
         baseUrl: '../../../../src/',  //本地模拟为src，线上版问asset
         paths: {
-            'underscore': '../dep/underscore-1.6.0',
-            'jquery': '../dep/jquery-1.11.1',
-            'backbone': '../dep/backbone-1.1.2',
-            'template': '../dep/template-3.0.0',
+            'underscore': '../dep/underscore-1.6.0.min',
+            'jquery': '../dep/jquery-1.11.1.min',
+            'backbone': '../dep/backbone-1.1.2.min',
+            'template': '../dep/template-3.0.0.min',
             'jqueryui': '../dep/jquery-ui.custom-1.10.4',
             'jquerydi': 'common/jquery.di',
-            'dialog': 'core/dialog'
+            'dialog': 'core/dialog',
+            'url': 'core/url',
+            'constant': 'core/constant'
         },
         shim: {
             'dialog': {
                 deps: [
-                    'jqueryui',
-                    'jquerydi'
+                    'jqueryui'
                 ]
             },
             'jqueryui': {
@@ -51,16 +51,14 @@
                 deps: [
                     'underscore',
                     'jquery',
+                    'jquerydi',
                     'template'
-
                 ]
             }
         }
     });
 
     require(['../test/demo/report/new-report/enter'], function (main) {
-
-        
          <!--delete start-->
          /* 前端拦截模拟,上线版通过压缩工具删除 */
          var temp = $.ajax;
@@ -70,7 +68,7 @@
              }
              var mockPsth = '/test/mock-data/';
              var extendion = '.json';
-             url = mockPsth + url + extendion;;
+             url = mockPsth + url + extendion;
              temp(url, p);
          };
          $.ajax = ajax;

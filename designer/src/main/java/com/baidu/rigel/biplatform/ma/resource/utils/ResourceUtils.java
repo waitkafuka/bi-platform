@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -42,9 +44,14 @@ import com.google.common.collect.Lists;
  *
  *         
  */
-public class ResourceUtils {
+public final class ResourceUtils {
     
-    
+    /**
+     * ResourceUtils
+     */
+    private ResourceUtils() {
+        
+    }
     /**
      * 构建返回结果
      * 
@@ -128,14 +135,14 @@ public class ResourceUtils {
             LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) area;
             Set<String> usedItemOlapIdSet = area.listAllItems().keySet();
             Item[] candDims = liteOlapArea.getCandDims().values().toArray(new Item[0]);
-			rs.setCandDims(buildItemViewObject(schema, cubeId, candDims, usedItemOlapIdSet));
+            rs.setCandDims(buildItemViewObject(schema, cubeId, candDims, usedItemOlapIdSet));
             Item[] candInds = liteOlapArea.getCandInds().values().toArray(new Item[0]);
             rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, usedItemOlapIdSet));
         } else {
-        		final Item[] canDims = area.getLogicModel().getSelectionDims().values().toArray(new Item[0]);
-			rs.setCandDims(buildItemViewObject(schema, cubeId,canDims, null));
-			Item[] candInds = area.getLogicModel().getSelectionMeasures().values().toArray(new Item[0]);
-			rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, null));
+            final Item[] canDims = area.getLogicModel().getSelectionDims().values().toArray(new Item[0]);
+            rs.setCandDims(buildItemViewObject(schema, cubeId, canDims, null));
+            Item[] candInds = area.getLogicModel().getSelectionMeasures().values().toArray(new Item[0]);
+            rs.setCandInds(buildItemViewObject(schema, cubeId, candInds, null));
         }
         return rs;
     }
@@ -167,6 +174,9 @@ public class ResourceUtils {
             if (olapElement != null) {
                 obj.setCaption(olapElement.getCaption());
                 obj.setName(olapElement.getName());
+                if (olapElement instanceof Dimension) {
+                    obj.setDimGroup(((Dimension) olapElement).getType() == DimensionType.GROUP_DIMENSION);
+                }
                 rs.add(obj);
             }
         }

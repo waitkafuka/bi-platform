@@ -102,8 +102,7 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         SearchRequestMessage searchReqeustMessage = (SearchRequestMessage) msg;
         
         String idxPath = searchReqeustMessage.getIdxPath();
-        SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(
-            idxPath);
+        SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath,true);
         IndexSearcher is = null;
         is = searcherManager.acquire();
         
@@ -190,12 +189,12 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
     }
     
     /* (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
-	 */
-	@Override
-	public <T extends AbstractMessage> void setMessage(T t) {
-		return ; 
-		
-	}
+     * @see com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler#setMessage(com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage)
+     */
+    @Override
+    public <T extends AbstractMessage> void setMessage(T t) {
+        return ; 
+        
+    }
     
 }

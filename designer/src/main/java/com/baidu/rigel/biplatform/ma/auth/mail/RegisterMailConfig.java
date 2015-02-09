@@ -27,37 +27,32 @@ import com.baidu.rigel.biplatform.ma.auth.resource.RegisterController;
  * @author jiangyichao
  *
  */
-public class RegisterMailConfig {
+public final class RegisterMailConfig {
     
     /**
      * 发送方email
      */
-    private static String SENDER_MAIL = "biplatform.ma.auth"
-             + ".register.mail.senderMail";
+    private static String SENDER_MAIL = "biplatform.ma.auth.register.mail.senderMail";
     
     /**
      * 接收方email
      */
-    private static String ADMINISTRATOR = "biplatform.ma.auth"
-             + ".register.mail.administrator";
+    private static String ADMINISTRATOR = "biplatform.ma.auth.register.mail.administrator";
     
     /**
      * 注册邮件邮箱标题
      */
-    private static String SUBJECT_FOR_REGISTER = "biplatform.ma.auth"
-             + ".register.mail.subjectForRegister";
+    private static String SUBJECT_FOR_REGISTER = "biplatform.ma.auth.register.mail.subjectForRegister";
     
     /**
      * 开通服务邮件标题
      */
-    private static String SUBJECT_FOR_OPENSERVICE = "biplatform.ma.auth"
-             + ".register.mail.subjectForOpenService";
+    private static String SUBJECT_FOR_OPENSERVICE = "biplatform.ma.auth.register.mail.subjectForOpenService";
     
     /**
      * email服务器地址
      */
-    private static String MAIL_SERVER_HOST = "biplatform.ma.auth"
-             + ".register.mail.mailServerHost";
+    private static String MAIL_SERVER_HOST = "biplatform.ma.auth.register.mail.mailServerHost";
     
     /**
      * 配置信息
@@ -71,6 +66,12 @@ public class RegisterMailConfig {
         loads();
     }
     
+    /**
+     * 构造函数
+     */
+    private RegisterMailConfig() {
+    }
+
     /**
      * 加载静态资源
      */

@@ -269,6 +269,17 @@ body
     padding-left: 5px;
     border-radius: 3px;
 }
+.validate-code {
+    float: left;
+    margin-left: 15px;
+    /*margin-bottom: 20px;*/
+    width: 70px;
+    height: 30px;
+    border: 1px solid #919191;
+    color: #919191;
+    font-family: '微软雅黑';
+    border-radius: 3px;
+}
 /*下拉框样式*/
 .register-box span {
     width: 310px;
@@ -303,6 +314,7 @@ body
     padding-bottom: 5px;
     color: #ffffff;
     font-family: '微软雅黑';
+    font-size: 16px;
     text-decoration: none;
     cursor: pointer;
 }

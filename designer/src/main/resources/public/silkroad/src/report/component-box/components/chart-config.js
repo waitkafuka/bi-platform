@@ -13,7 +13,7 @@ define(
         ChartVmTemplate
     ) {
         // Chart图形 id后缀
-        var chartIdSuffix = Constant.COMPONENT_ID_SUFFIX.SELECT;
+        var chartIdSuffix = Constant.COMPONENT_ID_SUFFIX.CHART;
 
         // Chart图形 实例 描述信息（从report-ui里面获取）
         var entityDescription = [
@@ -60,9 +60,9 @@ define(
             var data = $.extend(true, [], entityDescription);
             data[0].id = id;
             data[0].vuiRef = {
-                "mainChart": id + "-vu-chart"
+                "mainChart": id + chartIdSuffix
             };
-            data[1].id = id + '-vu-chart';
+            data[1].id = id + chartIdSuffix;
             return data;
         };
 

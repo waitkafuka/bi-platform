@@ -24,25 +24,74 @@ package com.baidu.rigel.biplatform.ma.model.consts;
  */
 public interface Constants {
     
+    /**
+     * FILE_NAME_SEPERATOR
+     */
     String FILE_NAME_SEPERATOR = "^_^";
-    // add by jiangyichao at 2014-09-17
-    // bitplatform_productLine
+    
+    /**
+     * BIPLATFORM_PRODUCTLINE
+     */
     String BIPLATFORM_PRODUCTLINE = "biplatform_productline";
-    // sessionID
+    
+    /**
+     * sessionID
+     */
     String SESSION_ID = "identity";
-    // 产品线和sessionId的cookie path
+    
+    /**
+     *  产品线和sessionId的cookie path
+     */
     String COOKIE_PATH = "/";
-    // token
+    
+    /**
+     *  token
+     */
     String TOKEN = "token";
-    // TODO jpass url传参数临时方案
-    // orgname
+    
+    /**
+     *  TODO jpass url传参数临时方案
+     */
     String ORG_NAME = "orgname";
-    // appname
+    
+    /**
+     *  appname
+     */
     String APP_NAME = "appname";
+    
     /**
      * 过滤空白行设置
      */
     String FILTER_BLANK = "filterBlank";
     
+    /**
+     * TOD
+     */
     String TOP = "top";
+    
+    /**
+     * RANDOMCODEKEY
+     */
+    String RANDOMCODEKEY = "RANDOMVALIDATECODEKEY";
+    
+    /**
+     * NEED_LIMITED
+     */
+    String NEED_LIMITED = "needLimited";
+    
+    /**
+     * 级次关系
+     */
+    String LEVEL = "LEVEL";
+    
+    /**
+     * SOCKET_TIME_OUT_KEY
+     */
+    String SOCKET_TIME_OUT_KEY = "timeOut";
+
+    /**
+     * 判断是否由设计器发起请求
+     */
+    String IN_EDITOR = "isEdit";
+    
 }

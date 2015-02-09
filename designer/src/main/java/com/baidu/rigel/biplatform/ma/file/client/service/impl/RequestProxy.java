@@ -15,7 +15,10 @@
  */
 package com.baidu.rigel.biplatform.ma.file.client.service.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -41,6 +44,11 @@ public class RequestProxy {
     private static final Logger LOG = Logger.getLogger(RequestProxy.class);
     
     /**
+     * 服务器地址、端口缓存
+     */
+    private static final List<String> SERVERS = Collections.synchronizedList(new ArrayList<String>());
+    
+    /**
      * 文件服务器客户端
      */
     private final FileServerClient client = FileServerClient.newInstance();
@@ -54,8 +62,8 @@ public class RequestProxy {
     /**
      * 文件服务器端口号
      */
-    @Value("${biplatform.ma.fileserver.port}")
-    private int port;
+//    @Value("${biplatform.ma.fileserver.port}")
+//    private int port;
 
     /**
      * 文件服务器操作请求
@@ -66,7 +74,12 @@ public class RequestProxy {
      */
     @SuppressWarnings("unchecked")
     public Map<String, Object> doActionOnRemoteFileSystem(Request request) throws FileServiceException {
-        Response response = client.doRequest(host, port, request);
+        Response response = null;
+        try {
+            response = doRequest(request);
+        } catch (Throwable e) {
+            LOG.error(e.getMessage(), e);
+        }
         //需要重新定义response的datas属性
         if (response.getStatus() == ResponseStatus.SUCCESS) { //兼容原有逻辑，后续需要调整
             return (Map<String, Object>) response.getDatas();
@@ -78,4 +91,32 @@ public class RequestProxy {
         return rs;
     }
 
+    /**
+     * 
+     * @param request
+     * @return Response
+     */
+    private Response doRequest(Request request) {
+        if (SERVERS.isEmpty()) {
+            initServers();
+        }
+        Response response = null;
+        LOG.info("connect to file server : " + SERVERS);
+        for (String tmp : SERVERS) {
+            String[] server = tmp.split(":");
+            LOG.info("connect to file server : " + server[0] + " port " + server[1]);
+            response = client.doRequest(server[0], Integer.valueOf(server[1]), request);
+            if (response.getStatus() != ResponseStatus.FAIL) {
+                break;
+            }
+        }
+        return response;
+    }
+
+    private void initServers() {
+        String[] servers = host.split(",");
+        for (String server : servers) {
+            SERVERS.add(server);
+        }
+    }
 }

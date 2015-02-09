@@ -9,12 +9,6 @@
 /**
  * 标记且功能性css，在console会起标记作用
  */
-.di-o_o-body {
-    position: relative;
-    padding: 10px;
-    font-size: 12px;
-    min-height: 400px;
-}
 .di-o_o-block {
     position: relative;
     margin: 0 10px 20px 0;
@@ -75,15 +69,15 @@
     -ms-box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .global-prompt-waiting {
-    width: 24px; 
-    height: 24px; 
-    background: url('img/waiting.gif') 0px 0px no-repeat; 
-    overflow: hidden; 
+    width: 24px;
+    height: 24px;
+    background: url('img/waiting.gif') 0px 0px no-repeat;
+    overflow: hidden;
     float: left;
 }
 .global-prompt-waiting-text {
-    margin-left: 34px; 
-    height: 24px; 
+    margin-left: 34px;
+    height: 24px;
     line-height: 24px;
     font-family: "微软雅黑", Serif;
     font-size: 14px;
@@ -121,4 +115,13 @@
     clear: both;
     overflow: hidden;
     height: 0px;
+}
+.canvas .report {
+    background-color: #FFF;
+}
+/* 皮肤对应的背景色,以及字体显示设置 */
+.ecui-loaded {
+    background-color: #FFF;
+    font-family: '微软雅黑', '宋体';
+    font-size: 12px;
 }

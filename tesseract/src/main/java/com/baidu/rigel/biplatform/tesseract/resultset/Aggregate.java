@@ -74,5 +74,11 @@ public class Aggregate {
                 throw new UnsupportedOperationException("unsupported aggregator:" + aggregator);
         }
     }
+    
+    public static void main(String[] args) {
+        Number a = 100;
+        Number b = 100.00;
+        System.out.println(a.doubleValue() + b.doubleValue());
+    }
 
 }

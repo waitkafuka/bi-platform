@@ -1,7 +1,7 @@
 /**
  * repo dict
  * Copyright 2012 Baidu Inc. All rights reserved.
- * 
+ *
  * @file:    描述构件的引用。构建程序（buidlfront会根据此文件生成repo.js）
  * @author:  sushuang(sushuang)
  */
@@ -14,9 +14,9 @@
 
     var repoDict =
 
-        //==[DI=BEGIN]==[NIGEB=ID]=========
-        // 此注释不可改动，标记了解析段落的开始
-        //=================================
+            //==[DI=BEGIN]==[NIGEB=ID]=========
+            // 此注释不可改动，标记了解析段落的开始
+            //=================================
 
         {
             /**
@@ -113,15 +113,16 @@
                     "clzType": "COMPONENT",
                     "vuiRefCandidate": {
                         "input": [
-                            "HIDDEN_INPUT", 
-                            "DAY_POP_CALENDAR", 
-                            "RANGE_POP_CALENDAR", 
-                            "CALENDAR_PLUS", 
-                            "X_CALENDAR", 
-                            "ECUI_SELECT", 
-                            "ECUI_MULTI_SELECT", 
-                            "ECUI_INPUT_TREE", 
-                            "ECUI_SUGGEST", 
+                            "HIDDEN_INPUT",
+                            "DAY_POP_CALENDAR",
+                            "RANGE_POP_CALENDAR",
+                            "CALENDAR_PLUS",
+                            "X_CALENDAR",
+                            "RANGE_CALENDAR",
+                            "ECUI_SELECT",
+                            "ECUI_MULTI_SELECT",
+                            "ECUI_INPUT_TREE",
+                            "ECUI_SUGGEST",
                             "ECUI_INPUT",
                             "MULTI_CHECKBOX",
                             "SIMPLE_RADIO"
@@ -287,6 +288,13 @@
                     "caption": "混合日历（季月周切换＋单选范围选切换）"
                 },
                 {
+                    "clzKey": "RANGE_CALENDAR",
+                    "clzPath": "di.shared.vui.RangeCalendar",
+                    "adapterMethod": { "create": "xuiCreate", "dispose": "xuiDispose" },
+                    "clzType": "VUI",
+                    "caption": "隐藏的输入"
+                },
+                {
                     "clzKey": "OLAP_TABLE",
                     "clzPath": "ecui.ui.OlapTable",
                     "clzType": "VUI",
@@ -322,7 +330,7 @@
                     "adapterMethod": { "create": "ecuiCreate", "dispose": "ecuiDispose" },
                     "caption": "带图标按钮"
                 },
-        		{
+                {
                     "clzKey" : "SAVE_BUTTON",
                     "clzPath" : "di.shared.vui.SaveButton",
                     "clzType" : "VUI",
@@ -454,11 +462,11 @@
 
         }
 
-        //==[DI=END]==[DNE=ID]=============
-        // 此注释不可改动，标记了解析段落的结束
-        //=================================
+    //==[DI=END]==[DNE=ID]=============
+    // 此注释不可改动，标记了解析段落的结束
+    //=================================
 
-    ;
+        ;
     extend(DICT, repoDict);
 
     /**
@@ -470,7 +478,7 @@
             throw new Error('dupicate clzKey: ' + clzDef.clzKey);
         }
         DICT.CLZ[clzDef.clzKey] = clzDef;
-        
+
         // 规范化
         var handlers = clzDef.rtplParamHandler = clzDef.rtplParamHandler || [];
         if (!isArray(handlers)) {

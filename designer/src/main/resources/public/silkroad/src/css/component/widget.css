@@ -95,14 +95,22 @@
 .btn-has-icon:active {
     background-color: #deebf3;
 }
+.btn-report-icon {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    color: #747474;
+    padding: 0 2px 2px 0;
+    background: url(../img/btn-icons.png) no-repeat 4px -2px;
+}
 .btn-has-icon-copy {
     background-position: 4px -33px;
 }
 .btn-has-icon-edit {
-    background-position: 4px -63px;
+    background-position: 0 -63px;
 }
 .btn-has-icon-delete {
-    background-position: 4px -92px;
+    background-position: 0 -93px;
 }
 .btn-has-icon-new {
     background-position: 4px -152px;
@@ -114,7 +122,13 @@
     background-position: 4px -182px;
 }
 .btn-has-icon-drag {
-    background-position: 4px -212px;
+    background-position: 0 -215px;
+}
+.btn-cavnas-icon-edit {
+    background-position: 0 -65px;
+}
+.btn-cavnas-icon-delete {
+    background-position: 0 -95px;
 }
 .con-common-line {
     height: 41px;

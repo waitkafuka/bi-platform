@@ -23,28 +23,28 @@ package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
  */
 public final class RateConditionProcessHandlerFactory {
 
-	/**
-	 * 构造函数
-	 */
-	private RateConditionProcessHandlerFactory() {
-	}
-	
-	/**
-	 * 
-	 * @param strategy 计算方式
-	 * @return AbsRateConditionProcessHandler
-	 */
-	public static RateConditionProcessHandler getInstance(RateCalStrategy strategy) {
-		switch (strategy) {
-			case SR_NUMERATOR:
-				return new SrNumeratorConditionProcessHandler();
-			case SR_DENOMINATOR:
-				return new SrDenominatorConditionProcessHandler();
-			case RR_NUMERATOR:
-				return new RrNumberatorConditionProcessHandler();
-			case RR_DENOMINATOR:
-				return new RrDenominatorConditionProcessHandler();
-		}
-		throw new IllegalArgumentException("不支持的计算类型：" + strategy.name());
-	}
+    /**
+     * 构造函数
+     */
+    private RateConditionProcessHandlerFactory() {
+    }
+    
+    /**
+     * 
+     * @param strategy 计算方式
+     * @return AbsRateConditionProcessHandler
+     */
+    public static RateConditionProcessHandler getInstance(RateCalStrategy strategy) {
+        switch (strategy) {
+            case SR_NUMERATOR:
+                return new SrNumeratorConditionProcessHandler();
+            case SR_DENOMINATOR:
+                return new SrDenominatorConditionProcessHandler();
+            case RR_NUMERATOR:
+                return new RrNumberatorConditionProcessHandler();
+            case RR_DENOMINATOR:
+                return new RrDenominatorConditionProcessHandler();
+        }
+        throw new IllegalArgumentException("不支持的计算类型：" + strategy.name());
+    }
 }

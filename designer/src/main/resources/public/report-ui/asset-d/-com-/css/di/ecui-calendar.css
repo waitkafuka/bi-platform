@@ -50,12 +50,12 @@
     vertical-align: middle;
     /*width: 175px;*/
     height: 24px;
-    background: #F8F8F8;
+    background: white;
     *display: inline;
     *zoom: 1;
 }
 .ui-calendar-range-mode {
-    /*width:254px;*/
+    /*width:227px;*/
 }
 .ui-calendar-fix-view {
     background: #FFF;
@@ -66,7 +66,7 @@
     vertical-align: middle;
     height: 21px;
     padding-top: 1px;
-    border: 1px solid #F8F8F8;
+    border: 1px solid white;
     position: relative;
     *display: inline;
     *zoom: 1;
@@ -76,7 +76,7 @@
     height: 20px;
     *display: inline;
     *zoom: 1;
-    border-top: 1px solid #F8F8F8;
+    border-top: 1px solid white;
 }
 .ui-calendar-btn .ui-button-icon {
     position: absolute;

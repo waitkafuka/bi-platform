@@ -13,7 +13,7 @@ define([
         'report/edit/drag-ind-dim/main-view',
         'report/edit/ue-view',
         'report/global-setting-btns/btns-view',
-        'report/global-menu-btns/menu-view'
+        'report/global-menu-btns/main-view'
     ],
     function (
         template,
@@ -25,14 +25,17 @@ define([
         DragView,
         UEView,
         BtnsView,
-        MenuView
+        MainView
         ) {
         return Backbone.View.extend({
             // view事件绑定
             events: {
                 'change .j-cube-select': 'changeCube',
-                //'click .j-global-para': 'setglobalbtn',
-                'click .j-global-component': 'shiftMenu'
+                'click .j-global-para': 'setglobalbtn',
+                'click .j-global-component': 'shiftMenu',
+                'click .j-button-skin': 'shiftMenu',
+                'click .j-skin-btn': 'chanceTheme'
+//                'click .j-button-line': 'referenceLine'
             },
 
             /**
@@ -49,7 +52,7 @@ define([
                 });
                 this.model.loadCubeList();
                 this.btnsView = new BtnsView();
-                this.menuView = new MenuView();
+                this.mainView = new MainView();
                 this.initListening();
             },
 
@@ -57,7 +60,10 @@ define([
              * 参数维度弹出框事件
              */
             setglobalbtn: function () {
-                this.btnsView.setGlobal();
+                this.model.loadDimList();
+                var dim = {};
+                dim.dimList = this.model.get('dimList');
+                this.btnsView.setGlobal(dim);
             },
 
             /**
@@ -157,22 +163,24 @@ define([
                 // 工具条按钮区域按钮添加
                 this.$el.find('.j-global-btn').html((new BtnsView).createBtns());
                 // 工具条菜单区域菜单添加
-                this.$el.find('.j-global-menu').html((new MenuView).componentMenu());
+                this.$el.find('.j-global-menu').html((new MainView).componentMenu());
                 // FIXME:临时使用，重构时，逻辑干掉
                 $(document).mousedown(function (e) {
                     // 如果触发元素，不属于组件添加按钮区域
                     if (
-                        !$.contains($('.j-global-component')[0], e.target)
-                    ) {
+                        !$.contains($('.j-global-btn')[0], e.target)
+                        ) {
                         // 如果触发元素，不属于组件区域
                         if (
-                            $('.j-all-menus') && (!$.contains($('.j-all-menus')[0], e.target))
-                        ) {
+                            $('.j-all-menus') && (!$.contains($('.j-global-menu')[0], e.target))
+                            ) {
                             // 上面两个条件都满足，组件区域如果显示，那么就该隐藏掉
-                            if ($('.j-con-component') && (!$('.j-con-component').is(':hidden'))) {
-                                $('.j-all-menus').hide();
-                            }
-
+                            //if ($('.j-con-component') && (!$('.j-con-component').is(':hidden'))) {
+                            $('.j-all-menus').each(function () {
+                                $(this).hide();
+                            });
+                            //$('.j-all-menus').hide();
+                            //}
                         }
 
                     }
@@ -202,9 +210,26 @@ define([
              * @public
              */
             shiftMenu : function (event) {
-                this.menuView.shiftMenu(event);
-            }
+                this.mainView.shiftMenu(event);
+            },
 
+            /**
+             * 切换皮肤
+             *
+             * @public
+             */
+            chanceTheme : function (event) {
+                this.mainView.chanceTheme(event);
+            },
+
+            /**
+             * 切换皮肤
+             *
+             * @public
+             */
+            referenceLine : function (event) {
+                this.mainView.referenceLine(event);
+            }
         });
     }
 );

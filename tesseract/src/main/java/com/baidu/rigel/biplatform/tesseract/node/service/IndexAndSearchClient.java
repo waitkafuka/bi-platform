@@ -34,11 +34,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-
-import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +43,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.FileClientHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.IndexClientHandler;
@@ -70,39 +68,33 @@ import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
 /**
- * IndexAndSearchClient 用spring管理，单例
+ * IndexAndSearchClient 
  * 
  * @author lijin
  *
  */
-
 public class IndexAndSearchClient {
     /**
      * logger
      */
     private Logger logger = LoggerFactory.getLogger(IndexAndSearchClient.class);
-    
     /**
-     * isNodeService
+     * Netty客户端
      */
-    @Resource(name = "isNodeService")
-    private IsNodeService isNodeService;
-    
-    /**
-     * LOCAL_HOST_ADDRESS
-     */
-    private static final String LOCAL_HOST_ADDRESS = "127.0.0.1";
-    
-    // private ConcurrentHashMap<NodeAddress, Channel> channelMaps;
-    //private ConcurrentHashMap<String, ChannelHandler> actionHandlerMaps;
     private Bootstrap b;
+    /**
+     * group
+     */
     private EventLoopGroup group;
-    
+    /**
+     * INSTANCE
+     */
     private static IndexAndSearchClient INSTANCE;
     
-    public IndexAndSearchClient() {
-        // channelMaps = new ConcurrentHashMap<NodeAddress, Channel>();
-        //actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
+    /**
+     * 私有构造函数
+     */
+    private IndexAndSearchClient() {
         b = new Bootstrap();
         group = new NioEventLoopGroup();
         b.group(group);
@@ -117,14 +109,16 @@ public class IndexAndSearchClient {
                 pipeline.addLast("encode", new ObjectEncoder());
                 pipeline.addLast("decode",
                     new ObjectDecoder(Integer.MAX_VALUE,ClassResolvers.weakCachingConcurrentResolver(null)));
-//                pipeline.addLast("frameencoder",new LengthFieldPrepender(4,false));
-//                pipeline.addLast("framedecoder",new LengthFieldBasedFrameDecoder(1024*1024*1024, 0, 4,0,4));
             }
         });
         
         logger.info("IndexAndSearchClient init finished");
     }
     
+    /**
+     * getNodeClient
+     * @return IndexAndSearchClient的实例
+     */
     public static synchronized IndexAndSearchClient getNodeClient() {
         if (INSTANCE == null) {
             INSTANCE = new IndexAndSearchClient();
@@ -132,13 +126,25 @@ public class IndexAndSearchClient {
         return INSTANCE;
     }
     
+    /**
+     * NodeAddress 内部类
+     * @author lijin
+     *
+     */
     public class NodeAddress {
+    	/**
+    	 * ip
+    	 */
         private String ip;
+        /**
+         * 端口
+         */
         private int port;
         
         /**
-         * @param ip
-         * @param port
+         * 构造函数
+         * @param ip ip
+         * @param port port
          */
         public NodeAddress(String ip, int port) {
             super();
@@ -232,6 +238,10 @@ public class IndexAndSearchClient {
             return true;
         }
         
+        /**
+         * getOuterType
+         * @return 外部类：IndexAndSearchClient
+         */
         private IndexAndSearchClient getOuterType() {
             return IndexAndSearchClient.this;
         }
@@ -248,29 +258,13 @@ public class IndexAndSearchClient {
         
     }
     
-//    public ChannelHandler getActionHandler(String actionMove) {
-//        logger.info("getActionHandler:[actionMove=" + actionMove + "]");
-//        if (!StringUtils.isEmpty(actionMove) && this.actionHandlerMaps.containsKey(actionMove)) {
-//            return this.actionHandlerMaps.get(actionMove);
-//        }
-//        logger.info("getActionHandler:[actionMove=" + actionMove + "] has no handler");
-//        return null;
-//    }
-    
-//    private boolean registerActionHandler(NettyAction nettyAction,
-//        AbstractChannelInboundHandler handler) throws InstantiationException,
-//        IllegalAccessException {
-//        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
-//            + "] start");
-//        if (nettyAction == null || handler == null) {
-//            return false;
-//        }
-//        this.actionHandlerMaps.put(nettyAction.getActionName(), handler);
-//        logger.info("registerActionHandler:[NettyAction=" + nettyAction + "][handler=" + handler
-//            + "] success");
-//        return true;
-//    }
-    
+    /**
+     * 获取指定IP及端口的连接channel
+     * @param ipAddress 要连接的ip
+     * @param port 要连接的端口
+     * @return Channel 
+     * @throws IndexAndSearchException
+     */
     public Channel getChannelByAddressAndPort(String ipAddress, int port)
         throws IndexAndSearchException {
         logger.info("getChannelByAddressAndPort:[address=" + ipAddress + "][port=" + port
@@ -282,17 +276,11 @@ public class IndexAndSearchClient {
                 IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
         }
         Channel channel = null;
-        // NodeAddress nodeAddr = new NodeAddress(address, port);
         String address = ipAddress;
+        
         try {
-//            InetAddress currAddress = InetAddress.getLocalHost();
-//            
-//            if (ipAddress.equals(currAddress.getHostAddress())) {
-//                address = LOCAL_HOST_ADDRESS;
-//            }
             if (b != null) {
                 channel = b.connect(address, port).sync().channel();
-                // this.channelMaps.put(nodeAddr, channel);
                 logger.info("getChannelByAddressAndPort:connect server success [address=" + address
                     + "][port=" + port + "]");
             }
@@ -310,44 +298,53 @@ public class IndexAndSearchClient {
             + "] connect sucess");
         return channel;
         
-    }
-    
-    public IndexMessage index(TesseractResultSet data, boolean isInit, boolean isUpdate, IndexShard idxShard,
+    }    
+
+    /**
+     * index 索引请求
+     * @param data data数据
+     * @param idxAction 动作
+     * @param idxShard 分片
+     * @param idName 数据的主键字段名
+     * @param lastPiece 是否为最后一块数据
+     * @return IndexMessage
+     * @throws IndexAndSearchException
+     */
+    public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,Node node,
         String idName, boolean lastPiece) throws IndexAndSearchException {
-        logger.info("index:[data=" + data + "][isUpdate=" + isUpdate + "][idxShard=" + idxShard
+        logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "][idName:" + idName + "] start");
         if (data == null || idxShard == null || StringUtils.isEmpty(idxShard.getFilePath())
                 || StringUtils.isEmpty(idxShard.getIdxFilePath())) {
-            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
-                IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
+            throw new IllegalArgumentException();
         }
         
-        NettyAction action = null;
-        if (isUpdate) {
-            action = NettyAction.NETTY_ACTION_UPDATE;
-        } else if (isInit) {
-            action = NettyAction.NETTY_ACTION_INITINDEX;
-        } else {
-            action = NettyAction.NETTY_ACTION_INDEX;
-        }
+		NettyAction action = null;
+		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
+			action = NettyAction.NETTY_ACTION_UPDATE;
+		} else if (idxAction.equals(IndexAction.INDEX_MOD)) {
+			action = NettyAction.NETTY_ACTION_MOD;
+		} else if (idxAction.equals(IndexAction.INDEX_MERGE)
+				    || idxAction.equals(IndexAction.INDEX_INIT)
+				    || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+			action = NettyAction.NETTY_ACTION_INITINDEX;
+		} else {
+			action = NettyAction.NETTY_ACTION_INDEX;
+		}
         MessageHeader messageHeader = new MessageHeader(action, data.toString());
         IndexMessage message = new IndexMessage(messageHeader, data);
-        message.setIdxPath(idxShard.getAbsoluteFilePath());
-        message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath());
+        message.setIdxPath(idxShard.getAbsoluteFilePath(node.getIndexBaseDir()));
+        message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath(node.getIndexBaseDir()));
         message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
         message.setIdName(idName);
         message.setLastPiece(lastPiece);
-//        List<String> measureInfoList = new ArrayList<String>();
-//        measureInfoList.addAll(idxShard.getIndexMeta().getMeasureInfoMap().keySet());
-//        message.setMeasureInfo(measureInfoList);
+
         logger.info("ready to send index message:" + message.toString());
         AbstractMessage ret = null;
         IndexMessage result = null;
         IndexClientHandler handler = new IndexClientHandler();
         try {
-            ret = this.executeAction(action, message, handler, idxShard.getNode());
+            ret = this.executeAction(action, message, handler, node);
             if (ret instanceof IndexMessage) {
                 result = (IndexMessage) ret;
             } else {
@@ -363,13 +360,38 @@ public class IndexAndSearchClient {
                 IndexAndSearchExceptionType.INDEX_EXCEPTION), e,
                 IndexAndSearchExceptionType.INDEX_EXCEPTION);
         }
-        logger.info("index:[data=" + data + "][isUpdate=" + isUpdate + "][idxShard=" + idxShard
+        logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "] finished index ");
         return result;
     }
     
+    /**
+     * getIndexFileCopyTmpDirPath 
+     * @param filePath
+     * @return
+     */
+    private String getIndexFileCopyTmpDirPath(String filePath){
+    	StringBuffer sb=new StringBuffer();
+    	if(!StringUtils.isEmpty(filePath)){
+    		sb.append(filePath.substring(0, filePath.indexOf("indexbase")));
+    		sb.append("indexbase");
+    		sb.append(File.separator);
+    		sb.append("copytmp");
+    		sb.append(File.separator);
+    	}
+    	return sb.toString();
+    }
     
     
+    /**
+     * copyIndexDataToRemoteNode 拷贝索引数据到其它节点
+     * @param filePath 当前要拷贝的目录
+     * @param targetFilePath 目标机器目录
+     * @param replace replace
+     * @param node node
+     * @return ServerFeedbackMessage
+     * @throws IndexAndSearchException
+     */
     public ServerFeedbackMessage copyIndexDataToRemoteNode(String filePath, String targetFilePath, boolean replace,
         Node node) throws IndexAndSearchException {
         logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
@@ -382,13 +404,18 @@ public class IndexAndSearchClient {
                     + "][nodeList:" + node + "]"));
             throw new IllegalArgumentException();
         }
+        String tmpBaseDir=getIndexFileCopyTmpDirPath(filePath);
+        File tmpBaseDirFile=new File(tmpBaseDir);
+        if(!tmpBaseDirFile.exists()){
+        	tmpBaseDirFile.mkdirs();
+        }
         // 压缩
-        String compressedFilePath = filePath + ".tar.gz";
+        String compressedFilePath = tmpBaseDir +System.currentTimeMillis() + ".tar.gz";
         File compressedFile = new File(compressedFilePath);
         compressedFile.deleteOnExit();
         
         try {
-            compressedFilePath = FileUtils.doCompressFile(filePath);
+            compressedFilePath = FileUtils.doCompressFile(filePath,compressedFilePath);
         } catch (IOException e2) {
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                 IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
@@ -477,6 +504,14 @@ public class IndexAndSearchClient {
         return backMessage;
     }
     
+    /**
+     * search
+     * @param query query 
+     * @param idxShard idxShard
+     * @param searchNode searchNode
+     * @return SearchResultMessage
+     * @throws IndexAndSearchException
+     */
     public SearchResultMessage search(QueryRequest query, IndexShard idxShard, Node searchNode)
         throws IndexAndSearchException {
         NettyAction action = NettyAction.NETTY_ACTION_SEARCH;
@@ -484,7 +519,7 @@ public class IndexAndSearchClient {
         MessageHeader messageHeader = new MessageHeader(action);
         
         SearchRequestMessage message = new SearchRequestMessage(messageHeader, query);
-        message.setIdxPath(idxShard.getAbsoluteIdxFilePath(searchNode));
+        message.setIdxPath(idxShard.getAbsoluteIdxFilePath(searchNode.getIndexBaseDir()));
         
         AbstractMessage ret = null;
         
@@ -512,6 +547,15 @@ public class IndexAndSearchClient {
         return result;
     }
     
+    /**
+     * executeAction
+     * @param action 动作
+     * @param message 消息
+     * @param handler handler
+     * @param node 节点
+     * @return AbstractMessage的子类
+     * @throws Exception
+     */
     public <T extends AbstractMessage, R extends AbstractMessage, S extends AbstractChannelInboundHandler> T executeAction(
         NettyAction action, R message, S handler, Node node) throws Exception {
         logger.info("executeAction:[NettyAction=" + action + "][Message=" + message + "][Handler="
@@ -522,10 +566,7 @@ public class IndexAndSearchClient {
                 + "][Handler=" + handler + "]-Exception:IllegalArgumentException");
             throw new IllegalArgumentException();
         }
-//        if (!registerActionHandler(action, handler)) {
-//            logger.info("executeAction-Exception:HandlerRegistException");
-//            throw new HandlerRegistException();
-//        }
+
         Channel channel = null;
         channel = this.getChannelByAddressAndPort(node.getAddress(), node.getPort());
         channel.pipeline().addLast(handler);
@@ -533,9 +574,7 @@ public class IndexAndSearchClient {
         channel.writeAndFlush(message);
         channel.closeFuture().sync();
         
-        System.out.println("hahahaha---------------done:"+channel.closeFuture().isDone()+"    succ:"+channel.closeFuture().isSuccess());
-        
-        
+       
         returnMessage = handler.getMessage();
         
         handler.setMessage(null);
@@ -548,18 +587,8 @@ public class IndexAndSearchClient {
     }
     
     public void shutDown() {
-        
-//        if (this.actionHandlerMaps != null && !this.actionHandlerMaps.isEmpty()) {
-//            this.actionHandlerMaps.clear();
-//        }
         this.b.group().shutdownGracefully();
     }
     
-//    public ConcurrentHashMap<String, ChannelHandler> getActionHandlerMaps() {
-//        if (this.actionHandlerMaps == null) {
-//            this.actionHandlerMaps = new ConcurrentHashMap<String, ChannelHandler>();
-//        }
-//        return actionHandlerMaps;
-//    }
-//    
+
 }

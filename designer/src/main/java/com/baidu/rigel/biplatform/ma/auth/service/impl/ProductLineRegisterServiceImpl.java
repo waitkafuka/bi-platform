@@ -26,10 +26,9 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
-import com.baidu.rigel.biplatform.ma.auth.mail.RegisterMailConfig;
 import com.baidu.rigel.biplatform.ma.auth.mail.SendMail;
-import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
+import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.resource.BaseResource;
@@ -43,32 +42,15 @@ import com.baidu.rigel.biplatform.ma.resource.BaseResource;
 public class ProductLineRegisterServiceImpl extends BaseResource implements ProductLineRegisterService {
     
     /**
-     * 日志对象
+     * 发布目录
      */
-    private static final Logger LOG = Logger.getLogger(ProductLineRegisterServiceImpl.class);
-           
-    /**
-     * 报表目录
-     */
-    @Value("${biplatform.ma.report.location}")
-    public String report;
+    public static final String RELEASE_PATH = "release";
     
     /**
      * dev目录
      */
     public static final String DEV_PATH = "dev";
     
-    /**
-     * 发布目录
-     */
-    public static final String RELEASE_PATH = "release";
-    
-    /**
-     * 数据源目录
-     */
-    @Value("${biplatform.ma.ds.location}")
-    public String ds;
- 
     /**
      * 编码方式
      */
@@ -79,6 +61,11 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      */
     public static final String URL_PARAM_SEPERATOR = "&";
     
+    /**
+     * 日志对象
+     */
+    private static final Logger LOG = Logger.getLogger(ProductLineRegisterServiceImpl.class);
+           
     /**
      * 文件服务对象
      */
@@ -92,27 +79,68 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     ProductLineManageService userManageService;
     
     /**
+     * 报表目录
+     */
+    @Value("${biplatform.ma.report.location}")
+    private String report;
+    
+    /**
+     * 数据源目录
+     */
+    @Value("${biplatform.ma.ds.location}")
+    private String ds;
+    
+    /**
+     * mailReceiver
+     */
+    @Value("${biplatform.ma.auth.register.mail.administrator}")
+    private String mailReceiver;
+    
+    /**
+     * mailSubject
+     */
+    @Value("${biplatform.ma.auth.register.mail.subjectForRegister}")
+    private String mailSubject;
+    
+    /**
+     * mailServer
+     */
+    @Value("${biplatform.ma.auth.register.mail.mailServerHost}")
+    private String mailServer;
+    
+    /**
+     * mailSender
+     */
+    @Value("${biplatform.ma.auth.register.mail.senderMail}")
+    private String mailSender;
+    
+    /**
+     * openServiceSubject
+     */
+    @Value("${biplatform.ma.auth.register.mail.subjectForOpenService}")
+    private String openServiceSubject;
+    
+    /**
      * @{inheritDoc}
      */
     @Override
-    public int sendRegisterMsgToAdministrator(ProductlineInfo user, String hostAddress) {
+    public int sendRegisterMsgToAdministrator(ProductlineInfo user, String hostAddress, String magicStr) {
         SendMail sendMail = new SendMail();
         try {
             // 发送方
-            sendMail.setFromAddress(RegisterMailConfig.getSenderMail());
+            sendMail.setFromAddress(mailSender);
             // 接收方，平台管理员
-            sendMail.setToAddress(RegisterMailConfig.getAdministrator());
+            sendMail.setToAddress(mailReceiver);
             // 邮件主题
-            sendMail.setSubject(RegisterMailConfig.getSubjectForRegister() 
-                    + user.getDepartment());
+            sendMail.setSubject(mailSubject + user.getDepartment());
             // 邮件服务器地址
-            sendMail.setMailServerHost(RegisterMailConfig.getMailServerHost());
+            sendMail.setMailServerHost(mailServer);
             // 设置是否需要验证
             sendMail.setNeedAuth(false);
             // 设置发送方名字
-            sendMail.setUserName(RegisterMailConfig.getSenderMail());
+            sendMail.setUserName(mailSender);
             // 设置发送内容和格式
-            sendMail.setBody(makeUpRegisterMailContent(user, hostAddress), SendMail.HTML);
+            sendMail.setBody(makeUpRegisterMailContent(user, hostAddress, magicStr), SendMail.HTML);
             // 发送
             sendMail.send();
             return 0;
@@ -126,9 +154,10 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      * 构建注册邮件内容
      * @param user
      * @param hostAddress 
+     * @param magicStr 
      * @return
      */
-    private String makeUpRegisterMailContent(ProductlineInfo user, String hostAddress) {
+    private String makeUpRegisterMailContent(ProductlineInfo user, String hostAddress, String magicStr) {
         StringBuilder stringBuilder = new StringBuilder();
         // TODO 修改为加载模板文件
         // 构建邮件html形式内容
@@ -168,13 +197,13 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         
         // 添加开通线上服务url
         stringBuilder.append("<td align=center><a href=" 
-                 + makeUpOpenServiceUrl(user, 1, hostAddress) + ">线上服务</a></td>");
+                    + makeUpOpenServiceUrl(user, 1, hostAddress, magicStr) + ">线上服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("<tr>");     
         // 添加开通线下服务url
         stringBuilder.append("<td align=center><a href="
-                 + makeUpOpenServiceUrl(user, 0, hostAddress) + ">线下服务</a></td>");
+                + makeUpOpenServiceUrl(user, 0, hostAddress, magicStr) + ">线下服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("</table>");
@@ -186,10 +215,11 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      * 构建开通服务url
      * @param user 用户对象
      * @param serviceType 服务类型，1代表线上服务，0代表线下服务
+     * @param magicStr 
      * @param hsotAddress 服务器请求处理地址
      * @return url
      */
-    private String makeUpOpenServiceUrl(ProductlineInfo user, int serviceType, String hostAddress) {
+    private String makeUpOpenServiceUrl(ProductlineInfo user, int serviceType, String hostAddress, String magicStr) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(hostAddress);
         stringBuilder.append("/");
@@ -210,7 +240,9 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             stringBuilder.append(URLEncoder.encode(user.getDepartment(), DEFAULT_CODE));
             stringBuilder.append(URL_PARAM_SEPERATOR);
             stringBuilder.append("serviceType=" 
-                     + URLEncoder.encode(String.valueOf(user.getServiceType()), DEFAULT_CODE));       
+                     + URLEncoder.encode(String.valueOf(user.getServiceType()), DEFAULT_CODE));   
+            stringBuilder.append(URL_PARAM_SEPERATOR);
+            stringBuilder.append("magicStr=" + magicStr);
         } catch (Exception e) {
             LOG.warn(e.getMessage(), e);
         }
@@ -224,18 +256,17 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         SendMail sendMail = new SendMail();
         try {
             // 发送方
-            sendMail.setFromAddress(RegisterMailConfig.getSenderMail());
+            sendMail.setFromAddress(mailSender);
             // 接收方
             sendMail.setToAddress(user.getEmail());
             // 邮件主题
-            sendMail.setSubject(RegisterMailConfig.getSubjectForOpenService()
-                    + user.getDepartment());
+            sendMail.setSubject(openServiceSubject + user.getDepartment());
             // 邮件服务器地址
-            sendMail.setMailServerHost(RegisterMailConfig.getMailServerHost());
+            sendMail.setMailServerHost(mailServer);
             // 设置是否需要验证
             sendMail.setNeedAuth(false);
             // 设置发送方名字
-            sendMail.setUserName(RegisterMailConfig.getSenderMail());
+            sendMail.setUserName(mailSender);
             // 设置发送内容和格式
             sendMail.setBody(makeUpOpenServiceMailContent(user, serviceType), SendMail.HTML);
             // 发送

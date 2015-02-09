@@ -429,61 +429,61 @@ public class TimeUtils {
      * @return 返回具体以日为粒度的时间格式 20141107
      */
     protected static Map<String, String> singleTimeContidion(String start, String end, TimeType timeType) {
-    	Map<String, String> result = new HashMap<String, String>();
-		String startYear = start.substring(0,4);// 起始年份
-		String endYear = end.substring(0,4); // 截止年份
-    	Calendar cal = Calendar.getInstance();
+        Map<String, String> result = new HashMap<String, String>();
+        String startYear = start.substring(0,4);// 起始年份
+        String endYear = end.substring(0,4); // 截止年份
+        Calendar cal = Calendar.getInstance();
         switch (timeType) {
-        	case TimeYear:
-        		start = startYear + "0101"; // 起始年份的第一天
-        		end = endYear + "1231"; // 截止年份的最后一天
-        		break;
-        	case TimeHalfYear:
-        		break;
-        	case TimeQuarter:
-        		String startQuarter = start.substring(5);
-        		String startDate = QUARTER_BEGIN[Integer.valueOf(startQuarter)-1];
-        		start = startYear + startDate;
-        		String endQuarter = end.substring(5);
-        		String endDate = QUARTER_END[Integer.valueOf(endQuarter)-1];
-        		end = endYear + endDate;
-        		break;
-        	case TimeMonth:
-        		String startMonth = start.substring(4);
-        		start = startYear + startMonth + "01";
-        		String endMonth = end.substring(4);
-        		cal.set(Calendar.YEAR, Integer.valueOf(endYear));
-        		cal.set(Calendar.MONTH, Integer.valueOf(endMonth)-1);
-        		end = endYear + endMonth + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-        		break;
-        	case TimeWeekly:
-        		cal.clear();
-        		cal.set(Calendar.YEAR, Integer.valueOf(endYear));
-        		cal.set(Calendar.MONTH, Integer.valueOf(end.substring(4,6))-1);
-        		cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(end.substring(6)));
-        		cal.add(Calendar.DAY_OF_MONTH, 6);
-        		int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-        		String day = "" + dayOfMonth;
-        		if (dayOfMonth < 10) {
-        			day = "0" + day;
-        		}
-        		end = "" + cal.get(Calendar.YEAR) + (cal.get(Calendar.MONTH) + 1) + day;
-        		break;
-        	case TimeDay:
-        		break;
-        	case TimeHour:
-        		break;
-        	case TimeMinute:
-        		break;
-        	case TimeSecond:
-        		break;
-        	default:
-        		break;                    	
+            case TimeYear:
+                start = startYear + "0101"; // 起始年份的第一天
+                end = endYear + "1231"; // 截止年份的最后一天
+                break;
+            case TimeHalfYear:
+                break;
+            case TimeQuarter:
+                String startQuarter = start.substring(5);
+                String startDate = QUARTER_BEGIN[Integer.valueOf(startQuarter)-1];
+                start = startYear + startDate;
+                String endQuarter = end.substring(5);
+                String endDate = QUARTER_END[Integer.valueOf(endQuarter)-1];
+                end = endYear + endDate;
+                break;
+            case TimeMonth:
+                String startMonth = start.substring(4);
+                start = startYear + startMonth + "01";
+                String endMonth = end.substring(4);
+                cal.set(Calendar.YEAR, Integer.valueOf(endYear));
+                cal.set(Calendar.MONTH, Integer.valueOf(endMonth)-1);
+                end = endYear + endMonth + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+                break;
+            case TimeWeekly:
+                cal.clear();
+                cal.set(Calendar.YEAR, Integer.valueOf(endYear));
+                cal.set(Calendar.MONTH, Integer.valueOf(end.substring(4,6))-1);
+                cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(end.substring(6)));
+                cal.add(Calendar.DAY_OF_MONTH, 6);
+                int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+                String day = "" + dayOfMonth;
+                if (dayOfMonth < 10) {
+                    day = "0" + day;
+                }
+                end = "" + cal.get(Calendar.YEAR) + (cal.get(Calendar.MONTH) + 1) + day;
+                break;
+            case TimeDay:
+                break;
+            case TimeHour:
+                break;
+            case TimeMinute:
+                break;
+            case TimeSecond:
+                break;
+            default:
+                break;                        
         }
         end = checkEndDateAfterNow(end);
-		result.put("start", start);
-		result.put("end", end);
-    	return result;
+        result.put("start", start);
+        result.put("end", end);
+        return result;
     }
     
     /**
@@ -492,20 +492,20 @@ public class TimeUtils {
      * @return
      */
     protected static String checkEndDateAfterNow(String end) {
-    	Calendar calEnd = Calendar.getInstance();
-		calEnd.set(Calendar.YEAR, Integer.valueOf(end.substring(0,4)));
-		calEnd.set(Calendar.MONTH, Integer.valueOf(end.substring(4,6))-1);
-		calEnd.set(Calendar.DAY_OF_MONTH, Integer.valueOf(end.substring(6)));
-		
-		Calendar calNow = Calendar.getInstance();
-		if (calNow.before(calEnd)) {
-			int dayOfMonth = calNow.get(Calendar.DAY_OF_MONTH);
-    		String day = "" + dayOfMonth;
-    		if (dayOfMonth < 10) {
-    			day = "0" + day;
-    		}
-    		end = "" + calNow.get(Calendar.YEAR) + (calNow.get(Calendar.MONTH) + 1) + day;
-		}
-    	return end;
+        Calendar calEnd = Calendar.getInstance();
+        calEnd.set(Calendar.YEAR, Integer.valueOf(end.substring(0,4)));
+        calEnd.set(Calendar.MONTH, Integer.valueOf(end.substring(4,6))-1);
+        calEnd.set(Calendar.DAY_OF_MONTH, Integer.valueOf(end.substring(6)));
+        
+        Calendar calNow = Calendar.getInstance();
+        if (calNow.before(calEnd)) {
+            int dayOfMonth = calNow.get(Calendar.DAY_OF_MONTH);
+            String day = "" + dayOfMonth;
+            if (dayOfMonth < 10) {
+                day = "0" + day;
+            }
+            end = "" + calNow.get(Calendar.YEAR) + (calNow.get(Calendar.MONTH) + 1) + day;
+        }
+        return end;
     }
 }

@@ -15,16 +15,22 @@
  */
 package com.baidu.rigel.biplatform.tesseract.store.service.impl;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.EventObject;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
@@ -53,11 +59,13 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 
 // TODO 需要通过factory返回StoryManager的实例，不要直接用Spring的注解 --Add by xiaoming.chen
 @Service("hazelcastStoreManager")
-public class HazelcastStoreManager implements StoreManager {
+public class HazelcastStoreManager implements StoreManager,InitializingBean {
     
+    public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
+
     public static final String EVENT_QUEUE = "eventQueue";
 
-	private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
+    private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
 
     private static final String HAZELCAST_SERVER_GROUP_USER_NAME = "hazelcastServer.groupUserName";
 
@@ -104,15 +112,30 @@ public class HazelcastStoreManager implements StoreManager {
         }
         cfg.getGroupConfig().setName(prop.getProperty(HAZELCAST_SERVER_GROUP_USER_NAME, "tesseract-cluster"));
         cfg.getGroupConfig().setPassword(prop.getProperty(HAZELCAST_SERVER_GROUP_PASSWORD, "tesseract"));
+        
         cfg.setInstanceName(prop.getProperty(HAZELCAST_SERVER_NAME, "TesseractHZ_Cluster"));
         
        // cfg.getQueueConfig(EVENT_QUEUE).addItemListenerConfig(new ItemListenerConfig(this.hazelcastQueueItemListener,true));
+        String manCenter = prop.getProperty(HAZELCAST_MANCERTER_URL);
+        boolean enableManCerter = Boolean.valueOf(prop.getProperty("hazelcastServer.mancenter.enable"));
+        if (enableManCerter && StringUtils.isNotBlank(manCenter)) {
+            cfg.getManagementCenterConfig().setEnabled(true);
+            cfg.getManagementCenterConfig().setUrl(manCenter);
+        }
+        System.setProperty("hazelcast.socket.bind.any", "false");
+        String ip = "127.0.0.1";
+        try {
+            ip = InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            LOGGER.warn("get ip error, {}",e.getMessage());
+        }
+        LOGGER.info("local memchine ip: {}", ip);
+        cfg.getProperties();//.getGroupProperties().SOCKET_SERVER_BIND_ANY
+        cfg.getNetworkConfig().getInterfaces().addInterface(ip);
+        cfg.getNetworkConfig().getInterfaces().setEnabled(true);
         
-        cfg.getManagementCenterConfig().setEnabled(true);
-        cfg.getManagementCenterConfig().setUrl(prop.getProperty(HAZELCAST_MANCERTER_URL, "mancenterUrl"));
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-        
         tcpIpConfig.addMember(prop.getProperty(HAZELCAST_SERVER_MEMBERS,"127.0.0.1"));
         tcpIpConfig.setEnabled(true);
         
@@ -120,14 +143,37 @@ public class HazelcastStoreManager implements StoreManager {
         this.cacheManager = new HazelcastCacheManager(this.hazelcast);
     }
     
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.hazelcast.getTopic("topics").addMessageListener(hazelcastNoticePort);
+        IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
+        queue.addItemListener(hazelcastQueueItemListener,true);
+    }
+    
     private Properties loadConf(String location) throws IOException {
         if(StringUtils.isBlank(location)) {
             location = "config/application.properties";
+            LOGGER.info("default load config from {}", location);
         }
-        
-        Properties properties = PropertiesLoaderUtils.loadAllProperties(location);
-        if (properties.isEmpty()) {
-            properties = PropertiesLoaderUtils.loadAllProperties("conf/tesseract.properties");
+        String filePath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+        File propertiesFile = new File(new File(filePath).getParent(), location);
+        Properties properties =null; 
+        if(propertiesFile.exists()) {
+            LOGGER.info("load from config {}", propertiesFile.getAbsolutePath());
+            properties = new Properties();
+            FileInputStream fis = null;
+            try {
+                fis = new FileInputStream(propertiesFile);
+                properties.load(fis);
+            } catch (IOException e) {
+                LOGGER.warn("load config properties catch error",e);
+            } finally {
+                IOUtils.closeQuietly(fis);
+            }
+        }
+        if (properties == null || properties.isEmpty()) {
+            LOGGER.info("can not get default config from {} load config from {}", propertiesFile.getAbsolutePath(),DEFAULT_TESSERACT_CONFIG);
+            properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_TESSERACT_CONFIG);
         }
         return properties;
     }
@@ -163,7 +209,6 @@ public class HazelcastStoreManager implements StoreManager {
             throw new IllegalArgumentException();
         }
         IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
-        queue.addItemListener(hazelcastQueueItemListener,true);
         try {
             queue.put(event);
         } catch (InterruptedException e) {
@@ -206,8 +251,7 @@ public class HazelcastStoreManager implements StoreManager {
             throw new IllegalArgumentException();
         }
         ITopic<Object> topics = this.hazelcast.getTopic("topics");
-        topics.addMessageListener(hazelcastNoticePort);
-
+        
         topics.publish(event);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "postEvent",

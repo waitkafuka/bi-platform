@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.CallbackDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
+import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StandardDimTableMetaDefine;
@@ -206,7 +207,7 @@ public class DimConfigResource extends BaseResource {
                     NormalDimDetail dateDim = starModelBuildService
                         .generateNormalDimBindView((StandardDimTableMetaDefine) dimTable);
                     if (dateDim != null) {
-                    		normal.getChildren().add(dateDim);
+                        normal.getChildren().add(dateDim);
                     }
                 }
             }
@@ -225,17 +226,20 @@ public class DimConfigResource extends BaseResource {
                 logger.error(msg, e);
                 return ResourceUtils.getErrorResult(msg, 1);
             }
-            DBInfoReader reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            DBInfoReader reader = null;
             String tableName = cubeTable.getName();
             if (cubeTable.isMutilple() && CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
                 tableName = cubeTable.getRegExpTables().get(0);
             }
             List<ColumnInfo> cols = null;
             try {
+                reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
                 cols = reader.getColumnInfos(tableName);
             } finally {
-                reader.closeConn(); 
+                if (reader != null) {
+                    reader.closeConn(); 
+                }
             }
             if (CollectionUtils.isEmpty(cols)) {
                 String msg = String.format("不能从表%s中获取字段！", tableName);
@@ -306,6 +310,12 @@ public class DimConfigResource extends BaseResource {
         }
         
         ReportDesignModel reportModel = getReportModel(reportId);
+        DataSourceDefine ds = null;
+        try {
+            ds = dsService.getDsDefine(reportModel.getDsId());
+        } catch (DataSourceOperationException e1) {
+            logger.error("[ERROR] --- --- 获取数据源信息失败", e1);
+        }
         Schema schema = reportModel.getSchema();
         StarModel[] starModels = director.getStarModel(schema);
         for (StarModel starModel : starModels) {
@@ -339,6 +349,8 @@ public class DimConfigResource extends BaseResource {
             
             // 重置starModel的
             starModel.setDimTables(newDimTables);
+            // 修正事实表定义
+            modifyFactTable(starModel, ds);
         }
         schema = director.modifySchemaWithNewModel(schema, starModels);
         ResponseResult rs = null;
@@ -357,6 +369,38 @@ public class DimConfigResource extends BaseResource {
         return rs;
     }
     
+    /**
+     * 
+     * @param starModel
+     */
+    private void modifyFactTable(StarModel starModel, DataSourceDefine ds) {
+        if (ds == null) {
+            return;
+        }
+        List<ColumnInfo> cols = null;
+        DBInfoReader reader = null;
+        try {
+            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
+                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            cols = reader.getColumnInfos(starModel.getFactTable().getName());
+        } finally {
+            if (reader != null) {
+                reader.closeConn(); 
+            }
+        }
+        if (cols == null || cols.isEmpty()) {
+            return;
+        }
+        starModel.getFactTable().clearColumns();
+        ColumnMetaDefine column = null;
+        for (ColumnInfo col : cols) {
+            column = new ColumnMetaDefine();
+            column.setName(col.getId());
+            column.setCaption(col.getName());
+            starModel.getFactTable().addColumn(column);
+        }
+    }
+
     /**
      * 
      * @param reportId

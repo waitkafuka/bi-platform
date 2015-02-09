@@ -1,0 +1,1 @@
+define(["url"],function(a){return Backbone.Model.extend({initialize:function(){},getSkinType:function(b,c){$.ajax({url:a.getSkinType(b,c),type:"POST",success:function(){}})}})});

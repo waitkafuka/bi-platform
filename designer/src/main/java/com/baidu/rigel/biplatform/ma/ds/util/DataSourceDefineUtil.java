@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.comm.util.ConfigUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -38,12 +39,18 @@ import com.google.common.collect.Maps;
  * @author david.wang
  *
  */
-public class DataSourceDefineUtil {
+public final class DataSourceDefineUtil {
     
     /**
      * LOGGER
      */
     private static Logger logger = LoggerFactory.getLogger(DataSourceDefineUtil.class);
+    
+    /**
+     * 构造函数
+     */
+    private DataSourceDefineUtil() {
+    }
     
     /**
      * 获取数据源文件的文件名（含路径）
@@ -73,12 +80,12 @@ public class DataSourceDefineUtil {
      * @param dsDefine 数据源定义
      * @return SqlDataSourceInfo
      */
-    public static SqlDataSourceInfo parseToDataSourceInfo(DataSourceDefine dsDefine) {
+    public static SqlDataSourceInfo parseToDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
         SqlDataSourceInfo dsInfo = new SqlDataSourceInfo(dsDefine.getId());
         dsInfo.setDataBase(parseToDataBase(dsDefine.getType()));
         dsInfo.setDBProxy(true);
         try {
-            dsInfo.setPassword(dsDefine.getDbPwd());
+            dsInfo.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
         } catch (Exception e) {
             logger.error("Encrypt password Fail !!", e);
             throw new RuntimeException(e);
@@ -86,7 +93,7 @@ public class DataSourceDefineUtil {
         dsInfo.setUsername(dsDefine.getDbUser());
         dsInfo.setProductLine(dsDefine.getProductLine());
         dsInfo.setInstanceName(dsDefine.getDbInstance());
-        dsInfo.setDataSourceKey(dsDefine.getName());
+//        dsInfo.setDataSourceKey(dsDefine.getName());
         dsInfo.setDBProxy(true);
         List<String> urls = Lists.newArrayList();
         urls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
@@ -105,7 +112,7 @@ public class DataSourceDefineUtil {
             case ORACLE:
                 return DataBase.ORACLE;
             case H2:
-            		return DataBase.H2;
+                return DataBase.H2;
             default:
                 return DataBase.OTHER;
         }

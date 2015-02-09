@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
@@ -44,6 +45,7 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.auth.bo.CalMeasureViewBo;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.SchemaManageService;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 
@@ -549,7 +551,7 @@ public class SchemaManageServiceImpl implements SchemaManageService {
         }
         
         if (cube.getMeasures() == null || cube.getMeasures().isEmpty()) {
-           throw new IllegalStateException("cube's measures is empty"); 
+            throw new IllegalStateException("cube's measures is empty");
         }
         return cube;
     }
@@ -584,38 +586,62 @@ public class SchemaManageServiceImpl implements SchemaManageService {
             return null;
         }
         extendMeasure.getCals().stream().filter(cal -> {
-            return !StringUtils.isEmpty(cal.getId());
+            return !StringUtils.isEmpty(cal.getCaption()) && !StringUtils.isEmpty(cal.getFormula());
         }).forEach(cal -> {
-            Measure m = cube.getMeasures().get(cal.getId());
-            if (StringUtils.isEmpty(m.getCaption())) {
-                cube.getMeasures().remove(m.getId());
+            if (StringUtils.isEmpty(cal.getId())) {
+                ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(cal.getCaption());
+                m.setAggregator(Aggregator.SUM);
+                m.setCaption(cal.getCaption());
+                m.setCube(cube);
+                m.setDefine(m.getName());
+                m.setFormula(cal.getFormula());
+                m.setRefIndNames(cal.getReferenceNames());
+                m.setType(MeasureType.CAL);
+//                m.setName(cal.getCaption());
+                m.setId(UuidGeneratorUtils.generate());
+                cube.getMeasures().put(m.getId(), m);
             } else {
+                Measure m = cube.getMeasures().get(cal.getId());
                 if (m != null) {
+                    ((ExtendMinicubeMeasure) m).setCaption(cal.getCaption());
+                    ((ExtendMinicubeMeasure) m).setName(cal.getCaption());
                     ((ExtendMinicubeMeasure) m).setFormula(cal.getFormula());
                     ((ExtendMinicubeMeasure) m).setRefIndNames(cal.getReferenceNames());
-                    cube.getMeasures().put(m.getId(), m);
                 }
+                cube.getMeasures().put(m.getId(), m);
             }
         });
         
-        extendMeasure.getCals().stream().filter(cal -> {
-            return StringUtils.isEmpty(cal.getId()) && StringUtils.hasText(cal.getCaption());
-        }).forEach(cal -> {
-            ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(cal.getCaption());
-            m.setAggregator(Aggregator.SUM);
-            m.setCaption(cal.getCaption());
-            m.setCube(cube);
-            m.setDefine(m.getName());
-            m.setFormula(cal.getFormula());
-            m.setRefIndNames(cal.getReferenceNames());
-            m.setType(MeasureType.CAL);
-            m.setId(UuidGeneratorUtils.generate());
-            cube.getMeasures().put(m.getId(), m);
+        extendMeasure.getCallback().forEach(measureBo -> {
+            CallbackMeasure m = new CallbackMeasure(measureBo.getName());
+            if (!StringUtils.isEmpty(measureBo.getId())) {
+                m = (CallbackMeasure) cube.getMeasures().get(measureBo.getId());
+            } else {
+                m.setId(UuidGeneratorUtils.generate());
+            }
+            if (m != null) {
+                m.setCallbackUrl(measureBo.getUrl());
+                m.setName(measureBo.getName());
+                m.setCaption(measureBo.getCaption());
+                String timeOut = measureBo.getProperties().get(Constants.SOCKET_TIME_OUT_KEY);
+                if (StringUtils.isEmpty(timeOut)) {
+                    timeOut = "30000";
+                }
+                m.setType(MeasureType.CALLBACK);
+                m.setAggregator(Aggregator.CALCULATED);
+                m.setSocketTimeOut(Long.valueOf(timeOut));
+                m.setCube(cube);
+                cube.getMeasures().put(m.getId(), m);
+            }
         });
-        extendMeasure.getTbs().stream().filter(tb -> {
-            return StringUtils.isEmpty(tb.getId()) && !StringUtils.isEmpty(tb.getCaption());
-        }).forEach(tb -> {
+        
+        extendMeasure.getTbs().stream().forEach(tb -> {
             ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(tb.getName());
+            if (StringUtils.isEmpty(tb.getId())) {
+                m.setId(UuidGeneratorUtils.generate());
+            } else {
+                m.setId(tb.getId());
+            }
             m.setAggregator(Aggregator.SUM);
             m.setCaption(tb.getCaption());
             m.setCube(cube);
@@ -623,13 +649,10 @@ public class SchemaManageServiceImpl implements SchemaManageService {
             m.setFormula(tb.getFormula());
             m.setRefIndNames(tb.getReferenceNames());
             m.setType(MeasureType.SR);
-            m.setId(UuidGeneratorUtils.generate());
             cube.getMeasures().put(m.getId(), m);
         });
         
-        extendMeasure.getHbs().stream().filter(hb -> {
-            return StringUtils.isEmpty(hb.getId()) && !StringUtils.isEmpty(hb.getCaption());
-        }).forEach(hb -> {
+        extendMeasure.getHbs().stream().forEach(hb -> {
             ExtendMinicubeMeasure m = new ExtendMinicubeMeasure(hb.getName());
             m.setAggregator(Aggregator.SUM);
             m.setCaption(hb.getCaption());
@@ -638,7 +661,11 @@ public class SchemaManageServiceImpl implements SchemaManageService {
             m.setFormula(hb.getFormula());
             m.setRefIndNames(hb.getReferenceNames());
             m.setType(MeasureType.RR);
-            m.setId(UuidGeneratorUtils.generate());
+            if (StringUtils.isEmpty(hb.getId())) {
+                m.setId(UuidGeneratorUtils.generate());
+            } else {
+                m.setId(hb.getId());
+            }
             cube.getMeasures().put(m.getId(), m);
         });
         return schema;

@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -200,18 +201,6 @@ public class IndexMeta extends StoreMeta implements Serializable {
     @Override
     public String getStoreKey() {
         StringBuffer sb = new StringBuffer();
-        // if (this.clusterName != null && this.productLine != null &&
-        // this.dataSourceInfo != null
-        // && this.dataSourceInfo.getDataSourceKey() != null &&
-        // !("").equals(this.clusterName)
-        // && !this.productLine.equals("") &&
-        // !("").equals(this.dataSourceInfo.getDataSourceKey())) {
-        // sb.append(this.clusterName);
-        // sb.append(INDEX_META_KEY_SPLITTER);
-        // sb.append(this.productLine);
-        // sb.append(INDEX_META_KEY_SPLITTER);
-        // sb.append(this.dataSourceInfo.getDataSourceKey());
-        // }
         if (this.dataSourceInfo != null
             && !StringUtils.isEmpty(this.dataSourceInfo.getDataSourceKey())) {
             sb.append(this.dataSourceInfo.getDataSourceKey());
@@ -356,26 +345,6 @@ public class IndexMeta extends StoreMeta implements Serializable {
         this.idxShardList = idxShardList;
     }
     
-    // /**
-    // * getter method for property idxShardRule
-    // *
-    // * @return the idxShardRule
-    // */
-    // public Set<IndexShardRule> getIdxShardRule() {
-    // return idxShardRule;
-    // }
-    //
-    // /**
-    // * setter method for property idxShardRule
-    // *
-    // * @param idxShardRule
-    // * the idxShardRule to set
-    // */
-    // public void setIdxShardRule(Set<IndexShardRule> idxShardRule) {
-    // this.idxShardRule = idxShardRule;
-    // }
-    
-    
     
    
     /**
@@ -392,6 +361,26 @@ public class IndexMeta extends StoreMeta implements Serializable {
             }
         }
         return factTable;
+    }
+    
+    /**
+     * 获取索引元数据所在目录前缀
+     * @return String
+     */
+    public String getIndexMetaFileDirPath(){
+    	StringBuffer sb=new StringBuffer();
+    	if(this.getDataSourceInfo()!=null && StringUtils.isNotEmpty(this.getDataSourceInfo().getDataSourceKey())
+    			&& StringUtils.isNotEmpty(this.getFacttableName()) 
+    			&& StringUtils.isNotEmpty(this.getIndexMetaId())){
+    		sb.append(this.getDataSourceInfo().getDataSourceKey() + File.separator);
+    		sb.append(this.getFacttableName() + File.separator);
+    		sb.append(this.getIndexMetaId() + File.separator);
+    		
+    	}else{
+    		throw new IllegalArgumentException();
+    	}
+    	
+    	return sb.toString();
     }
     
     /**
@@ -476,74 +465,74 @@ public class IndexMeta extends StoreMeta implements Serializable {
     
     
     /**
-	 * @return the dimSet
-	 */
-	public Set<String> getDimSet() {
-		if(dimSet==null){
-			dimSet=new HashSet<String>();
-		}
-		return dimSet;
-	}
+     * @return the dimSet
+     */
+    public Set<String> getDimSet() {
+        if(dimSet==null){
+            dimSet=new HashSet<String>();
+        }
+        return dimSet;
+    }
 
-	/**
-	 * @param dimSet the dimSet to set
-	 */
-	public void setDimSet(Set<String> dimSet) {
-		this.dimSet = dimSet;
-	}
+    /**
+     * @param dimSet the dimSet to set
+     */
+    public void setDimSet(Set<String> dimSet) {
+        this.dimSet = dimSet;
+    }
 
-	/**
-	 * @return the measureSet
-	 */
-	public Set<String> getMeasureSet() {
-		if(measureSet==null){
-			measureSet=new HashSet<String>();
-		}
-		return measureSet;
-	}
+    /**
+     * @return the measureSet
+     */
+    public Set<String> getMeasureSet() {
+        if(measureSet==null){
+            measureSet=new HashSet<String>();
+        }
+        return measureSet;
+    }
 
-	/**
-	 * @param measureSet the measureSet to set
-	 */
-	public void setMeasureSet(Set<String> measureSet) {
-		this.measureSet = measureSet;
-	}
+    /**
+     * @param measureSet the measureSet to set
+     */
+    public void setMeasureSet(Set<String> measureSet) {
+        this.measureSet = measureSet;
+    }
 
-	/**
-	 * @return the dimInfoMergeSet
-	 */
-	public Set<String> getDimInfoMergeSet() {
-		if(dimInfoMergeSet==null){
-			dimInfoMergeSet=new HashSet<String>();
-		}
-		return dimInfoMergeSet;
-	}
+    /**
+     * @return the dimInfoMergeSet
+     */
+    public Set<String> getDimInfoMergeSet() {
+        if(dimInfoMergeSet==null){
+            dimInfoMergeSet=new HashSet<String>();
+        }
+        return dimInfoMergeSet;
+    }
 
-	/**
-	 * @param dimInfoMergeSet the dimInfoMergeSet to set
-	 */
-	public void setDimInfoMergeSet(Set<String> dimInfoMergeSet) {
-		this.dimInfoMergeSet = dimInfoMergeSet;
-	}
+    /**
+     * @param dimInfoMergeSet the dimInfoMergeSet to set
+     */
+    public void setDimInfoMergeSet(Set<String> dimInfoMergeSet) {
+        this.dimInfoMergeSet = dimInfoMergeSet;
+    }
 
-	/**
-	 * @return the measureInfoMergeSet
-	 */
-	public Set<String> getMeasureInfoMergeSet() {
-		if(measureInfoMergeSet==null){
-			measureInfoMergeSet=new HashSet<String>();
-		}
-		return measureInfoMergeSet;
-	}
+    /**
+     * @return the measureInfoMergeSet
+     */
+    public Set<String> getMeasureInfoMergeSet() {
+        if(measureInfoMergeSet==null){
+            measureInfoMergeSet=new HashSet<String>();
+        }
+        return measureInfoMergeSet;
+    }
 
-	/**
-	 * @param measureInfoMergeSet the measureInfoMergeSet to set
-	 */
-	public void setMeasureInfoMergeSet(Set<String> measureInfoMergeSet) {
-		this.measureInfoMergeSet = measureInfoMergeSet;
-	}
+    /**
+     * @param measureInfoMergeSet the measureInfoMergeSet to set
+     */
+    public void setMeasureInfoMergeSet(Set<String> measureInfoMergeSet) {
+        this.measureInfoMergeSet = measureInfoMergeSet;
+    }
 
-	/*
+    /*
      * (non-Javadoc)
      * 
      * @see java.lang.Object#hashCode()
@@ -592,30 +581,30 @@ public class IndexMeta extends StoreMeta implements Serializable {
     public Set<String> getSelectList(boolean needMerge) {
         Set<String> selectList = new HashSet<String>();
         if(this.dimSet!=null){
-        	for(String dimKey:this.dimSet){
-            	selectList.add(dimKey);
+            for(String dimKey:this.dimSet){
+                selectList.add(dimKey);
             }
         }
         
         if(this.measureSet!=null){
-        	for(String measureKey:this.measureSet){
-            	selectList.add(measureKey);
+            for(String measureKey:this.measureSet){
+                selectList.add(measureKey);
             }
         }
         
         
         if(needMerge){
-        	if(this.dimInfoMergeSet!=null && this.dimInfoMergeSet.size()>0){
-        		for(String dimKey:this.dimInfoMergeSet){
-        			selectList.add(dimKey);
-        		}
-        	}
-        	
-        	if(this.measureInfoMergeSet!=null && this.measureInfoMergeSet.size()>0){
-        		for(String measureKey:this.measureInfoMergeSet){
-        			selectList.add(measureKey);
-        		}
-        	}
+            if(this.dimInfoMergeSet!=null && this.dimInfoMergeSet.size()>0){
+                for(String dimKey:this.dimInfoMergeSet){
+                    selectList.add(dimKey);
+                }
+            }
+            
+            if(this.measureInfoMergeSet!=null && this.measureInfoMergeSet.size()>0){
+                for(String measureKey:this.measureInfoMergeSet){
+                    selectList.add(measureKey);
+                }
+            }
         }        
        
         return selectList;

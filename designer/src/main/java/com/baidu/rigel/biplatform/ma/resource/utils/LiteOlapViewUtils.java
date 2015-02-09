@@ -45,8 +45,20 @@ import com.google.common.collect.Maps;
  * @author zhongyi
  *
  */
-public class LiteOlapViewUtils {
+public final class LiteOlapViewUtils {
     
+    /**
+     * LiteOlapViewUtils
+     */
+    private LiteOlapViewUtils() {
+        
+    }
+    /**
+     * 
+     * @param liteOlapArea
+     * @param schema
+     * @return MetaData
+     */
     public static MetaData parseMetaData(LiteOlapExtendArea liteOlapArea, Schema schema) {
         LogicModel logicModel = liteOlapArea.getLogicModel();
         MetaData metaData = new MetaData();
@@ -88,6 +100,12 @@ public class LiteOlapViewUtils {
         return metaData;
     }
     
+    /**
+     * 
+     * @param liteOlapArea
+     * @param schema
+     * @return MetaStatusData
+     */
     public static MetaStatusData parseMetaStatusData(LiteOlapExtendArea liteOlapArea, Schema schema) {
         MetaStatusData metaStatusData = new MetaStatusData();
         LogicModel logicModel = liteOlapArea.getLogicModel();
@@ -125,6 +143,13 @@ public class LiteOlapViewUtils {
         return metaStatusData;
     }
     
+    /**
+     * 
+     * @param item
+     * @param schema
+     * @param selected
+     * @return LiteOlapDim
+     */
     public static LiteOlapDim parseDim(Item item, Schema schema, boolean selected) {
         LiteOlapDim dim = new LiteOlapDim();
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema,
@@ -139,6 +164,13 @@ public class LiteOlapViewUtils {
         return dim;
     }
     
+    /**
+     * 
+     * @param item
+     * @param schema
+     * @param selected
+     * @return LiteOlapInd
+     */
     public static LiteOlapInd parseInd(Item item, Schema schema, boolean selected) {
         LiteOlapInd ind = new LiteOlapInd();
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema,
@@ -152,6 +184,12 @@ public class LiteOlapViewUtils {
         return ind;
     }
     
+    /**
+     * 
+     * @param liteOlapArea
+     * @param schema
+     * @return Map<String, Object>
+     */
     public static Map<String, Object> parseSelectedItemMap(LiteOlapExtendArea liteOlapArea, Schema schema) {
         LogicModel logicModel = liteOlapArea.getLogicModel();
         List<SelectedItem> cols = Lists.newArrayList();
@@ -182,6 +220,12 @@ public class LiteOlapViewUtils {
         return selectedMapResult;
     }
     
+    /**
+     * 
+     * @param element
+     * @param cubeId
+     * @return SelectedItem
+     */
     private static SelectedItem parseSelectedItem(OlapElement element, String cubeId) {
         SelectedItem selected = new SelectedItem();
         selected.setCaption(element.getCaption());
@@ -193,6 +237,11 @@ public class LiteOlapViewUtils {
         return selected;
     }
     
+    /**
+     * 
+     * @param element
+     * @return IndCandicateForChart
+     */
     public static IndCandicateForChart parseIndForChart(OlapElement element) {
         IndCandicateForChart ind = new IndCandicateForChart();
         ind.setCaption(element.getCaption());

@@ -15,14 +15,12 @@
  */
 package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
@@ -31,13 +29,15 @@ import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Level;
-import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Member;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackDimTreeNode;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackResponse;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
+import com.baidu.rigel.biplatform.ac.model.callback.ResponseStatus;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
-import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
-import com.baidu.rigel.biplatform.tesseract.model.CallBackTreeNode;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -58,20 +58,42 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
     /**
      * treeCallbackService TODO 这个后续修改，会变成从工厂获取
      */
-    private static CallbackServiceImpl treeCallbackService = new CallbackServiceImpl();
+//    private static CallbackServiceImpl treeCallbackService = new CallbackServiceImpl();
 
     @Override
     public List<MiniCubeMember> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, Member parentMember,
             Map<String, String> params) throws MiniCubeQueryException, MetaException {
-        MetaDataService.checkCube(cube);
-        MetaDataService.checkDataSourceInfo(dataSourceInfo);
-        List<CallBackTreeNode> posTree = fetchCallBack(level, params);
-        List<MiniCubeMember> result = createMembersByPosTreeNode(posTree, level, null);
-        if (parentMember == null) {
-            return result;
-        } else {
-            return createMembersByPosTreeNode(posTree.get(0).getChildren(), level, null);
+//        MetaDataService.checkCube(cube);
+//        MetaDataService.checkDataSourceInfo(dataSourceInfo);
+        CallbackLevel callbackLevel = (CallbackLevel) level;
+        Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
+        if (MapUtils.isNotEmpty(params)) {
+            params.forEach((k, v) -> {
+                if (callbackParams.containsKey(k)) {
+                    callbackParams.put(k, v);
+                }
+            }); 
+//            callbackParams.putAll(params);
         }
+        
+        CallbackResponse response = 
+                CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), 
+                callbackParams, CallbackType.DIM);
+        if (response.getStatus() == ResponseStatus.SUCCESS) {
+            @SuppressWarnings("unchecked")
+            List<CallbackDimTreeNode> posTree = (List<CallbackDimTreeNode>) response.getData();
+            List<MiniCubeMember> result = createMembersByPosTreeNode(posTree, level, null);
+            if (parentMember == null) {
+                return result;
+            } else {
+                return createMembersByPosTreeNode(posTree.get(0).getChildren(), level, null);
+            }
+        } else {
+            log.error("[ERROR] --- --- " + response.getStatus() + "---" + response.getMessage());
+            // 错误请求，直接提示出错
+            throw new RuntimeException(response.getMessage());
+        }
+        
     }
 
     /**
@@ -81,11 +103,11 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @param parent
      * @return
      */
-    private List<MiniCubeMember> createMembersByPosTreeNode(List<CallBackTreeNode> posTree, Level level,
+    private List<MiniCubeMember> createMembersByPosTreeNode(List<CallbackDimTreeNode> posTree, Level level,
             MiniCubeMember parent) {
         List<MiniCubeMember> members = new ArrayList<MiniCubeMember>();
         if (CollectionUtils.isNotEmpty(posTree)) {
-            for (CallBackTreeNode node : posTree) {
+            for (CallbackDimTreeNode node : posTree) {
                 MiniCubeMember member = createMemberByPosTreeNode(node, level, parent);
                 member.setChildren(createMembersByPosTreeNode(node.getChildren(), level, member));
                 members.add(member);
@@ -94,49 +116,69 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         return members;
     }
 
-    /**
-     * 根据Callback的level获取Callback
-     * 
-     * @param level CallbackLevel
-     * @param params 参数信息
-     * @return Callback返回结果
-     * @throws IOException Http请求异常
-     */
-    private List<CallBackTreeNode> fetchCallBack(Level level, Map<String, String> params) throws MiniCubeQueryException {
-        if (level == null || !level.getType().equals(LevelType.CALL_BACK)) {
-            throw new IllegalArgumentException("level type must be call back:" + level);
-        }
-        CallbackLevel callbackLevel = (CallbackLevel) level;
-        if (StringUtils.isBlank(callbackLevel.getCallbackUrl())) {
-            throw new IllegalArgumentException("callback url can not be empty:" + callbackLevel);
-        }
-        Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
-        if (MapUtils.isNotEmpty(params)) {
-            callbackParams.putAll(params);
-        }
-
-        // 默认设置只取本身和本身的孩子节点
-        List<CallBackTreeNode> result;
-        try {
-            result = treeCallbackService.fetchCallback(callbackLevel.getCallbackUrl(), callbackParams);
-            return result;
-        } catch (IOException e) {
-            log.error("fetch callback error,url:" + callbackLevel.getCallbackUrl() + " params:" + callbackParams, e);
-            throw new MiniCubeQueryException(e);
-        }
-    }
+//    /**
+//     * 根据Callback的level获取Callback
+//     * 
+//     * @param level CallbackLevel
+//     * @param params 参数信息
+//     * @return Callback返回结果
+//     * @throws IOException Http请求异常
+//     */
+//    private List<CallBackTreeNode> fetchCallBack(Level level, Map<String, String> params) throws MiniCubeQueryException {
+//        if (level == null || !level.getType().equals(LevelType.CALL_BACK)) {
+//            throw new IllegalArgumentException("level type must be call back:" + level);
+//        }
+//        CallbackLevel callbackLevel = (CallbackLevel) level;
+//        if (StringUtils.isBlank(callbackLevel.getCallbackUrl())) {
+//            throw new IllegalArgumentException("callback url can not be empty:" + callbackLevel);
+//        }
+//        Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
+//        if (MapUtils.isNotEmpty(params)) {
+//            callbackParams.putAll(params);
+//        }
+//
+//        // 默认设置只取本身和本身的孩子节点
+//        List<CallBackTreeNode> result;
+//        try {
+//            result = treeCallbackService.fetchCallback(callbackLevel.getCallbackUrl(), callbackParams);
+//            return result;
+//        } catch (IOException e) {
+//            log.error("fetch callback error,url:" + callbackLevel.getCallbackUrl() + " params:" + callbackParams, e);
+//            throw new MiniCubeQueryException(e);
+//        }
+//    }
 
     @Override
     public MiniCubeMember getMemberFromLevelByName(DataSourceInfo dataSourceInfo, Cube cube, Level level, String name,
             MiniCubeMember parent, Map<String, String> params) throws MiniCubeQueryException, MetaException {
-        MetaDataService.checkCube(cube);
-        MetaDataService.checkDataSourceInfo(dataSourceInfo);
-        List<CallBackTreeNode> posTree = fetchCallBack(level, params);
-        if (posTree.size() != 1) {
-            throw new MiniCubeQueryException("pos tree return over 1 node:" + posTree);
+//        MetaDataService.checkCube(cube);
+//        MetaDataService.checkDataSourceInfo(dataSourceInfo);
+//        List<CallBackTreeNode> posTree = fetchCallBack(level, params);
+        CallbackLevel callbackLevel = (CallbackLevel) level;
+        Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
+        if (MapUtils.isNotEmpty(params)) {
+            params.forEach((k, v) -> {
+                if (callbackParams.containsKey(k)) {
+                    callbackParams.put(k, v);
+                }
+            }); 
+//            callbackParams.putAll(params);
         }
-
-        return createMemberByPosTreeNode(posTree.get(0), level, null);
+        CallbackResponse response = 
+                CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), 
+                callbackParams, CallbackType.DIM);
+        if (response.getStatus() == ResponseStatus.SUCCESS) {
+            @SuppressWarnings("unchecked")
+            List<CallbackDimTreeNode> posTree = (List<CallbackDimTreeNode>) response.getData();
+            if (posTree.size() != 1) {
+                throw new MiniCubeQueryException("pos tree return over 1 node:" + posTree);
+            }
+            
+            return createMemberByPosTreeNode(posTree.get(0), level, null);
+            
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
     }
 
     /**
@@ -144,7 +186,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @param level
      * @return
      */
-    private MiniCubeMember createMemberByPosTreeNode(CallBackTreeNode node, Level level, Member parentMember) {
+    private MiniCubeMember createMemberByPosTreeNode(CallbackDimTreeNode node, Level level, Member parentMember) {
         MiniCubeMember result = new MiniCubeMember(node.getId());
         result.setLevel(level);
         result.setCaption(node.getName());

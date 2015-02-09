@@ -41,7 +41,7 @@ public final class QueryRequestTransService {
      * @param request
      * @return QueryAction
      */
-    public QueryAction tranRequest2QueryAction (QueryRequest request) {
+    public QueryAction tranRequest2QueryAction(QueryRequest request) {
         
         if (this.handler == null) {
             throw new IllegalStateException("未找到合适的请求处理拦截器。Service 未正确初始化");

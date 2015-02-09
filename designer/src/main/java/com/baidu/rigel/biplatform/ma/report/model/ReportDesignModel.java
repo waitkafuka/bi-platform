@@ -27,6 +27,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -112,6 +113,16 @@ public class ReportDesignModel implements Serializable {
      * 兼容旧报表 vm文件定义
      */
     private String vmContent;
+    
+    /**
+     * 主题
+     */
+    private String theme;
+    
+    /**
+     * 报表参数映射关系
+     */
+    private Map<String, ReportParam> params = Maps.newHashMap();
     
     public String getId() {
         return id;
@@ -310,4 +321,40 @@ public class ReportDesignModel implements Serializable {
     public String toString() {
         return this.getName() + ": " + this.getVersion();
     }
+
+    /**
+     * @return the params
+     */
+    public Map<String, ReportParam> getParams() {
+        if (this.params == null) {
+            this.params = Maps.newHashMap();
+        }
+        return params;
+    }
+
+    /**
+     * @param params the params to set
+     */
+    public void setParams(Map<String, ReportParam> params) {
+        this.params = params;
+    }
+
+    /**
+     * @return the theme
+     */
+    public String getTheme() {
+        if (StringUtils.isEmpty(this.theme)) {
+            this.theme = "di";
+        }
+        return theme;
+    }
+
+    /**
+     * @param theme the theme to set
+     */
+    public void setTheme(String theme) {
+        this.theme = theme;
+    }
+    
+    
 }

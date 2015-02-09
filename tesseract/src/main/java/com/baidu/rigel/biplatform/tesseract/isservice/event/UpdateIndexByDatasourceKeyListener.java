@@ -70,7 +70,7 @@ public class UpdateIndexByDatasourceKeyListener implements
         if (event.getDataSourceKey() != null) {
             String dataSourceKey = event.getDataSourceKey();
             try {
-                this.indexService.updateIndexByDataSourceKey(dataSourceKey, event.getDataSetNames());
+                this.indexService.updateIndexByDataSourceKey(dataSourceKey,event.getDataSetNames(), event.getDataSetMap());
             } catch (IndexAndSearchException e) {
                 LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
                     "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event), e);
@@ -78,8 +78,6 @@ public class UpdateIndexByDatasourceKeyListener implements
             }
         }
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-            "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event));
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_ON_LISTENER_END,
             "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event));

@@ -1725,8 +1725,9 @@
                 attachEvent(WINDOW, 'scroll', onscroll);
 
                 init(DOCUMENT.body);
+                //TODO:更改BODY属性
                 addClass(DOCUMENT.body, 'ecui-loaded');
-
+                DOCUMENT.body.setAttribute("id","body-white");
                 status = NORMAL;
                 return true;
             }

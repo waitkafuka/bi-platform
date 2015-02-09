@@ -101,16 +101,11 @@ public abstract class AbstractChannelInboundHandler extends ChannelInboundHandle
      */
     @Override
     public final void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        System.out.println("mamaammamamamama-------"+this.getClass());
         AbstractMessage message = (AbstractMessage) msg;
-        System.out.println("kkkkkkkkkkkkkkkk-------"+message);
-//        System.out.println("current support is : "+this.supportedAction);
         if (message.getMessageHeader() == null) {
-        	System.out.println("messageHeader is null");
             exceptionCaught(ctx, new MessageHeaderNullException());
             return;
         } else if (!message.md5Check()) {
-        	System.out.println("md5check is false");
             exceptionCaught(ctx, new MessageDamagedException(message.toString()));
             return;
         }
@@ -118,7 +113,6 @@ public abstract class AbstractChannelInboundHandler extends ChannelInboundHandle
             this.messageReceived(ctx, msg);
             
         } else {
-        	System.out.println("message is :" +message);
             ctx.fireChannelRead(msg);
         }
     }

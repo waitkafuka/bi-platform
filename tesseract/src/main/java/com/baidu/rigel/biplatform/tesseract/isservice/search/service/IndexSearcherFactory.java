@@ -60,6 +60,11 @@ public class IndexSearcherFactory {
     private static IndexSearcherFactory INSTANCE = new IndexSearcherFactory();
     
     /**
+     * 线程池
+     */
+    private static ExecutorService EXECUTOR_POOL=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
+    
+    /**
      * getInstance
      * 
      * @return IndexSearcherFactory
@@ -85,8 +90,7 @@ public class IndexSearcherFactory {
          */
         @Override
         public IndexSearcher newSearcher(IndexReader reader) throws IOException {
-            ExecutorService pool = Executors.newCachedThreadPool();
-            return new IndexSearcher(reader, pool);
+            return new IndexSearcher(reader, EXECUTOR_POOL);
         }
         
     }
@@ -101,9 +105,12 @@ public class IndexSearcherFactory {
      * @throws IOException
      *             可能抛出异常
      */
-    public synchronized SearcherManager getSearcherManager(String idxPath) throws IOException {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-            "getSearcherManager", idxPath));
+    public synchronized SearcherManager getSearcherManager(String idxPath,boolean isLog) throws IOException {
+		if (isLog) {
+			LOGGER.info(String.format(
+					LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
+					"getSearcherManager", idxPath));
+		}
         SearcherManager searcherManager = null;
         if (StringUtils.isEmpty(idxPath)) {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
@@ -124,8 +131,11 @@ public class IndexSearcherFactory {
             }
             
         }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "getSearcherManager",
-            idxPath));
+		if (isLog) {
+			LOGGER.info(String.format(
+					LogInfoConstants.INFO_PATTERN_FUNCTION_END,
+					"getSearcherManager", idxPath));
+		}
         return searcherManager;
     }
     
@@ -145,7 +155,7 @@ public class IndexSearcherFactory {
                 "refreshSearchManager", idxPath));
             throw new IllegalArgumentException();
         }
-        SearcherManager searcherManager = getSearcherManager(idxPath);
+        SearcherManager searcherManager = getSearcherManager(idxPath,true);
         if (searcherManager != null) {
             searcherManager.maybeRefresh();
         }

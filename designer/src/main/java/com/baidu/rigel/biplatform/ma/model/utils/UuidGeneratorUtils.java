@@ -25,7 +25,7 @@ import java.util.UUID;
  * @author david.wang
  *
  */
-public class UuidGeneratorUtils {
+public final class UuidGeneratorUtils {
     
     /**
      * 构造函数

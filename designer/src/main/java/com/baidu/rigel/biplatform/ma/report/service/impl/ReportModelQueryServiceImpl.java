@@ -36,10 +36,12 @@ import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -75,7 +77,8 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      * 
      */
     @Override
-    public List<Member> getMembers(Cube cube, Dimension dimension, Level level, Map<String, String> params)
+    public List<Member> getMembers(Cube cube, Dimension dimension, Level level, Map<String, String> params,
+                String securityKey)
             throws MiniCubeQueryException, DataSourceOperationException {
         LinkedHashMap<String, Integer> levelIndexRep = Maps.newLinkedHashMap();
         int index = 0;
@@ -91,7 +94,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         List<Member> members;
         try {
             members = level.getMembers(cube, dsInfo, params);
@@ -112,7 +115,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      * @throws MiniCubeQueryException 
      */
     @Override
-    public List<List<Member>> getMembers(Cube cube, Dimension dim, Map<String, String> params)
+    public List<List<Member>> getMembers(Cube cube, Dimension dim, Map<String, String> params, String securityKey)
             throws MiniCubeQueryException, DataSourceOperationException {
         
         if (dim == null) {
@@ -126,7 +129,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         Level[] parentLevels = dim.getLevels().values().toArray(new Level[0]);
         List<Member> rootMembers = null;
         try {
-                rootMembers = getMembers(cube, dim, parentLevels[0], params);
+            rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
             logger.error("Exception happened when getMemebers of dim " + dim.getName(),
                     e);
@@ -137,7 +140,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             for (int i = 1; i < parentLevels.length; ++i) {
                 List<Member> tmpMember = Lists.newArrayList();
                 for (Member m : rootMembers) {
-                    tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params));
+                    tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params, securityKey));
                 }
                 members.add(tmpMember);
                 rootMembers = tmpMember;
@@ -156,7 +159,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      * @throws MiniCubeQueryException 
      */
     private List<Member> getMembers(Cube cube, Dimension dim,
-            Member parent, Level level, Map<String, String> params)
+            Member parent, Level level, Map<String, String> params, String securityKey)
             throws MiniCubeQueryException, DataSourceOperationException {
         DataSourceDefine dsDefine = null;
         try {
@@ -165,7 +168,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         List<Member> members = parent.getChildMembers(cube, dsInfo, params);
         for (Member m : members) {
             MiniCubeMember member = (MiniCubeMember) m;
@@ -179,7 +182,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
      */
     @Override
     public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache,
-    			boolean needSumary, String securityKey)
+                boolean needSumary, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
         return this.queryDatas(model, action, usingCache, needSumary, null, securityKey);
     }
@@ -205,7 +208,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine);
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
         try {
@@ -223,6 +226,14 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                         questionModel.getRequestParams().put(key, (String) value);
                     }
                 } 
+                // 设计器中
+                if (requestParams.get(Constants.IN_EDITOR) != 
+                        null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
+                    PageInfo pageInfo = new PageInfo();
+                    pageInfo.setPageSize(100);
+                    pageInfo.setTotalPage(1);
+                    questionModel.setPageInfo(pageInfo);
+                }
             }
         } catch (QueryModelBuildException e) {
             if (model.getExtendById(action.getExtendAreaId()).getLogicModel() != null) {

@@ -22,87 +22,87 @@ import java.io.Serializable;
  * @author david.wang
  *
  */
-public class MeasureTopSetting implements Serializable{
+public class MeasureTopSetting implements Serializable {
 
-	/**
-	 * serialVersionUID
-	 */
-	private static final long serialVersionUID = 5893492933636273757L;
-	
-	/**
-	 * 排序方式
-	 */
-	private TopType topType = TopType.DESC;
-	
-	/**
-	 * 指标id
-	 */
-	private String measureId;
-	
-	/**
-	 * 纪录数
-	 */
-	private int recordSize;
-	
-	/**
-	 * 区域id
-	 */
-	private String areaId;
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = 5893492933636273757L;
+    
+    /**
+     * 排序方式
+     */
+    private TopType topType = TopType.DESC;
+    
+    /**
+     * 指标id
+     */
+    private String measureId;
+    
+    /**
+     * 纪录数
+     */
+    private int recordSize;
+    
+    /**
+     * 区域id
+     */
+    private String areaId;
 
-	/**
-	 * @return the topType
-	 */
-	public TopType getTopType() {
-		return topType;
-	}
+    /**
+     * @return the topType
+     */
+    public TopType getTopType() {
+        return topType;
+    }
 
-	/**
-	 * @param topType the topType to set
-	 */
-	public void setTopType(TopType topType) {
-		this.topType = topType;
-	}
+    /**
+     * @param topType the topType to set
+     */
+    public void setTopType(TopType topType) {
+        this.topType = topType;
+    }
 
-	/**
-	 * @return the measureId
-	 */
-	public String getMeasureId() {
-		return measureId;
-	}
+    /**
+     * @return the measureId
+     */
+    public String getMeasureId() {
+        return measureId;
+    }
 
-	/**
-	 * @param measureId the measureId to set
-	 */
-	public void setMeasureId(String measureId) {
-		this.measureId = measureId;
-	}
+    /**
+     * @param measureId the measureId to set
+     */
+    public void setMeasureId(String measureId) {
+        this.measureId = measureId;
+    }
 
-	/**
-	 * @return the recordSize
-	 */
-	public int getRecordSize() {
-		return recordSize;
-	}
+    /**
+     * @return the recordSize
+     */
+    public int getRecordSize() {
+        return recordSize;
+    }
 
-	/**
-	 * @param recordSize the recordSize to set
-	 */
-	public void setRecordSize(int recordSize) {
-		this.recordSize = recordSize;
-	}
+    /**
+     * @param recordSize the recordSize to set
+     */
+    public void setRecordSize(int recordSize) {
+        this.recordSize = recordSize;
+    }
 
-	/**
-	 * @return the areaId
-	 */
-	public String getAreaId() {
-		return areaId;
-	}
+    /**
+     * @return the areaId
+     */
+    public String getAreaId() {
+        return areaId;
+    }
 
-	/**
-	 * @param areaId the areaId to set
-	 */
-	public void setAreaId(String areaId) {
-		this.areaId = areaId;
-	}
-	
+    /**
+     * @param areaId the areaId to set
+     */
+    public void setAreaId(String areaId) {
+        this.areaId = areaId;
+    }
+    
 }

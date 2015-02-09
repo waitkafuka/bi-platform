@@ -31,23 +31,23 @@ public class ColField implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /**
-	 * v
-	 */
+     * v
+     */
     private String v;
     
     /**
-	 * colspan
-	 */
+     * colspan
+     */
     private Integer colspan;
     
     /**
-	 * rowspan
-	 */
+     * rowspan
+     */
     private Integer rowspan;
     
     /**
-	 * uniqName
-	 */
+     * uniqName
+     */
     private String uniqName;
     
     /**

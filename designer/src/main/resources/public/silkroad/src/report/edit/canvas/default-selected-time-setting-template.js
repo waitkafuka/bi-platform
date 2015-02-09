@@ -2,89 +2,91 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,list=$data.list,item=$data.item,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<div class="con-tab">\r\n    <!--<span class="item">静止时间</span>-->\r\n    <span class="item">动态时间</span>\r\n</div>\r\n<div class="con-tab-content">\r\n    ';
+        var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,list=$data.list,item=$data.item,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<div class="con-tab">\n    <!--<span class="item">静止时间</span>-->\n    <span class="item">动态时间</span>\n</div>\n<div class="con-tab-content">\n    ';
         $each(list,function(item,$index){
-        $out+='\r\n    ';
+        $out+='\n    ';
         if(item.type == 'D'){
-        $out+='\r\n    <div class="item j-item" data-type="D">\r\n        <div class="title">日粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="" value="';
+        $out+='\n    <div class="item j-item" data-type="D">\n        <div class="title">日粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="';
         $out+=$escape(item.defaultSelectedVal);
-        $out+='"/>\r\n            <select>\r\n                <option value="D">日</option>\r\n            </select>\r\n        </div>\r\n    </div>\r\n    ';
+        $out+='"/>\n            <select>\n                <option value="D">日</option>\n            </select>\n        </div>\n    </div>\n    ';
         }
-        $out+='\r\n\r\n    ';
+        $out+='\n\n    ';
         if(item.type == 'W'){
-        $out+='\r\n    <div class="item j-item" data-type="W">\r\n        <div class="title">周粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="" value="-1"/>\r\n            <select>\r\n                <option value="D"';
+        $out+='\n    <div class="item j-item" data-type="W">\n        <div class="title">周粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="';
+        $out+=$escape(item.defaultSelectedVal);
+        $out+='"/>\n            <select>\n                <option value="D"';
         if(item.defaultSelectedUnit == 'D'){
         $out+=' selected';
         }
-        $out+='>日</option>\r\n                <option value="W"';
+        $out+='>日</option>\n                <option value="W"';
         if(item.defaultSelectedUnit == 'W'){
         $out+=' selected';
         }
-        $out+='>周</option>\r\n            </select>\r\n        </div>\r\n    </div>\r\n    ';
+        $out+='>周</option>\n            </select>\n        </div>\n    </div>\n    ';
         }
-        $out+='\r\n\r\n    ';
+        $out+='\n\n    ';
         if(item.type == 'M'){
-        $out+='\r\n    <div class="item j-item" data-type="M">\r\n        <div class="title">月粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="" value="-1"/>\r\n            <select>\r\n                <option value="D"';
+        $out+='\n    <div class="item j-item" data-type="M">\n        <div class="title">月粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="-1"/>\n            <select>\n                <option value="D"';
         if(item.defaultSelectedUnit == 'D'){
         $out+=' selected';
         }
-        $out+='>日</option>\r\n                <option value="W"';
+        $out+='>日</option>\n                <option value="W"';
         if(item.defaultSelectedUnit == 'W'){
         $out+=' selected';
         }
-        $out+='>周</option>\r\n                <option value="M"';
+        $out+='>周</option>\n                <option value="M"';
         if(item.defaultSelectedUnit == 'M'){
         $out+=' selected';
         }
-        $out+='>月</option>\r\n            </select>\r\n        </div>\r\n    </div>\r\n    ';
+        $out+='>月</option>\n            </select>\n        </div>\n    </div>\n    ';
         }
-        $out+='\r\n\r\n    ';
+        $out+='\n\n    ';
         if(item.type == 'Q'){
-        $out+='\r\n    <div class="item j-item" data-type="Q">\r\n        <div class="title">季粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="" value="-1"/>\r\n            <select>\r\n                <option value="D"';
+        $out+='\n    <div class="item j-item" data-type="Q">\n        <div class="title">季粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="-1"/>\n            <select>\n                <option value="D"';
         if(item.defaultSelectedUnit == 'D'){
         $out+=' selected';
         }
-        $out+='>日</option>\r\n                <option value="W"';
+        $out+='>日</option>\n                <option value="W"';
         if(item.defaultSelectedUnit == 'W'){
         $out+=' selected';
         }
-        $out+='>周</option>\r\n                <option value="M"';
+        $out+='>周</option>\n                <option value="M"';
         if(item.defaultSelectedUnit == 'M'){
         $out+=' selected';
         }
-        $out+='>月</option>\r\n                <option value="Q"';
+        $out+='>月</option>\n                <option value="Q"';
         if(item.defaultSelectedUnit == 'Q'){
         $out+=' selected';
         }
-        $out+='>季</option>\r\n            </select>\r\n        </div>\r\n    </div>\r\n    ';
+        $out+='>季</option>\n            </select>\n        </div>\n    </div>\n    ';
         }
-        $out+='\r\n\r\n    ';
+        $out+='\n\n    ';
         if(item.type == 'Y'){
-        $out+='\r\n    <div class="item j-item" data-type="Y">\r\n        <div class="title">季粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="" value="-1"/>\r\n            <select>\r\n                <option value="D"';
+        $out+='\n    <div class="item j-item" data-type="Y">\n        <div class="title">季粒度设置</div>\n        <div class="content">\n            <input type="text" name="" value="-1"/>\n            <select>\n                <option value="D"';
         if(item.defaultSelectedUnit == 'D'){
         $out+=' selected';
         }
-        $out+='>日</option>\r\n                <option value="W"';
+        $out+='>日</option>\n                <option value="W"';
         if(item.defaultSelectedUnit == 'W'){
         $out+=' selected';
         }
-        $out+='>周</option>\r\n                <option value="M"';
+        $out+='>周</option>\n                <option value="M"';
         if(item.defaultSelectedUnit == 'M'){
         $out+=' selected';
         }
-        $out+='>月</option>\r\n                <option value="Q"';
+        $out+='>月</option>\n                <option value="Q"';
         if(item.defaultSelectedUnit == 'Q'){
         $out+=' selected';
         }
-        $out+='>季</option>\r\n                <option value="Y"';
+        $out+='>季</option>\n                <option value="Y"';
         if(item.defaultSelectedUnit == 'Y'){
         $out+=' selected';
         }
-        $out+='>年</option>\r\n            </select>\r\n        </div>\r\n    </div>\r\n    ';
+        $out+='>年</option>\n            </select>\n        </div>\n    </div>\n    ';
         }
-        $out+='\r\n    ';
+        $out+='\n    ';
         });
-        $out+='\r\n</div>';
+        $out+='\n</div>';
         return $out;
     }
     return { render: anonymous };

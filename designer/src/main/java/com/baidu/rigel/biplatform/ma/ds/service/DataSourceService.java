@@ -97,5 +97,5 @@ public interface DataSourceService {
      * @param dsName 数据源名称
      * @return DataSourceDefine
      */
-	public DataSourceDefine getDsDefine(String productLine, String dsName) throws DataSourceOperationException;
+    public DataSourceDefine getDsDefine(String productLine, String dsName) throws DataSourceOperationException;
 }

@@ -67,6 +67,11 @@ public class ItemViewObject implements Serializable {
     private String chartType;
 
     /**
+     * dimGroup
+     */
+    private boolean dimGroup = false;
+    
+    /**
      * @return the id
      */
     public String getId() {
@@ -150,19 +155,32 @@ public class ItemViewObject implements Serializable {
         this.used = used;
     }
 
-	/**
-	 * @return the chartType
-	 */
-	public String getChartType() {
-		return chartType;
-	}
+    /**
+     * @return the chartType
+     */
+    public String getChartType() {
+        return chartType;
+    }
 
-	/**
-	 * @param chartType the chartType to set
-	 */
-	public void setChartType(String chartType) {
-		this.chartType = chartType;
-	}
-    
+    /**
+     * @param chartType the chartType to set
+     */
+    public void setChartType(String chartType) {
+        this.chartType = chartType;
+    }
+
+    /**
+     * @return the dimGroup
+     */
+    public boolean isDimGroup() {
+        return dimGroup;
+    }
+
+    /**
+     * @param dimGroup the dimGroup to set
+     */
+    public void setDimGroup(boolean dimGroup) {
+        this.dimGroup = dimGroup;
+    }
     
 }

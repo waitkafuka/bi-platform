@@ -286,6 +286,7 @@ $namespace('di.shared.model');
             // 在地图设置颜色值范围时，需要值的最大值和最小值
             chartData.mapMaxValue = rawData.maxValue;
             chartData.mapMinValue = rawData.minValue;
+            chartData.dimMap = rawData.dimMap;
             this._oChartData = chartData;                    
         }
         catch (e) {

@@ -45,10 +45,9 @@
     overflow: auto; 
 }
 .ui-input-tree-layer .ui-data-tree {
-    width: 150px;
+    width: 200px;
     line-height: 1.5;
 }
 .ui-input-tree-layer .ui-data-tree-children {
     line-height: 0;
 }
-

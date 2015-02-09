@@ -24,13 +24,13 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
  */
 class RrNumberatorConditionProcessHandler extends RateConditionProcessHandler {
 
-	/* 
-	 * (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.AbsRateConditionProcessHandler#processCondition(com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext)
-	 */
-	@Override
-	public QueryContext processCondition(QueryContext context) {
-		return super.processCondition(context);
-	}
+    /* 
+     * (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.AbsRateConditionProcessHandler#processCondition(com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext)
+     */
+    @Override
+    public QueryContext processCondition(QueryContext context) {
+        return super.processCondition(context);
+    }
 
 }

@@ -3,10 +3,17 @@
  * @author 赵晓强(longze_xq@163.com)
  * @date 2014-08-05
  */
-define([
+define(
+    [
         'url',
+        'constant',
         'report/component-box/components/form-config'
-    ], function (Url, formModel) {
+    ],
+    function (
+        Url,
+        Constant,
+        formModel
+    ) {
         var rootId = 'snpt.';
 
         return Backbone.Model.extend({
@@ -160,9 +167,12 @@ define([
                 compType,
                 serverData
             ) {
-                var vm = createShell(serverData.id);
-
+                // var reportId = rootId + serverData.id + Constant.COMPONENT_ID_SUFFIX[compType];
+                var reportId = rootId + serverData.id;
+                var vm = createShell(serverData.id, reportId);
                 vm.html(
+                    //'<div class="placeholer-20" style="width:100%; height:20px"></div>'
+                    //+
                     compData.vm.render({
                         rootId: rootId,
                         serverData: serverData
@@ -182,13 +192,25 @@ define([
             addCompDataToJson: function (compData, compType, serverData) {
                 var reportJson = this.reportJson;
                 var compRenderData;
-
+                var isAddConfirm = false;
+                var isHaveConfirm = false;
+                var entityDefs = reportJson.entityDefs;
+                for (var i = 0; i < entityDefs.length; i ++) {
+                    if (entityDefs[i].clzType === 'COMPONENT' && entityDefs[i].clzType === 'DI_FORM') {
+                        if (entityDefs[i].vuiRef  && entityDefs[i].vuiRef.confirm) {
+                            isHaveConfirm = true;
+                        }
+                    }
+                }
                 // 组件的json配置信息
                 compRenderData = compData.processRenderData({
                     rootId: rootId,
                     serverData: serverData
                 });
-
+                // 当新添加组件时，如果有查询按钮，就修改提交模式为confirm
+                if (isHaveConfirm && compRenderData.dataOpt) {
+                    compRenderData.dataOpt.submitMode = 'CONFIRM';
+                }
                 // 添加compId，方便删除组件
                 // TODO:重构
                 if ($.isArray(compRenderData)) {
@@ -199,10 +221,7 @@ define([
                 else {
                     compRenderData.compId = serverData.id;
                 }
-
-                var entityDefs = reportJson.entityDefs;
                 // 如果是vui，需要向form中添加配置
-
                 if (
                     compData.entityDescription
                     && !$.isArray(compData.entityDescription)
@@ -210,9 +229,25 @@ define([
                 ) {
                     formJson = this._getFormJson();
                     // 址引用，直接赋值可以生效
-                    formJson.vuiRef.input.push(compRenderData.id);
-                }
+                    if (compData.entityDescription.clzKey === 'H_BUTTON') {
+                        formJson.vuiRef.confirm = compRenderData.id;
+                        isAddConfirm = true;
+                    }
+                    else {
+                        formJson.vuiRef.input.push(compRenderData.id);
+                    }
 
+                }
+                // 如果添加的是查询按钮，需要把所有查询方式替换成CONFIRM，因为默认都是IMMEDIATE
+                if (isAddConfirm) {
+                    for (var i = 0; i < entityDefs.length; i ++) {
+                        if (entityDefs[i].clzType === 'COMPONENT') {
+                            if (entityDefs[i].dataOpt && entityDefs[i].dataOpt.submitMode) {
+                                entityDefs[i].dataOpt.submitMode = 'CONFIRM';
+                            }
+                        }
+                    }
+                }
                 this.reportJson.entityDefs = entityDefs.concat(compRenderData);
             },
 
@@ -220,17 +255,18 @@ define([
              * 删除报表中的某一组件,具体发送异步请求
              *
              * @param {string} compId 组件Id
+             * @param {string} reportCompId 组件在report-ui端使用的Id
              * @param {Function} success 回调函数
              * @public
              */
-            deleteComp: function (compId, success) {
+            deleteComp: function (compId, reportCompId, success) {
                 var that = this;
 
                 $.ajax({
                     url: Url.deleteComp(that.id, compId),
                     type: 'DELETE',
                     success: function () {
-                        that._deleteComp(compId, success);
+                        that._deleteComp(compId, reportCompId, success);
                     }
                 });
             },
@@ -239,12 +275,14 @@ define([
              * 删除报表中的某一组件,具体处理本地数据
              *
              * @param {string} compId 组件Id
+             * @param {string} reportCompId 组件在report-ui端使用的Id
              * @param {Function} success 回调函数
              * @private
              */
-            _deleteComp: function (compId, success) {
+            _deleteComp: function (compId, reportCompId, success) {
                 var that = this;
                 var isDeleteVUI = false;
+                var isDeleteConfirm = false;
                 success = success || new Function();
                 // 移除vm中的东西
                 var selector = '[data-comp-id=' + compId + ']';
@@ -259,17 +297,60 @@ define([
                             arr[i].clzType == 'VUI'
                             &&
                             (
-                                arr[i].clzKey == 'X_CALENDAR'
-                                || arr[i].clzKey == 'ECUI_SELECT'
-                                || arr[i].clzKey == 'ECUI_MULTI_SELECT'
+                                arr[i].clzKey === 'X_CALENDAR'
+                                || arr[i].clzKey === 'RANGE_CALENDAR'
+                                || arr[i].clzKey === 'ECUI_SELECT'
+                                || arr[i].clzKey === 'ECUI_MULTI_SELECT'
                             )
                         ) {
                             that._deleteCompFromForm(arr[i].id);
                             isDeleteVUI = true;
                         }
+                        if (
+                            arr[i].clzType == 'VUI'
+                            &&
+                            (
+                                arr[i].clzKey === 'H_BUTTON'
+                                && arr[i].dataOpt
+                                && arr[i].dataOpt.text === '查询'
+                            )
+                        ) {
+                            var formJson = that._getFormJson();
+                            formJson.vuiRef.confirm = null;
+                            delete formJson.vuiRef.confirm;
+                            isDeleteVUI = true;
+                            isDeleteConfirm = true;
+                        }
                         arr.splice(i, 1);
                         // 某些组件的数据项可能是一组而并非一个，比如table
                         i--;
+                    }
+                    // TODO:如果当前组件含有被关联组件，那么也要删除关联关系:测试
+                    if (arr[i].clzType === 'COMPONENT' && arr[i].interactions) {
+                        for (var j = 0, jLen = arr[i].interactions.length; j < jLen; j ++) {
+                            var inter =  arr[i].interactions[j];
+                            if (inter.event && inter.event.rid === reportCompId) {
+                                arr[i].interactions.splice(j, 1);
+                            }
+                            else if (inter.events) {
+                                for (var x = 0, xLen = inter.events.length; x < xLen; x ++ ) {
+                                    if (inter.events[x].rid === reportCompId) {
+                                        inter.events.splice(x, 1);
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+
+                if (isDeleteConfirm) {
+                    for (var i = 0; i < arr.length; i++) {
+                        if (arr[i].clzType === 'COMPONENT') {
+                            if (arr[i].dataOpt && arr[i].dataOpt.submitMode) {
+                                arr[i].dataOpt.submitMode = 'IMMEDIATE';
+                            }
+                        }
                     }
                 }
 
@@ -366,7 +447,6 @@ define([
              */
             saveReport: function (success) {
                 var that = this;
-
                 $.ajax({
                     url: Url.saveReport(that.id),
                     type: 'PUT',
@@ -389,7 +469,6 @@ define([
             saveJsonVm: function (success) {
                 var that = this;
                 success = success || new Function();
-
                 $.ajax({
                     url: Url.saveJsonVm(that.id),
                     type: 'PUT',

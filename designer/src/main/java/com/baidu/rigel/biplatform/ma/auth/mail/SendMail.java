@@ -17,9 +17,7 @@ package com.baidu.rigel.biplatform.ma.auth.mail;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -34,6 +32,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +51,17 @@ public class SendMail {
      * html格式
      */
     public static final String HTML = "text/html;charset=GBK";
+    
+    /**
+     * 编码方式
+     */
+    public static final String DEFAULT_CODE = "utf-8";
+
+    /**
+     * 日志类
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(SendMail.class);
+    
     /**
      * 邮件服务器
      */
@@ -75,11 +85,11 @@ public class SendMail {
     /**
      * Carbon Copy, 抄送邮件给某人
      */
-    private String copyTo;
+//    private String copyTo;
     /**
      * bcc Blind Carbon Copy,隐蔽副本 隐蔽抄送给某人
      */
-    private String bc;
+//    private String bc;
     /**
      * 邮件主题
      */
@@ -95,57 +105,44 @@ public class SendMail {
     /**
      * 邮件附件
      */
-    private List<Object> attaches;
+//    private List<Object> attaches;
     
-    /**
-     * 编码方式
-     */
-    public static final String DEFAULT_CODE = "utf-8";
-
-    /**
-     * 日志类
-     */
-    private static final Logger LOG = LoggerFactory
-            .getLogger(SendMail.class);
+    
 
     /**
      * 构造方法
      * 
      */
     public SendMail() {
-        needAuth = true;
-        attaches = new ArrayList<Object>();
     }
 
-    /**
-     * 构造方法
-     * 
-     * @param mailServerHost
-     *            邮件服务器端口号
-     */
-    public SendMail(String mailServerHost) {
-        needAuth = true;
-        attaches = new ArrayList<Object>();
-        this.mailServerHost = mailServerHost;
-    }
-
-    /**
-     * 构造方法
-     * 
-     * @param mailServerHost
-     *            邮件服务器端口号
-     * @param userName
-     *            用户名
-     * @param password
-     *            用户密码
-     */
-    public SendMail(String mailServerHost, String userName, String password) {
-        needAuth = true;
-        attaches = new ArrayList<Object>();
-        this.mailServerHost = mailServerHost;
-        this.userName = userName;
-        this.password = password;
-    }
+//    /**
+//     * 构造方法
+//     * 
+//     * @param mailServerHost
+//     *            邮件服务器端口号
+//     */
+//    public SendMail(String mailServerHost) {
+//        needAuth = true;
+//        this.mailServerHost = mailServerHost;
+//    }
+//
+//    /**
+//     * 构造方法
+//     * 
+//     * @param mailServerHost
+//     *            邮件服务器端口号
+//     * @param userName
+//     *            用户名
+//     * @param password
+//     *            用户密码
+//     */
+//    public SendMail(String mailServerHost, String userName, String password) {
+//        needAuth = true;
+//        this.mailServerHost = mailServerHost;
+//        this.userName = userName;
+//        this.password = password;
+//    }
 
     /**
      * 获取mailServerHost
@@ -242,43 +239,9 @@ public class SendMail {
         this.toAddress = toAddress;
     }
 
-    /**
-     * 获取copyTo
-     * 
-     * @return copyTo copyTo
-     */
-    public String getCopyTo() {
-        return copyTo;
-    }
+   
 
-    /**
-     * 设置copyTo
-     * 
-     * @param copyTo
-     *            copyTo
-     */
-    public void setCopyTo(String copyTo) {
-        this.copyTo = copyTo;
-    }
-
-    /**
-     * 获取bc
-     * 
-     * @return bc bc
-     */
-    public String getBc() {
-        return bc;
-    }
-
-    /**
-     * 设置bc
-     * 
-     * @param bc
-     *            bc
-     */
-    public void setBc(String bc) {
-        this.bc = bc;
-    }
+    
 
     /**
      * 获取body
@@ -340,19 +303,19 @@ public class SendMail {
      * 
      * @return attaches attaches
      */
-    public List<Object> getAttaches() {
-        return attaches;
-    }
-
-    /**
-     * 设置attaches
-     * 
-     * @param attaches
-     *            attaches
-     */
-    public void setAttaches(List<Object> attaches) {
-        this.attaches = attaches;
-    }
+//    public List<Object> getAttaches() {
+//        return attaches;
+//    }
+//
+//    /**
+//     * 设置attaches
+//     * 
+//     * @param attaches
+//     *            attaches
+//     */
+//    public void setAttaches(List<Object> attaches) {
+//        this.attaches = attaches;
+//    }
 
     /**
      * 获取subject
@@ -410,7 +373,6 @@ public class SendMail {
             FileDataSource fds = new FileDataSource(filename);
             DataHandler dh = new DataHandler(fds);
             mdp.setDataHandler(dh);
-            attaches.add(mdp);
         } catch (Exception exception) {
             LOG.warn("email setBodyFromFile failed", exception);
         }
@@ -428,7 +390,6 @@ public class SendMail {
             URLDataSource ur = new URLDataSource(new URL(url));
             DataHandler dh = new DataHandler(ur);
             mdp.setDataHandler(dh);
-            attaches.add(mdp);
         } catch (Exception exception) {
             LOG.warn("email setBodyFromUrl failed", exception);
         }
@@ -448,7 +409,6 @@ public class SendMail {
             DataHandler dh = new DataHandler(string, TEXT);
             mdp.setFileName(MimeUtility.encodeWord(showname, DEFAULT_CODE, null));
             mdp.setDataHandler(dh);
-            attaches.add(mdp);
         } catch (Exception exception) {
             LOG.warn("email addAttachFromString failed", exception);
         }
@@ -469,7 +429,6 @@ public class SendMail {
             DataHandler dh = new DataHandler(fds);
             mdp.setFileName(MimeUtility.encodeWord(showname, DEFAULT_CODE, null));
             mdp.setDataHandler(dh);
-            attaches.add(mdp);
         } catch (Exception exception) {
             LOG.warn("email addAttachFromFile failed", exception);
         }
@@ -490,7 +449,6 @@ public class SendMail {
             DataHandler dh = new DataHandler(ur);
             mdp.setFileName(MimeUtility.encodeWord(showname, DEFAULT_CODE, null));
             mdp.setDataHandler(dh);
-            attaches.add(mdp);
         } catch (Exception exception) {
             LOG.warn("email addAttachFromUrl failed", exception);
         }
@@ -535,25 +493,25 @@ public class SendMail {
             } else {
                 throw new Exception("没有指定收件人地址");
             }
-            // 指定抄送
-            if (copyTo != null) {
-                msg.addRecipients(javax.mail.Message.RecipientType.CC,
-                        InternetAddress.parse(copyTo));
-            }
-            // 指定密送
-            if (bc != null) {
-                msg.addRecipients(javax.mail.Message.RecipientType.BCC,
-                        InternetAddress.parse(bc));
-            }
+//            // 指定抄送
+//            if (copyTo != null) {
+//                msg.addRecipients(javax.mail.Message.RecipientType.CC,
+//                        InternetAddress.parse(copyTo));
+//            }
+//            // 指定密送
+//            if (bc != null) {
+//                msg.addRecipients(javax.mail.Message.RecipientType.BCC,
+//                        InternetAddress.parse(bc));
+//            }
             Multipart mm = new MimeMultipart();
             // 设置邮件的附件
             if (body != null) {
                 mm.addBodyPart(body);
             }
-            for (int i = 0; i < attaches.size(); i++) {
-                BodyPart part = (BodyPart) attaches.get(i);
-                mm.addBodyPart(part);
-            }
+//            for (int i = 0; i < attaches.size(); i++) {
+//                BodyPart part = (BodyPart) attaches.get(i);
+//                mm.addBodyPart(part);
+//            }
             // 设置邮件的内容
             msg.setContent(mm);
             // 保存所有改变

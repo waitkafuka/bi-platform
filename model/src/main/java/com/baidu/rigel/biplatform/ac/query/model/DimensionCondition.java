@@ -21,6 +21,8 @@ package com.baidu.rigel.biplatform.ac.query.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
+
 /**
  * 维度条件
  * 
@@ -53,6 +55,12 @@ public class DimensionCondition implements MetaCondition {
      * metaType 条件对应的类型
      */
     private MetaType metaType;
+    
+    
+    /** 
+     * memberSortType 维度维值的排序方式，默认升序，不支持NONE
+     */
+    private SortType memberSortType = SortType.ASC;
 
     /**
      * construct with dimUniqueName
@@ -125,6 +133,24 @@ public class DimensionCondition implements MetaCondition {
     @Override
     public String getMetaName() {
         return this.metaName;
+    }
+
+    /** 
+     * 获取 memberSortType 
+     * @return the memberSortType 
+     */
+    public SortType getMemberSortType() {
+    
+        return memberSortType;
+    }
+
+    /** 
+     * 设置 memberSortType 
+     * @param memberSortType the memberSortType to set 
+     */
+    public void setMemberSortType(SortType memberSortType) {
+    
+        this.memberSortType = memberSortType;
     }
 
     //

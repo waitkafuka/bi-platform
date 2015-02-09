@@ -19,7 +19,9 @@ define([
         return Backbone.View.extend({
             // 事件
             events: {
-                'change #component-group-selector': 'showCompByGroup'
+                'change #component-group-selector': 'showCompByGroup',
+                'mouseover .j-component-border': 'showEditorLine',
+                'mouseout .j-component-border': 'hideEditorLine'
                 //'click .j-component-box-fold': 'fold'
             },
 
@@ -98,8 +100,7 @@ define([
                         ui.helper.html('临时展示').css({
                             'width': '100px',
                             'height': '100px',
-                            'cursor': 'move',
-                            'background': '#ffffff'
+                            'cursor': 'move'
                         }).addClass('active shell-component j-component-border');
                         ui.helper.attr('data-default-width', compData.defaultWidth);
                         ui.helper.attr('data-default-height', compData.defaultHeight);
@@ -136,6 +137,38 @@ define([
                 }
             },
             **/
+
+            /**
+             * 组件编辑区以及参考线域移入出现
+             *
+             * @public
+             */
+            showEditorLine: function () {
+                var $compElement = this.$el.find($('.j-component-border'));
+                $compElement.mouseover(function () {
+                    // 操作区在鼠标移出当前组件时出现
+                    $(this).find('.con-edit-btns').children().show();
+                    $(this).find('.con-edit-btns').css('padding-top', '0');
+                    // 参考线在鼠标移出当前组件时出现
+                    $(this).find('.j-guide-line').show();
+                });
+            },
+
+            /**
+             * 组件编辑区以及参考线域移出隐藏
+             *
+             * @public
+             */
+            hideEditorLine: function () {
+                var $compElement = this.$el.find($('.j-component-border'));
+                $compElement.mouseout(function () {
+                    // 操作区在鼠标移出当前组件时消失
+                    $(this).find('.con-edit-btns').children().hide();
+                    $(this).find('.con-edit-btns').css('padding-top', '22px');
+                    // 参考线在鼠标移出当前组件时消失
+                    $(this).find('.j-guide-line').hide();
+                });
+            },
 
             /**
              * 销毁view

@@ -147,22 +147,22 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 if (item.getParams() != null) {
                     oldItem.setParams(item.getParams());
                 }
-                if (position == PositionType.CAND_DIM ) {
-                		if (area instanceof LiteOlapExtendArea) {
-                			((LiteOlapExtendArea) area).addCandDim(item);
-                		} else {
-                		    item.setPositionType(PositionType.CAND_DIM);
-                			area.addSelectionDimItem(item);
-                		}
+                if (position == PositionType.CAND_DIM) {
+                    if (area instanceof LiteOlapExtendArea) {
+                        ((LiteOlapExtendArea) area).addCandDim(item);
+                    } else {
+                        item.setPositionType(PositionType.CAND_DIM);
+                        area.addSelectionDimItem(item);
+                    }
                 } else if (position == PositionType.CAND_IND) {
                     if (area instanceof LiteOlapExtendArea) {
-                    		((LiteOlapExtendArea) area).addCandInd(item);
-	            		} else {
-	            			item.setPositionType(PositionType.CAND_IND);
-	            			area.addSelectionMeasureItem(item);
-	            		}
+                        ((LiteOlapExtendArea) area).addCandInd(item);
+                    } else {
+                        item.setPositionType(PositionType.CAND_IND);
+                        area.addSelectionMeasureItem(item);
+                    }
                 } else {
-                		changeSelItemChartType(item, area);
+                    changeSelItemChartType(item, area);
                 }
             } else {
                 addNewInfoIntoArea(ori, areaId, item, position, area);
@@ -173,37 +173,37 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
         }
     }
 
-	/**
-	 * @param item
-	 * @param area
-	 */
-	private void changeSelItemChartType(Item item, ExtendArea area) {
-		final Object chartType = item.getParams().get("chartType");
-		if (chartType == null) {
-			return;
-		}
-		
-		if (area.getLogicModel() == null || area.getLogicModel().getSelectionMeasures() == null) {
-			return;
-		}
-		Map<String, Item> tmpMap = DeepcopyUtils.deepCopy(area.getLogicModel().getSelectionMeasures());
-		tmpMap.forEach((k, v) -> {
-			Object tmp = v.getParams().get("chartType");
-			final String chartTypeKey = "chartType";
-			if (tmp != null) {
-				if ("column".equalsIgnoreCase(chartType.toString()) || "line".equalsIgnoreCase(chartType.toString())) {
-					if (!"column".equalsIgnoreCase(tmp.toString()) && !"line".equalsIgnoreCase(tmp.toString())) {
-						v.getParams().put(chartTypeKey, chartType);
-					}
-				} else {
-					v.getParams().put(chartTypeKey, chartType);
-				}
-			} else {
-				v.getParams().put(chartTypeKey, chartType);;
-			}
-			area.getLogicModel().getSelectionMeasures().put(k, v);
-		}); 
-	}
+    /**
+     * @param item
+     * @param area
+     */
+    private void changeSelItemChartType(Item item, ExtendArea area) {
+        final String chartTypeKey = "chartType";
+        final Object chartType = item.getParams().get(chartTypeKey);
+        if (chartType == null) {
+            return;
+        }
+        
+        if (area.getLogicModel() == null || area.getLogicModel().getSelectionMeasures() == null) {
+            return;
+        }
+        Map<String, Item> tmpMap = DeepcopyUtils.deepCopy(area.getLogicModel().getSelectionMeasures());
+        tmpMap.forEach((k, v) -> {
+            Object tmp = v.getParams().get(chartTypeKey);
+            if (tmp != null) {
+                if ("column".equalsIgnoreCase(chartType.toString()) || "line".equalsIgnoreCase(chartType.toString())) {
+                    if (!"column".equalsIgnoreCase(tmp.toString()) && !"line".equalsIgnoreCase(tmp.toString())) {
+                        v.getParams().put(chartTypeKey, chartType);
+                    }
+                } else {
+                    v.getParams().put(chartTypeKey, tmp);
+                }
+            } else {
+                v.getParams().put(chartTypeKey, chartType);;
+            }
+            area.getLogicModel().getSelectionMeasures().put(k, v);
+        }); 
+    }
     
     /**
      * 
@@ -272,18 +272,18 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                 break;
             case CAND_DIM:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
-                		item.setPositionType(PositionType.CAND_DIM);
-                		area.addSelectionDimItem(item);
+                    item.setPositionType(PositionType.CAND_DIM);
+                    area.addSelectionDimItem(item);
                 } else {
-                		((LiteOlapExtendArea) area).addCandDim(item);
+                    ((LiteOlapExtendArea) area).addCandDim(item);
                 }
                 break;
             case CAND_IND:
                 if (area.getType() != ExtendAreaType.LITEOLAP) {
-                		item.setPositionType(PositionType.CAND_IND);
-                		area.addSelectionMeasureItem(item);
+                    item.setPositionType(PositionType.CAND_IND);
+                    area.addSelectionMeasureItem(item);
                 } else {
-                		((LiteOlapExtendArea) area).addCandInd(item);
+                    ((LiteOlapExtendArea) area).addCandInd(item);
                 }
                 break;
             default:
@@ -304,19 +304,19 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
             String olapElementId = itemId;
             switch (position) {
                 case X:
-                	if (area.getType() == ExtendAreaType.TIME_COMP) {
+                    if (area.getType() == ExtendAreaType.TIME_COMP) {
                         TimerAreaLogicModel logicModel = (TimerAreaLogicModel) area.getLogicModel();
                         LinkedHashMap<Item, TimeRange> items = logicModel.getTimeDimensions();
                         for (Item item : items.keySet()) {
-                        	if (item.getId().equals(itemId)) {
-                        		logicModel.getTimeDimensions().remove(item);
-                        		break;
-                        	}
+                            if (item.getId().equals(itemId)) {
+                                logicModel.getTimeDimensions().remove(item);
+                                break;
+                            }
                         }
                         area.getLogicModel().removeRow(olapElementId);
-                	} else {
+                    } else {
                         area.getLogicModel().removeRow(olapElementId);
-                	}
+                    }
                     break;
                 case Y:
                     area.getLogicModel().removeColumn(olapElementId);
@@ -326,9 +326,9 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     break;
                 case CAND_DIM:
                     if (area.getType() != ExtendAreaType.LITEOLAP) {
-                    		area.removeSelectDimItem(olapElementId);
+                        area.removeSelectDimItem(olapElementId);
                     } else {
-	                    	((LiteOlapExtendArea) area).removeCandDim(olapElementId);
+                        ((LiteOlapExtendArea) area).removeCandDim(olapElementId);
                     }
 //                    if (area.listAllItems().containsKey(olapElementId)) {
 //                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
@@ -338,7 +338,7 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     if (area.getType() != ExtendAreaType.LITEOLAP) {
                         area.removeSelectMeasureItem(olapElementId);
                     } else {
-	                    	((LiteOlapExtendArea) area).removeCandInd(olapElementId);
+                        ((LiteOlapExtendArea) area).removeCandInd(olapElementId);
                     }
 //                    if (area.listAllItems().containsKey(olapElementId)) {
 //                        throw new ReportModelOperationException("不能从候选区删除已经使用的维度！");
@@ -370,10 +370,11 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                     moveItem(rows, first, second);
                     logicModel.resetRows(rows);
                     // 如果为日期控件，修改日期维度中的顺序
-                    if (area.getType() ==ExtendAreaType.TIME_COMP) {
-                    	 TimerAreaLogicModel timerLogicModel = (TimerAreaLogicModel) logicModel;
-                         LinkedHashMap<Item, TimeRange> newTimeItems = this.moveItem(rows, timerLogicModel.getTimeDimensions());
-                         timerLogicModel.setTimeDimensions(newTimeItems);
+                    if (area.getType() == ExtendAreaType.TIME_COMP) {
+                        TimerAreaLogicModel timerLogicModel = (TimerAreaLogicModel) logicModel;
+                        LinkedHashMap<Item, TimeRange> newTimeItems = 
+                            this.moveItem(rows, timerLogicModel.getTimeDimensions());
+                        timerLogicModel.setTimeDimensions(newTimeItems);
                     }
                     return model;
                 case Y:
@@ -427,11 +428,11 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
      * @return
      */
     private LinkedHashMap<Item, TimeRange> moveItem(Item[] rows, LinkedHashMap<Item, TimeRange> old) {
-    	LinkedHashMap<Item, TimeRange> newTimeItems = new LinkedHashMap<Item, TimeRange>();
-    	for (int i = 0; i<rows.length; i++) {
-    		newTimeItems.put(rows[i], old.get(rows[i]));
-    	}
-    	return newTimeItems;
+        LinkedHashMap<Item, TimeRange> newTimeItems = new LinkedHashMap<Item, TimeRange>();
+        for (int i = 0; i < rows.length; i++) {
+            newTimeItems.put(rows[i], old.get(rows[i]));
+        }
+        return newTimeItems;
     }
     
 }

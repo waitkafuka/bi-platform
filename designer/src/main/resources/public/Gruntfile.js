@@ -20,6 +20,8 @@ module.exports = function(grunt) {
      *      prePublish
      *      release
      *  bizKey: 表示产品线key或者skin名
+     *  skin: 默认为 di
+     *      支持：bb(businessbridge)
      *  fromPhase:
      *  srcMode:
      *      min
@@ -28,7 +30,6 @@ module.exports = function(grunt) {
      *  mock:
      *      true
      *      false
-     *  skin: 默认为 -di-
      *  vtplName: 可以传多个vtplName（用-o_o-分割），如果值为"FALSE"表示所有vplName
      */
 
@@ -53,7 +54,6 @@ module.exports = function(grunt) {
         grunt.initConfig(
             {
                 pkg: grunt.file.readJSON('package.json'),
-
                 // 变量和常量
                 prop: (prop = {
                     dirBinBase: "silkroad",
@@ -80,15 +80,38 @@ module.exports = function(grunt) {
                     srcEchartsMap: "report-ui/src/core/echarts/echarts-plain-map.js",
                     srcJquery: "report-ui/src/core/jquery/jquery-1.7.1.js",
                     srcRepoDict: "report-ui/src/biz-shared/di.config/repo-dict.js",
+                    // silkroad端打包js
                     getDirBinProdBiz: function (bizKey) {
-                        return [prop.dirBinBase, bizKey || prop.bizKey].join('/');
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin].join('/');
                     },
+                    // silkroad端css
                     getDirBinProdCSS: function (bizKey) {
-                        return [prop.dirBinBase, bizKey || prop.bizKey, 'css'].join('/');
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin, 'css'].join('/');
                     },
+                    // TODO:ailkroad端支持多套皮肤
+                    getBinSilkRoadCSS: function (suffix, bizKey) {
+                        // 表示依照srcMode
+                        suffix === false && (suffix = '-' + prop.srcMode);
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin, 'css', '-di-silkroad' + (suffix || '') + '.css'].join('/');
+                    },
+                    // silkroad端打包img
+                    getBinSilkRoadImg: function (skin, suffix, bizKey) {
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin, 'css', suffix].join('/');
+                    },
+                    // product端打包js
                     getBinProdJS: function (suffix, bizKey) {
                         suffix === false && (suffix = '-' + prop.srcMode);
-                        return [prop.dirBinBase, bizKey || prop.bizKey, '-di-product' + (suffix || '') + '.js'].join('/');
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin, '-di-product' + (suffix || '') + '.js'].join('/');
+                    },
+                    // product端打包css
+                    getBinProdCSS: function (suffix, bizKey) {
+                        // 表示依照srcMode
+                        suffix === false && (suffix = '-' + prop.srcMode);
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin, 'css', '-di-product' + (suffix || '') + '.css'].join('/');
+                    },
+                    // product端打包img
+                    getDirBinProdImg: function (bizKey) {
+                        return [prop.dirBinBase, bizKey || prop.bizKey, prop.skin, 'css', 'img'].join('/');
                     },
                     getBinProdAllJS: function (bizKey) {
                         return [prop.dirBinBase, bizKey || prop.bizKey, '-di-product*.js'].join('/');
@@ -97,29 +120,13 @@ module.exports = function(grunt) {
                         suffix === false && (suffix = '-' + prop.srcMode);
                         return [prop.dirBinStubBase, 'di-stub' + (suffix || '') + '.js'].join('/');
                     },
-                    getBinProdCSS: function (suffix, bizKey) {
-                        // 表示依照srcMode
-                        suffix === false && (suffix = '-' + prop.srcMode);
-                        return [prop.dirBinBase, bizKey || prop.bizKey, 'css', '-di-product' + (suffix || '') + '.css'].join('/');
-                    },
-                    getBinSilkRoadCSS: function (suffix, bizKey) {
-                        // 表示依照srcMode
-                        suffix === false && (suffix = '-' + prop.srcMode);
-                        return [prop.dirBinBase, bizKey || prop.bizKey, 'css', '-di-silkroad' + (suffix || '') + '.css'].join('/');
-                    },
-                    getBinSilkRoadImg: function (suffix, bizKey) {
-                        return [prop.dirBinBase, bizKey || prop.bizKey, 'css', suffix].join('/');
-                    },
                     prodAllImg: [
                         // TODO
                         // 后面精确一下
                         "<%= prop.dirBinCom %>/css/<%= prop.skin %>/img/*",
                         "!<%= prop.dirBinCom %>/css/<%= prop.skin %>/img/*source*",
                         "!<%= prop.dirBinCom %>/css/<%= prop.skin %>/img/*.psd"
-                    ],
-                    getDirBinProdImg: function (bizKey) {
-                        return [prop.dirBinBase, bizKey || prop.bizKey, 'css', 'img'].join('/');
-                    }
+                    ]
                 }),
                 // 任务配置
                 clean: {
@@ -300,13 +307,16 @@ module.exports = function(grunt) {
     //-----------------------------------------
     // 入口
     //-----------------------------------------
-    function taskRebuildSilkRoadBiz(bizKey, srcMode) {
+    function taskRebuildSilkRoadBiz(bizKey, skin, srcMode, mock) {
         prepareConf(
-            {
+            // 输入验证
+            checkBaseInput({
                 bizKey: bizKey,
                 srcMode: srcMode || 'min',
-                rangeMode: 'prodAll'
-            }
+                skin: skin,
+                rangeMode: 'prodAll',
+                mock: mock || false
+            })
         );
         // 先检查
         requireProp('bizKey', 'srcMode', 'rangeMode');

@@ -57,7 +57,10 @@ define(function () {
         SELECT: '-vu-form-select',
         CALENDAR: '-vu-form-calendar',
         TEXT: '-vu-form-text',
-        MULTISELECT: '-vu-form-multiselect'
+        MULTISELECT: '-vu-form-multiselect',
+        CHART: '-vu-chart',
+        TABLE: '-vu-table',
+        H_BUTTON: '-vu-confirm'
     };
 
     return {

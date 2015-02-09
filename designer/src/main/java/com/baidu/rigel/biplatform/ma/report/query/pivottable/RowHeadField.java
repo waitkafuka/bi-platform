@@ -31,54 +31,39 @@ public class RowHeadField implements Serializable {
     private static final long serialVersionUID = 1L;
     
     /**
-	 * dimName
-	 */
+     * dimName
+     */
     private String dimName; // dim's name
     
     /**
-	 * uniqueNameAll
-	 */
+     * uniqueNameAll
+     */
     private String uniqueNameAll; // 完整行uniqueName
     
     /**
-	 * valueAll
-	 */
+     * valueAll
+     */
     private String valueAll; // 完整行caption
     
     /**
-	 * uniqueName
-	 */
+     * uniqueName
+     */
     private String uniqueName; // 行当前单元格uniqueName
     
     /**
-	 * v
-	 */
+     * v
+     */
     private String v; // 行当前单元格caption
     
     /**
-	 * drillByLink
-	 */
+     * drillByLink
+     */
     private boolean drillByLink;
     
     /**
      * Start from <code>1</code>
      */
     private Integer indent;
-    
-    /**
-     * @return the indent
-     */
-    public Integer getIndent() {
-        return indent;
-    }
-    
-    /**
-     * @param indent
-     *            the indent to set
-     */
-    public void setIndent(Integer indent) {
-        this.indent = indent;
-    }
     
     /**
      * <code>NULL</code> means leaf node. <code>FALSE</code> means expanded
@@ -95,6 +80,21 @@ public class RowHeadField implements Serializable {
      * colspan
      */
     private Integer colspan = 1;
+    
+    /**
+     * @return the indent
+     */
+    public Integer getIndent() {
+        return indent;
+    }
+    
+    /**
+     * @param indent
+     *            the indent to set
+     */
+    public void setIndent(Integer indent) {
+        this.indent = indent;
+    }
     
     /**
      * @return the value

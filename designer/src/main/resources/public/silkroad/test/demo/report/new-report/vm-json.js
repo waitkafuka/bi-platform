@@ -59,8 +59,7 @@ define(function () {
                         },
                         "dataOpt": {
                             "submitMode": "CONFIRM"
-                        },
-                        "reportTemplateId": "RTPL_VIRTUAL_ID"
+                        }
                     },
                     {
                         "id": "snpt1.vu-form1-confirm1",
@@ -829,6 +828,7 @@ define(function () {
         // 表格vm和json
         table: {
             html: [
+                '<div style="width: 500px">',
                 '<div class="di-o_o-block table-block" data-o_o-di="snpt1.cpnt-table1">',
                 '<div class="di-o_o-line">',
                 '<div class="di-o_o-item" data-o_o-di="snpt1.vu-table1-download1"></div>',
@@ -843,6 +843,7 @@ define(function () {
                 '<div class="di-table-prompt">',
                 '<div class="di-table-count" data-o_o-di="snpt1.vu-table1-count1">',
                 '符合查询条件的数据只显示<span class="di-table-count-num">#{currRecordCount}</span>条。',
+                '</div>',
                 '</div>',
                 '</div>',
                 '</div>',
@@ -1600,9 +1601,61 @@ define(function () {
                     }
                 ]
             }
+        },
+        handsonTable: {
+            html: [
+                '<div class="di-o_o-block table-block" data-o_o-di="snpt1.cpnt-table1">',
+                '<div class="di-o_o-line">',
+                '<div class="vu-table" data-o_o-di="snpt1.vu-table1"></div>',
+                '</div>',
+                '</div>'
+            ],
+            json: {
+                "desc" : "查询条件||多维表格",
+                "diKey": "DEPICT",
+                "clzDefs": [
+                    {
+                        "clzKey": "OLAP_TABLE",
+                        "dataOpt": {
+                            "emptyHTML": "未查询到相关数据"
+                        }
+                    },
+                    {
+                        "clzKey": "ECUI_SELECT",
+                        "dataOpt": {
+                            "optionSize": 10
+                        }
+                    }
+                ],
+                "entityDefs": [
+                    {
+                        "id": "snpt1",
+                        "clzType": "SNIPPET"
+                    },
+                    {
+                        "id": "snpt1.cpnt-table1",
+                        "clzType": "COMPONENT",
+                        "clzKey": "DI_TABLE",
+                        "sync": { "viewDisable": "ALL" },
+                        "init": {
+                            "action": { "name": "sync" }
+                        },
+                        "vuiRef": {
+                            "mainTable": "snpt1.vu-table1"
+                        },
+                        "init": {
+                            "action": { "name": "sync" }
+                        }
+                    },
+                    {
+                        "id": "snpt1.vu-table1",
+                        "clzType": "VUI",
+                        "clzKey": "HANDSON_TABLE",
+                        "name": "table"
+                    }
+                ]
+            }
         }
-
     };
-
     return VmJson;
 });
