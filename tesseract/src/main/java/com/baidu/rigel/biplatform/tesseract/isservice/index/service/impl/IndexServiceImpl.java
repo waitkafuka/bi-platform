@@ -480,6 +480,7 @@ public class IndexServiceImpl implements IndexService {
 								idxMeta, idxAction, currIdxShardIdx);
 						currIdxShard = idxMeta.getIdxShardList().get(
 								currIdxShardIdx);
+						currIdxShard.setFull(Boolean.FALSE);
 					}
 
 					// 处理

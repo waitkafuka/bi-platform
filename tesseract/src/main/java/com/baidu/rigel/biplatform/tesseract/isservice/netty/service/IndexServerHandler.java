@@ -237,6 +237,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         // 如果当前分片写满了 or 是当前数据的最后一片，释放indexWriter\设置服务路径
         long totalDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
         if (totalDiskSize > indexMsg.getBlockSize() || indexMsg.isLastPiece()) {
+        	
             IndexWriterFactory.destoryWriters(indexMsg.getIdxPath());
             feedBackIndexServicePath = indexMsg.getIdxPath();
             feedBackIndexFilePath = indexMsg.getIdxServicePath();
