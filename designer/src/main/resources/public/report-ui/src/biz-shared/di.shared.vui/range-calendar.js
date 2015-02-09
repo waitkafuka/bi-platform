@@ -78,7 +78,7 @@ $namespace('di.shared.vui');
                 "name": calendarId,
                 "id": calendarId,
                 "value": "",
-                "endlessCheck": "false",
+                "endlessCheck": "true",
                 "isEndless": "false",
                 "showedShortCut": "昨天,最近7天,上周",
                 "extensions": [],
@@ -132,6 +132,7 @@ $namespace('di.shared.vui');
             begin: new Date(begin),
             end: new Date(end)
         };
+        this.currentDate = begin + ' - ' + end;
         this.rangeCal.setRawValue(setting);
         this.rangeCal.render();
         this._oData = data;
@@ -169,6 +170,7 @@ $namespace('di.shared.vui');
                 begin: new Date(defStart),
                 end: new Date(defEnd)
             };
+            this.currentDate = defStart + ' - ' + defEnd;
             this.rangeCal.setRawValue(setting);
             this.rangeCal.render();
             return {
