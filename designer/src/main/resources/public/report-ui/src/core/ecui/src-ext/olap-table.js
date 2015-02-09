@@ -726,7 +726,6 @@
      * @protected
      */
     UI_OLAP_TABLE_CLASS.$renderCell = function(html, colDefItem, rowDefItem, wrap, x, y, rowDefine) {
-        console.log('x:' + x + ';y: ' + y);
         var type = this.getType();
         var classStr = [type + '-ccell'];
         var styleStr = [];

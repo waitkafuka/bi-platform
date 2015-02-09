@@ -562,6 +562,9 @@ _eFill       - 用于控制中部宽度的单元格
             dragLineEl = createDom(type + '-dot-line', null, 'span'),
             mainEl = me.$di('getEl'),
             headEl = dom.getElementsByClass(mainEl, 'div', 'ui-table-head')[0],
+            headTableEl,
+            headTrEl,
+            headThsEls,
             dragMinW = dom.getPosition(headEl).left,
             disX = 0, // 这个距离是鼠标点击虚线时的位置，距离虚线左侧的距离
             curHeadTh,
@@ -569,54 +572,62 @@ _eFill       - 用于控制中部宽度的单元格
             oldPosLeft, // 表格元素居左的问题
             mainElLeft = dom.getPosition(mainEl).left;
 
+        if (headEl) {
+            headEl && (headTableEl = dom.first(dom.first(headEl)));
+            headTrEl = dom.first(dom.first(headTableEl));
+            headThsEls = dom.children(headTrEl);
+        }
         // 为表格添加虚线元素
         setStyle(dragLineEl, 'height', this.$$height + 'px');
         mainEl.appendChild(dragLineEl);
 
         if (headEl) {
-            attachEvent(headEl, 'mouseover', headMouseOver);
-            attachEvent(headEl, 'mouseout', function () {
-                //setStyle(dragLineEl, 'display', 'none');
-            });
+            for (var i = 0, iLen = headThsEls.length; i < iLen; i ++) {
+                drag(headThsEls[i]);
+            }
+        }
 
+        function drag(o) {
+            attachEvent(o, 'mouseover', headMouseOver);
             // 监听虚线的mousedown事件，当mousedown时，注册document事件
-            attachEvent(dragLineEl, 'mousedown', dragLineMouseDown);
+            attachEvent(o, 'mousedown', dragLineMouseDown);
+            // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
+            function dragLineMouseDown(ev) {
+                var oEv = ev || window.event;
+
+                // 全局捕获,生成了一个透明的层:用来解决IE8之前选中拖的BUG
+                if (dragLineEl.setCapture) {
+                    dragLineEl.setCapture();
+                }
+                disX = oEv.clientX - dragLineEl.offsetLeft;
+                attachEvent(document, 'mousemove', dragLineMouseMove);
+                attachEvent(document, 'mouseup', dragLineMouseUp);
+                return false; // 阻止浏览器去做其他事情
+            }
+            // 虚线移动事件
+            // TODO:虚线移动的最大位置与最小位置的判断
+            function dragLineMouseMove(ev) {
+                var oEv = ev || window.event;
+                var lineLeft = oEv.clientX - disX;
+                //lineL = range(lineL, max, min);
+                setStyle(o, 'left', lineLeft + 'px');
+                setStyle(dragLineEl, 'left', lineLeft + 'px');
+            }
         }
         // 表头mouseover时，把虚线定位到触发元素旁
         function headMouseOver(ev) {
             var oEv = ev || window.event;
             var target = oEv.target || oEv.srcElement;
 
-            if (hasClass(target, 'ui-table-head-drag')) {
-                curHeadTh = dom.getParent(target);
-                oldPosLeft = dom.getPosition(target).left;
-                // FIXME:这点的实现着实不好，抽时间赶紧改了
-                setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 9) + 'px');
-                setStyle(dragLineEl, 'top', 0 + 'px');
-                setStyle(dragLineEl, 'display', 'block');
-            }
-        }
-        // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
-        function dragLineMouseDown(ev) {
-            var oEv = ev || window.event;
+            curHeadTh = dom.getParent(target);
+            oldPosLeft = dom.getPosition(target).left;
+            // FIXME:这点的实现着实不好，抽时间赶紧改了
+            setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 9) + 'px');
+            setStyle(dragLineEl, 'top', 0 + 'px');
+            setStyle(dragLineEl, 'display', 'block');
 
-            // 全局捕获,生成了一个透明的层:用来解决IE8之前选中拖的BUG
-            if (dragLineEl.setCapture) {
-                dragLineEl.setCapture();
-            }
-            disX = oEv.clientX - dragLineEl.offsetLeft;
-            attachEvent(document, 'mousemove', dragLineMouseMove);
-            attachEvent(document, 'mouseup', dragLineMouseUp);
-            return false; // 阻止浏览器去做其他事情
         }
-        // 虚线移动事件
-        // TODO:虚线移动的最大位置与最小位置的判断
-        function dragLineMouseMove(ev) {
-            var oEv = ev || window.event;
-            var lineLeft = oEv.clientX - disX;
-            //lineL = range(lineL, max, min);
-            setStyle(dragLineEl, 'left', lineLeft + 'px');
-        }
+
         // 虚线松开事件
         function dragLineMouseUp() {
             detachEvent(document, 'mousemove', dragLineMouseMove);
