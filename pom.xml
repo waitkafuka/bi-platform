@@ -11,7 +11,7 @@
 
 	<groupId>com.baidu.rigel</groupId>
 	<artifactId>biplatform</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.3.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>bi-platform</name>
@@ -67,7 +67,7 @@
         <com.mchange.version>0.9.5-pre8</com.mchange.version>
         <maven.checkstyle.plugin.version>2.11</maven.checkstyle.plugin.version>
         <license.maven.plugin.version>2.6</license.maven.plugin.version>
-        <biplatform.version>1.3.0-SNAPSHOT</biplatform.version>
+        <biplatform.version>1.3.1-SNAPSHOT</biplatform.version>
 	</properties>
 
 	<modules>
