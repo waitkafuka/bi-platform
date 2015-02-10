@@ -1,40 +1,40 @@
 /*
-修改版的LockedTable，为性能而优化。（为区别，改名为SlowLockedTable）
+ 修改版的LockedTable，为性能而优化。（为区别，改名为SlowLockedTable）
 
-LockedTable - 定义允许左右锁定若干列显示的高级表格的基本操作。
-允许锁定左右两列的高级表格控件，继承自表格控件，内部包含两个部件——锁定的表头区(基础控件)与锁定的行内容区(基础控件)。
+ LockedTable - 定义允许左右锁定若干列显示的高级表格的基本操作。
+ 允许锁定左右两列的高级表格控件，继承自表格控件，内部包含两个部件——锁定的表头区(基础控件)与锁定的行内容区(基础控件)。
 
-锁定列高级表格控件直接HTML初始化的例子:
-<div ecui="type:locked-table;left-lock:2;right-lock:1">
-    <table>
-        <!-- 当前节点的列定义，如果有特殊格式，需要使用width样式 -->
-        <thead>
-            <tr>
-                <th>标题</th>
-                ...
-            </tr>
-        </thead>
-        <tbody>
-            <!-- 这里放单元格序列 -->
-            <tr>
-                <td>单元格一</td>
-                ...
-            </tr>
-            ...
-        </tbody>
-    </table>
-</div>
+ 锁定列高级表格控件直接HTML初始化的例子:
+ <div ecui="type:locked-table;left-lock:2;right-lock:1">
+ <table>
+ <!-- 当前节点的列定义，如果有特殊格式，需要使用width样式 -->
+ <thead>
+ <tr>
+ <th>标题</th>
+ ...
+ </tr>
+ </thead>
+ <tbody>
+ <!-- 这里放单元格序列 -->
+ <tr>
+ <td>单元格一</td>
+ ...
+ </tr>
+ ...
+ </tbody>
+ </table>
+ </div>
 
-属性
-_nLeft       - 最左部未锁定列的序号
-_nRight      - 最右部未锁定列的后续序号，即未锁定的列序号+1
-_aLockedRow  - 用于显示锁定区域的行控件数组
-_uLockedHead - 锁定的表头区
-_uLockedMain - 锁定的行内容区
+ 属性
+ _nLeft       - 最左部未锁定列的序号
+ _nRight      - 最右部未锁定列的后续序号，即未锁定的列序号+1
+ _aLockedRow  - 用于显示锁定区域的行控件数组
+ _uLockedHead - 锁定的表头区
+ _uLockedMain - 锁定的行内容区
 
-表格行与锁定行属性
-_eFill       - 用于控制中部宽度的单元格
-*/
+ 表格行与锁定行属性
+ _eFill       - 用于控制中部宽度的单元格
+ */
 //{if 0}//
 (function () {
 
@@ -71,11 +71,11 @@ _eFill       - 用于控制中部宽度的单元格
 
         firefoxVersion = /firefox\/(\d+\.\d)/i.test(USER_AGENT) ? REGEXP.$1 - 0 : undefined
 
-        eventNames = [
-            'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
-            'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
-            'keydown', 'keypress', 'keyup', 'mousewheel'
-        ],
+    eventNames = [
+        'mousedown', 'mouseover', 'mousemove', 'mouseout', 'mouseup',
+        'click', 'dblclick', 'focus', 'blur', 'activate', 'deactivate',
+        'keydown', 'keypress', 'keyup', 'mousewheel'
+    ],
 
         UI_CONTROL = ui.Control,
         UI_CONTROL_CLASS = UI_CONTROL.prototype,
@@ -105,7 +105,7 @@ _eFill       - 用于控制中部宽度的单元格
 
                 // ==========================
                 // var ddd = new Date();                
-                
+
                 var i = 0,
                     type = this.getType(),
                     headRows = this._aHeadRows,
@@ -124,7 +124,7 @@ _eFill       - 用于控制中部宽度的单元格
                     el = el.getMain();
                     list[i++] =
                         '<tr class="' + el.className + '" style="' + el.style.cssText +
-                            '"><td style="padding:0px;border:0px"></td></tr>';
+                        '"><td style="padding:0px;border:0px"></td></tr>';
                 }
 
                 lockedEl.innerHTML =
@@ -150,14 +150,14 @@ _eFill       - 用于控制中部宽度的单元格
                 // ddd = new Date();                
             }
         );
-        UI_LOCKED_TABLE_CLASS = UI_LOCKED_TABLE.prototype,
+    UI_LOCKED_TABLE_CLASS = UI_LOCKED_TABLE.prototype,
 
-        /**
-         * 初始化高级表格控件的行部件。
-         * @public
-         *
-         * @param {Object} options 初始化选项
-         */
+    /**
+     * 初始化高级表格控件的行部件。
+     * @public
+     *
+     * @param {Object} options 初始化选项
+     */
         UI_LOCKED_TABLE_ROW_CLASS = (UI_LOCKED_TABLE_CLASS.Row = inheritsControl(UI_TABLE_CLASS.Row)).prototype;
 //{else}//
     /**
@@ -173,7 +173,7 @@ _eFill       - 用于控制中部宽度的单元格
 
         return row;
     }
-    
+
     /**
      * 拆分行内的单元格到锁定列或基本列中。
      * @private
@@ -253,7 +253,7 @@ _eFill       - 用于控制中部宽度的单元格
         this.$$paddingTop = MAX(this.$$paddingTop, this._uLockedHead.getBody().offsetHeight);
         this.$$mainWidth -=
             (this.$$paddingLeft = pos) +
-                (this.$$paddingRight =
+            (this.$$paddingRight =
                     this._nRight < cols.length ? this.$$mainWidth - cols[this._nRight].$$pos : 0);
         // TODO:如果当前表格宽度小于外围div宽度，那么重设表格宽度
 
@@ -370,12 +370,12 @@ _eFill       - 用于控制中部宽度的单元格
 
         // console.log('=================== locked-table $setSize 1] ' + ((new Date()).getTime() - ddd));
         // ddd = new Date();
-        
+
         UI_TABLE_CLASS.$setSize.call(this, width, height);
 
         // console.log('=================== locked-table $setSize 2] ' + ((new Date()).getTime() - ddd));
         // ddd = new Date();
-        
+
         o = this._uHead.getWidth() + this.$$paddingLeft + this.$$paddingRight;
         (o < 0 || isNaN(o)) && (o = 0);
 
@@ -395,7 +395,7 @@ _eFill       - 用于控制中部宽度的单元格
 
         style.width = this._uLockedMain.getBody().lastChild.style.width = o + 'px';
         this._uLockedMain.getOuter().style.top = this.$$paddingTop + 'px';
-        
+
         // bugfix: 尽管有已经有padding来定位内容区，但是如果不设left，还是有可能初始定位到左上角。
         this._uHead.getOuter().style.left = this.$$paddingLeft + 'px';
 
@@ -411,7 +411,7 @@ _eFill       - 用于控制中部宽度的单元格
 
 
         // 设置表头， 处理多行表头的问题
-        height = this.$$paddingTop / rows.length; 
+        height = this.$$paddingTop / rows.length;
         for (i = 0; o = rows[i]; i++) {
             o._eFill.style.width = width;
             o._eFill.style.height = height + 'px';
@@ -446,28 +446,28 @@ _eFill       - 用于控制中部宽度的单元格
             // 通过css来保证这些，所以去掉这段代码。
 
             /*
-            console.log('=================== locked-table $setSize hot_0] ' + ((new Date()).getTime() - ddd1));
-            ddd1 = new Date();
+             console.log('=================== locked-table $setSize hot_0] ' + ((new Date()).getTime() - ddd1));
+             ddd1 = new Date();
 
-            // ================================== ch 4 (着重优化)
-            style = MAX(height = o.getCell(this._nLeft).getOuter().offsetHeight, o._eFill.offsetHeight);
+             // ================================== ch 4 (着重优化)
+             style = MAX(height = o.getCell(this._nLeft).getOuter().offsetHeight, o._eFill.offsetHeight);
 
-            console.log('=================== locked-table $setSize hot_1] ' + ((new Date()).getTime() - ddd1));
-            
-            // ==================================
-            ddd1 = new Date();
+             console.log('=================== locked-table $setSize hot_1] ' + ((new Date()).getTime() - ddd1));
 
-            // ================================== 一般不走此两条分支
-            if (style > o._eFill.offsetHeight) {
-                o._eFill.style.height = style + 'px';
-            }
-            else if (height < style) {
-                minHeight = firefoxVersion ? 0 : o.getCell(this._nLeft).$getBasicHeight();
-                o.getCell(this._nLeft).getOuter().style.height = MAX(style - minHeight, 0) + 'px';
-            }
+             // ==================================
+             ddd1 = new Date();
 
-            console.log('=================== locked-table $setSize hot_2] ' + ((new Date()).getTime() - ddd1));
-            */
+             // ================================== 一般不走此两条分支
+             if (style > o._eFill.offsetHeight) {
+             o._eFill.style.height = style + 'px';
+             }
+             else if (height < style) {
+             minHeight = firefoxVersion ? 0 : o.getCell(this._nLeft).$getBasicHeight();
+             o.getCell(this._nLeft).getOuter().style.height = MAX(style - minHeight, 0) + 'px';
+             }
+
+             console.log('=================== locked-table $setSize hot_2] ' + ((new Date()).getTime() - ddd1));
+             */
         }
 
         // console.log('=================== locked-table $setSize end (hot!!) (into)] ' + ((new Date()).getTime() - ddd));
@@ -562,9 +562,6 @@ _eFill       - 用于控制中部宽度的单元格
             dragLineEl = createDom(type + '-dot-line', null, 'span'),
             mainEl = me.$di('getEl'),
             headEl = dom.getElementsByClass(mainEl, 'div', 'ui-table-head')[0],
-            headTableEl,
-            headTrEl,
-            headThsEls,
             dragMinW = dom.getPosition(headEl).left,
             disX = 0, // 这个距离是鼠标点击虚线时的位置，距离虚线左侧的距离
             curHeadTh,
@@ -572,62 +569,54 @@ _eFill       - 用于控制中部宽度的单元格
             oldPosLeft, // 表格元素居左的问题
             mainElLeft = dom.getPosition(mainEl).left;
 
-        if (headEl) {
-            headEl && (headTableEl = dom.first(dom.first(headEl)));
-            headTrEl = dom.first(dom.first(headTableEl));
-            headThsEls = dom.children(headTrEl);
-        }
         // 为表格添加虚线元素
         setStyle(dragLineEl, 'height', this.$$height + 'px');
         mainEl.appendChild(dragLineEl);
 
         if (headEl) {
-            for (var i = 0, iLen = headThsEls.length; i < iLen; i ++) {
-                drag(headThsEls[i]);
-            }
-        }
+            attachEvent(headEl, 'mouseover', headMouseOver);
+            attachEvent(headEl, 'mouseout', function () {
+                //setStyle(dragLineEl, 'display', 'none');
+            });
 
-        function drag(o) {
-            attachEvent(o, 'mouseover', headMouseOver);
             // 监听虚线的mousedown事件，当mousedown时，注册document事件
-            attachEvent(o, 'mousedown', dragLineMouseDown);
-            // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
-            function dragLineMouseDown(ev) {
-                var oEv = ev || window.event;
-
-                // 全局捕获,生成了一个透明的层:用来解决IE8之前选中拖的BUG
-                if (dragLineEl.setCapture) {
-                    dragLineEl.setCapture();
-                }
-                disX = oEv.clientX - dragLineEl.offsetLeft;
-                attachEvent(document, 'mousemove', dragLineMouseMove);
-                attachEvent(document, 'mouseup', dragLineMouseUp);
-                return false; // 阻止浏览器去做其他事情
-            }
-            // 虚线移动事件
-            // TODO:虚线移动的最大位置与最小位置的判断
-            function dragLineMouseMove(ev) {
-                var oEv = ev || window.event;
-                var lineLeft = oEv.clientX - disX;
-                //lineL = range(lineL, max, min);
-                setStyle(o, 'left', lineLeft + 'px');
-                setStyle(dragLineEl, 'left', lineLeft + 'px');
-            }
+            attachEvent(dragLineEl, 'mousedown', dragLineMouseDown);
         }
         // 表头mouseover时，把虚线定位到触发元素旁
         function headMouseOver(ev) {
             var oEv = ev || window.event;
             var target = oEv.target || oEv.srcElement;
 
-            curHeadTh = dom.getParent(target);
-            oldPosLeft = dom.getPosition(target).left;
-            // FIXME:这点的实现着实不好，抽时间赶紧改了
-            setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 9) + 'px');
-            setStyle(dragLineEl, 'top', 0 + 'px');
-            setStyle(dragLineEl, 'display', 'block');
-
+            if (hasClass(target, 'ui-table-head-drag')) {
+                curHeadTh = dom.getParent(target);
+                oldPosLeft = dom.getPosition(target).left;
+                // FIXME:这点的实现着实不好，抽时间赶紧改了
+                setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 9) + 'px');
+                setStyle(dragLineEl, 'top', 0 + 'px');
+                setStyle(dragLineEl, 'display', 'block');
+            }
         }
+        // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
+        function dragLineMouseDown(ev) {
+            var oEv = ev || window.event;
 
+            // 全局捕获,生成了一个透明的层:用来解决IE8之前选中拖的BUG
+            if (dragLineEl.setCapture) {
+                dragLineEl.setCapture();
+            }
+            disX = oEv.clientX - dragLineEl.offsetLeft;
+            attachEvent(document, 'mousemove', dragLineMouseMove);
+            attachEvent(document, 'mouseup', dragLineMouseUp);
+            return false; // 阻止浏览器去做其他事情
+        }
+        // 虚线移动事件
+        // TODO:虚线移动的最大位置与最小位置的判断
+        function dragLineMouseMove(ev) {
+            var oEv = ev || window.event;
+            var lineLeft = oEv.clientX - disX;
+            //lineL = range(lineL, max, min);
+            setStyle(dragLineEl, 'left', lineLeft + 'px');
+        }
         // 虚线松开事件
         function dragLineMouseUp() {
             detachEvent(document, 'mousemove', dragLineMouseMove);
