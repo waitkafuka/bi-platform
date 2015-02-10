@@ -439,6 +439,23 @@ $namespace('di.shared.ui');
                 };
             }
         }
+        else if (def.clzKey === 'ECUI_SELECT') {
+            // 如果渲染数据存在，就获取到当前渲染数据
+            sourceData && (curData = sourceData[def.name]);
+            if (curData && curData.datasource && def.hasAllNode) {
+                curData.datasource.unshift({
+                    'parent': '',
+                    'text': def.hasAllNodeText,
+                    'value': ''
+                });
+                // 如果当前渲染数据存在
+                defaultData
+                && defaultData[def.name]
+                && defaultData[def.name].value
+                    // 更新渲染数据里面的value为默认值
+                && (curData.value = defaultData[def.name].value);
+            }
+        }
         else {
             // 如果渲染数据存在，就获取到当前渲染数据
             sourceData && (curData = sourceData[def.name]);

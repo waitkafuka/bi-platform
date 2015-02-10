@@ -34,8 +34,7 @@ define([
                 'click .j-button-preview-report': 'previewReport',
                 'click .j-comp-div': 'focusText',
                 'blur .j-comp-text': 'blurText',
-                'keydown .j-comp-text': 'keyDownText',
-                'change .j-select-default': 'changeSelectDefault'
+                'keydown .j-comp-text': 'keyDownText'
             },
             /* 判断是否保存的变量 */
             savestate: 0,
@@ -583,27 +582,6 @@ define([
                     that.editCompView.activeComp();
                     that.initSnptHeight();
                 }, 2000);
-            },
-
-            /**
-             * 添加默认值
-             *
-             * @param {event} event 事件焦点（下拉框多选框）
-             * @public
-             */
-            changeSelectDefault: function (event) {
-                var that = this;
-                var $target = $(event.target);
-                var $nowComp = $target.parent().parent().parent();
-                var compId = $nowComp.attr('data-comp-id');
-                var $comp = that.$el.find('.report').find('.component-item');
-                var checked = $target[0].checked;
-                $comp.each(function () {
-                    var $this = $(this);
-                    if ($this.attr('data-comp-id') == compId) {
-                        $this.attr('data-default-value', checked);
-                    }
-                });
             }
         });
     }
