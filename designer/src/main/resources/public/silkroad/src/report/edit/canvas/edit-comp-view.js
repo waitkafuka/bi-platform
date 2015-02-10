@@ -795,16 +795,16 @@ define([
                 var $item = $draggedUi.clone().attr('style', '');
                 // 默认值选择
                 var $selectDefault = $('.select-default');
-                // 获取当前单选下拉框设定默认值元素
-                var $selectValue = $('input[class ^= "select-default-value"]');
-                $selectValue.removeAttr('checked');
-                var $selectName = $('.select-default-name');
-                // 当前单选下拉框默认值判定变量
-                var checked = $selectValue[0].checked;
-                // 当前单选下拉框默认值
-                var allName = $selectValue.attr('value');
                 // 单选下拉框添加维度时，初始化默认值设定
                 if (compType === 'SELECT') {
+                    // 获取当前单选下拉框设定默认值元素
+                    var $selectValue = $('input[class ^= "select-default-value"]');
+                    $selectValue.removeAttr('checked');
+                    var $selectName = $('.select-default-name');
+                    // 当前单选下拉框默认值判定变量
+                    var checked = $selectValue[0].checked;
+                    // 当前单选下拉框默认值
+                    var allName = $selectValue.attr('value');
                     // 设置单选下拉框默认值
                     that.selectSetAll(checked, allName, compId);
                 }
@@ -1307,7 +1307,7 @@ define([
                                     var rangeEnd = $this.find('[name="endDateSetting"]').val();
                                     // 如果设置range时间时，rangeend如果大于rangestart则不能设置。
                                     if (rangeStart !== undefined && rangeEnd !== undefined) {
-                                        if (rangeEnd < rangeStart) {
+                                        if (parseInt(rangeEnd) < parseInt(rangeStart)) {
                                             dialog.alert("设置的默认结束时间应小于默认开始时间");
                                             return;
                                         }
