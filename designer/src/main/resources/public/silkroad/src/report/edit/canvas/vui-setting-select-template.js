@@ -38,7 +38,7 @@ define(['template'], function (template) {
         $out+=$escape(item.caption);
         $out+='）\n                ';
         });
-        $out+='\n            </span>\n            <input class="select-default-value j-select-default"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
+        $out+='\n            </span>\n            <input class="select-default-value j-select-setAll"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
         $out+=$escape(compId);
         $out+='"\n                value="全部（';
         $each(xAxis,function(item,$index){
@@ -58,13 +58,15 @@ define(['template'], function (template) {
         $out+=$escape(item.caption);
         $out+='）\n                ';
         });
-        $out+='\n            </span>\n            <input class="select-default-value j-select-default"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
+        $out+='\n            </span>\n            <input class="select-default-value j-select-setAll"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
         $out+=$escape(compId);
-        $out+='"\n                value="全部（';
+        $out+='"\n                value="全部';
         $each(xAxis,function(item,$index){
+        $out+='（';
         $out+=$escape(item.caption);
+        $out+='）';
         });
-        $out+='）"\n                ';
+        $out+='"\n                ';
         if($data.compAll==="true"){
         $out+='\n                    checked="checked"\n                    ';
         }else{
