@@ -631,7 +631,7 @@
         }
         // 重设表格宽度
         function resetTableWidth() {
-            // TODO:重设表头右侧部分宽度
+            // 重设表头右侧部分宽度
             var headTableEl = dom.first(
                 dom.first(
                     dom.getElementsByClass(mainEl, 'div', 'ui-table-head')[0]
