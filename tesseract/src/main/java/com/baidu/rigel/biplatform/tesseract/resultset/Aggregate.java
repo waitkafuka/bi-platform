@@ -75,10 +75,10 @@ public class Aggregate {
         }
     }
     
-    public static void main(String[] args) {
-        Number a = 100;
-        Number b = 100.00;
-        System.out.println(a.doubleValue() + b.doubleValue());
-    }
+//    public static void main(String[] args) {
+//        Number a = 100;
+//        Number b = 100.00;
+//        System.out.println(a.doubleValue() + b.doubleValue());
+//    }
 
 }

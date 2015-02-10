@@ -386,7 +386,7 @@ public class FileUtils {
             fileOutputStream = new FileOutputStream(file);
             // 写入本地
             fileOutputStream.write(content);
-            fileOutputStream.close();
+            fileOutputStream.flush();
             result = true;
         } catch (IOException e) {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FILEPROCESS_ERROR,
