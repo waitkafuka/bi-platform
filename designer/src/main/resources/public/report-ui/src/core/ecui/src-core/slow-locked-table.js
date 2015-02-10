@@ -559,95 +559,94 @@
     UI_LOCKED_TABLE_CLASS.headDrag = function () {
         var me = this,
             type = me.getType(),
-            dragLineEl = createDom(type + '-dot-line', null, 'span'),
             mainEl = me.$di('getEl'),
-            headEl = dom.getElementsByClass(mainEl, 'div', 'ui-table-head')[0],
-            dragMinW = dom.getPosition(headEl).left,
+            headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0],
+            dragBoxEl = createDom(type + '-drag-box', null, 'div'), // 拖拽接触点模块
+            dotLineEl,
             disX = 0, // 这个距离是鼠标点击虚线时的位置，距离虚线左侧的距离
             curHeadTh,
             difLeft, // 虚线移动的距离
-            oldPosLeft, // 表格元素居左的问题
+            oldPosLeft, // 表格元素居左的距离
             mainElLeft = dom.getPosition(mainEl).left;
 
-        // 为表格添加虚线元素
-        setStyle(dragLineEl, 'height', this.$$height + 'px');
-        mainEl.appendChild(dragLineEl);
+        dragBoxEl.innerHTML = ''
+            + '<span class="' + type +'-dot-box-drag"></span>'
+            + '<span class="' + type + '-dot-box-line" ></span>';
+        mainEl.appendChild(dragBoxEl);
+
+        // 设置虚线高度
+        dotLineEl = dom.getElementsByClass(dragBoxEl, 'span', type + '-dot-box-line')[0];
+        setStyle(dotLineEl, 'height', this.$$height + 'px');
 
         if (headEl) {
             attachEvent(headEl, 'mouseover', headMouseOver);
-            attachEvent(headEl, 'mouseout', function () {
-                //setStyle(dragLineEl, 'display', 'none');
-            });
-
-            // 监听虚线的mousedown事件，当mousedown时，注册document事件
-            attachEvent(dragLineEl, 'mousedown', dragLineMouseDown);
+            attachEvent(dragBoxEl, 'mousedown', dragBoxMouseDown);
         }
-        // 表头mouseover时，把虚线定位到触发元素旁
+
+        // 表头mouseover时，把拖拽接触点模块定位到触发元素旁
         function headMouseOver(ev) {
             var oEv = ev || window.event;
             var target = oEv.target || oEv.srcElement;
 
-            if (hasClass(target, 'ui-table-head-drag')) {
+            if (hasClass(target, type + '-head-drag')) {
                 curHeadTh = dom.getParent(target);
                 oldPosLeft = dom.getPosition(target).left;
-                // FIXME:这点的实现着实不好，抽时间赶紧改了
-                setStyle(dragLineEl, 'left', (dom.getPosition(target).left - mainElLeft + 9) + 'px');
-                setStyle(dragLineEl, 'top', 0 + 'px');
-                setStyle(dragLineEl, 'display', 'block');
+                setStyle(dragBoxEl, 'left', (dom.getPosition(target).left - mainElLeft) + 'px');
+                setStyle(dragBoxEl, 'top', '0px');
             }
         }
-        // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
-        function dragLineMouseDown(ev) {
-            var oEv = ev || window.event;
 
+        // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
+        function dragBoxMouseDown(ev) {
+            var oEv = ev || window.event;
             // 全局捕获,生成了一个透明的层:用来解决IE8之前选中拖的BUG
-            if (dragLineEl.setCapture) {
-                dragLineEl.setCapture();
+            if (dragBoxEl.setCapture) {
+                dragBoxEl.setCapture();
             }
-            disX = oEv.clientX - dragLineEl.offsetLeft;
-            attachEvent(document, 'mousemove', dragLineMouseMove);
-            attachEvent(document, 'mouseup', dragLineMouseUp);
+            disX = oEv.clientX - dragBoxEl.offsetLeft;
+            attachEvent(document, 'mousemove', dragBoxMouseMove);
+            attachEvent(document, 'mouseup', dragBoxMouseUp);
             return false; // 阻止浏览器去做其他事情
         }
+
         // 虚线移动事件
         // TODO:虚线移动的最大位置与最小位置的判断
-        function dragLineMouseMove(ev) {
+        function dragBoxMouseMove(ev) {
             var oEv = ev || window.event;
             var lineLeft = oEv.clientX - disX;
-            //lineL = range(lineL, max, min);
-            setStyle(dragLineEl, 'left', lineLeft + 'px');
+            setStyle(dragBoxEl, 'left', lineLeft + 'px');
         }
-        // 虚线松开事件
-        function dragLineMouseUp() {
-            detachEvent(document, 'mousemove', dragLineMouseMove);
-            detachEvent(document, 'mouseup', dragLineMouseUp);
-            difLeft = dom.getPosition(dragLineEl).left - oldPosLeft;
-            setStyle(dragLineEl, 'display', 'none');
-            if (dragLineEl.releaseCapture) {
-                dragLineEl.releaseCapture(); // 释放捕获
+
+        // 拖拽接触点松开事件
+        function dragBoxMouseUp() {
+            detachEvent(document, 'mousemove', dragBoxMouseMove);
+            detachEvent(document, 'mouseup', dragBoxMouseUp);
+            difLeft = dom.getPosition(dragBoxEl).left - oldPosLeft;
+            if (dragBoxEl.releaseCapture) {
+                dragBoxEl.releaseCapture(); // 释放捕获
             }
             resetTableWidth();
-            // oTargetTh.style.width = (parseInt(oTargetTh.style.width) + newWidth) + 'px';
         }
+
         // 重设表格宽度
         function resetTableWidth() {
             // 重设表头右侧部分宽度
             var headTableEl = dom.first(
                 dom.first(
-                    dom.getElementsByClass(mainEl, 'div', 'ui-table-head')[0]
+                    dom.getElementsByClass(mainEl, 'div', type + '-head')[0]
                 )
             );
             setStyle(headTableEl, 'width', (parseInt(headTableEl.style.width) + difLeft) + 'px');
-            // TODO:重设表格内容右侧部分宽度
+            // 重设表格内容右侧部分宽度
             var tableLayoutEl = dom.first(
                 dom.first(
-                    dom.getElementsByClass(mainEl, 'div', 'ui-table-layout')[0]
+                    dom.getElementsByClass(mainEl, 'div', type + '-layout')[0]
                 )
             );
             setStyle(tableLayoutEl, 'width', (parseInt(tableLayoutEl.style.width) + difLeft) + 'px');
-            // TODO:重设表头中拖拽列宽度
+            // 重设表头中拖拽列宽度
             setStyle(curHeadTh, 'width', (parseInt(curHeadTh.style.width) + difLeft) + 'px');
-            // TODO:重设表格内部拖拽列宽度
+            // 重设表格内部拖拽列宽度
             var colIndex = dom.getAttribute(curHeadTh, 'data-cell-pos').split('-')[0];
             var rows = dom.children(
                 dom.first(tableLayoutEl)
@@ -659,26 +658,13 @@
                     var col = cols[cIndex];
                     var curIndex = dom.getAttribute(col, 'data-cell-pos').split('-')[0];
                     if (curIndex === colIndex) {
-                        console.log('old:' + parseInt(col.style.width) + 'new:' + (parseInt(col.style.width) + difLeft));
                         setStyle(col, 'width', (parseInt(col.style.width) + difLeft) + 'px');
                     }
                 }
             }
-            // TODO:调用cache方法
             me.cache(getStyle(me._eMain));
-            // TODO:resize
             me.resize();
         }
-//        function range(iNum, iMax, iMin) {
-//            console.log('min:' + iMin + 'max:' + iMax);
-//            if (iNum > iMax) {
-//                return iMax;
-//            } else if (iNum < iMin) {
-//                return iMin;
-//            } else {
-//                return iNum;
-//            }
-//        }
     };
 
     /**
