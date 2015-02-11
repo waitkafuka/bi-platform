@@ -21,13 +21,22 @@
     *display: inline;
     *zoom: 1;
 }
-.ui-button {
-    /*background: url(img/icon.png) 0px -103px repeat-x;*/
-    /*border:  1px solid #7FAFC7;*/
-    background: #2584DA;
-    border: 1px solid #2070BB;
-    color: white;
-    width: 96%;
+.ui-normal-btn {
+    color: #fff;
+    padding: 0 20px;
+    background: #00aef3;
+    border: 1px solid #00aef3;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    text-align: center;
+}
+.ui-normal-btn .ui-button-text {
+    height: 30px;
+    line-height: 30px;
+    width: 24px;
+    display: block;
+    font-size: 12px;
 }
 .ui-button-hover {
     /*background-position: 0px -127px;*/
@@ -276,6 +285,10 @@
     border-top: 1px solid #F0F0F0;
     cursor: default;
     font-size: 12px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 .ui-select-button {
     background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
@@ -333,6 +346,10 @@
     line-height: 18px;
     border-top: 1px solid #F0F0F0;
     cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 .ui-multi-select-button {
     background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
@@ -1981,6 +1998,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     border-bottom: 1px solid #CCC;
     border-right: 1px solid #e7f9fe;
     height: 30px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 .ui-table-locked-head {
@@ -3818,7 +3838,8 @@ div.di-dim-level-find-msg span{
 .comp-box {
     width: 100%;
     height: 90%;
-    overflow: auto
+    overflow: auto;
+    margin-top: 22px;
 }
 .component-item {
     /*overflow: auto;*/
