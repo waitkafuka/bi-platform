@@ -402,6 +402,7 @@ define([
              */
             addEditBtns: function ($component) {
                 $component.prepend(editBtnsTemplate.render());
+                $component.find('.comp-box').css('margin-top', 0);
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {
                     var compType = $($component[i]).attr('data-component-type');
