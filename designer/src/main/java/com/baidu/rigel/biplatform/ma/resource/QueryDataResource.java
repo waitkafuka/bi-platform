@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -1678,6 +1679,17 @@ public class QueryDataResource extends BaseResource {
         ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true,
             areaContext.getParams(), securityKey);
         DataModel dataModel = queryRs.getDataModel();
+        final StringBuilder timeRange = new StringBuilder();
+        areaContext.getParams().forEach((k, v) -> {
+            if (v instanceof String && v.toString().contains("start") 
+                && v.toString().contains("end") && v.toString().contains("granularity")) {
+                try {
+                    JSONObject json = new JSONObject(v.toString());
+                    timeRange.append(json.getString("start") + "至"  + json.getString("end"));
+                } catch (Exception e) {
+                }
+            }
+        }); 
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
         String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
@@ -1685,8 +1697,9 @@ public class QueryDataResource extends BaseResource {
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
         response.setContentType("application/x-msdownload;charset=GBK");
+        final String fileName = report.getName() + timeRange.toString();
         response.setHeader("Content-Disposition", "attachment;filename=" 
-                + URLEncoder.encode(report.getName(), "utf8") + ".csv"); 
+                + URLEncoder.encode(fileName, "utf8") + ".csv"); 
         byte[] content = csvString.getBytes("GBK");
         response.setContentLength(content.length);
         OutputStream os = response.getOutputStream();

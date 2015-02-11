@@ -57,7 +57,7 @@ public class QuestionModelBuildServiceImpl implements QuestionModelBuildService 
         try {
             QuestionModel questionModel = QueryUtils.convert2QuestionModel(action);
             questionModel.setNeedSummary(false);
-            questionModel.setUseIndex(false);
+//            questionModel.setUseIndex(false);
             questionModel.setUseIndex(true);
             if (action.getRequestParams() != null) {
                 for (Map.Entry<String, Object> entry : action.getRequestParams().entrySet()) {
