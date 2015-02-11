@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -775,7 +776,8 @@ public class QueryDataResource extends BaseResource {
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
         try {
-            table = queryBuildService.parseToPivotTable(result.getDataModel());
+            Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
+            table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
         } catch (PivotTableParseException e) {
             logger.info(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
@@ -1126,7 +1128,8 @@ public class QueryDataResource extends BaseResource {
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
         try {
-            table = queryBuildService.parseToPivotTable(result.getDataModel());
+            Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
+            table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
         } catch (PivotTableParseException e) {
             logger.info(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
@@ -1304,11 +1307,12 @@ public class QueryDataResource extends BaseResource {
         int rowNum = this.getRowNum(previousResult, condition);
         try {
             // 查询下钻的数据
+            Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
             if (type.equals("expand")) {
 //                ResultSet result = reportModelQueryService.queryDatas(model, action, true);
                 DataModel newDataModel = DataModelUtils.merageDataModel(previousResult.getDataModel(), 
                         result.getDataModel(), rowNum);
-                table = DataModelUtils.transDataModel2PivotTable(newDataModel, false, 0, false);
+                table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, false, 0, false);
                 result.setDataModel(newDataModel);
                 /**
                  * TODO 这里重新生成当前条件对应的action，而不是下钻使用的action，为的是记录下当前表的结果
@@ -1320,7 +1324,7 @@ public class QueryDataResource extends BaseResource {
                 runTimeModel.updateDatas(recordAction, result);
             } else { //上卷或者折叠操作
                 DataModel newModel = DataModelUtils.removeDataFromDataModel(previousResult.getDataModel(), rowNum);
-                table = DataModelUtils.transDataModel2PivotTable(newModel, false, 0, false);
+                table = DataModelUtils.transDataModel2PivotTable(cube, newModel, false, 0, false);
                 result = new ResultSet();
                 result.setDataModel(newModel);
                 /**
@@ -1515,6 +1519,7 @@ public class QueryDataResource extends BaseResource {
         ReportDesignModel reportModel = this.getDesignModelFromRuntimeModel(reportId);
                 // reportModelCacheManager.getReportModel(reportId);
         SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
+        ExtendArea targetArea = reportModel.getExtendById(areaId);
         ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
         DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
         SortRecord type = new SortRecord(sortType, uniqueName, 500);
@@ -1532,7 +1537,8 @@ public class QueryDataResource extends BaseResource {
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
         try {
-            table = queryBuildService.parseToPivotTable(model);
+            Cube cube = reportModel.getSchema().getCubes().get(targetArea.getCubeId());
+            table = queryBuildService.parseToPivotTable(cube, model);
         } catch (PivotTableParseException e) {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
@@ -1678,6 +1684,17 @@ public class QueryDataResource extends BaseResource {
         ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true,
             areaContext.getParams(), securityKey);
         DataModel dataModel = queryRs.getDataModel();
+        final StringBuilder timeRange = new StringBuilder();
+        areaContext.getParams().forEach((k, v) -> {
+            if (v instanceof String && v.toString().contains("start") 
+                && v.toString().contains("end") && v.toString().contains("granularity")) {
+                try {
+                    JSONObject json = new JSONObject(v.toString());
+                    timeRange.append(json.getString("start") + "至"  + json.getString("end"));
+                } catch (Exception e) {
+                }
+            }
+        }); 
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
         String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
@@ -1685,8 +1702,9 @@ public class QueryDataResource extends BaseResource {
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
         response.setContentType("application/x-msdownload;charset=GBK");
+        final String fileName = report.getName() + timeRange.toString();
         response.setHeader("Content-Disposition", "attachment;filename=" 
-                + URLEncoder.encode(report.getName(), "utf8") + ".csv"); 
+                + URLEncoder.encode(fileName, "utf8") + ".csv"); 
         byte[] content = csvString.getBytes("GBK");
         response.setContentLength(content.length);
         OutputStream os = response.getOutputStream();

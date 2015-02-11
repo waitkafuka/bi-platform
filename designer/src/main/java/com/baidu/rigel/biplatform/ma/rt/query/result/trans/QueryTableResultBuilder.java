@@ -22,9 +22,6 @@ import org.apache.log4j.Logger;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
-import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
-import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
-import com.baidu.rigel.biplatform.ma.report.service.impl.QueryActionBuildServiceImpl;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryResult;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryStrategy;
@@ -63,17 +60,17 @@ public class QueryTableResultBuilder extends AbsQueryResultBuilder {
     @Override
     QueryResult innerBuild(QueryAction queryAction, DataModel model) {
         QueryResult queryResult = new QueryResult();
-        PivotTable table = null;
+//        PivotTable table = null;
         try {
-            QueryBuildService queryBuildService = new QueryActionBuildServiceImpl();
-            table = queryBuildService.parseToPivotTable(model);
-            String[] dims = new String[0];
-            queryResult.addData("pivottable", table);
-            queryResult.addData("rowCheckMin", 1);
-            queryResult.addData("rowCheckMax", 5);
-            queryResult.addData("mainDimNodes", dims);
-            queryResult.addData("reportTemplateId", queryAction.getReportId());
-            queryResult.addData("totalSize", table.getDataRows());
+//            QueryBuildService queryBuildService = new QueryActionBuildServiceImpl();
+//            table = queryBuildService.parseToPivotTable(model);
+//            String[] dims = new String[0];
+//            queryResult.addData("pivottable", table);
+//            queryResult.addData("rowCheckMin", 1);
+//            queryResult.addData("rowCheckMax", 5);
+//            queryResult.addData("mainDimNodes", dims);
+//            queryResult.addData("reportTemplateId", queryAction.getReportId());
+//            queryResult.addData("totalSize", table.getDataRows());
             return queryResult;
         } catch (PivotTableParseException e) {
             logger.error(e.getMessage(), e);
