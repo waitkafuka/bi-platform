@@ -221,6 +221,33 @@
     DOM.getPreviousSibling = function(el) {
         return el.previousElementSibling || el.previousSibling;
     };
+    /**
+     * 挂载事件。
+     * @public
+     *
+     * @param {Object} obj 响应事件的对象
+     * @param {string} type 事件类型
+     * @param {Function} func 事件处理函数
+     */
+    DOM.attachEvent = DOM.ieVersion ? function (obj, type, func) {
+        obj.attachEvent('on' + type, func);
+    } : function (obj, type, func) {
+        obj.addEventListener(type, func, false);
+    };
+
+    /**
+     * 卸载事件。
+     * @public
+     *
+     * @param {Object} obj 响应事件的对象
+     * @param {string} type 事件类型
+     * @param {Function} func 事件处理函数
+     */
+    DOM.detachEvent = DOM.ieVersion ? function (obj, type, func) {
+        obj.detachEvent('on' + type, func);
+    } : function (obj, type, func) {
+        obj.removeEventListener(type, func, false);
+    };
 
 })();
 

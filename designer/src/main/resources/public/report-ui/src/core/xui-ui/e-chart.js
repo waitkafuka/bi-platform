@@ -13,12 +13,14 @@
     var removeClass = xutil.dom.removeClass;
     var q = xutil.dom.q;
     var domChildren = xutil.dom.children;
+    var domGetParent = xutil.dom.getParent;
     var getPreviousSibling = xutil.dom.getPreviousSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
-//    var extend = xutil.object.extend;
+    var attachEvent = xutil.dom.attachEvent;
+    var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
-//    var DI_ATTR_PREFIX = '\x06diA^_^';
+
     /**
      * 基于e-chart的JS图
      *
@@ -48,8 +50,7 @@
     /**
      * 初始化
      */
-    UI_E_CHART_CLASS.init = function () {
-    };
+    UI_E_CHART_CLASS.init = function () {};
 
     /**
      * 设置数据
@@ -163,13 +164,11 @@
         if (allMeasures.length > 0) {
             if (this._chartType === 'pie') {
                 // 多选
-                for (var i = 0; i < allMeasures.length; i ++) {
+                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
                     measureHtml.push(
-                        '<label>',
-                        allMeasures[i],
-                        '</label>',
+                        '<label>',allMeasures[i],'</label>',
                         '<input type="radio" name="echarts-candidate" ',
-                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                            isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
                         '/>'
                     );
                 }
@@ -183,13 +182,11 @@
             }
             else {
                 // 多选
-                for (var i = 0; i < allMeasures.length; i ++) {
+                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
                     measureHtml.push(
-                        '<label>',
-                        allMeasures[i],
-                        '</label>',
+                        '<label>',allMeasures[i],'</label>',
                         '<input type="checkbox" name="echarts-candidate" ',
-                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                            isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
                         '/>'
                     );
                 }
@@ -198,16 +195,18 @@
                     + '</div>';
                 // 绑定备选区按钮事件
                 this._eCandidateBox = domChildren(this._eHeader)[0];
-                this._eCandidateBox.onclick = function (ev) {
-                    candidateClick.call(me, ev || window.event);
-                };
+                attachEvent(this._eCandidateBox, 'click', function (ev) {
+                        var oEv = ev || window.event;
+                        var target = oEv.target || oEv.srcElement;
+                        candidateClick.call(me, target);
+                });
+
             }
         }
     };
     // 备选区按钮点击事件
-    function candidateClick(ev) {
+    function candidateClick(oTarget) {
         var resultName = '';
-        var oTarget = ev.target;
 
         if (oTarget.tagName.toLowerCase() === 'input') {
             resultName = getPreviousSibling(oTarget).innerHTML;
@@ -215,8 +214,20 @@
                 this._defaultMeasures = [resultName];
             }
             else {
-                // oTarget.checked = oTarget.checked ? false : true;
-                this._defaultMeasures = getCurrentCandidate(resultName, this._defaultMeasures);
+                // 如果是多选，那么限制不能少于一个
+                var chkBoxs = domChildren(domGetParent(oTarget));
+                for (var sum = 0, i = 0, iLen = chkBoxs.length; i < iLen; i ++) {
+                    if (chkBoxs[i].type === 'checkbox' && chkBoxs[i].checked) {
+                        sum ++ ;
+                    }
+                }
+                if (sum === 0) {
+                    oTarget.checked = true;
+                }
+                else {
+                    this._defaultMeasures = getCurrentCandidate(resultName, this._defaultMeasures);
+                }
+
             }
 
             //this.$disposeHeader();
@@ -740,7 +751,7 @@
         var toolTip = {};
 
         if (this._chartType === 'pie') {
-            toolTip.formatter = "{a} <br/>{b} : {c} ({d}%)";
+            toolTip.formatter = '{a} <br/>{b} : {c} ({d}%';
             toolTip.trigger = 'item';
         }
         else if (this._chartType === 'map') {
@@ -768,7 +779,10 @@
                     res += '<br/>' + data[i][0] + ' : ' + valueLable;
                 }
                 return res;
-            }
+            };
+            toolTip.textStyle = {
+                fontFamily: '微软雅黑,宋体'
+            };
         }
         options.tooltip = toolTip;
     };
