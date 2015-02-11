@@ -31,8 +31,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -41,12 +41,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-import org.springframework.core.task.TaskRejectedException;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
@@ -71,6 +68,7 @@ import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * SearchService 实现类，用来连接外部的查询API。
@@ -89,7 +87,7 @@ public class CallbackSearchServiceImpl {
     private static final String RESPONSE_VALUE_SPLIT = "$";
 
     @Autowired
-    private AsyncListenableTaskExecutor taskExecutor;
+    private ThreadPoolTaskExecutor taskExecutor;
     
     @Value(value="${callback.measure.timeout}")
     private long callbackTimeout;
@@ -231,46 +229,60 @@ public class CallbackSearchServiceImpl {
         }
         
         // Prepare query tools
-        Map<CallbackExecutor, CallbackResponse> response = new ConcurrentHashMap<CallbackExecutor, CallbackResponse>(callbackMeasures.size());
-        CountDownLatch latch = new CountDownLatch(response.size());
+//        CountDownLatch latch = new CountDownLatch(response.size());
+//        List<Future<CallbackResponse>> results = Lists.newArrayList();
+        Map<CallbackExecutor, Future<CallbackResponse>> results = Maps.newHashMap();
+        ExecutorCompletionService<CallbackResponse> service = new ExecutorCompletionService<CallbackResponse>(taskExecutor);
         for (Entry<String, List<MiniCubeMeasure>> e : callbackMeasures.entrySet()) {
             CallbackExecutor ce = new CallbackExecutor(e, groupbyParams, whereParams);
-            while (true) {
-                try {
-                    ListenableFuture<CallbackResponse> f = taskExecutor.submitListenable(ce);
-                    f.addCallback(new ListenableFutureCallback<CallbackResponse>() {
-                        @Override
-                        public void onSuccess(CallbackResponse result) {
-                            latch.countDown();
-                            response.put(ce, result);
-                        }
-                        
-                        @Override
-                        public void onFailure(Throwable t) {
-                            latch.countDown();
-                            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, 
-                                    "Error when try to callback " + e, "[callbackquery:]"), t);
-                        }
-                    });
-                    break;
-                } catch (TaskRejectedException tre) {
-                    try {
-                        // FIXME: MENGRAN. Need configure it?
-                        Thread.sleep(100L);
-                    } catch (InterruptedException e1) {
-                        // Ignore
-                    }
-                }
+            results.put(ce, service.submit(ce));
+////            while (true) {
+//                try {
+////                    ListenableFuture<CallbackResponse> f = taskExecutor.submitListenable(ce);
+//                    
+//                    Future<CallbackResponse> f = taskExecutor.submit(ce);
+//                    response.put(ce, f.get());
+////                    f.addCallback(new ListenableFutureCallback<CallbackResponse>() {
+////                        @Override
+////                        public void onSuccess(CallbackResponse result) {
+////                            latch.countDown();
+////                            response.put(ce, result);
+////                        }
+////                        
+////                        @Override
+////                        public void onFailure(Throwable t) {
+////                            latch.countDown();
+////                            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, 
+////                                    "Error when try to callback " + e, "[callbackquery:]"), t);
+////                        }
+////                    });
+////                    break;
+//                } catch (TaskRejectedException | InterruptedException | ExecutionException tre) {
+//                    try {
+//                        // FIXME: MENGRAN. Need configure it?
+//                        Thread.sleep(100L);
+//                    } catch (InterruptedException e1) {
+//                        // Ignore
+//                    }
+//                }
             }
-        }
-
+//        }
+        Map<CallbackExecutor, CallbackResponse> response = 
+                new ConcurrentHashMap<CallbackExecutor, CallbackResponse>(callbackMeasures.size());
+        results.forEach((k, v) -> {
+            try {
+                response.put(k, v.get());
+            } catch (Exception e1) {
+                LOGGER.error(e1.getMessage(), e1);
+            }
+        });
         // Waiting...
-        try {
-            latch.await(callbackTimeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e1) {
-            // Ignore
-            LOGGER.error(e1.getMessage(), e1);
-        }
+//        try {
+//            latch.await(callbackTimeout, TimeUnit.MILLISECONDS);
+//        } catch (InterruptedException e1) {
+//            // Ignore
+//            LOGGER.error(e1.getMessage(), e1);
+//        }
         
         // Package result
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);

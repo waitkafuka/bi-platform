@@ -258,7 +258,9 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         indexFeedbackMsg.setMaxId(currMaxId);
         
         ChannelFuture sendBack=ctx.writeAndFlush(indexFeedbackMsg);
-        
+        if (sendBack.isDone()) {
+            ctx.close();
+        }
         if(indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_MOD)){
         	IndexSearcherFactory.getInstance().refreshSearchManager(indexMsg.getIdxPath());
         	logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
