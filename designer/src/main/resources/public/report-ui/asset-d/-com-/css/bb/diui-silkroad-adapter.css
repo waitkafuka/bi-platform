@@ -12,7 +12,8 @@
 .comp-box {
     width: 100%;
     height: 90%;
-    overflow: auto
+    overflow: auto;
+    margin-top: 22px;
 }
 .component-item {
     /*overflow: auto;*/

@@ -17,6 +17,8 @@ package com.baidu.rigel.biplatform.ma.resource.utils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,9 +29,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
+import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
@@ -143,7 +148,7 @@ public final class DataModelUtils {
      * @return 转换后的PivotTable
      * @throws Exception
      */
-    public static PivotTable transDataModel2PivotTable(DataModel oriDataModel, boolean needLimit,
+    public static PivotTable transDataModel2PivotTable(Cube cube, DataModel oriDataModel, boolean needLimit,
         int limitSize, boolean hideWhiteRow) throws PivotTableParseException {
 
         PivotTable pTable = new PivotTable();
@@ -175,6 +180,7 @@ public final class DataModelUtils {
         // s1. calc colHeight
         // s2. trans colField
         // s3. if rowAxis's exists,fill the first col of colFields
+        String[] dimCaptions = getDimCaptions(cube, rowHeadFields);
         int rowWidth = getHeightOfHeadFieldList(rowHeadFields);
         if (rowHeadFields != null && rowHeadFields.size() != 0) {
             List<ColField> firstColFields = colFields.get(0);
@@ -183,7 +189,8 @@ public final class DataModelUtils {
                 firstColField.setRowspan(colHeight);
                 firstColField.setColSpan(1);
                 firstColField.setUniqName("test");
-                firstColField.setV(StringUtils.EMPTY);
+                // TODO 获取正确的caption信息
+                firstColField.setV(dimCaptions[i].replace("汇总", ""));
                 firstColFields.add(0, firstColField);
             }
         }
@@ -297,6 +304,47 @@ public final class DataModelUtils {
         return pTable;
     }
     
+    /**
+     * 
+     * @param cube
+     * @param rowHeadFields
+     * @return String[]
+     */
+    private static String[] getDimCaptions(Cube cube, List<HeadField> rowHeadFields) {
+        List<String> captions = Lists.newArrayList();
+        for (HeadField headField : rowHeadFields) {
+            if (!CollectionUtils.isEmpty(headField.getNodeList())) {
+                Collections.addAll(captions, getDimCaptions(cube, headField.getNodeList()));
+            }
+            String uniqueName = headField.getNodeUniqueName();
+            // TODO 这里有问题，需要重新考虑
+            if ("合计".equals(headField.getCaption())) {
+                uniqueName = headField.getChildren().get(0).getValue();
+            } else {
+                uniqueName = headField.getValue();
+//                captions.add(headField.getCaption());
+            }
+            String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
+            captions.add(getDimensionCaptionByName(cube, dimName));
+        }
+        return captions.toArray(new String[0]);
+    }
+
+    /**
+     * 
+     * @param cube
+     * @param dimName
+     * @return
+     */
+    private static String getDimensionCaptionByName(Cube cube, String dimName) {
+        for (Dimension dim : cube.getDimensions().values()) {
+            if (dim.getName().equals(dimName)) {
+                return dim.getCaption();
+            }
+        }
+        return dimName;
+    }
+
     /**
      * @param rowFields
      */
@@ -454,7 +502,8 @@ public final class DataModelUtils {
         List<HeadField> leafFileds = DataModelUtils.getLeafNodeList(rowHeadFields);
         // hasStoredMap用于记录已经存过的rowField
         Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
-        
+        SimpleDateFormat src = new SimpleDateFormat("yyyyMMdd");
+        SimpleDateFormat target = new SimpleDateFormat("yyyy-MM-dd");
         List<HeadField> ancestorFileds = null;
         for (HeadField filed : leafFileds) {
             ancestorFileds = getHeadListOutofHead(filed);
@@ -482,7 +531,15 @@ public final class DataModelUtils {
                 /**
                  * 把周的开始caption换成完整的caption
                  */
-                rowField.setV(caption);
+                // TODO 临时方案，需要后续调整
+                if (isTimeDim(headField.getValue())) {
+                    try {
+                        rowField.setV(target.format(src.parse(caption)));
+                    } catch (ParseException e) {
+                    }
+                } else {
+                    rowField.setV(caption);
+                }
                 /**
                  * 设置原始展开状态
                  */
@@ -518,6 +575,13 @@ public final class DataModelUtils {
         
     }
     
+    private static boolean isTimeDim(String value) {
+        if (MetaNameUtil.isAllMemberUniqueName(value)) {
+            return false;
+        }
+        return value.contains("ownertable_TimeDay");
+    }
+
     /**
      * 给出任意一个headField的祖先链
      * 
