@@ -29,6 +29,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
+import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
@@ -146,7 +148,7 @@ public final class DataModelUtils {
      * @return 转换后的PivotTable
      * @throws Exception
      */
-    public static PivotTable transDataModel2PivotTable(DataModel oriDataModel, boolean needLimit,
+    public static PivotTable transDataModel2PivotTable(Cube cube, DataModel oriDataModel, boolean needLimit,
         int limitSize, boolean hideWhiteRow) throws PivotTableParseException {
 
         PivotTable pTable = new PivotTable();
@@ -178,7 +180,7 @@ public final class DataModelUtils {
         // s1. calc colHeight
         // s2. trans colField
         // s3. if rowAxis's exists,fill the first col of colFields
-        String[] dimCaptions = getDimCaptions(rowHeadFields);
+        String[] dimCaptions = getDimCaptions(cube, rowHeadFields);
         int rowWidth = getHeightOfHeadFieldList(rowHeadFields);
         if (rowHeadFields != null && rowHeadFields.size() != 0) {
             List<ColField> firstColFields = colFields.get(0);
@@ -302,15 +304,45 @@ public final class DataModelUtils {
         return pTable;
     }
     
-    private static String[] getDimCaptions(List<HeadField> rowHeadFields) {
+    /**
+     * 
+     * @param cube
+     * @param rowHeadFields
+     * @return String[]
+     */
+    private static String[] getDimCaptions(Cube cube, List<HeadField> rowHeadFields) {
         List<String> captions = Lists.newArrayList();
         for (HeadField headField : rowHeadFields) {
             if (!CollectionUtils.isEmpty(headField.getNodeList())) {
-                Collections.addAll(captions, getDimCaptions(headField.getNodeList()));
+                Collections.addAll(captions, getDimCaptions(cube, headField.getNodeList()));
             }
-            captions.add(headField.getCaption());
+            String uniqueName = headField.getNodeUniqueName();
+            // TODO 这里有问题，需要重新考虑
+            if ("合计".equals(headField.getCaption())) {
+                uniqueName = headField.getChildren().get(0).getValue();
+            } else {
+                uniqueName = headField.getValue();
+//                captions.add(headField.getCaption());
+            }
+            String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
+            captions.add(getDimensionCaptionByName(cube, dimName));
         }
         return captions.toArray(new String[0]);
+    }
+
+    /**
+     * 
+     * @param cube
+     * @param dimName
+     * @return
+     */
+    private static String getDimensionCaptionByName(Cube cube, String dimName) {
+        for (Dimension dim : cube.getDimensions().values()) {
+            if (dim.getName().equals(dimName)) {
+                return dim.getCaption();
+            }
+        }
+        return dimName;
     }
 
     /**
