@@ -336,16 +336,13 @@
     left: 0px;
     width: 9px;
     height: 100%;
+    display: none;
 }
 .ui-table-dot-box-line {
     position: absolute;
     top: 0px;
     right: 0px;
-    border-right: 1px dashed blue;
-    display: none;
-}
-.ui-table-drag-box:hover .ui-table-dot-box-line {
-    display: block;
+    border-right: 1px dashed #CCCCCC;
 }
 
 .ui-table-head-th-content {

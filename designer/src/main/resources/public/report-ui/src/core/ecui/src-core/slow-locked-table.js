@@ -561,6 +561,7 @@
             type = me.getType(),
             mainEl = me.$di('getEl'),
             headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0],
+            layoutEl = dom.getElementsByClass(mainEl, 'div', type + '-layout')[0],
             dragBoxEl = createDom(type + '-drag-box', null, 'div'), // 拖拽接触点模块
             dotLineEl,
             disX = 0, // 这个距离是鼠标点击虚线时的位置，距离虚线左侧的距离
@@ -580,6 +581,12 @@
 
         if (headEl) {
             attachEvent(headEl, 'mouseover', headMouseOver);
+            attachEvent(mainEl, 'mouseleave', function () {
+                setStyle(dragBoxEl, 'display', 'none');
+            });
+            attachEvent(layoutEl, 'mouseleave', function () {
+                setStyle(dragBoxEl, 'display', 'none');
+            });
             attachEvent(dragBoxEl, 'mousedown', dragBoxMouseDown);
         }
 
@@ -590,9 +597,9 @@
 
             if (hasClass(target, type + '-head-drag')) {
                 curHeadTh = dom.getParent(target);
-                oldPosLeft = dom.getPosition(target).left;
                 setStyle(dragBoxEl, 'left', (dom.getPosition(target).left - mainElLeft) + 'px');
                 setStyle(dragBoxEl, 'top', '0px');
+                setStyle(dragBoxEl, 'display', 'block');
             }
         }
 
@@ -603,6 +610,7 @@
             if (dragBoxEl.setCapture) {
                 dragBoxEl.setCapture();
             }
+            oldPosLeft = oEv.clientX;
             disX = oEv.clientX - dragBoxEl.offsetLeft;
             attachEvent(document, 'mousemove', dragBoxMouseMove);
             attachEvent(document, 'mouseup', dragBoxMouseUp);
@@ -615,13 +623,15 @@
             var oEv = ev || window.event;
             var lineLeft = oEv.clientX - disX;
             setStyle(dragBoxEl, 'left', lineLeft + 'px');
+            difLeft = oEv.clientX - oldPosLeft;
         }
 
         // 拖拽接触点松开事件
-        function dragBoxMouseUp() {
+        function dragBoxMouseUp(ev) {
+            setStyle(dragBoxEl, 'display', 'none');
             detachEvent(document, 'mousemove', dragBoxMouseMove);
             detachEvent(document, 'mouseup', dragBoxMouseUp);
-            difLeft = dom.getPosition(dragBoxEl).left - oldPosLeft;
+
             if (dragBoxEl.releaseCapture) {
                 dragBoxEl.releaseCapture(); // 释放捕获
             }
