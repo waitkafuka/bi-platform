@@ -2283,20 +2283,52 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     margin-left: 5px;
 }
 
+/*.ui-table-head-drag {*/
+    /*position: absolute;*/
+    /*top: 0;*/
+    /*right: 0;*/
+    /*width: 10px;*/
+    /*height: 100%;*/
+    /*background-color: red;*/
+/*}*/
+/*.ui-table-dot-line {*/
+    /*position: absolute;*/
+    /*width: 1px;*/
+    /*border-right: 2px dashed #ccc;*/
+    /*display: none;*/
+    /*cursor: col-resize;*/
+/*}*/
 .ui-table-head-drag {
     position: absolute;
     top: 0;
     right: 0;
     width: 10px;
     height: 100%;
-    background-color: red;
+    /*background-color: red;*/
 }
-.ui-table-dot-line {
+.ui-table-drag-box {
     position: absolute;
-    width: 1px;
-    border-right: 2px dashed #ccc;
-    display: none;
+    width: 10px;
+    height: 100%;
     cursor: col-resize;
+    /*background-color: orange;*/
+}
+.ui-table-dot-box-drag {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 9px;
+    height: 100%;
+}
+.ui-table-dot-box-line {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-right: 1px dashed blue;
+    display: none;
+}
+.ui-table-drag-box:hover .ui-table-dot-box-line {
+    display: block;
 }
 
 .ui-table-expand-background {
