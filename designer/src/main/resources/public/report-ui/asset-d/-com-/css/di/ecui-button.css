@@ -21,13 +21,18 @@
     *display: inline;
     *zoom: 1;
 }
-.ui-button {
-    /*background: url(img/icon.png) 0px -103px repeat-x;*/
-    /*border:  1px solid #7FAFC7;*/
+.ui-normal-btn {
+    background: url(img/icon.png) 0px -103px repeat-x;
+    border:  1px solid #7FAFC7;
     background: #2584DA;
     border: 1px solid #2070BB;
     color: white;
     width: 96%;
+    text-align: center;
+}
+.ui-normal-btn .ui-button-text {
+    display: block;
+    line-height: normal;
 }
 .ui-button-hover {
     /*background-position: 0px -127px;*/
