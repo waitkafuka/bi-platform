@@ -220,7 +220,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
 //            pageInfo.setPageNo(0);
 //            pageInfo.setPageSize(100);
 //            questionModel.setPageInfo(pageInfo);
-            if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty()) {
+            if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
                 questionModel.setNeedSummary(false);
             } else {
                 questionModel.setNeedSummary(needSummary(questionModel));
