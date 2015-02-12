@@ -8,9 +8,10 @@
     table-layout: fixed;
 }
 .ui-table-head {
-    border-top: 1px solid #CCC;
-    border-bottom: 1px solid #CCC;
-    border-right: 1px solid #e7f9fe;
+    border-top: 1px solid #cfebf6;
+    border-bottom: 1px solid #cfebf6;
+    border-right: 1px solid #cfebf6;
+    border-left: 1px solid #cfebf6;
     height: 30px;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -18,24 +19,19 @@
     user-select: none;
 }
 .ui-table-locked-head {
-    border-bottom: 1px solid #CCC;
-    border-top: 1px solid #CCC;
-    border-left: 1px solid #CCC;
-    border-right: 1px solid #E7F9FE;
+    border: 1px solid #cfebf6;
     height: 30px;
     overflow: hidden;
 }
-.ui-table-layout {
-    border-right: 1px solid #FFF;
+.ui-table-layout, .ui-table-locked-layout {
+    border-left: 1px solid #cfebf6;
+    border-right: 1px solid #cfebf6;
 }
-.ui-table-locked-layout {
-    border-left: 1px solid #CCC;
-    border-right: 1px solid #CCC;
-    border-bottom: 1px solid #CCC;
-}
+
 .ui-table-cell {
     background: #FFF;
-    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #cfebf6;
+    border-bottom: 1px solid #e7ecee;
     height: 30px;
     line-height: 30px;
     padding: 0 9px;
@@ -61,6 +57,8 @@
     padding: 0 9px;
     margin: 0;
     /*vertical-align: middle;*/
+    border-right: 1px solid #cfebf6;
+    border-bottom: 1px solid #cfebf6;
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;

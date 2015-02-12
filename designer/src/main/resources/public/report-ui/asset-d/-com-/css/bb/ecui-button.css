@@ -52,6 +52,7 @@
     background: #2584DA;
     border: 1px solid #2070BB;
     color: white;
+    width: 55px;
 }
 .ui-button-g-hover {
     background-position: 0px -79px;
@@ -169,7 +170,7 @@
     -o-border-radius: 1px;
     -moz-border-radius: 1px;
     -ms-border-radius: 1px;
-    border-radius: 1px;    
+    border-radius: 1px;
 }
 .ui-g-btn-hover .ui-button-inner {
     background-color: #4E9AE0;
@@ -205,7 +206,7 @@
     -o-border-radius: 1px;
     -moz-border-radius: 1px;
     -ms-border-radius: 1px;
-    border-radius: 1px;    
+    border-radius: 1px;
 }
 .ui-lite-btn-hover .ui-button-inner {
     background-color: #FCFCFC;

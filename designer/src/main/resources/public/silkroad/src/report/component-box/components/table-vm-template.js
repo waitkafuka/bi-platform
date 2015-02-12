@@ -8,11 +8,11 @@ define(['template'], function (template) {
         $out+=$escape(id);
         $out+='-vu-table-breadcrumb"></div>\n    </div>\n    <div class="di-o_o-line">\n        <div class="vu-table" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table" style="height: 160px;"></div>\n    </div>\n    <div class="di-o_o-line">\n        <div class="di-table-prompt">\n            <div class="di-table-count" data-o_o-di="';
+        $out+='-vu-table" style="height: 160px;"></div>\n    </div>\n    <div class="di-o_o-line">\n        <div class="di-table-prompt">\n            <div>\n                <div class="di-table-count" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table-count">\n                符合查询条件的数据只显示\n                <span class="di-table-count-num">#{currRecordCount}</span>条。查看全部数据，请点击下载\n            </div>\n            <div class="di-o_o-line" title="下载全量数据" style="display: inline-block; width: 30px;">\n                <div class="di-o_o-item" data-o_o-di="';
+        $out+='-vu-table-count">\n                    符合查询条件的数据只显示\n                    <span class="di-table-count-num">#{currRecordCount}</span>条。查看全部数据，请点击下载\n                    <div class="di-o_o-line" title="下载全量数据" style="display: inline-block; width: 30px;">\n                        <div class="di-o_o-item" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table-download" style="width: 100%;"></div>\n            </div>\n        </div>\n    </div>\n\n</div>';
+        $out+='-vu-table-download" style="width: 100%;"></div>\n                    </div>\n                </div>\n\n            </div>\n        </div>\n    </div>\n\n</div>';
         return $out;
     }
     return { render: anonymous };

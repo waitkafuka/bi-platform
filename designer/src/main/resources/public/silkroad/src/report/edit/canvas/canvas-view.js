@@ -342,7 +342,7 @@ define([
                 // 固定查询按钮的高度
                 that.dragWidthHeight($component, 'H_BUTTON', 55, 55);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'TIME_COMP', 60, 60);
+                that.dragWidthHeight($component, 'TIME_COMP', 56, 56);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
