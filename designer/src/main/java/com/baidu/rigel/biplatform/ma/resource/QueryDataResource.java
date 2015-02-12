@@ -565,18 +565,20 @@ public class QueryDataResource extends BaseResource {
                 params.put(v.getElementId(), v.getName());
             });
         }
-        String[] tmp = null;
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的全局上下文参数
              */
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
-                runTimeModel.getContext().put(getRealKey(model, key), value[0]);
+                String realValue = value[0];//modifyFilterValue(value[0]);
+                if (!StringUtils.isEmpty(realValue)) {
+                    runTimeModel.getContext().put(getRealKey(model, key), realValue);
+                }
                 if (params.containsKey(key)) {
                     String paramName = params.get(key);
-                    tmp = MetaNameUtil.parseUnique2NameArray(value[0]);
-                    runTimeModel.getContext().put(paramName, tmp[tmp.length - 1]);
+                    String tmp = getParamRealValue(realValue);
+                    runTimeModel.getContext().put(paramName, tmp);
                 }
             } else {
                 runTimeModel.getContext().put(getRealKey(model, key), "");
@@ -599,6 +601,46 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
+    private String getParamRealValue(String realValue) {
+        StringBuilder rs = new StringBuilder();
+        String[] tmp = realValue.split(",");
+        if (tmp.length == 1) {
+            String[] metaName = MetaNameUtil.parseUnique2NameArray(tmp[0]);
+            return metaName[metaName.length - 1];
+        }
+        for (int i = 0; i < tmp.length; ++i) {
+            if (StringUtils.isEmpty(tmp[i]) || tmp[i].contains(":")) {
+                continue;
+            }
+            String[] metaName = MetaNameUtil.parseUnique2NameArray(tmp[i]);
+            rs.append(metaName[metaName.length - 1]);
+            if (i <= tmp.length - 2) {
+                rs.append(",");
+            }
+        }
+        return rs.toString();
+    }
+
+    /**
+     * 临时方案，后续需要调整
+     * @param tmpValue
+     * @return String
+     */
+//    private String modifyFilterValue(String tmpValue) {
+//        String[] tmpValueArray = tmpValue.split(",");
+//        if (tmpValue.length() == 1 && StringUtils.isEmpty(tmpValueArray[0])) {
+//            return "";
+//        }
+//        if (MetaNameUtil.isUniqueName(tmpValueArray[0])) {
+//            String metaName = MetaNameUtil.getDimNameFromUniqueName(tmpValueArray[0]);
+//            if (StringUtils.isEmpty(metaName) || metaName.contains(":")) {
+//                return tmpValue.replace(tmpValueArray[0], "");
+//            }
+//        }
+//        
+//        return tmpValue;
+//    }
+
     /**
      * 
      * @param model {@link ReportDesignModel}
@@ -1311,7 +1353,7 @@ public class QueryDataResource extends BaseResource {
             result = reportModelQueryService.queryDatas(model, action, true, false, securityKey);
         } catch (DataSourceOperationException | QueryModelBuildException | MiniCubeQueryException e1) {
             logger.error(e1.getMessage(), e1);
-            return ResourceUtils.getErrorResult(e1.getMessage(), 1);
+            return ResourceUtils.getErrorResult("查询出错", 1);
         } 
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();

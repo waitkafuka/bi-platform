@@ -82,6 +82,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         if (response.getStatus() == ResponseStatus.SUCCESS) {
             @SuppressWarnings("unchecked")
             List<CallbackDimTreeNode> posTree = (List<CallbackDimTreeNode>) response.getData();
+            posTree.get(0).setId("");
             List<MiniCubeMember> result = createMembersByPosTreeNode(posTree, level, null);
             if (parentMember == null) {
                 return result;
