@@ -571,7 +571,7 @@ public class QueryDataResource extends BaseResource {
              * 更新runtimeModel的全局上下文参数
              */
             String[] value = contextParams.get(key);
-            if (value != null && value.length > 0 && MetaNameUtil.isUniqueName(value[0])) {
+            if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
                 runTimeModel.getContext().put(getRealKey(model, key), value[0]);
                 if (params.containsKey(key)) {
                     String paramName = params.get(key);
