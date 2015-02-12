@@ -680,7 +680,8 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         // 如果当前索引元数据没有索引分片或者已有的分片已满， 分配索引分片
         if (idxMeta.getIdxShardList() == null || idxMeta.getIdxShardList().size() == 0
                 || isIndexShardFull(idxMeta)) {
-            
+        	Map<Node, Integer> assignedNodeMap = new HashMap<Node, Integer>();
+            /*
             // 当前产品线的索引列表
             List<IndexShard> idxShardList = getIndexShardListByProductLine(
                 idxMeta.getProductLine(), idxMeta.getStoreKey());
@@ -699,6 +700,11 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                 assignedNodeMap = this.isNodeService.assignFreeNodeByNodeList(idxShardNodeList,
                     DEFAULT_BLOCK_COUNT, clusterName);
             }
+            */
+            
+            
+            assignedNodeMap = this.isNodeService.assignFreeNode(DEFAULT_BLOCK_COUNT,
+                    clusterName);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                 "assignIndexShard", "assign node end"));
             

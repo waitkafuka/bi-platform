@@ -34,8 +34,7 @@ define([
                 'click .j-button-preview-report': 'previewReport',
                 'click .j-comp-div': 'focusText',
                 'blur .j-comp-text': 'blurText',
-                'keydown .j-comp-text': 'keyDownText',
-                'change .j-select-default': 'changeSelectDefault'
+                'keydown .j-comp-text': 'keyDownText'
             },
             /* 判断是否保存的变量 */
             savestate: 0,
@@ -340,7 +339,10 @@ define([
                 that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 50, 50);
-                that.dragWidthHeight($component, 'H_BUTTON', 50, 50);
+                // 固定查询按钮的高度
+                that.dragWidthHeight($component, 'H_BUTTON', 55, 55);
+                // 固定查询按钮的高度
+                that.dragWidthHeight($component, 'TIME_COMP', 56, 56);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
@@ -402,7 +404,9 @@ define([
              * @public
              */
             addEditBtns: function ($component) {
+                $component.find('.con-edit-btns').remove();
                 $component.prepend(editBtnsTemplate.render());
+                $component.find('.comp-box').css('margin-top', 0);
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {
                     var compType = $($component[i]).attr('data-component-type');
@@ -583,27 +587,6 @@ define([
                     that.editCompView.activeComp();
                     that.initSnptHeight();
                 }, 2000);
-            },
-
-            /**
-             * 添加默认值
-             *
-             * @param {event} event 事件焦点（下拉框多选框）
-             * @public
-             */
-            changeSelectDefault: function (event) {
-                var that = this;
-                var $target = $(event.target);
-                var $nowComp = $target.parent().parent().parent();
-                var compId = $nowComp.attr('data-comp-id');
-                var $comp = that.$el.find('.report').find('.component-item');
-                var checked = $target[0].checked;
-                $comp.each(function () {
-                    var $this = $(this);
-                    if ($this.attr('data-comp-id') == compId) {
-                        $this.attr('data-default-value', checked);
-                    }
-                });
             }
         });
     }

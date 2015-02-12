@@ -40,13 +40,29 @@ define([
                 'click .item .j-icon-chart': 'showChartList',
                 'change .select-type': 'selectTypeChange',
                 'change .select-calendar-type': 'selectCalendarTypeChange',
-                'click .j-others-operate': 'getFilterBlankLine'
+                'click .j-others-operate': 'getFilterBlankLine',
+                'change .j-select-setAll': 'changeSelectAll'
             },
 
             //------------------------------------------
             // 设置组件关联关系
             //------------------------------------------
+            /**
+             * 设置单选下拉框默认值
+             *
+             * @param {event} event 事件焦点（单选下拉框多选框）
+             * @public
+             */
+            changeSelectAll: function (event) {
+                var that = this;
+                var $target = $(event.target);
+                var compId = $target.attr('data-comp-id');
+                var checked = $target[0].checked;
+                var allName = $target.attr('value');
 
+                // 设置单选下拉框默认值
+                that.selectSetAll(checked, allName, compId);
+            },
             /**
              * 设置组件关联关系
              *
@@ -351,7 +367,7 @@ define([
                     }
                 });
 
-                // 修改reportVm中对应组件div的data-default-value属性
+                // 修改reportVm中对应组件div的data-set-all属性
                 var defaults = this.canvasView.model.$reportVm
                     .find('[data-component-type=SELECT]');
                 var $checkbox = $target.parent().find('.select-default');
@@ -362,10 +378,10 @@ define([
                         $this.attr('data-mold', selType);
                         if (selType == 'ECUI_SELECT') {
                             $checkbox.css('display', 'inline-block');
-                            $(this).attr('data-default-value', $checked[0].checked);
+                            $(this).attr('data-set-all', $checked[0].checked);
                         }
                         else {
-                            $(this).removeAttr('data-default-value');
+                            $(this).removeAttr('data-set-all');
                             $target.parent().find('.select-default').hide();
                         }
                     }
@@ -475,7 +491,7 @@ define([
                 var reportCompId = $shell.attr('report-comp-id');
                 var compType = $shell.attr('data-component-type');
                 var compMold = $shell.attr('data-mold');
-                var compAll = $shell.attr('data-default-value');
+                var compAll = $shell.attr('data-set-all');
                 that.model.compId = compId;
                 that.model.compType = compType;
                 that.model.compAll = compAll;
@@ -621,7 +637,16 @@ define([
                 var $target = $(event.target);
                 // 还原默认值
                 var $seldefault = $target.parent().parent();
+                // 当前控件ID
+                var compId = $seldefault.parent().attr('data-comp-id');
+                // 删除维度初始化单选下拉框默认值
                 if ($seldefault.parent().attr('data-comp-type') == 'SELECT') {
+                    var $allcheck = $seldefault.parent().find('input[class ^= "select-default-value"]');
+                    $allcheck.removeAttr('checked');
+                    var checked = $allcheck[0].checked;
+                    var allName = $allcheck.attr('value');
+                    // 设置单选下拉框默认值
+                    that.selectSetAll(checked, allName, compId);
                     $seldefault.next().find('.select-default-name').text('全部');
                     $seldefault.next().find('.select-default-value').val('全部');
                 }
@@ -770,8 +795,19 @@ define([
                 var $item = $draggedUi.clone().attr('style', '');
                 // 默认值选择
                 var $selectDefault = $('.select-default');
-                var $selectValue = $('.select-default-value');
-                var $selectName = $('.select-default-name');
+                // 单选下拉框添加维度时，初始化默认值设定
+                if (compType === 'SELECT') {
+                    // 获取当前单选下拉框设定默认值元素
+                    var $selectValue = $('input[class ^= "select-default-value"]');
+                    $selectValue.removeAttr('checked');
+                    var $selectName = $('.select-default-name');
+                    // 当前单选下拉框默认值判定变量
+                    var checked = $selectValue[0].checked;
+                    // 当前单选下拉框默认值
+                    var allName = $selectValue.attr('value');
+                    // 设置单选下拉框默认值
+                    that.selectSetAll(checked, allName, compId);
+                }
                 if (compType === 'SELECT' && $('.data-axis-line .item').length >= 1) {
                     alert('只能拖一个维度或者维度组');
                     return;
@@ -821,10 +857,9 @@ define([
                     if (compType == 'SELECT') {
                         if ($selectDefault.is(':visible')) {
                             var all = $selectName.text();
-                            var dimname = $acceptUi.find('span').eq(1).text().split('（')[0];;
-                            $selectValue.val(all + '（' + dimname + ' ）');
-                            $selectName.text(all + '（' + dimname + ' ）');
-                            console.log('显示');
+                            var dimname = $acceptUi.find('span').eq(1).text().split('（')[0];
+                            $selectValue.val(all + '（' + dimname + '）');
+                            $selectName.text(all + '（' + dimname + '）');
                         }
                     }
                     // 刷新报表展示
@@ -1272,7 +1307,7 @@ define([
                                     var rangeEnd = $this.find('[name="endDateSetting"]').val();
                                     // 如果设置range时间时，rangeend如果大于rangestart则不能设置。
                                     if (rangeStart !== undefined && rangeEnd !== undefined) {
-                                        if (rangeEnd < rangeStart) {
+                                        if (parseInt(rangeEnd) < parseInt(rangeStart)) {
                                             dialog.alert("设置的默认结束时间应小于默认开始时间");
                                             return;
                                         }
@@ -1590,6 +1625,39 @@ define([
             getActiveReportCompId: function () {
                 var $compSetting = this.$conCompSetting.find('.j-comp-setting');
                 return $compSetting.attr('report-comp-id');
+            },
+            /**
+             * 下拉卡框添加默认值公共函数
+             *
+             * @param {string} checked 默认值判断条件
+             * @param {string} allName 当前默认值
+             * @param {number} compId 当前控件ID
+             * @public
+             */
+            selectSetAll: function (checked, allName, compId) {
+                var selects = this.canvasView.model.$reportVm
+                    .find('[data-component-type=SELECT]');
+                selects.each(function () {
+                    var $this = $(this);
+                    if ($this.attr('data-comp-id') === compId) {
+                        $this.attr('data-set-all', checked);
+                    }
+                });
+                // TODO:在entityDef属性中加入新的属性，或者干掉
+                var entityDefs = this.model.canvasModel.reportJson.entityDefs;
+                var entityDef;
+                for (var i = 0, iLen = entityDefs.length; i < iLen; i ++) {
+                    if (entityDefs[i].clzType === 'VUI' && entityDefs[i].compId === compId) {
+                        entityDef = entityDefs[i];
+                        entityDef.hasAllNode = checked;
+                        entityDef.hasAllNodeText = allName;
+                        break;
+                    }
+                }
+                // 保存vm与json，保存成功后展示报表
+                this.model.canvasModel.saveJsonVm(
+                    this.canvasView.showReport.call(this.canvasView)
+                );
             }
         });
 

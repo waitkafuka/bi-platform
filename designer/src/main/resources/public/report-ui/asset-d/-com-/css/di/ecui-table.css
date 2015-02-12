@@ -10,6 +10,9 @@
 .ui-table-head {
     border: 1px solid #E6E6E6;
     height: 30px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 .ui-table-locked-head {
@@ -328,12 +331,25 @@
     width: 10px;
     height: 100%;
 }
-.ui-table-dot-line {
+.ui-table-drag-box {
     position: absolute;
-    width: 1px;
-    border-right: 2px dashed #ccc;
-    display: none;
+    width: 10px;
+    height: 100%;
     cursor: col-resize;
+}
+.ui-table-dot-box-drag {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 9px;
+    height: 100%;
+    display: none;
+}
+.ui-table-dot-box-line {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-right: 1px dashed #CCCCCC;
 }
 
 .ui-table-expand-background {

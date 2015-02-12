@@ -286,7 +286,9 @@ public class QueryServiceImpl implements QueryService {
                         // 暂时只支持在行上汇总，列上汇总有点怪怪的。。需要再开启
                         if (isRow && needSummary) {
                             nodeTree.setName(MiniCubeMember.SUMMARY_NODE_NAME);
+                            nodeTree.setUniqueName(MiniCubeMember.SUMMARY_NODE_NAME);
                             nodeTree.setCaption(MiniCubeMember.SUMMARY_NODE_CAPTION);
+                            nodeTree.setSummary(true);
                             nodeTree.setQuerySource(child.getQuerySource());
                             nodeTree.getLeafIds().addAll(child.getLeafIds());
                         }

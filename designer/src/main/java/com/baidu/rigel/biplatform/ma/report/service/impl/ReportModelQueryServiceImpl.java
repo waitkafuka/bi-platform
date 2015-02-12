@@ -36,6 +36,9 @@ import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
+import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
@@ -217,7 +220,11 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
 //            pageInfo.setPageNo(0);
 //            pageInfo.setPageSize(100);
 //            questionModel.setPageInfo(pageInfo);
-            questionModel.setNeedSummary(false);
+            if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
+                questionModel.setNeedSummary(false);
+            } else {
+                questionModel.setNeedSummary(needSummary(questionModel));
+            }
             questionModel.setUseIndex(true);
             if (requestParams != null) {
                 for (String key : requestParams.keySet()) {
@@ -256,5 +263,20 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         }
         rs.setDataModel(dataModel);
         return rs;
+    }
+
+    private boolean needSummary(QuestionModel questionModel) {
+        for (AxisMeta meta : questionModel.getAxisMetas().values()) {
+            if (meta.getAxisType() == AxisType.ROW) {
+                for (String str : meta.getCrossjoinDims()) {
+                    DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
+                    if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
+                        return false;
+                    }
+                }
+                break;
+            }
+        }
+        return true;
     }  
 }

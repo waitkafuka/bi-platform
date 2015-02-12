@@ -8,31 +8,30 @@
     table-layout: fixed;
 }
 .ui-table-head {
-    border-top: 1px solid #CCC;
-    border-bottom: 1px solid #CCC;
-    border-right: 1px solid #e7f9fe;
+    border-top: 1px solid #cfebf6;
+    border-bottom: 1px solid #cfebf6;
+    border-right: 1px solid #cfebf6;
+    border-left: 1px solid #cfebf6;
     height: 30px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 .ui-table-locked-head {
-    border-bottom: 1px solid #CCC;
-    border-top: 1px solid #CCC;
-    border-left: 1px solid #CCC;
-    border-right: 1px solid #E7F9FE;
+    border: 1px solid #cfebf6;
     height: 30px;
     overflow: hidden;
 }
-.ui-table-layout {
-    border-right: 1px solid #FFF;
+.ui-table-layout, .ui-table-locked-layout {
+    border-left: 1px solid #cfebf6;
+    border-right: 1px solid #cfebf6;
 }
-.ui-table-locked-layout {
-    border-left: 1px solid #CCC;
-    border-right: 1px solid #CCC;
-    border-bottom: 1px solid #CCC;
-}
+
 .ui-table-cell {
     background: #FFF;
-    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #cfebf6;
+    border-bottom: 1px solid #e7ecee;
     height: 30px;
     line-height: 30px;
     padding: 0 9px;
@@ -58,6 +57,8 @@
     padding: 0 9px;
     margin: 0;
     /*vertical-align: middle;*/
+    border-right: 1px solid #cfebf6;
+    border-bottom: 1px solid #cfebf6;
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;
@@ -319,18 +320,32 @@
 
 .ui-table-head-drag {
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: 0;
+    right: 0;
     width: 10px;
     height: 100%;
 }
-.ui-table-dot-line {
+.ui-table-drag-box {
     position: absolute;
-    width: 1px;
-    border-right: 2px dashed #ccc;
-    display: none;
+    width: 10px;
+    height: 100%;
     cursor: col-resize;
 }
+.ui-table-dot-box-drag {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 9px;
+    height: 100%;
+    display: none;
+}
+.ui-table-dot-box-line {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-right: 1px dashed #CCCCCC;
+}
+
 .ui-table-head-th-content {
     text-align: left;
 }
