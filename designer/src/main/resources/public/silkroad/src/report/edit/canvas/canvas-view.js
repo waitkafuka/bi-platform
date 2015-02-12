@@ -339,7 +339,10 @@ define([
                 that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 50, 50);
+                // 固定查询按钮的高度
                 that.dragWidthHeight($component, 'H_BUTTON', 55, 55);
+                // 固定查询按钮的高度
+                that.dragWidthHeight($component, 'TIME_COMP', 60, 60);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
@@ -401,6 +404,7 @@ define([
              * @public
              */
             addEditBtns: function ($component) {
+                $component.find('.con-edit-btns').remove();
                 $component.prepend(editBtnsTemplate.render());
                 $component.find('.comp-box').css('margin-top', 0);
                 // 文本框编辑数据及关联隐藏
