@@ -71,16 +71,7 @@ public class Aggregate {
                     return Integer.parseInt(src1.toString()) + 1;
                 }
             default:
-                if(src2 == null || StringUtils.isBlank(src2.toString())) {
-                    return src1; 
-                }
-                if(src1 == null) {
-                    return src2;
-                }
-                BigDecimal arg = new BigDecimal(src1.toString());
-                BigDecimal arg3 = new BigDecimal(src2.toString());
-                return arg.add(arg3);
-                //throw new UnsupportedOperationException("unsupported aggregator:" + aggregator);
+                throw new UnsupportedOperationException("unsupported aggregator:" + aggregator);
         }
     }
     

@@ -56,7 +56,6 @@ import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
-import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
@@ -290,7 +289,7 @@ public class CallbackSearchServiceImpl {
         if (!response.isEmpty()) {
             resultList = packageResultRecords(query, sqlQuery, response);
         }
-        TesseractResultSet result = new SearchResultSet(AggregateCompute.aggregate(resultList, query));
+        TesseractResultSet result = new SearchResultSet(resultList);
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
@@ -308,8 +307,9 @@ public class CallbackSearchServiceImpl {
         
         LinkedList<ResultRecord> result = new LinkedList<ResultRecord>();
         // Use first response as base SEQ. Weak implementation. FIXME: WANGYUXUE.
+        List<String> fieldValues = null;
         for (int index = 0; index < fieldValuesHolderList.get(0).getValue().getData().size(); index++) {
-            List<String> fieldValues = new ArrayList<String>(groupby.size());
+            fieldValues = new ArrayList<String>(groupby.size());
             CallbackMeasureVaue mv = (CallbackMeasureVaue) fieldValuesHolderList.get(0).getValue().getData().get(index);
             String key = mv.keySet().iterator().next();
             fieldValues.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(key, RESPONSE_VALUE_SPLIT)));
@@ -324,7 +324,7 @@ public class CallbackSearchServiceImpl {
             }
             Meta meta = new Meta(groupby.toArray(new String[0]));
             ResultRecord record = new ResultRecord(fieldValues.toArray(new Serializable[0]), meta);
-            record.setGroupBy(StringUtils.collectionToCommaDelimitedString(groupby));
+            record.setGroupBy(StringUtils.collectionToCommaDelimitedString(fieldValues));
             
             // Fill into result
             result.add(record);
