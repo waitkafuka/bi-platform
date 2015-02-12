@@ -31,3 +31,14 @@
     line-height: 18px;            
     vertical-align: middle;
 }
+.di-table-down {
+    width: 140px;
+    float: left;
+}
+.di-table-down-text {
+    float: left;
+    width: 100px;
+}
+.di-table-down-btn {
+    float: left;
+}
