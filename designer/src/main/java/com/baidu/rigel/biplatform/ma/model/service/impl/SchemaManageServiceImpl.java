@@ -622,10 +622,11 @@ public class SchemaManageServiceImpl implements SchemaManageService {
             if (m != null) {
                 m.setCallbackUrl(measureBo.getUrl());
                 m.setName(measureBo.getName());
+                m.setDefine(measureBo.getName());
                 m.setCaption(measureBo.getCaption());
                 String timeOut = measureBo.getProperties().get(Constants.SOCKET_TIME_OUT_KEY);
                 if (StringUtils.isEmpty(timeOut)) {
-                    timeOut = "30000";
+                    timeOut = "3000";
                 }
                 m.setType(MeasureType.CALLBACK);
                 m.setAggregator(Aggregator.CALCULATED);

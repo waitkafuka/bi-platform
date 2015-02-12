@@ -319,10 +319,11 @@ public final class QueryUtils {
                     condition.setQueryDataNodes(datas);
                 }
                 // 时间维度，并且在第一列位置，后续改成可配置方式
-                if (olapElement instanceof TimeDimension && firstIndex == 0 && !queryAction.isChartQuery()) {
+                if (item.getPositionType() == PositionType.X 
+                    && olapElement instanceof TimeDimension && firstIndex == 0 && !queryAction.isChartQuery()) {
                     condition.setMemberSortType(SortType.DESC);
+                    ++firstIndex;
                 }
-                ++firstIndex;
                 rs.put(condition.getMetaName(), condition);
             }
         }
