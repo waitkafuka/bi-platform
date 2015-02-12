@@ -300,7 +300,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         List<HeadField> rowLeafs = DataModelUtils.getLeafNodeList(dataModel.getRowHeadFields());
         
         List<HeadField> oriColumnFields = DataModelUtils.getLeafNodeList(dataModel.getColumnHeadFields());
-        oriColumnFields.forEach(field -> {
+        for (HeadField field : oriColumnFields) {
             if(constantResult.containsKey(field.getValue())) {
                 field.setCompareDatas(constantResult.get(field.getValue()));
             } else {
@@ -308,9 +308,20 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                 if(field.getParentLevelField() != null) {
                     pName = field.getParentLevelField().getNodeUniqueName();
                 }
-                field.setCompareDatas(datas.get(field.getValue()).get(pName));
+                field.setCompareDatas(datas ==  null ? null : datas.get(field.getValue()).get(pName));
             }
-        });
+        }
+//        oriColumnFields.forEach(field -> {
+//            if(constantResult.containsKey(field.getValue())) {
+//                field.setCompareDatas(constantResult.get(field.getValue()));
+//            } else {
+//                String pName = NONE;
+//                if(field.getParentLevelField() != null) {
+//                    pName = field.getParentLevelField().getNodeUniqueName();
+//                }
+//                field.setCompareDatas(datas.get(field.getValue()).get(pName));
+//            }
+//        });
         
         List<HeadField> columnLeafs = DataModelUtils.getLeafNodeList(dataModel.getColumnHeadFields());
         dataModel.getColumnBaseData().clear();
