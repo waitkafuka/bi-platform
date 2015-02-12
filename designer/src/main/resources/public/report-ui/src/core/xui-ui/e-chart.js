@@ -481,14 +481,18 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
+
         var legend = {
             // orient: 'vertical',
             x: 'center',
-            y: 'bottom'
+            y: 'top'
 //            padding: 5
 //            borderColor: '#ccc',
 //            borderWidth: 0.5
         };
+        if (this._chartType === 'map') {
+            legend.y = 'bottom';
+        }
         var data = [];
         var defaultMeasures = this._defaultMeasures;
 
@@ -851,7 +855,7 @@
         var options = {
             grid: {
                 x: '90px',
-                y: '10px',
+                y: '30px',
                 borderWidth: 0
             }
         };
