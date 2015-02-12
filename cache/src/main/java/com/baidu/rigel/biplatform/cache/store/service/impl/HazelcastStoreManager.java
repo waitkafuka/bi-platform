@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.tesseract.store.service.impl;
+package com.baidu.rigel.biplatform.cache.store.service.impl;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,10 +36,9 @@ import org.springframework.cache.CacheManager;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.tesseract.store.service.HazelcastNoticePort;
-import com.baidu.rigel.biplatform.tesseract.store.service.HazelcastQueueItemListener;
-import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
-import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
+import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
+import com.baidu.rigel.biplatform.cache.store.service.HazelcastQueueItemListener;
 import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.JoinConfig;
@@ -58,7 +57,7 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
  */
 
 // TODO 需要通过factory返回StoryManager的实例，不要直接用Spring的注解 --Add by xiaoming.chen
-@Service("hazelcastStoreManager")
+@Service
 public class HazelcastStoreManager implements StoreManager,InitializingBean {
     
     public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
@@ -182,7 +181,7 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
      * constructor 采用默认配置文件
      */
     public HazelcastStoreManager() {
-        this("conf/applicationContext-hazelcast.xml");
+        this("conf/hazelcast.xml");
     }
     
     @Override
@@ -201,24 +200,20 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
     @Override
     public void putEvent(EventObject event) throws Exception {
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "putEvent",
-            "[event:" + event + "]"));
+        LOGGER.info("putEvent params: [event:{}] start", event);
         if (event == null) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "putEvent",
-                "[event:" + event + "]"));
+            LOGGER.info("put event {} error, event is null", event);
             throw new IllegalArgumentException();
         }
         IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
         try {
             queue.put(event);
         } catch (InterruptedException e) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "putEvent",
-                "[event:" + event + "]"));
+            LOGGER.info("put event {} catch exception:{}", event, e);
             throw e;
         }
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "putEvent", "[event:"
-            + event + "]"));
+        LOGGER.info("put event {} success", event);
     }
     
     /*
@@ -243,19 +238,16 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
      */
     @Override
     public void postEvent(EventObject event) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "postEvent",
-            "[event:" + event + "]"));
+        LOGGER.info("postEvent params: [event:{}] start", event);
         if (event == null) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-                "postEvent", "[event:" + event + "]"));
+            LOGGER.info("post event {} error, event is null", event);
             throw new IllegalArgumentException();
         }
         ITopic<Object> topics = this.hazelcast.getTopic("topics");
         
         topics.publish(event);
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "postEvent",
-            "[event:" + event + "]"));
+        LOGGER.info("post event {} success", event);
     }
     
     public Lock getClusterLock() {

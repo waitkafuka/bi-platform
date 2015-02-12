@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.baidu.rigel.biplatform.tesseract.store.service;
+package com.baidu.rigel.biplatform.cache.store.service;
 
 import java.util.EventObject;
 

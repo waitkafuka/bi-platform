@@ -33,11 +33,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.meta.NodeState;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
-import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
 /**

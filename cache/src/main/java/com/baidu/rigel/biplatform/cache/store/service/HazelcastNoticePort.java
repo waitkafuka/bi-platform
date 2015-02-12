@@ -16,7 +16,7 @@
 /**
  * 
  */
-package com.baidu.rigel.biplatform.tesseract.store.service;
+package com.baidu.rigel.biplatform.cache.store.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +26,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexMetaWriteImageEvent;
-import com.baidu.rigel.biplatform.tesseract.isservice.event.IndexUpdateEvent;
-import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
 
@@ -47,29 +44,18 @@ public class HazelcastNoticePort implements ApplicationContextAware, MessageList
     
     @Override
     public void onMessage(Message<Object> message) {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "onMessage",
-            message));
+        LOGGER.info("receive message {} ", message);
         if (context == null || message == null) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-                "onMessage", message));
+            LOGGER.warn("message is null, skip.");
             return;
         }
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_GET_MULTIBROAD_EVENT_SUCC,
-            "onMessage", message.getMessageObject()));
-        ApplicationEvent event = null;
+        LOGGER.info("get message object: {} from message", message.getMessageObject());
+        ApplicationEvent event = (ApplicationEvent) message.getMessageObject();
         
-        if (message.getMessageObject() instanceof IndexUpdateEvent) {
-            event = (IndexUpdateEvent) message.getMessageObject();
-        }else if(message.getMessageObject() instanceof IndexMetaWriteImageEvent){
-        	event = (IndexMetaWriteImageEvent) message.getMessageObject();
-        }
         
         context.publishEvent(event);
         
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_PUBLISH_LOCALEVENT_SUCC,
-            "onMessage", event));
-        LOGGER
-            .info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "onMessage", message));
+        LOGGER.info("public event : {} to local event", event);
     }
     
     /*
