@@ -288,7 +288,7 @@ public class CallbackSearchServiceImpl {
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
         LinkedList<ResultRecord> resultList = Lists.newLinkedList();
         if (!response.isEmpty()) {
-            packageResultRecords(query, sqlQuery, response);
+            resultList = packageResultRecords(query, sqlQuery, response);
         }
         TesseractResultSet result = new SearchResultSet(AggregateCompute.aggregate(resultList, query));
 

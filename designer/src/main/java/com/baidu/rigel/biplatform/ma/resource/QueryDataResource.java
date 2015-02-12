@@ -571,12 +571,18 @@ public class QueryDataResource extends BaseResource {
              * 更新runtimeModel的全局上下文参数
              */
             String[] value = contextParams.get(key);
-            if (value != null && value.length > 0) {
+            if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
                 runTimeModel.getContext().put(getRealKey(model, key), value[0]);
                 if (params.containsKey(key)) {
                     String paramName = params.get(key);
                     tmp = MetaNameUtil.parseUnique2NameArray(value[0]);
                     runTimeModel.getContext().put(paramName, tmp[tmp.length - 1]);
+                }
+            } else {
+                runTimeModel.getContext().put(getRealKey(model, key), "");
+                if (params.containsKey(key)) {
+                    String paramName = params.get(key);
+                    runTimeModel.getContext().put(paramName, "");
                 }
             }
             /**
@@ -666,7 +672,13 @@ public class QueryDataResource extends BaseResource {
         } else {
             throw new RuntimeException("没有初始化？？");
         }
-        return queryParams;
+        Map<String, Object> tmp = Maps.newConcurrentMap();
+        queryParams.forEach((k, v) -> {
+          if (v != null && !StringUtils.isEmpty(v.toString())) {
+              tmp.put(k, v);
+          }
+        }); 
+        return tmp;
     }
     
     /**

@@ -10,6 +10,9 @@
 .ui-table-head {
     border: 1px solid #E6E6E6;
     height: 30px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 .ui-table-locked-head {
@@ -321,21 +324,6 @@
     margin-left: 5px;
 }
 
-/*.ui-table-head-drag {*/
-    /*position: absolute;*/
-    /*top: 0;*/
-    /*right: 0;*/
-    /*width: 10px;*/
-    /*height: 100%;*/
-    /*background-color: red;*/
-/*}*/
-/*.ui-table-dot-line {*/
-    /*position: absolute;*/
-    /*width: 1px;*/
-    /*border-right: 2px dashed #ccc;*/
-    /*display: none;*/
-    /*cursor: col-resize;*/
-/*}*/
 .ui-table-head-drag {
     position: absolute;
     top: 0;

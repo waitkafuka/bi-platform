@@ -12,6 +12,9 @@
     border-bottom: 1px solid #CCC;
     border-right: 1px solid #e7f9fe;
     height: 30px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
 }
 .ui-table-locked-head {
