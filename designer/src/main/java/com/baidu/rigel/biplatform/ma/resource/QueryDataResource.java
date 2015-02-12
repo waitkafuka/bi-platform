@@ -571,7 +571,7 @@ public class QueryDataResource extends BaseResource {
              */
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
-                String realValue = value[0];//modifyFilterValue(value[0]);
+                String realValue = modifyFilterValue(value[0]);
                 if (!StringUtils.isEmpty(realValue)) {
                     runTimeModel.getContext().put(getRealKey(model, key), realValue);
                 }
@@ -625,21 +625,21 @@ public class QueryDataResource extends BaseResource {
      * 临时方案，后续需要调整
      * @param tmpValue
      * @return String
-     */
-//    private String modifyFilterValue(String tmpValue) {
-//        String[] tmpValueArray = tmpValue.split(",");
-//        if (tmpValue.length() == 1 && StringUtils.isEmpty(tmpValueArray[0])) {
-//            return "";
-//        }
-//        if (MetaNameUtil.isUniqueName(tmpValueArray[0])) {
-//            String metaName = MetaNameUtil.getDimNameFromUniqueName(tmpValueArray[0]);
-//            if (StringUtils.isEmpty(metaName) || metaName.contains(":")) {
-//                return tmpValue.replace(tmpValueArray[0], "");
-//            }
-//        }
-//        
-//        return tmpValue;
-//    }
+     */ 
+    private String modifyFilterValue(String tmpValue) {
+        String[] tmpValueArray = tmpValue.split(",");
+        if (tmpValue.length() == 1 && StringUtils.isEmpty(tmpValueArray[0])) {
+            return "";
+        }
+        if (MetaNameUtil.isUniqueName(tmpValueArray[0])) {
+            String metaName = MetaNameUtil.getDimNameFromUniqueName(tmpValueArray[0]);
+            if (StringUtils.isEmpty(metaName) || metaName.contains(":")) {
+                return tmpValue.replace(tmpValueArray[0], "");
+            }
+        }
+        
+        return tmpValue;
+    }
 
     /**
      * 

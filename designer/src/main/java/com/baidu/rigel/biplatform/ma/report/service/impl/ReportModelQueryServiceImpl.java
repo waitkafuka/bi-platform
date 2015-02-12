@@ -40,7 +40,9 @@ import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
+import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
@@ -272,6 +274,19 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                     DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
                     if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
                         return false;
+                    } else {
+                        List<QueryData> queryDatas = condition.getQueryDataNodes();
+                        for (QueryData queryData : queryDatas) {
+                            if (MetaNameUtil.isAllMemberName(queryData.getUniqueName())) {
+                                return false;
+                            } else {
+                                // TODO 这里需要修改
+                                String[] tmp = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
+                                if (tmp[tmp.length - 1].contains(":")) {
+                                    return false;
+                                }
+                            }
+                        }
                     }
                 }
                 break;
