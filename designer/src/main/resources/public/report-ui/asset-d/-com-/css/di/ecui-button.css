@@ -52,6 +52,7 @@
     background: #2584DA;
     border: 1px solid #2070BB;
     color: white;
+    width: 55px;
 }
 .ui-button-g-hover {
     background-position: 0px -79px;

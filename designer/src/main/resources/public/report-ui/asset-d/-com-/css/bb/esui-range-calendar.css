@@ -1056,8 +1056,8 @@ button.skin-link-button:hover {
  */
 .esui-ui-rangecalendar {
     width: 315px;
-    height: 34px;
-    line-height: 34px;
+    height: 30px;
+    line-height: 30px;
     border-radius: 0;
     border: solid 1px #d5d5d5;
     background: #fff;
@@ -1080,7 +1080,7 @@ button.skin-link-button:hover {
 .esui-ui-rangecalendar-arrow {
     float: right;
     height: 16px;
-    margin-top: 8px;
+    margin-top: 7px;
     margin-right: 5px;
     width: 16px;
     background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px;
