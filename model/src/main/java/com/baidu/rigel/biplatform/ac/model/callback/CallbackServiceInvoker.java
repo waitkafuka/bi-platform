@@ -57,7 +57,7 @@ public final class CallbackServiceInvoker {
      * @return CallbackResponse callback响应
      */
     public static CallbackResponse invokeCallback(String url, Map<String, String> params, CallbackType type) {
-        return invokeCallback(url, params, type, Integer.MAX_VALUE);
+        return invokeCallback(url, params, type, 50000);
     }
     
     /**

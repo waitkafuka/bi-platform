@@ -241,11 +241,14 @@ public class QueryServiceImpl implements QueryService {
      * @return DataModel
      */
     private DataModel sortAndTrunc(DataModel result, SortRecord sortRecord) {
-            if (sortRecord != null) {
-                DataModelUtils.sortDataModelBySort(result, sortRecord);
-            }
-            int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
-        return DataModelUtils.truncModel(result, recordSize); 
+        if (sortRecord != null) {
+            DataModelUtils.sortDataModelBySort(result, sortRecord);
+        }
+        if (sortRecord == null) {
+            return result;
+        }
+//            int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
+        return DataModelUtils.truncModel(result, sortRecord.getRecordSize()); 
     }
 
     private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {

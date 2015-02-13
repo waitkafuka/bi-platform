@@ -231,7 +231,12 @@ public class QueryContextBuilder {
             boolean isCallBack = member.getLevel().getType().equals(LevelType.CALL_BACK);
             // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点
             if (queryData.isExpand() || isCallBack) {
-                List<MiniCubeMember> children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
+                List<MiniCubeMember> children = Lists.newArrayList();
+                try {
+                    children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
+                } catch (Exception e) {
+                    // TODO NONE 需要确认是否有问题 目前测试没有看出问题
+                }
                 if (CollectionUtils.isNotEmpty(children)) {
                     memberNode.setSummary(true);
                     children.forEach((child) -> {
