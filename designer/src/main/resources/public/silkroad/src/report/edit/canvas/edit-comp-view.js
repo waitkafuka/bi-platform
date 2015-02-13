@@ -858,8 +858,8 @@ define([
                         if ($selectDefault.is(':visible')) {
                             var all = $selectName.text();
                             var dimname = $acceptUi.find('span').eq(1).text().split('（')[0];
-                            $selectValue.val(all + '（' + dimname + '）');
-                            $selectName.text(all + '（' + dimname + '）');
+                            $selectValue.val(all + dimname);
+                            $selectName.text(all + dimname);
                         }
                     }
                     // 刷新报表展示
@@ -1309,6 +1309,14 @@ define([
                                     if (rangeStart !== undefined && rangeEnd !== undefined) {
                                         if (parseInt(rangeEnd) < parseInt(rangeStart)) {
                                             dialog.alert("设置的默认结束时间应小于默认开始时间");
+                                            return;
+                                        }
+                                    }
+                                    // 如果设置single时间时，则不能设置。
+                                    var singleDateSetting = $this.find('[name="singleDateSetting"]').val();
+                                    if (singleDateSetting !== undefined) {
+                                        if (parseInt(singleDateSetting) > 0) {
+                                            dialog.alert("设置的默认的时间点应为负数");
                                             return;
                                         }
                                     }

@@ -17,6 +17,7 @@
     var getPreviousSibling = xutil.dom.getPreviousSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
+    var isArray = xutil.lang.isArray;
     var attachEvent = xutil.dom.attachEvent;
     var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
@@ -176,9 +177,11 @@
                     + measureHtml.join('')
                     + '</div>';
                 this._eCandidateBox = domChildren(this._eHeader)[0];
-                this._eCandidateBox.onclick = function (ev) {
-                    candidateClick.call(me, ev || window.event);
-                };
+                attachEvent(this._eCandidateBox, 'click', function (ev) {
+                    var oEv = ev || window.event;
+                    var target = oEv.target || oEv.srcElement;
+                    candidateClick.call(me, target);
+                });
             }
             else {
                 // 多选
@@ -490,9 +493,6 @@
 //            borderColor: '#ccc',
 //            borderWidth: 0.5
         };
-        if (this._chartType === 'map') {
-            legend.y = 'bottom';
-        }
         var data = [];
         var defaultMeasures = this._defaultMeasures;
 
@@ -746,20 +746,25 @@
 //            oMaxDate.value = this._oldMaxDate;
 //        }
 //    }
+    //------------------------------------------
+    // 设置图形tooltip区域
+    //------------------------------------------
     /**
      * 设置提示浮层
      *
      * @protected
      */
-    UI_E_CHART_CLASS.$setupTooptip = function (options) {
+    UI_E_CHART_CLASS.$setupTooltip = function (options) {
         var toolTip = {};
-
         if (this._chartType === 'pie') {
-            toolTip.formatter = '{a} <br/>{b} : {c} ({d}%';
+            toolTip.formatter = '{a} <br/>{b} : {c} ({d}%)';
             toolTip.trigger = 'item';
         }
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
+            toolTip.formatter = function (data) {
+                return mapToolTipFunc(data, options.series)
+            };
         }
         else {
             toolTip.trigger = 'axis';
@@ -790,6 +795,59 @@
         }
         options.tooltip = toolTip;
     };
+    /**
+     * 地图tooltip
+     *
+     * @private
+     */
+    function mapToolTipFunc(data, series) {
+        var names,
+            areaValue,
+            areaName = data[1],
+            str = areaName;
+
+        data[0] && (names = data[0].split(' '));
+        if (isArray(names)) {
+            for (var i = 0, iLen = names.length; i < iLen; i ++) {
+                for (var j = 0, jLen = series.length; j < jLen; j++) {
+                    if (series[j].name === names[i]) {
+                        areaValue = getAreaValue(areaName, series[j].data, series[i].format);
+                        str += '<br/>' + series[j].name + ':' + areaValue;
+                    }
+                }
+            }
+        }
+        else {
+            str += ': -';
+        }
+        return str;
+    }
+    /**
+     * 根据地图地区名获取值
+     *
+     * @private
+     */
+    function getAreaValue(areaName, dataArray, format) {
+        var result= '';
+
+        for (var x = 0, xLen = dataArray.length; x < xLen; x++) {
+
+            if (dataArray[x].name === areaName) {
+                result = dataArray[x].value;
+                if (format) {
+                    result = formatNumber(
+                        result,
+                        format,
+                        null,
+                        null,
+                        true
+                    );
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 
     /**
      * 重新渲染图表
@@ -861,7 +919,7 @@
         };
 
         this.$setupSeries(options);
-        this.$setupTooptip(options);
+        this.$setupTooltip(options);
         if (
             this._chartType === 'column'
             || this._chartType === 'bar'
