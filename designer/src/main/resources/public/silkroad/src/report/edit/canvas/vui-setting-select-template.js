@@ -38,23 +38,23 @@ define(['template'], function (template) {
         }
         $out+='>\n            <span>&nbsp;&nbsp;下拉框默认值：</span>\n            <span class="select-default-name">\n                全部\n                ';
         $each(xAxis,function(item,$index){
-        $out+='\n                    （';
+        $out+='\n                    ';
         $out+=$escape(item.caption);
-        $out+='）\n                ';
+        $out+='\n                ';
         });
         $out+='\n            </span>\n            <input class="select-default-value j-select-setAll"\n                style="vertical-align: bottom;" type="checkbox"\n                data-comp-id="';
         $out+=$escape(compId);
-        $out+='"\n                value="全部（';
+        $out+='"\n                value="全部';
         $each(xAxis,function(item,$index){
         $out+=$escape(item.caption);
         });
-        $out+='）"\n                ';
+        $out+='"\n                ';
         if($data.compAll==="true"){
         $out+='\n                    checked="checked"\n                    ';
         }else{
         $out+='\n                ';
         }
-        $out+='\n            />\n        </div>\n        <!--<span>下拉框皮肤：</span>-->\n        <!--<select class="select-skin" data-comp-id="';
+        $out+='/>\n        </div>\n        <!--<span>下拉框皮肤：</span>-->\n        <!--<select class="select-skin" data-comp-id="';
         $out+=$escape(compId);
         $out+='">-->\n            <!--<option value="classics" ';
         if($data.compSkin && $data.compSkin==="classics"){
