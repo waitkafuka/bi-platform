@@ -572,13 +572,19 @@ public class QueryDataResource extends BaseResource {
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
                 String realValue = modifyFilterValue(value[0]);
-                if (!StringUtils.isEmpty(realValue)) {
+                if (StringUtils.hasText(realValue)) {
                     runTimeModel.getContext().put(getRealKey(model, key), realValue);
+                } else {
+                    runTimeModel.getContext().removeParam(getRealKey(model, key));
                 }
                 if (params.containsKey(key)) {
                     String paramName = params.get(key);
-                    String tmp = getParamRealValue(realValue);
-                    runTimeModel.getContext().put(paramName, tmp);
+                    String tmp = getParamRealValue(value[0]);
+                    if (StringUtils.hasText(tmp)) {
+                        runTimeModel.getContext().put(paramName, tmp);
+                    } else {
+                        runTimeModel.getContext().removeParam(paramName);
+                    }
                 }
             } else {
                 runTimeModel.getContext().put(getRealKey(model, key), "");
@@ -602,12 +608,17 @@ public class QueryDataResource extends BaseResource {
     }
     
     private String getParamRealValue(String realValue) {
-        StringBuilder rs = new StringBuilder();
         String[] tmp = realValue.split(",");
         if (tmp.length == 1) {
-            String[] metaName = MetaNameUtil.parseUnique2NameArray(tmp[0]);
-            return metaName[metaName.length - 1];
+            if (StringUtils.isEmpty(tmp)) {
+                return realValue;
+            } 
+            if (MetaNameUtil.isUniqueName(tmp[0])) {
+                String[] metaName = MetaNameUtil.parseUnique2NameArray(tmp[0]);
+                return metaName[metaName.length - 1];
+            }
         }
+        StringBuilder rs = new StringBuilder();
         for (int i = 0; i < tmp.length; ++i) {
             if (StringUtils.isEmpty(tmp[i]) || tmp[i].contains(":")) {
                 continue;
@@ -628,17 +639,26 @@ public class QueryDataResource extends BaseResource {
      */ 
     private String modifyFilterValue(String tmpValue) {
         String[] tmpValueArray = tmpValue.split(",");
-        if (tmpValue.length() == 1 && StringUtils.isEmpty(tmpValueArray[0])) {
-            return "";
-        }
-        if (MetaNameUtil.isUniqueName(tmpValueArray[0])) {
-            String metaName = MetaNameUtil.getDimNameFromUniqueName(tmpValueArray[0]);
-            if (StringUtils.isEmpty(metaName) || metaName.contains(":")) {
-                return tmpValue.replace(tmpValueArray[0], "");
+        if (tmpValueArray.length == 1) {
+            return tmpValue;
+        } 
+        StringBuilder rs = new StringBuilder();
+        for (int i = 0; i < tmpValueArray.length; ++i) {
+            if (MetaNameUtil.isUniqueName(tmpValueArray[i])) {
+                String[] metaName = MetaNameUtil.parseUnique2NameArray(tmpValueArray[i]);
+                String value = metaName[metaName.length - 1];
+                if (StringUtils.isEmpty(value) || value.contains(":")) {
+                    continue;
+                }
+                rs.append(tmpValueArray[i]);
+                if (i <= tmpValueArray.length - 1) {
+                    rs.append(",");
+                }
             }
+            
         }
+        return rs.toString();
         
-        return tmpValue;
     }
 
     /**
