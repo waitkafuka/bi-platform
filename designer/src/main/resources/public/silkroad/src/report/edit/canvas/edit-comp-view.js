@@ -1312,6 +1312,14 @@ define([
                                             return;
                                         }
                                     }
+                                    // 如果设置single时间时，则不能设置。
+                                    var singleDateSetting = $this.find('[name="singleDateSetting"]').val();
+                                    if (singleDateSetting !== undefined) {
+                                        if (parseInt(singleDateSetting) > 0) {
+                                            dialog.alert("设置的默认的时间点应为负数");
+                                            return;
+                                        }
+                                    }
                                     // 提取表单数据
                                     var data = getDataFromForm($this);
                                     // 处理并回填json
