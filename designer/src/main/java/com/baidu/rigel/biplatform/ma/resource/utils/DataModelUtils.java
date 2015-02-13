@@ -170,6 +170,7 @@ public final class DataModelUtils {
         List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
         List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
         
+        
         // build colField
         List<List<ColField>> colFields = new ArrayList<List<ColField>>();
         
