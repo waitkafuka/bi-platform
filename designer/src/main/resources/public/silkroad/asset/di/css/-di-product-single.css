@@ -52,6 +52,7 @@
     background: #2584DA;
     border: 1px solid #2070BB;
     color: white;
+    width: 55px;
 }
 .ui-button-g-hover {
     background-position: 0px -79px;
@@ -232,7 +233,7 @@
     background-color: rgba(255, 255, 255, 0);
 }
 .ui-download-btn .ui-button-inner {
-    padding: 2px 0px 4px 3px;
+    padding: 0;
     line-height: 8px;
     -webkit-border-radius: 1px;
     -o-border-radius: 1px;
@@ -3790,6 +3791,17 @@ div.di-dim-level-find-msg span{
     float: right;
     line-height: 18px;            
     vertical-align: middle;
+}
+.di-table-down {
+    width: 140px;
+    float: left;
+}
+.di-table-down-text {
+    float: left;
+    width: 100px;
+}
+.di-table-down-btn {
+    float: left;
 }
 /**
  * @name                      :roport-ui针对silkroad所做的的css适配

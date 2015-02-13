@@ -233,7 +233,7 @@
     background-color: rgba(255, 255, 255, 0);
 }
 .ui-download-btn .ui-button-inner {
-    padding: 2px 0px 4px 3px;
+    padding: 0;
     line-height: 8px;
     -webkit-border-radius: 1px;
     -o-border-radius: 1px;

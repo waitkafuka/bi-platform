@@ -15,19 +15,35 @@
     line-height: 18px;
 }
 .di-table-count {
-    float: right;
-    line-height: 18px;            
+    color: #000;
+    line-height: 20px;
     vertical-align: middle;
     width: auto;
+    font-size: 12px;
+    float: left;
 }
 .di-table-count-num {
-    font-size: 14px;
-    color: #4289D4;
-    font-weight: bold;
-    font-family: Arial;
+    font-size: 12px;
+    color: #000;
 }
 .di-table-prompt-sel {
     float: right;
     line-height: 18px;            
     vertical-align: middle;
+}
+.di-table-down {
+    width: 130px;
+    color: #000;
+    float: right;
+    vertical-align: bottom;
+}
+.di-table-down-text {
+    height: 20px;
+    line-height: 20px;
+    color: #000;
+    float: right;
+    vertical-align: bottom;
+}
+.di-table-down-btn {
+    float: left;
 }
