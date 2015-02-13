@@ -490,9 +490,6 @@
 //            borderColor: '#ccc',
 //            borderWidth: 0.5
         };
-        if (this._chartType === 'map') {
-            legend.y = 'bottom';
-        }
         var data = [];
         var defaultMeasures = this._defaultMeasures;
 
