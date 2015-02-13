@@ -858,8 +858,8 @@ define([
                         if ($selectDefault.is(':visible')) {
                             var all = $selectName.text();
                             var dimname = $acceptUi.find('span').eq(1).text().split('（')[0];
-                            $selectValue.val(all + '（' + dimname + '）');
-                            $selectName.text(all + '（' + dimname + '）');
+                            $selectValue.val(all + dimname);
+                            $selectName.text(all + dimname);
                         }
                     }
                     // 刷新报表展示
