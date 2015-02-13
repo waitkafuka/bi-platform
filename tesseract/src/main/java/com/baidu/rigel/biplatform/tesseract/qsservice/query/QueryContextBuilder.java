@@ -35,7 +35,6 @@ import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
@@ -241,7 +240,7 @@ public class QueryContextBuilder {
                     memberNode.setSummary(true);
                     children.forEach((child) -> {
                         MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                        buildMemberNodeByMember(childNode, child);
+                        buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
                         childNodes.add(childNode);
 //                        member.getQueryNodes().addAll(child.getQueryNodes());
                     });
@@ -249,7 +248,7 @@ public class QueryContextBuilder {
             }
             // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
             if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                buildMemberNodeByMember(memberNode, member);
+                buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
                 memberNode.setChildren(childNodes);
                 nodeTree.getChildren().add(memberNode);
 //                return memberNode;
@@ -269,7 +268,8 @@ public class QueryContextBuilder {
      * @param node 查询节点
      * @param member 维值
      */
-    private void buildMemberNodeByMember(MemberNodeTree node, MiniCubeMember member) {
+    private void buildMemberNodeByMember(DataSourceInfo dataSource, 
+            Cube cube, MemberNodeTree node, MiniCubeMember member, Map<String, String> params) {
         node.setCaption(member.getCaption());
         if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
             node.setLeafIds(member.getQueryNodes());
@@ -290,16 +290,26 @@ public class QueryContextBuilder {
                 node.setHasChildren(true);
             }
         } else {
-            Dimension dim = member.getLevel().getDimension();
-            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
-            for (int i = 0; i < levelNames.size(); i++) {
-                if (member.getLevel().getName().equals(levelNames.get(i))) {
-                    if (i < levelNames.size() - 1) {
-                        node.setHasChildren(true);
-                    }
-                    break;
-                }
+            // TODO 后续考虑维度预加载
+            List<MiniCubeMember> children = null;
+            try {
+                children = metaDataService.getChildren(dataSource, cube, member, params);
+            } catch (Exception e) {
+                logger.warn(e.getMessage(), e);
             }
+            if (CollectionUtils.isNotEmpty(children)) {
+                node.setHasChildren(true);
+            }
+//            Dimension dim = member.getLevel().getDimension();
+//            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
+//            for (int i = 0; i < levelNames.size(); i++) {
+//                if (member.getLevel().getName().equals(levelNames.get(i))) {
+//                    if (i < levelNames.size() - 1) {
+//                        node.setHasChildren(true);
+//                    }
+//                    break;
+//                }
+//            }
         }
 
     }

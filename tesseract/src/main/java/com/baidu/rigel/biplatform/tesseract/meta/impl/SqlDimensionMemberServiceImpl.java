@@ -125,7 +125,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 ResultRecord record = resultSet.getCurrentRecord();
 
                 String value = record.getField(queryLevel.getSource()).toString();
-                if (value == null) {
+                if (StringUtils.isBlank(value)) {
                     log.warn("can not get:" + queryLevel.getSource() + " from record:" + record);
                     continue;
                     // return;
