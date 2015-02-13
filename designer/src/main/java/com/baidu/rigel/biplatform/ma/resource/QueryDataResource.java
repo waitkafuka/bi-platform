@@ -638,6 +638,9 @@ public class QueryDataResource extends BaseResource {
      * @return String
      */ 
     private String modifyFilterValue(String tmpValue) {
+        if (tmpValue.contains("start") && tmpValue.contains("end")) {
+            return tmpValue;
+        }
         String[] tmpValueArray = tmpValue.split(",");
         if (tmpValueArray.length == 1) {
             return tmpValue;
