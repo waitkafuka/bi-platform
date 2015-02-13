@@ -1427,6 +1427,13 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
             Object breadCrum = runTimeModel.getContext().get("bread_key");
+            if (breadCrum == null) {
+                List<Map<String, String>> tmp = Lists.newArrayList();
+                if (areaContext.getCurBreadCrumPath() != null  && !areaContext.getCurBreadCrumPath().isEmpty()) {
+                    tmp.add(areaContext.getCurBreadCrumPath());
+                    breadCrum = tmp;
+                }
+            }
             if (breadCrum != null) {
 //                List<Map<String, String>> mainDims = Lists.newArrayList();
 //                do {
