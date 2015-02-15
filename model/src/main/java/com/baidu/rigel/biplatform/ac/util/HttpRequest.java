@@ -225,6 +225,7 @@ public class HttpRequest {
             String requestUrl = prefix + address + suffix;
             try {
                 HttpUriRequest request = RequestBuilder.get().setUri(requestUrl).build();
+                
                 if (StringUtils.isNotBlank(cookie)) {
                     // 需要将cookie添加进去
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
