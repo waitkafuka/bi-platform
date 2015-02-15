@@ -104,8 +104,6 @@ public class SearchIndexServiceImpl implements SearchService {
     private TaskExecutor taskExecutor;
     
     
-    private ExecutorCompletionService<TesseractResultSet> completionService;
-
     /**
      * Constructor by no param
      */
@@ -122,9 +120,7 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public TesseractResultSet query(QueryRequest query) throws IndexAndSearchException {
-    	if(completionService == null) {
-            completionService = new ExecutorCompletionService<>(taskExecutor);
-        }
+    	ExecutorCompletionService<TesseractResultSet> completionService = new ExecutorCompletionService<>(taskExecutor);
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard
@@ -196,7 +192,7 @@ public class SearchIndexServiceImpl implements SearchService {
 
             List<TesseractResultSet> idxShardResultSetList = new ArrayList<TesseractResultSet>();
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
-                this.completionService.submit(new Callable<TesseractResultSet>() {
+                completionService.submit(new Callable<TesseractResultSet>() {
                     
                     @Override
                     public TesseractResultSet call() throws Exception {
