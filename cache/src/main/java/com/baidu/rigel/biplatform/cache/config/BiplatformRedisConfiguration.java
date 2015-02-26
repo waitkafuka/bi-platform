@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package com.baidu.rigel.biplatform.cache.impl;
+package com.baidu.rigel.biplatform.cache.config;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
-import org.springframework.boot.autoconfigure.redis.RedisProperties;
 import org.springframework.boot.autoconfigure.redis.RedisProperties.Sentinel;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
@@ -38,7 +38,6 @@ import org.springframework.data.redis.connection.jedis.JedisConnection;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -61,7 +60,7 @@ public class BiplatformRedisConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RedisPoolProperties redisProperties() {
+    RedisPoolProperties redisPoolProperties() {
         return new RedisPoolProperties();
     }
 
@@ -121,51 +120,62 @@ public class BiplatformRedisConfiguration {
     }
 
     /**
-     * Redis connection configuration.
-     */
-    @Configuration
-    @ConditionalOnMissingClass(name = "org.apache.commons.pool2.impl.GenericObjectPool")
-    protected static class RedisConnectionConfiguration extends
-            AbstractRedisConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean
-        public RedisConnectionFactory redisConnectionFactory()
-                throws UnknownHostException {
-            return applyProperties(new JedisConnectionFactory(getSentinelConfig()));
-        }
-
-    }
-
-    /**
      * Redis pooled connection configuration.
      */
     @Configuration
-    @ConditionalOnClass(GenericObjectPool.class)
     protected static class RedisPooledConnectionConfiguration extends
             AbstractRedisConfiguration {
 
         @Bean
-        @ConditionalOnMissingBean
         public RedisConnectionFactory redisConnectionFactory()
                 throws UnknownHostException {
             return applyProperties(createJedisConnectionFactory());
         }
+        
+        @Bean
+        @ConditionalOnBean(RedisConnectionFactory.class)
+        public RedisOperations<Object, Object> redisTemplate(
+                RedisConnectionFactory redisConnectionFactory)
+                throws UnknownHostException {
+            RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
+            template.setConnectionFactory(redisConnectionFactory);
+            return template;
+        }
+
+        
+        @Bean(name="redisCacheManager")
+        @ConditionalOnBean(RedisOperations.class)
+        public CacheManager redisCacheManager(RedisTemplate<Object, Object> template) {
+            return new RedisCacheManager(template);
+        }
 
         private JedisConnectionFactory createJedisConnectionFactory() {
-            if (this.properties.getPool() != null) {
-                return new JedisConnectionFactory(getSentinelConfig(), jedisPoolConfig());
+            JedisConnectionFactory factory = null;
+            if (this.properties.getPoolConfig() != null) {
+                factory = new JedisConnectionFactory(getSentinelConfig(), jedisPoolConfig());
             }
-            return new JedisConnectionFactory(getSentinelConfig());
+            factory = new JedisConnectionFactory(getSentinelConfig());
+            factory.setUsePool(this.properties.isUsePool());
+            factory.setPassword(this.properties.getPassword());
+            return factory;
         }
 
         private JedisPoolConfig jedisPoolConfig() {
             JedisPoolConfig config = new JedisPoolConfig();
-            RedisProperties.Pool props = this.properties.getPool();
+            RedisPoolProperties.Pool props = this.properties.getPoolConfig();
             config.setMaxTotal(props.getMaxActive());
             config.setMaxIdle(props.getMaxIdle());
             config.setMinIdle(props.getMinIdle());
             config.setMaxWaitMillis(props.getMaxWait());
+            config.setTestOnBorrow(props.isTestOnBorrow());
+            config.setTestOnCreate(props.isTestOnCreate());
+            config.setTestOnReturn(props.isTestOnReturn());
+            config.setTestWhileIdle(props.isTestWhileIdle());
+            config.setTimeBetweenEvictionRunsMillis(props.getTimeBetweenEvictionRunsMillis());
+            config.setMinEvictableIdleTimeMillis(props.getMinEvictableIdleTimeMillis());
+            config.setNumTestsPerEvictionRun(props.getNumTestsPerEvictionRun());
+            config.setSoftMinEvictableIdleTimeMillis(props.getSoftMinEvictableIdleTimeMillis());
+            config.setLifo(props.isLifo());
             return config;
         }
 
@@ -177,25 +187,7 @@ public class BiplatformRedisConfiguration {
     @Configuration
     protected static class RedisConfiguration {
 
-        @Bean
-        @ConditionalOnMissingBean(name = "redisTemplate")
-        public RedisOperations<Object, Object> redisTemplate(
-                RedisConnectionFactory redisConnectionFactory)
-                throws UnknownHostException {
-            RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
-            template.setConnectionFactory(redisConnectionFactory);
-            return template;
-        }
-
-        @Bean
-        @ConditionalOnMissingBean(StringRedisTemplate.class)
-        public StringRedisTemplate stringRedisTemplate(
-                RedisConnectionFactory redisConnectionFactory)
-                throws UnknownHostException {
-            StringRedisTemplate template = new StringRedisTemplate();
-            template.setConnectionFactory(redisConnectionFactory);
-            return template;
-        }
+        
 
     }
 

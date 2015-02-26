@@ -85,6 +85,7 @@ public class AggregateCompute {
 //        }
         
         Meta meta = dataList.get(0).getMeta();
+        
         long current = System.currentTimeMillis();
         Map<String, ResultRecord> groupResult = dataList.parallelStream().collect(Collectors.groupingByConcurrent(ResultRecord::getGroupBy,
                 Collectors.reducing(new ResultRecord(new Serializable[meta.getFieldNameArray().length], DeepcopyUtils.deepCopy(meta)), (x,y) ->{

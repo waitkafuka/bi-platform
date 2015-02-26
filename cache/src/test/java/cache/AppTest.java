@@ -6,8 +6,12 @@ import java.util.Set;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
@@ -35,7 +39,7 @@ public class AppTest {
         sentinels.add("10.57.204.72:8379");
         
         
-        JedisSentinelPool sentinelPool = new JedisSentinelPool(config.getMaster().getName(), sentinels, poolConfig1, "biplatform");
+        JedisSentinelPool sentinelPool = new JedisSentinelPool(config.getMaster().getName(), sentinels, poolConfig1);
         System.out.println("Current master: " + sentinelPool.getCurrentHostMaster().toString());
         
         JedisConnectionFactory factory = new JedisConnectionFactory(config);
@@ -69,22 +73,22 @@ public class AppTest {
         
         t.start();
         
-        Jedis jedis2 = sentinelPool.getResource();
-        
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            
-        }
-        System.out.println("start to publish..");
-        jedis2.publish("channel", "testMsg");
-        try {
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            
-        }
+//        Jedis jedis2 = sentinelPool.getResource();
+//        
+//        try {
+//            Thread.sleep(3000);
+//        } catch (InterruptedException e) {
+//            // TODO Auto-generated catch block
+//            
+//        }
+//        System.out.println("start to publish..");
+//        jedis2.publish("channel", "testMsg");
+//        try {
+//            Thread.sleep(30000);
+//        } catch (InterruptedException e) {
+//            // TODO Auto-generated catch block
+//            
+//        }
         
         System.out.println("publish end");
 //        sentinelPool.returnResource(jedis2);

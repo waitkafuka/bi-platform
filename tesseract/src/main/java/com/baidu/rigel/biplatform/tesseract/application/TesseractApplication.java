@@ -19,6 +19,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
+import org.springframework.cache.CacheManager;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -48,10 +50,13 @@ public class TesseractApplication {
      */
     public static void main(String[] args) throws RegisterFunctionException {
 
-        SpringApplication.run(TesseractApplication.class);
+        ConfigurableApplicationContext  context = SpringApplication.run(TesseractApplication.class);
         
         RegisterFunction.register("rRate", RelativeRate.class);
         RegisterFunction.register("sRate", SimilitudeRate.class);
         
+//        CacheManager cacheManager = (CacheManager) context.getBean("redisCacheManager");
+//        
+//        cacheManager.getCache("test").put("key", "val");
     }
 }

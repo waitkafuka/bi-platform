@@ -147,7 +147,7 @@ public class TimeRangeDetail {
         do {
             days.add(sdf.format(startCalen.getTime()));
             startCalen.add(Calendar.DAY_OF_MONTH, 1);
-        } while (endCalen.after(startCalen));
+        } while (endCalen.equals(startCalen) || endCalen.after(startCalen));
         
         return days.toArray(new String[0]);
     }

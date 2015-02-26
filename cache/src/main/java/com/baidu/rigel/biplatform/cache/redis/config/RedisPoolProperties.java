@@ -19,7 +19,6 @@ package com.baidu.rigel.biplatform.cache.redis.config;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.boot.autoconfigure.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 import redis.clients.jedis.Protocol;
 
@@ -30,7 +29,6 @@ import redis.clients.jedis.Protocol;
  * @version  2015年1月29日 
  * @since jdk 1.8 or after
  */
-@Component
 @ConfigurationProperties(prefix = "config.redis")
 public class RedisPoolProperties extends RedisProperties {
     
@@ -45,7 +43,7 @@ public class RedisPoolProperties extends RedisProperties {
     private RedisPoolProperties.Pool poolConfig;
     
     
-    private boolean usePool;
+    private boolean usePool = true;
     
 //    /** 
 //     * redisServers 多个redis server的配置信息，多个redis server配置格式为  host1:port1:pass,host2:port2
@@ -166,7 +164,6 @@ public class RedisPoolProperties extends RedisProperties {
          * @param testOnReturn the testOnReturn to set 
          */
         public void setTestOnReturn(boolean testOnReturn) {
-        
             this.testOnReturn = testOnReturn;
         }
 
