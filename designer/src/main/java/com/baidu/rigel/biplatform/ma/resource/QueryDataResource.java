@@ -1757,6 +1757,7 @@ public class QueryDataResource extends BaseResource {
             throw new IllegalStateException("未知报表定义，请确认下载信息");
         }
         ExtendArea targetArea = report.getExtendById(areaId);
+        Cube cube = report.getSchema().getCubes().get(targetArea.getCubeId());
         ReportRuntimeModel model = reportModelCacheManager.getRuntimeModel(reportId);
         
         ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
@@ -1781,7 +1782,7 @@ public class QueryDataResource extends BaseResource {
         }); 
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
-        String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
+        String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");

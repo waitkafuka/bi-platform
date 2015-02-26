@@ -1011,13 +1011,14 @@ public final class DataModelUtils {
      * @param dataModel
      * @return 转换后的文件
      */
-    public static String convertDataModel2CsvString(DataModel dataModel) {
+    public static String convertDataModel2CsvString(Cube cube, DataModel dataModel) {
         StringBuilder rs = new StringBuilder();
         
         List<List<BigDecimal>> rowDatas = convertToRowData(dataModel.getColumnBaseData());
-        int maxDepth = getMaxDepth4Dim(dataModel.getRowHeadFields());
-        for (int i = 0; i < maxDepth; ++i) {
-            rs.append(" ,");
+        String[] captions = getDimCaptions(cube, dataModel.getRowHeadFields());
+        //getMaxDepth4Dim(dataModel.getRowHeadFields());
+        for (String caption : captions) {
+            rs.append(caption + ",");
         }
         final int colSize = dataModel.getColumnHeadFields().size();
         for (int i = 0; i < colSize; ++i) {
@@ -1098,13 +1099,16 @@ public final class DataModelUtils {
      * @param dataModel
      * @return int
      */
-    private static int getMaxDepth4Dim(List<HeadField> headFields) {
-        int rs = 0;
-        if (headFields == null || headFields.size() == 0) {
-            return rs;
-        }
-        rs += getMaxDepth4Dim(headFields.get(0).getNodeList());
-        return rs + 1;
-    }
+//    private static List<String> getMaxDepth4Dim(List<HeadField> headFields) {
+////        int rs = 0;
+//        List<String> rs = Lists.newArrayList();
+//        if (headFields == null || headFields.size() == 0) {
+//            return rs;
+//        }
+//        // dirty solution
+//        rs.add(headFields.get(0).getCaption().replace("汇总", ""));
+//        rs.addAll(getMaxDepth4Dim(headFields.get(0).getNodeList()));
+//        return rs;
+//    }
     
 }
