@@ -82,7 +82,7 @@ public final class CallbackServiceInvoker {
             timeOutMillSecond = 1000;
         }
         params.put(HttpRequest.SOCKET_TIME_OUT, String.valueOf(timeOutMillSecond));
-        String responseStr = HttpRequest.sendGet(url, params);
+        String responseStr = HttpRequest.sendPost1(url, params);
         CallbackResponse response = convertStrToResponse(responseStr, type);
         LOG.info("[INFO] --- --- resposne : {}", response);
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
