@@ -134,6 +134,7 @@
 /* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #F0F4F7;
-    font-family: '微软雅黑', '宋体';
+    /*font-family: '微软雅黑', '宋体';*/
+    font-family: "Microsoft YaHei",Arial,sans-serif;
     font-size: 12px;
 }
