@@ -340,9 +340,9 @@ define([
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 50, 50);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'H_BUTTON', 55, 55);
+                that.dragWidthHeight($component, 'H_BUTTON', 56, 56, 88);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'TIME_COMP', 56, 56);
+                that.dragWidthHeight($component, 'TIME_COMP', 56, 56, 220);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
@@ -356,11 +356,14 @@ define([
              * @param {string} type 组件类型
              * @param {number} minHeight 组件拖拽最小高度
              * @param {number} maxHeight 组件拖拽最大高度
+             * @param {number} minWidth 组件拖拽最小宽度
+             * @param {number} maxWidth 组件拖拽最大宽度
              * @public
              */
-            dragWidthHeight: function ($ele, type, minHeight, maxHeight) {
+            dragWidthHeight: function ($ele, type, minHeight, maxHeight, minWidth, maxWidth) {
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minHeight", minHeight);
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "maxHeight", maxHeight);
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minWidth", minWidth);
             },
 
             /**

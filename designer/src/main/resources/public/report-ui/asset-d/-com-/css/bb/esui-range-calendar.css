@@ -1055,7 +1055,7 @@ button.skin-link-button:hover {
  * @author dbear
  */
 .esui-ui-rangecalendar {
-    width: 315px;
+    width: 200px;
     height: 30px;
     line-height: 30px;
     border-radius: 0;
