@@ -829,9 +829,8 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     -ms-border-radius: 0px;
 }
 .ui-vscrollbar-prev {
-    width: 16px;
+    width: 20px;
     height: 16px;
-    border: 0px;
     background: url(img/icon.png) -81px -203px no-repeat;
 }
 .ui-vscrollbar-next {
@@ -841,7 +840,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     background: url(img/icon.png) -63px -203px no-repeat;
 }
 .ui-vscrollbar .ui-scrollbar-thumb {
-    width: 16px;
+    width: 7px;
     border-top: 1px solid #F0F0F0;
     border-bottom: 1px solid #F0F0F0;
     background: #D8D8D8;
@@ -1996,9 +1995,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-head {
     border-top: 1px solid #cfebf6;
     border-bottom: 1px solid #cfebf6;
-    border-right: 1px solid #cfebf6;
+    border-right: 1px solid #E7F9FE;
     border-left: 1px solid #cfebf6;
-    height: 30px;
+    height: 40px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -2017,10 +2016,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-cell {
     background: #FFF;
     border-right: 1px solid #cfebf6;
-    border-bottom: 1px solid #e7ecee;
-    height: 30px;
+    height: 40px;
     line-height: 30px;
-    padding: 0 9px;
+    padding: 0 9px 0 10px;
     color: #555;
     margin: 0;
     max-width: 200px;
@@ -2038,13 +2036,12 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-rowhcell {
     position: relative;
     color: #000;
-    height: 30px;
+    height: 40px;
     line-height: 30px;
-    padding: 0 9px;
+    padding: 0 9px 0 5px;
     margin: 0;
     /*vertical-align: middle;*/
-    border-right: 1px solid #cfebf6;
-    border-bottom: 1px solid #cfebf6;
+    border-right: 1px solid #E7F9FE;
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;
@@ -2141,11 +2138,11 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
-    width: 6px;
+    width: 7px;
     background: #FFF;
     padding: 30px 0 0 0;
-    border-right: 1px solid #CCC;
-    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #cfebf6;
+    border-bottom: 1px solid #cfebf6;
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
@@ -2164,14 +2161,14 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     -ms-border-radius: 0;
 }
 .ui-table .ui-vscrollbar-prev {
-    width: 6px;
+    width: 20px;
     height: 14px;
     border: 0;
     background: #E7F9FE;
     overflow: hidden;
-    border-bottom: 1px solid #CCC;
-    border-right: 1px solid #CCC;
-    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #cfebf6;
+    border-right: 1px solid #E7F9FE;
+    border-top: 1px solid #E7F9FE;
     border-radius: 0;
 }
 .ui-table .ui-vscrollbar-next {
@@ -2184,7 +2181,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     display: none;
 }
 .ui-table .ui-vscrollbar .ui-scrollbar-thumb {
-    width: 6px;
+    width: 7px;
     background: #b5b5b5;
     border-radius: 4px;
 }
@@ -2272,7 +2269,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     height: 30px;
 }
 .ui-table-head-font {
-
+    color: #727272;
+    font-size: 12px;
+    font-weight: bold;
 }
 .ui-table-hcell-sort-desc {
     background-image: url(img/icon-hcell-desc.png);
@@ -3804,13 +3803,13 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 6px 17px 10px 0;
+    padding: 3px 17px 10px 0;
     overflow: hidden;
     line-height: 18px;
 }
 .di-table-count {
     color: #000;
-    line-height: 20px;
+    line-height: 23px;
     vertical-align: middle;
     width: auto;
     font-size: 12px;
@@ -3826,14 +3825,14 @@ div.di-dim-level-find-msg span{
     vertical-align: middle;
 }
 .di-table-down {
-    width: 130px;
+    width: 128px;
     color: #000;
     float: right;
     vertical-align: bottom;
 }
 .di-table-down-text {
     height: 20px;
-    line-height: 20px;
+    line-height: 23px;
     color: #000;
     float: right;
     vertical-align: bottom;
@@ -4982,7 +4981,7 @@ button.skin-link-button:hover {
  * @author dbear
  */
 .esui-ui-rangecalendar {
-    width: 315px;
+    width: 200px;
     height: 30px;
     line-height: 30px;
     border-radius: 0;
