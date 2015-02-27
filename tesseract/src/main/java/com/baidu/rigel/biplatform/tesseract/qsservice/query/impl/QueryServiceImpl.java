@@ -166,8 +166,10 @@ public class QueryServiceImpl implements QueryService {
                         DataModel dm = null;
                         if (con instanceof CallbackCondition) {
                             try {
-                                TesseractResultSet resultSet = callbackSearchService.query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, context, questionModel.isUseIndex(),null));
-                                dm = new DataModelBuilder(resultSet, context).build();
+                                TesseractResultSet resultSet = callbackSearchService
+                                        .query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, 
+                                        context, questionModel.isUseIndex(),null));
+                                dm = new DataModelBuilder(resultSet, context).build(true);
                             } catch (Exception e) {
                                 logger.error("catch error when process callback measure {}",e.getMessage());
                                 throw new RuntimeException(e);
@@ -203,7 +205,7 @@ public class QueryServiceImpl implements QueryService {
         if (statDimensionNode(queryContext.getRowMemberTrees(), false, false) == 0
                 || (statDimensionNode(queryContext.getColumnMemberTrees(), false, false) == 0 && CollectionUtils
                         .isEmpty(queryContext.getQueryMeasures()))) {
-            return new DataModelBuilder(null, queryContext).build();
+            return new DataModelBuilder(null, queryContext).build(false);
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query request.");
         current = System.currentTimeMillis();
@@ -225,7 +227,7 @@ public class QueryServiceImpl implements QueryService {
 
             }
             
-            result = new DataModelBuilder(resultSet, queryContext).build();
+            result = new DataModelBuilder(resultSet, queryContext).build(false);
         } catch (IndexAndSearchException e) {
             logger.error("query occur when search queryRequest：" + queryContext, e);
             throw new MiniCubeQueryException(e);
