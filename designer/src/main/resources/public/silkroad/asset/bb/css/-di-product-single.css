@@ -267,10 +267,10 @@
  * select控件
  */
 .ui-select {
-    height: 20px;
+    height: 30px;
     display: inline-block;
     vertical-align: middle;
-    border: 1px solid #A8ADB6;
+    border: 1px solid #D5D5D5;
     background: #FFF;
     /*width: 100px;*/
     width: 95%;
@@ -280,9 +280,9 @@
 .ui-select-text {
     white-space: nowrap;
     display: block;
-    padding-left: 4px;
-    line-height: 18px;
-    border-top: 1px solid #F0F0F0;
+    padding-left: 10px;
+    line-height: 30px;
+    /*border-top: 1px solid #F0F0F0;*/
     cursor: default;
     font-size: 12px;
     -webkit-user-select: none;
@@ -291,46 +291,60 @@
     user-select: none;
 }
 .ui-select-button {
-    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
-    border-radius: 0px;
-    -webkit-border-radius: 0px;
-    -o-border-radius: 0px;
-    -moz-border-radius: 0px;
-    -ms-border-radius: 0px;
+    /*background: url(img/icon2-lightblue.png) -16px -64px no-repeat;*/
+    /*padding: 0px;*/
+    /*margin: 0px;*/
+    /*border: 0px;*/
+    /*border-radius: 0px;*/
+    /*-webkit-border-radius: 0px;*/
+    /*-o-border-radius: 0px;*/
+    /*-moz-border-radius: 0px;*/
+    /*-ms-border-radius: 0px;*/
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 7px;
+    right: 5px;
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px;
+    background-repeat: no-repeat, no-repeat;
+    background-position: left -9px, 0 0;
 }
 .ui-select-hover .ui-select-button {
-    background-position: 4px -64px;
+    /*background-position: 4px -64px;*/
 }
 .ui-select-options {
-    border-left: 1px solid #A8ADB6;
-    border-right: 1px solid #A8ADB6;
+    /*border-left: 1px solid #A8ADB6;*/
+    /*border-right: 1px solid #A8ADB6;*/
+    border-left: 1px solid #D5D5D5;
+    border-right: 1px solid #D5D5D5;
+    border-bottom: 1px solid #D5D5D5;
     background: #FFF;
     font-size: 12px;
 }
 .ui-select-item {
-    border-bottom: 1px solid #A8ADB6;
+    color: #8a8c8d;
+    margin-left: 10px;
+    border-bottom: 1px solid #E7ECEE;
     white-space: nowrap;
-    height: 20px;
-    line-height: 20px;
-    padding-left: 4px;
-    cursor: default;
+    height: 30px;
+    line-height: 30px;
+    /*padding-left: 4px;*/
+    cursor: pointer;
     font-size: 12px;
     -moz-user-select: none;
     -webkit-user-select: none;
 }
 .ui-select-item-hover, 
 .ui-select-item-focus {
-    background: #E4EAFA;
+    /*background: #E4EAFA;*/
+    color: #000;
 }
 
 /**
  * multi select
  */
 .ui-multi-select {
-    height: 20px;
+    height: 30px;
     display: inline-block;
     vertical-align: middle;
     border: 1px solid #CCC;
@@ -343,7 +357,7 @@
     white-space: nowrap;
     display: block;
     padding-left: 4px;
-    line-height: 18px;
+    line-height: 28px;
     border-top: 1px solid #F0F0F0;
     cursor: default;
     -webkit-user-select: none;
@@ -352,18 +366,26 @@
     user-select: none;
 }
 .ui-multi-select-button {
-    background: url(img/icon2-lightblue.png) -16px -64px no-repeat;
-    padding: 0px;
-    margin: 0px;
-    border: 0px;
-    border-radius: 0px;
-    -webkit-border-radius: 0px;
-    -o-border-radius: 0px;
-    -moz-border-radius: 0px;
-    -ms-border-radius: 0px;
+    /*background: url(img/icon2-lightblue.png) -16px -64px no-repeat;*/
+    /*padding: 0px;*/
+    /*margin: 0px;*/
+    /*border: 0px;*/
+    /*border-radius: 0px;*/
+    /*-webkit-border-radius: 0px;*/
+    /*-o-border-radius: 0px;*/
+    /*-moz-border-radius: 0px;*/
+    /*-ms-border-radius: 0px;*/
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 7px;
+    right: 5px;
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px;
+    background-repeat: no-repeat, no-repeat;
+    background-position: left -9px, 0 0;
 }
 .ui-multi-select-hover .ui-multi-select-button {
-    background-position: 4px -64px;
+    /*background-position: 4px -64px;*/
 }
 .ui-multi-select-options {
     border-left: 1px solid #CCC;
@@ -374,8 +396,8 @@
     position: relative;
     white-space: nowrap;
     display: block;
-    height: 20px;
-    line-height: 20px;
+    height: 30px;
+    line-height: 30px;
     padding-left: 25px;
     cursor: default;
     font-size: 12px;
@@ -385,7 +407,7 @@
 .ui-multi-select-item-icon {
     position: absolute;
     display: inline-block;
-    top: 2px;
+    top: 9px;
     left: 3px;
     margin: 0 3px;
     width: 13px;
@@ -829,9 +851,8 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     -ms-border-radius: 0px;
 }
 .ui-vscrollbar-prev {
-    width: 16px;
+    width: 20px;
     height: 16px;
-    border: 0px;
     background: url(img/icon.png) -81px -203px no-repeat;
 }
 .ui-vscrollbar-next {
@@ -841,7 +862,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     background: url(img/icon.png) -63px -203px no-repeat;
 }
 .ui-vscrollbar .ui-scrollbar-thumb {
-    width: 16px;
+    width: 7px;
     border-top: 1px solid #F0F0F0;
     border-bottom: 1px solid #F0F0F0;
     background: #D8D8D8;
@@ -1996,9 +2017,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-head {
     border-top: 1px solid #cfebf6;
     border-bottom: 1px solid #cfebf6;
-    border-right: 1px solid #cfebf6;
+    border-right: 1px solid #E7F9FE;
     border-left: 1px solid #cfebf6;
-    height: 30px;
+    height: 40px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -2017,10 +2038,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-cell {
     background: #FFF;
     border-right: 1px solid #cfebf6;
-    border-bottom: 1px solid #e7ecee;
-    height: 30px;
+    height: 40px;
     line-height: 30px;
-    padding: 0 9px;
+    padding: 0 9px 0 10px;
     color: #555;
     margin: 0;
     max-width: 200px;
@@ -2038,13 +2058,12 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-rowhcell {
     position: relative;
     color: #000;
-    height: 30px;
+    height: 40px;
     line-height: 30px;
-    padding: 0 9px;
+    padding: 0 9px 0 5px;
     margin: 0;
     /*vertical-align: middle;*/
-    border-right: 1px solid #cfebf6;
-    border-bottom: 1px solid #cfebf6;
+    border-right: 1px solid #E7F9FE;
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;
@@ -2141,11 +2160,11 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
-    width: 6px;
+    width: 7px;
     background: #FFF;
     padding: 30px 0 0 0;
-    border-right: 1px solid #CCC;
-    border-bottom: 1px solid #CCC;
+    border-right: 1px solid #cfebf6;
+    border-bottom: 1px solid #cfebf6;
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
@@ -2164,14 +2183,14 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     -ms-border-radius: 0;
 }
 .ui-table .ui-vscrollbar-prev {
-    width: 6px;
+    width: 20px;
     height: 14px;
     border: 0;
     background: #E7F9FE;
     overflow: hidden;
-    border-bottom: 1px solid #CCC;
-    border-right: 1px solid #CCC;
-    border-top: 1px solid #CCC;
+    border-bottom: 1px solid #cfebf6;
+    border-right: 1px solid #E7F9FE;
+    border-top: 1px solid #E7F9FE;
     border-radius: 0;
 }
 .ui-table .ui-vscrollbar-next {
@@ -2184,7 +2203,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     display: none;
 }
 .ui-table .ui-vscrollbar .ui-scrollbar-thumb {
-    width: 6px;
+    width: 7px;
     background: #b5b5b5;
     border-radius: 4px;
 }
@@ -2272,7 +2291,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     height: 30px;
 }
 .ui-table-head-font {
-
+    color: #727272;
+    font-size: 12px;
+    font-weight: bold;
 }
 .ui-table-hcell-sort-desc {
     background-image: url(img/icon-hcell-desc.png);
@@ -3372,7 +3393,8 @@ li {
 /* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #F0F4F7;
-    font-family: '微软雅黑', '宋体';
+    /*font-family: '微软雅黑', '宋体';*/
+    font-family: "Microsoft YaHei",Arial,sans-serif;
     font-size: 12px;
 }
 /**
@@ -3804,13 +3826,13 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 6px 17px 10px 0;
+    padding: 3px 17px 10px 0;
     overflow: hidden;
     line-height: 18px;
 }
 .di-table-count {
     color: #000;
-    line-height: 20px;
+    line-height: 23px;
     vertical-align: middle;
     width: auto;
     font-size: 12px;
@@ -3826,14 +3848,14 @@ div.di-dim-level-find-msg span{
     vertical-align: middle;
 }
 .di-table-down {
-    width: 130px;
+    width: 128px;
     color: #000;
     float: right;
     vertical-align: bottom;
 }
 .di-table-down-text {
     height: 20px;
-    line-height: 20px;
+    line-height: 23px;
     color: #000;
     float: right;
     vertical-align: bottom;
@@ -4982,7 +5004,7 @@ button.skin-link-button:hover {
  * @author dbear
  */
 .esui-ui-rangecalendar {
-    width: 315px;
+    width: 200px;
     height: 30px;
     line-height: 30px;
     border-radius: 0;
