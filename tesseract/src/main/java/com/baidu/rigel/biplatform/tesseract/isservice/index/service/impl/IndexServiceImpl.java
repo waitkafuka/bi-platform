@@ -497,6 +497,9 @@ public class IndexServiceImpl implements IndexService {
 								|| idxAction
 										.equals(IndexAction.INDEX_MERGE_NORMAL)) {
 							currIdxShardIdx++;
+							if(currIdxShardIdx>=idxMeta.getIdxShardList().size()){
+								idxAction=IndexAction.INDEX_NORMAL;
+							}
 						} else {
 							currIdxShardIdx = -1;
 						}

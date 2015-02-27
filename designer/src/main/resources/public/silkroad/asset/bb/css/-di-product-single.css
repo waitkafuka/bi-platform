@@ -2136,6 +2136,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     background-position: -25px -151px;
     display: block;
 }
+.ui-table-default-icon {
+    padding-left: 9px;
+}
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
     width: 6px;
@@ -7002,4 +7005,16 @@ ol {
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
+}
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+::-webkit-scrollbar
+{
+    width: 5px;
+    background-color: #FFF;
+}
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb
+{
+    border-radius: 5px;
+    background-color: rgb(181, 181, 181);
 }

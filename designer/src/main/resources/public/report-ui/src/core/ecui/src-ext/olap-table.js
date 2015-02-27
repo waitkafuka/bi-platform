@@ -422,7 +422,7 @@
         this.$dispose = new Function();
         disposeControl(this);
         this.$dispose = disposeFunc;
-    }
+    };
 
     /**
      * 渲染HTML
@@ -489,9 +489,6 @@
             }
             html.push('</thead>');
 
-
-
-
             // 表内容
             html.push('<tbody>');
             if (this._bInvalid || !datasource.length) {
@@ -536,7 +533,7 @@
                             rowHeadFields // TODO:这一块可能有问题，需要监测一下
                         );
                     }
-                    html.push('</tr>')
+                    html.push('</tr>');
                 }
             }
         }
@@ -593,7 +590,7 @@
                 }
             }
         };
-    }
+    };
     /**
      * 渲染上方表头节点
      *
@@ -602,7 +599,7 @@
     UI_OLAP_TABLE_CLASS.$renderHCell = function(
         // 只有最底层有colField
         html, colDefItem, wrap, x, y
-        ) {
+    ) {
         var type = this.getType();
         var classStr = [type + '-hcell'];
         var classSortStr;
@@ -611,6 +608,8 @@
         var span = [];
         var innerStr = '';
         var tooltipStr = '';
+        var tooltipTag = '';
+        var dragStr = '';
 
         wrap = objWrap(wrap);
 
@@ -634,21 +633,27 @@
         if(colDefItem && colDefItem.uniqueName){
             attrStr.push('uniqueName="' + colDefItem.uniqueName + '"');
         }
+        // 如果是维度列，就不显示tooltip图标
+        if (!wrap.colSpan) {
+            tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">?</span>';
+            dragStr += '<span class="' + type + '-head-drag"></span>';
+        }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr); // 列头文本
         // 如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
         // 不然文本过多的话会显示不全
         // TODO:如果是最后一个，就不加drag
         // var useBag = dom.ieVersion < 8;
+
         var strThContent = (innerStr === '')
             ? ''
             : (
                 '<div class="' + type + '-head-th-content">'
                 + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
                 + '<span class="'+ classSortStr + '"></span>'
-                + '<span class="'+ type + '-head-tips" ' + tooltipStr + '">?</span>'
+                + tooltipTag
                 + '</div>'
-                + '<span class="' + type + '-head-drag"></span>'
+                + dragStr
             );
         html.push(
             '<th ', span.join(' '), ' ', attrStr.join(' '), ' ',
@@ -675,8 +680,8 @@
 
         wrap = objWrap(wrap);
 
-        span.push(wrap.colspan ? ' colspan="' + wrap.colspan + '" ' : '');
-        span.push(wrap.rowspan ? ' rowspan="' + wrap.rowspan + '" ' : '');
+        span.push(wrap.colspan ?  ' colspan="' + wrap.colspan  +  '" ' : '');
+        span.push(wrap.rowspan ?  ' rowspan="' + wrap.rowspan  +  '" ' : '');
         // 先为左侧添加背景色
         // FIXME:实现不是很好,目前只测到两个维度，多个维度时，需要待测
         if (rowDefine) {
@@ -865,7 +870,7 @@
             ].join('');
         }
         else if (indentStyle) {
-            value = '<div style="' + indentStyle
+            value = '<div class="' + type + '-default-icon" style="' + indentStyle
                 + 'text-align:left;">' + value + '</div>';
         }
 

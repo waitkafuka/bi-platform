@@ -1427,6 +1427,13 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
             Object breadCrum = runTimeModel.getContext().get("bread_key");
+            if (breadCrum == null) {
+                List<Map<String, String>> tmp = Lists.newArrayList();
+                if (areaContext.getCurBreadCrumPath() != null  && !areaContext.getCurBreadCrumPath().isEmpty()) {
+                    tmp.add(areaContext.getCurBreadCrumPath());
+                    breadCrum = tmp;
+                }
+            }
             if (breadCrum != null) {
 //                List<Map<String, String>> mainDims = Lists.newArrayList();
 //                do {
@@ -1750,6 +1757,7 @@ public class QueryDataResource extends BaseResource {
             throw new IllegalStateException("未知报表定义，请确认下载信息");
         }
         ExtendArea targetArea = report.getExtendById(areaId);
+        Cube cube = report.getSchema().getCubes().get(targetArea.getCubeId());
         ReportRuntimeModel model = reportModelCacheManager.getRuntimeModel(reportId);
         
         ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
@@ -1774,7 +1782,7 @@ public class QueryDataResource extends BaseResource {
         }); 
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
-        String csvString = DataModelUtils.convertDataModel2CsvString(dataModel);
+        String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
@@ -1793,4 +1801,10 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
+//    @RequestMapping(value = "/test", method = {RequestMethod.POST , RequestMethod.GET})
+//    public ResponseResult test(HttpServletRequest request, HttpServletResponse response) throws Exception {
+//        System.out.println(request.getParameter("test"));
+//        System.out.println(request.getAttribute("test"));
+//        return null;
+//    }
 }

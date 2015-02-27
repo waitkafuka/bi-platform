@@ -148,6 +148,9 @@
     background-position: -25px -151px;
     display: block;
 }
+.ui-table-default-icon {
+    padding-left: 9px;
+}
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
     width: 7px;
