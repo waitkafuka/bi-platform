@@ -1801,4 +1801,10 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
+//    @RequestMapping(value = "/test", method = {RequestMethod.POST , RequestMethod.GET})
+//    public ResponseResult test(HttpServletRequest request, HttpServletResponse response) throws Exception {
+//        System.out.println(request.getParameter("test"));
+//        System.out.println(request.getAttribute("test"));
+//        return null;
+//    }
 }

@@ -64,6 +64,7 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
+import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.google.common.collect.Lists;
@@ -206,11 +207,16 @@ public class CallbackSearchServiceImpl {
         for (String g : groupby) {
             groupbyParams.put(g, new ArrayList<String>());
         }
+        
         LinkedHashMap<String, List<String>> whereParams = new LinkedHashMap<String, List<String>>();
         for (Expression e : query.getWhere().getAndList()) {
             List<String> l = e.getQueryValues().stream().filter(v -> !StringUtils.isEmpty(v.getValue()))
                 .map(v -> v.getValue() ).collect(Collectors.toList());
             if (groupbyParams.containsKey(e.getProperties())) {
+                // if not contains SUMMARY_KEY, add it into group by list
+                if (!l.contains(TesseractConstant.SUMMARY_KEY)) {
+                    l.add(TesseractConstant.SUMMARY_KEY);
+                }
                 // Put it into group by field
                 groupbyParams.get(e.getProperties()).addAll(l);
             } else {
