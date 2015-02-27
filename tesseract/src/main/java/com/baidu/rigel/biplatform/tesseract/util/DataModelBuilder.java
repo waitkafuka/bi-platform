@@ -312,11 +312,16 @@ public class DataModelBuilder {
         }
         String prop = nodeTree.getQuerySource();
         if (StringUtils.isNotBlank(nodeTree.getName())) {
-            if (MetaNameUtil.isAllMemberName(nodeTree.getName()) && nodeTree.getChildren().isEmpty()) {
+            final boolean allMemberName = MetaNameUtil.isAllMemberName(nodeTree.getName());
+            if (allMemberName && nodeTree.getChildren().isEmpty()) {
                 return nodeNames;
             }
             if(StringUtils.isNotBlank(prop)) {
-                nodeNames.add(prop + PROP_KEY_SPLIT + nodeTree.getName());
+                if (allMemberName) {
+                    nodeNames.add(prop + PROP_KEY_SPLIT + TesseractConstant.SUMMARY_KEY);
+                } else {
+                    nodeNames.add(prop + PROP_KEY_SPLIT + nodeTree.getName());
+                }
                 treePropResult.getQueryPropers().put(prop, new HashSet<String>());
             }
         }

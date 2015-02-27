@@ -73,4 +73,9 @@ public class TesseractConstant {
      * 重试次数
      */
     public static final int RETRY_TIMES = 3;
+    
+    /**
+     * callback 汇总节点key
+     */
+    public static final String SUMMARY_KEY = "SUMMARY";
 }
