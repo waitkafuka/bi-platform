@@ -168,11 +168,11 @@ public final class DataModelUtils {
             }
         }
         // 除第一列为时间外，其他表格均按照第一列指标由高到低顺序排列，如为空值，按照维度默认顺序排列
-        long tmp = dataModel.getColumnHeadFields().stream().
-                filter(headField -> 
-                headField.getExtInfos().get("sortType") != null 
-                && !"NONE".equals(headField.getExtInfos().get("sortType")))
-                .count();
+//        long tmp = dataModel.getColumnHeadFields().stream().
+//                filter(headField -> 
+//                headField.getExtInfos().get("sortType") != null 
+//                && !"NONE".equals(headField.getExtInfos().get("sortType")))
+//                .count();
 //		String firstCol = dataModel.getRowHeadFields().get(0)
 //				.getNodeUniqueName();
 //		if (StringUtils.isNotEmpty(firstCol) && firstCol.contains("SUMMARY")) {
