@@ -30,10 +30,11 @@
 
 .ui-table-cell {
     background: #FFF;
-    border-right: 1px solid #cfebf6;
+    border-right: 1px solid #CFEBF6;
+    border-bottom: 1px solid #E6E6E6;
     height: 40px;
     line-height: 30px;
-    padding: 0 9px 0 10px;
+    padding: 0 9px;
     color: #555;
     margin: 0;
     max-width: 200px;
@@ -50,13 +51,15 @@
 .ui-table-hcell,
 .ui-table-rowhcell {
     position: relative;
-    color: #000;
+    background: #E7F9FE;
+    border-right: 1px solid #CFEBF6;
+    border-bottom: 1px solid #E6E6E6;
+    color: #727272;
     height: 40px;
     line-height: 30px;
-    padding: 0 9px 0 5px;
+    padding: 0 9px;
     margin: 0;
-    /*vertical-align: middle;*/
-    border-right: 1px solid #E7F9FE;
+    vertical-align: middle;
     cursor: default;
     font-weight: normal;
     text-overflow: ellipsis;

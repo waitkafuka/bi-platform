@@ -11,7 +11,8 @@ define([
         'report/component-box/main-view',
         'report/edit/canvas/edit-comp-view',
         'report/edit/canvas/edit-btns-template',
-        'report/edit/canvas/guides-template'
+        'report/edit/canvas/guides-template',
+        'report/global-menu-btns/main-view'
     ],
     function (
         template,
@@ -21,7 +22,8 @@ define([
         ComponentBoxView,
         EditCompView,
         editBtnsTemplate,
-        guidesTemplate
+        guidesTemplate,
+        GlobalMenuView
     ) {
 
         return Backbone.View.extend({
@@ -47,6 +49,13 @@ define([
              */
             initialize: function (option) {
                 var that = this;
+
+                // 初始化工具栏菜单模块
+                that.globalMenuView = new GlobalMenuView({
+                    el: that.el,
+                    reportId: that.id,
+                    canvasView: that
+                });
 
                 // 初始化工具箱
                 that.compBoxView = new ComponentBoxView({
