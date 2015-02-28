@@ -932,13 +932,13 @@
             this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
-            options.roamController = {
-                show: true,
-                x: 'right',
-                mapTypeControl: {
-                    'china': true
-                }
-            };
+//            options.roamController = {
+//                show: true,
+//                x: 'right',
+//                mapTypeControl: {
+//                    'china': true
+//                }
+//            };
             // TODO:需要后端返回最大最小值
             options.dataRange = {
                 min: this._mapMinValue,
