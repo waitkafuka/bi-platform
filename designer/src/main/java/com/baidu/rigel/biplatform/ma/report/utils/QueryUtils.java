@@ -141,7 +141,7 @@ public final class QueryUtils {
         questionModel.setCube(cube);
         questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
-        if (orderDesc != null) {
+        if (orderDesc != null && !queryAction.isChartQuery()) {
             SortType sortType = SortType.valueOf(orderDesc.getOrderType());
             String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
             SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
