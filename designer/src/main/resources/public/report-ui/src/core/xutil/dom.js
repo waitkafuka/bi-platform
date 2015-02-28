@@ -211,7 +211,7 @@
             var tmpEl = DOM.getParent(el);
             tmpEl && tmpEl.removeChild(el);
         }
-    }
+    };
     /**
      * 获取上一个元素
      *
@@ -220,6 +220,15 @@
      */
     DOM.getPreviousSibling = function(el) {
         return el.previousElementSibling || el.previousSibling;
+    };
+    /**
+     * 获取下一个元素
+     *
+     * @public
+     * @param {HTMLElement} el Element 对象
+     */
+    DOM.getNextSibling = function(el) {
+        return el.nextElementSibling || el.nextSibling;
     };
     /**
      * 挂载事件。

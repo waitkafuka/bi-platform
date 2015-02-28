@@ -886,8 +886,8 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
             List<Map<String, String>> mainDims = Lists.newArrayList();
             Map<String, String> root =  genRootDimCaption(table);
-                areaContext.setCurBreadCrumPath(root);
             if (action.getRows().size() >= 2) {
+            	areaContext.setCurBreadCrumPath(root);
 //                    resultMap.put("mainDimNodes", dims);
                     // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                 if (!root.get("uniqName").toLowerCase().contains("all")) {
@@ -1412,7 +1412,7 @@ public class QueryDataResource extends BaseResource {
                 QueryAction recordAction = queryBuildService.generateTableQueryAction(model,
                         areaId, previousContext.getParams());
                 runTimeModel.updateDatas(recordAction, result);
-            }
+            }  
             areaContext.getQueryStatus().add(result);
             reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -1435,19 +1435,6 @@ public class QueryDataResource extends BaseResource {
                 }
             }
             if (breadCrum != null) {
-//                List<Map<String, String>> mainDims = Lists.newArrayList();
-//                do {
-//                    Map<String, String> dims3 = Maps.newHashMap();
-//                    dims3.put("uniqName", drillTargetUniqueName);
-//                    String showName = genShowName(drillTargetUniqueName);
-//                    showName = areaContext.getCurBreadCrumPath().get("showName");
-//                    dims3.put("showName", showName);
-//                    mainDims.add(dims3);
-//                    drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
-//                } while (drillTargetUniqueName != null 
-//                        && !drillTargetUniqueName.toLowerCase().contains("all"));
-//                Collections.reverse(mainDims);
-//                breadCrum = mainDims;
                 resultMap.put("mainDimNodes", breadCrum);
             }
             resultMap.put("reportTemplateId", reportId);
