@@ -15,6 +15,7 @@
     var domChildren = xutil.dom.children;
     var domGetParent = xutil.dom.getParent;
     var getPreviousSibling = xutil.dom.getPreviousSibling;
+    var getNextSibling = xutil.dom.getNextSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
     var isArray = xutil.lang.isArray;
@@ -38,9 +39,9 @@
                 var type = this._sType;
                 // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                    '<div class="' + type + '-header">',
+                        '<div class="' + type + '-header">',
                     '</div>',
-                    '<div class="' + type + '-content"></div>'
+                        '<div class="' + type + '-content"></div>'
                 ].join('');
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
@@ -167,10 +168,10 @@
                 // 多选
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
                     measureHtml.push(
-                        '<label>',allMeasures[i],'</label>',
                         '<input type="radio" name="echarts-candidate" ',
-                            isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                        '/>'
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>',
+                        '<label>',allMeasures[i],'</label>'
                     );
                 }
                 this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
@@ -187,10 +188,10 @@
                 // 多选
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
                     measureHtml.push(
-                        '<label>',allMeasures[i],'</label>',
                         '<input type="checkbox" name="echarts-candidate" ',
-                            isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                        '/>'
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>',
+                        '<label>',allMeasures[i],'</label>'
                     );
                 }
                 this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
@@ -199,9 +200,9 @@
                 // 绑定备选区按钮事件
                 this._eCandidateBox = domChildren(this._eHeader)[0];
                 attachEvent(this._eCandidateBox, 'click', function (ev) {
-                        var oEv = ev || window.event;
-                        var target = oEv.target || oEv.srcElement;
-                        candidateClick.call(me, target);
+                    var oEv = ev || window.event;
+                    var target = oEv.target || oEv.srcElement;
+                    candidateClick.call(me, target);
                 });
 
             }
@@ -212,7 +213,7 @@
         var resultName = '';
 
         if (oTarget.tagName.toLowerCase() === 'input') {
-            resultName = getPreviousSibling(oTarget).innerHTML;
+            resultName = getNextSibling(oTarget).innerHTML;
             if (oTarget.type === 'radio') {
                 this._defaultMeasures = [resultName];
             }
@@ -437,7 +438,7 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                   // yAxisOption.boundaryGap = [0.1, 0.1];
+                    // yAxisOption.boundaryGap = [0.1, 0.1];
                     yAxisOption.splitNumber = 5;
 //                    if (option.title.text) {
 //                        yAxisOption.axisLabel = {
@@ -910,13 +911,7 @@
      * @private
      */
     UI_E_CHART_CLASS.$initOptions = function () {
-        var options = {
-            grid: {
-                x: '90px',
-                y: '30px',
-                borderWidth: 0
-            }
-        };
+        var options = {};
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
@@ -926,6 +921,13 @@
             || this._chartType === 'line'
             || this._chartType === 'pie'
         ) {
+            if (this._chartType !== 'pie') {
+                options.grid = {
+                    x: '90px',
+                    y: '30px',
+                    borderWidth: 0
+                }
+            }
             this.$setupDataRoom(options);
             this.$setupToolBox(options);
             this.$setupYAxis(options);
