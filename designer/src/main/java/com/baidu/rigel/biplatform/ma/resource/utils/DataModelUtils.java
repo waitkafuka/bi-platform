@@ -173,7 +173,12 @@ public final class DataModelUtils {
                 headField.getExtInfos().get("sortType") != null 
                 && !"NONE".equals(headField.getExtInfos().get("sortType")))
                 .count();
-        String firstCol = dataModel.getRowHeadFields().get(0).getNodeUniqueName(); 
+		String firstCol = dataModel.getRowHeadFields().get(0)
+				.getNodeUniqueName();
+		if (StringUtils.isNotEmpty(firstCol) && firstCol.contains("SUMMARY")) {
+			firstCol = dataModel.getRowHeadFields().get(0).getChildren().get(0)
+					.getNodeUniqueName();
+		}
         if (!firstCol.contains("ownertable_Time") && tmp == 0) {
             String colUniqueName = dataModel.getColumnHeadFields().get(0).getValue();
             SortRecord sortRecord = new SortRecord(SortRecord.SortType.DESC, colUniqueName, 500);

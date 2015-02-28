@@ -71,20 +71,14 @@ public final class CallbackServiceInvoker {
     public static CallbackResponse invokeCallback(String url, Map<String, String> params,
             CallbackType type, long timeOutMillSecond) {
         long begin = System.currentTimeMillis();
-        LOG.info("[INFO] --- --- begin invoke callback service ... ...");
-        LOG.info("[INFO] --- --- params : {}", params);
-        LOG.info("[INFO] --- --- request url : {}", url);
-        LOG.info("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
-        LOG.info("[INFO] --- --- callback type : {}", type.name());
-        LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
-        LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+        
         if (timeOutMillSecond <= 0) {
             timeOutMillSecond = 1000;
         }
         params.put(HttpRequest.SOCKET_TIME_OUT, String.valueOf(timeOutMillSecond));
         // TODO 这里先做容错处理，待小明来来了以后排查具体原因
-        if (url.contains("?")) {
-        	String[] tmp = url.split("?");
+        if (url.contains("\\?")) {
+        	String[] tmp = url.split("\\?");
         	url = tmp[0];
         	String[] paramsMap = tmp[1].split("&");
         	for (String str : paramsMap) {
@@ -95,6 +89,13 @@ public final class CallbackServiceInvoker {
         		params.put(tmp[0], tmp[1]);
         	}
         }
+        LOG.info("[INFO] --- --- begin invoke callback service ... ...");
+        LOG.info("[INFO] --- --- params : {}", params);
+        LOG.info("[INFO] --- --- request url : {}", url);
+        LOG.info("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
+        LOG.info("[INFO] --- --- callback type : {}", type.name());
+        LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
+        LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
         String responseStr = HttpRequest.sendPost1(url, params);
         CallbackResponse response = convertStrToResponse(responseStr, type);
         LOG.info("[INFO] --- --- resposne : {}", response);
