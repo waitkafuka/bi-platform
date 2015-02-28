@@ -543,16 +543,17 @@
             if (series.length === 1 || chartTypeLen >= 2) {
                 return;
             }
-            toolbox = {
-                show: true,
-                orient : 'horizontal',
-                x: 'right',
-                y : 'top',
-                feature : {
-                    magicType : {show: true, type: ['stack', 'tiled']}
-                }
-            };
-            options.toolbox = toolbox;
+            // toolbox是工具条
+//            toolbox = {
+//                show: true,
+//                orient : 'horizontal',
+//                x: 'right',
+//                y : 'top',
+//                feature : {
+//                    magicType : {show: true, type: ['stack', 'tiled']}
+//                }
+//            };
+//            options.toolbox = toolbox;
         }
 
 
