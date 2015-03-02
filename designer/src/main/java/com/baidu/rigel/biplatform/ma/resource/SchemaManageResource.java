@@ -183,7 +183,9 @@ public class SchemaManageResource {
             }
             if (measure instanceof CallbackMeasure) {
                 CallbackMeasure m = (CallbackMeasure) measure;
-                measureObj.setUrl(HttpUrlUtils.generateTotalUrl(m.getCallbackUrl(), m.getCallbackParams()));
+                Map<String, String> params = m.getCallbackParams() == null ? 
+                		HttpUrlUtils.getParams(m.getCallbackUrl()) : m.getCallbackParams();
+                measureObj.setUrl(HttpUrlUtils.generateTotalUrl(m.getCallbackUrl(), params));
                 Map<String, String> prop = Maps.newHashMap();
                 prop.put(Constants.SOCKET_TIME_OUT_KEY, String.valueOf(m.getSocketTimeOut()));
                 measureObj.setProperties(prop);

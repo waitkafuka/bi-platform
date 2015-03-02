@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
@@ -64,6 +65,7 @@ import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
+import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
@@ -149,6 +151,8 @@ public final class QueryUtils {
         }
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
+        // TODO 需要开发通用工具包 将常量定义到通用工具包中
+        questionModel.getRequestParams().put("NEED_OTHERS", "1");
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
     }
@@ -497,7 +501,15 @@ public final class QueryUtils {
             for (String elementId : candInds.keySet()) {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
                         area.getCubeId(), elementId);
-                measures.put(element.getName(), (Measure) element);
+                if (element instanceof CallbackMeasure) {
+                	CallbackMeasure m = DeepcopyUtils.deepCopy((CallbackMeasure) element);
+                	String url = ((CallbackMeasure) element).getCallbackUrl();
+                	m.setCallbackUrl(HttpUrlUtils.getBaseUrl(url));
+                	m.setCallbackParams(HttpUrlUtils.getParams(url));
+                	measures.put(m.getName(), m);
+                } else {
+                	measures.put(element.getName(), (Measure) element);
+                }
             }
         }
         if (filterDims != null ) { // && filterDims.get(area.getCubeId()) != null) {
