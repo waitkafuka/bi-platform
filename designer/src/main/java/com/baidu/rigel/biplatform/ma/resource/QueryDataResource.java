@@ -75,6 +75,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
+import com.baidu.rigel.biplatform.ma.report.query.chart.ChartShowType;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo.SeriesUnitType;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
@@ -809,6 +810,12 @@ public class QueryDataResource extends BaseResource {
                 if (action != null) {
                     action.setChartQuery(true);
                 }
+                boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
+                //TODO to be delete
+                boolean isPieChart = isPieChart(getChartTypeWithExtendArea(model, targetArea));
+                if (!timeLine && isPieChart) {
+                	action.setNeedOthers(true);
+                }
             } catch (QueryModelBuildException e) {
                 String msg = "没有配置时间维度，不能使用liteOlap趋势分析图！";
                 logger.warn(msg);
@@ -829,10 +836,6 @@ public class QueryDataResource extends BaseResource {
             if (action == null || CollectionUtils.isEmpty(action.getRows())
                     || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
-            }
-            boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
-            if (action.isChartQuery() && !timeLine) {
-            	action.setNeedOthers(true);
             }
             result = reportModelQueryService.queryDatas(model, action,
                     true, true, areaContext.getParams(), securityKey);
@@ -928,6 +931,15 @@ public class QueryDataResource extends BaseResource {
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
     }
+
+	private boolean isPieChart(Map<String, String> chartType) {
+		for (String chart : chartType.values()) {
+			if (ChartShowType.PIE.name().toLowerCase().equals(chart)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	private boolean isTimeDimOnFirstCol(ReportDesignModel model,
 			ExtendArea targetArea, QueryAction action) {
@@ -1861,6 +1873,12 @@ public class QueryDataResource extends BaseResource {
                 if (action != null) {
                     action.setChartQuery(true);
                 }
+                //TODO to be delete
+                boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
+                boolean isPieChart = isPieChart(getChartTypeWithExtendArea(model, targetArea));
+                if (!timeLine && isPieChart) {
+                	action.setNeedOthers(true);
+                }
             } catch (QueryModelBuildException e) {
                 String msg = "没有配置时间维度，不能使用liteOlap趋势分析图！";
                 logger.warn(msg);
@@ -1879,10 +1897,6 @@ public class QueryDataResource extends BaseResource {
             if (action == null || CollectionUtils.isEmpty(action.getRows())
                     || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
-            }
-            boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
-            if (action.isChartQuery() && !timeLine) {
-            	action.setNeedOthers(true);
             }
             areaContext.getParams().remove(Constants.CHART_SELECTED_MEASURE);
             result = reportModelQueryService.queryDatas(model, action,
