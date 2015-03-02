@@ -1873,8 +1873,10 @@ public class QueryDataResource extends BaseResource {
             if (action.isChartQuery()) {
             	action.setNeedOthers(true);
             }
+            areaContext.getParams().remove(Constants.CHART_SELECTED_MEASURE);
             result = reportModelQueryService.queryDatas(model, action,
                     true, true, areaContext.getParams(), securityKey);
+            
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);

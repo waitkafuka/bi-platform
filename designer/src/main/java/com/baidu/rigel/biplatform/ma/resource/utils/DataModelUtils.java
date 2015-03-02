@@ -178,14 +178,14 @@ public final class DataModelUtils {
 //			firstCol = dataModel.getRowHeadFields().get(0).getChildren().get(0)
 //					.getNodeUniqueName();
 //		}
-//        if (!firstCol.contains("ownertable_Time") && tmp == 0) {
+//		boolean hasDataOnFirstCol = dataModel.getColumnBaseData().get(0).get(0) != null;
+//        if (!firstCol.contains("ownertable_Time") && tmp == 0 && hasDataOnFirstCol) {
 //            String colUniqueName = dataModel.getColumnHeadFields().get(0).getValue();
 //            SortRecord sortRecord = new SortRecord(SortRecord.SortType.DESC, colUniqueName, 500);
 //            com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord);
 //        }
         List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
         List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
-        
         
         // build colField
         List<List<ColField>> colFields = new ArrayList<List<ColField>>();
