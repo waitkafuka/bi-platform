@@ -419,13 +419,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 }
                 
                 if (context.get("time_line") != null) { //时间序列图
-            		orderDesc = new QueryAction.MeasureOrderDesc(tmp[0].getName(), "ASC", Integer.MAX_VALUE);
+            		orderDesc = new QueryAction.MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
             	}
             } else {
             	if (context.get("time_line") != null) { //时间序列图
             		orderDesc = new QueryAction.MeasureOrderDesc(
             				measures.get(topSet.getMeasureId()).getName(), 
-            				"ASC", Integer.MAX_VALUE);
+            				"NONE", Integer.MAX_VALUE);
             	} else {
         			String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
 					orderDesc = new QueryAction.MeasureOrderDesc(

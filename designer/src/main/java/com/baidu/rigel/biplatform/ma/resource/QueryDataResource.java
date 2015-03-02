@@ -830,7 +830,8 @@ public class QueryDataResource extends BaseResource {
                     || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
-            if (action.isChartQuery()) {
+            boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
+            if (action.isChartQuery() && !timeLine) {
             	action.setNeedOthers(true);
             }
             result = reportModelQueryService.queryDatas(model, action,
@@ -927,6 +928,15 @@ public class QueryDataResource extends BaseResource {
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
     }
+
+	private boolean isTimeDimOnFirstCol(ReportDesignModel model,
+			ExtendArea targetArea, QueryAction action) {
+		Item item = action.getRows().keySet().toArray(new Item[0])[0];
+		OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
+		        targetArea.getCubeId(), item.getOlapElementId());
+		boolean timeLine = element instanceof TimeDimension;
+		return timeLine;
+	}
 
     /**
      * 
@@ -1870,7 +1880,8 @@ public class QueryDataResource extends BaseResource {
                     || CollectionUtils.isEmpty(action.getColumns())) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
-            if (action.isChartQuery()) {
+            boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
+            if (action.isChartQuery() && !timeLine) {
             	action.setNeedOthers(true);
             }
             areaContext.getParams().remove(Constants.CHART_SELECTED_MEASURE);
