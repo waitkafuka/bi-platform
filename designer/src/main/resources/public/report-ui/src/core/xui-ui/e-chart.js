@@ -953,7 +953,9 @@
             };
         }
         if (this._chartType === 'pie') {
-            options.calculable = true;
+            //options.calculable = true;
+        	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
+            options.calculable = false;
         }
         this.$setupLegend(options);
         return options;
