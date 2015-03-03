@@ -168,8 +168,7 @@
     UI_E_CHART_CLASS.$renderCheckBoxs = function () {
         var me = this;
         var allMeasures = me._allMeasures;
-        var defaultMeasures = this.$getDefaultMeasures(this._chartType);
-        //var defaultMeasures = this._defaultMeasures;
+        var defaultMeasures = me._defaultMeasures;
         var measureHtml = [];
         // 渲染图形中备选区模块
         if (allMeasures.length > 0) {
@@ -965,7 +964,9 @@
             };
         }
         if (this._chartType === 'pie') {
-            options.calculable = true;
+            //options.calculable = true;
+        	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
+            options.calculable = false;
         }
         this.$setupLegend(options);
         return options;
