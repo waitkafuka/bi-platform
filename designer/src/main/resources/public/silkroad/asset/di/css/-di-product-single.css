@@ -3238,7 +3238,7 @@ li {
  */
 .di-o_o-block {
     position: relative;
-    margin: 0 10px 20px 0;
+    /*margin: 0 10px 20px 0;*/
     border-radius: 3px;
 }
 .di-o_o-line {
@@ -3770,7 +3770,7 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 6px 0px 10px 10px;
+    padding: 3px 0px 0px 10px;
     overflow: hidden;
     line-height: 18px;
 }
@@ -3815,9 +3815,8 @@ div.di-dim-level-find-msg span{
 
 .comp-box {
     width: 100%;
-    height: 90%;
+    height: 100%;
     overflow: auto;
-    margin-top: 22px;
 }
 .hide {
     display: none;
