@@ -417,7 +417,7 @@ define([
              */
             addEditBtns: function ($component) {
                 $component.find('.con-edit-btns').remove();
-                $component.prepend(editBtnsTemplate.render());
+                $component.append(editBtnsTemplate.render());
                 $component.find('.comp-box').css('margin-top', 0);
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {
