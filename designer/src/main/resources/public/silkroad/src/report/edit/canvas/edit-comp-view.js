@@ -26,7 +26,26 @@ define([
         'report/edit/canvas/norm-info-depict-template',
         'report/edit/canvas/filter-blank-line-template'
     ],
-    function (template, dialog, Constant, EditCompModel, compSettingDefaultTemplate, compSettingTimeTemplate, compSettingLITEOLAPTemplate, compSettingChartTemplate, vuiSettingSelectTemplate, defaultSelectedTimeSettingTemplate, defaultSelectedRangeTimeSettingTemplate, dataFormatSettingTemplate, topnSettingTemplate, compRelationEventSettingTemplate, FloatWindow, indMenuTemplate, normInfoDepictTemplate, filterBlankLineTemplate) {
+    function (
+        template,
+        dialog,
+        Constant,
+        EditCompModel,
+        compSettingDefaultTemplate,
+        compSettingTimeTemplate,
+        compSettingLITEOLAPTemplate,
+        compSettingChartTemplate,
+        vuiSettingSelectTemplate,
+        defaultSelectedTimeSettingTemplate,
+        defaultSelectedRangeTimeSettingTemplate,
+        dataFormatSettingTemplate,
+        topnSettingTemplate,
+        compRelationEventSettingTemplate,
+        FloatWindow,
+        indMenuTemplate,
+        normInfoDepictTemplate,
+        filterBlankLineTemplate
+    ) {
 
         return Backbone.View.extend({
             events: {
@@ -1068,6 +1087,7 @@ define([
                 var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
+                json.name = id;
                 this.model.canvasModel.saveJsonVm();
             },
             /**

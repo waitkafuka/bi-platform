@@ -11,7 +11,8 @@ define([
         'report/component-box/main-view',
         'report/edit/canvas/edit-comp-view',
         'report/edit/canvas/edit-btns-template',
-        'report/edit/canvas/guides-template'
+        'report/edit/canvas/guides-template',
+        'report/global-menu-btns/main-view'
     ],
     function (
         template,
@@ -21,7 +22,8 @@ define([
         ComponentBoxView,
         EditCompView,
         editBtnsTemplate,
-        guidesTemplate
+        guidesTemplate,
+        GlobalMenuView
     ) {
 
         return Backbone.View.extend({
@@ -47,6 +49,13 @@ define([
              */
             initialize: function (option) {
                 var that = this;
+
+                // 初始化工具栏菜单模块
+                that.globalMenuView = new GlobalMenuView({
+                    el: that.el,
+                    reportId: that.id,
+                    canvasView: that
+                });
 
                 // 初始化工具箱
                 that.compBoxView = new ComponentBoxView({
@@ -340,9 +349,9 @@ define([
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 50, 50);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'H_BUTTON', 55, 55);
+                that.dragWidthHeight($component, 'H_BUTTON', 56, 56, 88);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'TIME_COMP', 56, 56);
+                that.dragWidthHeight($component, 'TIME_COMP', 56, 56, 220);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
@@ -356,11 +365,14 @@ define([
              * @param {string} type 组件类型
              * @param {number} minHeight 组件拖拽最小高度
              * @param {number} maxHeight 组件拖拽最大高度
+             * @param {number} minWidth 组件拖拽最小宽度
+             * @param {number} maxWidth 组件拖拽最大宽度
              * @public
              */
-            dragWidthHeight: function ($ele, type, minHeight, maxHeight) {
+            dragWidthHeight: function ($ele, type, minHeight, maxHeight, minWidth, maxWidth) {
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minHeight", minHeight);
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "maxHeight", maxHeight);
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minWidth", minWidth);
             },
 
             /**
@@ -405,7 +417,7 @@ define([
              */
             addEditBtns: function ($component) {
                 $component.find('.con-edit-btns').remove();
-                $component.prepend(editBtnsTemplate.render());
+                $component.append(editBtnsTemplate.render());
                 $component.find('.comp-box').css('margin-top', 0);
                 // 文本框编辑数据及关联隐藏
                 for (var i = 0; i < $component.length; i ++) {

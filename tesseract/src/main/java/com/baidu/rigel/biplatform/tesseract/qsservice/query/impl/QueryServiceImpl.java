@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.qsservice.query.impl;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -33,11 +34,13 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.CallbackCondition;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
@@ -60,6 +63,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
+import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -166,8 +170,10 @@ public class QueryServiceImpl implements QueryService {
                         DataModel dm = null;
                         if (con instanceof CallbackCondition) {
                             try {
-                                TesseractResultSet resultSet = callbackSearchService.query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, context, questionModel.isUseIndex(),null));
-                                dm = new DataModelBuilder(resultSet, context).build();
+                                TesseractResultSet resultSet = callbackSearchService
+                                        .query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, 
+                                        context, questionModel.isUseIndex(),null));
+                                dm = new DataModelBuilder(resultSet, context).build(true);
                             } catch (Exception e) {
                                 logger.error("catch error when process callback measure {}",e.getMessage());
                                 throw new RuntimeException(e);
@@ -185,7 +191,8 @@ public class QueryServiceImpl implements QueryService {
             result = executeQuery(dataSourceInfo, cube, queryContext,questionModel.isUseIndex(), questionModel.getPageInfo());
         }
         if (result != null) {
-            result = sortAndTrunc(result, questionModel.getSortRecord());
+            result = sortAndTrunc(result, questionModel.getSortRecord(), 
+            		questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
             if (questionModel.isFilterBlank()) {
                 DataModelUtils.filterBlankRow(result);
             }
@@ -203,7 +210,7 @@ public class QueryServiceImpl implements QueryService {
         if (statDimensionNode(queryContext.getRowMemberTrees(), false, false) == 0
                 || (statDimensionNode(queryContext.getColumnMemberTrees(), false, false) == 0 && CollectionUtils
                         .isEmpty(queryContext.getQueryMeasures()))) {
-            return new DataModelBuilder(null, queryContext).build();
+            return new DataModelBuilder(null, queryContext).build(false);
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query request.");
         current = System.currentTimeMillis();
@@ -225,7 +232,7 @@ public class QueryServiceImpl implements QueryService {
 
             }
             
-            result = new DataModelBuilder(resultSet, queryContext).build();
+            result = new DataModelBuilder(resultSet, queryContext).build(false);
         } catch (IndexAndSearchException e) {
             logger.error("query occur when search queryRequest：" + queryContext, e);
             throw new MiniCubeQueryException(e);
@@ -238,9 +245,10 @@ public class QueryServiceImpl implements QueryService {
      * 排序并截断结果集，默认显示500条纪录
      * @param result
      * @param sortRecord
+     * @param needOthers 
      * @return DataModel
      */
-    private DataModel sortAndTrunc(DataModel result, SortRecord sortRecord) {
+    private DataModel sortAndTrunc(DataModel result, SortRecord sortRecord, String needOthers) {
         if (sortRecord != null) {
             DataModelUtils.sortDataModelBySort(result, sortRecord);
         }
@@ -248,8 +256,56 @@ public class QueryServiceImpl implements QueryService {
             return result;
         }
 //            int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
+        // 二八原则进行统计计算 
+        if (TesseractConstant.NEED_OTHERS_VALUE.equals(needOthers)) {
+        	//TODO 此处先简化计算，由于图形会走此处逻辑，并且图形不包含汇总合集数据 后续考虑处理包含汇总合集的情况
+        	return tonNSetting4Chart(result, sortRecord);
+        }
         return DataModelUtils.truncModel(result, sortRecord.getRecordSize()); 
     }
+
+    /**
+     * 
+     * @param result
+     * @param sortRecord
+     * @return DataModel
+     */
+	private DataModel tonNSetting4Chart(DataModel result, SortRecord sortRecord) {
+		BigDecimal sum = BigDecimal.ZERO;
+		for (BigDecimal tmp : result.getColumnBaseData().get(0)) {
+			//TODO 如果是回调指标，这里需要如何处理？？？？
+			if (tmp == null) {
+				continue;
+			}
+			sum = sum.add(tmp);
+		}
+		// 此处采用默认计算
+		result = DataModelUtils.truncModel(result, sortRecord.getRecordSize() - 1); 
+		BigDecimal sum1 = BigDecimal.ZERO;
+		for (BigDecimal tmp : result.getColumnBaseData().get(0)) {
+			//TODO 如果是回调指标，这里需要如何处理？？？？
+			if (tmp == null) {
+				continue;
+			}
+			sum1 = sum1.add(tmp);
+		}
+		BigDecimal other = null;
+		if (sum1 != BigDecimal.ZERO) {
+			other = sum.subtract(sum1);
+		}
+		result.getColumnBaseData().get(0).add(other);
+		HeadField otherRowField = DeepcopyUtils.deepCopy(result.getRowHeadFields().get(0));
+		otherRowField.setSummarizeData(other);
+		String caption = "其余";
+		otherRowField.setCaption(caption);
+		String dimName = MetaNameUtil.getDimNameFromUniqueName(otherRowField.getValue());
+		String uniqueName = "[" + dimName + "].[" + caption + "]";
+		String nodeUniqueName = "{" + uniqueName + "}";
+		otherRowField.setNodeUniqueName(nodeUniqueName);
+		otherRowField.setValue(uniqueName);
+		result.getRowHeadFields().add(otherRowField);
+		return result;
+	}
 
     private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
         if (context == null) {

@@ -225,7 +225,8 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
             dataModelDatas.put(EmptyCondition.getInstance(), new HashMap<>());
         }
         splitResult.getDataModels().forEach((con, dm) -> {
-            con = con.equals(CallbackCondition.getInstance())?EmptyCondition.getInstance() : con;
+            boolean isCallbackCondition = con.equals(CallbackCondition.getInstance());
+            con = isCallbackCondition ? EmptyCondition.getInstance() : con;
             // 先把数据按照列封装了
             DataModelUtils.fillFieldData(dm, FillDataType.COLUMN);
             List<HeadField> columnFields = DataModelUtils.getLeafNodeList(dm.getColumnHeadFields());

@@ -489,8 +489,8 @@ _uOptions     - 下拉选择框
         this._uText.$setSize(width = this.getBodyWidth() - height, height);
 
         // 设置下拉按钮
-        this._uButton.$setSize(height, height);
-        this._uButton.setPosition(width, 0);
+//        this._uButton.$setSize(height, height);
+//        this._uButton.setPosition(width, 0);
     };
 
     /**

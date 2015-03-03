@@ -15,6 +15,7 @@
     var domChildren = xutil.dom.children;
     var domGetParent = xutil.dom.getParent;
     var getPreviousSibling = xutil.dom.getPreviousSibling;
+    var getNextSibling = xutil.dom.getNextSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var formatNumber = xutil.number.formatNumber;
     var isArray = xutil.lang.isArray;
@@ -38,9 +39,9 @@
                 var type = this._sType;
                 // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                    '<div class="' + type + '-header">',
+                        '<div class="' + type + '-header">',
                     '</div>',
-                    '<div class="' + type + '-content"></div>'
+                        '<div class="' + type + '-content"></div>'
                 ].join('');
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
@@ -151,6 +152,15 @@
     //------------------------------------------
 
     /**
+     * 判断图表是否显示图例，并设置默认选项
+     *
+     * @protected
+     */
+    UI_E_CHART_CLASS.$getDefaultMeasures = function (chartType){
+        return (this._defaultMeasures.length > 0 && chartType != 'line') ?
+            [this._defaultMeasures[0]] : this._defaultMeasures;
+    };
+    /**
      * 生成指标切换按钮
      *
      * @protected
@@ -160,17 +170,40 @@
         var allMeasures = me._allMeasures;
         var defaultMeasures = me._defaultMeasures;
         var measureHtml = [];
-
         // 渲染图形中备选区模块
         if (allMeasures.length > 0) {
-            if (this._chartType === 'pie') {
+            if (this._chartType === 'line') {
                 // 多选
+                /**由于商桥的需求，折线图没有checkbox显示
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
                     measureHtml.push(
-                        '<label>',allMeasures[i],'</label>',
+                        '<input type="checkbox" name="echarts-candidate" ',
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>',
+                        '<label>',allMeasures[i],'</label>'
+                    );
+                }
+                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+                    + measureHtml.join('')
+                    + '</div>';
+                // 绑定备选区按钮事件
+                this._eCandidateBox = domChildren(this._eHeader)[0];
+                attachEvent(this._eCandidateBox, 'click', function (ev) {
+                    var oEv = ev || window.event;
+                    var target = oEv.target || oEv.srcElement;
+                    candidateClick.call(me, target);
+                });
+                **/
+            }
+            else {
+                // 单选
+
+                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+                    measureHtml.push(
                         '<input type="radio" name="echarts-candidate" ',
-                            isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                        '/>'
+                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+                        '/>',
+                        '<label>',allMeasures[i],'</label>'
                     );
                 }
                 this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
@@ -183,36 +216,16 @@
                     candidateClick.call(me, target);
                 });
             }
-            else {
-                // 多选
-                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
-                    measureHtml.push(
-                        '<label>',allMeasures[i],'</label>',
-                        '<input type="checkbox" name="echarts-candidate" ',
-                            isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                        '/>'
-                    );
-                }
-                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
-                    + measureHtml.join('')
-                    + '</div>';
-                // 绑定备选区按钮事件
-                this._eCandidateBox = domChildren(this._eHeader)[0];
-                attachEvent(this._eCandidateBox, 'click', function (ev) {
-                        var oEv = ev || window.event;
-                        var target = oEv.target || oEv.srcElement;
-                        candidateClick.call(me, target);
-                });
-
-            }
         }
     };
-    // 备选区按钮点击事件
+
+
+        // 备选区按钮点击事件
     function candidateClick(oTarget) {
         var resultName = '';
 
         if (oTarget.tagName.toLowerCase() === 'input') {
-            resultName = getPreviousSibling(oTarget).innerHTML;
+            resultName = getNextSibling(oTarget).innerHTML;
             if (oTarget.type === 'radio') {
                 this._defaultMeasures = [resultName];
             }
@@ -230,10 +243,7 @@
                 else {
                     this._defaultMeasures = getCurrentCandidate(resultName, this._defaultMeasures);
                 }
-
             }
-
-            //this.$disposeHeader();
             this.$disposeChart();
             this.$createChart(this.$initOptions());
         }
@@ -278,7 +288,6 @@
         var seryKind = {};
         var tempData = [];
         var xAxis = this._aXAxis;
-        var defaultMeasures = this._defaultMeasures;
 
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
@@ -293,6 +302,7 @@
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
+            var defaultMeasures = this.$getDefaultMeasures(ser.type);
             if (defaultMeasures) {
                 if (ser.type === 'bar') {
                     if (isInArray(ser.name, defaultMeasures)) {
@@ -437,7 +447,7 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                   // yAxisOption.boundaryGap = [0.1, 0.1];
+                    // yAxisOption.boundaryGap = [0.1, 0.1];
                     yAxisOption.splitNumber = 5;
 //                    if (option.title.text) {
 //                        yAxisOption.axisLabel = {
@@ -494,8 +504,7 @@
 //            borderWidth: 0.5
         };
         var data = [];
-        var defaultMeasures = this._defaultMeasures;
-
+        var defaultMeasures = this.$getDefaultMeasures(this._chartType);
         if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
@@ -516,7 +525,9 @@
             }
         }
         legend.data = data;
-        options.legend = legend;
+        if (this._chartType === 'line') {
+            options.legend = legend;
+        }
     };
     /**
      * 设置工具箱
@@ -542,16 +553,17 @@
             if (series.length === 1 || chartTypeLen >= 2) {
                 return;
             }
-            toolbox = {
-                show: true,
-                orient : 'horizontal',
-                x: 'right',
-                y : 'top',
-                feature : {
-                    magicType : {show: true, type: ['stack', 'tiled']}
-                }
-            };
-            options.toolbox = toolbox;
+            // toolbox是工具条
+//            toolbox = {
+//                show: true,
+//                orient : 'horizontal',
+//                x: 'right',
+//                y : 'top',
+//                feature : {
+//                    magicType : {show: true, type: ['stack', 'tiled']}
+//                }
+//            };
+//            options.toolbox = toolbox;
         }
 
 
@@ -910,35 +922,37 @@
      * @private
      */
     UI_E_CHART_CLASS.$initOptions = function () {
-        var options = {
-            grid: {
-                x: '90px',
-                y: '30px',
-                borderWidth: 0
-            }
-        };
+        var options = {};
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
+
         if (
             this._chartType === 'column'
             || this._chartType === 'bar'
             || this._chartType === 'line'
             || this._chartType === 'pie'
         ) {
+            if (this._chartType !== 'pie') {
+                options.grid = {
+                    x: '90px',
+                    y: '30px',
+                    borderWidth: 0
+                }
+            }
             this.$setupDataRoom(options);
             this.$setupToolBox(options);
             this.$setupYAxis(options);
             this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
-            options.roamController = {
-                show: true,
-                x: 'right',
-                mapTypeControl: {
-                    'china': true
-                }
-            };
+//            options.roamController = {
+//                show: true,
+//                x: 'right',
+//                mapTypeControl: {
+//                    'china': true
+//                }
+//            };
             // TODO:需要后端返回最大最小值
             options.dataRange = {
                 min: this._mapMinValue,
@@ -950,7 +964,9 @@
             };
         }
         if (this._chartType === 'pie') {
-            options.calculable = true;
+            //options.calculable = true;
+        	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
+            options.calculable = false;
         }
         this.$setupLegend(options);
         return options;

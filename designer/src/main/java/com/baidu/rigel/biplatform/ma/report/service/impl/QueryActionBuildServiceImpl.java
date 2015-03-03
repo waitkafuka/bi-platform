@@ -273,20 +273,26 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             List<String> timeItemIds = runTimeModel.getTimeDimItemIds();
             Item timeDimItem = null;
             for (String timeItemId : timeItemIds) {
-                timeDimItem = targetLogicModel.getItemByOlapElementId(timeItemId);
+                timeDimItem = cpModel.getItemByOlapElementId(timeItemId);
                 if (timeDimItem != null) {
                     break;
                 }
             }
             if (timeDimItem != null && timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
-                Map<String, Object> params = DeepcopyUtils.deepCopy(timeDimItem.getParams());
+                Map<String, Object> params = timeDimItem.getParams();
                 params.put("range", true);
                 timeDimItem.setParams(params);
+                context.put("time_line", timeDimItem);
             }
             if (cpModel != null && !CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
                 cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
             }
-            targetLogicModel = DeepcopyUtils.deepCopy(targetLogicModel);
+            // 修正查询条件，重新设置查询指标
+            Object index = context.get(Constants.CHART_SELECTED_MEASURE);
+            if (index != null) {
+            	modifyModel(cpModel, Integer.valueOf(index.toString()));
+            }
+//            targetLogicModel = DeepcopyUtils.deepCopy(targetLogicModel);
            return generateQueryAction(model.getSchema(),
                cubeId, cpModel, context, logicModelAreaId, false, model);
         }
@@ -294,6 +300,21 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     }
     
     /**
+     * 修正查询条件
+     * @param model
+     * @param index
+     */
+    private void modifyModel(LogicModel model, Integer index) {
+    	Item[] items = new Item[1];
+    	Item[] selMeasures = model.getSelectionMeasures().values().toArray(new Item[0]);
+    	if (index >= selMeasures.length) {
+    		throw new IndexOutOfBoundsException("索引越界");
+    	}
+    	items = new Item[]{ selMeasures[index] };
+		model.resetColumns(items);
+	}
+
+	/**
      * 生成QueryAction
      * 
      * @param targetLogicModel
@@ -396,10 +417,26 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 } else {
                     context.remove(Constants.NEED_LIMITED);
                 }
+                
+                if (context.get("time_line") != null) { //时间序列图
+            		orderDesc = new QueryAction.MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
+            	}
             } else {
-                orderDesc = new QueryAction.MeasureOrderDesc(
-                        measures.get(topSet.getMeasureId()).getName(), 
-                        topSet.getTopType().name(), topSet.getRecordSize());
+            	if (context.get("time_line") != null) { //时间序列图
+            		orderDesc = new QueryAction.MeasureOrderDesc(
+            				measures.get(topSet.getMeasureId()).getName(), 
+            				"NONE", Integer.MAX_VALUE);
+            	} else {
+        			String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
+					orderDesc = new QueryAction.MeasureOrderDesc(
+        					measures.get(olapElementId).getName(), 
+        					topSet.getTopType().name(), topSet.getRecordSize());
+        		}
+//            	else {
+//        			orderDesc = new QueryAction.MeasureOrderDesc(
+//        					measures.get(topSet.getMeasureId()).getName(), 
+//        					topSet.getTopType().name(), topSet.getRecordSize());
+//            	}
             }
         }
         ExtendArea area = reportModel.getExtendById(areaId);

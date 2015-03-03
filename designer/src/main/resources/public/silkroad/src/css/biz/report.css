@@ -206,9 +206,11 @@
 }
 .shell-component .con-edit-btns {
     white-space: nowrap;
-    width: 100%;
-    padding-top: 22px;
+    /*width: 100%;*/
     overflow: hidden;
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 .con-edit-btns .fold {
     cursor: pointer;
@@ -815,5 +817,5 @@
 .shell-component .con-edit-btns span{
     /*border: 1px solid rgba(0, 119, 119, 0.17);*/
     display: none;
-    float: right;
+    float: left;
 }

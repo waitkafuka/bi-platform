@@ -12,22 +12,28 @@ define([
         dialog,
         ComponentMenuTemplate,
         MenuMainModel
-        ) {
+    ) {
         return Backbone.View.extend({
+            // view事件绑定
+            events: {
+                'click .j-global-component': 'shiftMenu',
+                'click .j-button-skin': 'shiftMenu',
+                'click .j-skin-btn': 'chanceTheme'
+                //'click .j-button-line': 'referenceLine'
+            },
             /**
              * 构造函数
              *
              */
-            initialize: function () {
+            initialize: function (option) {
+                this.model = new MenuMainModel({
+                    canvasModel: option.canvasView.model,
+                    reportId: option.reportId
+                });
                 this.model = new MenuMainModel();
-            },
-
-            /**
-             * 组件区域下拉框
-             *
-             */
-            componentMenu: function () {
-                return ComponentMenuTemplate.render();
+                this.canvasView = option.canvasView;
+                // 工具条菜单区域菜单添加
+                this.$el.find('.j-global-menu').html(ComponentMenuTemplate.render());
             },
 
             /**
@@ -80,14 +86,16 @@ define([
                         + type
                         + '/css/-di-product-min.css');
                 $('.skin-menu').hide();
+                // 换肤后刷新报表，完善ecui控件样式更换
+                this.canvasView.showReport();
             },
 
             /**
-             * 更换皮肤
+             * 参考线开关
              *
              * @public
              */
-            referenceLine : function (event) {
+            referenceLine : function () {
                 var imglineurl = 'url(' + '/silkroad/src/css/img/grid.png)';
                 var imgemptyurl = 'url(' + '/silkroad/src/css/img/grid-empty.png)';
                 var $report = $('.report');
@@ -100,23 +108,25 @@ define([
                     $report.css('background-image', imglineurl);
                     dialog.alert('背景参考线已打开');
                 }
-//                // 获取全部参考线
-//                var $line = $('.j-guide-line');
-//                var lineNum = $line.length;
-//                // 根据参考线个数进行对应操作
-//                if (lineNum == 0) {
-//                    dialog.warning('未添加组件，或未找到参考线请添加组件并重试');
-//                }
-//                else {
-//                    if ($line.is(':visible')) {
-//                        $line.hide();
-//                        dialog.alert('参考线已关闭，再次点击启用。');
-//                    }
-//                    else {
-//                        $line.show();
-//                        dialog.alert('参考线已打开，再次点击关闭。');
-//                    }
-//                }
+                /**
+                // 获取全部参考线
+                var $line = $('.j-guide-line');
+                var lineNum = $line.length;
+                // 根据参考线个数进行对应操作
+                if (lineNum == 0) {
+                    dialog.warning('未添加组件，或未找到参考线请添加组件并重试');
+                }
+                else {
+                    if ($line.is(':visible')) {
+                        $line.hide();
+                        dialog.alert('参考线已关闭，再次点击启用。');
+                    }
+                    else {
+                        $line.show();
+                        dialog.alert('参考线已打开，再次点击关闭。');
+                    }
+                }
+                **/
             }
 
         });

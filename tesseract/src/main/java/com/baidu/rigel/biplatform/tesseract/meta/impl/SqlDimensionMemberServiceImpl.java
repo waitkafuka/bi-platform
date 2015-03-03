@@ -122,7 +122,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             long current = System.currentTimeMillis();
             Map<String, MiniCubeMember> members = new TreeMap<String, MiniCubeMember>();
             while (resultSet.next()) {
-                ResultRecord record = resultSet.getCurrentRecord();
+            	
+                ResultRecord record = (ResultRecord) resultSet.getCurrentRecord();
 
                 String value = record.getField(queryLevel.getSource()).toString();
                 if (StringUtils.isBlank(value)) {
