@@ -9,9 +9,9 @@
 }
 .ui-table-head {
     border-top: 1px solid #cfebf6;
-    border-bottom: 1px solid #cfebf6;
+    /*border-bottom: 1px solid #cfebf6;*/
     border-right: 1px solid #E7F9FE;
-    border-left: 1px solid #cfebf6;
+    /*border-left: 1px solid #cfebf6;*/
     height: 40px;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -19,19 +19,20 @@
     user-select: none;
 }
 .ui-table-locked-head {
-    border: 1px solid #cfebf6;
+    border-top: 1px solid #cfebf6;
+    border-bottom: 1px solid #e7ecee;
     height: 30px;
     overflow: hidden;
 }
 .ui-table-layout, .ui-table-locked-layout {
-    border-left: 1px solid #cfebf6;
-    border-right: 1px solid #cfebf6;
+    /*border-left: 1px solid #cfebf6;*/
+    border-right: 1px solid #FFF;
 }
 
 .ui-table-cell {
     background: #FFF;
-    border-right: 1px solid #CFEBF6;
-    border-bottom: 1px solid #E6E6E6;
+    border-left: 1px solid #CFEBF6;
+    border-bottom: 1px solid #e7ecee;
     height: 40px;
     line-height: 30px;
     padding: 0 9px;
@@ -51,9 +52,8 @@
 .ui-table-hcell,
 .ui-table-rowhcell {
     position: relative;
-    background: #E7F9FE;
-    border-right: 1px solid #CFEBF6;
-    border-bottom: 1px solid #E6E6E6;
+    border-left: 1px solid #CFEBF6;
+    border-bottom: 1px solid #e7ecee;
     color: #727272;
     height: 40px;
     line-height: 30px;
@@ -158,8 +158,7 @@
 .ui-table .ui-vscrollbar {
     width: 7px;
     background: #FFF;
-    padding: 30px 0 0 0;
-    border-right: 1px solid #cfebf6;
+    padding: 40px 5px 0 8px;
     border-bottom: 1px solid #cfebf6;
 }
 .ui-table .ui-vscrollbar .ui-button {
@@ -170,7 +169,6 @@
 }
 .ui-table .ui-vscrollbar .ui-button-hover {
     padding: 0;
-    margin: 0;
     cursor: default;
     border-radius: 0;
     -webkit-border-radius: 0;
@@ -184,9 +182,9 @@
     border: 0;
     background: #E7F9FE;
     overflow: hidden;
-    border-bottom: 1px solid #cfebf6;
-    border-right: 1px solid #E7F9FE;
-    border-top: 1px solid #E7F9FE;
+    border-bottom: 1px solid #e7ecee;
+    border-right: 1px solid #cfebf6;
+    border-top: 1px solid #cfebf6;
     border-radius: 0;
 }
 .ui-table .ui-vscrollbar-next {
@@ -202,6 +200,7 @@
     width: 7px;
     background: #b5b5b5;
     border-radius: 4px;
+    margin-left: 8px;
 }
 /* 表格横向滚动条 */
 .ui-table .ui-hscrollbar {

@@ -1087,6 +1087,7 @@ define([
                 var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
                 json.dimId = id;
+                json.name = id;
                 this.model.canvasModel.saveJsonVm();
             },
             /**

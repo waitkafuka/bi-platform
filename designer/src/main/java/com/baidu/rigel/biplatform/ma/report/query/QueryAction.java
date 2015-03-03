@@ -80,7 +80,15 @@ public class QueryAction implements Serializable {
     
     private MeasureOrderDesc measureOrderDesc;
 
+    /**
+     * 
+     */
     private boolean filterBlank = false;
+    
+    /**
+     * 是否需要采用二八原则进行统计分析
+     */
+    private boolean needOthers = false;
     
     
     /**
@@ -313,6 +321,13 @@ public class QueryAction implements Serializable {
     public boolean isFilterBlank() {
         return filterBlank;
     }
-    
+
+	public boolean isNeedOthers() {
+		return needOthers;
+	}
+
+	public void setNeedOthers(boolean needOthers) {
+		this.needOthers = needOthers;
+	}
     
 }

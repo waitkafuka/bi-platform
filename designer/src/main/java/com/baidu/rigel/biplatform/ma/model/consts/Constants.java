@@ -94,4 +94,9 @@ public interface Constants {
      */
     String IN_EDITOR = "isEdit";
     
+    /**
+     * 统计图当前选中索引
+     */
+    String CHART_SELECTED_MEASURE = "chartSelectedMeasureIndex";
+    
 }

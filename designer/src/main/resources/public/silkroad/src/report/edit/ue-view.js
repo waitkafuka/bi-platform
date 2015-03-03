@@ -72,7 +72,8 @@ define(function () {
          * @public
          */
         setSize: function () {
-            var height = $(window).height() - $('.j-nav').height();
+            var globalBtnHeight = 34 + 2; // 34（高度）+ 2（外边距）
+            var height = $(window).height() - $('.j-nav').height() - globalBtnHeight;
             $('.j-scroll-data-sources').height(height);
             var $report = $('.j-report');
             var otherHeight = $report.outerHeight(true) - $report.height();
@@ -92,7 +93,7 @@ define(function () {
         initEditReportBodyScroll: function () {
             var $window = $(window);
             var $scrollDataSources = $('.j-scroll-data-sources');
-            var navHeight = $('.j-nav').height();
+            var navHeight = $('.j-nav').height() + 34;
             var $foot = $('.j-foot');
             var footHeight = $foot.height();
             var $buttons = $('.j-button-publish-report,.j-button-save-report');
