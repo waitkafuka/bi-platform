@@ -33,6 +33,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
@@ -166,26 +167,26 @@ public final class DataModelUtils {
                 throw parseEx;
             }
         }
-        // 除第一列为时间外，其他表格均按照第一列指标由高到低顺序排列，如为空值，按照维度默认顺序排列
-//        long tmp = dataModel.getColumnHeadFields().stream().
-//                filter(headField -> 
-//                headField.getExtInfos().get("sortType") != null 
-//                && !"NONE".equals(headField.getExtInfos().get("sortType")))
-//                .count();
-//		String firstCol = dataModel.getRowHeadFields().get(0)
-//				.getNodeUniqueName();
-//		if (StringUtils.isNotEmpty(firstCol) && firstCol.contains("SUMMARY")) {
-//			firstCol = dataModel.getRowHeadFields().get(0).getChildren().get(0)
-//					.getNodeUniqueName();
-//		}
-//        if (!firstCol.contains("ownertable_Time") && tmp == 0) {
-//            String colUniqueName = dataModel.getColumnHeadFields().get(0).getValue();
-//            SortRecord sortRecord = new SortRecord(SortRecord.SortType.DESC, colUniqueName, 500);
-//            com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord);
-//        }
+//         除第一列为时间外，其他表格均按照第一列指标由高到低顺序排列，如为空值，按照维度默认顺序排列
+        long tmp = dataModel.getColumnHeadFields().stream().
+                filter(headField -> 
+                headField.getExtInfos().get("sortType") != null 
+                && !"NONE".equals(headField.getExtInfos().get("sortType")))
+                .count();
+		String firstCol = dataModel.getRowHeadFields().get(0)
+				.getNodeUniqueName();
+		if (StringUtils.isNotEmpty(firstCol) && firstCol.contains("SUMMARY")) {
+			firstCol = dataModel.getRowHeadFields().get(0).getChildren().get(0)
+					.getNodeUniqueName();
+		}
+		boolean hasDataOnFirstCol = hasDataOnFirstCol(dataModel);
+        if (!firstCol.contains("ownertable_Time") && tmp == 0 && hasDataOnFirstCol) {
+            String colUniqueName = dataModel.getColumnHeadFields().get(0).getValue();
+            SortRecord sortRecord = new SortRecord(SortRecord.SortType.DESC, colUniqueName, 500);
+            com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord);
+        }
         List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
         List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
-        
         
         // build colField
         List<List<ColField>> colFields = new ArrayList<List<ColField>>();
@@ -320,6 +321,28 @@ public final class DataModelUtils {
         // PivotTableUtils.addSummaryRowHead(pTable);
         return pTable;
     }
+
+	private static boolean hasDataOnFirstCol(DataModel dataModel) {
+		if (dataModel == null) {
+			return false;
+		}
+		List<List<BigDecimal>> columnBaseData = dataModel.getColumnBaseData();
+		if (CollectionUtils.isEmpty(columnBaseData)) {
+			return false;
+		}
+		List<BigDecimal> firstColData = columnBaseData.get(0);
+		if (CollectionUtils.isEmpty(firstColData)) {
+			return false;
+		}
+		boolean rs = true;
+		for (BigDecimal data : firstColData) {
+			if (data == null || data.equals(BigDecimal.ZERO)) {
+				rs = false;
+				break;
+			}
+		}
+		return rs;
+	}
     
     /**
      * 
