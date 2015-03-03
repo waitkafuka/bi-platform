@@ -158,10 +158,8 @@
 .ui-table .ui-vscrollbar {
     width: 7px;
     background: #FFF;
-    padding: 40px 0 0 0;
+    padding: 40px 5px 0 8px;
     border-bottom: 1px solid #cfebf6;
-    /*padding-left: 8px;*/
-    /*padding-right: 5px;*/
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
@@ -184,9 +182,9 @@
     border: 0;
     background: #E7F9FE;
     overflow: hidden;
-    border-bottom: 1px solid #cfebf6;
-    border-right: 1px solid #E7F9FE;
-    border-top: 1px solid #E7F9FE;
+    border-bottom: 1px solid #e7ecee;
+    border-right: 1px solid #cfebf6;
+    border-top: 1px solid #cfebf6;
     border-radius: 0;
 }
 .ui-table .ui-vscrollbar-next {
@@ -202,6 +200,7 @@
     width: 7px;
     background: #b5b5b5;
     border-radius: 4px;
+    margin-left: 8px;
 }
 /* 表格横向滚动条 */
 .ui-table .ui-hscrollbar {
