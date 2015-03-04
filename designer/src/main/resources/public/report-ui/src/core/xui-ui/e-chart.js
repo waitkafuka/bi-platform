@@ -197,13 +197,14 @@
             }
             else {
                 // 单选
-
+                var radioName = 'echarts-candidate-radio-' + new Date().getTime();
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+                    var radioId = 'allMeasures-radio' + new Date().getTime() + i;
                     measureHtml.push(
-                        '<input type="radio" name="echarts-candidate" ',
+                        '<input type="radio" name="' + radioName + '" id="' + radioId + '"',
                         isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
                         '/>',
-                        '<label>',allMeasures[i],'</label>'
+                        '<label for="' + radioId + '">',allMeasures[i],'</label>'
                     );
                 }
                 this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
