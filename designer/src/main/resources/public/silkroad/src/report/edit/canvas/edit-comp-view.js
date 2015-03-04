@@ -1687,7 +1687,7 @@ define([
                 }
                 // 保存vm与json，保存成功后展示报表
                 this.model.canvasModel.saveJsonVm(
-                    this.canvasView.showReport.call(this.canvasView)
+//                    this.canvasView.showReport.call(this.canvasView)
                 );
             }
         });
