@@ -917,7 +917,7 @@ public class QueryDataResource extends BaseResource {
             } else {
                 chart = chartBuildService.parseToChart(table, chartType, false);
             }
-            QueryUtils.decorateChart(chart, targetArea, model.getSchema());
+            QueryUtils.decorateChart(chart, targetArea, model.getSchema(), -1);
             resultMap.put("reportChart", chart);
         }
         areaContext.getQueryStatus().add(result);
@@ -1939,7 +1939,7 @@ public class QueryDataResource extends BaseResource {
             } else {
                 chart = chartBuildService.parseToChart(table, chartType, false);
             }
-            QueryUtils.decorateChart(chart, targetArea, model.getSchema());
+            QueryUtils.decorateChart(chart, targetArea, model.getSchema(), index);
             resultMap.put("reportChart", chart);
         }
         areaContext.getQueryStatus().add(result);
