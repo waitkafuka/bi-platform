@@ -362,3 +362,6 @@
 .ui-table-expand-background {
     background-color: #F6F6F5;
 }
+.ui-table-row-selected .ui-table-rowhcell{
+	background: #FFF;
+}
