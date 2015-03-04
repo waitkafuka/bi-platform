@@ -168,7 +168,7 @@
     UI_E_CHART_CLASS.$renderCheckBoxs = function () {
         var me = this;
         var allMeasures = me._allMeasures;
-        var defaultMeasures = me._defaultMeasures;
+        var defaultMeasures = this.$getDefaultMeasures(this._chartType);
         var measureHtml = [];
         // 渲染图形中备选区模块
         if (allMeasures.length > 0) {
