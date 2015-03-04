@@ -814,6 +814,7 @@ public class ReportDesignModelResource extends BaseResource {
             runTimeModel.getLocalContextByAreaId(area.getTableAreaId()).reset();
         }
         runTimeModel.getContext().removeParam(element.getId());
+        runTimeModel.getLocalContext().values().forEach(ctx -> ctx.removeParam(element.getId()));
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remode item from area");
