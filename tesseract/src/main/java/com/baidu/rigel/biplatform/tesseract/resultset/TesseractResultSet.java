@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.TesseractResultRecord;
 
 /**
  * 
@@ -186,7 +186,7 @@ public interface TesseractResultSet extends Serializable {
      * 注意，请先调用next()方法，否则直接调用本方法会返回null; 
      * getCurrentRecord
      * 
-     * @return ResultRecord;
+     * @return TesseractResultRecord;
      */
-    ResultRecord getCurrentRecord();
+    TesseractResultRecord getCurrentRecord();
 }

@@ -55,11 +55,14 @@ import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitService.QueryContextSplitStrategy;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+
+
 
 /**
  * 元数据查询相关接口，包括取维度的members和children
@@ -152,6 +155,8 @@ public class MetaQueryAction {
         return ResponseResultUtils.getErrorResult(errorMsg, 100);
     }
 
+	
+
     @RequestMapping(value = "/meta/getChildren", method = RequestMethod.POST)
 //    @ResponseBody
     public ResponseResult getChildren(@RequestBody String requestJson) {
@@ -192,7 +197,8 @@ public class MetaQueryAction {
                 JsonUnSeriallizableUtils.fillCubeInfo(cube);
 
                 children =
-                        metaDataService.getChildren(dataSourceInfo, cube, uniqueName, questionModel.getRequestParams());
+                            metaDataService.getChildren(dataSourceInfo, cube, uniqueName, 
+                            		QueryContextBuilder.getRequestParams(questionModel, cube));
                 if (CollectionUtils.isNotEmpty(children)) {
                     List<MetaJsonDataInfo> metaJsons = new ArrayList<MetaJsonDataInfo>(children.size());
                     for (MiniCubeMember member : children) {
@@ -355,9 +361,10 @@ public class MetaQueryAction {
                 String uniqueName =
                         CollectionUtils.isNotEmpty(dimCondition.getQueryDataNodes()) ? dimCondition.getQueryDataNodes()
                                 .get(0).getUniqueName() : null;
-                MiniCubeMember member =
-                        metaDataService.lookUp(questionModel.getDataSourceInfo(), questionModel.getCube(), uniqueName,
-                                questionModel.getRequestParams());
+                Cube cube = questionModel.getCube();
+				MiniCubeMember member =
+                        metaDataService.lookUp(questionModel.getDataSourceInfo(), cube, uniqueName,
+                        	QueryContextBuilder.getRequestParams(questionModel, cube));
 
                 return ResponseResultUtils.getCorrectResult("return member:" + member.getName(),
                         JsonUnSeriallizableUtils.parseMember2MetaJson(member));

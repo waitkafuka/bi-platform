@@ -210,6 +210,7 @@
     overflow: hidden;
     position: absolute;
     top: 0;
+    right: 0;
 }
 .con-edit-btns .fold {
     cursor: pointer;

@@ -343,15 +343,15 @@ define([
                 // 上下小零件的总高度94（=40+19+35），一行数据加表头的高度70
                 $component.filter('[data-component-type="TABLE"]').resizable("option", "minHeight", 204);
                 // 固定单选下拉框的高度
-                that.dragWidthHeight($component, 'SELECT', 47, 47);
+                that.dragWidthHeight($component, 'SELECT', 33, 33);
                 // 固定多选下拉框的高度
-                that.dragWidthHeight($component, 'MULTISELECT', 47, 47);
+                that.dragWidthHeight($component, 'MULTISELECT', 33, 33);
                 // 固定文本框的高度
-                that.dragWidthHeight($component, 'TEXT', 50, 50);
+                that.dragWidthHeight($component, 'TEXT', 33, 33);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'H_BUTTON', 56, 56, 88);
+                that.dragWidthHeight($component, 'H_BUTTON', 33, 33, 67);
                 // 固定查询按钮的高度
-                that.dragWidthHeight($component, 'TIME_COMP', 56, 56, 220);
+                that.dragWidthHeight($component, 'TIME_COMP', 33, 33, 220);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
