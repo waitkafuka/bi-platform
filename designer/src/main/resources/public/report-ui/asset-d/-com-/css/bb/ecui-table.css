@@ -274,12 +274,16 @@
 .ui-table-head-tips {
     width: 15px;
     height: 15px;
-    background: #8A8C8C;
-    border-radius: 8px;
     line-height: 15px;
-    color: #E7F9FE;
     display: inline-block;
-    text-align: center;
+    background: url("img/icon-help-normal.png");
+}
+.ui-table-head-tips:hover {
+    width: 15px;
+    height: 15px;
+    line-height: 15px;
+    display: inline-block;
+    background: url("img/icon-help-hover.png");
 }
 .ui-table-heade-th-content {
     text-align: center;
@@ -289,6 +293,7 @@
     color: #727272;
     font-size: 12px;
     font-weight: bold;
+    margin-right: 7px;
 }
 .ui-table-hcell-sort-desc {
     background-image: url(img/icon-hcell-desc.png);
@@ -317,6 +322,7 @@
     height: 18px;
     color: #E7F9FE;
     vertical-align: middle;
+    margin-right: 4px;
 }
 .ui-table-heade-th-content span {
     padding: 0;
@@ -354,10 +360,6 @@
 .ui-table-head-th-content {
     text-align: left;
 }
-.ui-table-head-th-content span {
-    margin-right: 7px;
-}
-
 .ui-table-expand-background {
     background-color: #F6F6F5;
 }
