@@ -20,7 +20,7 @@
 }
 .ui-table-locked-head {
     border-top: 1px solid #cfebf6;
-    border-bottom: 1px solid #e7ecee;
+    border-bottom: 1px solid #E7F9FEtop;
     height: 30px;
     overflow: hidden;
 }
@@ -33,7 +33,7 @@
     background: #FFF;
     border-left: 1px solid #CFEBF6;
     border-bottom: 1px solid #e7ecee;
-    height: 40px;
+    height: 39px;
     line-height: 30px;
     padding: 0 9px;
     color: #555;
@@ -53,9 +53,9 @@
 .ui-table-rowhcell {
     position: relative;
     border-left: 1px solid #CFEBF6;
-    border-bottom: 1px solid #e7ecee;
+    /*border-bottom: 1px solid #e7ecee;*/
     color: #727272;
-    height: 40px;
+    height: 39px;
     line-height: 30px;
     padding: 0 9px;
     margin: 0;
@@ -158,8 +158,8 @@
 .ui-table .ui-vscrollbar {
     width: 7px;
     background: #FFF;
-    padding: 40px 5px 0 8px;
-    border-bottom: 1px solid #cfebf6;
+    padding: 40px 5px 0 7px;
+    border-right: 1px solid #CFEBF6;
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
@@ -182,7 +182,7 @@
     border: 0;
     background: #E7F9FE;
     overflow: hidden;
-    border-bottom: 1px solid #e7ecee;
+    /*border-bottom: 1px solid #e7ecee;*/
     border-right: 1px solid #cfebf6;
     border-top: 1px solid #cfebf6;
     border-radius: 0;
@@ -200,7 +200,7 @@
     width: 7px;
     background: #b5b5b5;
     border-radius: 4px;
-    margin-left: 8px;
+    margin-left: 7px;
 }
 /* 表格横向滚动条 */
 .ui-table .ui-hscrollbar {
@@ -303,6 +303,7 @@
     display: inline-block;
     color: #E7F9FE;
     vertical-align: middle;
+    margin-right: 4px;
 }
 .ui-table-hcell-sort-asc {
     background-image: url(img/icon-hcell-asc.png);
@@ -312,6 +313,7 @@
     height: 18px;
     color: #E7F9FE;
     vertical-align: middle;
+    margin-right: 4px;
 }
 .ui-table-hcell-sort,
 .ui-table-hcell-sort-none {
