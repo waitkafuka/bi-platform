@@ -1083,11 +1083,14 @@ define([
              */
             afterAddSelectCompAxis: function (option) {
                 var compId = this.getActiveCompId();
-                var editCompModel = this.canvasView.editCompView.model;
-                var json = editCompModel.getCompDataById(compId)[0];
                 var id = option.$item.attr('data-id');
-                json.dimId = id;
-                json.name = id;
+                var editCompModel = this.canvasView.editCompView.model;
+                var entityDefs = editCompModel.canvasModel.reportJson.entityDefs;
+                for (var i = 0, len = entityDefs.length; i < len; i++) {
+                    if (entityDefs[i].compId == compId) {
+                        entityDefs[i].dimId = id;
+                    }
+                }
                 this.model.canvasModel.saveJsonVm();
             },
             /**
