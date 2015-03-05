@@ -1076,7 +1076,7 @@
             }
         }
         // 单选
-        else if (rowCheckMode == 'SELECT') {
+        else if (rowCheckMode == 'SELECT' || rowCheckMode == 'SELECTONLY') {
             var rows = this._aRows || [];
             for (var i = 0, row, cell; i < rows.length; i ++) {
                 if ((row = rows[i]) && row._bRowChecked) {
@@ -1299,6 +1299,10 @@
                 if (rowCheckMode == 'SELECT') {
                     tableCtrl.$setRowChecked(rowCtrl, true);
                     eventName = 'rowselect';
+                }
+                else if (rowCheckMode == 'SELECTONLY') {
+                    tableCtrl.$setRowChecked(rowCtrl, true);
+                    eventName = 'rowselectonly';
                 }
                 else if (rowCheckMode == 'CHECK') {
                     if (rowChecked && tableCtrl.$setRowChecked(rowCtrl, false)) {
