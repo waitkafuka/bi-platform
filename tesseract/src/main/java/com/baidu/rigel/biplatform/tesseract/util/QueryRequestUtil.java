@@ -473,6 +473,15 @@ public class QueryRequestUtil {
             for(String name : meta.getFieldNameArray()){
                 if(groups.contains(name)){
                     groupBy += record.getField(meta.getFieldIndex(name)).toString() + ",";
+            for(String meta : record.getMeta().getFieldNameArray()){
+                if(groups.contains(meta)){
+                		//TODO 这里可能会影响其他逻辑，如有问题 需要回滚
+                	    /**
+                	     * bug fixed：维度组中维度引用了单独维度 而单独维度又在其他轴中出现导致数据查询出错情况
+                	     */
+                		if (record.getField(meta) != null) {
+                			groupBy += record.getField(meta).toString() + ",";
+                		}
                 }
             }
             record.setGroupBy(groupBy);
