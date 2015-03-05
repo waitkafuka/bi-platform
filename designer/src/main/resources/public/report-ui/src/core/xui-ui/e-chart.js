@@ -515,6 +515,10 @@
                 data[i] = this._aXAxis.data[i];
             }
         }
+        // 地图的指标现在都是单指标，所以不需要展示这一图例，暂时将其隐藏   update by majun
+        if (this._chartType === 'map') {
+        	legend.show = false;
+        }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
                 for (var i = 0; i < this._aSeries.length; i++) {
