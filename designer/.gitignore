@@ -12,4 +12,4 @@
 /build.sh
 /designer (1).iml
 /designer.iml
-/bin/
+.buildpath
