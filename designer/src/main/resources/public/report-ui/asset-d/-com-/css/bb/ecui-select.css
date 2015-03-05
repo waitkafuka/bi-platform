@@ -93,7 +93,7 @@
     display: block;
     padding-left: 4px;
     line-height: 28px;
-    border-top: 1px solid #F0F0F0;
+    /*border-top: 1px solid #F0F0F0;*/
     cursor: pointer;
     -webkit-user-select: none;
     -moz-user-select: none;
