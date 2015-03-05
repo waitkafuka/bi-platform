@@ -1373,6 +1373,11 @@ public class ReportDesignModelResource extends BaseResource {
         return rs;
     }
  
+    /**
+     * 不保证正确性，请勿随意使用
+     * @param request
+     * @return String
+     */
     @RequestMapping(value = "/jsonVm", method = { RequestMethod.POST })
     public String modifyJsonVm(HttpServletRequest request) {
         ReportDesignModel model = null;
