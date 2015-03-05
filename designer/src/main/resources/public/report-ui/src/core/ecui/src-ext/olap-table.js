@@ -1082,10 +1082,12 @@
                 if ((row = rows[i]) && row._bRowChecked) {
                     row._bRowChecked = false;
                     removeClass(row.getMain(), type + '-row-selected');
+                    removeClass(getParent(row._eFill), type + '-row-selected');
                 }
             }
             rowCtrl._bRowChecked = true;
             addClass(rowCtrl.getMain(), type + '-row-selected');
+            addClass(getParent(rowCtrl._eFill), type + '-row-selected');
             rowCheck.rowCheckCount = 1;
         }
 
