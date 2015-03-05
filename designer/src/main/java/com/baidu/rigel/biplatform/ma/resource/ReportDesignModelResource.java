@@ -155,7 +155,11 @@ public class ReportDesignModelResource extends BaseResource {
      */
     @RequestMapping(value = "/{id}", method = { RequestMethod.GET })
     public ResponseResult queryById(@PathVariable("id") String id, HttpServletRequest request) {
-        ReportDesignModel model = reportModelCacheManager.getReportModel(id);
+        ReportDesignModel model = null;
+		try {
+			model = reportModelCacheManager.getReportModel(id);
+		} catch (Exception e) {
+		}
         if (model != null) {
             logger.info("get model from cache");
         } else {
@@ -814,6 +818,7 @@ public class ReportDesignModelResource extends BaseResource {
             runTimeModel.getLocalContextByAreaId(area.getTableAreaId()).reset();
         }
         runTimeModel.getContext().removeParam(element.getId());
+        runTimeModel.getLocalContext().values().forEach(ctx -> ctx.removeParam(element.getId()));
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remode item from area");
@@ -1367,5 +1372,38 @@ public class ReportDesignModelResource extends BaseResource {
         logger.info("query operation rs is : " + rs.toString());
         return rs;
     }
-    
+ 
+    /**
+     * 不保证正确性，请勿随意使用
+     * @param request
+     * @return String
+     */
+    @RequestMapping(value = "/jsonVm", method = { RequestMethod.POST })
+    public String modifyJsonVm(HttpServletRequest request) {
+        ReportDesignModel model = null;
+        String reportId = request.getParameter("reportId");
+        try {
+            model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
+            String json = request.getParameter("jsonTxt");
+            String vm = request.getParameter("vmTxt");
+            if (model == null) {
+            		return "not get report";
+            }
+            if (StringUtils.isEmpty(json)) {
+            		return "json is null";
+            } else {
+            		model.setJsonContent(json);
+            }
+            if (StringUtils.isEmpty(vm)) {
+            		return "vm is null";
+            } else {
+            		model.setVmContent(vm);
+            }
+            reportDesignModelService.saveOrUpdateModel(model);
+        } catch (Exception e) {
+            logger.error("There are no such model in cache. Report Id: " + reportId, e);
+            return "error";
+        }
+        return "ok";
+    }
 }

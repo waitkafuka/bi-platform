@@ -42,7 +42,7 @@ define(
             iconClass: 'select',
             caption: '下拉框',
             defaultWidth: 300,
-            defaultHeight: 56,
+            defaultHeight: 33,
             defaultValue: 'false',
             vm: {
                 render: function (data) {

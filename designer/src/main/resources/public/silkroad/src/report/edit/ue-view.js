@@ -93,7 +93,7 @@ define(function () {
         initEditReportBodyScroll: function () {
             var $window = $(window);
             var $scrollDataSources = $('.j-scroll-data-sources');
-            var navHeight = $('.j-nav').height() + 34;
+            var navHeight = $('.j-nav').height();
             var $foot = $('.j-foot');
             var footHeight = $foot.height();
             var $buttons = $('.j-button-publish-report,.j-button-save-report');

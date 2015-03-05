@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.annotation.Resource;
@@ -41,6 +42,7 @@ import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchEx
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.From;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
@@ -49,6 +51,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Where;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * sql类型维度维值获取实现
@@ -84,6 +87,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeLevel queryLevel = (MiniCubeLevel) level;
         // 发出的查询SQL类似 select name,caption from dim_table where pid = 1 and parentValue=0 group by name,caption
         QueryRequest nameQuery = buildQueryRequest(cube, queryLevel, parentMember, dataSourceInfo);
+        String filterDimKey = params.get(QueryContextBuilder.FILTER_DIM_KEY);
+        if (StringUtils.isNotEmpty(filterDimKey)) {
+        		nameQuery.setWhere(genWhere(nameQuery.getWhere(), filterDimKey, params));
+        }
         nameQuery.setDataSourceInfo(dataSourceInfo);
         // 调用查询接口开始查询，查询返回一个resultSet
         List<MiniCubeMember> members = null;
@@ -105,7 +112,33 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
 
     }
 
-    /**
+    private Where genWhere(Where where, String filterDimKey, Map<String, String> params) {
+	    	List<Expression> andList = Lists.newArrayList();
+    		for (String key : filterDimKey.split(",")) {
+    			if (StringUtils.isEmpty(key)) {
+    				continue;
+    			}
+    			if (StringUtils.isEmpty(params.get(key))) {
+    				continue;
+    			}
+    			Set<QueryObject> value = Sets.newHashSet();
+    			for (String v : params.get(key).split(",")) {
+    				QueryObject queryObj = new QueryObject(v, Sets.newHashSet());
+    				value.add(queryObj);
+    			}
+    			Expression exp = new Expression(key, value);
+    			andList.add(exp);
+    		}
+    		if (!andList.isEmpty()) {
+    			if (where == null) {
+    				where = new Where();
+    			}
+    			where.setAndList(andList);
+    		}
+		return where;
+	}
+
+	/**
      * 将查询的结果集封装成member
      * 
      * @param resultSet

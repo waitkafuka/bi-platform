@@ -699,8 +699,9 @@ public final class QueryUtils {
      * decorate chart with extend area
      * @param chart
      * @param area
+     * @param index 
      */
-    public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema) {
+    public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema, int index) {
         if (area.getType() == ExtendAreaType.CHART) {
             // 设置topN默认设置
             if (area.getLogicModel().getTopSetting() != null) {
@@ -744,8 +745,12 @@ public final class QueryUtils {
             }
             List<String>  defaultDims = getOlapElementNames(
                     area.getLogicModel().getRows(), area.getCubeId(), schema);
-            if (defaultDims.size() > 0) {
-                chart.setDefaultDims(defaultDims.toArray(new String[0]));
+            if (index >= 0 && index < defaultDims.size()) {
+            		chart.setDefaultDims(new String[]{defaultDims.get(index)});
+            } else {
+	            	if (defaultDims.size() > 0) {
+	            		chart.setDefaultDims(defaultDims.toArray(new String[0]));
+	            	}
             }
         } 
     }

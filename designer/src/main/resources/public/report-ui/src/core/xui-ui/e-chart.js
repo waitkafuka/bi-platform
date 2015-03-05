@@ -2,9 +2,9 @@
  * xui.ui.HChart
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
- * @file:    基于highcharts的js图
+ * @file:    基于ECharts的js图
  *           (最早源自pl-charts.js by cxl(chenxinle))
- * @author:  sushuang(sushuang@baidu.com)
+ * @author:  sushuang(sushuang)
  * @depend:  xui, xutil, echarts
  */
 
@@ -168,7 +168,7 @@
     UI_E_CHART_CLASS.$renderCheckBoxs = function () {
         var me = this;
         var allMeasures = me._allMeasures;
-        var defaultMeasures = me._defaultMeasures;
+        var defaultMeasures = this.$getDefaultMeasures(this._chartType);
         var measureHtml = [];
         // 渲染图形中备选区模块
         if (allMeasures.length > 0) {
@@ -197,24 +197,29 @@
             }
             else {
                 // 单选
-
+                var radioName = 'echarts-candidate-radio-' + new Date().getTime();
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+                    var radioId = 'allMeasures-radio' + new Date().getTime() + i;
                     measureHtml.push(
-                        '<input type="radio" name="echarts-candidate" ',
+                        '<input type="radio" name="' + radioName + '" id="' + radioId + '"',
                         isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
                         '/>',
-                        '<label>',allMeasures[i],'</label>'
+                        '<label for="' + radioId + '">',allMeasures[i],'</label>'
                     );
                 }
                 this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
                     + measureHtml.join('')
                     + '</div>';
                 this._eCandidateBox = domChildren(this._eHeader)[0];
-                attachEvent(this._eCandidateBox, 'click', function (ev) {
-                    var oEv = ev || window.event;
-                    var target = oEv.target || oEv.srcElement;
-                    candidateClick.call(me, target);
-                });
+                var inputRadios = this._eCandidateBox.getElementsByTagName('input');
+
+                for (var i = 0, iLen = inputRadios.length; i < iLen; i ++) {
+                    inputRadios[i].onclick = (function (j) {
+                        return function () {
+                            me.notify('changeRadioButton', String(j));
+                        }
+                    })(i);
+                }
             }
         }
     };
@@ -509,6 +514,10 @@
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             }
+        }
+        // 地图的指标现在都是单指标，所以不需要展示这一图例，暂时将其隐藏   update by majun
+        if (this._chartType === 'map') {
+        	legend.show = false;
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {

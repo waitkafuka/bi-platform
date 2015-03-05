@@ -635,7 +635,7 @@
         }
         // 如果是维度列，就不显示tooltip图标
         if (!wrap.colSpan) {
-            tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">?</span>';
+            tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</span>';
             dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
@@ -1076,16 +1076,18 @@
             }
         }
         // 单选
-        else if (rowCheckMode == 'SELECT') {
+        else if (rowCheckMode == 'SELECT' || rowCheckMode == 'SELECTONLY') {
             var rows = this._aRows || [];
             for (var i = 0, row, cell; i < rows.length; i ++) {
                 if ((row = rows[i]) && row._bRowChecked) {
                     row._bRowChecked = false;
                     removeClass(row.getMain(), type + '-row-selected');
+                    removeClass(getParent(row._eFill), type + '-row-selected');
                 }
             }
             rowCtrl._bRowChecked = true;
             addClass(rowCtrl.getMain(), type + '-row-selected');
+            addClass(getParent(rowCtrl._eFill), type + '-row-selected');
             rowCheck.rowCheckCount = 1;
         }
 
@@ -1297,6 +1299,10 @@
                 if (rowCheckMode == 'SELECT') {
                     tableCtrl.$setRowChecked(rowCtrl, true);
                     eventName = 'rowselect';
+                }
+                else if (rowCheckMode == 'SELECTONLY') {
+                    tableCtrl.$setRowChecked(rowCtrl, true);
+                    eventName = 'rowselectonly';
                 }
                 else if (rowCheckMode == 'CHECK') {
                     if (rowChecked && tableCtrl.$setRowChecked(rowCtrl, false)) {
