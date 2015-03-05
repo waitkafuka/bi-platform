@@ -1653,9 +1653,9 @@
                 x = control.getX(),
                 y = control.getY();
             // 判断是竖直滚动条，则将其left设置为0，防止抖动问题
-            if (control._sClass == 'ui-scrollbar-thumb') {
-                x = 0;
-            }
+//            if (control._sClass == 'ui-scrollbar-thumb') {
+//                x = -5;
+//            }
             currStyle.left = x + 'px';
             currStyle.top = y + 'px';
             currStyle.position = 'absolute';

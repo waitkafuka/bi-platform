@@ -780,6 +780,7 @@
                 ' style="', styleStr.join(' '),
                 '" class="', classStr.join(' '),
             '">',
+            //'<div class="ui-table-cell-infor">' + innerStr + '</div><div class="ui-table-cell-empty"></div>',
             innerStr,
             '</td>'
         );
@@ -1259,7 +1260,8 @@
         // 左表头节点
         if (el.getAttribute('data-row-h') && (ec = el.getAttribute('data-e-c'))) {
             if (getMouseX(this) <=
-                toNumber(getStyle(el.firstChild, 'marginLeft'))
+                toNumber(getStyle(el, 'paddingLeft'))
+                + toNumber(getStyle(el.firstChild, 'marginLeft'))
                 + toNumber(getStyle(el.firstChild, 'paddingLeft'))
                 ) {
                 var pos;
