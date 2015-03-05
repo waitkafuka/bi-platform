@@ -33,11 +33,6 @@ import redis.clients.jedis.Protocol;
 public class RedisPoolProperties extends RedisProperties {
     
     
-    /** 
-     * redis 服务监控 sentinel的地址，多个以 ip1:port1,ip2:port2
-     * 如果多个服务器密码一直，可以配置一个，其它不写就可以了。
-     */
-    private String sentinelServers;
     
     
     private RedisPoolProperties.Pool poolConfig;
@@ -332,14 +327,6 @@ public class RedisPoolProperties extends RedisProperties {
     }
 
 
-    /** 
-     * 获取 sentinelServers 
-     * @return the sentinelServers 
-     */
-    public String getSentinelServers() {
-    
-        return sentinelServers;
-    }
 
 
     /** 

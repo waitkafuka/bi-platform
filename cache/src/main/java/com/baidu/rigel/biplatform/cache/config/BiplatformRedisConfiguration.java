@@ -25,6 +25,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.redis.RedisProperties.Sentinel;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.CacheManager;
@@ -95,6 +96,8 @@ public class BiplatformRedisConfiguration {
                 RedisSentinelConfiguration config = new RedisSentinelConfiguration();
                 config.master(sentinelProperties.getMaster());
                 config.setSentinels(createSentinels(sentinelProperties));
+                
+                
                 return config;
             }
             return null;
@@ -127,6 +130,7 @@ public class BiplatformRedisConfiguration {
             AbstractRedisConfiguration {
 
         @Bean
+        @ConditionalOnProperty(prefix = "config.redis", name = "active", havingValue = "true")
         public RedisConnectionFactory redisConnectionFactory()
                 throws UnknownHostException {
             return applyProperties(createJedisConnectionFactory());
@@ -181,15 +185,6 @@ public class BiplatformRedisConfiguration {
 
     }
 
-    /**
-     * Standard Redis configuration.
-     */
-    @Configuration
-    protected static class RedisConfiguration {
-
-        
-
-    }
 
 
 }

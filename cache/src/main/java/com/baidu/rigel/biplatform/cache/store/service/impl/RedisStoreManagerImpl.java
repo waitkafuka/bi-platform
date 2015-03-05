@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.cache.impl;
+package com.baidu.rigel.biplatform.cache.store.service.impl;
 
 import java.util.EventObject;
 import java.util.concurrent.locks.Lock;
@@ -31,30 +31,10 @@ import com.baidu.rigel.biplatform.cache.StoreManager;
  * @version  2015年2月9日 
  * @since jdk 1.8 or after
  */
-//@Service
-public class StoreManagerImpl implements StoreManager {
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+public class RedisStoreManagerImpl implements StoreManager {
 
+    @Autowired(required=false)
+    private CacheManager cacheManager;
     /*
      * (non-Javadoc) 
      * @see com.baidu.rigel.biplatform.cache.StoreManager#getDataStore(java.lang.String) 
@@ -84,7 +64,6 @@ public class StoreManagerImpl implements StoreManager {
     public EventObject getNextEvent() throws Exception {
         // TODO Auto-generated method stub
         return null;
-
     }
 
     /*

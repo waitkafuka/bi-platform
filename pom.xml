@@ -87,6 +87,11 @@
 				<version>${biplatform.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.baidu.rigel.biplatform</groupId>
+				<artifactId>cache</artifactId>
+				<version>${biplatform.version}</version>
+			</dependency>
+			<dependency>
                 <groupId>com.baidu.rigel.biplatform</groupId>
                 <artifactId>fileserver</artifactId>
                 <version>${biplatform.version}</version>

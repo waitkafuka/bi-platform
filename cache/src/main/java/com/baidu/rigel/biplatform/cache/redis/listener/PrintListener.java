@@ -1,4 +1,4 @@
-package com.baidu.rigel.biplatform.cache.listener;
+package com.baidu.rigel.biplatform.cache.redis.listener;
 
 import java.util.Date;
 
@@ -12,10 +12,6 @@ public class PrintListener extends JedisPubSub{
 	public void onMessage(String channel, String message) {
 		String time = DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");
 		System.out.println("message receive:" + message + ",channel:" + channel + "..." + time);
-		//此处我们可以取消订阅
-		if(message.equalsIgnoreCase("quit")){
-			this.unsubscribe(channel);
-		}
 	}
 
     @Override

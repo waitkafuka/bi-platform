@@ -46,8 +46,8 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.From;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Where;
-import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.google.common.collect.Lists;
 
 /**
@@ -89,7 +89,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         List<MiniCubeMember> members = null;
         try {
             current = System.currentTimeMillis();
-            TesseractResultSet resultSet = searchService.query(nameQuery);
+            SearchIndexResultSet resultSet = searchService.query(nameQuery);
             log.info("cost:{}ms in query request.level:{}",System.currentTimeMillis() - current,nameQuery);
             members = buildMembersFromCellSet(resultSet, queryLevel, parentMember, dataSourceInfo, cube);
         } catch (MiniCubeQueryException e) {
@@ -116,16 +116,15 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
      * @return
      * @throws MiniCubeQueryException
      */
-    private List<MiniCubeMember> buildMembersFromCellSet(TesseractResultSet resultSet, MiniCubeLevel queryLevel,
+    private List<MiniCubeMember> buildMembersFromCellSet(SearchIndexResultSet resultSet, MiniCubeLevel queryLevel,
             Member parentMember, DataSourceInfo dataSourceInfo, Cube cube) throws MiniCubeQueryException {
         try {
             long current = System.currentTimeMillis();
             Map<String, MiniCubeMember> members = new TreeMap<String, MiniCubeMember>();
             while (resultSet.next()) {
             	
-                ResultRecord record = (ResultRecord) resultSet.getCurrentRecord();
-
-                String value = record.getField(queryLevel.getSource()).toString();
+                SearchIndexResultRecord record = resultSet.getCurrentRecord();
+                String value = record.getField(resultSet.getMeta().getFieldIndex(queryLevel.getSource())).toString();
                 if (StringUtils.isBlank(value)) {
                     log.warn("can not get:" + queryLevel.getSource() + " from record:" + record);
                     continue;
@@ -139,7 +138,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 }
                 member.setLevel(queryLevel);
                 if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
-                    member.setCaption(record.getField(queryLevel.getCaptionColumn()).toString());
+                    member.setCaption(record.getField(resultSet.getMeta().getFieldIndex(queryLevel.getCaptionColumn())).toString());
                 }
                 member.setParent(parentMember);
                 // 手动调用生成一下UniqueName，这时候生成代价最小
@@ -147,7 +146,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 // 需要查询Member对应的最细粒度节点，即与事实表关联的字段的外键
                 if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
                         && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-                    member.getQueryNodes().add(record.getField(queryLevel.getPrimaryKey()).toString());
+                    member.getQueryNodes().add(record.getField(resultSet.getMeta().getFieldIndex(queryLevel.getPrimaryKey())).toString());
                 } else {
                     member.getQueryNodes().add(value);
                 }
@@ -286,7 +285,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         result.setLevel(queryLevel);
         try {
             // 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
-            TesseractResultSet resultSet = searchService.query(queryRequest);
+            SearchIndexResultSet resultSet = searchService.query(queryRequest);
             if(!resultSet.next()){
                     log.error("no result return by query:" + queryRequest);
                     throw new MetaException("no result return by query:" + queryRequest);
@@ -309,7 +308,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
                 }
                 request.getWhere().getAndList().add(expression);
-                TesseractResultSet leafResultSet = searchService.query(request);
+                SearchIndexResultSet leafResultSet = searchService.query(request);
                 while (leafResultSet.next()) {
                     result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
                 }
@@ -324,7 +323,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 expression.getQueryValues().add(new QueryObject(result.getName()));
                 request.getWhere().getAndList().add(expression);
                 log.info("query member leaf nodes,queryRequest:" + request);
-                TesseractResultSet leafResultSet = searchService.query(request);
+                SearchIndexResultSet leafResultSet = searchService.query(request);
                 while (leafResultSet.next()) {
                     result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
                 }
@@ -337,7 +336,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 expression.getQueryValues().add(new QueryObject(result.getName()));
                 request.getWhere().getAndList().add(expression);
                 log.info("query member leaf nodes,queryRequest:" + request);
-                TesseractResultSet leafResultSet = searchService.query(request);
+                SearchIndexResultSet leafResultSet = searchService.query(request);
                 while (leafResultSet.next()) {
                     result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
                 }

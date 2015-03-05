@@ -25,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.parser.RegisterFunction;
 import com.baidu.rigel.biplatform.parser.exception.RegisterFunctionException;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.RelativeRate;
@@ -51,6 +52,8 @@ public class TesseractApplication {
     public static void main(String[] args) throws RegisterFunctionException {
 
         ConfigurableApplicationContext  context = SpringApplication.run(TesseractApplication.class);
+        
+        ApplicationContextHelper.setContext(context);
         
         RegisterFunction.register("rRate", RelativeRate.class);
         RegisterFunction.register("sRate", SimilitudeRate.class);
