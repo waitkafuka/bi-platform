@@ -6,18 +6,14 @@ import java.util.Set;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
-import com.baidu.rigel.biplatform.cache.listener.PrintListener;
+import com.baidu.rigel.biplatform.cache.redis.listener.PrintListener;
 
 public class AppTest {
 
