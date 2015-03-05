@@ -169,33 +169,25 @@ public final class DataModelUtils {
             }
         }
        //除第一列为时间外，其他表格均按照第一列指标由高到低顺序排列，如为空值，按照维度默认顺序排列
-        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(dataModel.getRowHeadFields())) {
-	        	long tmp = dataModel.getColumnHeadFields().stream().
-	        			filter(headField -> 
-	        			headField.getExtInfos().get("sortType") != null 
-	        			&& !"NONE".equals(headField.getExtInfos().get("sortType")))
-	        			.count();
-	        	String firstCol = dataModel.getRowHeadFields().get(0)
-	        			.getNodeUniqueName();
+//        if (org.apache.commons.collections.CollectionUtils.isNotEmpty(dataModel.getRowHeadFields())) {
+//	        	long tmp = dataModel.getColumnHeadFields().stream().
+//	        			filter(headField -> 
+//	        			headField.getExtInfos().get("sortType") != null 
+//	        			&& !"NONE".equals(headField.getExtInfos().get("sortType")))
+//	        			.count();
+//	        	String firstCol = dataModel.getRowHeadFields().get(0)
+//	        			.getNodeUniqueName();
 //	        	if (StringUtils.isNotEmpty(firstCol) && firstCol.contains("SUMMARY")) {
 //	        		firstCol = dataModel.getRowHeadFields().get(0).getChildren().get(0)
 //	        				.getNodeUniqueName();
 //	        	}
 //	        	boolean hasDataOnFirstCol = hasDataOnFirstCol(dataModel);
-	        	if (!firstCol.contains("ownertable_Time") && tmp == 0) { //&& hasDataOnFirstCol) {
-	        		String colUniqueName = dataModel.getRowHeadFields().get(0).getValue();
-	        		SortRecord sortRecord = new SortRecord(SortRecord.SortType.DESC, colUniqueName, 500);
-	        		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord, 
-	        				new Comparator<HeadField>(){
-
-						    @Override
-						    public int compare(HeadField o1, HeadField o2) {
-						        return 0;
-					        }
-		        			
-		        		    } );
-	        	}
-        }
+//	        	if (!firstCol.contains("ownertable_Time") && tmp == 0) { //&& hasDataOnFirstCol) {
+//	        		String colUniqueName = dataModel.getRowHeadFields().get(0).getValue();
+//	        		SortRecord sortRecord = new SortRecord(SortRecord.SortType.DESC, colUniqueName, 500);
+//	        		com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord);
+//	        	}
+//        }
         List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
         List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
         
