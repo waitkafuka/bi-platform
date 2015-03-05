@@ -92,7 +92,8 @@ $namespace('di.shared.model');
             S_DATA: URL.fn('OLAP_CHART_S_DATA'),
             S_ADD_DATA: URL.fn('OLAP_CHART_S_ADD_DATA'),
             S_REMOVE_DATA: URL.fn('OLAP_CHART_S_REMOVE_DATA'),
-            OFFLINE_DOWNLOAD: URL.fn('OLAP_CHART_OFFLINE_DOWNLOAD')
+            OFFLINE_DOWNLOAD: URL.fn('OLAP_CHART_OFFLINE_DOWNLOAD'),
+            CHANGE_RADIOBUTTON: URL.fn('OLAP_CHART_CHANGE_RADIOBUTTON')
         }
     );
 
@@ -108,7 +109,8 @@ $namespace('di.shared.model');
             S_DATA: 'DI_ECHART_MODEL_S_DATA_' + getUID(),
             S_ADD_DATA: 'DI_ECHART_MODEL_S_ADD_DATA_' + getUID(),
             S_REMOVE_DATA: 'DI_ECHART_MODEL_S_REMOVE_DATA_' + getUID(),
-            OFFLINE_DOWNLOAD: 'DI_CHART_OFFLINE_DOWNLOAD_' + getUID()
+            OFFLINE_DOWNLOAD: 'DI_CHART_OFFLINE_DOWNLOAD_' + getUID(),
+            CHANGE_RADIOBUTTON: 'DI_CHART_CHANGE_RADIOBUTTON_' + getUID()
         }
     );
 
@@ -123,6 +125,7 @@ $namespace('di.shared.model');
             S_DATA: doParam,
             S_ADD_DATA: doParam,
             S_REMOVE_DATA: doParam,
+            CHANGE_RADIOBUTTON:doParam,
             LITEOLAPCHART_DATA: function (options) {
                 var reportTemplateId = this._fCommonParamGetter.getReportTemplateId();
                 var paramArr = [];
@@ -177,7 +180,8 @@ $namespace('di.shared.model');
             S_DATA: doComplete,
             S_ADD_DATA: doComplete,
             S_REMOVE_DATA: doComplete,
-            OFFLINE_DOWNLOAD: doComplete
+            OFFLINE_DOWNLOAD: doComplete,
+            CHANGE_RADIOBUTTON: doComplete
         }
     );
 
@@ -199,7 +203,8 @@ $namespace('di.shared.model');
             LITEOLAPCHART_DATA: doParse,
             S_DATA: doParse,
             S_ADD_DATA: doParse,
-            S_REMOVE_DATA: doParse
+            S_REMOVE_DATA: doParse,
+            CHANGE_RADIOBUTTON: doParse
         }
     );
 
@@ -306,7 +311,8 @@ $namespace('di.shared.model');
             LITEOLAPCHART_DATA: doError,
             S_DATA: doError,
             S_ADD_DATA: doError,
-            S_REMOVE_DATA: doError
+            S_REMOVE_DATA: doError,
+            CHANGE_RADIOBUTTON: doError
         }
     );
 

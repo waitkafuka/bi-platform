@@ -203,7 +203,7 @@ $namespace('di.config');
     // 图-最新路径
     URL_SET.OLAP_CHART_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
     URL_SET.LITEOLAP_CHART_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
-
+    URL_SET.OLAP_CHART_CHANGE_RADIOBUTTON = '/reports/#{reportId}/runtime/extend_area/#{componentId}/index/#{index}';
     // 报表预览
     URL_SET.REPORT_PREVIEW = '/reportTemplate/complex/generateReport.action';
     // URL_SET.REPORT_PREVIEW = '/asset-d/ditry/dev/try-standard.html';
