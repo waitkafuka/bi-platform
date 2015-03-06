@@ -323,7 +323,7 @@ public class DirectorImpl implements Director {
         if (level instanceof MiniCubeLevel) {
             return ident + "_" + ((MiniCubeLevel) level).getSource();
         }
-        return ident + "_" + ((CallbackLevel) level).getCallbackUrl();
+        return ident + "_" + ((CallbackLevel) level).getName();
     }
 
     /**
