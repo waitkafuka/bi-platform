@@ -423,6 +423,14 @@
             },
             data: this._aXAxis.data
         };
+
+        // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的翻着） - 晓强
+        if (this._chartType === 'bar') {
+            xAxis.position = 'right';
+            options.grid.x = 23;
+            options.grid.x2 = 130;
+        }
+
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
         if (this._chartType === 'column' || this._chartType === 'line') {
             options.xAxis = xAxis;
@@ -431,6 +439,8 @@
 
         }
         else {
+
+
             options.yAxis = xAxis;
         }
         return options;
@@ -453,11 +463,6 @@
                     yAxisOption.splitArea = { show : true };
                     // yAxisOption.boundaryGap = [0.1, 0.1];
                     yAxisOption.splitNumber = 5;
-//                    if (option.title.text) {
-//                        yAxisOption.axisLabel = {
-//                            formatter: '{value} '+ option.title.text
-//                        }
-//                    }
                     yAxis.push(yAxisOption);
                 }
             }
@@ -465,8 +470,29 @@
                 yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
-                // yAxisOption.boundaryGap = [0.1, 0.1];
                 yAxisOption.splitNumber = 5;
+                // y轴添加单位 - 晓强
+                yAxisOption.axisLabel = yAxisOption.axisLabel || {};
+                yAxisOption.axisLabel.formatter = function (value) {
+                    var resultStr = value;
+                    var w = 10000;
+                    var y = 1000000000;
+                    // 确定可以转换成数字
+                    if (!Number.isNaN(value/1)) {
+                        if (value >= w && value <= y) {
+                            resultStr = (value / w).toFixed(0) + '万';
+                        }
+                        else if (value >= y) {
+                            resultStr = (value / y).toFixed(0) + '亿';
+                        }
+                    }
+
+                    return resultStr;
+                };
+                // 字体修改
+                // yAxisOption.axisLabel.textStyle = {
+                //     fontFamily: 'simhei'
+                // };
                 yAxis.push(yAxisOption);
             }
             if (this._isAddYxis && yAxis.length <= 1) {
@@ -488,7 +514,7 @@
         if (this._chartType === 'bar') {
             options.xAxis = yAxis;
         }
-        if (this._chartType === 'column' || this._chartType === 'line') {
+        else if (this._chartType === 'column' || this._chartType === 'line') {
             options.yAxis = yAxis;
         }
     };
@@ -788,7 +814,7 @@
                 // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
                 // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
-                    x: 70,
+                    x: 56,
                     y: 50,
                     borderWidth: 0
                 }
