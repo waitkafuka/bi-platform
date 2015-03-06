@@ -743,15 +743,16 @@ public final class QueryUtils {
             for (int i = 0; i < columns.length; ++i) {
                 chart.getMeasureMap().put(columns[i].getOlapElementId(), tmp.get(i));
             }
-            List<String>  defaultDims = getOlapElementNames(
-                    area.getLogicModel().getRows(), area.getCubeId(), schema);
-            if (index >= 0 && index < defaultDims.size()) {
-            		chart.setDefaultDims(new String[]{defaultDims.get(index)});
-            } else {
-	            	if (defaultDims.size() > 0) {
-	            		chart.setDefaultDims(defaultDims.toArray(new String[0]));
-	            	}
-            }
+//            List<String>  defaultDims = getOlapElementNames(
+//                    area.getLogicModel().getRows(), area.getCubeId(), schema);
+            if (index >= 0 && index < chart.getAllMeasures().length) {
+            		chart.setDefaultMeasures(new String[]{ chart.getAllMeasures()[index] });
+            } 
+//            else {
+//	            	if (defaultDims.size() > 0) {
+//	            		chart.setDefaultDims(defaultDims.toArray(new String[0]));
+//	            	}
+//            }
         } 
     }
 

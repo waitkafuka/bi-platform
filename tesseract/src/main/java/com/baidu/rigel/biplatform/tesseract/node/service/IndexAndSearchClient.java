@@ -269,6 +269,7 @@ public class IndexAndSearchClient {
         throws IndexAndSearchException {
         logger.info("getChannelByAddressAndPort:[address=" + ipAddress + "][port=" + port
             + "] start");
+        long currTime=System.currentTimeMillis();
         if (StringUtils.isEmpty(ipAddress) || port <= 0) {
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                 IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
@@ -281,6 +282,7 @@ public class IndexAndSearchClient {
         try {
             if (b != null) {
                 channel = b.connect(address, port).sync().channel();
+                
                 logger.info("getChannelByAddressAndPort:connect server success [address=" + address
                     + "][port=" + port + "]");
             }
@@ -293,7 +295,7 @@ public class IndexAndSearchClient {
                 IndexAndSearchExceptionType.INDEX_EXCEPTION), e,
                 IndexAndSearchExceptionType.INDEX_EXCEPTION);
         }
-        
+        System.out.println("getChannelByAddressAndPort cost : "+ (System.currentTimeMillis()-currTime)+" ms");
         logger.info("getChannelByAddressAndPort:[address=" + address + "][port=" + port
             + "] connect sucess");
         return channel;

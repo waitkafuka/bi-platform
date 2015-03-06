@@ -58,12 +58,12 @@ public class HazelcastNoticePort implements ApplicationContextAware, MessageList
             "onMessage", message.getMessageObject()));
         ApplicationEvent event = null;
         
-        if (message.getMessageObject() instanceof IndexUpdateEvent) {
-            event = (IndexUpdateEvent) message.getMessageObject();
-        }else if(message.getMessageObject() instanceof IndexMetaWriteImageEvent){
-        	event = (IndexMetaWriteImageEvent) message.getMessageObject();
-        }
-        
+//        if (message.getMessageObject() instanceof IndexUpdateEvent) {
+//            event = (IndexUpdateEvent) message.getMessageObject();
+//        }else if(message.getMessageObject() instanceof IndexMetaWriteImageEvent){
+//        	event = (IndexMetaWriteImageEvent) message.getMessageObject();
+//        }
+        event=(ApplicationEvent)message.getMessageObject();
         context.publishEvent(event);
         
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_PUBLISH_LOCALEVENT_SUCC,
