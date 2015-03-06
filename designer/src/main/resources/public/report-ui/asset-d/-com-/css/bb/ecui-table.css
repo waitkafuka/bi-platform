@@ -394,6 +394,9 @@
 .ui-table-expand-background {
     background-color: #F6F6F5;
 }
+.ui-table-row-selected .ui-table-rowhcell{
+	background: #FFF;
+}
 /* 表格内部数据外框样式 */
 .ui-table-cell-infor {
     height: 39px;
