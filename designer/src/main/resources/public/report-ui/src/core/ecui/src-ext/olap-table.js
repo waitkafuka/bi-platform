@@ -867,7 +867,7 @@
                     + type + '-tree-item">',
                     '<div class="' + clz + '"></div>',
                 value,
-                '</div>',
+                '</div>'
             ].join('');
         }
         else if (indentStyle) {

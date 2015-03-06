@@ -177,10 +177,11 @@
 }
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
-    width: 7px;
+    width: 0;
     background: #FFF;
     padding: 40px 0 0 0;
     border-right: 1px solid #CFEBF6;
+    z-index: 2;
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
@@ -218,9 +219,24 @@
     display: none;
 }
 .ui-table .ui-vscrollbar .ui-scrollbar-thumb {
-    width: 7px;
+    width: 0;
+    padding: 0;
     background: #b5b5b5;
     border-radius: 4px;
+    overflow: visible;
+}
+.ui-table .ui-vscrollbar .ui-scrollbar-thumb:before {
+    content: ' ';
+    font-size: 0;
+    width: 7px;
+    position: absolute;
+    display: inline-block;
+    top: 0;
+    left: -10px;
+    height: 100%;
+    background-color: #b5b5b5;
+    border-radius: 5px;
+    z-index: 3;
 }
 /* 表格横向滚动条 */
 .ui-table .ui-hscrollbar {
