@@ -781,7 +781,7 @@
                 '" class="', classStr.join(' '),
             '">',
             //'<div class="ui-table-cell-infor">' + innerStr + '</div><div class="ui-table-cell-empty"></div>',
-            innerStr,
+            '<div class="ui-table-cell-text">' + innerStr + '</div>',
             '</td>'
         );
     };
