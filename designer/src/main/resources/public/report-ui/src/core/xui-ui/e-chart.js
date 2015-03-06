@@ -408,6 +408,11 @@
             }
             series = targetSeries;
         }
+        if (this._chartType === 'bar') {
+            for (var i = 0, iLen = series.length; i < iLen; i ++) {
+                series[i].data = series[i].data.reverse();
+            }
+        }
         options.series = series;
     };
     /**
@@ -432,6 +437,7 @@
 
         }
         else {
+            xAxis.data = xAxis.data.reverse();
             options.yAxis = xAxis;
         }
         return options;
