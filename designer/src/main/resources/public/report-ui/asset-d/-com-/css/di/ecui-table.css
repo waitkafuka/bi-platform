@@ -16,7 +16,10 @@
     user-select: none;
 }
 .ui-table-locked-head {
-    border: 1px solid #E6E6E6;
+    border-right: 1px solid #E6E6E6;
+    border-bottom: 1px solid #E6E6E6;
+    border-left: 2px solid #E6E6E6;
+    border-top: 1px solid #E6E6E6;
     height: 30px;
     overflow: hidden;
 }

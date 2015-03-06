@@ -15,6 +15,7 @@
 .ui-table-locked-head {
     border-top: 1px solid #cfebf6;
     border-bottom: 1px solid #E7F9FE;
+    border-left: 1px solid #E7F9FE;
     height: 30px;
     overflow: hidden;
 }
@@ -59,7 +60,7 @@
     white-space: nowrap;
     word-break: keep-all;
     padding: 0 20px 0 20px;
-    border-bottom: 1px solid #CCC;
+    /*border-bottom: 1px solid #CCC;*/
 }
 /*.ui-table-rowhcell:before {*/
     /*content: ' ';*/
