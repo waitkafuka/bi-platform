@@ -20,7 +20,6 @@
 }
 .ui-table-layout, .ui-table-locked-layout {
     /*border-left: 1px solid #cfebf6;*/
-    border-right: 1px solid #FFF;
 }
 
 .ui-table-cell {
@@ -171,17 +170,16 @@
 }
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
-    width: 0;
-    background: #FFF;
+    width: 1px;
+    background: #CFEBF6;
     padding: 40px 0 0 0;
-    border-right: 1px solid #CFEBF6;
     z-index: 2;
 }
 .ui-table .ui-vscrollbar .ui-button {
     cursor: default;
     padding: 0;
     margin: 0;
-    background-color: #e7f9fe;
+    background-color: #CFEBF6;
 }
 .ui-table .ui-vscrollbar .ui-button-hover {
     padding: 0;
@@ -193,10 +191,10 @@
     -ms-border-radius: 0;
 }
 .ui-table .ui-vscrollbar-prev {
-    width: 5px;
+    width: 1px;
     height: 14px;
     border: 0;
-    background: #E7F9FE;
+    background-color: #CFEBF6;
     overflow: hidden;
     /*border-bottom: 1px solid #e7ecee;*/
     border-right: 1px solid #cfebf6;
@@ -206,7 +204,6 @@
 .ui-table .ui-vscrollbar-next {
     width: 6px;
     height: 14px;
-    border: 0;
     background: url(img/icon2.png) -59px -84px no-repeat;
     overflow: hidden;
     border: 1px solid #A2BCC7;
@@ -215,7 +212,7 @@
 .ui-table .ui-vscrollbar .ui-scrollbar-thumb {
     width: 0;
     padding: 0;
-    background: #b5b5b5;
+    background: rgba(255, 255, 255, 0);
     border-radius: 4px;
     overflow: visible;
 }
