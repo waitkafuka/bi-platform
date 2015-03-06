@@ -18,8 +18,6 @@ package com.baidu.rigel.biplatform.tesseract.resultset;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 
 /**
