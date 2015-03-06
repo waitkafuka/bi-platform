@@ -123,10 +123,11 @@ $namespace('di.shared.ui');
             ['sync.complete.' + key, this.$syncEnable, this, key]
         );
         this.getModel().attach(
-            ['sync.preprocess.CHANGE_RADIOBUTTON', this.$syncDisable, this, key],
+            ['sync.preprocess.CHANGE_RADIOBUTTON', this.$syncDisable, this, 'CHANGE_RADIOBUTTON'],
             ['sync.result.CHANGE_RADIOBUTTON', this.$renderMain, this],
-            ['sync.error.CHANGE_RADIOBUTTON', this.$renderMain, this],
-            ['sync.complete.CHANGE_RADIOBUTTON', this.$syncEnable, this, key]
+            ['sync.result.CHANGE_RADIOBUTTON', this.$handleDataLoaded, this],
+            ['sync.error.CHANGE_RADIOBUTTON', this.$handleDataError, this],
+            ['sync.complete.CHANGE_RADIOBUTTON', this.$syncEnable, this, 'CHANGE_RADIOBUTTON']
         );
         foreachDo(
             [
@@ -383,4 +384,5 @@ $namespace('di.shared.ui');
             this.$di('getEvent')
         );
     };
+
 })();
