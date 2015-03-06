@@ -48,7 +48,7 @@ define([
                     "hCellCut": 30,
                     "cCellCut": 30,
                     "vScroll": true,
-                    "rowCheckMode": "SELECT"
+                    "rowCheckMode": "SELECTONLY"
                 }
             },
             {

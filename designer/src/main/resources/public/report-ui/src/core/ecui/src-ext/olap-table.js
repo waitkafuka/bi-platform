@@ -780,7 +780,8 @@
                 ' style="', styleStr.join(' '),
                 '" class="', classStr.join(' '),
             '">',
-            innerStr,
+            //'<div class="ui-table-cell-infor">' + innerStr + '</div><div class="ui-table-cell-empty"></div>',
+            '<div class="ui-table-cell-text">' + innerStr + '</div>',
             '</td>'
         );
     };
@@ -814,7 +815,7 @@
         if (wrap.indent) {
             // margin-left会用来判断indent的点击事件，所以结构不能变
             attrStr.push('data-indent="' + wrap.indent + '"');
-            indentStyle = 'margin-left:' + TREE_INDENT * wrap.indent + 'px;';
+            indentStyle = 'margin-left:' + (parseInt(TREE_INDENT * wrap.indent) - 15) + 'px;';
         }
 
         if (wrap.drillByLink) {
@@ -1261,7 +1262,8 @@
         // 左表头节点
         if (el.getAttribute('data-row-h') && (ec = el.getAttribute('data-e-c'))) {
             if (getMouseX(this) <=
-                toNumber(getStyle(el.firstChild, 'marginLeft'))
+                toNumber(getStyle(el, 'paddingLeft'))
+                + toNumber(getStyle(el.firstChild, 'marginLeft'))
                 + toNumber(getStyle(el.firstChild, 'paddingLeft'))
                 ) {
                 var pos;
