@@ -815,7 +815,7 @@
         if (wrap.indent) {
             // margin-left会用来判断indent的点击事件，所以结构不能变
             attrStr.push('data-indent="' + wrap.indent + '"');
-            indentStyle = 'margin-left:' + TREE_INDENT * wrap.indent + 'px;';
+            indentStyle = 'margin-left:' + (parseInt(TREE_INDENT * wrap.indent) - 15) + 'px;';
         }
 
         if (wrap.drillByLink) {
