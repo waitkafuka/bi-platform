@@ -2,9 +2,9 @@
  * xui.ui.HChart
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
- * @file:    基于highcharts的js图
+ * @file:    基于ECharts的js图
  *           (最早源自pl-charts.js by cxl(chenxinle))
- * @author:  sushuang(sushuang@baidu.com)
+ * @author:  sushuang(sushuang)
  * @depend:  xui, xutil, echarts
  */
 
@@ -39,9 +39,8 @@
                 var type = this._sType;
                 // FIXME:优化，header估计得干掉
                 el.innerHTML = [
-                        '<div class="' + type + '-header">',
-                    '</div>',
-                        '<div class="' + type + '-content"></div>'
+                    '<div class="' + type + '-header"></div>',
+                    '<div class="' + type + '-content"></div>'
                 ].join('');
                 this._eHeader = el.childNodes[0];
                 this._eContent = el.childNodes[1];
@@ -197,24 +196,29 @@
             }
             else {
                 // 单选
-
+                var radioName = 'echarts-candidate-radio-' + new Date().getTime();
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+                    var radioId = 'allMeasures-radio' + new Date().getTime() + i;
                     measureHtml.push(
-                        '<input type="radio" name="echarts-candidate" ',
+                        '<input type="radio" name="' + radioName + '" id="' + radioId + '"',
                         isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
                         '/>',
-                        '<label>',allMeasures[i],'</label>'
+                        '<label for="' + radioId + '">',allMeasures[i],'</label>'
                     );
                 }
                 this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
                     + measureHtml.join('')
                     + '</div>';
                 this._eCandidateBox = domChildren(this._eHeader)[0];
-                attachEvent(this._eCandidateBox, 'click', function (ev) {
-                    var oEv = ev || window.event;
-                    var target = oEv.target || oEv.srcElement;
-                    candidateClick.call(me, target);
-                });
+                var inputRadios = this._eCandidateBox.getElementsByTagName('input');
+
+                for (var i = 0, iLen = inputRadios.length; i < iLen; i ++) {
+                    inputRadios[i].onclick = (function (j) {
+                        return function () {
+                            me.notify('changeRadioButton', String(j));
+                        }
+                    })(i);
+                }
             }
         }
     };
@@ -403,6 +407,11 @@
             }
             series = targetSeries;
         }
+        if (this._chartType === 'bar') {
+            for (var i = 0, iLen = series.length; i < iLen; i ++) {
+                series[i].data = series[i].data.reverse();
+            }
+        }
         options.series = series;
     };
     /**
@@ -427,6 +436,7 @@
 
         }
         else {
+            xAxis.data = xAxis.data.reverse();
             options.yAxis = xAxis;
         }
         return options;
@@ -495,13 +505,12 @@
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
 
+        // 控制图例位置 需要同事修改下面两处 - 晓强
+        // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
+        // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
         var legend = {
-            // orient: 'vertical',
             x: 'center',
-            y: 'top'
-//            padding: 5
-//            borderColor: '#ccc',
-//            borderWidth: 0.5
+            y: '20'
         };
         var data = [];
         var defaultMeasures = this.$getDefaultMeasures(this._chartType);
@@ -509,6 +518,10 @@
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             }
+        }
+        // 地图的指标现在都是单指标，所以不需要展示这一图例，暂时将其隐藏   update by majun
+        if (this._chartType === 'map') {
+        	legend.show = false;
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
@@ -535,7 +548,6 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupToolBox = function (options) {
-        var toolbox;
         var series;
         var itemChartType = {};
         var chartTypeLen = 0;
@@ -553,20 +565,7 @@
             if (series.length === 1 || chartTypeLen >= 2) {
                 return;
             }
-            // toolbox是工具条
-//            toolbox = {
-//                show: true,
-//                orient : 'horizontal',
-//                x: 'right',
-//                y : 'top',
-//                feature : {
-//                    magicType : {show: true, type: ['stack', 'tiled']}
-//                }
-//            };
-//            options.toolbox = toolbox;
         }
-
-
     };
     /**
      * 设置dataRoom
@@ -595,7 +594,6 @@
                 ? true
                 : enableSelectRange;
             dataZoom.show = enableSelectRange;
-//            setupRangSelector.call(this, options, enableSelectRange);
 
             dataZoom.realtime = true;
             if (this._zoomStart === 0) {
@@ -615,149 +613,7 @@
         }
 
     };
-//    function setupRangSelector(options, enabled) {
-//        var me = this;
-//        var xDatas;
-//        // 禁用rangeselector的情况
-//        if (!enabled) {
-//            return;
-//        }
-//
-//        xDatas = me._aXAxis.data;
-//        createRangeHtml.call(me);
-//
-//        me._zoomButtons.onclick = function (ev) {
-//            var target = ev.target;
-//            if (ev.target.tagName.toLowerCase() === 'span') {
-//                me._zoomSelectedButton = Number(target.getAttribute('selRangeIndex'));
-//                me._oldZoomSelectButton && removeClass(me._oldZoomSelectButton, 'zoom-button-focus');
-//                addClass(ev.target, 'zoom-button-focus');
-//                me._oldZoomSelectButton = target;
-//                me._zoomStart = (me._zoomSelectedButton == 0)
-//                    ? 0
-//                    : (xDatas.length - (me._zoomSelectedButton * 30));
-//                me._zoomStart = (me._zoomStart <= 0)
-//                    ? 0
-//                    : me._zoomStart;
-//                me._zoomEnd = xDatas.length - 1;
-//            }
-//            // TODO:校验，如果所选时间的长度大于当前时间存在的时间，就不重绘，没必要，因为展现的东西还是一样的
-//            me.render();
-//        };
-//        var oMinDate = q('zoomMin', this._zoomDateRange)[0];
-//        var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
-//        // 当from to改变后，render图形
-//        document.onkeydown = function() {
-//            if (event.keyCode === 13) {
-//                dateRangeChange.call(me, oMinDate, oMaxDate);
-//            }
-//        };
-//        oMinDate.onblur = function () {
-//            dateRangeChange.call(me, oMinDate, oMaxDate);
-//        };
-//        oMaxDate.onblur = function () {
-//            dateRangeChange.call(me, oMinDate, oMaxDate);
-//        };
-//
-//        var min = xDatas[me._zoomStart];
-//        var max = xDatas[me._zoomEnd];
-//        oMinDate.value = min;
-//        oMaxDate.value = max;
-//        me._oldMinDate = min;
-//        me._oldMaxDate = max;
-//    }
-    // 创建html元素
-//    function createRangeHtml() {
-//        var buttons;
-//        var axisType = this._aXAxis.type;
-//        this._zoomSelectedButton = (this._zoomSelectedButton === undefined)
-//            ? 0
-//            : this._zoomSelectedButton;
-//        if (axisType === 'date') {
-//            buttons = [
-//                { type: 'month', count: 1, text: '1月' },
-//                { type: 'month', count: 2, text: '2月' },
-//                { type: 'all', count: 0, text: '全部' }
-//            ];
-//        }
-//        else if (axisType === 'month') {
-//            buttons = [
-//                { type: 'month', count: 6, text: '6月' },
-//                { type: 'year', count: 12, text: '1年' },
-//                { type: 'all', count: 0, text: '全部' }
-//            ];
-//        }
-//        else {
-//            buttons = [
-//                { type: 'all', count: 0, text: '全部' }
-//            ];
-//        }
-//
-//        // zoom按钮html模板
-//        var buttonsHtml = [
-//            '<ul class="zoom-buttons">'
-//        ];
-//        for (var i = 0, len = buttons.length; i < len; i++) {
-//            // li模版：<li><span selRangeIndex="1" class="zoom-button-focus">1月</span></li>
-//            buttonsHtml.push(
-//                '<li>',
-//                '<span selRangeIndex ="', buttons[i].count, '"',
-//                    this._zoomSelectedButton == buttons[i].count
-//                    ? ' class="zoom-button-focus"'
-//                    : '',
-//                '>', buttons[i].text, '</span>',
-//                '</li>'
-//            );
-//        }
-//        buttonsHtml.push('</ul>');
-//        // 时间范围html模板
-//        var selectRangeHtml = [
-//            '<div class="zoom-dateRange">',
-//            '<span>From:</span>',
-//            '<input class="zoomMin" type="text">',
-//            '<span>To:</span>',
-//            '<input class="zoomMax" type="text">',
-//            '</div>'
-//        ].join('');
-//        this._eHeader.innerHTML = buttonsHtml.join('') + selectRangeHtml;
-//
-//        this._zoomButtons = domChildren(this._eHeader)[0];
-//        this._oldZoomSelectButton = q('zoom-button-focus', this._zoomButtons)[0];
-//        this._zoomDateRange = domChildren(this._eHeader)[1];
-//    }
-    // 当时间range改变后
-//    function dateRangeChange(oMinDate, oMaxDate) {
-//        var xDatas = this._aXAxis.data;
-//        var start;
-//        var end;
-//        var minDate = oMinDate.value;
-//        var maxDate = oMaxDate.value;
-//        for (var i = 0, iLen = xDatas.length; i < iLen; i++) {
-//            if (minDate === xDatas[i]) {
-//                start = i;
-//            }
-//            if (maxDate === xDatas[i]) {
-//                end = i;
-//            }
-//        }
-//        if ((start === 0 || start) && end) {
-//            if ((xDatas[start] === this._oldMinDate)
-//                && (xDatas[end] === this._oldMaxDate)
-//                ) {
-//                return;
-//            }
-//            this._zoomStart = start;
-//            this._zoomEnd = end;
-//            var oZoomSelBtn = q('zoom-button-focus', this._zoomButtons)[0];
-//            oZoomSelBtn && removeClass(oZoomSelBtn, 'zoom-button-focus');
-//            this._zoomSelectedButton = -1;
-//            this.render();
-//        }
-//        else {
-//            oMinDate.value = this._oldMinDate;
-//            oMaxDate.value = this._oldMaxDate;
-//        }
-//    }
+
     //------------------------------------------
     // 设置图形tooltip区域
     //------------------------------------------
@@ -934,9 +790,12 @@
             || this._chartType === 'pie'
         ) {
             if (this._chartType !== 'pie') {
+                // 控制图例位置 需要同事修改下面两处 - 晓强
+                // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
+                // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
-                    x: '90px',
-                    y: '30px',
+                    x: 70,
+                    y: 50,
                     borderWidth: 0
                 }
             }

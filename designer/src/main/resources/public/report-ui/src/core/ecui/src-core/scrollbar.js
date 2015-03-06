@@ -508,7 +508,7 @@ _oRange         - 滑动按钮的合法滑动区间
 
         //__gzip_original__next
         var bodyWidth = this.getBodyWidth(),
-            prevHeight = this.$$paddingTop,
+            prevHeight = this.$$paddingTop-1,
             // 竖直滚动条宽度不使用其父级宽度，用自身宽度
             prevWidth = this.$$width,
             next = this._uNext;

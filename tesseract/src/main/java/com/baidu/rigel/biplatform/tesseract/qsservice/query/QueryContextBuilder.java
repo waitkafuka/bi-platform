@@ -32,9 +32,11 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
@@ -51,6 +53,7 @@ import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /** 
@@ -62,6 +65,11 @@ import com.google.common.collect.Sets;
 @Service
 public class QueryContextBuilder {
     
+	/**
+	 * TODO 此处需要移动到指定类中
+	 */
+	public static final String FILTER_DIM_KEY = "filter_Dim_Key";
+	
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     
     
@@ -69,6 +77,36 @@ public class QueryContextBuilder {
     private MetaDataService metaDataService;
     
     
+    public static Map<String, String> getRequestParams(QuestionModel questionModel, Cube cube) {
+		Map<String, String> rs = Maps.newHashMap();
+		rs.putAll(questionModel.getRequestParams());
+		StringBuilder filterDimNames = new StringBuilder();
+		if (questionModel.getQueryConditions() != null && questionModel.getQueryConditions().size() > 0) {
+			questionModel.getQueryConditions().forEach((k, v) -> {
+				Dimension dim = cube.getDimensions().get(k);
+				MiniCube miniCube = (MiniCube) cube;
+				if (dim != null && dim.getTableName().equals(miniCube.getSource())) {
+				    DimensionCondition cond = (DimensionCondition) v;
+				    StringBuilder sb = new StringBuilder();
+				    List<QueryData> queryDataNodes = cond.getQueryDataNodes();
+					int size = queryDataNodes.size();
+					String[] strArray = null;
+					for (int index = 0; index < size; ++index) {
+				    		QueryData data = queryDataNodes.get(index);
+				    		strArray = MetaNameUtil.parseUnique2NameArray(data.getUniqueName());
+				    		sb.append(strArray[strArray.length - 1]);
+				    		if (index < size - 1) {
+				    			sb.append(",");
+				    		}
+				    }
+					filterDimNames.append(cond.getMetaName());
+				    rs.put(cond.getMetaName(), sb.toString());
+				}
+			}); 
+		}
+		rs.put(FILTER_DIM_KEY, filterDimNames.toString());
+		return rs;
+	}
     /**
      * 构建查询上下文
      * 
@@ -88,7 +126,8 @@ public class QueryContextBuilder {
             long current = System.currentTimeMillis();
             AxisMeta axisMeta = null;
             AxisType axisType = AxisType.COLUMN;
-            while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
+            Map<String, String> requestParams = questionModel.getRequestParams();
+			while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
                 if (CollectionUtils.isNotEmpty(axisMeta.getCrossjoinDims())) {
                     int i = 0;
                     for (String dimName : axisMeta.getCrossjoinDims()) {
@@ -98,7 +137,8 @@ public class QueryContextBuilder {
                             dimCondition = new DimensionCondition(dimName);
                         }
                         queryContext.addMemberNodeTreeByAxisType(axisType,
-                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, questionModel.getRequestParams()));
+                                buildQueryMemberTree(dsInfo, cube, dimCondition, i == 0, 
+                                questionModel.getRequestParams()));
                         i++;
                     }
                 }
@@ -129,7 +169,7 @@ public class QueryContextBuilder {
                     }
                     if (condition instanceof DimensionCondition) {
                         DimensionCondition dimCondition = (DimensionCondition) condition;
-                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, questionModel.getRequestParams());
+                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, requestParams);
                         if (MapUtils.isNotEmpty(filterCondition)) {
                             queryContext.getFilterMemberValues().putAll(filterCondition);
                         }
