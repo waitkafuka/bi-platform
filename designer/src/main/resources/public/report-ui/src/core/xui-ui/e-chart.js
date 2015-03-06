@@ -224,7 +224,7 @@
     };
 
 
-        // 备选区按钮点击事件
+    // 备选区按钮点击事件
     function candidateClick(oTarget) {
         var resultName = '';
 
@@ -428,6 +428,8 @@
             },
             data: this._aXAxis.data
         };
+        // 调整柱状图向右 - 晓强
+
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
         if (this._chartType === 'column' || this._chartType === 'line') {
             options.xAxis = xAxis;
@@ -457,13 +459,9 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                    // yAxisOption.boundaryGap = [0.1, 0.1];
+                    // 这里处理Y轴单位 - 晓强
+
                     yAxisOption.splitNumber = 5;
-//                    if (option.title.text) {
-//                        yAxisOption.axisLabel = {
-//                            formatter: '{value} '+ option.title.text
-//                        }
-//                    }
                     yAxis.push(yAxisOption);
                 }
             }
@@ -756,21 +754,6 @@
             };
             that.notify('chartClick', o);
         }
-//        if (!this._chartType === 'pie') {
-//            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
-//        }
-
-//        function zoomChage(param) {
-//            start = param.zoom.xStart;
-//            end = param.zoom.xEnd;
-//            changeDateRange();
-//        }
-//        function changeDateRange() {
-//            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
-//            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
-//            oMinDate.value = xDatas[start];
-//            oMaxDate.value = xDatas[end - 1];
-//        }
     };
     /**
      * 构建图表参数
@@ -794,7 +777,7 @@
                 // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
                 // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
-                    x: 70,
+                    x: 43,
                     y: 50,
                     borderWidth: 0
                 }
