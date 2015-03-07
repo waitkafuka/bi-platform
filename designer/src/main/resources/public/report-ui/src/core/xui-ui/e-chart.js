@@ -428,7 +428,14 @@
             },
             data: this._aXAxis.data
         };
-        // 调整柱状图向右 - 晓强
+
+        // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的翻着） - 晓强
+        if (this._chartType === 'bar') {
+            xAxis.position = 'right';
+            options.grid.x = 23;
+            options.grid.x2 = 130;
+            // options.grid.y2 = 0;
+        }
 
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
         if (this._chartType === 'column' || this._chartType === 'line') {
@@ -469,7 +476,30 @@
                 yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
-                // yAxisOption.boundaryGap = [0.1, 0.1];
+
+                // y轴添加单位 - 晓强
+                yAxisOption.axisLabel = yAxisOption.axisLabel || {};
+                yAxisOption.axisLabel.formatter = function (value) {
+                    var resultStr = value;
+                    var w = 10000;
+                    var y = 1000000000;
+                    // 确定可以转换成数字
+                    if (!Number.isNaN(value/1)) {
+                        if (value >= w && value <= y) {
+                            resultStr = (value / w).toFixed(0) + '万';
+                        }
+                        else if (value >= y) {
+                            resultStr = (value / y).toFixed(0) + '亿';
+                        }
+                    }
+
+                    return resultStr;
+                };
+                // 字体修改
+                // yAxisOption.axisLabel.textStyle = {
+                //     fontFamily: 'simhei'
+                // };
+
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -607,9 +637,12 @@
             else {
                 dataZoom.end = Math.round(101 / xNums * this._zoomEnd);
             }
+
+            // 动态设置dataRoom的垂直定位 - 晓强
+            dataZoom.y = $(this.el).height() - 50;
+
             options.dataZoom = dataZoom;
         }
-
     };
 
     //------------------------------------------
@@ -765,7 +798,6 @@
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
-
         if (
             this._chartType === 'column'
             || this._chartType === 'bar'
@@ -779,22 +811,28 @@
                 options.grid = {
                     x: 43,
                     y: 50,
+                    y2: 90,
                     borderWidth: 0
                 }
             }
+            //
+            if (this._chartType === 'bar') {
+
+            }
+
             this.$setupDataRoom(options);
+            // 可视数据区DataRoom影响距y2的值
+            if (options.dataZoom.show) {
+                options.grid.y2 = 90;
+            }
+            else {
+                options.grid.y2 = 42;
+            }
             this.$setupToolBox(options);
             this.$setupYAxis(options);
             this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
-//            options.roamController = {
-//                show: true,
-//                x: 'right',
-//                mapTypeControl: {
-//                    'china': true
-//                }
-//            };
             // TODO:需要后端返回最大最小值
             options.dataRange = {
                 min: this._mapMinValue,
@@ -806,7 +844,6 @@
             };
         }
         if (this._chartType === 'pie') {
-            //options.calculable = true;
         	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
             options.calculable = false;
         }
