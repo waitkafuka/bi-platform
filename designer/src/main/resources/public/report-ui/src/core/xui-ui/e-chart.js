@@ -434,7 +434,6 @@
             xAxis.position = 'right';
             options.grid.x = 23;
             options.grid.x2 = 130;
-            // options.grid.y2 = 0;
         }
 
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
@@ -494,9 +493,9 @@
                     return resultStr;
                 };
                 // 字体修改
-                // yAxisOption.axisLabel.textStyle = {
-                //     fontFamily: 'simhei'
-                // };
+                yAxisOption.axisLabel.textStyle = {
+                     fontFamily: 'simhei'
+                };
 
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
@@ -809,7 +808,6 @@
                 options.grid = {
                     x: 43,
                     y: 50,
-                    y2: 90,
                     borderWidth: 0
                 }
             }
