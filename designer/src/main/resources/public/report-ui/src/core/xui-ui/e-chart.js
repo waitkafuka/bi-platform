@@ -651,6 +651,7 @@
      * @protected
      */
     UI_E_CHART_CLASS.$setupTooltip = function (options) {
+        var me = this;
         var toolTip = {};
         if (this._chartType === 'pie') {
             toolTip.formatter = '{a} <br/>{b} : {c} ({d}%)';
@@ -667,18 +668,25 @@
             // 在此将提示信息的format属性加上以便方便显示
             toolTip.formatter =  function(data, ticket, callback) {
                 var res = data[0][1];
+                // 如果为date类型则设置显示周
+                if (options.xAxis.showDataType === 'date'){
+                    var weekStr = ['周日','周一','周二','周三','周四','周五','周六'][new Date(data[0][1]).getDay()];
+                    res = res + '(' + weekStr + ')';
+                }
                 for (var i = 0, l = data.length; i < l; i++) {
+
                     var valueFormat = options.series[i].format;
                     var valueLable = data[i][2];
+
                     // 当发现图数据有配置format属性时，按format所示进行展示
                     // 当没有format的时候，展示原值
                     if (valueFormat) {
                         valueLable = formatNumber(
-                            data[i][2],
-                            valueFormat,
-                            null,
-                            null,
-                            true
+                                data[i][2],
+                                valueFormat,
+                                null,
+                                null,
+                                true
                         );
                     }
                     res += '<br/>' + data[i][0] + ' : ' + valueLable;
