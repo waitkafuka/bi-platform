@@ -466,8 +466,6 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                    // 这里处理Y轴单位 - 晓强
-
                     yAxisOption.splitNumber = 5;
                     yAxis.push(yAxisOption);
                 }
@@ -814,10 +812,6 @@
                     y2: 90,
                     borderWidth: 0
                 }
-            }
-            //
-            if (this._chartType === 'bar') {
-
             }
 
             this.$setupDataRoom(options);
