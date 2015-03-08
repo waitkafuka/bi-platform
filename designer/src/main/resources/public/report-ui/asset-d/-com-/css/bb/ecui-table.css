@@ -449,3 +449,7 @@ tr > td:last-child:after{
 .ui-table-head-font  {
     margin-left: -10px;
 }
+/* 汇总行字体加粗 */
+.ui-table-expand-font {
+    font-weight: bold;
+}
