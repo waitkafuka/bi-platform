@@ -15,7 +15,7 @@
 .ui-table-locked-head {
     border-top: 1px solid #cfebf6;
     border-bottom: 1px solid #E7F9FE;
-    border-left: 1px solid #E7F9FE;
+    border-left: 1px solid #cfebf6;
     height: 30px;
     overflow: hidden;
 }
@@ -452,4 +452,8 @@ tr > td:last-child:after{
 /* 汇总行字体加粗 */
 .ui-table-expand-font {
     font-weight: bold;
+}
+/* 解决表头第一块区域左侧边框线错位问题 */
+.ui-table-locked-head th:first-child {
+    border-left: 1px solid #E7F9FE;
 }
