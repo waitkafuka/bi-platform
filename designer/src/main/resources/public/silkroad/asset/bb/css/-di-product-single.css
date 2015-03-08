@@ -2025,7 +2025,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-locked-head {
     border-top: 1px solid #cfebf6;
     border-bottom: 1px solid #E7F9FE;
-    border-left: 1px solid #E7F9FE;
+    border-left: 1px solid #cfebf6;
     height: 30px;
     overflow: hidden;
 }
@@ -2087,7 +2087,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-table-rowhcell .ui-table-tree-item {
     height: 39px;
-    padding-left: 20px;
+    padding-left: 15px;
     /*border-bottom: 1px solid #CCC;*/
 }
 .ui-table-hcell-bag {
@@ -2158,7 +2158,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     overflow: hidden;
     background: url(img/icon.png) 0px 0px no-repeat;
     position: absolute;
-    left: 2px;
+    left: 1px;
     top: 10px;
     vertical-align: middle;
     cursor: pointer;
@@ -2175,7 +2175,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     display: block;
 }
 .ui-table-default-icon {
-    padding-left: 9px;
+    padding-left: 0;
 }
 /* 表格纵向滚动条改为左侧边框线 */
 .ui-table .ui-vscrollbar {
@@ -2458,6 +2458,14 @@ tr > td:last-child:after{
 .ui-table-head
 .ui-table-head-font  {
     margin-left: -10px;
+}
+/* 汇总行字体加粗 */
+.ui-table-expand-font {
+    font-weight: bold;
+}
+/* 解决表头第一块区域左侧边框线错位问题 */
+.ui-table-locked-head th:first-child {
+    border-left: 1px solid #E7F9FE;
 }
 /** 
  * Pager
