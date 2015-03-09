@@ -11,6 +11,7 @@
     position: absolute;
     top: 14px;
     left: 18px;
+    z-index: 999;
 }
 .xui-e-chart-title {
     font-weight:bold;
@@ -95,6 +96,7 @@
     margin-right: 8px;
     height: 15px;
     line-height: 15px;
+    cursor: pointer;
 }
 .echarts-candidate input {
     float: left;
@@ -102,6 +104,7 @@
     height: 15px;
     line-height: 15px;
     width: 20px;
+    cursor: pointer;
 }
 
 /**
