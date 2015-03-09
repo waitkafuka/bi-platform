@@ -124,6 +124,10 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         long current = System.currentTimeMillis();
         try {
             QueryWrapperFilter filter = new QueryWrapperFilter(queryAll);
+            
+            logger.info("cost " + (System.currentTimeMillis() - current) + " in trans QUERY --> filter:");
+            
+            long gcurrent = System.currentTimeMillis();
             Set<String> groupBy = new HashSet<>();
             if (queryRequest.getGroupBy() != null) {
                 groupBy = queryRequest.getGroupBy().getGroups();
@@ -133,6 +137,7 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
 //            TesseractResultRecordCollector collector = new TesseractResultRecordCollector(
 //                dimFieldList.toArray(new String[0]), measureFieldList.toArray(new String[0]), groupBy);
             
+            logger.info("cost " + (System.currentTimeMillis() - gcurrent) + " in init TesseractResultRecordCollector ");
             
             is.search(new MatchAllDocsQuery(), filter, collector);
             

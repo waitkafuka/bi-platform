@@ -24,7 +24,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.stereotype.Service;
 
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
@@ -35,7 +34,6 @@ import com.hazelcast.core.MessageListener;
  * @author lijin
  *
  */
-@Service
 public class HazelcastNoticePort implements ApplicationContextAware, MessageListener<Object> {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastNoticePort.class);

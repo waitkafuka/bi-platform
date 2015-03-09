@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 
- */
-package com.baidu.rigel.biplatform.ma.rt.query.service;
+package com.baidu.rigel.biplatform.cache.redis.listener;
 
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
+import org.redisson.core.MessageListener;
+import org.springframework.context.ApplicationEvent;
 
-/**
- *
- * @author david.wang
- * @version 1.0.0.1
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
+
+/** 
+ *  
+ * @author xiaoming.chen
+ * @version  2015年2月27日 
+ * @since jdk 1.8 or after
  */
-public interface QuestionModelBuildService {
+public class RedisTopicListener implements MessageListener<Object>{
+
     
-    /**
-     * 构建问题模型
-     * @param action query action
-     * @return 问题模型
-     */
-    public QuestionModel buildQuestionModel(QueryAction action);
+    
+    @Override
+    public void onMessage(Object msg) {
+        if(msg != null) {
+            ApplicationContextHelper.getContext().publishEvent((ApplicationEvent)msg);
+        }
+    }
     
 }

@@ -6,6 +6,13 @@ import java.util.Set;
 
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.junit.Test;
+import org.redisson.Config;
+import org.redisson.Redisson;
+import org.redisson.codec.SerializationCodec;
+import org.redisson.core.MessageListener;
+import org.redisson.core.RQueue;
+import org.redisson.core.RTopic;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 
@@ -13,9 +20,83 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
-import com.baidu.rigel.biplatform.cache.redis.listener.PrintListener;
-
 public class AppTest {
+    
+    @Test
+    public void testRedisson() throws InterruptedException {
+        Config config = new Config();
+        config.useSentinelConnection()
+            .setMasterName("biplatform_master")
+            .addSentinelAddress("10.57.204.73:8379")
+            .addSentinelAddress("10.57.204.72:8379")
+            
+            .setPassword("biplatform");
+        config.setCodec(new SerializationCodec());
+
+        Redisson redisson = Redisson.create(config);
+        
+        RTopic<String> topic = redisson.getTopic("topic");
+        
+        topic.addListener(new MessageListener<String>() {
+            
+            @Override
+            public void onMessage(String msg) {
+               System.out.println("get message:" + msg);
+                
+            }
+        });
+        
+        topic.publish("message publish");
+        
+        System.err.println("publish message");
+        
+        
+        
+        
+        
+        
+        RQueue<ApplicationEvent> queue = redisson.getQueue("queue");
+//        queue.add(new ContextRefreshedEvent(null) );
+//        queue.add(new ContextRefreshedEvent(null) );
+        
+        Thread t1 = new Thread(new GetFromQueue(queue));
+        
+        Thread t2 = new Thread(new GetFromQueue(queue));
+        
+        t1.start();
+        t2.start();
+        
+        Thread.sleep(30000);
+        
+        redisson.shutdown();
+    }
+    
+    
+    private class GetFromQueue implements Runnable {
+
+        RQueue<ApplicationEvent> queue;
+        
+        /** 
+         * 构造函数
+         */
+        public GetFromQueue(RQueue<ApplicationEvent> queue) {
+            super();
+            this.queue = queue;
+        }
+
+        @Override
+        public void run() {
+            while(true) {
+                ApplicationEvent event = queue.poll();
+                if(event != null) {
+                    System.out.println("get event from queue by thread:" + Thread.currentThread() + " event:" + event);
+                    
+                }
+                
+            }
+        }
+        
+    }
 
     
     @Test
@@ -62,7 +143,7 @@ public class AppTest {
                 jedis1.auth("biplatform");
                 System.out.println("prepare jedis:" + jedis1);
                 System.out.println(jedis1.get("key"));
-                jedis1.subscribe(new PrintListener(), "channel");
+//                jedis1.subscribe(new PrintListener(), "channel");
 //                jedis1.close();
             }
         });

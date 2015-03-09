@@ -75,7 +75,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
     /**
      * storeManager
      */
-    @Resource(name = "hazelcastStoreManager")
+    @Resource
     private StoreManager storeManager;
     /**
      * isNodeService

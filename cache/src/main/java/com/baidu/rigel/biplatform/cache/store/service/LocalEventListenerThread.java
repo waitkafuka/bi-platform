@@ -28,7 +28,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
 
@@ -38,7 +37,6 @@ import com.baidu.rigel.biplatform.cache.StoreManager;
  * @author lijin
  *
  */
-@Service("localEventListenerThread")
 public class LocalEventListenerThread implements ApplicationContextAware {
     /**
      * LOGGER
@@ -64,6 +62,7 @@ public class LocalEventListenerThread implements ApplicationContextAware {
 
         try {
             EventObject item = this.storeManager.getNextEvent();
+            
             context.publishEvent((ApplicationEvent) item);
             LOGGER.info("publish topic event : {} success", item);
 

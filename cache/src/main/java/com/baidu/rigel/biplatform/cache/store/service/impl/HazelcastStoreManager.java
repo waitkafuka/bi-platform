@@ -34,7 +34,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
-import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
@@ -57,12 +56,10 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
  */
 
 // TODO 需要通过factory返回StoryManager的实例，不要直接用Spring的注解 --Add by xiaoming.chen
-@Service
 public class HazelcastStoreManager implements StoreManager,InitializingBean {
     
-    public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
 
-    public static final String EVENT_QUEUE = "eventQueue";
+    public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
 
     private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
 
@@ -144,7 +141,7 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
     
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.hazelcast.getTopic("topics").addMessageListener(hazelcastNoticePort);
+        this.hazelcast.getTopic(TOPICS).addMessageListener(hazelcastNoticePort);
         IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
         queue.addItemListener(hazelcastQueueItemListener,true);
     }
@@ -243,7 +240,7 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
             LOGGER.info("post event {} error, event is null", event);
             throw new IllegalArgumentException();
         }
-        ITopic<Object> topics = this.hazelcast.getTopic("topics");
+        ITopic<Object> topics = this.hazelcast.getTopic(TOPICS);
         
         topics.publish(event);
         

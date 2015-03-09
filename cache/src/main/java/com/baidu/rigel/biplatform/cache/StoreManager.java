@@ -30,6 +30,19 @@ import org.springframework.cache.Cache.ValueWrapper;
  *
  */
 public interface StoreManager {
+    
+    
+    /** 
+     * TOPICS
+     */
+    public static final String TOPICS = "topics";
+
+
+    
+    /** 
+     * EVENT_QUEUE
+     */
+    public static final String EVENT_QUEUE = "eventQueue";
     /**
      * String 当前的storeManager
      */

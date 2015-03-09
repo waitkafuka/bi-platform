@@ -9,7 +9,6 @@ import javax.annotation.Resource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.hazelcast.core.ItemEvent;
 import com.hazelcast.core.ItemListener;
@@ -19,7 +18,6 @@ import com.hazelcast.core.ItemListener;
  * @author lijin
  *
  */
-@Service
 public class HazelcastQueueItemListener implements ItemListener<EventObject> {
 
     /**

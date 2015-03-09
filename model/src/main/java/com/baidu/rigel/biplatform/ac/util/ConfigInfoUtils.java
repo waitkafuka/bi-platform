@@ -70,8 +70,4 @@ public class ConfigInfoUtils {
         return SERVERADDRESS;
     }
     
-    public static void main(String[] args) {
-        System.out.println(SERVERADDRESS);
-    }
-
 }

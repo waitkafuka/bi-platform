@@ -40,6 +40,12 @@ public class RedisPoolProperties extends RedisProperties {
     
     private boolean usePool = true;
     
+    
+    /** 
+     * dev 是否是开发模式，开发模式的话，默认的KEY前面都会加上mac地址
+     */
+    private boolean dev = false;
+    
 //    /** 
 //     * redisServers 多个redis server的配置信息，多个redis server配置格式为  host1:port1:pass,host2:port2
 //     * 如果多个服务器密码一直，可以配置一个，其它不写就可以了。
@@ -345,6 +351,24 @@ public class RedisPoolProperties extends RedisProperties {
     public void setUsePool(boolean usePool) {
     
         this.usePool = usePool;
+    }
+
+    /** 
+     * 获取 dev 
+     * @return the dev 
+     */
+    public boolean isDev() {
+    
+        return dev;
+    }
+
+    /** 
+     * 设置 dev 
+     * @param dev the dev to set 
+     */
+    public void setDev(boolean dev) {
+    
+        this.dev = dev;
     }
     
 }

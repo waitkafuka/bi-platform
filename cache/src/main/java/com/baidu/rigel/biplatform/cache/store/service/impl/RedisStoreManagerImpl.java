@@ -19,11 +19,17 @@ package com.baidu.rigel.biplatform.cache.store.service.impl;
 import java.util.EventObject;
 import java.util.concurrent.locks.Lock;
 
+import org.redisson.Redisson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 
+import com.baidu.rigel.biplatform.cache.RedissonCache;
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
+import com.baidu.rigel.biplatform.cache.util.MacAddressUtil;
 
 /** 
  *  
@@ -31,18 +37,35 @@ import com.baidu.rigel.biplatform.cache.StoreManager;
  * @version  2015年2月9日 
  * @since jdk 1.8 or after
  */
-public class RedisStoreManagerImpl implements StoreManager {
-
+public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
+    
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+    
+    private static final String REDIS_LOCK = "RedisLock";
+    
+    
+    @Autowired(required = false)
+    private Redisson redisson;
+    
     @Autowired(required=false)
-    private CacheManager cacheManager;
+    private RedisPoolProperties redisProperties;
+    
+    private String topicKey = TOPICS;
+    
+    private String queueKey = EVENT_QUEUE;
+    
+    private String lockKey = REDIS_LOCK;
+    
+    
+
     /*
      * (non-Javadoc) 
      * @see com.baidu.rigel.biplatform.cache.StoreManager#getDataStore(java.lang.String) 
      */
     @Override
     public Cache getDataStore(String name) {
-        // TODO Auto-generated method stub
-        return null;
+        
+        return new RedissonCache(redisson.getMap(name), name);
 
     }
 
@@ -52,8 +75,7 @@ public class RedisStoreManagerImpl implements StoreManager {
      */
     @Override
     public void putEvent(EventObject event) throws Exception {
-        // TODO Auto-generated method stub
-
+        redisson.getQueue(queueKey).add(event);
     }
 
     /*
@@ -62,8 +84,8 @@ public class RedisStoreManagerImpl implements StoreManager {
      */
     @Override
     public EventObject getNextEvent() throws Exception {
-        // TODO Auto-generated method stub
-        return null;
+        Object obj = redisson.getQueue(queueKey).poll();
+        return obj == null ? null : (EventObject)obj;
     }
 
     /*
@@ -72,8 +94,7 @@ public class RedisStoreManagerImpl implements StoreManager {
      */
     @Override
     public void postEvent(EventObject event) throws Exception {
-        // TODO Auto-generated method stub
-
+        redisson.getTopic(topicKey).publish(event);
     }
 
     /*
@@ -82,9 +103,19 @@ public class RedisStoreManagerImpl implements StoreManager {
      */
     @Override
     public Lock getClusterLock() {
-        // TODO Auto-generated method stub
-        return null;
+        return redisson.getLock(lockKey);
 
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (redisProperties.isDev()) {
+            String currentMac = MacAddressUtil.getMacAddress(null);
+            log.info("this instance is run with dev mode,current mac :{}", currentMac);
+            topicKey = currentMac + "_" + topicKey;
+            queueKey = currentMac + "_" + queueKey;
+            lockKey = currentMac + "_" + lockKey;
+        }
     }
 
 }

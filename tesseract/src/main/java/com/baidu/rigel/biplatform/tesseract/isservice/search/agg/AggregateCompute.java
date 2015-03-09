@@ -74,22 +74,22 @@ public class AggregateCompute {
         long current = System.currentTimeMillis();
         Map<String, SearchIndexResultRecord> groupResult = dataList.parallelStream().collect(Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy,
                 Collectors.reducing(new SearchIndexResultRecord(new Serializable[arraySize], null), (x,y) ->{
-//                    SearchIndexResultRecord var = new SearchIndexResultRecord(new Serializable[arraySize], y.getGroupBy());
+                    SearchIndexResultRecord var = new SearchIndexResultRecord(new Serializable[arraySize], y.getGroupBy());
                     try {
                         for(int i = 0; i < dimSize; i++) {
-                            x.setField(i, y.getField(i));
+                            var.setField(i, y.getField(i));
                         }
                         int index = dimSize;
                         for(int i = 0; i < queryMeasures.size(); i++){
                             QueryMeasure measure = queryMeasures.get(i);
                             index = i + dimSize;
-                            x.setField(i+dimSize, Aggregate.aggregate(x.getField(index), y.getField(index), measure.getAggregator()));
+                            var.setField(i+dimSize, Aggregate.aggregate(x.getField(index), y.getField(index), measure.getAggregator()));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
                     }
-                    return x;
+                    return var;
                 })));
         LOGGER.info("group agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
         result.addAll(groupResult.values());

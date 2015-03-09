@@ -16,10 +16,9 @@
 
 package com.baidu.rigel.biplatform.cache.config;
 
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-
+import org.redisson.Config;
+import org.redisson.Redisson;
+import org.redisson.codec.SerializationCodec;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,23 +27,19 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.redis.RedisProperties.Sentinel;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.RedisNode;
-import org.springframework.data.redis.connection.RedisSentinelConfiguration;
-import org.springframework.data.redis.connection.jedis.JedisConnection;
-import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import redis.clients.jedis.JedisPoolConfig;
-
+import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
+import com.baidu.rigel.biplatform.cache.redis.listener.RedisQueueListener;
+import com.baidu.rigel.biplatform.cache.redis.listener.RedisTopicListener;
+import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
+import com.baidu.rigel.biplatform.cache.store.service.HazelcastQueueItemListener;
+import com.baidu.rigel.biplatform.cache.store.service.LocalEventListenerThread;
+import com.baidu.rigel.biplatform.cache.store.service.impl.HazelcastStoreManager;
+import com.baidu.rigel.biplatform.cache.store.service.impl.RedisStoreManagerImpl;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for Spring Data's Redis support.
@@ -54,7 +49,7 @@ import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
  * @author Christian Dupuis
  */
 @Configuration
-@ConditionalOnClass({ JedisConnection.class})
+@ConditionalOnClass({ Redisson.class})
 @EnableConfigurationProperties
 public class BiplatformRedisConfiguration {
 
@@ -73,52 +68,34 @@ public class BiplatformRedisConfiguration {
         @Autowired
         protected RedisPoolProperties properties;
 
-        @Autowired(required = false)
-        private RedisSentinelConfiguration sentinelConfiguration;
-
-        protected final JedisConnectionFactory applyProperties(
-                JedisConnectionFactory factory) {
-            factory.setHostName(this.properties.getHost());
-            factory.setPort(this.properties.getPort());
-            if (this.properties.getPassword() != null) {
-                factory.setPassword(this.properties.getPassword());
-            }
-            factory.setDatabase(this.properties.getDatabase());
-            return factory;
-        }
-
-        protected final RedisSentinelConfiguration getSentinelConfig() {
-            if (this.sentinelConfiguration != null) {
-                return this.sentinelConfiguration;
-            }
-            Sentinel sentinelProperties = this.properties.getSentinel();
-            if (sentinelProperties != null) {
-                RedisSentinelConfiguration config = new RedisSentinelConfiguration();
-                config.master(sentinelProperties.getMaster());
-                config.setSentinels(createSentinels(sentinelProperties));
-                
-                
+        protected final Config getConfig() {
+            Config config = new Config();
+            config.setCodec(new SerializationCodec());
+            if(properties.getSentinel() != null) {
+                return createSentinelServerConfig(config, properties.getSentinel());
+            } else {
+                config.useSingleServer()
+                .setAddress(properties.getHost())
+                .setConnectionPoolSize(properties.getPoolConfig().getMaxActive())
+                .setDatabase(properties.getDatabase())
+                .setPassword(properties.getPassword())
+                .setTimeout(properties.getPoolConfig().getTimeout());
                 return config;
             }
-            return null;
+        }
+        
+        
+        private Config createSentinelServerConfig(Config config, Sentinel sentinel) {
+            config.useSentinelConnection()
+            .setMasterName(sentinel.getMaster())
+            .addSentinelAddress(StringUtils.commaDelimitedListToStringArray(sentinel.getNodes()))
+            .setDatabase(properties.getDatabase())
+            .setPassword(properties.getPassword())
+            .setMasterConnectionPoolSize(properties.getPoolConfig().getMaxActive())
+            .setTimeout(properties.getPoolConfig().getTimeout());
+            return config;
         }
 
-        private List<RedisNode> createSentinels(Sentinel sentinel) {
-            List<RedisNode> sentinels = new ArrayList<RedisNode>();
-            String nodes = sentinel.getNodes();
-            for (String node : StringUtils.commaDelimitedListToStringArray(nodes)) {
-                try {
-                    String[] parts = StringUtils.split(node, ":");
-                    Assert.state(parts.length == 2, "Must be defined as 'host:port'");
-                    sentinels.add(new RedisNode(parts[0], Integer.valueOf(parts[1])));
-                }
-                catch (RuntimeException ex) {
-                    throw new IllegalStateException("Invalid redis sentinel "
-                            + "property '" + node + "'", ex);
-                }
-            }
-            return sentinels;
-        }
 
     }
 
@@ -129,59 +106,81 @@ public class BiplatformRedisConfiguration {
     protected static class RedisPooledConnectionConfiguration extends
             AbstractRedisConfiguration {
 
+        
         @Bean
         @ConditionalOnProperty(prefix = "config.redis", name = "active", havingValue = "true")
-        public RedisConnectionFactory redisConnectionFactory()
-                throws UnknownHostException {
-            return applyProperties(createJedisConnectionFactory());
+        public Redisson redisson(){
+            Redisson redisson = Redisson.create(getConfig());
+            redisson.getTopic(StoreManager.TOPICS).addListener(new RedisTopicListener());
+            return redisson;
+        }
+
+        
+        @Bean(name="redisStoreManager")
+        @ConditionalOnBean(Redisson.class)
+        public StoreManager redisStoreManager() {
+            return new RedisStoreManagerImpl();
         }
         
         @Bean
-        @ConditionalOnBean(RedisConnectionFactory.class)
-        public RedisOperations<Object, Object> redisTemplate(
-                RedisConnectionFactory redisConnectionFactory)
-                throws UnknownHostException {
-            RedisTemplate<Object, Object> template = new RedisTemplate<Object, Object>();
-            template.setConnectionFactory(redisConnectionFactory);
-            return template;
+        @ConditionalOnBean(Redisson.class)
+        public RedisQueueListener redisQueueListener() {
+            return new RedisQueueListener();
         }
-
         
-        @Bean(name="redisCacheManager")
-        @ConditionalOnBean(RedisOperations.class)
-        public CacheManager redisCacheManager(RedisTemplate<Object, Object> template) {
-            return new RedisCacheManager(template);
+        @Bean(name="hazelcastStoreManager")
+        @ConditionalOnMissingBean(name = "redisStoreManager")
+        public StoreManager hazelcastStoreManager() {
+            return new HazelcastStoreManager();
+        }
+        
+        @Bean
+        @ConditionalOnBean(name="hazelcastStoreManager")
+        public HazelcastNoticePort hazelcastNoticePort() {
+            return new HazelcastNoticePort();
+        }
+        
+        @Bean
+        @ConditionalOnBean(name="hazelcastStoreManager")
+        public HazelcastQueueItemListener hazelcastQueueItemListener() {
+            return new HazelcastQueueItemListener();
+        }
+        
+        @Bean
+        @ConditionalOnBean(name="hazelcastStoreManager")
+        public LocalEventListenerThread localEventListenerThread() {
+            return new LocalEventListenerThread();
         }
 
-        private JedisConnectionFactory createJedisConnectionFactory() {
-            JedisConnectionFactory factory = null;
-            if (this.properties.getPoolConfig() != null) {
-                factory = new JedisConnectionFactory(getSentinelConfig(), jedisPoolConfig());
-            }
-            factory = new JedisConnectionFactory(getSentinelConfig());
-            factory.setUsePool(this.properties.isUsePool());
-            factory.setPassword(this.properties.getPassword());
-            return factory;
-        }
+//        private JedisConnectionFactory createJedisConnectionFactory() {
+//            JedisConnectionFactory factory = null;
+//            if (this.properties.getPoolConfig() != null) {
+//                factory = new JedisConnectionFactory(getSentinelConfig(), jedisPoolConfig());
+//            }
+//            factory = new JedisConnectionFactory(getSentinelConfig());
+//            factory.setUsePool(this.properties.isUsePool());
+//            factory.setPassword(this.properties.getPassword());
+//            return factory;
+//        }
 
-        private JedisPoolConfig jedisPoolConfig() {
-            JedisPoolConfig config = new JedisPoolConfig();
-            RedisPoolProperties.Pool props = this.properties.getPoolConfig();
-            config.setMaxTotal(props.getMaxActive());
-            config.setMaxIdle(props.getMaxIdle());
-            config.setMinIdle(props.getMinIdle());
-            config.setMaxWaitMillis(props.getMaxWait());
-            config.setTestOnBorrow(props.isTestOnBorrow());
-            config.setTestOnCreate(props.isTestOnCreate());
-            config.setTestOnReturn(props.isTestOnReturn());
-            config.setTestWhileIdle(props.isTestWhileIdle());
-            config.setTimeBetweenEvictionRunsMillis(props.getTimeBetweenEvictionRunsMillis());
-            config.setMinEvictableIdleTimeMillis(props.getMinEvictableIdleTimeMillis());
-            config.setNumTestsPerEvictionRun(props.getNumTestsPerEvictionRun());
-            config.setSoftMinEvictableIdleTimeMillis(props.getSoftMinEvictableIdleTimeMillis());
-            config.setLifo(props.isLifo());
-            return config;
-        }
+//        private JedisPoolConfig jedisPoolConfig() {
+//            JedisPoolConfig config = new JedisPoolConfig();
+//            RedisPoolProperties.Pool props = this.properties.getPoolConfig();
+//            config.setMaxTotal(props.getMaxActive());
+//            config.setMaxIdle(props.getMaxIdle());
+//            config.setMinIdle(props.getMinIdle());
+//            config.setMaxWaitMillis(props.getMaxWait());
+//            config.setTestOnBorrow(props.isTestOnBorrow());
+//            config.setTestOnCreate(props.isTestOnCreate());
+//            config.setTestOnReturn(props.isTestOnReturn());
+//            config.setTestWhileIdle(props.isTestWhileIdle());
+//            config.setTimeBetweenEvictionRunsMillis(props.getTimeBetweenEvictionRunsMillis());
+//            config.setMinEvictableIdleTimeMillis(props.getMinEvictableIdleTimeMillis());
+//            config.setNumTestsPerEvictionRun(props.getNumTestsPerEvictionRun());
+//            config.setSoftMinEvictableIdleTimeMillis(props.getSoftMinEvictableIdleTimeMillis());
+//            config.setLifo(props.isLifo());
+//            return config;
+//        }
 
     }
 

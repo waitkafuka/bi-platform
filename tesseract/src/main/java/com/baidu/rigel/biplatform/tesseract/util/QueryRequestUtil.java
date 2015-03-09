@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -470,18 +471,13 @@ public class QueryRequestUtil {
     public static void generateGroupBy(SearchIndexResultRecord record, List<String> groups, Meta meta) throws NoSuchFieldException{
         if(CollectionUtils.isNotEmpty(groups)){
             String groupBy = "";
+            Serializable field = null;
             for(String name : meta.getFieldNameArray()){
                 if(groups.contains(name)){
-                    groupBy += record.getField(meta.getFieldIndex(name)).toString() + ",";
-            for(String meta : record.getMeta().getFieldNameArray()){
-                if(groups.contains(meta)){
-                		//TODO 这里可能会影响其他逻辑，如有问题 需要回滚
-                	    /**
-                	     * bug fixed：维度组中维度引用了单独维度 而单独维度又在其他轴中出现导致数据查询出错情况
-                	     */
-                		if (record.getField(meta) != null) {
-                			groupBy += record.getField(meta).toString() + ",";
-                		}
+                    field = record.getField(meta.getFieldIndex(name));
+                    if(field != null) {
+                        groupBy += field.toString() + ",";
+                    }
                 }
             }
             record.setGroupBy(groupBy);

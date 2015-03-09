@@ -16,21 +16,20 @@
  */
 package com.baidu.rigel.biplatform.cache.redis.listener;
 
+import java.util.EventObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.redis.RedisProperties.Sentinel;
+import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.util.StringUtils;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisSentinelPool;
-
-import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
+import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 
 /** 
- *  
+ *  需要自己启动bean
  * @author xiaoming.chen
  * @version  2015年2月27日 
  * @since jdk 1.8 or after
@@ -43,26 +42,27 @@ public class RedisQueueListener implements ApplicationListener<ContextRefreshedE
      */
     private Logger log = LoggerFactory.getLogger(this.getClass());
     
-    @Autowired(required=false)
-    private RedisPoolProperties poolProperties;
 
+    @Autowired(required=false)
+    private StoreManager storeManager;
+    
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(poolProperties == null) {
-            log.warn("no redis properties bean...can not listen redis queue");
-        }
-        Jedis jedis = null;
-        Sentinel sentinel = poolProperties.getSentinel();
-        if(sentinel != null) {
-            JedisSentinelPool sentinelPool = new JedisSentinelPool(sentinel.getMaster(), StringUtils.commaDelimitedListToSet(sentinel.getNodes()));
-            jedis = sentinelPool.getResource();
-        } else {
-            jedis = new Jedis(poolProperties.getHost(), poolProperties.getPort());
-        }
-        jedis.auth(poolProperties.getPassword());
-        
-        jedis.subscribe(new PrintListener(), "channel");
-        
+        new Thread(() -> {
+            while(true) {
+                try {
+                    Thread.sleep(1000);
+                    EventObject item = storeManager.getNextEvent();
+                    if(item != null) {
+                        ApplicationContextHelper.getContext().publishEvent((ApplicationEvent) item);
+                        log.info("publish topic event : {} success", item);
+                    }
+                } catch (Exception e) {
+                    log.warn("get event error:{}", e);
+                }
+            }
+        }).start();;
+        log.info("start redis queue thread success.");
     }
 
 }
