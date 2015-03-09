@@ -3216,6 +3216,7 @@ li {
     position: absolute;
     top: 14px;
     left: 18px;
+    z-index: 999;
 }
 .xui-e-chart-title {
     font-weight:bold;
