@@ -3301,6 +3301,7 @@ li {
     margin-right: 8px;
     height: 15px;
     line-height: 15px;
+    cursor: pointer;
 }
 .echarts-candidate input {
     float: left;
@@ -3308,6 +3309,7 @@ li {
     height: 15px;
     line-height: 15px;
     width: 20px;
+    cursor: pointer;
 }
 
 /**

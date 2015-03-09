@@ -638,7 +638,7 @@
 
             // 动态设置dataRoom的垂直定位 - 晓强
             // dataZoom.y = $(this.el).height() - 50;
-            dataZoom.y = this.el.offsetHeight - 50;
+            this.el.offsetHeight - 50;
             options.dataZoom = dataZoom;
         }
     };
@@ -824,12 +824,10 @@
 
             this.$setupDataRoom(options);
             // 可视数据区DataRoom影响距y2的值 - 晓强
-            if (options.dataZoom.show) {
-                options.grid.y2 = 90;
+            if (options.grid && options.dataZoom) {
+                options.grid.y2 = options.dataZoom.show ? 90 : 33;
             }
-            else {
-                options.grid.y2 = 33;
-            }
+
             this.$setupToolBox(options);
             this.$setupYAxis(options);
             this.$setupXAxis(options);
