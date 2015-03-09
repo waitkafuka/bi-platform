@@ -637,8 +637,8 @@
             }
 
             // 动态设置dataRoom的垂直定位 - 晓强
-            dataZoom.y = $(this.el).height() - 50;
-
+            // dataZoom.y = $(this.el).height() - 50;
+            dataZoom.y = this.el.offsetHeight - 50;
             options.dataZoom = dataZoom;
         }
     };
