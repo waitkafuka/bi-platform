@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.dataquery.service.DataQueryService;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
@@ -63,7 +64,6 @@ import com.baidu.rigel.biplatform.tesseract.node.meta.NodeState;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
-import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;

@@ -60,7 +60,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContextSplitResult;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
-import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.DataModelBuilder;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
@@ -170,7 +170,7 @@ public class QueryServiceImpl implements QueryService {
                         DataModel dm = null;
                         if (con instanceof CallbackCondition) {
                             try {
-                                TesseractResultSet resultSet = callbackSearchService
+                                SearchIndexResultSet resultSet = callbackSearchService
                                         .query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, 
                                         context, questionModel.isUseIndex(),null));
                                 dm = new DataModelBuilder(resultSet, context).build(true);
@@ -216,7 +216,7 @@ public class QueryServiceImpl implements QueryService {
         current = System.currentTimeMillis();
         DataModel result = null;
         try {
-            TesseractResultSet resultSet = searchService.query(queryRequest);
+            SearchIndexResultSet resultSet = searchService.query(queryRequest);
             
             if (queryRequest.getGroupBy() != null && CollectionUtils.isNotEmpty(queryRequest.getGroupBy().getGroups())) {
                 try {

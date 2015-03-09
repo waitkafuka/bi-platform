@@ -179,5 +179,14 @@ public class TesseractResultRecordCollector extends Collector {
     public List<ResultRecord> getResult() {
         return result;
     }
+
+    /** 
+     * 获取 meta 
+     * @return the meta 
+     */
+    public Meta getMeta() {
+    
+        return meta;
+    }
     
 }
