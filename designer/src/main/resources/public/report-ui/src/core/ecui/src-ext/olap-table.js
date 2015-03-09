@@ -695,12 +695,18 @@
                     if (wrap.indent !== 0) {
                         classStr.push(type + '-expand-background');
                     }
+                    else {
+                        classStr.push(type + '-expand-font');
+                    }
                 }
             }
             else {
                 // 如果不是第一层级，全部加底色
                 if (rowDefines[0].indent >= 1) {
                     classStr.push(type + '-expand-background');
+                }
+                else {
+                    classStr.push(type + '-expand-font');
                 }
             }
         }
@@ -748,6 +754,9 @@
                     if (rowDefines[rDefLen - 1].expand !== true) {
                         classStr.push(type + '-expand-background');
                     }
+                    else {
+                        classStr.push(type + '-expand-font');
+                    }
                 }
 
             }
@@ -755,6 +764,9 @@
                 // 如果不是第一层级，全部加底色
                 if (rowDefines[0].indent >= 1) {
                     classStr.push(type + '-expand-background');
+                }
+                else {
+                    classStr.push(type + '-expand-font');
                 }
             }
         }
