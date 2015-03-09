@@ -91,7 +91,7 @@
 .ui-multi-select-text {
     white-space: nowrap;
     display: block;
-    padding-left: 4px;
+    padding-left: 15px;
     line-height: 28px;
     /*border-top: 1px solid #F0F0F0;*/
     cursor: pointer;
@@ -125,6 +125,7 @@
 .ui-multi-select-options {
     border-left: 1px solid #CCC;
     border-right: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
     background: #FFF;
 }
 .ui-multi-select-item {
