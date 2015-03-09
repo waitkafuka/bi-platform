@@ -159,6 +159,7 @@
         return (this._defaultMeasures.length > 0 && chartType != 'line') ?
             [this._defaultMeasures[0]] : this._defaultMeasures;
     };
+
     /**
      * 生成指标切换按钮
      *
@@ -432,7 +433,7 @@
         // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的翻着） - 晓强
         if (this._chartType === 'bar') {
             xAxis.position = 'right';
-            options.grid.x = 23;
+            options.grid.x = 20;
             options.grid.x2 = 130;
         }
 
@@ -492,7 +493,7 @@
 
                     return resultStr;
                 };
-                // 字体修改
+                // 字体修改 - 晓强
                 yAxisOption.axisLabel.textStyle = {
                      fontFamily: 'simhei'
                 };
@@ -815,18 +816,19 @@
                 // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
                     x: 43,
+                    x2: 20,
                     y: 50,
                     borderWidth: 0
                 }
             }
 
             this.$setupDataRoom(options);
-            // 可视数据区DataRoom影响距y2的值
+            // 可视数据区DataRoom影响距y2的值 - 晓强
             if (options.dataZoom.show) {
                 options.grid.y2 = 90;
             }
             else {
-                options.grid.y2 = 42;
+                options.grid.y2 = 33;
             }
             this.$setupToolBox(options);
             this.$setupYAxis(options);
