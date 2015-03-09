@@ -1256,7 +1256,7 @@ public class QueryDataResource extends BaseResource {
                 mainDims.add(root);
             }
             Collections.reverse(mainDims);
-            resultMap.put("mainDimNodes", mainDims);
+//            resultMap.put("mainDimNodes", mainDims);
             runTimeModel.getContext().put("bread_key", mainDims);
         } 
         areaContext.getQueryStatus().add(result);
