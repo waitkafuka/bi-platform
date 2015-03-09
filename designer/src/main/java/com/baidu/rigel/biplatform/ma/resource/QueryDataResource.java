@@ -887,19 +887,22 @@ public class QueryDataResource extends BaseResource {
             List<Map<String, String>> mainDims = Lists.newArrayList();
             Map<String, String> root =  genRootDimCaption(table);
             if (action.getRows().size() >= 2) {
-            	areaContext.setCurBreadCrumPath(root);
-//                    resultMap.put("mainDimNodes", dims);
-                    // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
-                if (!root.get("uniqName").toLowerCase().contains("all")) {
-                    root.put("uniqName", root.get("uniqName"));
-                    root.put("showName", "全部");
-//                        runTimeModel.getContext().put(vertualDimKey, action);
+                	areaContext.setCurBreadCrumPath(root);
+    //                    resultMap.put("mainDimNodes", dims);
+                        // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
+                    if (!root.get("uniqName").toLowerCase().contains("all")) {
+                        root.put("uniqName", root.get("uniqName"));
+                        root.put("showName", "全部");
+    //                        runTimeModel.getContext().put(vertualDimKey, action);
+                    }
+                    mainDims.add(root);
+                    Collections.reverse(mainDims);
+                    areaContext.setCurBreadCrumPath(root);
+                    resultMap.put("mainDimNodes", mainDims);
+                } else {
+                    areaContext.setCurBreadCrumPath (Maps.newHashMap ());
+                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
-                mainDims.add(root);
-                Collections.reverse(mainDims);
-                areaContext.setCurBreadCrumPath(root);
-                resultMap.put("mainDimNodes", mainDims);
-            }
 //            runTimeModel.getContext().put(areaId, root);
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {

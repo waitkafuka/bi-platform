@@ -703,6 +703,7 @@ public final class QueryUtils {
      */
     public static void decorateChart(DIReportChart chart, ExtendArea area, Schema schema, int index) {
         if (area.getType() == ExtendAreaType.CHART) {
+            assert area.getLogicModel () != null : "当前区域未设置逻辑模型";
             // 设置topN默认设置
             if (area.getLogicModel().getTopSetting() != null) {
                 MeasureTopSetting topSetting = area.getLogicModel().getTopSetting();
