@@ -61,7 +61,6 @@ public class Aggregate {
                 if(src1 == null) {
                     return src2;
                 }
-                
                 BigDecimal arg1 = src1 instanceof BigDecimal ? (BigDecimal) src1 : new BigDecimal(src1.toString());
                 BigDecimal arg2 = src2 instanceof BigDecimal ? (BigDecimal) src2 : new BigDecimal(src2.toString());
                 return arg1.add(arg2);
