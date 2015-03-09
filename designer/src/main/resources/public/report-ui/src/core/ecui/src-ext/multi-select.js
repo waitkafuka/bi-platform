@@ -165,6 +165,7 @@ _eInput - 多选项的INPUT对象
      * @param {ecui.ui.MultiSelect} control 多选下拉框控件
      */
     function UI_MULTI_SELECT_FLUSH_TEXT(control) {
+        // TODO:重新修改显示逻辑
         var tip;
         if (control) {
             var btnAllSelected = false;
@@ -176,6 +177,7 @@ _eInput - 多选项的INPUT对象
                     else {
                         text.push(o._sTip);
                     }
+
                 }
             }
             tip = '<span title="'+ text.join(',') +'">';
@@ -190,10 +192,15 @@ _eInput - 多选项的INPUT对象
                 text = control._sTextNone;
             }
             else {
-                text = text.join(',');
-                if (control._nTextLen && text.length > control._nTextLen) {
-                    text = text.substring(0, control._nTextLen) + '...';
-                }
+                text = [
+                    '已选中',
+                    text.length ,
+                    '项'
+                ].join('');
+//                text = text.join(',');
+//                if (control._nTextLen && text.length > control._nTextLen) {
+//                    text = text.substring(0, control._nTextLen) + '...';
+//                }
             }
             if (control._bTip) {
                 text = tip + text + '</span>';

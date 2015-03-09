@@ -8,8 +8,10 @@
     z-index:0;
 }
 .xui-e-chart-header {
-    width: 100%;
-    height: 25px;
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    z-index: 999;
 }
 .xui-e-chart-title {
     font-weight:bold;
@@ -46,7 +48,7 @@
     background-position:-42px -385px;
 }
 .xui-e-chart-content {
-    height:80%;
+    height:100%;
 }
 .xui-e-chart-empty {
     width: 99%;
@@ -94,6 +96,7 @@
     margin-right: 8px;
     height: 15px;
     line-height: 15px;
+    cursor: pointer;
 }
 .echarts-candidate input {
     float: left;
@@ -101,6 +104,7 @@
     height: 15px;
     line-height: 15px;
     width: 20px;
+    cursor: pointer;
 }
 
 /**
