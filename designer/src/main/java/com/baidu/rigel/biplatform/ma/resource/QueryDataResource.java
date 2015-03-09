@@ -898,10 +898,10 @@ public class QueryDataResource extends BaseResource {
                     mainDims.add(root);
                     Collections.reverse(mainDims);
                     areaContext.setCurBreadCrumPath(root);
-                    resultMap.put("mainDimNodes", mainDims);
+//                    resultMap.put("mainDimNodes", mainDims);
                 } else {
                     areaContext.setCurBreadCrumPath (Maps.newHashMap ());
-                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
+//                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
 //            runTimeModel.getContext().put(areaId, root);
         } else if (targetArea.getType() == ExtendAreaType.CHART 
@@ -1456,7 +1456,7 @@ public class QueryDataResource extends BaseResource {
                 }
             }
             if (breadCrum != null) {
-                resultMap.put("mainDimNodes", breadCrum);
+//                resultMap.put("mainDimNodes", breadCrum);
             }
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getActualSize());
