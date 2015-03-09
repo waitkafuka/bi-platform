@@ -3212,8 +3212,9 @@ li {
     z-index:0;
 }
 .xui-e-chart-header {
-    width: 100%;
-    height: 25px;
+    position: absolute;
+    top: 14px;
+    left: 18px;
 }
 .xui-e-chart-title {
     font-weight:bold;
