@@ -16,19 +16,25 @@
  */
 package com.baidu.rigel.biplatform.cache.store.service.impl;
 
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.EventObject;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import org.redisson.Redisson;
+import org.redisson.core.RMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 
 import com.baidu.rigel.biplatform.cache.RedissonCache;
 import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
+import com.baidu.rigel.biplatform.cache.redis.listener.RedisTopicListener;
 import com.baidu.rigel.biplatform.cache.util.MacAddressUtil;
 
 /** 
@@ -48,6 +54,9 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     private Redisson redisson;
     
     @Autowired(required=false)
+    private CacheManager redisCacheManager;
+    
+    @Autowired(required=false)
     private RedisPoolProperties redisProperties;
     
     private String topicKey = TOPICS;
@@ -64,8 +73,16 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
      */
     @Override
     public Cache getDataStore(String name) {
-        
-        return new RedissonCache(redisson.getMap(name), name);
+        if(redisProperties.isDev()) {
+            try {
+                name = MacAddressUtil.getMacAddress(null) + "_" + name;
+            } catch (SocketException | UnknownHostException e) {
+                log.warn("get mac address error:{}",e);
+            }
+        }
+        RMap<Object, Object> map = redisson.getMap(name);
+        map.expire(redisProperties.getDefaultExpire(), TimeUnit.SECONDS);
+        return new RedissonCache(map, name);
 
     }
 
@@ -116,6 +133,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
             queueKey = currentMac + "_" + queueKey;
             lockKey = currentMac + "_" + lockKey;
         }
+        redisson.getTopic(topicKey).addListener(new RedisTopicListener());
     }
 
 }
