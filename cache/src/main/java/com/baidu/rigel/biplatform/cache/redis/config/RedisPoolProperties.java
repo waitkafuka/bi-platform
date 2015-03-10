@@ -46,6 +46,18 @@ public class RedisPoolProperties extends RedisProperties {
      */
     private boolean dev = false;
     
+    
+    /** 
+     * defaultExpire 默认超时时间
+     */
+    private long defaultExpire = 30 * 60;
+    
+    
+    /** 
+     * clusterPre 集群的前缀标识
+     */
+    private String clusterPre;
+    
 //    /** 
 //     * redisServers 多个redis server的配置信息，多个redis server配置格式为  host1:port1:pass,host2:port2
 //     * 如果多个服务器密码一直，可以配置一个，其它不写就可以了。
@@ -369,6 +381,42 @@ public class RedisPoolProperties extends RedisProperties {
     public void setDev(boolean dev) {
     
         this.dev = dev;
+    }
+
+    /** 
+     * 获取 defaultExpire 
+     * @return the defaultExpire 
+     */
+    public long getDefaultExpire() {
+    
+        return defaultExpire;
+    }
+
+    /** 
+     * 设置 defaultExpire 
+     * @param defaultExpire the defaultExpire to set 
+     */
+    public void setDefaultExpire(long defaultExpire) {
+    
+        this.defaultExpire = defaultExpire;
+    }
+
+    /** 
+     * 获取 clusterPre 
+     * @return the clusterPre 
+     */
+    public String getClusterPre() {
+    
+        return clusterPre;
+    }
+
+    /** 
+     * 设置 clusterPre 
+     * @param clusterPre the clusterPre to set 
+     */
+    public void setClusterPre(String clusterPre) {
+    
+        this.clusterPre = clusterPre;
     }
     
 }
