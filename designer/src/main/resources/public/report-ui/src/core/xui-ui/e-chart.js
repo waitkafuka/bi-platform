@@ -106,7 +106,18 @@
          *      }
          *  ];
          */
-        this._aSeries = dataWrap.series || [];
+        // 晓强测试
+        /*
+        dataWrap.series[0].data[0]=10;
+        dataWrap.series[0].data[1]=20;
+        dataWrap.series[0].data[2]=30;
+        dataWrap.series[0].data[3]=40;
+        dataWrap.series[0].data[5]=40;
+        dataWrap.series[0].data[3]=40;
+        dataWrap.series[0].data[3]=40;
+        dataWrap.xAxis.barMaxWidth=10;
+        */
+        this._aSeries = dataWrap.series || []; //barMaxWidth  yAxisName
         /**
          * 用户自定义rangeselector的按钮
          * 例如：
