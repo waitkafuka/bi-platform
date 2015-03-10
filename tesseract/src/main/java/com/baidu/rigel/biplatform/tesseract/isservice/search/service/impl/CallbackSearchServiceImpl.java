@@ -53,6 +53,7 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ThreadLocalPlaceholder;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.QueryContextAdapter;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
@@ -185,11 +186,19 @@ public class CallbackSearchServiceImpl {
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
         }
-        
+        Map<String, String> requestParams = ((QueryContextAdapter) context).getQuestionModel().getRequestParams ();
         // Build query target map
         Map<String, List<MiniCubeMeasure>> callbackMeasures = context.getQueryMeasures().stream()
                 .filter(m -> m.getType().equals(MeasureType.CALLBACK))
-                .collect(Collectors.groupingBy(c -> ((CallbackMeasure) c).getCallbackUrl(), Collectors.toList()));
+                .map (m -> {
+                    CallbackMeasure tmp = (CallbackMeasure) m;
+                    for (Map.Entry<String, String> entry : tmp.getCallbackParams ().entrySet ()) {
+                        if (requestParams.containsKey (entry.getKey ())) {
+                            tmp.getCallbackParams ().put (entry.getKey (), requestParams.get (entry.getKey ()));
+                        }
+                    }
+                    return m;
+                }).collect(Collectors.groupingBy(c -> ((CallbackMeasure) c).getCallbackUrl(), Collectors.toList()));
         if (callbackMeasures == null || callbackMeasures.isEmpty()) {
         	LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "Empty callback measure", "[callbackquery:" + query
                     + "]"));

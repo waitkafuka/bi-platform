@@ -422,6 +422,9 @@ public final class DataModelUtils {
                     }
                 } else {
                     rowHead.setDrillByLink(false);
+                    if (i == 0 && rowHead.getIndent () == 0) {
+                        rowHead.setExpand (null);
+                    }
                 }
             }
         }
