@@ -331,7 +331,7 @@ _uOptions     - 下拉选择框
             // 为了设置激活状态样式, 因此必须控制下拉框中的选项必须在滚动条以内
             // TODO:根据具体样式修改
             this.setItemSize(
-                width - options.getMinimumWidth() - (itemLength > optionSize ? scrollbar.getWidth() : 0) - 20,
+                width - options.getMinimumWidth() - (itemLength > optionSize ? scrollbar.getWidth() : 0) - 15,
                 step
             );
 
