@@ -96,15 +96,20 @@ public final class CallbackServiceInvoker {
         LOG.info("[INFO] --- --- callback type : {}", type.name());
         LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
-        String responseStr = HttpRequest.sendPost1(url, params);
-        CallbackResponse response = convertStrToResponse(responseStr, type);
-        LOG.info("[INFO] --- --- resposne : {}", response);
-        LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
-        long end = System.currentTimeMillis() - begin;
-        LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
-                + " cost on data transfer : " + (end - response.getCost()) + "ms,"
-                + " callback execute cost : " + response.getCost() + "ms") ;
-        return response;
+        try {
+            String responseStr = HttpRequest.sendPost1(url, params);
+            CallbackResponse response = convertStrToResponse(responseStr, type);
+            LOG.info("[INFO] --- --- resposne : {}", response);
+            LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+            long end = System.currentTimeMillis() - begin;
+            LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
+                    + " cost on data transfer : " + (end - response.getCost()) + "ms,"
+                    + " callback execute cost : " + response.getCost() + "ms") ;
+            return response;
+        } catch (Exception e) {
+            LOG.error (e.getMessage (), e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**

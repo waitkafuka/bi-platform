@@ -321,7 +321,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             if(!resultSet.next()){
                     log.error("no result return by query:" + queryRequest);
-                    throw new MetaException("no result return by query:" + queryRequest);
+//                    throw new MetaException("no result return by query:" + queryRequest);
             }
             if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
                 result.setCaption(resultSet.getString(queryLevel.getCaptionColumn()));
