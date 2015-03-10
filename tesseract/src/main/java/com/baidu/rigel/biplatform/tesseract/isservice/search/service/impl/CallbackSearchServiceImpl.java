@@ -251,7 +251,7 @@ public class CallbackSearchServiceImpl {
             CallbackExecutor ce = new CallbackExecutor(e, groupbyParams, whereParams);
             results.put(ce, service.submit(ce));
             e.getValue ().forEach (m -> {
-                callbackMeasureNames.append (m.getName() + ",");
+                callbackMeasureNames.append (m.getName() + " ");
             });
             }
 //        }
