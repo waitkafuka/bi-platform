@@ -687,28 +687,38 @@
         if (rowDefine) {
             var rowDefines = rowDefine[y];
             var rDefLen = rowDefines.length;
+            // 多个维度时对左侧表头背景色的处理
             if (rDefLen > 1) {
-                if (rowDefines[0].indent >= 1) {
-                    classStr.push(type + '-expand-background');
-                }
-                else {
-                    if (wrap.indent !== 0) {
-                        classStr.push(type + '-expand-background');
-                    }
-                    else {
-                        classStr.push(type + '-expand-font');
-                    }
-                }
+
             }
+            // 单独维度时对左侧表头背景色的处理
             else {
-                // 如果不是第一层级，全部加底色
-                if (rowDefines[0].indent >= 1) {
+                if (rowDefines[0].indent > 1) {
                     classStr.push(type + '-expand-background');
                 }
-                else {
-                    classStr.push(type + '-expand-font');
-                }
             }
+//                if (rowDefines[0].indent >= 1) {
+//                    // 背景色
+//                    classStr.push(type + '-expand-background');
+//                }
+//                else {
+//                    if (wrap.indent !== 0) {
+//                        classStr.push(type + '-expand-background');
+//                    }
+//                    else {
+//                        classStr.push(type + '-expand-font');
+//                    }
+//                }
+//            }
+//            else {
+//                // 如果不是第一层级，全部加底色
+//                if (rowDefines[0].indent >= 1) {
+//                    classStr.push(type + '-expand-background');
+//                }
+//                else {
+//                    classStr.push(type + '-expand-font');
+//                }
+//            }
         }
         if (colDefItem.width) {
             styleStr.push('width:' + colDefItem.width + 'px;');
@@ -746,30 +756,45 @@
         if (rowDefine) {
             var rowDefines = rowDefine[y];
             var rDefLen = rowDefines.length;
+            // 多个维度时对左侧表头背景色的处理
             if (rDefLen > 1) {
-                if (rowDefines[0].indent >= 1) {
-                    classStr.push(type + '-expand-background');
-                }
-                else {
-                    if (rowDefines[rDefLen - 1].expand !== true) {
-                        classStr.push(type + '-expand-background');
-                    }
-                    else {
-                        classStr.push(type + '-expand-font');
-                    }
-                }
 
             }
+            // 单独维度时对左侧表头背景色的处理
             else {
-                // 如果不是第一层级，全部加底色
-                if (rowDefines[0].indent >= 1) {
+                if (rowDefines[0].indent > 1) {
                     classStr.push(type + '-expand-background');
-                }
-                else {
-                    classStr.push(type + '-expand-font');
                 }
             }
         }
+            //
+//            if (rDefLen > 1) {
+//                if (rowDefines[0].indent >= 1) {
+//                    classStr.push(type + '-expand-background');
+//                }
+//                else {
+//                    if (rowDefines[rDefLen - 1].expand !== true) {
+//                        //classStr.push(type + '-expand-background');
+//                    }
+//                    else {
+//                        classStr.push(type + '-expand-font');
+//                    }
+//                }
+//
+//            }
+//            else {
+//                // 如果不是第一层级，全部加底色
+//                if (rowDefines[0].indent >= 1) {
+//                    classStr.push(type + '-expand-background');
+//                }
+//                else {
+//                    classStr.push(type + '-expand-font');
+//                }
+//            }
+//        }
+//
+            //
+            //da
         var align = colDefItem.align || this._oStyle.defaultCCellAlign;
         if (align) {
             classStr.push(type + '-cell-align-' + align);
@@ -879,7 +904,7 @@
                     + type + '-tree-item">',
                     '<div class="' + clz + '"></div>',
                 value,
-                '</div>',
+                '</div>'
             ].join('');
         }
         else if (indentStyle) {
