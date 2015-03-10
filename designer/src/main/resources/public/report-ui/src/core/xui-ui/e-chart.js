@@ -638,7 +638,7 @@
 
             // 动态设置dataRoom的垂直定位 - 晓强
             // dataZoom.y = $(this.el).height() - 50;
-            dataZoom.y = this.el.offsetHeight - 50;
+            this.el.offsetHeight - 50;
             options.dataZoom = dataZoom;
         }
     };
@@ -780,9 +780,6 @@
      */
     UI_E_CHART_CLASS.$createChart = function (options) {
         var that = this;
-        var start;
-        var end;
-        var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
         this._oChart.on(echarts.config.EVENT.CLICK, chartClick);
@@ -824,12 +821,10 @@
 
             this.$setupDataRoom(options);
             // 可视数据区DataRoom影响距y2的值 - 晓强
-            if (options.dataZoom.show) {
-                options.grid.y2 = 90;
+            if (options.grid && options.dataZoom) {
+                options.grid.y2 = options.dataZoom.show ? 90 : 33;
             }
-            else {
-                options.grid.y2 = 33;
-            }
+
             this.$setupToolBox(options);
             this.$setupYAxis(options);
             this.$setupXAxis(options);
