@@ -319,6 +319,7 @@ public final class DataModelUtils {
             + (System.currentTimeMillis() - current) + "ms!");
         
         // PivotTableUtils.addSummaryRowHead(pTable);
+        pTable.setOthers (oriDataModel.getOthers ());
         return pTable;
     }
 

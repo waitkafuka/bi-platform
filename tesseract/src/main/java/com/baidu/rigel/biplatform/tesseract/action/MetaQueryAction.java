@@ -268,7 +268,7 @@ public class MetaQueryAction {
                         AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.SPLITSTRATEGY_PARAM_KEY),
                                 QueryContextSplitStrategy.class);
             }
-
+            
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
             LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             return ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
@@ -283,7 +283,7 @@ public class MetaQueryAction {
         } catch (Exception e) {
             e.printStackTrace();
             errorMsg = "unexpected error:" + e.getMessage();
-        }
+        } 
         LOG.error("cost:" + (System.currentTimeMillis() - current) + " error,errorMsg:" + errorMsg);
         // 走到这里说明已经出错了，状态码暂时设为100，后续加个状态码表
         return ResponseResultUtils.getErrorResult(errorMsg, 100);

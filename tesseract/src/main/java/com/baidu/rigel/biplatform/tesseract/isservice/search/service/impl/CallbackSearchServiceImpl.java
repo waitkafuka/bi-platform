@@ -52,6 +52,7 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackResponse;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
+import com.baidu.rigel.biplatform.ac.util.ThreadLocalPlaceholder;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
@@ -236,57 +237,29 @@ public class CallbackSearchServiceImpl {
 //        List<Future<CallbackResponse>> results = Lists.newArrayList();
         Map<CallbackExecutor, Future<CallbackResponse>> results = Maps.newHashMap();
         ExecutorCompletionService<CallbackResponse> service = new ExecutorCompletionService<CallbackResponse>(taskExecutor);
+        StringBuilder callbackMeasureNames = new StringBuilder();
         for (Entry<String, List<MiniCubeMeasure>> e : callbackMeasures.entrySet()) {
             CallbackExecutor ce = new CallbackExecutor(e, groupbyParams, whereParams);
             results.put(ce, service.submit(ce));
-////            while (true) {
-//                try {
-////                    ListenableFuture<CallbackResponse> f = taskExecutor.submitListenable(ce);
-//                    
-//                    Future<CallbackResponse> f = taskExecutor.submit(ce);
-//                    response.put(ce, f.get());
-////                    f.addCallback(new ListenableFutureCallback<CallbackResponse>() {
-////                        @Override
-////                        public void onSuccess(CallbackResponse result) {
-////                            latch.countDown();
-////                            response.put(ce, result);
-////                        }
-////                        
-////                        @Override
-////                        public void onFailure(Throwable t) {
-////                            latch.countDown();
-////                            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, 
-////                                    "Error when try to callback " + e, "[callbackquery:]"), t);
-////                        }
-////                    });
-////                    break;
-//                } catch (TaskRejectedException | InterruptedException | ExecutionException tre) {
-//                    try {
-//                        // FIXME: MENGRAN. Need configure it?
-//                        Thread.sleep(100L);
-//                    } catch (InterruptedException e1) {
-//                        // Ignore
-//                    }
-//                }
+            e.getValue ().forEach (m -> {
+                callbackMeasureNames.append (m.getName() + ",");
+            });
             }
 //        }
         Map<CallbackExecutor, CallbackResponse> response = 
                 new ConcurrentHashMap<CallbackExecutor, CallbackResponse>(callbackMeasures.size());
+        StringBuffer sb = new StringBuffer();
         results.forEach((k, v) -> {
             try {
                 response.put(k, v.get());
             } catch (Exception e1) {
                 LOGGER.error(e1.getMessage(), e1);
+                sb.append ("查询回调指标" + callbackMeasureNames.toString () + " 异常");
             }
         });
-        // Waiting...
-//        try {
-//            latch.await(callbackTimeout, TimeUnit.MILLISECONDS);
-//        } catch (InterruptedException e1) {
-//            // Ignore
-//            LOGGER.error(e1.getMessage(), e1);
-//        }
-        
+        if (!StringUtils.isEmpty (sb.toString ())) {
+            ThreadLocalPlaceholder.bindProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY, sb.toString ());
+        }
         // Package result
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
         SearchIndexResultSet result = null;

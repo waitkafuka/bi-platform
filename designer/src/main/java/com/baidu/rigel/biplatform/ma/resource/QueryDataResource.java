@@ -860,7 +860,7 @@ public class QueryDataResource extends BaseResource {
         }
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
         	
-        	DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+            DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
             /**
              * 每次查询以后，清除选中行，设置新的
              */
