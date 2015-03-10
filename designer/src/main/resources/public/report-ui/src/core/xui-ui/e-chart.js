@@ -780,9 +780,6 @@
      */
     UI_E_CHART_CLASS.$createChart = function (options) {
         var that = this;
-        var start;
-        var end;
-        var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
         this._oChart.on(echarts.config.EVENT.CLICK, chartClick);
