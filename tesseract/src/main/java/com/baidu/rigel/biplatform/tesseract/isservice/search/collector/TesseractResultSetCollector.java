@@ -20,7 +20,6 @@ import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.Scorer;
 import org.apache.lucene.util.BytesRef;
 
-import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
@@ -118,7 +117,7 @@ public class TesseractResultSetCollector extends Collector {
 	@Override
 	public void setNextReader(AtomicReaderContext context) throws IOException {
 		this.docBase = context.docBase;
-		
+		this.reader = context.reader();
 		Map<String, FieldCache.Doubles> currDoubleValuesMap=new HashMap<String, FieldCache.Doubles>();		
 		for (String measure : measureFields) {
             currDoubleValuesMap.put(measure,
@@ -144,7 +143,7 @@ public class TesseractResultSetCollector extends Collector {
 		return false;
 	}
 	
-	public TesseractResultSet buildResultSet(Set<String> groupByFields){		
+	public SearchIndexResultSet buildResultSet(Set<String> groupByFields){		
 		Meta meta = new Meta((String[]) ArrayUtils.addAll(this.dimFields,
 				this.measureFields));
 		SearchIndexResultSet result = new SearchIndexResultSet(meta, this.size);
@@ -191,5 +190,25 @@ public class TesseractResultSetCollector extends Collector {
 		
 		return result;
 	}
+
+
+    /** 
+     * 获取 size 
+     * @return the size 
+     */
+    public int getSize() {
+    
+        return size;
+    }
+
+
+    /** 
+     * 设置 size 
+     * @param size the size to set 
+     */
+    public void setSize(int size) {
+    
+        this.size = size;
+    }
 
 }

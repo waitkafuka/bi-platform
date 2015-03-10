@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 
+import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.store.meta.StoreMeta;
 import com.baidu.rigel.biplatform.tesseract.store.service.MetaSerivce;
-import com.baidu.rigel.biplatform.tesseract.store.service.StoreManager;
 
 /**
  * 
@@ -49,7 +49,7 @@ public class AbstractMetaService implements MetaSerivce {
     /**
      * storeManager
      */
-    @Resource(name = "hazelcastStoreManager")
+    @Resource
     private StoreManager storeManager;
     
     @SuppressWarnings("unchecked")

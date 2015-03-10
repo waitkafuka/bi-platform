@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.resultset;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.TesseractResultRecord;
 
@@ -28,7 +29,7 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.TesseractResultR
  * @author lijin
  *
  */
-public interface TesseractResultSet extends Serializable {
+public interface TesseractResultSet<T> extends Serializable {
     /**
      * 
      * get next
@@ -181,6 +182,13 @@ public interface TesseractResultSet extends Serializable {
      * @return int
      */
     int size();
+    
+    
+    /** 
+     * getDataList
+     * @return
+     */
+    List<T> getDataList();
     
     /**
      * 注意，请先调用next()方法，否则直接调用本方法会返回null; 

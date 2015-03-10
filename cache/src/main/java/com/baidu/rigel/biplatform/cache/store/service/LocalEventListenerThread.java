@@ -16,7 +16,7 @@
 /**
  * 
  */
-package com.baidu.rigel.biplatform.tesseract.store.service;
+package com.baidu.rigel.biplatform.cache.store.service;
 
 import java.util.EventObject;
 
@@ -28,9 +28,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
+import com.baidu.rigel.biplatform.cache.StoreManager;
 
 /**
  * LocalEventListenerThread 本地监听事件线程
@@ -38,7 +37,6 @@ import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
  * @author lijin
  *
  */
-@Service("localEventListenerThread")
 public class LocalEventListenerThread implements ApplicationContextAware {
     /**
      * LOGGER
@@ -64,15 +62,12 @@ public class LocalEventListenerThread implements ApplicationContextAware {
 
         try {
             EventObject item = this.storeManager.getNextEvent();
+            
             context.publishEvent((ApplicationEvent) item);
-            LOGGER.info(String.format(
-                    LogInfoConstants.INFO_PATTERN_PUBLISH_EVENT_SUCC, "run",
-                    item));
+            LOGGER.info("publish topic event : {} success", item);
 
         } catch (Exception e) {
-            LOGGER.error(String.format(
-                    LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "run",
-                    "no param"), e);
+            LOGGER.error("get event from topic catch error:{}", e);
 
         }
     }
