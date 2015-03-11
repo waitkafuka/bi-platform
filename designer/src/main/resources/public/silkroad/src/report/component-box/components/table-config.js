@@ -63,12 +63,13 @@ define([
                 "clzKey": "H_BUTTON",
                 "dataOpt": {
                     "skin": "ui-download-btn"
-                    //"text": "下载数据"
+                    "text": "导出当前所有数据"
                 }
             },
             {
                 "clzType": "VUI",
                 "clzKey": "TEXT_LABEL",
+                "tpl": "符合条件的数据只显示#{currRecordCount}条",
                 "dataInitOpt": { "hide": true }
             }
         ];
