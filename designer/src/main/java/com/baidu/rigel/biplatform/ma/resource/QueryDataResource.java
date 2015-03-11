@@ -808,9 +808,10 @@ public class QueryDataResource extends BaseResource {
                 }
                 action = queryBuildService.generateChartQueryAction(model, areaId, 
                             areaContext.getParams(), indNames, runTimeModel);
-                if (action != null) {
-                    action.setChartQuery(true);
+                if (action == null) {
+                    return ResourceUtils.getErrorResult ("该区域未包含任何维度信息", 1);
                 }
+                action.setChartQuery(true);
                 boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
                 //TODO to be delete
                 boolean isPieChart = isPieChart(getChartTypeWithExtendArea(model, targetArea));

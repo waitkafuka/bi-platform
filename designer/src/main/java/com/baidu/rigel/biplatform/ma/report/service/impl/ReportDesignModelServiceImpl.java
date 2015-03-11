@@ -528,6 +528,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     public boolean updateReportModel(ReportDesignModel model, boolean modelInCache) {
         ReportDesignModel persModel = DeepcopyUtils.deepCopy (model);
         // 如果当前model在编辑状态，需要更新持久化的model的name
+        if (this.getModelByIdOrName (model.getName (), false) != null) {
+            return false;
+        }
         if (modelInCache) {
             persModel = getModelByIdOrName (model.getId (), false);
             persModel.setName (model.getName ());
@@ -539,7 +542,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             logger.error (e.getMessage (), e);
             return false;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -547,12 +550,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      * @param model
      * @param removeFromDisk
      */
-    private void deleteModel(ReportDesignModel model, boolean removeFromDisk) {
+    private void deleteModel(ReportDesignModel model, boolean removeFromDisk) throws ReportModelOperationException {
         try {
             fileService.rm(generateDevReportLocation(model));
             logger.info("delete report successfully");
         } catch (FileServiceException e) {
             logger.warn (e.getMessage (), e);
+            throw new ReportModelOperationException (e);
         }
     }
     
