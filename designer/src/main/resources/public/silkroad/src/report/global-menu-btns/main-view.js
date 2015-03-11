@@ -19,7 +19,7 @@ define([
                 'click .j-global-component': 'shiftMenu',
                 'click .j-button-skin': 'shiftMenu',
                 'click .j-skin-btn': 'chanceTheme',
-                'click .reportNameBox': 'editReportName'
+                'click .reportName': 'editReportName'
                 //'click .j-button-line': 'referenceLine'
             },
             /**
@@ -53,6 +53,8 @@ define([
                         }
                     });
                 });
+                // 初始化修改报表名称操作
+                this.changeReportName();
             },
 
             /**
@@ -215,6 +217,7 @@ define([
                             "</div>" );
                     }
                 }
+                // 更改名称区域
                 div += (
                     '<div class="reportNameBox"><div class="reportName"></div>'
                     + '<input type="text" class="reportSetName"/></div>'
@@ -225,8 +228,49 @@ define([
              * 更改报表名称切换为编辑状态
              */
             editReportName: function () {
-                $('.reportName').hide();
-                $('.reportSetName').show();
+                var $reportSetName = $('.reportSetName');
+                var $reportName = $('.reportName');
+                $reportSetName.val($reportName.html());
+                $reportName.hide();
+                $reportSetName.show();
+            },
+            /**
+             * 更改报表名称提交修改
+             */
+            changeReportName: function () {
+                var $reportSetName = $('.reportSetName');
+                var $reportName = $('.reportName');
+                // 保存原始报表名称
+                var originalReportName = $reportName.text();
+                var newReportname = null;
+                $reportSetName.keydown(function (ev) {
+                    var oEvent = ev || event;
+                    // 回车提交修改
+                    if (oEvent.keyCode == 13) {
+                        // 获取更改后的新名称
+                        newReportname = $reportSetName.val();
+                        $.ajax({
+                            type : "POST",
+                            dataType : "json",
+                            cache : false,
+                            timeout  : 10000,
+                            url : "reports/" + window.dataInsight.main.id+ "/name/" + newReportname,
+                            success : function(data){
+                                // 根据返回值进行判断
+                                if (data["status"] === 0) {
+                                    $reportName.html(newReportname).show();
+                                    $reportSetName.hide();
+                                    alert("成功")
+                                }
+                                else {
+                                    $reportName.html(originalReportName).show();
+                                    $reportSetName.hide();
+                                    alert("失败")
+                                }
+                            }
+                        });
+                    }
+                });
             }
 
         });
