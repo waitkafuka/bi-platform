@@ -18,7 +18,8 @@ define([
             events: {
                 'click .j-global-component': 'shiftMenu',
                 'click .j-button-skin': 'shiftMenu',
-                'click .j-skin-btn': 'chanceTheme'
+                'click .j-skin-btn': 'chanceTheme',
+                'click .reportNameBox': 'editReportName'
                 //'click .j-button-line': 'referenceLine'
             },
             /**
@@ -32,8 +33,26 @@ define([
                 });
                 this.model = new MenuMainModel();
                 this.canvasView = option.canvasView;
+                // 工具条按钮区域按钮添加
+                this.$el.find('.j-global-btn').html(this.createBtns());
                 // 工具条菜单区域菜单添加
                 this.$el.find('.j-global-menu').html(ComponentMenuTemplate.render());
+                // 初始化报表名字
+                this.$el.find('.reportName').ready(function () {
+                    $.ajax({
+                        type : "GET",
+                        dataType : "json",
+                        cache : false,
+                        timeout  : 10000,
+                        url : "reports/" + window.dataInsight.main.id+ "/name",
+                        success : function(data){
+                            if (data["status"] === 0) {
+                                var reportName = data["data"].name;
+                                $('.reportName').html(reportName);
+                            }
+                        }
+                    });
+                });
             },
 
             /**
@@ -127,6 +146,87 @@ define([
                     }
                 }
                 **/
+            },
+
+            // 参数区域按钮属性
+            btnBox: [
+                {
+                    id: 'para',
+                    picName: 'para',
+                    title: '参数维度设置',
+                    className: 'global-para'
+                },
+                {
+                    id: 'component',
+                    picName: 'component',
+                    title: '组件工具箱',
+                    className: 'global-component'
+                },
+                {
+                    id: 'save-report',
+                    picName: 'save',
+                    title: '保存',
+                    className: 'button-save-report'
+                },
+                {
+                    id: 'close-report',
+                    picName: 'close',
+                    title: '关闭',
+                    className: 'button-close-report button-right'
+                },
+                {
+                    id: 'preview-report',
+                    picName: 'preview',
+                    title: '预览',
+                    className: 'button-preview-report'
+                },
+                {
+                    id: 'skin-report',
+                    picName: 'skin',
+                    title: '换肤设置',
+                    className: 'button-skin'
+                }
+                /*
+                {
+                    id: 'reference-line',
+                    picName: 'line',
+                    title: '参考线设置',
+                    className: 'button-line'
+                }
+                */
+            ],
+            /**
+             * 创建按钮函数
+             */
+            createBtns: function () {
+                var div = '';
+                var btnBox = this.btnBox || [];
+                if (btnBox.length == 0) {
+                    div = '';
+                }
+                else {
+                    for(var i = 0; i < btnBox.length; i ++) {
+                        div += (
+                            "<div class='global-setting-btns j-" +
+                            btnBox[i].className +  "'" +
+                            "title='" + btnBox[i].title + "'" + "id='" +
+                            btnBox[i].id + "'>" +
+                            "<img src='../silkroad/src/css/img/global-btns/btn_" + btnBox[i].picName +".png' />" +
+                            "</div>" );
+                    }
+                }
+                div += (
+                    '<div class="reportNameBox"><div class="reportName"></div>'
+                    + '<input type="text" class="reportSetName"/></div>'
+                    );
+                return div;
+            },
+            /**
+             * 更改报表名称切换为编辑状态
+             */
+            editReportName: function () {
+                $('.reportName').hide();
+                $('.reportSetName').show();
             }
 
         });

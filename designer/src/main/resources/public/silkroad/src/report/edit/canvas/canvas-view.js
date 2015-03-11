@@ -56,7 +56,6 @@ define([
                     reportId: that.id,
                     canvasView: that
                 });
-
                 // 初始化工具箱
                 that.compBoxView = new ComponentBoxView({
                     el: that.el,
