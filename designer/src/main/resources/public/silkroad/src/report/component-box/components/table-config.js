@@ -62,7 +62,7 @@ define([
                 "clzType": "VUI",
                 "clzKey": "H_BUTTON",
                 "dataOpt": {
-                    "skin": "ui-download-btn"
+                    "skin": "ui-download-btn",
                     "text": "导出当前所有数据"
                 }
             },
