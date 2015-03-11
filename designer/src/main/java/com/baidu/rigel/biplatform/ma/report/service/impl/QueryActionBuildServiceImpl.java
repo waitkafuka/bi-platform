@@ -396,6 +396,16 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         String queryPath = "";
         action.setQueryPath(queryPath);
         
+        ExtendArea area = reportModel.getExtendById(areaId);
+        if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
+            if (filterBlank == null) {
+                action.setFilterBlank(false);
+            } else {
+                action.setFilterBlank(Boolean.valueOf(filterBlank.toString()));
+            }
+        }
+        
         final Cube cube = schema.getCubes().get(cubeId);
         if (cube == null) {
             return null;
@@ -413,41 +423,32 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 if (tmp != null && tmp.length > 0 && context.get(Constants.NEED_LIMITED) == null) {
                     orderDesc = new QueryAction.MeasureOrderDesc(
                             tmp[0].getName(), 
-                            "NONE", 500);
+                            "DESC", 500);
                 } else {
                     context.remove(Constants.NEED_LIMITED);
+                    orderDesc = new QueryAction.MeasureOrderDesc(
+                            tmp[0].getName(), 
+                            "DESC", Integer.MAX_VALUE);
+                    logger.info ("[INFO] -------- order desc = " + orderDesc);
                 }
                 
-                if (context.get("time_line") != null) { //时间序列图
-            		orderDesc = new QueryAction.MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
-            	}
+                if (context.get ("time_line") != null) { // 时间序列图
+                    orderDesc = new QueryAction.MeasureOrderDesc (
+                            tmp[0].getName (), "NONE", Integer.MAX_VALUE);
+                }
             } else {
-            	if (context.get("time_line") != null) { //时间序列图
-            		orderDesc = new QueryAction.MeasureOrderDesc(
-            				measures.get(topSet.getMeasureId()).getName(), 
-            				"NONE", Integer.MAX_VALUE);
-            	} else {
-        			String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
-					orderDesc = new QueryAction.MeasureOrderDesc(
-        					measures.get(olapElementId).getName(), 
-        					topSet.getTopType().name(), topSet.getRecordSize());
-        		}
-//            	else {
-//        			orderDesc = new QueryAction.MeasureOrderDesc(
-//        					measures.get(topSet.getMeasureId()).getName(), 
-//        					topSet.getTopType().name(), topSet.getRecordSize());
-//            	}
+                	if (context.get("time_line") != null) { //时间序列图
+                    orderDesc = new QueryAction.MeasureOrderDesc(
+                    measures.get(topSet.getMeasureId()).getName(), "NONE", Integer.MAX_VALUE);
+                	} else {
+                    String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
+                    orderDesc = new QueryAction.MeasureOrderDesc(
+                    measures.get(olapElementId).getName(), 
+                     topSet.getTopType().name(), topSet.getRecordSize());
+                }
             }
         }
-        ExtendArea area = reportModel.getExtendById(areaId);
-        if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
-            Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
-            if (filterBlank == null) {
-                action.setFilterBlank(false);
-            } else {
-                action.setFilterBlank(Boolean.valueOf(filterBlank.toString()));
-            }
-        }
+        
         action.setMeasureOrderDesc(orderDesc);
         return action;
     }
