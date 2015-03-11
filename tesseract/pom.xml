@@ -13,7 +13,7 @@
 	<groupId>com.baidu.rigel.biplatform</groupId>
 	<artifactId>tesseract</artifactId>
 	<packaging>jar</packaging>
-
+ 
 	<properties>
 		<hazelcast.version>3.2.3</hazelcast.version>
 		<java.version>1.8</java.version>

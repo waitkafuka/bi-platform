@@ -72,7 +72,7 @@ public class ResponseResultUtils {
     public static ResponseResult getCorrectResult(String successMessage, Object data) {
         ResponseResult rs = new ResponseResult();
         rs.setStatus(ResponseResult.SUCCESS);
-        rs.setStatusInfo(successMessage);
+//        rs.setStatusInfo(successMessage);
         rs.setData(data);
         try {
             String errorMessage = 

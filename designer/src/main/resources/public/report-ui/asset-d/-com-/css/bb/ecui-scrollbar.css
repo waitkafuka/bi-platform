@@ -10,7 +10,7 @@
     cursor: default;
     padding: 0px;
     margin: 0px;
-    background-color: #D8D8D8;
+    /*background-color: #D8D8D8;*/
 }
 .ui-vscrollbar .ui-button-hover {
     padding: 0px;
@@ -35,7 +35,7 @@
 }
 .ui-vscrollbar .ui-scrollbar-thumb {
     width: 7px;
-    /*border-top: 1px solid #F0F0F0;*/
+    border-top: 1px solid #F0F0F0;
     border-bottom: 1px solid #F0F0F0;
     background: #D8D8D8;
     border-left: 0 solid white;

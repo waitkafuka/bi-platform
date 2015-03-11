@@ -198,7 +198,7 @@ public class MetaQueryAction {
 
                 children =
                             metaDataService.getChildren(dataSourceInfo, cube, uniqueName, 
-                            		QueryContextBuilder.getRequestParams(questionModel, cube));
+                            QueryContextBuilder.getRequestParams(questionModel, cube));
                 if (CollectionUtils.isNotEmpty(children)) {
                     List<MetaJsonDataInfo> metaJsons = new ArrayList<MetaJsonDataInfo>(children.size());
                     for (MiniCubeMember member : children) {

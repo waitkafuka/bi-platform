@@ -87,7 +87,7 @@ _eInput - 多选项的INPUT对象
                     this._nMaxSelected = options.maxSelected;
                 }
                 else if (options.selectAllButton) {
-                    this.add('全部', 0, {selectAllButton: true});
+                    this.add('全选', 0, {selectAllButton: true});
                     this._bSelectAllBtn = true;
                 }
                 if (options.tip) {
@@ -210,6 +210,14 @@ _eInput - 多选项的INPUT对象
     }
 
     extend(UI_MULTI_SELECT_CLASS, UI_ITEMS);
+
+    var originRemoveMethod = UI_MULTI_SELECT_CLASS.remove;
+    UI_MULTI_SELECT_CLASS.remove = function () {
+        if (this._bSelectAllBtn && this.getItems().length <= 1) {
+            return null;
+        }
+        return originRemoveMethod.apply(this, arguments);
+    };
 
     /**
      * 鼠标单击控件事件的默认处理。
