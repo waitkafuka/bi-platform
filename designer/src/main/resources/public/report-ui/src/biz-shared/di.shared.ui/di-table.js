@@ -344,13 +344,18 @@ $namespace('di.shared.ui');
         }
 
         // 页信息
+        var countInfotpl;
+        if(this._uCountInfo){
+            countInfotpl = this._uCountInfo.$di('getDef').tpl
+        }
         this._uCountInfo && this._uCountInfo.$di(
             'setData', 
             {
                 args: {
                     totalRecordCount: data.pageInfo.totalRecordCount,
                     currRecordCount: data.pageInfo.currRecordCount
-                }
+                },
+                tpl: countInfotpl
             },
             setDataOpt
         );

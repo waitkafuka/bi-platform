@@ -98,8 +98,8 @@ public class IndexClientHandler extends AbstractChannelInboundHandler {
     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
         
         super.channelReadComplete(ctx);
-        logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
-                "IndexClientHandler",this.message,"read complete"));
+//        logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
+//                "IndexClientHandler",this.message,"read complete"));
         
     }
 

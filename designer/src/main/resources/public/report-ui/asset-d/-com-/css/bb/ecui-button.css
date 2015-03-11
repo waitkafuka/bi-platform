@@ -225,6 +225,7 @@
     background-color: rgba(255, 255, 255, 0);
     color: #3C78A2;
     padding: 0;
+    float: right;
 }
 .ui-download-btn-hover {
     background-color: rgba(255, 255, 255, 0);
@@ -262,4 +263,11 @@
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
+}
+.ui-download-btn .ui-button-text:before {
+    content: ' ';
+    font-size: 0;
+    width: 10px;
+    display: inline-block;
+    height: 100%;
 }

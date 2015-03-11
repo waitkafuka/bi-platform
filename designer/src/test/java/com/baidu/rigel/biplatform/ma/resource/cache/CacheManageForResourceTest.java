@@ -44,7 +44,6 @@ public class CacheManageForResourceTest {
     @Test
     public void testGetFromCacheWithNullCache() {
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Mockito.doReturn(null).when(cacheManager).getCache("bi_platform");
         Object rs = resource.getFromCache("test");
         Assert.assertNull(rs);
@@ -56,7 +55,6 @@ public class CacheManageForResourceTest {
     @Test
     public void testGetFromCacheWithNullValue() {
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Cache cache = Mockito.mock(Cache.class);
         Mockito.doReturn(cache).when(cacheManager).getCache("bi_platform");
         Object rs = resource.getFromCache("test");
@@ -69,7 +67,6 @@ public class CacheManageForResourceTest {
     @Test
     public void testGetFromCacheWithNullObject() {
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Cache cache = Mockito.mock(Cache.class);
         ValueWrapper wrapper = Mockito.mock(ValueWrapper.class);
         Mockito.doReturn(wrapper).when(cache).get("test");
@@ -85,7 +82,6 @@ public class CacheManageForResourceTest {
     public void testGetFromCache() {
         Cache cache = Mockito.mock(Cache.class);
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Mockito.doReturn(cache).when(this.cacheManager).getCache("bi_platform");
         ValueWrapper wrapper = Mockito.mock(ValueWrapper.class);
         Mockito.doReturn(wrapper).when(cache).get("test");
@@ -103,7 +99,6 @@ public class CacheManageForResourceTest {
     public void testSetToCacheWithEmptyKey() {
         Cache cache = Mockito.mock(Cache.class);
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Mockito.doReturn(cache).when(this.cacheManager).getCache("bi_platform");
         try {
             this.resource.setToCache(null, new Object());
@@ -126,7 +121,6 @@ public class CacheManageForResourceTest {
     public void testSetToCache() {
         Cache cache = Mockito.mock(Cache.class);
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Mockito.doReturn(cache).when(cacheManager).getCache("bi_platform");
         try {
             this.resource.setToCache("test", "test");
@@ -143,7 +137,6 @@ public class CacheManageForResourceTest {
     public void testDeleteFromCacheWithEmptyKey() {
         Cache cache = Mockito.mock(Cache.class);
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Mockito.doReturn(cache).when(this.cacheManager).getCache("bi_platform");
         try {
             this.resource.deleteFromCache(null);
@@ -166,7 +159,6 @@ public class CacheManageForResourceTest {
     public void testDeleteFromCache() {
         Cache cache = Mockito.mock(Cache.class);
         cacheManager = Mockito.mock(CacheManager.class);
-        resource.setCacheManager(cacheManager);
         Mockito.doReturn(cache).when(this.cacheManager).getCache("bi_platform");
         try {
             this.resource.deleteFromCache("test");

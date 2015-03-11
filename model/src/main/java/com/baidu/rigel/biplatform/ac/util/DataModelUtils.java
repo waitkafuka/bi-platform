@@ -213,7 +213,7 @@ public class DataModelUtils {
         List<HeadField> columnLeafs = getLeafNodeList(dataModel.getColumnHeadFields());
         List<HeadField> rowLeafs = getLeafNodeList(dataModel.getRowHeadFields());
         if (type.equals(FillDataType.COLUMN)) {
-            if (!CollectionUtils.isEmpty(columnLeafs)) {
+            if (!CollectionUtils.isEmpty(columnLeafs) && dataModel.getColumnBaseData () != null) {
                 for (int i = 0; i < columnLeafs.size(); i++) {
                     columnLeafs.get(i).setCompareDatas(dataModel.getColumnBaseData().get(i));
                 }

@@ -122,19 +122,20 @@ public class ChartBuildServiceImpl implements ChartBuildService {
      */
     private List<BigDecimal> getMaxAndMinValue(DIReportChart reportChart) {
         final List<BigDecimal> tmp = Lists.newArrayList();
-        reportChart.getSeriesData().stream().forEach(data -> {
-            if (data != null) {
-                Collections.addAll(tmp, data.getData());
-            }
-        });
-        BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } ).toArray(BigDecimal[] :: new);
-        tmp.clear();
-        Collections.addAll(tmp, tmpArray);
-        Collections.sort(tmp);
+//        reportChart.getSeriesData().stream().forEach(data -> {
+//            if (data != null) {
+//                Collections.addAll(tmp, data.getData());
+//            }
+//        });
+        Collections.addAll (tmp, reportChart.getSeriesData ().get (0).getData ());
+        BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } ).sorted ().toArray(BigDecimal[] :: new);
+//        tmp.clear();
+//        Collections.addAll(tmp, tmpArray);
+//        Collections.sort(tmp);
         List<BigDecimal> rs = Lists.newArrayList();
-        if (tmp.size() >= 2) {
-            rs.add(tmp.get(tmp.size() - 1));
-            rs.add(tmp.get(0));
+        if (tmpArray.length >= 2) {
+            rs.add(tmpArray[tmpArray.length - 1]);
+            rs.add(tmpArray[0]);
         }
         return rs;
     }

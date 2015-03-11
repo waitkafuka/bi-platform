@@ -18,7 +18,12 @@ define(
         // 单选下拉框 实例 描述信息（从report-ui里面获取）
         var entityDescription = {
             "clzType": "VUI",
-            "clzKey": "ECUI_SELECT"
+            "clzKey": "ECUI_SELECT",
+            "dataOpt": {
+                "textNone": "未选择",
+                "textAll": "全部",
+                "selectAllButton": true
+            }
         };
 
         /**
