@@ -106,7 +106,18 @@
          *      }
          *  ];
          */
-        this._aSeries = dataWrap.series || [];
+        // 晓强测试
+        /*
+        dataWrap.series[0].data[0]=10;
+        dataWrap.series[0].data[1]=20;
+        dataWrap.series[0].data[2]=30;
+        dataWrap.series[0].data[3]=40;
+        dataWrap.series[0].data[4]=30;
+        dataWrap.series[0].data[5]=20;
+        dataWrap.series[0].data[6]=10;
+        dataWrap.series[0].barMaxWidth=10;
+        */
+        this._aSeries = dataWrap.series || []; //barMaxWidth  yAxisName
         /**
          * 用户自定义rangeselector的按钮
          * 例如：
@@ -159,6 +170,7 @@
         return (this._defaultMeasures.length > 0 && chartType != 'line') ?
             [this._defaultMeasures[0]] : this._defaultMeasures;
     };
+
     /**
      * 生成指标切换按钮
      *
@@ -224,7 +236,7 @@
     };
 
 
-        // 备选区按钮点击事件
+    // 备选区按钮点击事件
     function candidateClick(oTarget) {
         var resultName = '';
 
@@ -428,9 +440,28 @@
             },
             data: this._aXAxis.data
         };
-        if (this._aXAxis.type === 'date') {
-            xAxis.showDataType = 'date';
+
+        // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的相反） - 晓强
+        if (this._chartType === 'bar') {
+            xAxis.position = 'right';
+            options.grid.x = 20;
+            options.grid.x2 = 130;
+
+            // Y轴调到右边需要数据翻转 晓强
+            if (options.series && options.series.length > 0) {
+                var series = options.series;
+                for (var i = 0, len = series.length; i < len; i++) {
+                    var sData = series[i].data;
+
+                    for (var j = 0, jLen = sData.length; j < jLen; j++) {
+                        if (sData[j] > 0) {
+                            sData[j] =  -1 * sData[j];
+                        }
+                    }
+                }
+            }
         }
+
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
         if (this._chartType === 'column' || this._chartType === 'line') {
             options.xAxis = xAxis;
@@ -451,6 +482,7 @@
      * @private
      */
     UI_E_CHART_CLASS.$setupYAxis = function (options) {
+        var that = this;
         if (this._chartType !== 'pie') {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
@@ -460,13 +492,7 @@
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
                     yAxisOption.splitArea = { show : true };
-                    // yAxisOption.boundaryGap = [0.1, 0.1];
                     yAxisOption.splitNumber = 5;
-//                    if (option.title.text) {
-//                        yAxisOption.axisLabel = {
-//                            formatter: '{value} '+ option.title.text
-//                        }
-//                    }
                     yAxis.push(yAxisOption);
                 }
             }
@@ -474,7 +500,37 @@
                 yAxisOption = {};
                 yAxisOption.type = 'value';
                 yAxisOption.splitArea = { show : true };
-                // yAxisOption.boundaryGap = [0.1, 0.1];
+
+                // y轴添加单位 - 晓强
+                yAxisOption.axisLabel = yAxisOption.axisLabel || {};
+                yAxisOption.axisLabel.formatter = function (value) {
+                    var resultStr;
+                    // 确定可以转换成数字
+                    if (!Number.isNaN(value/1)) {
+                        // Y轴调到右边需要数据翻转
+                        if (that._chartType === 'bar') {
+                            value = -1 * value;
+                        }
+
+                        resultStr = value;
+                        var w = 10000;
+                        var y = 1000000000;
+
+                        if (value >= w && value <= y) {
+                            resultStr = (value / w).toFixed(0) + '万';
+                        }
+                        else if (value >= y) {
+                            resultStr = (value / y).toFixed(0) + '亿';
+                        }
+                    }
+
+                    return resultStr;
+                };
+                // 字体修改 - 晓强
+                yAxisOption.axisLabel.textStyle = {
+                     fontFamily: 'simhei'
+                };
+
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -612,9 +668,12 @@
             else {
                 dataZoom.end = Math.round(101 / xNums * this._zoomEnd);
             }
+
+            // 动态设置dataRoom的垂直定位 - 晓强
+            // dataZoom.y = $(this.el).height() - 50;
+            this.el.offsetHeight - 50;
             options.dataZoom = dataZoom;
         }
-
     };
 
     //------------------------------------------
@@ -635,7 +694,7 @@
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
             toolTip.formatter = function (data) {
-                return mapToolTipFunc(data, options.series)
+                return mapToolTipFunc(data, options.series);
             };
         }
         else {
@@ -663,6 +722,10 @@
                                 null,
                                 true
                         );
+                    }
+                    // Y轴调到右边需要数据翻转 晓强
+                    if (me._chartType === 'bar') {
+                        valueLable = -1 * valueLable;
                     }
                     res += '<br/>' + data[i][0] + ' : ' + valueLable;
                 }
@@ -754,9 +817,6 @@
      */
     UI_E_CHART_CLASS.$createChart = function (options) {
         var that = this;
-        var start;
-        var end;
-        var xDatas = this._aXAxis.data;
         this._oChart = echarts.init(this._eContent);
         this._oChart.setOption(options);
         this._oChart.on(echarts.config.EVENT.CLICK, chartClick);
@@ -767,21 +827,6 @@
             };
             that.notify('chartClick', o);
         }
-//        if (!this._chartType === 'pie') {
-//            this._oChart.on(echarts.config.EVENT.DATA_ZOOM, zoomChage);
-//        }
-
-//        function zoomChage(param) {
-//            start = param.zoom.xStart;
-//            end = param.zoom.xEnd;
-//            changeDateRange();
-//        }
-//        function changeDateRange() {
-//            var oMinDate = q('zoomMin', this._zoomDateRange)[0];
-//            var oMaxDate = q('zoomMax', this._zoomDateRange)[0];
-//            oMinDate.value = xDatas[start];
-//            oMaxDate.value = xDatas[end - 1];
-//        }
     };
     /**
      * 构建图表参数
@@ -793,7 +838,6 @@
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
-
         if (
             this._chartType === 'column'
             || this._chartType === 'bar'
@@ -805,24 +849,24 @@
                 // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
                 // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
-                    x: 70,
+                    x: 43,
+                    x2: 20,
                     y: 50,
                     borderWidth: 0
                 }
             }
+
             this.$setupDataRoom(options);
+            // 可视数据区DataRoom影响距y2的值 - 晓强
+            if (options.grid && options.dataZoom) {
+                options.grid.y2 = options.dataZoom.show ? 90 : 33;
+            }
+
             this.$setupToolBox(options);
             this.$setupYAxis(options);
             this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
-//            options.roamController = {
-//                show: true,
-//                x: 'right',
-//                mapTypeControl: {
-//                    'china': true
-//                }
-//            };
             // TODO:需要后端返回最大最小值
             options.dataRange = {
                 min: this._mapMinValue,
@@ -834,7 +878,6 @@
             };
         }
         if (this._chartType === 'pie') {
-            //options.calculable = true;
         	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
             options.calculable = false;
         }
