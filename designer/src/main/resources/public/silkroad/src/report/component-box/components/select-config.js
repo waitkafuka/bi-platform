@@ -21,8 +21,8 @@ define(
             "clzKey": "ECUI_SELECT",
             "dataOpt": {
                 "textNone": "未选择",
-                "textAll": "全部"
-//                "selectAllButton": true
+                "textAll": "全部",
+                "selectAllButton": true
             }
         };
 
