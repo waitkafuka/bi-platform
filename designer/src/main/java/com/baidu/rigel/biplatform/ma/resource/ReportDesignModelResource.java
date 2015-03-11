@@ -1444,7 +1444,7 @@ public class ReportDesignModelResource extends BaseResource {
     public ResponseResult updateReportName(@PathVariable("id") String id, HttpServletRequest request,
             @PathVariable("name") String name) {
         // check name
-        if (NameCheckUtils.checkName (name)) {
+        if (!NameCheckUtils.checkName (name)) {
             return ResourceUtils.getErrorResult ("名称非法", ResponseResult.FAILED);
         }
         ReportDesignModel model = null;

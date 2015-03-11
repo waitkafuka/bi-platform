@@ -528,6 +528,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     public boolean updateReportModel(ReportDesignModel model, boolean modelInCache) {
         ReportDesignModel persModel = DeepcopyUtils.deepCopy (model);
         // 如果当前model在编辑状态，需要更新持久化的model的name
+        if (this.getModelByIdOrName (model.getName (), false) != null) {
+            return false;
+        }
         if (modelInCache) {
             persModel = getModelByIdOrName (model.getId (), false);
             persModel.setName (model.getName ());
@@ -539,7 +542,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             logger.error (e.getMessage (), e);
             return false;
         }
-        return false;
+        return true;
     }
 
     /**
