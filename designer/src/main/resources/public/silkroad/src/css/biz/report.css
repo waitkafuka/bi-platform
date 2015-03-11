@@ -819,3 +819,21 @@
     display: none;
     float: left;
 }
+.reportName {
+    height: 20px;
+    margin: 5px 0;
+    background: #e4e4e4;
+    float: right;
+    font-size: 13px;
+    width: 150px;
+}
+.reportSetName {
+    height: 20px;
+    margin: 5px 0;
+    background: #e4e4e4;
+    float: right;
+    display: none;
+    border: 0 solid #e4e4e4;
+    font-size: 14px;
+    width: 150px;
+}

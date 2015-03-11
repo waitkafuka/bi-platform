@@ -112,10 +112,10 @@
         dataWrap.series[0].data[1]=20;
         dataWrap.series[0].data[2]=30;
         dataWrap.series[0].data[3]=40;
-        dataWrap.series[0].data[5]=40;
-        dataWrap.series[0].data[3]=40;
-        dataWrap.series[0].data[3]=40;
-        dataWrap.xAxis.barMaxWidth=10;
+        dataWrap.series[0].data[4]=30;
+        dataWrap.series[0].data[5]=20;
+        dataWrap.series[0].data[6]=10;
+        dataWrap.series[0].barMaxWidth=10;
         */
         this._aSeries = dataWrap.series || []; //barMaxWidth  yAxisName
         /**
@@ -441,11 +441,25 @@
             data: this._aXAxis.data
         };
 
-        // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的翻着） - 晓强
+        // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的相反） - 晓强
         if (this._chartType === 'bar') {
             xAxis.position = 'right';
             options.grid.x = 20;
             options.grid.x2 = 130;
+
+            // Y轴调到右边需要数据翻转 晓强
+            if (options.series && options.series.length > 0) {
+                var series = options.series;
+                for (var i = 0, len = series.length; i < len; i++) {
+                    var sData = series[i].data;
+
+                    for (var j = 0, jLen = sData.length; j < jLen; j++) {
+                        if (sData[j] > 0) {
+                            sData[j] =  -1 * sData[j];
+                        }
+                    }
+                }
+            }
         }
 
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
@@ -468,6 +482,7 @@
      * @private
      */
     UI_E_CHART_CLASS.$setupYAxis = function (options) {
+        var that = this;
         if (this._chartType !== 'pie') {
             var yAxis = [];
             if (this._aYAxis && this._aYAxis.length > 0) {
@@ -489,11 +504,18 @@
                 // y轴添加单位 - 晓强
                 yAxisOption.axisLabel = yAxisOption.axisLabel || {};
                 yAxisOption.axisLabel.formatter = function (value) {
-                    var resultStr = value;
-                    var w = 10000;
-                    var y = 1000000000;
+                    var resultStr;
                     // 确定可以转换成数字
                     if (!Number.isNaN(value/1)) {
+                        // Y轴调到右边需要数据翻转
+                        if (that._chartType === 'bar') {
+                            value = -1 * value;
+                        }
+
+                        resultStr = value;
+                        var w = 10000;
+                        var y = 1000000000;
+
                         if (value >= w && value <= y) {
                             resultStr = (value / w).toFixed(0) + '万';
                         }
@@ -672,7 +694,7 @@
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
             toolTip.formatter = function (data) {
-                return mapToolTipFunc(data, options.series)
+                return mapToolTipFunc(data, options.series);
             };
         }
         else {
@@ -700,6 +722,10 @@
                                 null,
                                 true
                         );
+                    }
+                    // Y轴调到右边需要数据翻转 晓强
+                    if (me._chartType === 'bar') {
+                        valueLable = -1 * valueLable;
                     }
                     res += '<br/>' + data[i][0] + ' : ' + valueLable;
                 }
