@@ -547,12 +547,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      * @param model
      * @param removeFromDisk
      */
-    private void deleteModel(ReportDesignModel model, boolean removeFromDisk) {
+    private void deleteModel(ReportDesignModel model, boolean removeFromDisk) throws ReportModelOperationException {
         try {
             fileService.rm(generateDevReportLocation(model));
             logger.info("delete report successfully");
         } catch (FileServiceException e) {
             logger.warn (e.getMessage (), e);
+            throw new ReportModelOperationException (e);
         }
     }
     

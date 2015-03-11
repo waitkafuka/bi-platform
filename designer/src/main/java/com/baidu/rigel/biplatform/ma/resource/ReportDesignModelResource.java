@@ -1442,7 +1442,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/{id}/name/{name}", method = { RequestMethod.GET })
+    @RequestMapping(value = "/{id}/name/{name}", method = { RequestMethod.POST })
     public ResponseResult updateReportName(@PathVariable("id") String id, HttpServletRequest request,
             @PathVariable("name") String name) {
         // check name
@@ -1467,6 +1467,9 @@ public class ReportDesignModelResource extends BaseResource {
             reportModelCacheManager.updateReportModelToCache (id, model);
         }
         boolean rs = reportDesignModelService.updateReportModel(model, modelInCache);
-        return rs ? ResourceUtils.getCorrectResult ("修改成功", null) : ResourceUtils.getErrorResult ("修改失败", 1) ;
+        if (rs ) {
+            return ResourceUtils.getCorrectResult ("修改成功,需重新发布才能影响生产环境", null);
+        }
+        return ResourceUtils.getErrorResult ("修改失败", 1) ;
     }
 }
