@@ -428,6 +428,9 @@
             },
             data: this._aXAxis.data
         };
+        if (this._aXAxis.type === 'date') {
+            xAxis.showDataType = 'date';
+        }
         // 如果是正常图形（柱形图与线图），那么x轴在下面显示
         if (this._chartType === 'column' || this._chartType === 'line') {
             options.xAxis = xAxis;
