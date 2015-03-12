@@ -237,11 +237,14 @@ public class ReportDesignModelResource extends BaseResource {
             String productLine = ContextManager.getProductLine();
             String tmpKey = productLine + "_" + targetName;
             try {
-                if (nameCheckCacheManager.existsReportName(targetName)
-                        || reportDesignModelService.isNameExist(targetName)) {
-                    rs = ResourceUtils.getErrorResult("Repeated Name ! ", 1);
+//                if (nameCheckCacheManager.existsReportName(targetName)
+//                        || reportDesignModelService.isNameExist(targetName)) {
+//                    rs = ResourceUtils.getErrorResult("Repeated Name ! ", 1);
+//                }
+//                nameCheckCacheManager.useReportName(targetName);
+                if (reportDesignModelService.isNameExist (targetName)) {
+                    return ResourceUtils.getErrorResult("名称已经存在,请更换名称 ! ", 1);
                 }
-                nameCheckCacheManager.useReportName(targetName);
                 ReportDesignModel tmp = reportDesignModelService.copyModel(id, targetName);
                 if (tmp != null) {
                     reportModelCacheManager.updateReportModelToCache(tmp.getId(), tmp);
@@ -275,17 +278,17 @@ public class ReportDesignModelResource extends BaseResource {
             return rs;
         }
         
-        if (name.length() > 255) {
+        if (!NameCheckUtils.checkName (name)) {
             rs.setStatus(1);
-            rs.setStatusInfo("名称太长");
-            logger.debug("name too length");
+            rs.setStatusInfo("名称格式非法");
+            logger.debug("name too length ：" + name);
             return rs;
         }
         
         if (reportDesignModelService.isNameExist(name)) {
-            logger.info("name already exist");
+            logger.info("name already exist: " + name);
             rs.setStatus(1);
-            rs.setStatusInfo("name already exist");
+            rs.setStatusInfo("名称已经存在");
             return rs;
         }
         ReportDesignModel model = new ReportDesignModel();
@@ -294,13 +297,13 @@ public class ReportDesignModelResource extends BaseResource {
         model.setName(name);
         // 检索cache中报表是否重名，如果重名报错，否则在cache中存储暂态的模型
         
-        if (nameCheckCacheManager.existsReportName(name)) {
-            logger.info("name already exist");
-            rs.setStatus(1);
-            rs.setStatusInfo("name already exist");
-            return rs;
-        }
-        nameCheckCacheManager.useReportName(name);
+//        if (nameCheckCacheManager.existsReportName(name)) {
+//            logger.info("name already exist");
+//            rs.setStatus(1);
+//            rs.setStatusInfo("名称已经存在");
+//            return rs;
+//        }
+//        nameCheckCacheManager.useReportName(name);
         
         logger.info("create report : " + rs.toString());
         reportModelCacheManager.updateReportModelToCache(id, model);
@@ -385,8 +388,11 @@ public class ReportDesignModelResource extends BaseResource {
         
         try {
             model.setPersStatus(true); 
-//            model.setJsonContent(request.getParameter("json"));
-//            model.setVmContent(request.getParameter("vm"));
+            if (reportDesignModelService.isNameExist (model.getName (), model.getId ())) {
+                rs.setStatus (1);
+                rs.setStatusInfo ("名称已经存在");
+                return rs;
+            }
             model = reportDesignModelService.saveOrUpdateModel(model);
             if (model != null) { 
                 reportModelCacheManager.updateReportModelToCache(id, model);
@@ -1447,6 +1453,9 @@ public class ReportDesignModelResource extends BaseResource {
         if (!NameCheckUtils.checkName (name)) {
             return ResourceUtils.getErrorResult ("名称非法", ResponseResult.FAILED);
         }
+        if (reportDesignModelService.isNameExist (name, id)) {
+            return ResourceUtils.getErrorResult ("报表名称已经存在", ResponseResult.FAILED);
+        }
         ReportDesignModel model = null;
         try {
             model = reportModelCacheManager.getReportModel(id);
@@ -1461,11 +1470,11 @@ public class ReportDesignModelResource extends BaseResource {
             model = reportDesignModelService.getModelByIdOrName(id, false);
         }
         model.setName (name);
-        if (modelInCache) {
-            reportModelCacheManager.updateReportModelToCache (id, model);
-        }
         boolean rs = reportDesignModelService.updateReportModel(model, modelInCache);
         if (rs ) {
+            if (modelInCache) {
+                reportModelCacheManager.updateReportModelToCache (id, model);
+            }
             return ResourceUtils.getCorrectResult ("修改成功,需重新发布才能影响生产环境", null);
         }
         return ResourceUtils.getErrorResult ("修改失败", 1) ;
