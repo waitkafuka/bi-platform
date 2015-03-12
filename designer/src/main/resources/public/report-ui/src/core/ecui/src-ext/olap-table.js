@@ -636,7 +636,7 @@
         // 如果是维度列，就不显示tooltip图标
         if (!wrap.colSpan) {
             tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</span>';
-            dragStr += '<span class="' + type + '-head-drag"></span>';
+            //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr); // 列头文本

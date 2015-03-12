@@ -182,7 +182,7 @@
     width: 15px;
     background-color: #CFEBF6;
     background-color: rgba(255, 255, 255, 0);
-    /*padding: 30px 0 0 0;*/
+    padding: 30px 0 0 0;
 }
 /* 滚动条上部按钮 */
 .ui-multi-select-options .ui-vscrollbar-prev,
@@ -213,7 +213,7 @@
 
 }
 /* 设定下拉框上部按钮按钮样式 */
-.ui-multi-select-options .ui-vscrollbar .ui-vscrollbar-prev,
+/*.ui-multi-select-options .ui-vscrollbar .ui-vscrollbar-prev,*/
 .ui-select-options .ui-vscrollbar .ui-vscrollbar-prev {
     width: 20px;
     height: 0;

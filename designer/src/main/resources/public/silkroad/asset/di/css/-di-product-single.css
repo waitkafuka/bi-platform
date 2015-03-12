@@ -404,6 +404,11 @@
     background: #E4EAFA;
 }
 
+.ui-multi-select-selectall {
+    background: white;
+    z-index: 99
+}
+
 /**
  * 左侧菜单
  */

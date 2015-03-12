@@ -487,10 +487,16 @@
 
 }
 /* 设定下拉框上部按钮按钮样式 */
+/*.ui-multi-select-options .ui-vscrollbar .ui-vscrollbar-prev,*/
 .ui-select-options .ui-vscrollbar .ui-vscrollbar-prev {
     width: 20px;
     height: 0;
     background: rgba(255, 255, 255, 0);
+}
+
+.ui-multi-select-selectall {
+    background: white;
+    z-index: 99
 }
 /**
  * 左侧菜单
