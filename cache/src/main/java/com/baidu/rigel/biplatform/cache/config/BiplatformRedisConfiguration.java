@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.redis.config.HazelcastProperties;
 import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
 import com.baidu.rigel.biplatform.cache.redis.listener.RedisQueueListener;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
@@ -304,6 +305,12 @@ public class BiplatformRedisConfiguration {
         @ConditionalOnMissingBean(name = "redisStoreManager")
         public StoreManager hazelcastStoreManager() {
             return new HazelcastStoreManager();
+        }
+        
+        @Bean
+        @ConditionalOnBean(name="hazelcastStoreManager")
+        public HazelcastProperties hazelcastProperties() {
+            return new HazelcastProperties();
         }
         
         @Bean
