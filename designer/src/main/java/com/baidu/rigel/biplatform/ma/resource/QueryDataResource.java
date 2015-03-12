@@ -887,13 +887,13 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("totalSize", table.getDataRows());
             resultMap.put("currentSize", table.getDataSourceRowBased().size());
             List<Map<String, String>> mainDims = Lists.newArrayList();
-            Map<String, String> root =  genRootDimCaption(table);
             
             LogicModel logicModel = targetArea.getLogicModel ();
             if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
                 logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
             }
             if (logicModel.getRows ().length >= 2) {
+                Map<String, String> root =  genRootDimCaption(table);
                 	areaContext.setCurBreadCrumPath(root);
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
@@ -908,6 +908,7 @@ public class QueryDataResource extends BaseResource {
                     resultMap.put("mainDimNodes", mainDims);
                 } else {
                     areaContext.setCurBreadCrumPath (Maps.newHashMap ());
+                    resultMap.remove ("mainDimNodes");
 //                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
 //            runTimeModel.getContext().put(areaId, root);
@@ -1471,6 +1472,8 @@ public class QueryDataResource extends BaseResource {
                 if (breadCrum != null) {
                     resultMap.put("mainDimNodes", breadCrum);
                 }
+            } else {
+                resultMap.remove ("mainDimNodes");
             }
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getActualSize());
