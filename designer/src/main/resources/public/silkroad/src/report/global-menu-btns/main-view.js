@@ -22,16 +22,15 @@ define([
                 'click .reportName': 'editReportName'
                 //'click .j-button-line': 'referenceLine'
             },
+            // 当前报表名字
+            nowReportName: '',
             /**
              * 构造函数
              *
              */
             initialize: function (option) {
-                this.model = new MenuMainModel({
-                    canvasModel: option.canvasView.model,
-                    reportId: option.reportId
-                });
                 this.model = new MenuMainModel();
+                var Model = this.model;
                 this.canvasView = option.canvasView;
                 // 工具条按钮区域按钮添加
                 this.$el.find('.j-global-btn').html(this.createBtns());
@@ -39,19 +38,7 @@ define([
                 this.$el.find('.j-global-menu').html(ComponentMenuTemplate.render());
                 // 初始化报表名字
                 this.$el.find('.reportName').ready(function () {
-                    $.ajax({
-                        type : "GET",
-                        dataType : "json",
-                        cache : false,
-                        timeout  : 10000,
-                        url : "reports/" + window.dataInsight.main.id+ "/name",
-                        success : function(data){
-                            if (data["status"] === 0) {
-                                var reportName = data["data"].name;
-                                $('.reportName').html(reportName);
-                            }
-                        }
-                    });
+                    Model.editReportName(window.dataInsight.main.id);
                 });
                 // 初始化修改报表名称操作
                 this.changeReportName();
@@ -230,6 +217,7 @@ define([
             editReportName: function () {
                 var $reportSetName = $('.reportSetName');
                 var $reportName = $('.reportName');
+                this.nowReportName = $reportName.text();
                 $reportSetName.val($reportName.html());
                 $reportName.hide();
                 $reportSetName.show();
@@ -244,35 +232,35 @@ define([
                 var originalReportName = $reportName.text();
                 var newReportname = null;
                 $reportSetName.keydown(function (ev) {
-                    var oEvent = ev || event;
-                    // 回车提交修改
-                    if (oEvent.keyCode == 13) {
-                        // 获取更改后的新名称
-                        newReportname = $reportSetName.val();
-                        $.ajax({
-                            type : "POST",
-                            dataType : "json",
-                            cache : false,
-                            timeout  : 10000,
-                            url : "reports/" + window.dataInsight.main.id+ "/name/" + newReportname,
-                            success : function(data){
-                                // 根据返回值进行判断
-                                if (data["status"] === 0) {
-                                    $reportName.html(newReportname).show();
-                                    $reportSetName.hide();
-                                    alert("成功")
-                                }
-                                else {
-                                    $reportName.html(originalReportName).show();
-                                    $reportSetName.hide();
-                                    alert("失败")
-                                }
+                var oEvent = ev || event;
+                // 回车提交修改
+                if (oEvent.keyCode == 13) {
+                    // 获取更改后的新名称
+                    newReportname = $reportSetName.val();
+                    // TODO: 此逻辑需要写到model
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        cache: false,
+                        timeout: 10000,
+                        url: "reports/" + window.dataInsight.main.id+ "/name/" + newReportname,
+                        success: function(data) {
+                            // 根据返回值进行判断
+                            if (data["status"] === 0) {
+                                $reportName.html(newReportname).show();
+                                $reportSetName.hide();
+                                dialog.success(data["statusInfo"]);
                             }
-                        });
-                    }
+                            else {
+                                $reportName.html(originalReportName).show();
+                                $reportSetName.hide();
+                                dialog.error(data["statusInfo"]);
+                            }
+                        }
+                    });
+                }
                 });
             }
-
         });
     }
 );

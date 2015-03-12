@@ -444,10 +444,12 @@ define(
             /**
              * 保存报表
              *
+             * @param {string} reportName 报表名称
              * @param {Function} success 回调函数
+             * @param {Function} reportDialog 回调函数
              * @public
              */
-            saveReport: function (success) {
+            saveReport: function (nowReport, success, reportDialog) {
                 var that = this;
                 $.ajax({
                     url: Url.saveReport(that.id),
@@ -456,8 +458,14 @@ define(
                         json: JSON.stringify(that.reportJson),
                         vm: that.$reportVm.prop('outerHTML')
                     },
-                    success: function () {
-                        success && success();
+                    success: function (data) {
+                        if (data["status"] === 0) {
+                            success && success();
+                        }
+                        else {
+                            var info = data["statusInfo"];
+                            reportDialog && reportDialog(info, nowReport);
+                        }
                     }
                 });
             },
@@ -480,6 +488,32 @@ define(
                     },
                     success: function () {
                         success();
+                    }
+                });
+            },
+            /**
+             * 保存更改报表名称
+             *
+             * @param {string} reportId 报表id
+             * @param {string} nowReportName 旧报表名称
+             * @param {string} newReportName 新报表名称
+             * @public
+             */
+            saveEditReportName: function (reportId, newReportName) {
+                $.ajax({
+                    type : "POST",
+                    dataType : "json",
+                    cache : false,
+                    timeout  : 10000,
+                    uri : Url.saveEditReportName(reportId, newReportName),
+                    success : function(data){
+                        // 根据返回值进行判断
+                        if (data["status"] === 0) {
+                            dialog.success(data['statusInfo']);
+                        }
+                        else {
+                            dialog.error(data['statusInfo']);
+                        }
                     }
                 });
             }
