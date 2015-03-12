@@ -360,6 +360,11 @@ $namespace('di.shared.ui');
             setDataOpt
         );
 
+        // 当表格数据获取异常时（主要针对callback指标），需要弹出异常原因
+        if (data.tableData && data.tableData.others) {
+            DIALOG.alert(data.tableData.others);
+        }
+        
         /**
          * 渲染事件
          *
