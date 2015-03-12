@@ -73,7 +73,7 @@ _eInput - 多选项的INPUT对象
             },
             function(el, options) {
                 var values;
-
+                    me = this;
                 if (options.maxlength) {
                     this._nTextLen = options.maxlength;
                 }
@@ -104,6 +104,18 @@ _eInput - 多选项的INPUT对象
                 }
 
                 this._eInput.disabled = true;
+
+                core.addEventListener(this._uOptions, 'scrollimmediately', handleScroll);
+                // 当滚动条滚动后，如果有全选，就始终浮在最上面
+                function handleScroll(event) {
+                    var items = me.getItems();
+                    var selectAllEl = items[0]._eBody;
+                    if (me._bSelectAllBtn) {
+                        // TODO:为items[0]添加样式
+                        selectAllEl.style.top = this._uVScrollbar.getValue() + 'px';
+                        core.dom.addClass(selectAllEl, 'ui-multi-select-selectall');
+                    }
+                }
             }
         ),
         UI_MULTI_SELECT_CLASS = UI_MULTI_SELECT.prototype,

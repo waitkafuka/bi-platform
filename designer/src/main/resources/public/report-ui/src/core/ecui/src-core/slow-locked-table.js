@@ -548,7 +548,7 @@
         // ddd = new Date();
 
         UI_TABLE_CLASS.init.call(this);
-        this.headDrag.call(this);
+//        this.headDrag.call(this);
     };
     /**
      * 为表格添加可供拖拽的虚线，顺便绑定拖拽事件

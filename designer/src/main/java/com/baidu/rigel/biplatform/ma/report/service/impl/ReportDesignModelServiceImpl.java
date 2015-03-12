@@ -528,15 +528,15 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     public boolean updateReportModel(ReportDesignModel model, boolean modelInCache) {
         ReportDesignModel persModel = DeepcopyUtils.deepCopy (model);
         // 如果当前model在编辑状态，需要更新持久化的model的name
-        if (this.getModelByIdOrName (model.getName (), false) != null) {
+        if (isNameExist (model.getName ())) {
             return false;
         }
         if (modelInCache) {
             persModel = getModelByIdOrName (model.getId (), false);
-            persModel.setName (model.getName ());
         }
         try {
-            this.deleteModel (model, true);
+            this.deleteModel (persModel, true);
+            persModel.setName (model.getName ());
             this.saveOrUpdateModel (persModel);
         } catch (ReportModelOperationException e) {
             logger.error (e.getMessage (), e);
