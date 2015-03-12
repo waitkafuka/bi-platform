@@ -2177,9 +2177,12 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     cursor: pointer;
     background: #E7F9FE;
 }
-.ui-table-row-hover .ui-table-ccell {
-    /*background: #FFF;*/
+/* .ui-table-row-hover .ui-table-ccell {
+    background: #F0F4F6;
 }
+.ui-table-row-hover .ui-table-rowhcell {
+    background: #F0F4F6;
+} */
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
     background: #FFF;
@@ -3482,11 +3485,11 @@ li {
     z-index: 999;
     padding: 5px 10px;
     color: #333;
-    background: #F9EDBE;
+    background: #FFF;
     font-family: "微软雅黑", Serif;
     font-size: 14px;
     font-weight: bold;
-    border: 1px solid #F0C36D;
+    border: 1px solid RGB(202, 203, 205);
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
