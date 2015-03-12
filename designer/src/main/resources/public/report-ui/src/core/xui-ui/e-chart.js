@@ -9,6 +9,7 @@
  */
 
 (function () {
+    var stringTemplate = xutil.string.template;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
     var q = xutil.dom.q;
@@ -167,8 +168,9 @@
      * @protected
      */
     UI_E_CHART_CLASS.$getDefaultMeasures = function (chartType){
-        return (this._defaultMeasures.length > 0 && chartType != 'line') ?
-            [this._defaultMeasures[0]] : this._defaultMeasures;
+        return (this._defaultMeasures.length > 0 && chartType != 'line')
+            ? [this._defaultMeasures[0]]
+            : this._defaultMeasures;
     };
 
     /**
@@ -177,10 +179,11 @@
      * @protected
      */
     UI_E_CHART_CLASS.$renderCheckBoxs = function () {
-        var me = this;
-        var allMeasures = me._allMeasures;
-        var defaultMeasures = this.$getDefaultMeasures(this._chartType);
-        var measureHtml = [];
+        var me = this,
+            allMeasures = me._allMeasures,
+            defaultMeasures = me.$getDefaultMeasures(me._chartType),
+            measureHtml = [];
+
         // 渲染图形中备选区模块
         if (allMeasures.length > 0) {
             if (this._chartType === 'line') {
@@ -210,19 +213,28 @@
                 // 单选
                 var radioName = 'echarts-candidate-radio-' + new Date().getTime();
                 for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
-                    var radioId = 'allMeasures-radio' + new Date().getTime() + i;
-                    measureHtml.push(
-                        '<input type="radio" name="' + radioName + '" id="' + radioId + '"',
-                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                        '/>',
-                        '<label for="' + radioId + '">',allMeasures[i],'</label>'
-                    );
+                    var checkAbr = isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked"' : '';
+                    var radioId = [
+                       'allMeasures-radio',
+                        new Date().getTime(),
+                        i
+                    ].join('');
+                    var opt = {
+                        rName: radioName,
+                        rId: radioId,
+                        checked: checkAbr
+                    };
+                    var tpl = '<input type="radio" name="#{rName}" id="#{rId}" #{checked} /><label for="#{rId}">text</label>';
+                    measureHtml.push(stringTemplate(tpl, opt));
                 }
-                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
-                    + measureHtml.join('')
-                    + '</div>';
-                this._eCandidateBox = domChildren(this._eHeader)[0];
-                var inputRadios = this._eCandidateBox.getElementsByTagName('input');
+                me._eHeader.innerHTML = stringTemplate(
+                    '<div class="echarts-candidate" id="echarts-candidate">#{html}</div>',
+                    {
+                        html: measureHtml.join('')
+                    }
+                );
+                me._eCandidateBox = domChildren(me._eHeader)[0];
+                var inputRadios = me._eCandidateBox.getElementsByTagName('input');
 
                 for (var i = 0, iLen = inputRadios.length; i < iLen; i ++) {
                     inputRadios[i].onclick = (function (j) {
@@ -797,17 +809,23 @@
      * @public
      */
     UI_E_CHART_CLASS.render = function () {
-        this.$disposeChart();
+        var tpl,
+            me = this;
+        me.$disposeChart();
         // 如果没有数据，图形显示空
-        if (!this._aSeries || this._aSeries.length == 0) {
-            this._eContent.innerHTML = ''
-                + '<div class="' + this._sType + '-empty">'
-                +     this._sEmptyHTML
-                + '</div>';
+        if (!me._aSeries || me._aSeries.ledngth == 0) {
+            tpl = '<div class="#{dClass}-empty">#{html}</div>';
+            me._eContent.innerHTML = stringTemplate(
+                tpl,
+                {
+                    dClass: me._sType,
+                    html: me._sEmptyHTML
+                }
+            )
             return;
         }
-        this.$preload();
-        this.$createChart(this.$initOptions());
+        me.$preload();
+        me.$createChart(me.$initOptions());
     };
 
     /**

@@ -151,6 +151,9 @@ _oRange         - 滑动按钮的合法滑动区间
         var parent = scrollbar.getParent(),
             uid;
 
+        // 滚动时刻触发事件，会降低性能，目前有场景用到
+        triggerEvent(parent, 'scrollimmediately', false);
+
         if (parent) {
             parent.$scroll();
             if (!UI_SCROLLBAR[uid = parent.getUID()]) {
