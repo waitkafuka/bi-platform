@@ -1418,6 +1418,7 @@ public class QueryDataResource extends BaseResource {
             Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
             if (type.equals("expand")) {
 //                ResultSet result = reportModelQueryService.queryDatas(model, action, true);
+                logger.info ("[INFO] --- --- --- ---" + result.getDataModel ());
                 DataModel newDataModel = DataModelUtils.merageDataModel(previousResult.getDataModel(), 
                         result.getDataModel(), rowNum);
                 table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, false, 0, false);

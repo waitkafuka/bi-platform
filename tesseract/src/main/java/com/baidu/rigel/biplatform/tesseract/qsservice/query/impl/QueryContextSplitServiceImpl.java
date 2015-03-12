@@ -213,6 +213,11 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
             throw new IllegalSplitResultException(splitResult, "splitResult is null or condition size not equal", "MERGE_MODEL");
         }
         
+        // TODO 只有一种查询请求方式，不需要进行合并
+        if (splitResult.getDataModels ().size () == 1) {
+            return splitResult.getDataModels ().values ().toArray (new DataModel[0])[0];
+        }
+        
         DataModel dataModel = new DataModel();
         dataModel.setColumnHeadFields(DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getColumnMemberTrees(),
                 splitResult.getOriQueryContext().getQueryMeasures()));

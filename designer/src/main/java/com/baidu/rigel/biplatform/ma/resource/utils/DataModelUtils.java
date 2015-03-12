@@ -865,8 +865,7 @@ public final class DataModelUtils {
      * @param rowNum
      * @return
      */
-    public static DataModel merageDataModel(DataModel oriDataModel, DataModel newDataModel,
-        int rowNum) {
+    public static DataModel merageDataModel(DataModel oriDataModel, DataModel newDataModel, int rowNum) {
         DataModel dataModel = new DataModel();
         dataModel.setColumnBaseData(oriDataModel.getColumnBaseData());
         dataModel.setColumnHeadFields(oriDataModel.getColumnHeadFields());
