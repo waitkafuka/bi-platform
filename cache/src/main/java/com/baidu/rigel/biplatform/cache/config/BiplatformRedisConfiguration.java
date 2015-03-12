@@ -53,6 +53,7 @@ import org.springframework.util.StringUtils;
 import redis.clients.jedis.JedisPoolConfig;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.redis.config.HazelcastProperties;
 import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
 import com.baidu.rigel.biplatform.cache.redis.listener.RedisQueueListener;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
@@ -274,7 +275,7 @@ public class BiplatformRedisConfiguration {
             List<String> prefix = new ArrayList<>();
             if(this.properties.isDev()) {
                 try {
-                    prefix.add(MacAddressUtil.getMacAddress(null));
+                    prefix.add(MacAddressUtil.getMachineNetworkFlag(null));
                 } catch (SocketException | UnknownHostException e) {
                     log.warn("get mac add error:{}", e.getMessage());
                 }
@@ -304,6 +305,12 @@ public class BiplatformRedisConfiguration {
         @ConditionalOnMissingBean(name = "redisStoreManager")
         public StoreManager hazelcastStoreManager() {
             return new HazelcastStoreManager();
+        }
+        
+        @Bean
+        @ConditionalOnBean(name="hazelcastStoreManager")
+        public HazelcastProperties hazelcastProperties() {
+            return new HazelcastProperties();
         }
         
         @Bean

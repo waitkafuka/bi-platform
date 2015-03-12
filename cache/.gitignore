@@ -1,10 +1,4 @@
+/.settings/
 /target/
 /.classpath
-<<<<<<< HEAD
-/.gitignore
-/bin
 /.project
-=======
-/.project
-/.*
->>>>>>> branch 'branch_1.3.1' of https://github.com/Baidu-ecom/bi-platform.git

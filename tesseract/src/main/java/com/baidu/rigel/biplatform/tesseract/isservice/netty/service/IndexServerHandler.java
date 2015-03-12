@@ -24,7 +24,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +51,6 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 

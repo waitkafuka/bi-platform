@@ -15,27 +15,23 @@
  */
 package com.baidu.rigel.biplatform.cache.store.service.impl;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.EventObject;
-import java.util.Properties;
 import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.redis.config.HazelcastProperties;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastQueueItemListener;
 import com.hazelcast.config.ClasspathXmlConfig;
@@ -57,24 +53,8 @@ import com.hazelcast.spring.cache.HazelcastCacheManager;
 
 // TODO 需要通过factory返回StoryManager的实例，不要直接用Spring的注解 --Add by xiaoming.chen
 public class HazelcastStoreManager implements StoreManager,InitializingBean {
-    
-
-    public static final String DEFAULT_TESSERACT_CONFIG = "conf/tesseract.properties";
-
-    private static final String HAZELCAST_SERVER_GROUP_PASSWORD = "hazelcastServer.groupPassword";
-
-    private static final String HAZELCAST_SERVER_GROUP_USER_NAME = "hazelcastServer.groupUserName";
-
-    private static final String HAZELCAST_SERVER_MEMBERS = "hazelcastServer.members";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastStoreManager.class);
-
-    private static final String HAZELCAST_SERVER_NAME = "hazelcastServer.instance";
-
-    private static final String HAZELCAST_MANCERTER_URL = "hazelcastServer.mancenter.url";
-    
-    
-    
     /**
      * cacheManager
      */
@@ -85,6 +65,9 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
     
     @Resource
     private HazelcastQueueItemListener hazelcastQueueItemListener;
+    
+    @Autowired(required = false)
+    private HazelcastProperties hazelcastProperties;
     
     /**
      * hazelcast
@@ -100,23 +83,21 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
     public HazelcastStoreManager(String configPath) {
         Config cfg = new ClasspathXmlConfig(configPath);
         
-        Properties prop = new Properties();
-        try {
-            prop = loadConf(null);
-        } catch (IOException e) {
-            LOGGER.warn("load conf error,use default config");
-        }
-        cfg.getGroupConfig().setName(prop.getProperty(HAZELCAST_SERVER_GROUP_USER_NAME, "tesseract-cluster"));
-        cfg.getGroupConfig().setPassword(prop.getProperty(HAZELCAST_SERVER_GROUP_PASSWORD, "tesseract"));
+//        Properties prop = new Properties();
+//        try {
+//            prop = loadConf(null);
+//        } catch (IOException e) {
+//            LOGGER.warn("load conf error,use default config");
+//        }
+        cfg.getGroupConfig().setName(hazelcastProperties.getGroupUserName());
+        cfg.getGroupConfig().setPassword(hazelcastProperties.getGroupPassword());
         
-        cfg.setInstanceName(prop.getProperty(HAZELCAST_SERVER_NAME, "TesseractHZ_Cluster"));
+        cfg.setInstanceName(hazelcastProperties.getInstanceName());
         
        // cfg.getQueueConfig(EVENT_QUEUE).addItemListenerConfig(new ItemListenerConfig(this.hazelcastQueueItemListener,true));
-        String manCenter = prop.getProperty(HAZELCAST_MANCERTER_URL);
-        boolean enableManCerter = Boolean.valueOf(prop.getProperty("hazelcastServer.mancenter.enable"));
-        if (enableManCerter && StringUtils.isNotBlank(manCenter)) {
+        if (hazelcastProperties.getMancenter().isEnable() && StringUtils.isNotBlank(hazelcastProperties.getMancenter().getUrl())) {
             cfg.getManagementCenterConfig().setEnabled(true);
-            cfg.getManagementCenterConfig().setUrl(manCenter);
+            cfg.getManagementCenterConfig().setUrl(hazelcastProperties.getMancenter().getUrl());
         }
         System.setProperty("hazelcast.socket.bind.any", "false");
         String ip = "127.0.0.1";
@@ -132,7 +113,7 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
         
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
-        tcpIpConfig.addMember(prop.getProperty(HAZELCAST_SERVER_MEMBERS,"127.0.0.1"));
+        tcpIpConfig.addMember(hazelcastProperties.getMembers());
         tcpIpConfig.setEnabled(true);
         
         this.hazelcast = Hazelcast.newHazelcastInstance(cfg);
@@ -146,33 +127,33 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
         queue.addItemListener(hazelcastQueueItemListener,true);
     }
     
-    private Properties loadConf(String location) throws IOException {
-        if(StringUtils.isBlank(location)) {
-            location = "config/application.properties";
-            LOGGER.info("default load config from {}", location);
-        }
-        String filePath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
-        File propertiesFile = new File(new File(filePath).getParent(), location);
-        Properties properties =null; 
-        if(propertiesFile.exists()) {
-            LOGGER.info("load from config {}", propertiesFile.getAbsolutePath());
-            properties = new Properties();
-            FileInputStream fis = null;
-            try {
-                fis = new FileInputStream(propertiesFile);
-                properties.load(fis);
-            } catch (IOException e) {
-                LOGGER.warn("load config properties catch error",e);
-            } finally {
-                IOUtils.closeQuietly(fis);
-            }
-        }
-        if (properties == null || properties.isEmpty()) {
-            LOGGER.info("can not get default config from {} load config from {}", propertiesFile.getAbsolutePath(),DEFAULT_TESSERACT_CONFIG);
-            properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_TESSERACT_CONFIG);
-        }
-        return properties;
-    }
+//    private Properties loadConf(String location) throws IOException {
+//        if(StringUtils.isBlank(location)) {
+//            location = "config/application.properties";
+//            LOGGER.info("default load config from {}", location);
+//        }
+//        String filePath = this.getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+//        File propertiesFile = new File(new File(filePath).getParent(), location);
+//        Properties properties =null; 
+//        if(propertiesFile.exists()) {
+//            LOGGER.info("load from config {}", propertiesFile.getAbsolutePath());
+//            properties = new Properties();
+//            FileInputStream fis = null;
+//            try {
+//                fis = new FileInputStream(propertiesFile);
+//                properties.load(fis);
+//            } catch (IOException e) {
+//                LOGGER.warn("load config properties catch error",e);
+//            } finally {
+//                IOUtils.closeQuietly(fis);
+//            }
+//        }
+//        if (properties == null || properties.isEmpty()) {
+//            LOGGER.info("can not get default config from {} load config from {}", propertiesFile.getAbsolutePath(),DEFAULT_TESSERACT_CONFIG);
+//            properties = PropertiesLoaderUtils.loadAllProperties(DEFAULT_TESSERACT_CONFIG);
+//        }
+//        return properties;
+//    }
     
     /**
      * constructor 采用默认配置文件

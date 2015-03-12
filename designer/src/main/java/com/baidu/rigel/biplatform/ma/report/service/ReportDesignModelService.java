@@ -143,4 +143,12 @@ public interface ReportDesignModelService {
      */
     boolean updateReportModel(ReportDesignModel model, boolean modelInCache);
 
+    /**
+     * 
+     * @param name
+     * @param id
+     * @return boolean
+     */
+    boolean isNameExist(String name, String id);
+
 }

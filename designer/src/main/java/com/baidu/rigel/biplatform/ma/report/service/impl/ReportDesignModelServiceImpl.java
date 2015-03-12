@@ -528,7 +528,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     public boolean updateReportModel(ReportDesignModel model, boolean modelInCache) {
         ReportDesignModel persModel = DeepcopyUtils.deepCopy (model);
         // 如果当前model在编辑状态，需要更新持久化的model的name
-        if (isNameExist (model.getName ())) {
+        if (isNameExist (model.getName (), model.getId ())) {
             return false;
         }
         if (modelInCache) {
@@ -558,6 +558,31 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             logger.warn (e.getMessage (), e);
             throw new ReportModelOperationException (e);
         }
+    }
+
+    @Override
+    public boolean isNameExist(String name, String id) {
+        if (name == null) {
+            return false;
+        }
+        String[] listFile = null;
+        try {
+            listFile = fileService.ls(this.getDevReportDir());
+        } catch (FileServiceException e) {
+            logger.debug(e.getMessage(), e);
+        }
+        if (listFile == null || listFile.length == 0) {
+            return false;
+        }
+        String idTarget = id + Constants.FILE_NAME_SEPERATOR;
+        String nameTarget = Constants.FILE_NAME_SEPERATOR + name + Constants.FILE_NAME_SEPERATOR;
+        for (String file : listFile) {
+            // 名称相同，id不相同
+            if (!file.startsWith(idTarget) && file.contains(nameTarget)) {
+                return true;
+            }
+        }
+        return false;
     }
     
 }

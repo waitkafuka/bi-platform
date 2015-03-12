@@ -462,10 +462,18 @@ _eInput - 多选项的INPUT对象
     };
 
     UI_MULTI_SELECT_CLASS.getValue = function () {
-        var items = this.getSelected(),
+        var selectItems = this.getSelected(),
+            items,
             res = [], i, len;
-        for (i = 0, len = items.length; i < len; i++) {
-            if (!items[i]._bSelectAllBtn) {
+        for (i = 0, len = selectItems.length; i < len; i++) {
+            if (!selectItems[i]._bSelectAllBtn) {
+                res.push(selectItems[i]._eInput.value);
+            }
+        }
+        // 如果有全选按钮，且一个都没选中，那么传的值为所有的值
+        if (this._bSelectAllBtn && res.length === 0) {
+            items = this.getItems();
+            for (i = 1, len = items.length; i < len; i++) {
                 res.push(items[i]._eInput.value);
             }
         }

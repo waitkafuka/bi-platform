@@ -222,9 +222,10 @@
                     var opt = {
                         rName: radioName,
                         rId: radioId,
-                        checked: checkAbr
+                        checked: checkAbr,
+                        text: allMeasures[i]
                     };
-                    var tpl = '<input type="radio" name="#{rName}" id="#{rId}" #{checked} /><label for="#{rId}">text</label>';
+                    var tpl = '<input type="radio" name="#{rName}" id="#{rId}" #{checked} /><label for="#{rId}">#{text}</label>';
                     measureHtml.push(stringTemplate(tpl, opt));
                 }
                 me._eHeader.innerHTML = stringTemplate(
@@ -452,7 +453,9 @@
             },
             data: this._aXAxis.data
         };
-
+        if (this._aXAxis.type === 'date') {
+            xAxis.showDataType = 'date';
+        }
         // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的相反） - 晓强
         if (this._chartType === 'bar') {
             xAxis.position = 'right';
