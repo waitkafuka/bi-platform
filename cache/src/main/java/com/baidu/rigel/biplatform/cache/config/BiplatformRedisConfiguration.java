@@ -274,7 +274,7 @@ public class BiplatformRedisConfiguration {
             List<String> prefix = new ArrayList<>();
             if(this.properties.isDev()) {
                 try {
-                    prefix.add(MacAddressUtil.getMacAddress(null));
+                    prefix.add(MacAddressUtil.getMachineNetworkFlag(null));
                 } catch (SocketException | UnknownHostException e) {
                     log.warn("get mac add error:{}", e.getMessage());
                 }
