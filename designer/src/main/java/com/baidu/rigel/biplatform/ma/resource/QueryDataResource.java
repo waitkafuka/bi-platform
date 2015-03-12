@@ -1460,6 +1460,7 @@ public class QueryDataResource extends BaseResource {
             if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
                 logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
             }
+            logger.info ("[INFO] row length = " + logicModel.getRows ().length);
             if (logicModel.getRows ().length >= 2) {
                 Object breadCrum = areaContext.getParams ().get("bread_key");
                 if (breadCrum == null) {
