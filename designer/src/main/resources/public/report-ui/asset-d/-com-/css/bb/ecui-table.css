@@ -105,7 +105,10 @@
     background: #E7F9FE;
 }
 .ui-table-row-hover .ui-table-ccell {
-    /*background: #FFF;*/
+    background: #F0F4F6;
+}
+.ui-table-row-hover .ui-table-rowhcell {
+    background: #F0F4F6;
 }
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
