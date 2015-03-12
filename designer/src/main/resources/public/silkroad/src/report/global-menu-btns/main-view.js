@@ -18,7 +18,8 @@ define([
             events: {
                 'click .j-global-component': 'shiftMenu',
                 'click .j-button-skin': 'shiftMenu',
-                'click .j-skin-btn': 'chanceTheme'
+                'click .j-skin-btn': 'chanceTheme',
+                'click .reportName': 'editReportName'
                 //'click .j-button-line': 'referenceLine'
             },
             /**
@@ -32,8 +33,28 @@ define([
                 });
                 this.model = new MenuMainModel();
                 this.canvasView = option.canvasView;
+                // 工具条按钮区域按钮添加
+                this.$el.find('.j-global-btn').html(this.createBtns());
                 // 工具条菜单区域菜单添加
                 this.$el.find('.j-global-menu').html(ComponentMenuTemplate.render());
+                // 初始化报表名字
+                this.$el.find('.reportName').ready(function () {
+                    $.ajax({
+                        type : "GET",
+                        dataType : "json",
+                        cache : false,
+                        timeout  : 10000,
+                        url : "reports/" + window.dataInsight.main.id+ "/name",
+                        success : function(data){
+                            if (data["status"] === 0) {
+                                var reportName = data["data"].name;
+                                $('.reportName').html(reportName);
+                            }
+                        }
+                    });
+                });
+                // 初始化修改报表名称操作
+                this.changeReportName();
             },
 
             /**
@@ -78,14 +99,14 @@ define([
 //                    'href', 'asset/'
 //                    + type
 //                    + '/css/-di-product-debug.css');
-//                $('.skin-menu').hide();
+                $('.skin-menu').hide();
 
                 // 更换线上link里面的路径
                 $('.link-skin').attr(
                     'href', 'asset/'
                         + type
                         + '/css/-di-product-min.css');
-                $('.skin-menu').hide();
+//                $('.skin-menu').hide();
                 // 换肤后刷新报表，完善ecui控件样式更换
                 this.canvasView.showReport();
             },
@@ -127,6 +148,129 @@ define([
                     }
                 }
                 **/
+            },
+
+            // 参数区域按钮属性
+            btnBox: [
+                {
+                    id: 'para',
+                    picName: 'para',
+                    title: '参数维度设置',
+                    className: 'global-para'
+                },
+                {
+                    id: 'component',
+                    picName: 'component',
+                    title: '组件工具箱',
+                    className: 'global-component'
+                },
+                {
+                    id: 'save-report',
+                    picName: 'save',
+                    title: '保存',
+                    className: 'button-save-report'
+                },
+                {
+                    id: 'close-report',
+                    picName: 'close',
+                    title: '关闭',
+                    className: 'button-close-report button-right'
+                },
+                {
+                    id: 'preview-report',
+                    picName: 'preview',
+                    title: '预览',
+                    className: 'button-preview-report'
+                },
+                {
+                    id: 'skin-report',
+                    picName: 'skin',
+                    title: '换肤设置',
+                    className: 'button-skin'
+                }
+                /*
+                {
+                    id: 'reference-line',
+                    picName: 'line',
+                    title: '参考线设置',
+                    className: 'button-line'
+                }
+                */
+            ],
+            /**
+             * 创建按钮函数
+             */
+            createBtns: function () {
+                var div = '';
+                var btnBox = this.btnBox || [];
+                if (btnBox.length == 0) {
+                    div = '';
+                }
+                else {
+                    for(var i = 0; i < btnBox.length; i ++) {
+                        div += (
+                            "<div class='global-setting-btns j-" +
+                            btnBox[i].className +  "'" +
+                            "title='" + btnBox[i].title + "'" + "id='" +
+                            btnBox[i].id + "'>" +
+                            "<img src='../silkroad/src/css/img/global-btns/btn_" + btnBox[i].picName +".png' />" +
+                            "</div>" );
+                    }
+                }
+                // 更改名称区域
+                div += (
+                    '<div class="reportNameBox"><div class="reportName"></div>'
+                    + '<input type="text" class="reportSetName"/></div>'
+                    );
+                return div;
+            },
+            /**
+             * 更改报表名称切换为编辑状态
+             */
+            editReportName: function () {
+                var $reportSetName = $('.reportSetName');
+                var $reportName = $('.reportName');
+                $reportSetName.val($reportName.html());
+                $reportName.hide();
+                $reportSetName.show();
+            },
+            /**
+             * 更改报表名称提交修改
+             */
+            changeReportName: function () {
+                var $reportSetName = $('.reportSetName');
+                var $reportName = $('.reportName');
+                // 保存原始报表名称
+                var originalReportName = $reportName.text();
+                var newReportname = null;
+                $reportSetName.keydown(function (ev) {
+                    var oEvent = ev || event;
+                    // 回车提交修改
+                    if (oEvent.keyCode == 13) {
+                        // 获取更改后的新名称
+                        newReportname = $reportSetName.val();
+                        $.ajax({
+                            type : "POST",
+                            dataType : "json",
+                            cache : false,
+                            timeout  : 10000,
+                            url : "reports/" + window.dataInsight.main.id+ "/name/" + newReportname,
+                            success : function(data){
+                                // 根据返回值进行判断
+                                if (data["status"] === 0) {
+                                    $reportName.html(newReportname).show();
+                                    $reportSetName.hide();
+                                    alert(data["statusInfo"]);
+                                }
+                                else {
+                                    $reportName.html(originalReportName).show();
+                                    $reportSetName.hide();
+                                    alert(data["statusInfo"]);
+                                }
+                            }
+                        });
+                    }
+                });
             }
 
         });

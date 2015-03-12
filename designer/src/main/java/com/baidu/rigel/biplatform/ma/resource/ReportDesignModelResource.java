@@ -56,12 +56,14 @@ import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelManageServi
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.ExtendAreaUtils;
+import com.baidu.rigel.biplatform.ma.report.utils.NameCheckUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.NameCheckCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DragRuleCheckUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
+import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -235,11 +237,14 @@ public class ReportDesignModelResource extends BaseResource {
             String productLine = ContextManager.getProductLine();
             String tmpKey = productLine + "_" + targetName;
             try {
-                if (nameCheckCacheManager.existsReportName(targetName)
-                        || reportDesignModelService.isNameExist(targetName)) {
-                    rs = ResourceUtils.getErrorResult("Repeated Name ! ", 1);
+//                if (nameCheckCacheManager.existsReportName(targetName)
+//                        || reportDesignModelService.isNameExist(targetName)) {
+//                    rs = ResourceUtils.getErrorResult("Repeated Name ! ", 1);
+//                }
+//                nameCheckCacheManager.useReportName(targetName);
+                if (reportDesignModelService.isNameExist (targetName)) {
+                    return ResourceUtils.getErrorResult("名称已经存在,请更换名称 ! ", 1);
                 }
-                nameCheckCacheManager.useReportName(targetName);
                 ReportDesignModel tmp = reportDesignModelService.copyModel(id, targetName);
                 if (tmp != null) {
                     reportModelCacheManager.updateReportModelToCache(tmp.getId(), tmp);
@@ -273,17 +278,17 @@ public class ReportDesignModelResource extends BaseResource {
             return rs;
         }
         
-        if (name.length() > 255) {
+        if (!NameCheckUtils.checkName (name)) {
             rs.setStatus(1);
-            rs.setStatusInfo("名称太长");
-            logger.debug("name too length");
+            rs.setStatusInfo("名称格式非法");
+            logger.debug("name too length ：" + name);
             return rs;
         }
         
         if (reportDesignModelService.isNameExist(name)) {
-            logger.info("name already exist");
+            logger.info("name already exist: " + name);
             rs.setStatus(1);
-            rs.setStatusInfo("name already exist");
+            rs.setStatusInfo("名称已经存在");
             return rs;
         }
         ReportDesignModel model = new ReportDesignModel();
@@ -292,13 +297,13 @@ public class ReportDesignModelResource extends BaseResource {
         model.setName(name);
         // 检索cache中报表是否重名，如果重名报错，否则在cache中存储暂态的模型
         
-        if (nameCheckCacheManager.existsReportName(name)) {
-            logger.info("name already exist");
-            rs.setStatus(1);
-            rs.setStatusInfo("name already exist");
-            return rs;
-        }
-        nameCheckCacheManager.useReportName(name);
+//        if (nameCheckCacheManager.existsReportName(name)) {
+//            logger.info("name already exist");
+//            rs.setStatus(1);
+//            rs.setStatusInfo("名称已经存在");
+//            return rs;
+//        }
+//        nameCheckCacheManager.useReportName(name);
         
         logger.info("create report : " + rs.toString());
         reportModelCacheManager.updateReportModelToCache(id, model);
@@ -383,8 +388,11 @@ public class ReportDesignModelResource extends BaseResource {
         
         try {
             model.setPersStatus(true); 
-//            model.setJsonContent(request.getParameter("json"));
-//            model.setVmContent(request.getParameter("vm"));
+            if (reportDesignModelService.isNameExist (model.getName (), model.getId ())) {
+                rs.setStatus (1);
+                rs.setStatusInfo ("名称已经存在");
+                return rs;
+            }
             model = reportDesignModelService.saveOrUpdateModel(model);
             if (model != null) { 
                 reportModelCacheManager.updateReportModelToCache(id, model);
@@ -1405,5 +1413,70 @@ public class ReportDesignModelResource extends BaseResource {
             return "error";
         }
         return "ok";
+    }
+    
+    /**
+     * 查询报表模型
+     * 
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/{id}/name", method = { RequestMethod.GET })
+    public ResponseResult queryReportNameById(@PathVariable("id") String id, HttpServletRequest request) {
+        ReportDesignModel model = null;
+        try {
+            model = reportModelCacheManager.getReportModel(id);
+        } catch (Exception e) {
+        }
+        if (model != null) {
+            logger.info("get model from cache");
+        } else {
+            model = reportDesignModelService.getModelByIdOrName(id, false);
+        }
+        Map<String, String> datas = Maps.newHashMap ();
+        datas.put ("name", model.getName ());
+        ResponseResult rs = getResult(SUCCESS, "can not get report name", datas);
+        logger.info("query operation rs is : " + rs.toString());
+        return rs;
+    }
+    
+    /**
+     * 查询报表模型
+     * 
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/{id}/name/{name}", method = { RequestMethod.POST })
+    public ResponseResult updateReportName(@PathVariable("id") String id, HttpServletRequest request,
+            @PathVariable("name") String name) {
+        // check name
+        if (!NameCheckUtils.checkName (name)) {
+            return ResourceUtils.getErrorResult ("名称非法", ResponseResult.FAILED);
+        }
+        if (reportDesignModelService.isNameExist (name, id)) {
+            return ResourceUtils.getErrorResult ("报表名称已经存在", ResponseResult.FAILED);
+        }
+        ReportDesignModel model = null;
+        try {
+            model = reportModelCacheManager.getReportModel(id);
+        } catch (Exception e) {
+            logger.warn (e.getMessage (), e);
+        }
+        boolean modelInCache =false;
+        if (model != null) {
+            logger.info("get model from cache");
+            modelInCache = true;
+        } else {
+            model = reportDesignModelService.getModelByIdOrName(id, false);
+        }
+        model.setName (name);
+        boolean rs = reportDesignModelService.updateReportModel(model, modelInCache);
+        if (rs ) {
+            if (modelInCache) {
+                reportModelCacheManager.updateReportModelToCache (id, model);
+            }
+            return ResourceUtils.getCorrectResult ("修改成功,需重新发布才能影响生产环境", null);
+        }
+        return ResourceUtils.getErrorResult ("修改失败", 1) ;
     }
 }

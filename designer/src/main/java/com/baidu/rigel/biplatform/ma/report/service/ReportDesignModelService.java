@@ -136,4 +136,19 @@ public interface ReportDesignModelService {
      */
     List<String> lsReportWithDsId(String id);
 
+    /**
+     * 更新报表名称
+     * @param model
+     * @param modelInCache
+     */
+    boolean updateReportModel(ReportDesignModel model, boolean modelInCache);
+
+    /**
+     * 
+     * @param name
+     * @param id
+     * @return boolean
+     */
+    boolean isNameExist(String name, String id);
+
 }

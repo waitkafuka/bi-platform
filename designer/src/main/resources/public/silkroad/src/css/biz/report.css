@@ -819,3 +819,23 @@
     display: none;
     float: left;
 }
+/* 修改报表名称区域展示框样式 */
+.reportName {
+    height: 20px;
+    margin: 5px 0;
+    background: #e4e4e4;
+    float: right;
+    font-size: 14px;
+    width: 150px;
+}
+/* 修改报表名称输入框样式 */
+.reportSetName {
+    height: 20px;
+    margin: 5px 0;
+    background: #e4e4e4;
+    float: right;
+    display: none;
+    border: 0 solid #e4e4e4;
+    font-size: 14px;
+    width: 150px;
+}

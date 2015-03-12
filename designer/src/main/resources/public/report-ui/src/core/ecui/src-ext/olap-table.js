@@ -636,7 +636,7 @@
         // 如果是维度列，就不显示tooltip图标
         if (!wrap.colSpan) {
             tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</span>';
-            dragStr += '<span class="' + type + '-head-drag"></span>';
+            //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr); // 列头文本
@@ -687,25 +687,24 @@
         if (rowDefine) {
             var rowDefines = rowDefine[y];
             var rDefLen = rowDefines.length;
+            // 多个维度时对左侧表头背景色的处理
             if (rDefLen > 1) {
-                if (rowDefines[0].indent >= 1) {
+                if (rowDefines[0].indent != 1) {
                     classStr.push(type + '-expand-background');
-                }
-                else {
-                    if (wrap.indent !== 0) {
-                        classStr.push(type + '-expand-background');
-                    }
-                    else {
-                        classStr.push(type + '-expand-font');
+                    if (rowDefines[0].indent < 1) {
+                        if (wrap.indent == 0) {
+                            classStr.push(type + '-expand-font');
+                        }
                     }
                 }
             }
+            // 单独维度时对左侧表头背景色的处理
             else {
-                // 如果不是第一层级，全部加底色
-                if (rowDefines[0].indent >= 1) {
+                if (rowDefines[0].indent > 1) {
                     classStr.push(type + '-expand-background');
                 }
-                else {
+                // 单独维度时对左侧表头汇总行加粗
+                else if (rowDefines[0].indent == 0) {
                     classStr.push(type + '-expand-font');
                 }
             }
@@ -746,26 +745,25 @@
         if (rowDefine) {
             var rowDefines = rowDefine[y];
             var rDefLen = rowDefines.length;
+            // 多个维度时对内容区域背景色的处理
             if (rDefLen > 1) {
-                if (rowDefines[0].indent >= 1) {
+                if (rowDefines[0].indent != 1) {
+                    // 背景色
                     classStr.push(type + '-expand-background');
-                }
-                else {
-                    if (rowDefines[rDefLen - 1].expand !== true) {
-                        classStr.push(type + '-expand-background');
-                    }
-                    else {
-                        classStr.push(type + '-expand-font');
+                    if (rowDefines[0].indent < 1) {
+                        if (rowDefines[rDefLen - 1].expand == true) {
+                            classStr.push(type + '-expand-font');
+                        }
                     }
                 }
-
             }
+            // 单独维度时对内容区域背景色的处理
             else {
-                // 如果不是第一层级，全部加底色
-                if (rowDefines[0].indent >= 1) {
+                if (rowDefines[0].indent > 1) {
                     classStr.push(type + '-expand-background');
                 }
-                else {
+                // 单独维度时对内容区域汇总行加粗
+                else if (rowDefines[0].indent == 0) {
                     classStr.push(type + '-expand-font');
                 }
             }
@@ -879,7 +877,7 @@
                     + type + '-tree-item">',
                     '<div class="' + clz + '"></div>',
                 value,
-                '</div>',
+                '</div>'
             ].join('');
         }
         else if (indentStyle) {

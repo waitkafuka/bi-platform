@@ -28,6 +28,10 @@
     </build>
     
     <dependencies>
+    	<dependency> 
+            <groupId>com.baidu.rigel.biplatform</groupId>
+            <artifactId>cache</artifactId>
+        </dependency>
     	<dependency>
 			<groupId>com.baidu.rigel.biplatform</groupId>
 			<artifactId>fileserver</artifactId>
@@ -75,11 +79,6 @@
 	        <groupId>mysql</groupId>
 	        <artifactId>mysql-connector-java</artifactId>
 	    </dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-all</artifactId>
-			<version>5.0.0.Alpha1</version>
-		</dependency>
 		<dependency>
 		    <groupId>commons-collections</groupId>
 		    <artifactId>commons-collections</artifactId>

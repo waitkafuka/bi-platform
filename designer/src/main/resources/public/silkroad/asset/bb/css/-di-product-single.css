@@ -225,6 +225,7 @@
     background-color: rgba(255, 255, 255, 0);
     color: #3C78A2;
     padding: 0;
+    float: right;
 }
 .ui-download-btn-hover {
     background-color: rgba(255, 255, 255, 0);
@@ -262,6 +263,14 @@
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
+    color: black;
+}
+.ui-download-btn .ui-button-text:before {
+    content: ' ';
+    font-size: 0;
+    width: 10px;
+    display: inline-block;
+    height: 100%;
 }
 /** 
  * select控件
@@ -432,9 +441,62 @@
     /*background: #E4EAFA;*/
     color: #000;
 }
-
 .ui-multi-select-options .ui-item{
     border-bottom: 1px solid #E7ECEE;
+}
+
+/* 设定滚动条外部父框体 */
+.ui-select-options .ui-vscrollbar {
+    width: 15px;
+    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 0;
+}
+.ui-multi-select-options .ui-vscrollbar {
+    width: 15px;
+    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 30px 0 0 0;
+}
+/* 滚动条上部按钮 */
+.ui-multi-select-options .ui-vscrollbar-prev,
+.ui-select-options .ui-vscrollbar-prev {
+    background-color: #FFF;
+}
+/* 下拉框滚动条样式*/
+.ui-multi-select-options .ui-vscrollbar .ui-scrollbar-thumb,
+.ui-select-options .ui-vscrollbar .ui-scrollbar-thumb {
+    width: 5px;
+    border-radius: 7px;
+    background-color: #FFF;
+    overflow: visible;
+}
+/* 下拉框滚动条替换元素样式添加 */
+.ui-multi-select-options .ui-vscrollbar .ui-scrollbar-thumb:after,
+.ui-select-options .ui-vscrollbar .ui-scrollbar-thumb:after {
+    content: ' ';
+    font-size: 0;
+    width: 6px;
+    position: absolute;
+    display: inline-block;
+    left: 4px;
+    height: 100%;
+    background-color: #b5b5b5;
+    border-radius: 5px;
+    z-index: 3;
+
+}
+/* 设定下拉框上部按钮按钮样式 */
+/*.ui-multi-select-options .ui-vscrollbar .ui-vscrollbar-prev,*/
+.ui-select-options .ui-vscrollbar .ui-vscrollbar-prev {
+    width: 20px;
+    height: 0;
+    background: rgba(255, 255, 255, 0);
+}
+
+.ui-multi-select-selectall {
+    background: white;
+    z-index: 99
 }
 /**
  * 左侧菜单
@@ -842,7 +904,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     cursor: default;
     padding: 0px;
     margin: 0px;
-    background-color: #D8D8D8;
+    /*background-color: #D8D8D8;*/
 }
 .ui-vscrollbar .ui-button-hover {
     padding: 0px;
@@ -867,7 +929,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-vscrollbar .ui-scrollbar-thumb {
     width: 7px;
-    /*border-top: 1px solid #F0F0F0;*/
+    border-top: 1px solid #F0F0F0;
     border-bottom: 1px solid #F0F0F0;
     background: #D8D8D8;
     border-left: 0 solid white;
@@ -3931,7 +3993,7 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 3px 17px 0px 0;
+    padding: 3px 0 0 0;
     overflow: hidden;
     line-height: 18px;
 }
@@ -3942,6 +4004,7 @@ div.di-dim-level-find-msg span{
     width: auto;
     font-size: 12px;
     float: left;
+    margin-left: 20px;
 }
 .di-table-count-num {
     font-size: 12px;
@@ -3953,7 +4016,7 @@ div.di-dim-level-find-msg span{
     vertical-align: middle;
 }
 .di-table-down {
-    width: 128px;
+    width: auto;
     color: #000;
     float: right;
     vertical-align: bottom;
@@ -3966,7 +4029,7 @@ div.di-dim-level-find-msg span{
     vertical-align: bottom;
 }
 .di-table-down-btn {
-    float: left;
+    float: right;
 }
 /**
  * @name                      :roport-ui针对silkroad所做的的css适配

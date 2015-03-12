@@ -137,3 +137,8 @@
 .ui-multi-select-item-focus {
     background: #E4EAFA;
 }
+
+.ui-multi-select-selectall {
+    background: white;
+    z-index: 99
+}

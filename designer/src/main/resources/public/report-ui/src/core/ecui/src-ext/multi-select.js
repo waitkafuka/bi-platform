@@ -73,7 +73,7 @@ _eInput - 多选项的INPUT对象
             },
             function(el, options) {
                 var values;
-
+                    me = this;
                 if (options.maxlength) {
                     this._nTextLen = options.maxlength;
                 }
@@ -87,7 +87,7 @@ _eInput - 多选项的INPUT对象
                     this._nMaxSelected = options.maxSelected;
                 }
                 else if (options.selectAllButton) {
-                    this.add('全部', 0, {selectAllButton: true});
+                    this.add('全选', 0, {selectAllButton: true});
                     this._bSelectAllBtn = true;
                 }
                 if (options.tip) {
@@ -104,6 +104,18 @@ _eInput - 多选项的INPUT对象
                 }
 
                 this._eInput.disabled = true;
+
+                core.addEventListener(this._uOptions, 'scrollimmediately', handleScroll);
+                // 当滚动条滚动后，如果有全选，就始终浮在最上面
+                function handleScroll(event) {
+                    var items = me.getItems();
+                    var selectAllEl = items[0]._eBody;
+                    if (me._bSelectAllBtn) {
+                        // TODO:为items[0]添加样式
+                        selectAllEl.style.top = this._uVScrollbar.getValue() + 'px';
+                        core.dom.addClass(selectAllEl, 'ui-multi-select-selectall');
+                    }
+                }
             }
         ),
         UI_MULTI_SELECT_CLASS = UI_MULTI_SELECT.prototype,
@@ -210,6 +222,14 @@ _eInput - 多选项的INPUT对象
     }
 
     extend(UI_MULTI_SELECT_CLASS, UI_ITEMS);
+
+    var originRemoveMethod = UI_MULTI_SELECT_CLASS.remove;
+    UI_MULTI_SELECT_CLASS.remove = function () {
+        if (this._bSelectAllBtn && this.getItems().length <= 1) {
+            return null;
+        }
+        return originRemoveMethod.apply(this, arguments);
+    };
 
     /**
      * 鼠标单击控件事件的默认处理。
@@ -442,10 +462,18 @@ _eInput - 多选项的INPUT对象
     };
 
     UI_MULTI_SELECT_CLASS.getValue = function () {
-        var items = this.getSelected(),
+        var selectItems = this.getSelected(),
+            items,
             res = [], i, len;
-        for (i = 0, len = items.length; i < len; i++) {
-            if (!items[i]._bSelectAllBtn) {
+        for (i = 0, len = selectItems.length; i < len; i++) {
+            if (!selectItems[i]._bSelectAllBtn) {
+                res.push(selectItems[i]._eInput.value);
+            }
+        }
+        // 如果有全选按钮，且一个都没选中，那么传的值为所有的值
+        if (this._bSelectAllBtn && res.length === 0) {
+            items = this.getItems();
+            for (i = 1, len = items.length; i < len; i++) {
                 res.push(items[i]._eInput.value);
             }
         }

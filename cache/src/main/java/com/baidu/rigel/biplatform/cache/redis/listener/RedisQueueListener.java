@@ -20,13 +20,15 @@ import java.util.EventObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
-import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 
 /** 
  *  需要自己启动bean
@@ -34,7 +36,7 @@ import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
  * @version  2015年2月27日 
  * @since jdk 1.8 or after
  */
-public class RedisQueueListener implements ApplicationListener<ContextRefreshedEvent> {
+public class RedisQueueListener implements ApplicationListener<ContextRefreshedEvent>, ApplicationContextAware {
     
     
     /** 
@@ -46,6 +48,8 @@ public class RedisQueueListener implements ApplicationListener<ContextRefreshedE
     @Autowired(required=false)
     private StoreManager storeManager;
     
+    private ApplicationContext applicationContext;
+    
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         new Thread(() -> {
@@ -54,7 +58,7 @@ public class RedisQueueListener implements ApplicationListener<ContextRefreshedE
                     Thread.sleep(1000);
                     EventObject item = storeManager.getNextEvent();
                     if(item != null) {
-                        ApplicationContextHelper.getContext().publishEvent((ApplicationEvent) item);
+                        applicationContext.publishEvent((ApplicationEvent) item);
                         log.info("publish topic event : {} success", item);
                     }
                 } catch (Exception e) {
@@ -63,6 +67,11 @@ public class RedisQueueListener implements ApplicationListener<ContextRefreshedE
             }
         }).start();;
         log.info("start redis queue thread success.");
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 
 }

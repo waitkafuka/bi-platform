@@ -153,8 +153,6 @@ define([
                         parentView: that
                     });
                 });
-                // 工具条按钮区域按钮添加
-                this.$el.find('.j-global-btn').html((new BtnsView).createBtns());
                 // FIXME:临时使用，重构时，逻辑干掉
                 $(document).mousedown(function (e) {
                     // 如果触发元素，不属于组件添加按钮区域
