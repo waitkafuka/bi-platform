@@ -222,9 +222,10 @@
                     var opt = {
                         rName: radioName,
                         rId: radioId,
-                        checked: checkAbr
+                        checked: checkAbr,
+                        text: allMeasures[i]
                     };
-                    var tpl = '<input type="radio" name="#{rName}" id="#{rId}" #{checked} /><label for="#{rId}">text</label>';
+                    var tpl = '<input type="radio" name="#{rName}" id="#{rId}" #{checked} /><label for="#{rId}">#{text}</label>';
                     measureHtml.push(stringTemplate(tpl, opt));
                 }
                 me._eHeader.innerHTML = stringTemplate(
