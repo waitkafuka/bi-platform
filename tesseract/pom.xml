@@ -13,7 +13,7 @@
 	<groupId>com.baidu.rigel.biplatform</groupId>
 	<artifactId>tesseract</artifactId>
 	<packaging>jar</packaging>
- 
+
 	<properties>
 		<hazelcast.version>3.2.3</hazelcast.version>
 		<java.version>1.8</java.version>
@@ -29,6 +29,10 @@
 	</build>
 
 	<dependencies>
+	    <dependency>
+			<groupId>com.baidu.rigel.biplatform</groupId>
+			<artifactId>cache</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.baidu.rigel.biplatform</groupId>
 			<artifactId>model</artifactId>
@@ -119,14 +123,6 @@
 		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.baidu.rigel.biplatform</groupId>
-			<artifactId>cache</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-redis</artifactId>
 		</dependency>
 	</dependencies>
 

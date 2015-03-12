@@ -263,6 +263,7 @@
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
+    color: black;
 }
 .ui-download-btn .ui-button-text:before {
     content: ' ';
