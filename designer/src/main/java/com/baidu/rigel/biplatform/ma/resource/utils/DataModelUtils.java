@@ -879,20 +879,19 @@ public final class DataModelUtils {
             throw new IllegalStateException("can not found head field with row number " + rowNum);
         }
         realRowHead.getExtInfos().put(EXT_INFOS_MEM_EXPAND, false);
-        if (!CollectionUtils.isEmpty (newDataModel.getRowHeadFields ())) {
-            realRowHead.setChildren(newDataModel.getRowHeadFields().get(0).getChildren());
-            realRowHead.getChildren().forEach(tmp -> {
-                tmp.setNodeUniqueName(null);
-                tmp.setParentLevelField(realRowHead.getParentLevelField());
-                tmp.setParent(realRowHead);
-                tmp.getNodeUniqueName();
-            });
-            realRowHead.setNodeList(newDataModel.getRowHeadFields().get(0).getNodeList());
-            realRowHead.getNodeList().forEach(tmp -> {
-                tmp.setNodeUniqueName(null);
-                tmp.getNodeUniqueName();
-            });
-        }
+        
+        realRowHead.setChildren(newDataModel.getRowHeadFields().get(0).getChildren());
+        realRowHead.getChildren().forEach(tmp -> {
+            tmp.setNodeUniqueName(null);
+            tmp.setParentLevelField(realRowHead.getParentLevelField());
+            tmp.setParent(realRowHead);
+            tmp.getNodeUniqueName();
+        });
+        realRowHead.setNodeList(newDataModel.getRowHeadFields().get(0).getNodeList());
+        realRowHead.getNodeList().forEach(tmp -> {
+            tmp.setNodeUniqueName(null);
+            tmp.getNodeUniqueName();
+        });
         realRowHead.setNodeUniqueName(null);
         realRowHead.getNodeUniqueName();
         List<List<BigDecimal>> rowBaseData = transData(dataModel.getColumnBaseData());
