@@ -260,12 +260,12 @@ define([
                                 if (data["status"] === 0) {
                                     $reportName.html(newReportname).show();
                                     $reportSetName.hide();
-                                    alert("成功")
+                                    alert(data["statusInfo"]);
                                 }
                                 else {
                                     $reportName.html(originalReportName).show();
                                     $reportSetName.hide();
-                                    alert("失败")
+                                    alert(data["statusInfo"]);
                                 }
                             }
                         });
