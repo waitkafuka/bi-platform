@@ -56,12 +56,14 @@ import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelManageServi
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.ExtendAreaUtils;
+import com.baidu.rigel.biplatform.ma.report.utils.NameCheckUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.NameCheckCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DragRuleCheckUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
+import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 
 /**
@@ -1405,5 +1407,67 @@ public class ReportDesignModelResource extends BaseResource {
             return "error";
         }
         return "ok";
+    }
+    
+    /**
+     * 查询报表模型
+     * 
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/{id}/name", method = { RequestMethod.GET })
+    public ResponseResult queryReportNameById(@PathVariable("id") String id, HttpServletRequest request) {
+        ReportDesignModel model = null;
+        try {
+            model = reportModelCacheManager.getReportModel(id);
+        } catch (Exception e) {
+        }
+        if (model != null) {
+            logger.info("get model from cache");
+        } else {
+            model = reportDesignModelService.getModelByIdOrName(id, false);
+        }
+        Map<String, String> datas = Maps.newHashMap ();
+        datas.put ("name", model.getName ());
+        ResponseResult rs = getResult(SUCCESS, "can not get report name", datas);
+        logger.info("query operation rs is : " + rs.toString());
+        return rs;
+    }
+    
+    /**
+     * 查询报表模型
+     * 
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/{id}/name/{name}", method = { RequestMethod.POST })
+    public ResponseResult updateReportName(@PathVariable("id") String id, HttpServletRequest request,
+            @PathVariable("name") String name) {
+        // check name
+        if (!NameCheckUtils.checkName (name)) {
+            return ResourceUtils.getErrorResult ("名称非法", ResponseResult.FAILED);
+        }
+        ReportDesignModel model = null;
+        try {
+            model = reportModelCacheManager.getReportModel(id);
+        } catch (Exception e) {
+            logger.warn (e.getMessage (), e);
+        }
+        boolean modelInCache =false;
+        if (model != null) {
+            logger.info("get model from cache");
+            modelInCache = true;
+        } else {
+            model = reportDesignModelService.getModelByIdOrName(id, false);
+        }
+        model.setName (name);
+        if (modelInCache) {
+            reportModelCacheManager.updateReportModelToCache (id, model);
+        }
+        boolean rs = reportDesignModelService.updateReportModel(model, modelInCache);
+        if (rs ) {
+            return ResourceUtils.getCorrectResult ("修改成功,需重新发布才能影响生产环境", null);
+        }
+        return ResourceUtils.getErrorResult ("修改失败", 1) ;
     }
 }

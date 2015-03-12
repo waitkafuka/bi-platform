@@ -18,8 +18,6 @@ package com.baidu.rigel.biplatform.tesseract.resultset;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 
 /**
@@ -61,8 +59,8 @@ public class Aggregate {
                 if(src1 == null) {
                     return src2;
                 }
-                BigDecimal arg1 = new BigDecimal(src1.toString());
-                BigDecimal arg2 = new BigDecimal(src2.toString());
+                BigDecimal arg1 = src1 instanceof BigDecimal ? (BigDecimal) src1 : new BigDecimal(src1.toString());
+                BigDecimal arg2 = src2 instanceof BigDecimal ? (BigDecimal) src2 : new BigDecimal(src2.toString());
                 return arg1.add(arg2);
             case AGGREGATE_COUNT:
                 if(src1 == null || src2 == null) {

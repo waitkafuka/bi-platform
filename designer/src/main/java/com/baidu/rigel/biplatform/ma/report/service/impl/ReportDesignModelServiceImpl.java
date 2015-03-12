@@ -39,6 +39,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
@@ -494,6 +495,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         area.setOtherSetting(setting);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> lsReportWithDsId(String id) {
         String[] modelFileList = null;
@@ -515,6 +519,45 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             }
         }
         return rs;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean updateReportModel(ReportDesignModel model, boolean modelInCache) {
+        ReportDesignModel persModel = DeepcopyUtils.deepCopy (model);
+        // 如果当前model在编辑状态，需要更新持久化的model的name
+        if (this.getModelByIdOrName (model.getName (), false) != null) {
+            return false;
+        }
+        if (modelInCache) {
+            persModel = getModelByIdOrName (model.getId (), false);
+            persModel.setName (model.getName ());
+        }
+        try {
+            this.deleteModel (model, true);
+            this.saveOrUpdateModel (persModel);
+        } catch (ReportModelOperationException e) {
+            logger.error (e.getMessage (), e);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * TODO
+     * @param model
+     * @param removeFromDisk
+     */
+    private void deleteModel(ReportDesignModel model, boolean removeFromDisk) throws ReportModelOperationException {
+        try {
+            fileService.rm(generateDevReportLocation(model));
+            logger.info("delete report successfully");
+        } catch (FileServiceException e) {
+            logger.warn (e.getMessage (), e);
+            throw new ReportModelOperationException (e);
+        }
     }
     
 }

@@ -29,6 +29,10 @@
 	</build>
 
 	<dependencies>
+	    <dependency>
+			<groupId>com.baidu.rigel.biplatform</groupId>
+			<artifactId>cache</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.baidu.rigel.biplatform</groupId>
 			<artifactId>model</artifactId>

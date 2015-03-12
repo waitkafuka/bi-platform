@@ -58,6 +58,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
@@ -324,14 +325,57 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     private QueryAction generateQueryAction(Schema schema, String cubeId,
             LogicModel targetLogicModel, Map<String, Object> context,
             String areaId, boolean needTimeRange, ReportDesignModel reportModel) {
+        final Cube cube = schema.getCubes().get(cubeId);
+        if (cube == null) {
+            return null;
+        }
         if (targetLogicModel == null) {
             return null;
         }
         QueryAction action = new QueryAction();
-        Cube oriCube = null;
         action.setExtendAreaId(areaId);
+        
+        /**
+         * TODO 生成一个独立的id
+         */
+        String id = UuidGeneratorUtils.generate();
+        action.setId(id);
+        
+        /**
+         * TODO 生成path
+         */
+        String queryPath = "";
+        action.setQueryPath(queryPath);
+        
+        Cube oriCube4QuestionModel = genCube4QuestionModel (schema, cubeId,
+                targetLogicModel, context, areaId, reportModel);
+        
+        Map<Item, Object> columns = genereateItemValues(schema,
+                cubeId, targetLogicModel.getColumns(), context, needTimeRange, oriCube4QuestionModel);
+        action.setColumns(columns);
+        
+        Map<Item, Object> rows = genereateItemValues(schema,
+                cubeId, targetLogicModel.getRows(), context, needTimeRange, oriCube4QuestionModel);
+        action.setRows(rows);
+        
+        Map<Item, Object> slices = genereateItemValues(schema,
+                cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube4QuestionModel);
+        action.setSlices(slices);
+        
+        fillFilterBlankDesc (areaId, reportModel, action);
+        
+        QueryAction.MeasureOrderDesc orderDesc = genOrderDesc (targetLogicModel, context, action, cube);
+        logger.info ("[INFO] -------- order desc = " + orderDesc);
+        action.setMeasureOrderDesc(orderDesc);
+        return action;
+    }
+
+    private Cube genCube4QuestionModel(Schema schema, String cubeId,
+            LogicModel targetLogicModel, Map<String, Object> context,
+            String areaId, ReportDesignModel reportModel) {
+        Cube oriCube4QuestionModel = null;
         try {
-            oriCube = QueryUtils.getCubeWithExtendArea(reportModel, reportModel.getExtendById(areaId));
+            oriCube4QuestionModel = QueryUtils.getCubeWithExtendArea(reportModel, reportModel.getExtendById(areaId));
         } catch (QueryModelBuildException e) {
             logger.error(e.getMessage(), e);
             throw new RuntimeException(e.getMessage(), e);
@@ -351,8 +395,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             }
             
             // TODO 修正过滤条件
-            if (oriCube != null) {
-                oriCube.getDimensions().values().forEach(dim -> {
+            if (oriCube4QuestionModel != null) {
+                oriCube4QuestionModel.getDimensions().values().forEach(dim -> {
                     if (dim.getId().equals(key)) {
                         Item item = new Item();
                         if (targetLogicModel.getItemByOlapElementId(key) != null) {
@@ -371,74 +415,66 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 });
             }
         }
-        
-        Map<Item, Object> columns = genereateItemValues(schema,
-                cubeId, targetLogicModel.getColumns(), context, needTimeRange, oriCube);
-        action.setColumns(columns);
-        
-        Map<Item, Object> rows = genereateItemValues(schema,
-                cubeId, targetLogicModel.getRows(), context, needTimeRange, oriCube);
-        action.setRows(rows);
-        
-        Map<Item, Object> slices = genereateItemValues(schema,
-                cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube);
-        action.setSlices(slices);
-        
-        /**
-         * TODO 生成一个独立的id
-         */
-        String id = UuidGeneratorUtils.generate();
-        action.setId(id);
-        
-        /**
-         * TODO 生成path
-         */
-        String queryPath = "";
-        action.setQueryPath(queryPath);
-        
-        final Cube cube = schema.getCubes().get(cubeId);
-        if (cube == null) {
-            return null;
-        }
+        return oriCube4QuestionModel;
+    }
+
+    private MeasureOrderDesc genOrderDesc(LogicModel targetLogicModel,
+            Map<String, Object> context, QueryAction action, final Cube cube) {
         Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
-        QueryAction.MeasureOrderDesc orderDesc = null;
         if (!action.getColumns().isEmpty()) {
-            	if (topSet == null) {
+            if (topSet == null) {
                 Measure[] tmp = action.getColumns().keySet().stream().filter(item -> {
                     return cube.getMeasures().get(item.getOlapElementId()) != null;
                 }).map(item -> {
                     return cube.getMeasures().get(item.getOlapElementId());
                 }).toArray(Measure[] :: new);
                 if (tmp != null && tmp.length > 0 && context.get(Constants.NEED_LIMITED) == null) {
-                    orderDesc = new QueryAction.MeasureOrderDesc(
-                            tmp[0].getName(), 
-                            "NONE", 500);
+                    if ( isTimeDimOnFirstCol(action.getRows (), cube)) {
+                        return new MeasureOrderDesc(tmp[0].getName(), "NONE", 500);
+                    }
+                    return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
+                } else  if (context.get ("time_line") != null) { // 时间序列图
+                    return new MeasureOrderDesc (
+                            tmp[0].getName (), "NONE", Integer.MAX_VALUE);
                 } else {
                     context.remove(Constants.NEED_LIMITED);
+                    boolean isTimeDimOnFirstCol = isTimeDimOnFirstCol(action.getRows (), cube);
+                    if (isTimeDimOnFirstCol) {
+                        return new MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
+                    }
+                    return new MeasureOrderDesc(tmp[0].getName(), "DESC", Integer.MAX_VALUE);
                 }
-                
-                if (context.get("time_line") != null) { //时间序列图
-            		orderDesc = new QueryAction.MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
-            	}
             } else {
-            	if (context.get("time_line") != null) { //时间序列图
-            		orderDesc = new QueryAction.MeasureOrderDesc(
-            				measures.get(topSet.getMeasureId()).getName(), 
-            				"NONE", Integer.MAX_VALUE);
-            	} else {
-        			String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
-					orderDesc = new QueryAction.MeasureOrderDesc(
-        					measures.get(olapElementId).getName(), 
-        					topSet.getTopType().name(), topSet.getRecordSize());
-        		}
-//            	else {
-//        			orderDesc = new QueryAction.MeasureOrderDesc(
-//        					measures.get(topSet.getMeasureId()).getName(), 
-//        					topSet.getTopType().name(), topSet.getRecordSize());
-//            	}
+                	if (context.get("time_line") != null) { //时间序列图
+                    return  new MeasureOrderDesc(
+                            measures.get(topSet.getMeasureId()).getName(), "NONE", Integer.MAX_VALUE);
+                	}
+                String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
+                return  new MeasureOrderDesc(measures.get(olapElementId).getName(),
+                        topSet.getTopType().name(), topSet.getRecordSize());
             }
         }
+        return null;
+    }
+
+    private boolean isTimeDimOnFirstCol(Map<Item, Object> rows, Cube cube) {
+        if (rows  == null || rows.size () == 0) {
+            return false;
+        }
+        Item[] items = rows.keySet ().toArray (new Item[0]);
+        Dimension dim = cube.getDimensions ().get (items[0].getOlapElementId ());
+        return dim instanceof TimeDimension;
+    }
+
+    /**
+     * 
+     * @param areaId
+     * @param reportModel
+     * @param action
+     */
+    private void fillFilterBlankDesc(String areaId,
+            ReportDesignModel reportModel, QueryAction action) {
         ExtendArea area = reportModel.getExtendById(areaId);
         if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
@@ -448,8 +484,6 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 action.setFilterBlank(Boolean.valueOf(filterBlank.toString()));
             }
         }
-        action.setMeasureOrderDesc(orderDesc);
-        return action;
     }
     
     /**

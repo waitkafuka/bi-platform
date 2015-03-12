@@ -91,7 +91,7 @@
 .ui-multi-select-text {
     white-space: nowrap;
     display: block;
-    padding-left: 4px;
+    padding-left: 15px;
     line-height: 28px;
     /*border-top: 1px solid #F0F0F0;*/
     cursor: pointer;
@@ -125,6 +125,7 @@
 .ui-multi-select-options {
     border-left: 1px solid #CCC;
     border-right: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
     background: #FFF;
 }
 .ui-multi-select-item {
@@ -166,7 +167,54 @@
     /*background: #E4EAFA;*/
     color: #000;
 }
-
 .ui-multi-select-options .ui-item{
     border-bottom: 1px solid #E7ECEE;
+}
+
+/* 设定滚动条外部父框体 */
+.ui-select-options .ui-vscrollbar {
+    width: 15px;
+    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 0;
+}
+.ui-multi-select-options .ui-vscrollbar {
+    width: 15px;
+    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 30px 0 0 0;
+}
+/* 滚动条上部按钮 */
+.ui-multi-select-options .ui-vscrollbar-prev,
+.ui-select-options .ui-vscrollbar-prev {
+    background-color: #FFF;
+}
+/* 下拉框滚动条样式*/
+.ui-multi-select-options .ui-vscrollbar .ui-scrollbar-thumb,
+.ui-select-options .ui-vscrollbar .ui-scrollbar-thumb {
+    width: 5px;
+    border-radius: 7px;
+    background-color: #FFF;
+    overflow: visible;
+}
+/* 下拉框滚动条替换元素样式添加 */
+.ui-multi-select-options .ui-vscrollbar .ui-scrollbar-thumb:after,
+.ui-select-options .ui-vscrollbar .ui-scrollbar-thumb:after {
+    content: ' ';
+    font-size: 0;
+    width: 6px;
+    position: absolute;
+    display: inline-block;
+    left: 4px;
+    height: 100%;
+    background-color: #b5b5b5;
+    border-radius: 5px;
+    z-index: 3;
+
+}
+/* 设定下拉框上部按钮按钮样式 */
+.ui-select-options .ui-vscrollbar .ui-vscrollbar-prev {
+    width: 20px;
+    height: 0;
+    background: rgba(255, 255, 255, 0);
 }

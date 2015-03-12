@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -50,8 +49,9 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.netty.message.NettyAction;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage;
-import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
@@ -169,20 +169,21 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         }
         
         IndexWriter idxWriter = IndexWriterFactory.getIndexWriter(indexMsg.getIdxPath());
-        TesseractResultSet data=null;
+        SearchIndexResultSet data=null;
         
         if(indexMsg.getMessageHeader().getAction().equals(NettyAction.NETTY_ACTION_MOD)){
         	//索引修订
         	//S1:查找索引中存在的数据
-            Queue<ResultRecord> dataQ=((SearchResultSet)indexMsg.getDataBody()).getResultQ();
-            Iterator<ResultRecord> it=dataQ.iterator();
+//            Queue<ResultRecord> dataQ=((SearchResultSet)indexMsg.getDataBody()).getResultQ();
+            List<SearchIndexResultRecord> dataQ=((SearchIndexResultSet)indexMsg.getDataBody()).getDataList();
+            Iterator<SearchIndexResultRecord> it=dataQ.iterator();
             
-            LinkedList<ResultRecord> dataProcess=new LinkedList<ResultRecord>();
+            List<SearchIndexResultRecord> dataProcess=new ArrayList<SearchIndexResultRecord>();
             List<Query> deleteQueryList=new ArrayList<Query>();
             while(it.hasNext()){
-            	ResultRecord currRecord=it.next();
+                SearchIndexResultRecord currRecord=it.next();
             	//查询
-            	Query query=existInIndex(currRecord,indexMsg.getIdxPath(),indexMsg.getIdName());
+            	Query query=existInIndex(currRecord,indexMsg.getIdxPath(),indexMsg.getIdName(),((SearchIndexResultSet)indexMsg.getDataBody()).getMeta());
             	if(query!=null){
             		//如果存在，则从队列中删除
             		dataProcess.add(currRecord);
@@ -196,12 +197,12 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
             	idxWriter.commit();
             }
             //S3:设置需要重建索引的数据
-            data=new SearchResultSet(dataProcess);
+            data=new SearchIndexResultSet(((SearchIndexResultSet)indexMsg.getDataBody()).getMeta(),dataProcess.size());
         }
         
         
         if(data==null){
-        	data = indexMsg.getDataBody();
+        	data = (SearchIndexResultSet) indexMsg.getDataBody();
         }
         
         long currDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
@@ -273,12 +274,12 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
     
     
     
-    private Query existInIndex(ResultRecord currRecord,String idxPath,String queryField) throws Exception{    	
+    private Query existInIndex(SearchIndexResultRecord currRecord,String idxPath,String queryField,Meta meta) throws Exception{    	
     	Query result=null;
 		SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath,false);
 	    IndexSearcher is = null;
 	    is = searcherManager.acquire();
-	    Query query=new TermQuery(new Term(queryField,currRecord.getField(queryField).toString()));
+	    Query query=new TermQuery(new Term(queryField,currRecord.getField(meta.getFieldIndex(queryField)).toString()));
 	    TopDocs sresult=is.search(query, 1);
 	    if(sresult.totalHits>0){
 	    	result=query;

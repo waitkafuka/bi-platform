@@ -162,4 +162,11 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
         this.groupBy = groupBy;
     }
     
+    public int getFieldArraySize() {
+        if(this.fieldArray != null) {
+            return this.fieldArray.length;
+        }
+        return 0;
+    }
+    
 }

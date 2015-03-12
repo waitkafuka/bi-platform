@@ -7,12 +7,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.exception.NotSupportedDateFormatException;
 import com.baidu.rigel.biplatform.tesseract.util.DateFormatType;
 import com.baidu.rigel.biplatform.tesseract.util.String2DateUtils;
 
-public class SearchIndexResultSet implements TesseractResultSet {
+public class SearchIndexResultSet implements TesseractResultSet<SearchIndexResultRecord> {
 	/**
 	 * 
 	 */
@@ -25,10 +27,10 @@ public class SearchIndexResultSet implements TesseractResultSet {
      * 结果集数据
      */
     private List<SearchIndexResultRecord> dataList;
-    /**
-     * 当前数据下标
-     */
-    private int currIdx;
+//    /**
+//     * 当前数据下标
+//     */
+//    private int currIdx;
     /**
      * 当前结果集
      */
@@ -43,7 +45,7 @@ public class SearchIndexResultSet implements TesseractResultSet {
 		super();
 		this.meta = meta;		
 		this.dataList=new ArrayList<SearchIndexResultRecord>(size);
-		this.currIdx=0;
+//		this.currIdx=0;
 	}
 	
 	/**
@@ -63,9 +65,9 @@ public class SearchIndexResultSet implements TesseractResultSet {
     @Override
     public boolean next() throws IOException {
         boolean result = false;
-        if (this.dataList != null && currIdx<this.dataList.size()) {
-            this.currRecord = this.dataList.get(currIdx++);
-            
+        
+        if (CollectionUtils.isNotEmpty(dataList)) {
+            this.currRecord=this.dataList.remove(0);
             if (this.currRecord == null) {
                 result = false;
             } else {
@@ -318,6 +320,30 @@ public class SearchIndexResultSet implements TesseractResultSet {
     @Override
     public SearchIndexResultRecord getCurrentRecord() {
         return this.currRecord;
+    }
+
+    @Override
+    public List<SearchIndexResultRecord> getDataList() {
+        return this.dataList;
+        
+    }
+
+    /** 
+     * 设置 dataList 
+     * @param dataList the dataList to set 
+     */
+    public void setDataList(List<SearchIndexResultRecord> dataList) {
+    
+        this.dataList = dataList;
+    }
+
+    /** 
+     * 获取 meta 
+     * @return the meta 
+     */
+    public Meta getMeta() {
+    
+        return meta;
     }
 
 }

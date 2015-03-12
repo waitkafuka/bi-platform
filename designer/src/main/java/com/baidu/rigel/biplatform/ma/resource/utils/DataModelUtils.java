@@ -319,6 +319,7 @@ public final class DataModelUtils {
             + (System.currentTimeMillis() - current) + "ms!");
         
         // PivotTableUtils.addSummaryRowHead(pTable);
+        pTable.setOthers (oriDataModel.getOthers ());
         return pTable;
     }
 
@@ -421,6 +422,9 @@ public final class DataModelUtils {
                     }
                 } else {
                     rowHead.setDrillByLink(false);
+                    if (i == 0 && rowHead.getIndent () == 0) {
+                        rowHead.setExpand (null);
+                    }
                 }
             }
         }

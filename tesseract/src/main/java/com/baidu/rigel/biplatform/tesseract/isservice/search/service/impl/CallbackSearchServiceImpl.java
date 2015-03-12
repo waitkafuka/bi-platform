@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -53,16 +52,17 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackResponse;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
+import com.baidu.rigel.biplatform.ac.util.ThreadLocalPlaceholder;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.QueryContextAdapter;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
-import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.ResultRecord;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
@@ -176,7 +176,7 @@ public class CallbackSearchServiceImpl {
      * @return 查询结果
      * @throws IndexAndSearchException exception occurred when 
      */
-    public TesseractResultSet query(QueryContext context, QueryRequest query) throws IndexAndSearchException {
+    public SearchIndexResultSet query(QueryContext context, QueryRequest query) throws IndexAndSearchException {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "callbackquery", "[callbackquery:" + query + "]"));
         if (query == null || context == null || StringUtils.isEmpty(query.getCubeId())) {
             LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "callbackquery", "[callbackquery:" + query
@@ -186,11 +186,19 @@ public class CallbackSearchServiceImpl {
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
         }
-        
+        Map<String, String> requestParams = ((QueryContextAdapter) context).getQuestionModel().getRequestParams ();
         // Build query target map
         Map<String, List<MiniCubeMeasure>> callbackMeasures = context.getQueryMeasures().stream()
                 .filter(m -> m.getType().equals(MeasureType.CALLBACK))
-                .collect(Collectors.groupingBy(c -> ((CallbackMeasure) c).getCallbackUrl(), Collectors.toList()));
+                .map (m -> {
+                    CallbackMeasure tmp = (CallbackMeasure) m;
+                    for (Map.Entry<String, String> entry : tmp.getCallbackParams ().entrySet ()) {
+                        if (requestParams.containsKey (entry.getKey ())) {
+                            tmp.getCallbackParams ().put (entry.getKey (), requestParams.get (entry.getKey ()));
+                        }
+                    }
+                    return m;
+                }).collect(Collectors.groupingBy(c -> ((CallbackMeasure) c).getCallbackUrl(), Collectors.toList()));
         if (callbackMeasures == null || callbackMeasures.isEmpty()) {
         	LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "Empty callback measure", "[callbackquery:" + query
                     + "]"));
@@ -238,71 +246,43 @@ public class CallbackSearchServiceImpl {
 //        List<Future<CallbackResponse>> results = Lists.newArrayList();
         Map<CallbackExecutor, Future<CallbackResponse>> results = Maps.newHashMap();
         ExecutorCompletionService<CallbackResponse> service = new ExecutorCompletionService<CallbackResponse>(taskExecutor);
+        StringBuilder callbackMeasureNames = new StringBuilder();
         for (Entry<String, List<MiniCubeMeasure>> e : callbackMeasures.entrySet()) {
             CallbackExecutor ce = new CallbackExecutor(e, groupbyParams, whereParams);
             results.put(ce, service.submit(ce));
-////            while (true) {
-//                try {
-////                    ListenableFuture<CallbackResponse> f = taskExecutor.submitListenable(ce);
-//                    
-//                    Future<CallbackResponse> f = taskExecutor.submit(ce);
-//                    response.put(ce, f.get());
-////                    f.addCallback(new ListenableFutureCallback<CallbackResponse>() {
-////                        @Override
-////                        public void onSuccess(CallbackResponse result) {
-////                            latch.countDown();
-////                            response.put(ce, result);
-////                        }
-////                        
-////                        @Override
-////                        public void onFailure(Throwable t) {
-////                            latch.countDown();
-////                            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, 
-////                                    "Error when try to callback " + e, "[callbackquery:]"), t);
-////                        }
-////                    });
-////                    break;
-//                } catch (TaskRejectedException | InterruptedException | ExecutionException tre) {
-//                    try {
-//                        // FIXME: MENGRAN. Need configure it?
-//                        Thread.sleep(100L);
-//                    } catch (InterruptedException e1) {
-//                        // Ignore
-//                    }
-//                }
+            e.getValue ().forEach (m -> {
+                callbackMeasureNames.append (m.getName() + " ");
+            });
             }
 //        }
         Map<CallbackExecutor, CallbackResponse> response = 
                 new ConcurrentHashMap<CallbackExecutor, CallbackResponse>(callbackMeasures.size());
+        StringBuffer sb = new StringBuffer();
         results.forEach((k, v) -> {
             try {
                 response.put(k, v.get());
             } catch (Exception e1) {
                 LOGGER.error(e1.getMessage(), e1);
+                sb.append ("查询回调指标" + callbackMeasureNames.toString () + " 异常");
             }
         });
-        // Waiting...
-//        try {
-//            latch.await(callbackTimeout, TimeUnit.MILLISECONDS);
-//        } catch (InterruptedException e1) {
-//            // Ignore
-//            LOGGER.error(e1.getMessage(), e1);
-//        }
-        
+        if (!StringUtils.isEmpty (sb.toString ())) {
+            ThreadLocalPlaceholder.bindProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY, sb.toString ());
+        }
         // Package result
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
-        LinkedList<ResultRecord> resultList = Lists.newLinkedList();
+        SearchIndexResultSet result = null;
         if (!response.isEmpty()) {
-            resultList = packageResultRecords(query, sqlQuery, response);
+            result = packageResultRecords(query, sqlQuery, response);
+        } else {
+            result = new SearchIndexResultSet(new Meta(query.getGroupBy().getGroups().toArray(new String[0])), 0);
         }
-        TesseractResultSet result = new SearchResultSet(resultList);
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
     }
     
-    private LinkedList<ResultRecord> packageResultRecords(QueryRequest query, SqlQuery sqlQuery, Map<CallbackExecutor, CallbackResponse> response) {
-        
+    private SearchIndexResultSet packageResultRecords(QueryRequest query, SqlQuery sqlQuery, Map<CallbackExecutor, CallbackResponse> response) {
         List<String> groupby = new ArrayList<String>(query.getGroupBy().getGroups());
         // Confirm meta sequence
         List<Entry<CallbackExecutor, CallbackResponse>> fieldValuesHolderList = new ArrayList<Entry<CallbackExecutor, CallbackResponse>>(response.size());
@@ -311,7 +291,9 @@ public class CallbackSearchServiceImpl {
             fieldValuesHolderList.add(e);
         }
         
-        LinkedList<ResultRecord> result = new LinkedList<ResultRecord>();
+        Meta meta = new Meta(groupby.toArray(new String[0]));
+        // default result size 500
+        SearchIndexResultSet result = new SearchIndexResultSet(meta, 500);
         // Use first response as base SEQ. Weak implementation. FIXME: WANGYUXUE.
         List<String> fieldValues = null;
         for (int index = 0; index < fieldValuesHolderList.get(0).getValue().getData().size(); index++) {
@@ -328,12 +310,9 @@ public class CallbackSearchServiceImpl {
                     LOGGER.error("Wrong SEQ of callback response of {} : {}", fieldValuesHolderList.get(i).getKey().group.getKey(), callbackMeasureValue);
                 }
             }
-            Meta meta = new Meta(groupby.toArray(new String[0]));
-            ResultRecord record = new ResultRecord(fieldValues.toArray(new Serializable[0]), meta);
-            record.setGroupBy(StringUtils.collectionToCommaDelimitedString(fieldValues));
+            SearchIndexResultRecord record = new SearchIndexResultRecord(fieldValues.toArray(new Serializable[0]), StringUtils.collectionToCommaDelimitedString(fieldValues));
             
-            // Fill into result
-            result.add(record);
+            result.addRecord(record);
         }
         
         return result;

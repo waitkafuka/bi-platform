@@ -225,6 +225,7 @@
     background-color: rgba(255, 255, 255, 0);
     color: #3C78A2;
     padding: 0;
+    float: right;
 }
 .ui-download-btn-hover {
     background-color: rgba(255, 255, 255, 0);
@@ -262,6 +263,14 @@
 }
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
+    color: black;
+}
+.ui-download-btn .ui-button-text:before {
+    content: ' ';
+    font-size: 0;
+    width: 10px;
+    display: inline-block;
+    height: 100%;
 }
 /** 
  * select控件
@@ -356,7 +365,7 @@
 .ui-multi-select-text {
     white-space: nowrap;
     display: block;
-    padding-left: 4px;
+    padding-left: 15px;
     line-height: 28px;
     /*border-top: 1px solid #F0F0F0;*/
     cursor: pointer;
@@ -390,6 +399,7 @@
 .ui-multi-select-options {
     border-left: 1px solid #CCC;
     border-right: 1px solid #CCC;
+    border-bottom: 1px solid #CCC;
     background: #FFF;
 }
 .ui-multi-select-item {
@@ -431,9 +441,56 @@
     /*background: #E4EAFA;*/
     color: #000;
 }
-
 .ui-multi-select-options .ui-item{
     border-bottom: 1px solid #E7ECEE;
+}
+
+/* 设定滚动条外部父框体 */
+.ui-select-options .ui-vscrollbar {
+    width: 15px;
+    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 0;
+}
+.ui-multi-select-options .ui-vscrollbar {
+    width: 15px;
+    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 30px 0 0 0;
+}
+/* 滚动条上部按钮 */
+.ui-multi-select-options .ui-vscrollbar-prev,
+.ui-select-options .ui-vscrollbar-prev {
+    background-color: #FFF;
+}
+/* 下拉框滚动条样式*/
+.ui-multi-select-options .ui-vscrollbar .ui-scrollbar-thumb,
+.ui-select-options .ui-vscrollbar .ui-scrollbar-thumb {
+    width: 5px;
+    border-radius: 7px;
+    background-color: #FFF;
+    overflow: visible;
+}
+/* 下拉框滚动条替换元素样式添加 */
+.ui-multi-select-options .ui-vscrollbar .ui-scrollbar-thumb:after,
+.ui-select-options .ui-vscrollbar .ui-scrollbar-thumb:after {
+    content: ' ';
+    font-size: 0;
+    width: 6px;
+    position: absolute;
+    display: inline-block;
+    left: 4px;
+    height: 100%;
+    background-color: #b5b5b5;
+    border-radius: 5px;
+    z-index: 3;
+
+}
+/* 设定下拉框上部按钮按钮样式 */
+.ui-select-options .ui-vscrollbar .ui-vscrollbar-prev {
+    width: 20px;
+    height: 0;
+    background: rgba(255, 255, 255, 0);
 }
 /**
  * 左侧菜单
@@ -841,7 +898,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     cursor: default;
     padding: 0px;
     margin: 0px;
-    background-color: #D8D8D8;
+    /*background-color: #D8D8D8;*/
 }
 .ui-vscrollbar .ui-button-hover {
     padding: 0px;
@@ -866,7 +923,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-vscrollbar .ui-scrollbar-thumb {
     width: 7px;
-    /*border-top: 1px solid #F0F0F0;*/
+    border-top: 1px solid #F0F0F0;
     border-bottom: 1px solid #F0F0F0;
     background: #D8D8D8;
     border-left: 0 solid white;
@@ -2014,7 +2071,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-head {
     border-top: 1px solid #cfebf6;
     /*border-bottom: 1px solid #cfebf6;*/
-    border-right: 1px solid #E7F9FE;
+    border-right: 1px solid #cfebf6;
     /*border-left: 1px solid #cfebf6;*/
     height: 40px;
     -webkit-user-select: none;
@@ -2025,12 +2082,12 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-locked-head {
     border-top: 1px solid #cfebf6;
     border-bottom: 1px solid #E7F9FE;
-    border-left: 1px solid #E7F9FE;
+    border-left: 1px solid #cfebf6;
     height: 30px;
     overflow: hidden;
 }
 .ui-table-layout, .ui-table-locked-layout {
-    /*border-left: 1px solid #cfebf6;*/
+    border-right: 1px solid #cfebf6;
 }
 .ui-table-cell {
     background: #FFF;
@@ -2087,7 +2144,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-table-rowhcell .ui-table-tree-item {
     height: 39px;
-    padding-left: 20px;
+    padding-left: 15px;
     /*border-bottom: 1px solid #CCC;*/
 }
 .ui-table-hcell-bag {
@@ -2158,7 +2215,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     overflow: hidden;
     background: url(img/icon.png) 0px 0px no-repeat;
     position: absolute;
-    left: 2px;
+    left: 1px;
     top: 10px;
     vertical-align: middle;
     cursor: pointer;
@@ -2175,12 +2232,13 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     display: block;
 }
 .ui-table-default-icon {
-    padding-left: 9px;
+    padding-left: 0;
 }
 /* 表格纵向滚动条改为左侧边框线 */
 .ui-table .ui-vscrollbar {
     width: 1px;
-    background: #CFEBF6;
+    /*background-color: #CFEBF6;*/
+    background-color: rgba(255, 255, 255, 0);
     padding: 40px 0 0 0;
     z-index: 2;
 }
@@ -2188,7 +2246,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     cursor: default;
     padding: 0;
     margin: 0;
-    background-color: #CFEBF6;
+    /*background-color: #CFEBF6;*/
 }
 .ui-table .ui-vscrollbar .ui-button-hover {
     padding: 0;
@@ -2204,7 +2262,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     width: 1px;
     height: 14px;
     border: 0;
-    background-color: #CFEBF6;
+    background-color: rgba(255, 255, 255, 0);
     overflow: hidden;
     /*border-bottom: 1px solid #e7ecee;*/
     border-right: 1px solid #cfebf6;
@@ -2404,6 +2462,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-expand-background {
     background-color: #F6F6F5;
 }
+.ui-table-row-selected .ui-table-rowhcell{
+	background: #FFF;
+}
 /* 表格内部数据外框样式 */
 .ui-table-cell-infor {
     height: 39px;
@@ -2455,6 +2516,14 @@ tr > td:last-child:after{
 .ui-table-head
 .ui-table-head-font  {
     margin-left: -10px;
+}
+/* 汇总行字体加粗 */
+.ui-table-expand-font {
+    font-weight: bold;
+}
+/* 解决表头第一块区域左侧边框线错位问题 */
+.ui-table-locked-head th:first-child {
+    border-left: 1px solid #E7F9FE;
 }
 /** 
  * Pager
@@ -3200,8 +3269,10 @@ li {
     z-index:0;
 }
 .xui-e-chart-header {
-    width: 100%;
-    height: 25px;
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    z-index: 999;
 }
 .xui-e-chart-title {
     font-weight:bold;
@@ -3238,7 +3309,7 @@ li {
     background-position:-42px -385px;
 }
 .xui-e-chart-content {
-    height:80%;
+    height:100%;
 }
 .xui-e-chart-empty {
     width: 99%;
@@ -3286,6 +3357,7 @@ li {
     margin-right: 8px;
     height: 15px;
     line-height: 15px;
+    cursor: pointer;
 }
 .echarts-candidate input {
     float: left;
@@ -3293,6 +3365,7 @@ li {
     height: 15px;
     line-height: 15px;
     width: 20px;
+    cursor: pointer;
 }
 
 /**
@@ -3914,7 +3987,7 @@ div.di-dim-level-find-msg span{
 .di-table-prompt {
     font-size: 12px;
     color: #888;
-    padding: 3px 17px 0px 0;
+    padding: 3px 0 0 0;
     overflow: hidden;
     line-height: 18px;
 }
@@ -3925,6 +3998,7 @@ div.di-dim-level-find-msg span{
     width: auto;
     font-size: 12px;
     float: left;
+    margin-left: 20px;
 }
 .di-table-count-num {
     font-size: 12px;
@@ -3936,7 +4010,7 @@ div.di-dim-level-find-msg span{
     vertical-align: middle;
 }
 .di-table-down {
-    width: 128px;
+    width: auto;
     color: #000;
     float: right;
     vertical-align: bottom;
@@ -3949,7 +4023,7 @@ div.di-dim-level-find-msg span{
     vertical-align: bottom;
 }
 .di-table-down-btn {
-    float: left;
+    float: right;
 }
 /**
  * @name                      :roport-ui针对silkroad所做的的css适配

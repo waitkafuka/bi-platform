@@ -87,7 +87,7 @@ _eInput - 多选项的INPUT对象
                     this._nMaxSelected = options.maxSelected;
                 }
                 else if (options.selectAllButton) {
-                    this.add('全部', 0, {selectAllButton: true});
+                    this.add('全选', 0, {selectAllButton: true});
                     this._bSelectAllBtn = true;
                 }
                 if (options.tip) {
@@ -165,6 +165,7 @@ _eInput - 多选项的INPUT对象
      * @param {ecui.ui.MultiSelect} control 多选下拉框控件
      */
     function UI_MULTI_SELECT_FLUSH_TEXT(control) {
+        // TODO:重新修改显示逻辑
         var tip;
         if (control) {
             var btnAllSelected = false;
@@ -176,6 +177,7 @@ _eInput - 多选项的INPUT对象
                     else {
                         text.push(o._sTip);
                     }
+
                 }
             }
             tip = '<span title="'+ text.join(',') +'">';
@@ -190,10 +192,15 @@ _eInput - 多选项的INPUT对象
                 text = control._sTextNone;
             }
             else {
-                text = text.join(',');
-                if (control._nTextLen && text.length > control._nTextLen) {
-                    text = text.substring(0, control._nTextLen) + '...';
-                }
+                text = [
+                    '已选中',
+                    text.length ,
+                    '项'
+                ].join('');
+//                text = text.join(',');
+//                if (control._nTextLen && text.length > control._nTextLen) {
+//                    text = text.substring(0, control._nTextLen) + '...';
+//                }
             }
             if (control._bTip) {
                 text = tip + text + '</span>';
@@ -203,6 +210,14 @@ _eInput - 多选项的INPUT对象
     }
 
     extend(UI_MULTI_SELECT_CLASS, UI_ITEMS);
+
+    var originRemoveMethod = UI_MULTI_SELECT_CLASS.remove;
+    UI_MULTI_SELECT_CLASS.remove = function () {
+        if (this._bSelectAllBtn && this.getItems().length <= 1) {
+            return null;
+        }
+        return originRemoveMethod.apply(this, arguments);
+    };
 
     /**
      * 鼠标单击控件事件的默认处理。

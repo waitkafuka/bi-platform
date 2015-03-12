@@ -687,6 +687,7 @@ public class QueryDataResource extends BaseResource {
          * 查询区域的时候，会按照当前的参数更新区域上下文
          */
         QueryContext localContext = runTimeModel.getLocalContextByAreaId(areaId);
+        localContext.reset ();
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的区域上下文参数
@@ -807,9 +808,10 @@ public class QueryDataResource extends BaseResource {
                 }
                 action = queryBuildService.generateChartQueryAction(model, areaId, 
                             areaContext.getParams(), indNames, runTimeModel);
-                if (action != null) {
-                    action.setChartQuery(true);
+                if (action == null) {
+                    return ResourceUtils.getErrorResult ("该区域未包含任何维度信息", 1);
                 }
+                action.setChartQuery(true);
                 boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
                 //TODO to be delete
                 boolean isPieChart = isPieChart(getChartTypeWithExtendArea(model, targetArea));
@@ -887,19 +889,22 @@ public class QueryDataResource extends BaseResource {
             List<Map<String, String>> mainDims = Lists.newArrayList();
             Map<String, String> root =  genRootDimCaption(table);
             if (action.getRows().size() >= 2) {
-            	areaContext.setCurBreadCrumPath(root);
-//                    resultMap.put("mainDimNodes", dims);
-                    // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
-                if (!root.get("uniqName").toLowerCase().contains("all")) {
-                    root.put("uniqName", root.get("uniqName"));
-                    root.put("showName", "全部");
-//                        runTimeModel.getContext().put(vertualDimKey, action);
+                	areaContext.setCurBreadCrumPath(root);
+    //                    resultMap.put("mainDimNodes", dims);
+                        // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
+                    if (!root.get("uniqName").toLowerCase().contains("all")) {
+                        root.put("uniqName", root.get("uniqName"));
+                        root.put("showName", "全部");
+    //                        runTimeModel.getContext().put(vertualDimKey, action);
+                    }
+                    mainDims.add(root);
+                    Collections.reverse(mainDims);
+                    areaContext.setCurBreadCrumPath(root);
+                    resultMap.put("mainDimNodes", mainDims);
+                } else {
+                    areaContext.setCurBreadCrumPath (Maps.newHashMap ());
+//                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
-                mainDims.add(root);
-                Collections.reverse(mainDims);
-                areaContext.setCurBreadCrumPath(root);
-                resultMap.put("mainDimNodes", mainDims);
-            }
 //            runTimeModel.getContext().put(areaId, root);
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
@@ -1254,7 +1259,8 @@ public class QueryDataResource extends BaseResource {
             }
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
-            runTimeModel.getContext().put("bread_key", mainDims);
+            areaContext.getParams ().put ("bread_key", mainDims);
+//            runTimeModel.getContext().put("bread_key", mainDims);
         } 
         areaContext.getQueryStatus().add(result);
         // 更新局部区域参数，避免漏掉当前请求查询的
@@ -1444,16 +1450,18 @@ public class QueryDataResource extends BaseResource {
             resultMap.put("pivottable", table);
             resultMap.put("rowCheckMin", 1);
             resultMap.put("rowCheckMax", 5);
-            Object breadCrum = runTimeModel.getContext().get("bread_key");
-            if (breadCrum == null) {
-                List<Map<String, String>> tmp = Lists.newArrayList();
-                if (areaContext.getCurBreadCrumPath() != null  && !areaContext.getCurBreadCrumPath().isEmpty()) {
-                    tmp.add(areaContext.getCurBreadCrumPath());
-                    breadCrum = tmp;
+            if (targetArea.getLogicModel ().getRows ().length >= 2) {
+                Object breadCrum = areaContext.getParams ().get("bread_key");
+                if (breadCrum == null) {
+                    List<Map<String, String>> tmp = Lists.newArrayList();
+                    if (areaContext.getCurBreadCrumPath() != null  && !areaContext.getCurBreadCrumPath().isEmpty()) {
+                        tmp.add(areaContext.getCurBreadCrumPath());
+                        breadCrum = tmp;
+                    }
                 }
-            }
-            if (breadCrum != null) {
-                resultMap.put("mainDimNodes", breadCrum);
+                if (breadCrum != null) {
+                    resultMap.put("mainDimNodes", breadCrum);
+                }
             }
             resultMap.put("reportTemplateId", reportId);
             resultMap.put("totalSize", table.getActualSize());
