@@ -451,10 +451,55 @@ define([
              * @public
              */
             saveReport: function () {
-                this.model.saveReport(function () {
+                var that = this;
+                var nowReport = this.$el.find('.reportName').text();
+                this.model.saveReport(nowReport, function () {
                     dialog.success('报表保存成功。');
-                });
+                }, openDataFormatDialog);
                 this.savestate = 1;
+                function openDataFormatDialog(title, nowReport) {
+                    var html;
+                    var reportId = window.dataInsight.main.id;
+                    html =
+                        '<div class="save-reportNameBox">'
+                        + '<div class="save-reportName">' + title + '</div>'
+                        + '<input type="text" class="save-reportSetName" value="' + nowReport + '"/></div>';
+                    dialog.showDialog({
+                        content: html,
+                        title: '保存提示',
+                        dialog: {
+                            height: 200,
+                            width: 300,
+                            open: function () {
+                            },
+                            buttons: {
+                                '确认': function () {
+                                    // TODO:此逻辑应写在MODEL
+                                    $.ajax({
+                                        type: "POST",
+                                        dataType: "json",
+                                        cache: false,
+                                        timeout: 10000,
+                                        url: "reports/" + reportId+ "/name/" + $(".save-reportSetName").val(),
+                                        success: function(data){
+                                            // 根据返回值进行判断
+                                            if (data["status"] === 0) {
+                                                dialog.success(data["statusInfo"]);
+                                            }
+                                            else {
+                                                dialog.error(data["statusInfo"]);
+                                            }
+                                        }
+                                    });
+                                    $(this).dialog('close');
+                                },
+                                '取消': function () {
+                                    $(this).dialog('close');
+                                }
+                            }
+                        }
+                    });
+                }
             },
 
             /**
