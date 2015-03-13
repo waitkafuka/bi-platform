@@ -41,3 +41,10 @@
     background-color: #FFF;
     padding: 10px;
 }
+.ui-messagebox-bottom .ui-button-g:hover {
+    background: #2584DA;
+    color: #FFF
+}
+.ui-messagebox-bottom .ui-form-close {
+    display: none;
+}
