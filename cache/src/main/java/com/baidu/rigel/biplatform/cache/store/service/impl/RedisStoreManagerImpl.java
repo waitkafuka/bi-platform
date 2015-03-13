@@ -134,7 +134,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
                 log.warn("get mac add error:{}", e.getMessage());
             }
         }
-        if(StringUtils.isEmpty(!StringUtils.isEmpty(this.redisProperties.getClusterPre()))) {
+        if(!StringUtils.isEmpty(this.redisProperties.getClusterPre())) {
             prefix.add(this.redisProperties.getClusterPre());
         }
         if (CollectionUtils.isNotEmpty(prefix)) {

@@ -839,3 +839,27 @@
     font-size: 14px;
     width: 150px;
 }
+.save-reportNameBox {
+    width: 90%;
+    margin: 0 auto;
+    margin-top: 20px;
+}
+.save-reportSetName {
+    height: 20px;
+    margin: 5px 0;
+    background: #e4e4e4;
+    float: right;
+    border: 0 solid #e4e4e4;
+    font-size: 14px;
+    width: 150px;
+}
+/* 修改报表名称输入框样式 */
+.save-reportSetName {
+    height: 100%;
+    margin: 5px 0;
+    background: #FFF;
+    float: right;
+    border: 1px solid rgb(238, 238, 238);
+    font-size: 14px;
+    width: 100%;
+}
