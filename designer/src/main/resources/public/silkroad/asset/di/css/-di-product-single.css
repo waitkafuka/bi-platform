@@ -1102,7 +1102,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     font-weight: bold;
 }
 .ui-form-close {
-    display: block;
+    display: none;
     width: 11px;
     height: 11px;
     top: 9px;
@@ -1120,6 +1120,13 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-form-inner {
     background-color: #FFF;
     padding: 10px;
+}
+.ui-messagebox-bottom .ui-button-g:hover {
+    background: #2584DA;
+    color: #FFF
+}
+.ui-messagebox-bottom .ui-form-close {
+    display: none;
 }
 /**
  * 单选
