@@ -319,10 +319,10 @@ public class DataModelUtils {
      * @param rowHeadFields datamodel行上节点
      */
     public static void removeField(HeadField field, List<HeadField> rowHeadFields) {
+        HeadField parentField = field.getParentLevelField();
         if (field.getParentLevelField() != null) {
-            HeadField parentField = field.getParentLevelField();
             parentField.getNodeList().remove(field);
-            if (parentField.getChildren ().isEmpty() && parentField.getChildren ().isEmpty ()) {
+            if (parentField.getChildren ().isEmpty() && parentField.getNodeList ().isEmpty ()) {
                 removeField(parentField, rowHeadFields);
             }
         } else {
