@@ -1244,7 +1244,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     height: 24px;
     margin: 15px 8px 10px 8px;
     float: right;
-    font-size: 13px;
+    font-size: 14px;
     font-family: 'Microsoft Yahei';
 }
 .ui-messagebox-bottom .ui-button-g:hover {
@@ -2540,7 +2540,7 @@ tr > td:first-child:before {
     display: inline-block;
     top: 0;
     left: 0;
-    border-bottom: 1px solid #F6F6F5;
+    border-bottom: 1px solid #FFF;
 }
 /* 右侧留白 */
 .ui-table-layout
@@ -2554,7 +2554,7 @@ tr > td:last-child:after{
     right: 0;
     top: 0;
     display: inline-block;
-    border-bottom: 1px solid #f6f6f5;
+    border-bottom: 1px solid #FFF;
 }
 /* 表格内容区域横向表格线 */
 .ui-table-cell-infor {
@@ -3578,10 +3578,11 @@ li {
     background-position: 0 -120px;
     background-repeat: no-repeat;
     overflow: hidden;
-    display: inline-block;
-    *display: inline;
-    *zoom: 1;
+    /*display: inline-block;*/
+    /**display: inline;*/
+    /**zoom: 1;*/
     vertical-align: middle;
+    display: none;
 }
 
 /**
