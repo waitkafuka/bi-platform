@@ -16,6 +16,9 @@
  */
 package com.baidu.rigel.biplatform.cache.redis.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.boot.autoconfigure.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -50,7 +53,9 @@ public class RedisPoolProperties extends RedisProperties {
     /** 
      * defaultExpire 默认超时时间
      */
-    private long defaultExpire = 30 * 60;
+    private long defaultExpire = -1;
+    
+    private Map<String, Long> cacheExpire = new HashMap<>();
     
     
     /** 
@@ -417,6 +422,24 @@ public class RedisPoolProperties extends RedisProperties {
     public void setClusterPre(String clusterPre) {
     
         this.clusterPre = clusterPre;
+    }
+
+    /** 
+     * 获取 cacheExpire 
+     * @return the cacheExpire 
+     */
+    public Map<String, Long> getCacheExpire() {
+    
+        return cacheExpire;
+    }
+
+    /** 
+     * 设置 cacheExpire 
+     * @param cacheExpire the cacheExpire to set 
+     */
+    public void setCacheExpire(Map<String, Long> cacheExpire) {
+    
+        this.cacheExpire = cacheExpire;
     }
     
 }
