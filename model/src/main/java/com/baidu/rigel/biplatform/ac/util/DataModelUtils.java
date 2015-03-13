@@ -322,7 +322,7 @@ public class DataModelUtils {
         if (field.getParentLevelField() != null) {
             HeadField parentField = field.getParentLevelField();
             parentField.getNodeList().remove(field);
-            if (parentField.getNodeList().isEmpty()) {
+            if (parentField.getChildren ().isEmpty() && parentField.getChildren ().isEmpty ()) {
                 removeField(parentField, rowHeadFields);
             }
         } else {
