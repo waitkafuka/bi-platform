@@ -843,18 +843,10 @@ public class ReportDesignModelResource extends BaseResource {
     @RequestMapping(value = "/{id}/publish", method = { RequestMethod.POST })
     public ResponseResult publishReport(@PathVariable("id") String reportId,
             HttpServletRequest request) {
-        ReportDesignModel model = null;
-        if (this.reportDesignModelService.getModelByIdOrName(reportId, false) == null) {
-            return ResourceUtils.getErrorResult("未保存的报表，不能发布", 1);
-        }
-//        try {
-//            model = reportModelCacheManager.getReportModel(reportId);
-        model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
-//        } catch (CacheOperationException e) {
+        ReportDesignModel model = this.reportDesignModelService.getModelByIdOrName(reportId, false);
         if (model == null) {
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
         }
-//        }
         try {
             this.reportDesignModelService.publishReport(model, securityKey);
         } catch (ReportModelOperationException | DataSourceOperationException e) {

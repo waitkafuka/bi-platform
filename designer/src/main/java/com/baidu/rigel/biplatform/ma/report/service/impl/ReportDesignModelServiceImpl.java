@@ -390,6 +390,15 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         String devReportLocation = this.generateDevReportLocation(model);
         String realeaseLocation = this.getReleaseReportLocation(model);
         try {
+            // 删除原来已经发布的报表，如果不存在，忽略此处异常
+            ReportDesignModel tmp = this.getModelByIdOrName (model.getId (), true);
+            if (tmp != null) {
+                fileService.rm(getReleaseReportLocation(tmp));
+            }
+        } catch (FileServiceException e1) {
+            logger.info (e1.getMessage (), e1);
+        }
+        try {
             result = this.fileService.copy(devReportLocation, realeaseLocation);
         } catch (FileServiceException e) {
             logger.error(e.getMessage(), e);
