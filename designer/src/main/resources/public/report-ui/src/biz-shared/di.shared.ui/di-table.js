@@ -780,8 +780,8 @@ $namespace('di.shared.ui');
          * @event
          */
         this.$di('dispatchEvent', this.$diEvent('dataerror', options));
-
-        DIALOG.alert('获取表格数据异常：' + ejsonObj.statusInfo);
+        // 嵌入第三方系统之后，频繁切换页签刷新报表会因为请求中断而弹出该提示框，故先注释掉
+        // DIALOG.alert('获取表格数据异常：' + ejsonObj.statusInfo);
     };
 
     /**

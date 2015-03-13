@@ -62,7 +62,8 @@ $namespace('di.config');
             case 301: // 重定向的情况
             case 302: // 重定向的情况
             case 99999: // 其实302时返回的是这个 ...
-                DIALOG.alert(LANG.SAD_FACE + LANG.RE_LOGIN, null, true);
+                // 嵌入第三方系统之后，频繁切换页签刷新报表会因为请求中断而弹出该提示框，故先注释掉
+                // DIALOG.alert(LANG.SAD_FACE + LANG.RE_LOGIN, null, true);
                 break;
             case 333: //没有权限
                 DIALOG.alert(LANG.SAD_FACE + LANG.NO_AUTH_SYSTEM);
