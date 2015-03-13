@@ -41,7 +41,7 @@ public class HazelcastProperties {
     
     private String instanceName= "tesseract-cluster";
     
-    public class ManCenter {
+    public static class ManCenter {
         private String url;
         private boolean enable = false;
         /** 

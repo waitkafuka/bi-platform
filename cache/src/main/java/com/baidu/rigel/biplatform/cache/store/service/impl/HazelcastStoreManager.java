@@ -34,7 +34,6 @@ import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.cache.redis.config.HazelcastProperties;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastQueueItemListener;
-import com.hazelcast.config.ClasspathXmlConfig;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.JoinConfig;
 import com.hazelcast.config.TcpIpConfig;
@@ -80,15 +79,14 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
      * @param configPath
      *            hz的配置文件
      */
-    public HazelcastStoreManager(String configPath) {
-        Config cfg = new ClasspathXmlConfig(configPath);
-        
+    public HazelcastStoreManager(HazelcastProperties hazelcastProperties) {
 //        Properties prop = new Properties();
 //        try {
 //            prop = loadConf(null);
 //        } catch (IOException e) {
 //            LOGGER.warn("load conf error,use default config");
 //        }
+        Config cfg = new Config();
         cfg.getGroupConfig().setName(hazelcastProperties.getGroupUserName());
         cfg.getGroupConfig().setPassword(hazelcastProperties.getGroupPassword());
         
@@ -114,14 +112,19 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
         JoinConfig join = cfg.getNetworkConfig().getJoin();
         TcpIpConfig tcpIpConfig = join.getTcpIpConfig();
         tcpIpConfig.addMember(hazelcastProperties.getMembers());
+        if (!tcpIpConfig.getMembers().contains("127.0.0.1")){
+            tcpIpConfig.addMember("127.0.0.1");
+        }
+        LOGGER.info("hazelcast members in prop:{}", tcpIpConfig.getMembers());
         tcpIpConfig.setEnabled(true);
-        
         this.hazelcast = Hazelcast.newHazelcastInstance(cfg);
         this.cacheManager = new HazelcastCacheManager(this.hazelcast);
     }
     
     @Override
     public void afterPropertiesSet() throws Exception {
+        
+        
         this.hazelcast.getTopic(TOPICS).addMessageListener(hazelcastNoticePort);
         IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
         queue.addItemListener(hazelcastQueueItemListener,true);
@@ -155,12 +158,6 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
 //        return properties;
 //    }
     
-    /**
-     * constructor 采用默认配置文件
-     */
-    public HazelcastStoreManager() {
-        this("conf/hazelcast.xml");
-    }
     
     @Override
     public Cache getDataStore(String name) {

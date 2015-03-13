@@ -301,17 +301,18 @@ public class BiplatformRedisConfiguration {
             return new RedisQueueListener();
         }
         
-        @Bean(name="hazelcastStoreManager")
-        @ConditionalOnMissingBean(name = "redisStoreManager")
-        public StoreManager hazelcastStoreManager() {
-            return new HazelcastStoreManager();
-        }
-        
         @Bean
-        @ConditionalOnBean(name="hazelcastStoreManager")
+        @ConditionalOnMissingBean(name = "redisStoreManager")
         public HazelcastProperties hazelcastProperties() {
             return new HazelcastProperties();
         }
+        
+        @Bean(name="hazelcastStoreManager")
+        @ConditionalOnMissingBean(name = "redisStoreManager")
+        public StoreManager hazelcastStoreManager(HazelcastProperties properties) {
+            return new HazelcastStoreManager(properties);
+        }
+        
         
         @Bean
         @ConditionalOnBean(name="hazelcastStoreManager")
