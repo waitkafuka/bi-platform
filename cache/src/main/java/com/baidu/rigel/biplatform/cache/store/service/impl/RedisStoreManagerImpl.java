@@ -144,9 +144,9 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
         if (CollectionUtils.isNotEmpty(prefix)) {
             this.cachePrefix = org.apache.commons.lang.StringUtils.join(prefix, "_");
             log.info("this instance is run with dev mode,current mac :{}", cachePrefix);
-            topicKey = cachePrefix + "_" + topicKey;
-            queueKey = cachePrefix + "_" + queueKey;
-            lockKey = cachePrefix + "_" + lockKey;
+            topicKey = cachePrefix + "_" + redisProperties.getTopicName();
+            queueKey = cachePrefix + "_" + redisProperties.getEventQueueName();
+            lockKey = cachePrefix + "_" + redisProperties.getLockName();
         }
         redisson.getTopic(topicKey).addListener(new RedisTopicListener());
     }
