@@ -107,10 +107,11 @@
     background-position: 0 -120px;
     background-repeat: no-repeat;
     overflow: hidden;
-    display: inline-block;
-    *display: inline;
-    *zoom: 1;
+    /*display: inline-block;*/
+    /**display: inline;*/
+    /**zoom: 1;*/
     vertical-align: middle;
+    display: none;
 }
 
 /**
