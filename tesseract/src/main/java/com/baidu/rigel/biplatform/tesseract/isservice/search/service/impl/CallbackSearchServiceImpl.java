@@ -267,6 +267,9 @@ public class CallbackSearchServiceImpl {
             }
         });
         if (!StringUtils.isEmpty (sb.toString ())) {
+            if (ThreadLocalPlaceholder.getProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY) != null) {
+                ThreadLocalPlaceholder.unbindProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY);
+            }
             ThreadLocalPlaceholder.bindProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY, sb.toString ());
         }
         // Package result
