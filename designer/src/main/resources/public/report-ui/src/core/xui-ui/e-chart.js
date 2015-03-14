@@ -173,9 +173,10 @@
      * @protected
      */
     UI_E_CHART_CLASS.$getDefaultMeasures = function (chartType){
-        return (this._defaultMeasures.length > 0 && chartType != 'line')
-            ? [this._defaultMeasures[0]]
-            : this._defaultMeasures;
+        return (this._defaultMeasures
+                && this._defaultMeasures.length > 0
+                && chartType != 'line'
+            ) ? [this._defaultMeasures[0]] : this._defaultMeasures;
     };
 
     /**
@@ -217,7 +218,7 @@
             else {
                 // 单选
                 var radioName = 'echarts-candidate-radio-' + new Date().getTime();
-                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+                for (var i = 0,  iLen = allMeasures.length; i < iLen; i ++) {
                     var checkAbr = isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked"' : '';
                     var radioId = [
                        'allMeasures-radio',
