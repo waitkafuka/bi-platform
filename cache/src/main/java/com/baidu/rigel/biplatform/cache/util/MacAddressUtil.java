@@ -21,6 +21,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import org.apache.commons.lang.StringUtils;
+
 /** 
  *  
  * @author xiaoming.chen
@@ -28,6 +30,26 @@ import java.net.UnknownHostException;
  * @since jdk 1.8 or after
  */
 public class MacAddressUtil {
+    
+    
+    
+    /** 
+     * getMachineNetworkFlag 获取机器的MAC或者IP，优先获取MAC
+     * @param ia
+     * @return
+     * @throws SocketException
+     * @throws UnknownHostException
+     */
+    public static String getMachineNetworkFlag(InetAddress ia) throws SocketException, UnknownHostException {
+        if(ia == null) {
+            ia = InetAddress.getLocalHost();
+        }
+        String machineFlag = getMacAddress(ia);
+        if(StringUtils.isBlank(machineFlag)) {
+            machineFlag = getIpAddress(ia);
+        }
+        return machineFlag;
+    }
     
     /** 
      * 获取指定地址的mac地址，不指定默认取本机的mac地址
@@ -56,6 +78,20 @@ public class MacAddressUtil {
             }
         }
         return sb.toString();
+    }
+    
+    /** 
+     * 获取指定地址的ip地址，不指定默认取本机的ip地址
+     * @param ia
+     * @throws SocketException
+     * @throws UnknownHostException 
+     */
+    public static String getIpAddress(InetAddress ia) throws UnknownHostException {
+        if(ia == null) {
+            ia = InetAddress.getLocalHost();
+        }
+        
+        return ia.getHostAddress();
     }
 
 }

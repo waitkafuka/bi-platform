@@ -1173,15 +1173,15 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     position: absolute;
     border: 1px solid #4085B4;
     overflow: hidden;
-    padding-top: 29px;
+    padding-top: 40px;
     background-color: #FFF;
 }
 .ui-form-title {
     height: 28px;
-    background: #2584DA;
+    background: #00aef3;
     line-height: 28px;
-    padding-left: 10px;
-    border-bottom: 1px solid #4085B4;
+    padding: 6px 0 6px 10px;
+    /*border-bottom: 1px solid #4085B4;*/
     overflow: hidden;
     position: absolute;
     top: 0px;
@@ -1192,22 +1192,65 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-form-close {
     display: block;
     width: 11px;
-    height: 11px;
-    top: 9px;
-    right: 13px;
+    height: 12px;
+    top: 14px;
+    right: 12px;
     padding: 0px;
     margin: 0px;
     border: 0px;
     cursor: default;
-    background: url(img/icon.png) -27px -35px no-repeat;
+    background: url(img/close_alert.png);
 }
 .ui-form-body {
     background-color: #FFF;
-    padding: 10px;
+    padding: 20px 10px 30px 10px;
 }
 .ui-form-inner {
     background-color: #FFF;
     padding: 10px;
+}
+.ui-messagebox-pic {
+    width: 89px;
+    height: 80px;
+    margin: 20px 8px 26px 38px;
+    background: url(img/alarm.png);
+    float: left;
+}
+.ui-messagebox-bottom {
+    width: 205px;
+    height: 32px;
+    margin: 34px 8px 6px 8px;
+    float: right;
+}
+.ui-messagebox-bottom .ui-button-g {
+    float: left;
+    height: 30px;
+    line-height: 30px;
+    color: #00aef3;
+    padding: 0 20px;
+    background: #FFF;
+    border: 1px solid #00aef3;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    border-radius: 3px;
+    width: 24px;
+    font-family: 'Microsoft Yahei';
+    font-size: 12px;
+    cursor: pointer;
+}
+.ui-form-body .ui-messagebox-text {
+    width: 185px;
+    padding-right: 20px;
+    height: 24px;
+    margin: 15px 8px 10px 8px;
+    float: right;
+    font-size: 14px;
+    font-family: 'Microsoft Yahei';
+}
+.ui-messagebox-bottom .ui-button-g:hover {
+    background: #00aef3;
+    border: 1px solid #0099e0;
+    color: #FFF
 }
 /**
  * 单选
@@ -2177,9 +2220,12 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     cursor: pointer;
     background: #E7F9FE;
 }
-.ui-table-row-hover .ui-table-ccell {
-    /*background: #FFF;*/
+/* .ui-table-row-hover .ui-table-ccell {
+    background: #F0F4F6;
 }
+.ui-table-row-hover .ui-table-rowhcell {
+    background: #F0F4F6;
+} */
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
     background: #FFF;
@@ -2494,7 +2540,7 @@ tr > td:first-child:before {
     display: inline-block;
     top: 0;
     left: 0;
-    border-bottom: 1px solid #F6F6F5;
+    border-bottom: 1px solid #FFF;
 }
 /* 右侧留白 */
 .ui-table-layout
@@ -2508,7 +2554,7 @@ tr > td:last-child:after{
     right: 0;
     top: 0;
     display: inline-block;
-    border-bottom: 1px solid #f6f6f5;
+    border-bottom: 1px solid #FFF;
 }
 /* 表格内容区域横向表格线 */
 .ui-table-cell-infor {
@@ -3482,11 +3528,11 @@ li {
     z-index: 999;
     padding: 5px 10px;
     color: #333;
-    background: #F9EDBE;
+    background: #FFF;
     font-family: "微软雅黑", Serif;
     font-size: 14px;
     font-weight: bold;
-    border: 1px solid #F0C36D;
+    border: 1px solid RGB(202, 203, 205);
     border-radius: 4px;
     -moz-border-radius: 4px;
     -webkit-border-radius: 4px;
@@ -3532,10 +3578,11 @@ li {
     background-position: 0 -120px;
     background-repeat: no-repeat;
     overflow: hidden;
-    display: inline-block;
-    *display: inline;
-    *zoom: 1;
+    /*display: inline-block;*/
+    /**display: inline;*/
+    /**zoom: 1;*/
     vertical-align: middle;
+    display: none;
 }
 
 /**
@@ -4020,6 +4067,7 @@ div.di-dim-level-find-msg span{
     color: #000;
     float: right;
     vertical-align: bottom;
+    margin-right: 15px;
 }
 .di-table-down-text {
     height: 20px;

@@ -865,8 +865,7 @@ public final class DataModelUtils {
      * @param rowNum
      * @return
      */
-    public static DataModel merageDataModel(DataModel oriDataModel, DataModel newDataModel,
-        int rowNum) {
+    public static DataModel merageDataModel(DataModel oriDataModel, DataModel newDataModel, int rowNum) {
         DataModel dataModel = new DataModel();
         dataModel.setColumnBaseData(oriDataModel.getColumnBaseData());
         dataModel.setColumnHeadFields(oriDataModel.getColumnHeadFields());
@@ -879,6 +878,7 @@ public final class DataModelUtils {
             throw new IllegalStateException("can not found head field with row number " + rowNum);
         }
         realRowHead.getExtInfos().put(EXT_INFOS_MEM_EXPAND, false);
+        
         realRowHead.setChildren(newDataModel.getRowHeadFields().get(0).getChildren());
         realRowHead.getChildren().forEach(tmp -> {
             tmp.setNodeUniqueName(null);

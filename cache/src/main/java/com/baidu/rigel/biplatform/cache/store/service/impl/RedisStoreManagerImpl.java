@@ -18,10 +18,13 @@ package com.baidu.rigel.biplatform.cache.store.service.impl;
 
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.EventObject;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.redisson.Redisson;
 import org.redisson.core.RMap;
 import org.slf4j.Logger;
@@ -30,6 +33,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.cache.RedissonCache;
 import com.baidu.rigel.biplatform.cache.StoreManager;
@@ -65,6 +69,8 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     
     private String lockKey = REDIS_LOCK;
     
+    private String cachePrefix = "";
+    
     
 
     /*
@@ -73,17 +79,14 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
      */
     @Override
     public Cache getDataStore(String name) {
-        if(redisProperties.isDev()) {
-            try {
-                name = MacAddressUtil.getMacAddress(null) + "_" + name;
-            } catch (SocketException | UnknownHostException e) {
-                log.warn("get mac address error:{}",e);
-            }
+        
+        RMap<Object, Object> map = redisson.getMap(cachePrefix + "_" +name);
+        if(redisProperties.getCacheExpire().containsKey(name)) {
+            map.expire(redisProperties.getCacheExpire().get(name), TimeUnit.SECONDS);
+        } else {
+            map.expire(redisProperties.getDefaultExpire(), TimeUnit.SECONDS);
         }
-        RMap<Object, Object> map = redisson.getMap(name);
-        map.expire(redisProperties.getDefaultExpire(), TimeUnit.SECONDS);
         return new RedissonCache(map, name);
-
     }
 
     /*
@@ -126,12 +129,24 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        if (redisProperties.isDev()) {
-            String currentMac = MacAddressUtil.getMacAddress(null);
-            log.info("this instance is run with dev mode,current mac :{}", currentMac);
-            topicKey = currentMac + "_" + topicKey;
-            queueKey = currentMac + "_" + queueKey;
-            lockKey = currentMac + "_" + lockKey;
+        
+        List<String> prefix = new ArrayList<>();
+        if(this.redisProperties.isDev()) {
+            try {
+                prefix.add(MacAddressUtil.getMachineNetworkFlag(null));
+            } catch (SocketException | UnknownHostException e) {
+                log.warn("get mac add error:{}", e.getMessage());
+            }
+        }
+        if(!StringUtils.isEmpty(this.redisProperties.getClusterPre())) {
+            prefix.add(this.redisProperties.getClusterPre());
+        }
+        if (CollectionUtils.isNotEmpty(prefix)) {
+            this.cachePrefix = org.apache.commons.lang.StringUtils.join(prefix, "_");
+            log.info("this instance is run with dev mode,current mac :{}", cachePrefix);
+            topicKey = cachePrefix + "_" + redisProperties.getTopicName();
+            queueKey = cachePrefix + "_" + redisProperties.getEventQueueName();
+            lockKey = cachePrefix + "_" + redisProperties.getLockName();
         }
         redisson.getTopic(topicKey).addListener(new RedisTopicListener());
     }

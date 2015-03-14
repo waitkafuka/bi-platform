@@ -104,9 +104,12 @@
     cursor: pointer;
     background: #E7F9FE;
 }
-.ui-table-row-hover .ui-table-ccell {
-    /*background: #FFF;*/
+/* .ui-table-row-hover .ui-table-ccell {
+    background: #F0F4F6;
 }
+.ui-table-row-hover .ui-table-rowhcell {
+    background: #F0F4F6;
+} */
 .ui-table-row-checked .ui-table-ccell,
 .ui-table-row-selected .ui-table-ccell {
     background: #FFF;
@@ -421,7 +424,7 @@ tr > td:first-child:before {
     display: inline-block;
     top: 0;
     left: 0;
-    border-bottom: 1px solid #F6F6F5;
+    border-bottom: 1px solid #FFF;
 }
 /* 右侧留白 */
 .ui-table-layout
@@ -435,7 +438,7 @@ tr > td:last-child:after{
     right: 0;
     top: 0;
     display: inline-block;
-    border-bottom: 1px solid #f6f6f5;
+    border-bottom: 1px solid #FFF;
 }
 /* 表格内容区域横向表格线 */
 .ui-table-cell-infor {

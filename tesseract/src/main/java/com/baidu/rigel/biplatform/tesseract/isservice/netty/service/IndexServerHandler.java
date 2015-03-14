@@ -24,7 +24,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +51,6 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -205,6 +203,8 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         	data = (SearchIndexResultSet) indexMsg.getDataBody();
         }
         
+        logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+                "IndexServerHandler","Begin to index "+ (data==null ? 0 :data.size()) +" data" ));
         long currDiskSize = FileUtils.getDiskSize(indexMsg.getIdxPath());
         BigDecimal currMaxId = null;
         // 读取数据建索引
@@ -233,6 +233,8 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
             
         }
         
+        logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+                "IndexServerHandler"," finish index "));
         String feedBackIndexServicePath = null;
         String feedBackIndexFilePath = null;
         // 如果当前分片写满了 or 是当前数据的最后一片，释放indexWriter\设置服务路径
@@ -258,6 +260,8 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         indexFeedbackMsg.setIdName(indexMsg.getIdName());
         indexFeedbackMsg.setMaxId(currMaxId);
         
+        logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+                "IndexServerHandler"," send message back "));
         ChannelFuture sendBack=ctx.writeAndFlush(indexFeedbackMsg);
         if (sendBack.isDone()) {
             ctx.close();
