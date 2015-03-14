@@ -23,6 +23,11 @@
     var attachEvent = xutil.dom.attachEvent;
     var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
+    // 统一设置图例字体样式
+    var textStyle = {
+        fontFamily: '微软雅黑 宋体',
+        fontSize: '12'
+    };
 
     /**
      * 基于e-chart的JS图
@@ -168,9 +173,10 @@
      * @protected
      */
     UI_E_CHART_CLASS.$getDefaultMeasures = function (chartType){
-        return (this._defaultMeasures.length > 0 && chartType != 'line')
-            ? [this._defaultMeasures[0]]
-            : this._defaultMeasures;
+        return (this._defaultMeasures
+                && this._defaultMeasures.length > 0
+                && chartType != 'line'
+            ) ? [this._defaultMeasures[0]] : this._defaultMeasures;
     };
 
     /**
@@ -212,7 +218,7 @@
             else {
                 // 单选
                 var radioName = 'echarts-candidate-radio-' + new Date().getTime();
-                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+                for (var i = 0,  iLen = allMeasures.length; i < iLen; i ++) {
                     var checkAbr = isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked"' : '';
                     var radioId = [
                        'allMeasures-radio',
@@ -451,7 +457,11 @@
             axisLine: {
                 onZero: false
             },
-            data: this._aXAxis.data
+            data: this._aXAxis.data,
+            // 设置x轴字体样式
+            axisLabel: {
+                textStyle: textStyle
+            }
         };
         if (this._aXAxis.type === 'date') {
             xAxis.showDataType = 'date';
@@ -541,11 +551,8 @@
 
                     return resultStr;
                 };
-                // 字体修改 - 晓强
-                yAxisOption.axisLabel.textStyle = {
-                     fontFamily: 'simhei'
-                };
-
+                // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
+                yAxisOption.axisLabel.textStyle = textStyle;
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -613,6 +620,8 @@
         }
         legend.data = data;
         if (this._chartType === 'line') {
+            // 更改折线图图例字体
+            legend.textStyle = textStyle;
             options.legend = legend;
         }
     };
@@ -705,12 +714,16 @@
         if (this._chartType === 'pie') {
             toolTip.formatter = '{a} <br/>{b} : {c} ({d}%)';
             toolTip.trigger = 'item';
+            // 设置提示字体
+            toolTip.textStyle =textStyle;
         }
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
             toolTip.formatter = function (data) {
                 return mapToolTipFunc(data, options.series);
             };
+            // 设置提示字体
+            toolTip.textStyle =textStyle;
         }
         else {
             toolTip.trigger = 'axis';
@@ -746,9 +759,7 @@
                 }
                 return res;
             };
-            toolTip.textStyle = {
-                fontFamily: '微软雅黑,宋体'
-            };
+            toolTip.textStyle = textStyle;
         }
         options.tooltip = toolTip;
     };
@@ -895,7 +906,9 @@
                 x: 'left',
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
-                calculable : true
+                calculable: true,
+                // 设置地图值域字体
+                textStyle: textStyle
             };
         }
         if (this._chartType === 'pie') {
