@@ -790,6 +790,8 @@ public class QueryDataResource extends BaseResource {
          */
         ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
         
+        logger.info ("[INFO] --- --- --- --- --- ---params with context is : " + areaContext.getParams ());
+        
         /**
          * 5. 生成查询动作QueryAction
          */
