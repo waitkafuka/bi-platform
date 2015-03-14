@@ -64,7 +64,7 @@
     padding: 2px 6px;
     cursor: pointer;
     border: 1px solid white;
-    font-family: 微 软 雅 黑, Arial;
+    font-family: "微软雅黑", "Arial";
     font-size: 12px;
     color: #282828;
     fill: #282828;
@@ -97,6 +97,7 @@
     height: 15px;
     line-height: 15px;
     cursor: pointer;
+    font-family: "微软雅黑", "宋体";
 }
 .echarts-candidate input {
     float: left;

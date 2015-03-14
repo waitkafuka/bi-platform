@@ -23,6 +23,11 @@
     var attachEvent = xutil.dom.attachEvent;
     var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
+    // 统一设置图例字体样式
+    var legendTextStyle = {
+        fontFamily: '微软雅黑 宋体',
+        fontSize: '12'
+    };
 
     /**
      * 基于e-chart的JS图
@@ -452,7 +457,11 @@
             axisLine: {
                 onZero: false
             },
-            data: this._aXAxis.data
+            data: this._aXAxis.data,
+            // 设置x轴字体样式
+            axisLabel: {
+                textStyle: legendTextStyle
+            }
         };
         if (this._aXAxis.type === 'date') {
             xAxis.showDataType = 'date';
@@ -542,11 +551,8 @@
 
                     return resultStr;
                 };
-                // 字体修改 - 晓强
-                yAxisOption.axisLabel.textStyle = {
-                     fontFamily: 'simhei'
-                };
-
+                // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
+                yAxisOption.axisLabel.textStyle = legendTextStyle;
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -614,6 +620,8 @@
         }
         legend.data = data;
         if (this._chartType === 'line') {
+            // 更改折线图图例字体
+            legend.textStyle = legendTextStyle;
             options.legend = legend;
         }
     };
