@@ -201,7 +201,8 @@ _eInput - 多选项的INPUT对象
                 && (text.length != 0 || btnAllSelected)
                 && text.length == list.length + (control._bSelectAllBtn ? -1 : 0) 
             ) {
-                text = control._sTextAll;
+                // text = control._sTextAll;
+                text = list[0]._sTip;
             }
             else if (text.length == 0 && control._sTextNone) {
                 text = control._sTextNone;

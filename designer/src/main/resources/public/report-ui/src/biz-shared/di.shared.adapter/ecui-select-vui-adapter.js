@@ -49,6 +49,14 @@ $namespace('di.shared.adapter');
             getType.call(this) == 'ui-multi-select' ? [] : null
         );
         while(this.remove(0)) {}
+        // 补全多选下拉框默认选中值
+        if (getType.call(this) == 'ui-multi-select') {
+            var value = [];
+            for (var i = 0, len = datasource.length; i < len; i ++) {
+                value.push(datasource[i].value);
+            }
+            data.value = value;
+        }
         // 当是多选下拉框，含有全选按钮，返回的数据中含有 全部节点 时，过滤掉此节点，然后把‘全选’按钮的text给换成此节点的text（为了适应业务逻辑，不得不加这一段代码）
         // callback维度会返回一个全部节点
         if (getType.call(this) == 'ui-multi-select'
