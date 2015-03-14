@@ -128,17 +128,17 @@ define([
                     }
                 );
                 // 更换link里面的路径
-                $('.link-skin').attr(
-                    'href', 'asset/'
-                        + reportTheme
-                        + '/css/-di-product-debug.css'
-                );
-                // 更换线上link里面的路径
 //                $('.link-skin').attr(
 //                    'href', 'asset/'
-//                    + type
-//                    + '/css/-di-product-min.css'
+//                        + reportTheme
+//                        + '/css/-di-product-debug.css'
 //                );
+                // 更换线上link里面的路径
+                $('.link-skin').attr(
+                    'href', 'asset/'
+                    + reportTheme
+                    + '/css/-di-product-min.css'
+                );
             },
 
             /**
