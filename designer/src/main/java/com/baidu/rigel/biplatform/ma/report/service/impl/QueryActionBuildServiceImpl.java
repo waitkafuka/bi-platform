@@ -576,7 +576,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     start = json.getString("start").replace("-", "");
                     end = json.getString("end").replace("-", "");
                     if (item.getParams().get("range") != null && start.equals(end)) {
-                        TimeRangeDetail tail = TimeUtils.getMonthDays(TimeRangeDetail.getTime(start));
+                        TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(start), 30, 0);
                         start = tail.getStart();
                         end = tail.getEnd();
                     } else {

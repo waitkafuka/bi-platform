@@ -16,9 +16,14 @@
  */
 package com.baidu.rigel.biplatform.cache.redis.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.boot.autoconfigure.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import com.baidu.rigel.biplatform.cache.StoreManager;
 
 import redis.clients.jedis.Protocol;
 
@@ -50,7 +55,15 @@ public class RedisPoolProperties extends RedisProperties {
     /** 
      * defaultExpire 默认超时时间
      */
-    private long defaultExpire = 30 * 60;
+    private long defaultExpire = -1;
+    
+    private Map<String, Long> cacheExpire = new HashMap<>();
+    
+    private String topicName = StoreManager.TOPICS;
+    
+    private String eventQueueName = StoreManager.EVENT_QUEUE;
+    
+    private String lockName = "lock";
     
     
     /** 
@@ -417,6 +430,78 @@ public class RedisPoolProperties extends RedisProperties {
     public void setClusterPre(String clusterPre) {
     
         this.clusterPre = clusterPre;
+    }
+
+    /** 
+     * 获取 cacheExpire 
+     * @return the cacheExpire 
+     */
+    public Map<String, Long> getCacheExpire() {
+    
+        return cacheExpire;
+    }
+
+    /** 
+     * 设置 cacheExpire 
+     * @param cacheExpire the cacheExpire to set 
+     */
+    public void setCacheExpire(Map<String, Long> cacheExpire) {
+    
+        this.cacheExpire = cacheExpire;
+    }
+
+    /** 
+     * 获取 topicName 
+     * @return the topicName 
+     */
+    public String getTopicName() {
+    
+        return topicName;
+    }
+
+    /** 
+     * 设置 topicName 
+     * @param topicName the topicName to set 
+     */
+    public void setTopicName(String topicName) {
+    
+        this.topicName = topicName;
+    }
+
+    /** 
+     * 获取 eventQueueName 
+     * @return the eventQueueName 
+     */
+    public String getEventQueueName() {
+    
+        return eventQueueName;
+    }
+
+    /** 
+     * 设置 eventQueueName 
+     * @param eventQueueName the eventQueueName to set 
+     */
+    public void setEventQueueName(String eventQueueName) {
+    
+        this.eventQueueName = eventQueueName;
+    }
+
+    /** 
+     * 获取 lockName 
+     * @return the lockName 
+     */
+    public String getLockName() {
+    
+        return lockName;
+    }
+
+    /** 
+     * 设置 lockName 
+     * @param lockName the lockName to set 
+     */
+    public void setLockName(String lockName) {
+    
+        this.lockName = lockName;
     }
     
 }

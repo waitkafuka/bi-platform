@@ -728,7 +728,7 @@
                 // 如果为date类型则设置显示周
                 if (options.xAxis.showDataType === 'date'){
                     var weekStr = ['周日','周一','周二','周三','周四','周五','周六'][new Date(data[0][1]).getDay()];
-                    res = res + '(' + weekStr + ')';
+                    res = res + ' （' + weekStr + '）';
                 }
                 for (var i = 0, l = data.length; i < l; i++) {
 

@@ -48,7 +48,8 @@ _eInput - 多选项的INPUT对象
         UI_SELECT = ui.Select,
         UI_SELECT_CLASS = UI_SELECT.prototype,
         UI_SELECT_ITEM = UI_SELECT_CLASS.Item,
-        UI_SELECT_ITEM_CLASS = UI_SELECT_ITEM.prototype;
+        UI_SELECT_ITEM_CLASS = UI_SELECT_ITEM.prototype,
+        selectAllText = '全选';
 //{/if}//
 //{if $phase == "define"}//
     /**
@@ -74,6 +75,9 @@ _eInput - 多选项的INPUT对象
             function(el, options) {
                 var values;
                     me = this;
+                // TODO:为了适应当前配置的报表没有添加此属性，需要干掉
+                options.selectAllButton = true;
+
                 if (options.maxlength) {
                     this._nTextLen = options.maxlength;
                 }
@@ -87,7 +91,7 @@ _eInput - 多选项的INPUT对象
                     this._nMaxSelected = options.maxSelected;
                 }
                 else if (options.selectAllButton) {
-                    this.add('全选', 0, {selectAllButton: true});
+                    this.add(selectAllText, 0, {selectAllButton: true});
                     this._bSelectAllBtn = true;
                 }
                 if (options.tip) {
@@ -177,7 +181,6 @@ _eInput - 多选项的INPUT对象
      * @param {ecui.ui.MultiSelect} control 多选下拉框控件
      */
     function UI_MULTI_SELECT_FLUSH_TEXT(control) {
-        // TODO:重新修改显示逻辑
         var tip;
         if (control) {
             var btnAllSelected = false;
@@ -536,6 +539,24 @@ _eInput - 多选项的INPUT对象
         UI_MULTI_SELECT_FLUSH_SELECTALL(this);
         UI_MULTI_SELECT_FLUSH_TEXT(this);
     };
+
+    /**
+     * 为全选按钮重命名
+     * @public
+     *
+     * @param {Array/String} values 控件被选中的值列表
+     */
+    UI_MULTI_SELECT_CLASS.setSelectAllText = function (text) {
+        // FIXME:实现非常不好，需要优化
+        var list = this.getItems(),
+            html = list[0]._eBody.innerHTML;
+        if (list.length > 0) {
+            list[0]._sTip = text;
+            list[0]._sValue = text;
+            list[0]._eBody.innerHTML = html.replace(selectAllText, text);
+        }
+    };
+
 //{/if}//
 //{if 0}//
 })();
