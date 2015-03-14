@@ -309,6 +309,7 @@ public class DataModelUtils {
             }
         }
         fillColumnData(dataModel, FillDataType.ROW);
+        logger.info ("[INFO] ---- ---- ---- ---- ---- after remove filter blank row ,current dataModel is : " + dataModel);
         return blankRowCount;
     }
 

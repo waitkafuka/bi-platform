@@ -98,6 +98,8 @@
     line-height: 15px;
     cursor: pointer;
     font-family: "微软雅黑", "宋体";
+    font-size: 12px;
+
 }
 .echarts-candidate input {
     float: left;

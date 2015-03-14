@@ -152,8 +152,8 @@ public final class QueryUtils {
         // TODO 此处没有考虑指标、维度交叉情况，如后续有指标维度交叉情况，此处需要调整
         questionModel.getQueryConditionLimit().setWarningAtOverFlow(false);
         if (queryAction.isNeedOthers()) {
-        	// TODO 需要开发通用工具包 将常量定义到通用工具包中
-        	questionModel.getRequestParams().put("NEED_OTHERS", "1");
+            // TODO 需要开发通用工具包 将常量定义到通用工具包中
+            questionModel.getRequestParams().put("NEED_OTHERS", "1");
         }
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
