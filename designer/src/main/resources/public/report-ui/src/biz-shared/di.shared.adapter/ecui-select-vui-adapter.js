@@ -49,7 +49,17 @@ $namespace('di.shared.adapter');
             getType.call(this) == 'ui-multi-select' ? [] : null
         );
         while(this.remove(0)) {}
-
+        // 当是多选下拉框，含有全选按钮，返回的数据中含有 全部节点 时，过滤掉此节点，然后把‘全选’按钮的text给换成此节点的text（为了适应业务逻辑，不得不加这一段代码）
+        // callback维度会返回一个全部节点
+        if (getType.call(this) == 'ui-multi-select'
+            && this._bSelectAllBtn
+            && datasource.length > 1
+            && (datasource[0].text.indexOf('全部') > -1)
+        ) {
+            var text = datasource[0].text;
+            datasource = datasource.slice(1, datasource.length);
+            this.setSelectAllText(text);
+        }
         // 添加
         for (var i = 0, o; o = datasource[i]; i++) {
             var txt = String(o.text != null ? o.text : '');
