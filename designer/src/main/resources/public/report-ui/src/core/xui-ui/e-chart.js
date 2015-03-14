@@ -24,7 +24,7 @@
     var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
     // 统一设置图例字体样式
-    var legendTextStyle = {
+    var textStyle = {
         fontFamily: '微软雅黑 宋体',
         fontSize: '12'
     };
@@ -459,7 +459,7 @@
             data: this._aXAxis.data,
             // 设置x轴字体样式
             axisLabel: {
-                textStyle: legendTextStyle
+                textStyle: textStyle
             }
         };
         if (this._aXAxis.type === 'date') {
@@ -551,7 +551,7 @@
                     return resultStr;
                 };
                 // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
-                yAxisOption.axisLabel.textStyle = legendTextStyle;
+                yAxisOption.axisLabel.textStyle = textStyle;
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -620,7 +620,7 @@
         legend.data = data;
         if (this._chartType === 'line') {
             // 更改折线图图例字体
-            legend.textStyle = legendTextStyle;
+            legend.textStyle = textStyle;
             options.legend = legend;
         }
     };
@@ -713,12 +713,16 @@
         if (this._chartType === 'pie') {
             toolTip.formatter = '{a} <br/>{b} : {c} ({d}%)';
             toolTip.trigger = 'item';
+            // 设置提示字体
+            toolTip.textStyle =textStyle;
         }
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
             toolTip.formatter = function (data) {
                 return mapToolTipFunc(data, options.series);
             };
+            // 设置提示字体
+            toolTip.textStyle =textStyle;
         }
         else {
             toolTip.trigger = 'axis';
@@ -754,9 +758,7 @@
                 }
                 return res;
             };
-            toolTip.textStyle = {
-                fontFamily: '微软雅黑,宋体'
-            };
+            toolTip.textStyle = textStyle;
         }
         options.tooltip = toolTip;
     };
@@ -903,7 +905,9 @@
                 x: 'left',
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
-                calculable : true
+                calculable: true,
+                // 设置地图值域字体
+                textStyle: textStyle
             };
         }
         if (this._chartType === 'pie') {
