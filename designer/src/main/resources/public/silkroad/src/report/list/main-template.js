@@ -6,11 +6,13 @@ define(['template'], function (template) {
         $each(reportList,function($item,index){
         $out+='\n            <tr class="report-line j-root-line" data-id="';
         $out+=$escape($item.id);
+        $out+='" data-theme="';
+        $out+=$escape($item.theme);
         $out+='">\n                <td>';
         $out+=$escape(index + 1);
         $out+='</td>\n                <td><a class="text c-p ellipsis j-show-report" title="点击预览">';
         $out+=$escape($item.name);
-        $out+='</a>\n                </td>\n                <td><span\n                        class="btn-has-icon btn-has-icon-copy c-p j-copy-report">创建副本</span>\n						<span class="btn-has-icon btn-has-icon-info c-p j-info-report j-show-publish-info"\n                              title="报表的发布信息">查看发布信息</span> <span\n                            class="btn-has-icon btn-has-icon-edit c-p j-edit-report">编辑</span>\n                    <span class="btn-has-icon btn-has-icon-delete c-p j-delete-report">删除</span>\n                </td>\n            </tr>\n            ';
+        $out+='</a>\n                </td>\n                <td>\n                    <span class="btn-has-icon btn-has-icon-copy c-p j-copy-report">创建副本</span>\n                    <span class="btn-has-icon btn-has-icon-info c-p j-info-report j-show-publish-info"\n                              title="报表的发布信息">查看发布信息</span>\n                    <span class="btn-has-icon btn-has-icon-edit c-p j-edit-report">编辑</span>\n                    <span class="btn-has-icon btn-has-icon-delete c-p j-delete-report">删除</span>\n                </td>\n            </tr>\n            ';
         });
         $out+='\n            </tbody>\n        </table>\n        ';
         if(reportList.length == 0){

@@ -112,6 +112,7 @@ define([
              */
             editReport: function (event) {
                 var reportId = this.getLineId(event);
+                var reportTheme = this.getReportTheme(event);
                 var that = this;
 
                 require(
@@ -121,10 +122,23 @@ define([
                         window.dataInsight.main = new EditReportView({
                             el: $('.j-main'),
                             id: reportId,
-                            isEdit: true
+                            isEdit: true,
+                            theme: reportTheme
                         });
                     }
                 );
+                // 更换link里面的路径
+                $('.link-skin').attr(
+                    'href', 'asset/'
+                        + reportTheme
+                        + '/css/-di-product-debug.css'
+                );
+                // 更换线上link里面的路径
+//                $('.link-skin').attr(
+//                    'href', 'asset/'
+//                    + type
+//                    + '/css/-di-product-min.css'
+//                );
             },
 
             /**
@@ -201,6 +215,17 @@ define([
              */
             getLineId: function (event) {
                 return $(event.target).parents('.j-root-line').attr('data-id');
+            },
+
+            /**
+             * 获取被点击的行的theme
+             *
+             * @param {event} event 点击事件
+             * @public
+             * @return {string} 报表当前皮肤
+             */
+            getReportTheme: function (event) {
+                return $(event.target).parents('.j-root-line').attr('data-theme');
             },
 
             /**
