@@ -320,7 +320,8 @@ $namespace('di.shared.ui');
          * @event
          */
         this.$di('dispatchEvent', this.$diEvent('dataerror', options));
-        DIALOG.alert('获取图形数据异常：' + ejsonObj.statusInfo);
+        // 暂时注释掉报错提示，用以解决当商桥嵌入报表时页签快速切换的频繁弹窗问题
+        // DIALOG.alert('获取图形数据异常：' + ejsonObj.statusInfo);
     };
 
     /**
