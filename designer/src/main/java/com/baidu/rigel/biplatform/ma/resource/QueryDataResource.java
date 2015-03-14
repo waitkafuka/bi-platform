@@ -382,7 +382,7 @@ public class QueryDataResource extends BaseResource {
          */
         Map<String, Object> tmp = 
                 QueryUtils.resetContextParam(request, model);
-        runtimeModel.getContext().getParams().putAll(tmp);;
+        runtimeModel.getContext().getParams().putAll(tmp);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         StringBuilder builder = buildVMString(reportId, request, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
