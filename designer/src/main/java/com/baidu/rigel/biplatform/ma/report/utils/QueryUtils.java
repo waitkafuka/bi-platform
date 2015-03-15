@@ -27,6 +27,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
@@ -92,6 +94,7 @@ import com.google.common.collect.Sets;
  */
 public final class QueryUtils {
   
+    private static final Logger LOG = LoggerFactory.getLogger (QueryUtils.class);
     /**
      * 构造函数
      */
@@ -804,8 +807,12 @@ public final class QueryUtils {
         if (params.size() == 0) {
             return rs;
         }
+        LOG.info ("context params ============== " + ContextManager.getParams ());
         Map<String, String> requestParams = collectRequestParams(params, request);
+        rs.putAll(requestParams);
+        LOG.info ("current request params ============== " + requestParams);
         params.forEach(param -> {
+            LOG.info ("current param define ============== " + param.toString());
             if (param.isNeeded() && StringUtils.isEmpty(requestParams.get(param.getName()))) {
                 if (StringUtils.isEmpty(param.getDefaultValue())) {
                     throw new RuntimeException("必要参数未赋值");
@@ -819,7 +826,7 @@ public final class QueryUtils {
                 rs.put(param.getName(), param.getDefaultValue());
             }
         });
-        rs.putAll(requestParams);
+        LOG.info ("after reset params is : " + rs);
         return rs;
     }
 
