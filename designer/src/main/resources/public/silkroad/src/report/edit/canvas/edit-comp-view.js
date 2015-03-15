@@ -364,7 +364,7 @@ define([
                 this.canvasView._component.dispose();
                 // TODO:添加维度为空时，限制
                 // 修改entity中下拉框类型
-                var text = $target.parent().parent().find('.j-line-x').find('.j-item-text').text().split('（')[0];
+                var text = $.trim($target.parent().parent().find('.j-line-x').find('.j-item-text').text()).split('（')[0];
                 for (var i = 0, iLen = entityDefs.length; i < iLen; i++) {
                     if (compId === entityDefs[i].compId
                         &&
@@ -1089,7 +1089,7 @@ define([
                 var id = option.$item.attr('data-id');
                 var editCompModel = this.canvasView.editCompView.model;
                 var entityDefs = editCompModel.canvasModel.reportJson.entityDefs;
-                var text = option.$item.find('.j-item-text').text().split('（')[0];
+                var text = $.trim(option.$item.find('.j-item-text').text().split('（')[0]);
 
                 for (var i = 0, len = entityDefs.length; i < len; i++) {
                     if (entityDefs[i].compId == compId
