@@ -1086,8 +1086,14 @@ define([
                 var id = option.$item.attr('data-id');
                 var editCompModel = this.canvasView.editCompView.model;
                 var entityDefs = editCompModel.canvasModel.reportJson.entityDefs;
+
                 for (var i = 0, len = entityDefs.length; i < len; i++) {
-                    if (entityDefs[i].compId == compId) {
+                    if (entityDefs[i].compId == compId
+                        &&
+                        (entityDefs[i].clzKey === 'ECUI_MULTI_SELECT'
+                            || entityDefs[i].clzKey === 'ECUI_SELECT'
+                        )
+                     ) {
                         entityDefs[i].dimId = id;
                     }
                 }

@@ -106,6 +106,9 @@ _eInput - 多选项的INPUT对象
                 if (options.minSelected) {
                     this._nMinSelected = options.minSelected;
                 }
+                // TODO:为了适应当前配置的报表没有添加此属性，需要干掉
+                this._sTextAll = this._sTextAll || '全部';
+                this._sTextNone = this._sTextNone || '未选择';
 
                 this._eInput.disabled = true;
 
@@ -201,8 +204,14 @@ _eInput - 多选项的INPUT对象
                 && (text.length != 0 || btnAllSelected)
                 && text.length == list.length + (control._bSelectAllBtn ? -1 : 0) 
             ) {
+                if (list[0]._sTip === selectAllText) {
+                    text = control._sTextAll;
+                }
+                else {
+                    text = list[0]._sTip;
+                }
                 // text = control._sTextAll;
-                text = list[0]._sTip;
+                // text = list[0]._sTip;
             }
             else if (text.length == 0 && control._sTextNone) {
                 text = control._sTextNone;
