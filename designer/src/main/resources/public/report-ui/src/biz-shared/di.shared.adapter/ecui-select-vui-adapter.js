@@ -49,7 +49,7 @@ $namespace('di.shared.adapter');
             getType.call(this) == 'ui-multi-select' ? [] : null
         );
         while(this.remove(0)) {}
-        // 补全多选下拉框默认选中值
+        // 补全多选下拉框默认选中值 TODO:这个value是需要后端补全的
         if (getType.call(this) == 'ui-multi-select') {
             var value = [];
             for (var i = 0, len = datasource.length; i < len; i ++) {
@@ -64,9 +64,7 @@ $namespace('di.shared.adapter');
             && datasource.length > 1
             && (datasource[0].text.indexOf('全部') > -1)
         ) {
-            var text = datasource[0].text;
             datasource = datasource.slice(1, datasource.length);
-            this.setSelectAllText(text);
         }
         // 添加
         for (var i = 0, o; o = datasource[i]; i++) {
