@@ -43,6 +43,8 @@ import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.vo.MetaJsonDataInfo;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
@@ -254,7 +256,6 @@ public class MetaQueryAction {
             JsonUnSeriallizableUtils.fillCubeInfo(cube);
             questionModel.setDataSourceInfo(dataSourceInfo);
             questionModel.setCube(cube);
-
             QueryContext queryContext = null;
             QueryContextSplitStrategy preSplitStrategy = null;
             // 拆分的查询会有查询上下文和当前拆分策略参数

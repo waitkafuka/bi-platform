@@ -66,7 +66,7 @@ public class CacheManagerForResource {
         if (cache == null) {
             return null;
         }
-        ValueWrapper wrapper = getCache().get(key);
+        ValueWrapper wrapper = cache.get(key);
         if (wrapper == null) {
             logger.info("can not get obj from cache with key : " + key);
             return null;
