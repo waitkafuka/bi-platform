@@ -220,6 +220,7 @@ public class QueryDataResource extends BaseResource {
                     List<Map<String, String>> values;
                     try {
                         values = Lists.newArrayList();
+                        params.remove (dim.getId ());
                         List<Member> members = reportModelQueryService
                                 .getMembers(tmpCube, 
                                 tmpCube.getDimensions().get(dim.getName()), params, securityKey).get(0);

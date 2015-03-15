@@ -263,7 +263,7 @@ public class CallbackSearchServiceImpl {
                 response.put(k, v.get());
             } catch (Exception e1) {
                 LOGGER.error(e1.getMessage(), e1);
-                sb.append ("查询回调指标" + callbackMeasureNames.toString () + " 异常");
+                sb.append ("指标: " + callbackMeasureNames.toString () + " 数据获取异常, 请查询网络或重新查询");
             }
         });
         if (!StringUtils.isEmpty (sb.toString ())) {

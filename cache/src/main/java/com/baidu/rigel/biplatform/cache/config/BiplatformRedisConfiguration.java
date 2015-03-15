@@ -281,10 +281,12 @@ public class BiplatformRedisConfiguration {
                     log.warn("get mac add error:{}", e.getMessage());
                 }
             }
-            if(StringUtils.isEmpty(!StringUtils.isEmpty(this.properties.getClusterPre()))) {
+            if(!StringUtils.isEmpty(this.properties.getClusterPre())) {
                 prefix.add(this.properties.getClusterPre());
             }
             redisCacheManager.setUsePrefix(true);
+            redisCacheManager.setExpires(this.properties.getCacheExpire());
+            
             redisCacheManager.setCachePrefix(new ClusterRedisCachePrefix(prefix));
             
             return redisCacheManager;

@@ -411,7 +411,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         for (Dimension dim : dims) {
             // 过滤条件中包含当前维度表其他列的过滤条件，因此将过滤条件应用到当前维度成员查询上 此处暂时不考虑维度组
             String filterValue = params.get (dim.getId ());
-            if (StringUtils.isNotBlank (filterValue) && dimTable.equals (dim.getTableName ())) {
+            if (StringUtils.isNotBlank (filterValue) && dimTable.equals (dim.getTableName ()) && !dim.getId ().equals (level.getDimension ().getId ())) {
                 MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
                 Expression expression = new Expression(dimLevel.getSource ());
                 // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject

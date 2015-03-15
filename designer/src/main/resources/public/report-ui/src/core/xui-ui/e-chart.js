@@ -25,7 +25,7 @@
     var XOBJECT = xui.XObject;
     // 统一设置图例字体样式
     var textStyle = {
-        fontFamily: '微软雅黑 宋体',
+        fontFamily: '微软雅黑',
         fontSize: '12'
     };
 
@@ -579,7 +579,7 @@
             var sum = 0;
             // 判断数据书否全部为0
             var nowxAxis = 0;
-            var arrSeries = this._aSeries;
+            var arrSeries = options.series;
             // 判断是否查出数据，没有数据情况判断方式是数据为0
             for (var i = 0; i < arrSeries.length; i ++) {
                 xAxisData.push(arrSeries[i].data.length);
