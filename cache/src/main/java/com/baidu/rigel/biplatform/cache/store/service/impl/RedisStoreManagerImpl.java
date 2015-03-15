@@ -79,6 +79,9 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
      */
     @Override
     public Cache getDataStore(String name) {
+        if(redisCacheManager != null) {
+            return redisCacheManager.getCache(name);
+        }
         
         RMap<Object, Object> map = redisson.getMap(cachePrefix + "_" +name);
         if(redisProperties.getCacheExpire().containsKey(name)) {
