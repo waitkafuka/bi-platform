@@ -249,15 +249,15 @@ public class BiplatformRedisConfiguration {
             return Redisson.create(getConfig());
         }
         
-//        @Bean
-//        @ConditionalOnProperty(prefix = "config.redis", name = "active", havingValue = "true")
+        @Bean
+        @ConditionalOnProperty(prefix = "config.redis", name = "active", havingValue = "true")
         public RedisConnectionFactory redisConnectionFactory()
                 throws UnknownHostException {
             return applyProperties(createJedisConnectionFactory());
         }
         
-//        @Bean
-//        @ConditionalOnBean(RedisConnectionFactory.class)
+        @Bean
+        @ConditionalOnBean(RedisConnectionFactory.class)
         public RedisTemplate<Object, Object> redisTemplate(
                 RedisConnectionFactory redisConnectionFactory)
                 throws UnknownHostException {
@@ -267,12 +267,13 @@ public class BiplatformRedisConfiguration {
         }
 
         
-//        @Bean(name="redisCacheManager")
-//        @ConditionalOnBean(RedisOperations.class)
+        @Bean(name="redisCacheManager")
+        @ConditionalOnBean(RedisTemplate.class)
         public CacheManager redisCacheManager(RedisTemplate<Object, Object> template) {
             RedisCacheManager redisCacheManager = new RedisCacheManager(template);
             redisCacheManager.setDefaultExpiration(this.properties.getDefaultExpire());
             List<String> prefix = new ArrayList<>();
+            prefix.add("jedis");
             if(this.properties.isDev()) {
                 try {
                     prefix.add(MacAddressUtil.getMachineNetworkFlag(null));
@@ -280,10 +281,12 @@ public class BiplatformRedisConfiguration {
                     log.warn("get mac add error:{}", e.getMessage());
                 }
             }
-            if(StringUtils.isEmpty(!StringUtils.isEmpty(this.properties.getClusterPre()))) {
+            if(!StringUtils.isEmpty(this.properties.getClusterPre())) {
                 prefix.add(this.properties.getClusterPre());
             }
             redisCacheManager.setUsePrefix(true);
+            redisCacheManager.setExpires(this.properties.getCacheExpire());
+            
             redisCacheManager.setCachePrefix(new ClusterRedisCachePrefix(prefix));
             
             return redisCacheManager;

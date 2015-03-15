@@ -84,8 +84,8 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     public void start() {
 //        ExecutorService executor = Executors.newSingleThreadExecutor();
 //        executor.execute(() -> run());
-        Executors.newScheduledThreadPool(1)
-            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
+//        Executors.newScheduledThreadPool(1)
+//            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
     }
     
     /*
@@ -99,11 +99,9 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
             "ClusterNodeCheckThread"));
 //        while (true) {
             // get lock
-        Node node;
-        Node udpateNode;
         try {
-            node = this.applicationContext.getBean(Node.class);
-            udpateNode = this.isNodeService.getNodeByCurrNode(node);
+            Node node = this.applicationContext.getBean(Node.class);
+            Node udpateNode = this.isNodeService.getNodeByCurrNode(node);
             
             // update self state
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
@@ -114,22 +112,22 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update self state", "end"));
             // save node image
-            this.isNodeService.saveNodeImage(udpateNode);
+ //           this.isNodeService.saveNodeImage(udpateNode);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update localImage", "success"));
-            udpateNode=null;
-            node=null;
+//            udpateNode=null;
+//            node=null;
             // check others
             
             Lock lock = this.storeManger.getClusterLock();
+            
             if (lock.tryLock(this.getLockTimeOut, TimeUnit.SECONDS)) {
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                     "Get Lock", "Success"));
-                lock.lock();
-                LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                    "Locked", "Success"));
                 try {
-                    
+                    lock.lock();
+                    LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
+                            "Locked", "Success"));
                     this.isNodeService.markClusterBadNode();
                     LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                         "markClusterBadNode", "Success"));

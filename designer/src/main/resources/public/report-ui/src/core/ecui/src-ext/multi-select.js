@@ -48,8 +48,7 @@ _eInput - 多选项的INPUT对象
         UI_SELECT = ui.Select,
         UI_SELECT_CLASS = UI_SELECT.prototype,
         UI_SELECT_ITEM = UI_SELECT_CLASS.Item,
-        UI_SELECT_ITEM_CLASS = UI_SELECT_ITEM.prototype,
-        selectAllText = '全选';
+        UI_SELECT_ITEM_CLASS = UI_SELECT_ITEM.prototype;
 //{/if}//
 //{if $phase == "define"}//
     /**
@@ -91,7 +90,7 @@ _eInput - 多选项的INPUT对象
                     this._nMaxSelected = options.maxSelected;
                 }
                 else if (options.selectAllButton) {
-                    this.add(selectAllText, 0, {selectAllButton: true});
+                    this.add(options.selectAllText, 0, {selectAllButton: true});
                     this._bSelectAllBtn = true;
                 }
                 if (options.tip) {
@@ -106,9 +105,6 @@ _eInput - 多选项的INPUT对象
                 if (options.minSelected) {
                     this._nMinSelected = options.minSelected;
                 }
-                // TODO:为了适应当前配置的报表没有添加此属性，需要干掉
-                this._sTextAll = this._sTextAll || '全部';
-                this._sTextNone = this._sTextNone || '未选择';
 
                 this._eInput.disabled = true;
 
@@ -204,14 +200,8 @@ _eInput - 多选项的INPUT对象
                 && (text.length != 0 || btnAllSelected)
                 && text.length == list.length + (control._bSelectAllBtn ? -1 : 0) 
             ) {
-                if (list[0]._sTip === selectAllText) {
-                    text = control._sTextAll;
-                }
-                else {
-                    text = list[0]._sTip;
-                }
-                // text = control._sTextAll;
-                // text = list[0]._sTip;
+                text = control._sTextAll;
+//                text = list[0]._sTip;
             }
             else if (text.length == 0 && control._sTextNone) {
                 text = control._sTextNone;
@@ -550,22 +540,22 @@ _eInput - 多选项的INPUT对象
         UI_MULTI_SELECT_FLUSH_TEXT(this);
     };
 
-    /**
-     * 为全选按钮重命名
-     * @public
-     *
-     * @param {Array/String} values 控件被选中的值列表
-     */
-    UI_MULTI_SELECT_CLASS.setSelectAllText = function (text) {
-        // FIXME:实现非常不好，需要优化
-        var list = this.getItems(),
-            html = list[0]._eBody.innerHTML;
-        if (list.length > 0) {
-            list[0]._sTip = text;
-            list[0]._sValue = text;
-            list[0]._eBody.innerHTML = html.replace(selectAllText, text);
-        }
-    };
+//    /**
+//     * 为全选按钮重命名
+//     * @public
+//     *
+//     * @param {Array/String} values 控件被选中的值列表
+//     */
+//    UI_MULTI_SELECT_CLASS.setSelectAllText = function (text) {
+//        // FIXME:实现非常不好，需要优化
+//        var list = this.getItems(),
+//            html = list[0]._eBody.innerHTML;
+//        if (list.length > 0) {
+//            list[0]._sTip = text;
+//            list[0]._sValue = text;
+//            list[0]._eBody.innerHTML = html.replace(selectAllText, text);
+//        }
+//    };
 
 //{/if}//
 //{if 0}//

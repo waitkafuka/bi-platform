@@ -22,6 +22,7 @@ define(
             "dataOpt": {
                 "textNone": "未选择",
                 "textAll": "全部",
+                "selectAllText": "全部",
                 "selectAllButton": true
             }
         };

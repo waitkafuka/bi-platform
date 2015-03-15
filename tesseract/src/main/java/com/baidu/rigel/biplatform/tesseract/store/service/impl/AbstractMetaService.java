@@ -65,7 +65,7 @@ public class AbstractMetaService implements MetaSerivce {
         List<StoreMeta> storeMetaList = null;
         ValueWrapper storeMetaValue = metaDataStore.get(storeMeta.getStoreKey());
         if (storeMetaValue != null) {
-            storeMetaList = (List<StoreMeta>) metaDataStore.get(storeMeta.getStoreKey()).get();
+            storeMetaList = (List<StoreMeta>) storeMetaValue.get();
         }
         if (storeMetaList == null) {
             storeMetaList = new ArrayList<StoreMeta>();
