@@ -83,7 +83,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
         RMap<Object, Object> map = redisson.getMap(cachePrefix + "_" +name);
         if(redisProperties.getCacheExpire().containsKey(name)) {
             map.expire(redisProperties.getCacheExpire().get(name), TimeUnit.SECONDS);
-        } else {
+        } else if (redisProperties.getDefaultExpire() > 0) {
             map.expire(redisProperties.getDefaultExpire(), TimeUnit.SECONDS);
         }
         return new RedissonCache(map, name);
