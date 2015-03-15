@@ -112,7 +112,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update self state", "end"));
             // save node image
-            this.isNodeService.saveNodeImage(udpateNode);
+ //           this.isNodeService.saveNodeImage(udpateNode);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update localImage", "success"));
 //            udpateNode=null;
