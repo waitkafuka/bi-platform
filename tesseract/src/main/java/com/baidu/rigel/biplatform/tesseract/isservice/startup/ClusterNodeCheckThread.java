@@ -84,8 +84,8 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     public void start() {
 //        ExecutorService executor = Executors.newSingleThreadExecutor();
 //        executor.execute(() -> run());
-        Executors.newScheduledThreadPool(1)
-            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
+//        Executors.newScheduledThreadPool(1)
+//            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
     }
     
     /*
