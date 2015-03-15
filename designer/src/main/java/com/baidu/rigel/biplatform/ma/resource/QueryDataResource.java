@@ -601,10 +601,10 @@ public class QueryDataResource extends BaseResource {
              */
             
         }
-        Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
-        for (Map.Entry<String, Object> entry : runtimeParams.entrySet ()) {
-            runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
-        }
+//        for (Map.Entry<String, Object> entry : runtimeParams.entrySet ()) {
+//            runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
+//        }
+//        Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
                 "Fail Getting VM of Report", "");
