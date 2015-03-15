@@ -277,6 +277,8 @@ public class HttpRequest {
             } catch (Exception e) {
                 ex = e;
                 LOGGER.warn("send get error " + requestUrl + ",retry next one", e);
+            } finally {
+                closeConn (client);
             }
         }
         throw new RuntimeException(ex);
@@ -359,10 +361,23 @@ public class HttpRequest {
                 return content;
             } catch (Exception e) {
                 LOGGER.warn("send post error " + requestUrl + ",retry next one", e);
+            } finally {
+                closeConn (client);
             }
         }
         throw new RuntimeException("send post failed[" + requestUrl + "]. params :" + nameValues);
 
+    }
+
+    @SuppressWarnings("deprecation")
+    private static void closeConn(HttpClient client) {
+        if (client != null) {
+            try {
+                client.getConnectionManager ().shutdown ();
+            } catch (Exception e) {
+                LOGGER.warn(e.getMessage (), e);
+            }
+        }
     }
 
     /**
