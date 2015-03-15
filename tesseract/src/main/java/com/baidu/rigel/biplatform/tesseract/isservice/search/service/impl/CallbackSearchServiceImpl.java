@@ -186,6 +186,10 @@ public class CallbackSearchServiceImpl {
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
         }
+        // TODO 需要综合处理此处
+        if (query.getGroupBy () == null || query.getSelect () == null) {
+            return null;
+        }
         Map<String, String> requestParams = ((QueryContextAdapter) context).getQuestionModel().getRequestParams ();
         // Build query target map
         Map<String, List<MiniCubeMeasure>> callbackMeasures = context.getQueryMeasures().stream()
