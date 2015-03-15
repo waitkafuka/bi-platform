@@ -536,7 +536,6 @@
                         if (that._chartType === 'bar') {
                             value = -1 * value;
                         }
-
                         resultStr = value;
                         var w = 10000;
                         var y = 1000000000;
@@ -573,6 +572,35 @@
             }
         }
         if (this._chartType === 'bar') {
+            // 用来接遍历数据
+            var xAxisSeries = [];
+            var xAxisData = [];
+            // 为0的数据个数
+            var sum = 0;
+            // 判断数据书否全部为0
+            var nowxAxis = 0;
+            var arrSeries = this._aSeries;
+            // 判断是否查出数据，没有数据情况判断方式是数据为0
+            for (var i = 0; i < arrSeries.length; i ++) {
+                xAxisData.push(arrSeries[i].data.length);
+                for (var j = 0; j < arrSeries[i].data.length; j ++) {
+                    if (arrSeries[i].data[j] == 0) {
+                        sum = sum + 1;
+                    }
+                }
+                xAxisSeries.push(sum);
+                sum = 0;
+            }
+            // 通过判断为0数据并对same进行累加为判断数据准备
+            for (var i = 0; i < xAxisSeries.length; i ++) {
+                if (xAxisSeries[i] == xAxisData[i]) {
+                    nowxAxis = nowxAxis + 1;
+                }
+            }
+            if(xAxisSeries.length == nowxAxis && xAxisData.length == nowxAxis) {
+                yAxis[0].max = 0;
+                yAxis[0].min = -10;
+            }
             options.xAxis = yAxis;
         }
         if (this._chartType === 'column' || this._chartType === 'line') {
