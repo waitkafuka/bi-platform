@@ -25,7 +25,7 @@
     var XOBJECT = xui.XObject;
     // 统一设置图例字体样式
     var textStyle = {
-        fontFamily: '微软雅黑 宋体',
+        fontFamily: '微软雅黑',
         fontSize: '12'
     };
 
