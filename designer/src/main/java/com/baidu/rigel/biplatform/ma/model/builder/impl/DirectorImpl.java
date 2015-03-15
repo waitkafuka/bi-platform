@@ -214,7 +214,7 @@ public class DirectorImpl implements Director {
         final Map<String, Dimension> tmp = Maps.newHashMap();
         oriDims.values().forEach(dim -> {
             if (dim.getType() != DimensionType.GROUP_DIMENSION && dim.getTableName().equals(cube.getSource())) {
-                tmp.put(dim.getPrimaryKey(), dim);
+                tmp.put(dim.getName (), dim);
             }
         });
         while (it.hasNext()) {
@@ -222,6 +222,7 @@ public class DirectorImpl implements Director {
             if (tmp.containsKey(m.getName())) {
                 Dimension dim = tmp.get(m.getName());
                 dims.put(dim.getId(), dim);
+                it.remove ();
             }
         }
     }

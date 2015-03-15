@@ -600,6 +600,10 @@ public class QueryDataResource extends BaseResource {
              */
             
         }
+        Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
+        for (Map.Entry<String, Object> entry : runtimeParams.entrySet ()) {
+            runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
+        }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
                 "Fail Getting VM of Report", "");
@@ -789,6 +793,8 @@ public class QueryDataResource extends BaseResource {
          * 4. 更新区域本地的上下文
          */
         ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
+        
+        logger.info ("[INFO] --- --- --- --- --- ---params with context is : " + areaContext.getParams ());
         
         /**
          * 5. 生成查询动作QueryAction
