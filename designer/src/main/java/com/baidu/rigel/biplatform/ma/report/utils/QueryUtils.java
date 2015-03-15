@@ -820,7 +820,7 @@ public final class QueryUtils {
                 rs.put(param.getElementId(), param.getDefaultValue());
                 rs.put(param.getName(), param.getDefaultValue());
             } else if (!StringUtils.isEmpty(requestParams.get(param.getName()))) {
-                rs.put(param.getElementId(), requestParams.get(param.getName()).split(","));
+                rs.put(param.getElementId(), requestParams.get(param.getName()));
             } else if (!StringUtils.isEmpty(param.getDefaultValue())) {
                 rs.put(param.getElementId(), param.getDefaultValue());
                 rs.put(param.getName(), param.getDefaultValue());
