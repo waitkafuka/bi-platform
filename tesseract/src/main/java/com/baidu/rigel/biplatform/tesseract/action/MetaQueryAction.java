@@ -44,8 +44,6 @@ import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.data.vo.MetaJsonDataInfo;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
@@ -277,11 +275,11 @@ public class MetaQueryAction {
             
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
             if (dataModel != null) {
-                dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
-                        questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
                 if (questionModel.isFilterBlank()) {
                     DataModelUtils.filterBlankRow(dataModel);
                 }
+                dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
+                        questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
             }
             LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             return ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));

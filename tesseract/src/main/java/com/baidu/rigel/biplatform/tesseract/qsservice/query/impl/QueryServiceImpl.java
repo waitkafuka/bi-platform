@@ -181,7 +181,6 @@ public class QueryServiceImpl implements QueryService {
             
             result = queryContextSplitService.mergeDataModel(splitResult);
         } else {
-            
             result = executeQuery(dataSourceInfo, cube, queryContext,questionModel.isUseIndex(), questionModel.getPageInfo());
         }
         return result;
