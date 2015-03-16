@@ -42,13 +42,17 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.data.vo.MetaJsonDataInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
+import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
@@ -61,6 +65,7 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextBuilder;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryContextSplitService.QueryContextSplitStrategy;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.QueryService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
+import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
@@ -271,6 +276,13 @@ public class MetaQueryAction {
             }
             
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
+            if (dataModel != null) {
+                dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
+                        questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
+                if (questionModel.isFilterBlank()) {
+                    DataModelUtils.filterBlankRow(dataModel);
+                }
+            }
             LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             return ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
 
@@ -424,4 +436,69 @@ public class MetaQueryAction {
 
     }
 
+    /**
+     * 排序并截断结果集，默认显示500条纪录
+     * @param result
+     * @param sortRecord
+     * @param needOthers 
+     * @return DataModel
+     */
+    private DataModel sortAndTrunc(DataModel result, SortRecord sortRecord, String needOthers) {
+        if (sortRecord != null) {
+            DataModelUtils.sortDataModelBySort(result, sortRecord);
+        }
+        if (sortRecord == null) {
+            return result;
+        }
+//            int recordSize = sortRecord == null ? 500 : sortRecord.getRecordSize();
+        // 二八原则进行统计计算 
+        if (TesseractConstant.NEED_OTHERS_VALUE.equals(needOthers)) {
+            //TODO 此处先简化计算，由于图形会走此处逻辑，并且图形不包含汇总合集数据 后续考虑处理包含汇总合集的情况
+            return tonNSetting4Chart(result, sortRecord);
+        }
+        return DataModelUtils.truncModel(result, sortRecord.getRecordSize()); 
+    }
+
+    /**
+     * 
+     * @param result
+     * @param sortRecord
+     * @return DataModel
+     */
+    private DataModel tonNSetting4Chart(DataModel result, SortRecord sortRecord) {
+        BigDecimal sum = BigDecimal.ZERO;
+        for (BigDecimal tmp : result.getColumnBaseData().get(0)) {
+            //TODO 如果是回调指标，这里需要如何处理？？？？
+            if (tmp == null) {
+                continue;
+            }
+            sum = sum.add(tmp);
+        }
+        // 此处采用默认计算
+        result = DataModelUtils.truncModel(result, sortRecord.getRecordSize() - 1); 
+        BigDecimal sum1 = BigDecimal.ZERO;
+        for (BigDecimal tmp : result.getColumnBaseData().get(0)) {
+            //TODO 如果是回调指标，这里需要如何处理？？？？
+            if (tmp == null) {
+                continue;
+            }
+            sum1 = sum1.add(tmp);
+        }
+        BigDecimal other = null;
+        if (sum1 != BigDecimal.ZERO) {
+            other = sum.subtract(sum1);
+        }
+        result.getColumnBaseData().get(0).add(other);
+        HeadField otherRowField = DeepcopyUtils.deepCopy(result.getRowHeadFields().get(0));
+        otherRowField.setSummarizeData(other);
+        String caption = "其余";
+        otherRowField.setCaption(caption);
+        String dimName = MetaNameUtil.getDimNameFromUniqueName(otherRowField.getValue());
+        String uniqueName = "[" + dimName + "].[" + caption + "]";
+        String nodeUniqueName = "{" + uniqueName + "}";
+        otherRowField.setNodeUniqueName(nodeUniqueName);
+        otherRowField.setValue(uniqueName);
+        result.getRowHeadFields().add(otherRowField);
+        return result;
+    }
 }
