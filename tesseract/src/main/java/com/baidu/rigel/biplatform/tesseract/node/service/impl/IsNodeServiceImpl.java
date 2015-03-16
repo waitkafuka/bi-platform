@@ -416,13 +416,13 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
             "markClusterBadNode", "[no param]"));
         Node currNode=this.getCurrentNode();
         List<Node> nodeList = this.getNodeListByClusterName(currNode.getClusterName());
-        long currTime = System.currentTimeMillis();
         if (nodeList != null) {
             for (Node curr : nodeList) {
+                long currTime = System.currentTimeMillis();
                 if (curr.getNodeState().equals(NodeState.NODE_AVAILABLE)
                         && ((currTime - curr.getLastStateUpdateTime()) > this.nodeStateUpdateMaxIntervalTime)) {
-                	curr.setNodeState(NodeState.NODE_UNAVAILABLE);
-                	curr.setLastStateUpdateTime(currTime);
+                    curr.setNodeState(NodeState.NODE_UNAVAILABLE);
+                    curr.setLastStateUpdateTime(currTime);
                     this.saveOrUpdateNodeInfo(curr);
                 }
             }

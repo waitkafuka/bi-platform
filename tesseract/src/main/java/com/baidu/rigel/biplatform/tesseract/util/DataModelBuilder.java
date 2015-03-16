@@ -142,7 +142,7 @@ public class DataModelBuilder {
                             columnBaseDatas.get(i).add(parseData.get(rowName).get(columnName));
                         } else {
                             // 填充一个null对象
-                            columnBaseDatas.get(i).add(null);
+                            columnBaseDatas.get(i).add(BigDecimal.ZERO);
                         }
                     }
                 }

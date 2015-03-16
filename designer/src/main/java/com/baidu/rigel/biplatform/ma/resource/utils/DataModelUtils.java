@@ -449,6 +449,9 @@ public final class DataModelUtils {
         if (value != null) {
             value = value.setScale(8, RoundingMode.HALF_UP);
             data.setV(value);
+        } else {
+            value = BigDecimal.ZERO;
+            data.setV(value);
         }
         return data;
     }

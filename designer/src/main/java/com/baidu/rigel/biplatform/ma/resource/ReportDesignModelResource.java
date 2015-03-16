@@ -1250,7 +1250,8 @@ public class ReportDesignModelResource extends BaseResource {
         } catch (Exception e) {
             throw new RuntimeException("token encrpt happen exception, please check");
         }
-        publishInfoBuilder.append("?token=" + tokenEncrypt);
+        // 报表访问链接接口增加_rbk属性，对于原有逻辑流程无影响
+        publishInfoBuilder.append("?token=" + tokenEncrypt + "&_rbk=" + token);
         return publishInfoBuilder.toString();
     }
     
