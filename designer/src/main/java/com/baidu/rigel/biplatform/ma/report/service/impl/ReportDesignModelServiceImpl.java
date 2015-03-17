@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.report.service.impl;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -73,6 +74,12 @@ import com.google.common.collect.Maps;
 public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     
     /**
+     * 文件描述分割正则表达式
+     */
+    private static final String FILE_SPLIT_REG = "\\^_\\^";
+    
+
+    /**
      * 文件管理服务
      */
     @Resource
@@ -86,6 +93,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     
     @Value("${biplatform.ma.report.location}")
     private String reportBaseDir;
+    
     
     /**
      * logger
@@ -110,27 +118,22 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             if (listFile == null || listFile.length == 0) {
                 return new ReportDesignModel[0];
             }
-            List<String> tmp = Lists.newArrayList();
-            Collections.addAll(tmp, listFile);
-            Collections.sort(tmp, new Comparator<String>() {
+            ReportDesignModel[] modelList = buildResult(listFile);
+            List<ReportDesignModel> reportList = Arrays.asList (modelList);
+            Collections.sort (reportList, new Comparator<ReportDesignModel>() {
 
                 @Override
-                public int compare(String firstStr, String secondStr) {
-                    if (firstStr.startsWith(".") || secondStr.startsWith(".")) {
+                public int compare(ReportDesignModel o1, ReportDesignModel o2) {
+                    if (o1 == null || StringUtils.isEmpty (o1.getName ())) {
                         return -1;
                     }
-                    firstStr = firstStr.replaceAll("[?]", "-");
-                    String tmp = firstStr.substring(firstStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
-                            + Constants.FILE_NAME_SEPERATOR.length(), 
-                            firstStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR));
-                    secondStr = secondStr.replace("[?]", "-");
-                    String tmp2 = secondStr.substring(secondStr.indexOf(Constants.FILE_NAME_SEPERATOR) 
-                            + Constants.FILE_NAME_SEPERATOR.length(), 
-                            secondStr.lastIndexOf(Constants.FILE_NAME_SEPERATOR));
-                    return tmp.compareTo(tmp2);
+                    if (o2 == null) {
+                        return 0;
+                    }
+                    return o1.getName ().compareTo (o2.getName ());
                 }
             });
-            return buildResult(tmp.toArray(new String[0]));
+            return reportList.toArray (new ReportDesignModel[0]);
             
         } catch (FileServiceException e) {
             logger.error(e.getMessage(), e);
@@ -187,10 +190,14 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         
         try {
             for (String modelFile : modelFileList) {
-                if (modelFile.startsWith(idOrName) || modelFile.endsWith(idOrName)) {
+                if (modelFile.contains (".")) {
+                    continue;
+                }
+                String[] tmpArray = modelFile.split (FILE_SPLIT_REG);
+                if (idOrName.equals (tmpArray[0]) || tmpArray[1].equals (idOrName) 
+                        || String.valueOf (idOrName.hashCode ()).equals(tmpArray[1])) {
                     byte[] content = fileService.read(baseDir + File.separator + modelFile);
-                    ReportDesignModel model = (ReportDesignModel) SerializationUtils
-                        .deserialize(content);
+                    ReportDesignModel model = (ReportDesignModel) SerializationUtils.deserialize(content);
                     return model;
                 }
             }
@@ -219,6 +226,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                     return false;
                 }
                 result = fileService.rm(generateDevReportLocation(model));
+                // 尝试删除原有命名方式命名的报表
+                if (!result) {
+                    result = fileService.rm(generateOriDevReportLocation(model));
+                }
                 logger.info("delete report " + (result ? "successfully" : "failed"));
                 return result;
             }
@@ -229,6 +240,27 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         }
     }
     
+    /**
+     * 升级方法
+     * @param model
+     * @return String
+     */
+    @Deprecated
+    private String generateOriDevReportLocation(ReportDesignModel model) {
+        if (model == null) {
+            return null;
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append(getDevReportDir());
+        builder.append(File.separator);
+        builder.append(model.getId());
+        builder.append(Constants.FILE_NAME_SEPERATOR);
+        builder.append(model.getName());
+        builder.append(Constants.FILE_NAME_SEPERATOR);
+        builder.append(model.getDsId());
+        return builder.toString();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -246,10 +278,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         if (listFile == null || listFile.length == 0) {
             return false;
         }
-        String idTarget = name + Constants.FILE_NAME_SEPERATOR;
-        String nameTarget = Constants.FILE_NAME_SEPERATOR + name + Constants.FILE_NAME_SEPERATOR;
         for (String file : listFile) {
-            if (file.startsWith(idTarget) || file.contains(nameTarget)) {
+            String[] tmpArray = file.split (FILE_SPLIT_REG);
+            if (name.equals (tmpArray[0]) || name.equals(tmpArray[1]) 
+                    || String.valueOf (tmpArray[1].hashCode ()).equals (name)) {
                 return true;
             }
         }
@@ -276,10 +308,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         try {
             ReportDesignModel oldReport = getModelByIdOrName(model.getId(), false);
             if (oldReport != null) {
-                fileService.rm(generateDevReportLocation(oldReport));
+                try {
+                    this.deleteModel (oldReport, true);
+                } catch (Exception e) {
+                    fileService.rm (generateOriDevReportLocation (model));
+                }
             }
-            boolean rs = fileService.write(generateDevReportLocation(model),
-                SerializationUtils.serialize(model));
+            boolean rs = fileService.write(generateDevReportLocation(model), SerializationUtils.serialize(model));
             if (rs) {
                 return model;
             }
@@ -294,8 +329,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      * {@inheritDoc}
      */
     @Override
-    public ReportDesignModel copyModel(String src, String targetName)
-            throws ReportModelOperationException {
+    public ReportDesignModel copyModel(String src, String targetName) throws ReportModelOperationException {
         if (StringUtils.isEmpty(src)) {
             logger.warn("source name is empty");
             throw new ReportModelOperationException("source name is empty");
@@ -328,8 +362,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      */
     private String getDevReportDir() {
         String productLine = ContextManager.getProductLine();
-        return productLine + File.separator + reportBaseDir + File.separator
-            + "dev";
+        return productLine + File.separator + reportBaseDir + File.separator + "dev";
     }
     
     /**
@@ -339,8 +372,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      */
     private String getReleaseReportDir() {
         String productLine = ContextManager.getProductLine();
-        return productLine + File.separator + reportBaseDir + File.separator
-            + "release";
+        return productLine + File.separator + reportBaseDir + File.separator + "release";
     }
     
     /**
@@ -354,7 +386,8 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         }
         String productLine = ContextManager.getProductLine();
         return productLine + File.separator + reportBaseDir + File.separator
-            + "release" + File.separator + model.getId() + Constants.FILE_NAME_SEPERATOR + model.getName();
+                + "release" + File.separator + model.getId() 
+                + Constants.FILE_NAME_SEPERATOR + model.getName().hashCode ();
     }
     
     /**
@@ -372,7 +405,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         builder.append(File.separator);
         builder.append(model.getId());
         builder.append(Constants.FILE_NAME_SEPERATOR);
-        builder.append(model.getName());
+        builder.append(model.getName().hashCode ());
         builder.append(Constants.FILE_NAME_SEPERATOR);
         builder.append(model.getDsId());
         return builder.toString();
@@ -393,7 +426,11 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             // 删除原来已经发布的报表，如果不存在，忽略此处异常
             ReportDesignModel tmp = this.getModelByIdOrName (model.getId (), true);
             if (tmp != null) {
-                fileService.rm(getReleaseReportLocation(tmp));
+                try {
+                    fileService.rm(getReleaseReportLocation(tmp));
+                } catch (Exception e) {
+                    fileService.rm(getOriReleaseReportLocation(tmp));
+                }
             }
         } catch (FileServiceException e1) {
             logger.info (e1.getMessage (), e1);
@@ -447,6 +484,17 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             }
         }.start();
         return true;
+    }
+
+    @Deprecated
+    private String getOriReleaseReportLocation(ReportDesignModel model) {
+        if (model == null) {
+            return null;
+        }
+        String productLine = ContextManager.getProductLine();
+        return productLine + File.separator + reportBaseDir + File.separator
+                + "release" + File.separator + model.getId() 
+                + Constants.FILE_NAME_SEPERATOR + model.getName();
     }
 
     @Override
@@ -561,6 +609,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
      */
     private void deleteModel(ReportDesignModel model, boolean removeFromDisk) throws ReportModelOperationException {
         try {
+            // TODO 升级兼容 后续考虑删除
             fileService.rm(generateDevReportLocation(model));
             logger.info("delete report successfully");
         } catch (FileServiceException e) {
