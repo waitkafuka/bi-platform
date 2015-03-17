@@ -854,7 +854,7 @@ public class QueryDataResource extends BaseResource {
         } catch (QueryModelBuildException e1) {
             logger.info("构建问题模型失败！", e1);
             return ResourceUtils.getErrorResult("构建问题模型失败！", 1);
-        } catch (MiniCubeQueryException e1) {
+        } catch (Exception e1) {
             logger.info("查询数据失败！", e1);
             return ResourceUtils.getErrorResult("没有查询到相关数据", 1);
         }

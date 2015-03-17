@@ -35,6 +35,7 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ma.auth.bo.ReportDesignModelBo;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
@@ -141,14 +142,34 @@ public class ReportDesignModelResource extends BaseResource {
         String productLine = ContextManager.getProductLine();
         if (!StringUtils.isEmpty(productLine)) {
             ReportDesignModel[] modelList = reportDesignModelService.queryAllModels();
-            if (modelList == null || modelList.length == 0) {
-                modelList = new ReportDesignModel[0];
-            }
-            rs = getResult(SUCCESS, "can not get model list", modelList);
+            ReportDesignModelBo[] reportList = genReportModelList(modelList);
+            rs = getResult(SUCCESS, "can not get model list", reportList);
         }
         return rs;
     }
     
+    /**
+     * 
+     * @param modelList
+     * @return ReportDesignModelBo[]
+     */
+    private ReportDesignModelBo[] genReportModelList(ReportDesignModel[] modelList) {
+        if (modelList == null || modelList.length == 0) {
+            return new ReportDesignModelBo[0];
+        }
+        ReportDesignModelBo[] rs = new ReportDesignModelBo[modelList.length];
+        int i = 0;
+        for (ReportDesignModel model : modelList) {
+            rs[i] = new ReportDesignModelBo ();
+            rs[i].setId (model.getId());
+            rs[i].setName (model.getName ());
+            rs[i].setDsId (model.getDsId ());
+            rs[i].setTheme (model.getTheme ());
+            rs[i++].setRunTimeId (model.getRunTimeId ());
+        }
+        return rs;
+    }
+
     /**
      * 查询报表模型
      * 
