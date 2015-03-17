@@ -253,11 +253,26 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         StringBuilder builder = new StringBuilder();
         builder.append(getDevReportDir());
         builder.append(File.separator);
-        builder.append(model.getId());
-        builder.append(Constants.FILE_NAME_SEPERATOR);
-        builder.append(model.getName());
-        builder.append(Constants.FILE_NAME_SEPERATOR);
-        builder.append(model.getDsId());
+        String name = null;
+        try {
+            String[] listFile = fileService.ls(this.getDevReportDir());
+            for (String file : listFile) {
+                
+                if (file.startsWith (model.getId ())) {
+                    name = file;
+                    builder.append(name);
+                    break;
+                } 
+            }
+        } catch (FileServiceException e) {
+        }
+        if (name == null) {
+            builder.append(model.getId());
+            builder.append(Constants.FILE_NAME_SEPERATOR);
+            builder.append (name);
+            builder.append(Constants.FILE_NAME_SEPERATOR);
+            builder.append(model.getDsId());
+        }
         return builder.toString();
     }
 
@@ -311,7 +326,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 try {
                     this.deleteModel (oldReport, true);
                 } catch (Exception e) {
-                    fileService.rm (generateOriDevReportLocation (model));
+                    try {
+                        fileService.rm (generateOriDevReportLocation (model));
+                    } catch (Exception e1) {
+                    }
                 }
             }
             boolean rs = fileService.write(generateDevReportLocation(model), SerializationUtils.serialize(model));
@@ -491,10 +509,21 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         if (model == null) {
             return null;
         }
+        String name = model.getName ();
         String productLine = ContextManager.getProductLine();
+        try {
+            String[] listFile = fileService.ls(this.getReleaseReportDir ());
+            for (String file : listFile) {
+                if (file.startsWith (model.getId ())) {
+                    return productLine + File.separator + reportBaseDir + File.separator
+                            + "release" + File.separator +  file;
+                } 
+            }
+        } catch (FileServiceException e) {
+        }
         return productLine + File.separator + reportBaseDir + File.separator
                 + "release" + File.separator + model.getId() 
-                + Constants.FILE_NAME_SEPERATOR + model.getName();
+                + Constants.FILE_NAME_SEPERATOR + name;
     }
 
     @Override
@@ -592,7 +621,15 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             persModel = getModelByIdOrName (model.getId (), false);
         }
         try {
-            this.deleteModel (persModel, true);
+            try {
+                this.deleteModel (persModel, true);
+            } catch (Exception e) {
+                try {
+                    fileService.rm (generateOriDevReportLocation (persModel));
+                } catch (FileServiceException e1) {
+                    throw new ReportModelOperationException(e1);
+                }
+            }
             persModel.setName (model.getName ());
             this.saveOrUpdateModel (persModel);
         } catch (ReportModelOperationException e) {
