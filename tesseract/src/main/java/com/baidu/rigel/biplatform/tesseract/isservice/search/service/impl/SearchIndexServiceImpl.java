@@ -116,7 +116,7 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public SearchIndexResultSet query(QueryRequest query) throws IndexAndSearchException {
-    	ExecutorCompletionService<SearchIndexResultSet> completionService = new ExecutorCompletionService<>(taskExecutor);
+        ExecutorCompletionService<SearchIndexResultSet> completionService = new ExecutorCompletionService<>(taskExecutor);
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard

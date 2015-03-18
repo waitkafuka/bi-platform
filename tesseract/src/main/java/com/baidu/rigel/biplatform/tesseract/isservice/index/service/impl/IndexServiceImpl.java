@@ -563,6 +563,7 @@ public class IndexServiceImpl implements IndexService {
 				String bakFilePath = idxShard.getIdxFilePath();
 				idxShard.setIdxFilePath(servicePath);
 				idxShard.setFilePath(bakFilePath);
+				idxShard.setIdxState(IndexState.INDEX_AVAILABLE);
 			} else if (idxAction.equals(IndexAction.INDEX_MERGE)) {
 				idxMeta.getIdxShardList().remove(idxShard);
 			}
