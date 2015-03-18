@@ -376,11 +376,13 @@ public class QueryContextBuilder {
                 if(callbackMembers.size() == 1) {
                     List<Member> children = callbackMembers.get(0).getChildren();
                     MemberNodeTree parentNode = new MemberNodeTree(nodeTree);
-                    children.forEach((child) -> {
-                        MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                        buildMemberNodeByMember(dataSourceInfo, cube, childNode, (MiniCubeMember) child, params);
-                        parentNode.getChildren().add(childNode);
-                    });
+                    if (CollectionUtils.isNotEmpty (children)) { 
+                        children.forEach((child) -> {
+                            MemberNodeTree childNode = new MemberNodeTree(nodeTree);
+                            buildMemberNodeByMember(dataSourceInfo, cube, childNode, (MiniCubeMember) child, params);
+                            parentNode.getChildren().add(childNode);
+                        });
+                    }
                     nodeTree.getChildren().add(parentNode);
                 } else {
                     callbackMembers.forEach((child) -> {
