@@ -109,6 +109,10 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
          */
         CUBE_ID, // CUBE的ID
         /**
+         * INDEX_META_ID
+         */
+        INDEX_META_ID,// indexMetaId
+        /**
          * PRODUCT_LINE
          */
         PRODUCT_LINE // 产品线
@@ -349,6 +353,34 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         }
         
     }
+    
+    
+    @Override
+	public IndexMeta getIndexMetaByIndexMetaId(String idxMetaId, String storeKey) {
+		if (idxMetaId == null || storeKey == null || idxMetaId.equals("")
+				|| storeKey.equals("")) {
+			LOGGER.info("can not find IndexMeta:[idxMetaId:" + idxMetaId
+					+ "] in Store:[StoreKey:" + storeKey + "]");
+			return null;
+		}
+		IndexMeta result = null;
+		List<IndexMeta> metaList = super.getStoreMetaListByStoreKey(
+				IndexMeta.getDataStoreName(), storeKey);
+
+		if (!CollectionUtils.isEmpty(metaList)) {
+			for (IndexMeta meta : metaList) {
+				if (meta.getIndexMetaId().equals(idxMetaId)) {
+					result = meta;
+					break;
+				}
+			}
+		} else {
+			LOGGER.info("can not find indexMeta for IndexMetaId:[" + idxMetaId
+					+ "]");
+			return null;
+		}
+		return result;
+	}
     
     @Override
     public IndexMeta getIndexMetaByCubeId(String cubeId, String storeKey) {

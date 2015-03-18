@@ -364,6 +364,7 @@
                     }
                 }
                 else if (ser.type === 'line') {
+                    ser.yAxisIndex = 0;
                     ser.symbol = 'none'; // 线图上的点的形状
                     if (isInArray(ser.name, defaultMeasures)) {
                         tempData.push(ser);
@@ -402,6 +403,7 @@
                     series.push(ser);
                 }
                 else if (ser.type === 'line') {
+                    ser.yAxisIndex = 0;
                     tempData.push(ser);
                 }
                 else if (ser.type === 'map') {
@@ -762,6 +764,36 @@
             toolTip.trigger = 'item';
             toolTip.formatter = function (data) {
                 return mapToolTipFunc(data, options.series);
+            };
+            // 设置提示字体
+            toolTip.textStyle = styleConfiguration.textStyle;
+        }
+        else if (this._chartType === 'bar') {
+            toolTip.trigger = 'axis';
+            toolTip.formatter =  function(data, ticket, callback) {
+                var res = data[0][1];
+                for (var i = 0, l = data.length; i < l; i++) {
+                    var valueFormat = options.series[i].format;
+                    var valueLable = data[i][2];
+                    // Y轴调到右边需要数据翻转 晓强
+                    if (me._chartType === 'bar') {
+                        valueLable = -1 * valueLable;
+                    }
+                    // 当发现图数据有配置format属性时，按format所示进行展示
+                    // 当没有format的时候，展示原值
+                    if (valueFormat) {
+                        valueLable = formatNumber(
+                                valueLable,
+                                valueFormat,
+                                null,
+                                null,
+                                true
+                        );
+                    }
+                    
+                    res += '<br/>' + data[i][0] + ' : ' + valueLable;
+                }
+                return res;
             };
             // 设置提示字体
             toolTip.textStyle = styleConfiguration.textStyle;

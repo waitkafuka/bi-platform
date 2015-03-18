@@ -266,6 +266,11 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_TABLE_CLASS.$renderMain = function (data, ejsonObj, options) {
+        // 当数据为null时，清空视图
+        if(data === null) {
+            this.$handleDataError(ejsonObj.status, ejsonObj, options);
+            return;
+        }
         this.$di('getEl').style.display = '';
 
         foreachDo(

@@ -401,6 +401,7 @@ public class FileUtils {
                     LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FILEPROCESS_ERROR,
                         "IOException"));
                     LOGGER.error(e.getMessage(), e);
+                    
                     return false;
                 }
             }
