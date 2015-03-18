@@ -445,8 +445,7 @@ public class IndexServiceImpl implements IndexService {
                 currMaxId = idxMeta.getDataDescInfo ().getMaxDataId (tableName);
             }
             // 其它情况，init、merge情况currMaxId=0，mod情况currMaxId可以为0
-            String currWhereStr = sqlQuery.getIdName () + " > "
-                    + currMaxId.longValue ();
+            String currWhereStr = sqlQuery.getIdName () + " > " + currMaxId.longValue ();
             sqlQuery.getWhereList ().add (currWhereStr);
             if (idxAction.equals (IndexAction.INDEX_INIT_LIMITED)) {
                 total = IndexFileSystemConstants.INDEX_DATA_TOTAL_IN_LIMITEDMODEL;

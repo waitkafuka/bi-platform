@@ -24,6 +24,7 @@ import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.rt.query.model.QueryAction;
 import com.baidu.rigel.biplatform.ma.rt.query.service.QuestionModelBuildService;
 import com.baidu.rigel.biplatform.ma.rt.utils.QueryUtils;
@@ -66,6 +67,20 @@ public class QuestionModelBuildServiceImpl implements QuestionModelBuildService 
                         questionModel.getRequestParams().put(entry.getKey(), (String) value);
                     }
                 } 
+            }
+            if (action.getSlices () != null && !action.getSlices ().isEmpty ()) {
+                for (Map.Entry<Item, Object> entry : action.getSlices ().entrySet ()) {
+                    if (entry.getValue () instanceof String[]) {
+                        StringBuilder value = new StringBuilder();
+                        for (String str : (String[]) entry.getValue ()) {
+                            value.append (str + ",");
+                        }
+                        questionModel.getRequestParams().put(entry.getKey ().getOlapElementId (), value.toString ());
+                    } else if (entry.getValue () != null) {
+                        questionModel.getRequestParams().put(entry.getKey ().getOlapElementId (), 
+                                entry.getValue ().toString ());
+                    }
+                }
             }
             return questionModel;
         } catch (Exception e) {
