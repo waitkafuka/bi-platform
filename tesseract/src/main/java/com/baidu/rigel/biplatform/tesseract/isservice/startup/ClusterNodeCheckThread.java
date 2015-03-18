@@ -18,7 +18,6 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.startup;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
