@@ -78,6 +78,7 @@ import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
  *
  */
 @Service("indexService")
+
 public class IndexServiceImpl implements IndexService {
 	/**
 	 * LOGGER
@@ -849,6 +850,7 @@ public class IndexServiceImpl implements IndexService {
 		LOGGER.info("IndexMetaIsNullException ocurred:" + sb.toString());
 		return new IndexMetaIsNullException(sb.toString());
 	}
+
 
 
     
