@@ -364,6 +364,7 @@
                     }
                 }
                 else if (ser.type === 'line') {
+                    ser.yAxisIndex = 0;
                     ser.symbol = 'none'; // 线图上的点的形状
                     if (isInArray(ser.name, defaultMeasures)) {
                         tempData.push(ser);
@@ -402,6 +403,7 @@
                     series.push(ser);
                 }
                 else if (ser.type === 'line') {
+                    ser.yAxisIndex = 0;
                     tempData.push(ser);
                 }
                 else if (ser.type === 'map') {
