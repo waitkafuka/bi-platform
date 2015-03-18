@@ -217,24 +217,66 @@ public class QueryContextBuilder {
             return null;
         }
         Map<String, Set<String>> filterValues = new HashMap<>();
+        
+        Dimension dimension = cube.getDimensions().get(dimCondition.getMetaName());
+        boolean hasCallbackLevel = false;
+        int callbackLevelIndex = 0;
+        List<String> callbackParams = null;
+        List<Level> levels = Lists.newArrayList(dimension.getLevels().values());
+        for(int i = 0; i < levels.size(); i++) {
+            if(levels.get(i).getType().equals(LevelType.CALL_BACK)) {
+                hasCallbackLevel = true;
+                callbackLevelIndex = i;
+                callbackParams = new ArrayList<>();
+                break;
+            }
+        }
+        
+        
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())) {
                 logger.info("filter axises ignore all member filter");
                 return null;
             }
-            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-            if (member != null) {
-                String querySource = member.getLevel().getFactTableColumn();
-                Set<String> nodes =
-                        CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
-                                .getQueryNodes();
-                if (filterValues.containsKey(querySource)) {
-                    filterValues.get(querySource).addAll(nodes);
-                } else {
-                    filterValues.put(querySource, nodes);
-                }
+            String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
+            if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
+                callbackParams.add(names[names.length - 1]);
+                continue;
             } else {
-                logger.warn("can not found member by query data:{}", queryData);
+                MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
+                if (member != null) {
+                    String querySource = member.getLevel().getFactTableColumn();
+                    Set<String> nodes =
+                            CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
+                                    .getQueryNodes();
+                    if (filterValues.containsKey(querySource)) {
+                        filterValues.get(querySource).addAll(nodes);
+                    } else {
+                        filterValues.put(querySource, nodes);
+                    }
+                } else {
+                    logger.warn("can not found member by query data:{}", queryData);
+                }
+            }
+        }
+        if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
+            Map<String, String> newParams = new HashMap<>(params);
+            newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
+            List<MiniCubeMember> callbackMembers = callbackDimensionService.getMembers(cube, levels.get(callbackLevelIndex), dataSourceInfo, null, newParams);
+            String querySource = null;
+            if(CollectionUtils.isNotEmpty(callbackMembers)) {
+                for(MiniCubeMember member : callbackMembers) {
+                    querySource = member.getLevel().getFactTableColumn();
+                    Set<String> nodes =
+                            CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
+                                    .getQueryNodes();
+                            if (filterValues.containsKey(querySource)) {
+                                filterValues.get(querySource).addAll(nodes);
+                            } else {
+                                filterValues.put(querySource, nodes);
+                            }
+                    
+                }
             }
         }
 
