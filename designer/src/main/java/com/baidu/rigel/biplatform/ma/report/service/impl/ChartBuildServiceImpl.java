@@ -246,8 +246,8 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         seriesUnit.setName(col.getCaption());
         seriesUnit.setType(info.getType().getName());
         seriesUnit.setFormat(col.getFormat());
-//        seriesUnit.setProperties(genDataCaptions(rowHeadFields));
-        seriesUnit.setyAxisName(info.getyAxisName());
+        String[] measuerNames = MetaNameUtil.parseUnique2NameArray (col.getUniqueName ());
+        seriesUnit.setyAxisName (measuerNames[measuerNames.length - 1]);
         return seriesUnit;
     }
 
