@@ -781,7 +781,7 @@
                     // 当没有format的时候，展示原值
                     if (valueFormat) {
                         valueLable = formatNumber(
-                                data[i][2],
+                                valueLable,
                                 valueFormat,
                                 null,
                                 null,
