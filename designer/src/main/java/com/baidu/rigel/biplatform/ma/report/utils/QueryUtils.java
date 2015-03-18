@@ -160,33 +160,33 @@ public final class QueryUtils {
             // TODO 需要开发通用工具包 将常量定义到通用工具包中
             questionModel.getRequestParams().put("NEED_OTHERS", "1");
         }
-        putSliceConditionIntoParams (queryAction, questionModel);
+//        putSliceConditionIntoParams (queryAction, questionModel);
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
     }
 
-    /**
-     * 
-     * @param queryAction
-     * @param questionModel
-     */
-    private static void putSliceConditionIntoParams(QueryAction queryAction, QuestionModel questionModel) {
-        if (queryAction.getSlices () != null && !queryAction.getSlices ().isEmpty ()) {
-            for (Map.Entry<Item, Object> entry : queryAction.getSlices ().entrySet ()) {
-                String olapElementId = entry.getKey ().getOlapElementId ();
-                Object value = entry.getValue ();
-                if (value instanceof String[]) {
-                    StringBuilder rs = new StringBuilder();
-                    for (String str : (String[]) value) {
-                        rs.append (str + ",");
-                    }
-                    questionModel.getRequestParams().put(olapElementId, rs.toString ());
-                } else {
-                    questionModel.getRequestParams().put(olapElementId, value.toString ());
-                }
-            }
-        }
-    }
+//    /**
+//     * 
+//     * @param queryAction
+//     * @param questionModel
+//     */
+//    private static void putSliceConditionIntoParams(QueryAction queryAction, QuestionModel questionModel) {
+//        if (queryAction.getSlices () != null && !queryAction.getSlices ().isEmpty ()) {
+//            for (Map.Entry<Item, Object> entry : queryAction.getSlices ().entrySet ()) {
+//                String olapElementId = entry.getKey ().getOlapElementId ();
+//                Object value = entry.getValue ();
+//                if (value instanceof String[]) {
+//                    StringBuilder rs = new StringBuilder();
+//                    for (String str : (String[]) value) {
+//                        rs.append (str + ",");
+//                    }
+//                    questionModel.getRequestParams().put(olapElementId, rs.toString ());
+//                } else {
+//                    questionModel.getRequestParams().put(olapElementId, value.toString ());
+//                }
+//            }
+//        }
+//    }
     
 //    /**
 //     * 
@@ -796,6 +796,9 @@ public final class QueryUtils {
             return;
         }
         for (SeriesDataUnit seriesData : chart.getSeriesData ()) {
+            if (seriesData == null) {
+                continue;
+            }
             seriesData.setFormat (dataFormat.get (seriesData.getyAxisName ()));
         }
     }
