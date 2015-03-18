@@ -373,9 +373,10 @@ public class QueryContextBuilder {
             newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
             List<MiniCubeMember> callbackMembers = callbackDimensionService.getMembers(cube, levels.get(callbackLevelIndex), dataSourceInfo, null, newParams);
             if(CollectionUtils.isNotEmpty(callbackMembers)) {
-                if(callbackMembers.size() == 1) {
+                if(callbackMembers.size() == 1) { 
                     List<Member> children = callbackMembers.get(0).getChildren();
-                    MemberNodeTree parentNode = new MemberNodeTree(nodeTree);
+                    MemberNodeTree parentNode = new MemberNodeTree(nodeTree);  
+                    buildMemberNodeByMember(dataSourceInfo, cube, parentNode, callbackMembers.get(0), params);
                     if (CollectionUtils.isNotEmpty (children)) { 
                         children.forEach((child) -> {
                             MemberNodeTree childNode = new MemberNodeTree(nodeTree);
