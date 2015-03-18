@@ -306,10 +306,11 @@ public final class DataModelUtils {
         
         // build cellDataSetRowBased;
         List<List<CellData>> rowBasedData = transColumnBasedData2RowBasedData(columnBasedData);
-        pTable.setDataSourceRowBased(rowBasedData);
-        
-        // build cellDataSetColumnBased;
-        pTable.setDataSourceColumnBased(columnBasedData);
+        if (rowBasedData.size () > 1) {
+            pTable.setDataSourceRowBased(rowBasedData);
+            // build cellDataSetColumnBased;
+            pTable.setDataSourceColumnBased(columnBasedData);
+        }
         
         // build stat;
         pTable.setDataColumns(pTable.getDataSourceColumnBased().size());

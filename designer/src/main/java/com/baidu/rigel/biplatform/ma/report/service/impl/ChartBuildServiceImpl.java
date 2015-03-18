@@ -26,6 +26,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo;
@@ -276,9 +277,11 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         SeriesDataUnit seriesUnit = new SeriesDataUnit();
         seriesUnit.setData(getDataFromCells(columnData));
         seriesUnit.setName(col.getCaption());
+        String[] measuerNames = MetaNameUtil.parseUnique2NameArray (col.getUniqueName ());
+        seriesUnit.setyAxisName (measuerNames[measuerNames.length - 1]);
         seriesUnit.setType(info.getType().getName());
         seriesUnit.setFormat(col.getFormat());
-        seriesUnit.setyAxisName(info.getyAxisName());
+//        seriesUnit.setyAxisName(info.getyAxisName());
         return seriesUnit;
     }
 
