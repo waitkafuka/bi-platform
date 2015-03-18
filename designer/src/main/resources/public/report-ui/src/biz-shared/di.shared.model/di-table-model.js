@@ -222,7 +222,7 @@ $namespace('di.shared.model');
     function doParse(data, ejsonObj, options) {
         try {
             if (data === null) {
-                return;
+                return null;
             }
             var retData = {};
             var tableData = retData.tableData = data['pivottable'];
