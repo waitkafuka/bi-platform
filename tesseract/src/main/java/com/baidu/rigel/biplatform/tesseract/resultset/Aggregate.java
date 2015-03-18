@@ -17,8 +17,10 @@ package com.baidu.rigel.biplatform.tesseract.resultset;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
+import com.google.common.collect.Lists;
 
 /**
  * 聚集计算
@@ -74,9 +76,13 @@ public class Aggregate {
     }
     
 //    public static void main(String[] args) {
-//        Number a = 100;  
-//        Number b = 100.00;
-//        System.out.println(a.doubleValue() + b.doubleValue());
+//        BigDecimal a = BigDecimal.valueOf (100);
+//        BigDecimal b = BigDecimal.valueOf (200);
+//        List<BigDecimal> lists = Lists.newArrayList ();
+//        lists.add (a);
+//        lists.add (b);
+//        lists.add (a);
+//        System.out.println(aggregate(a, b, Aggregator.SUM));
 //    }
 
 }
