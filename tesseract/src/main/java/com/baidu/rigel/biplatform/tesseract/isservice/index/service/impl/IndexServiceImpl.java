@@ -34,6 +34,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -96,6 +97,9 @@ public class IndexServiceImpl implements IndexService {
 	 * RESULT_KEY_MAXID
 	 */
 	private static final String RESULT_KEY_MAXID = "RESULT_KEY_MAXID";
+	
+	@Value("${index.indexInterval}")
+    private int indexInterval;
 
 	/**
 	 * indexMetaService
@@ -389,7 +393,15 @@ public class IndexServiceImpl implements IndexService {
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
 				"doIndexByIndexAction", "[indexMeta:" + indexMeta
 						+ "][idxAction:" + idxAction + "]"));
-		IndexMeta idxMeta = indexMeta;
+		IndexMeta idxMeta = this.indexMetaService.getIndexMetaByIndexMetaId(indexMeta.getIndexMetaId(), indexMeta.getStoreKey());
+		
+		if ((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexInterval)) {
+			idxMeta.setLocked(Boolean.TRUE);
+			this.indexMetaService.saveIndexMetaLocally(idxMeta);
+		}else {			
+			return ;
+		}		
+		
 		if (idxMeta == null || idxAction == null) {
 			LOGGER.info(String.format(
 					LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
@@ -485,6 +497,9 @@ public class IndexServiceImpl implements IndexService {
 
 					// 处理
 					Map<String, Object> result = writeIndex(currResult,	idxAction, currIdxShard, isLastPiece, sqlQuery.getIdName());
+					
+					//更新时间戳
+					this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
 
 					currResult = (TesseractResultSet) result.get(RESULT_KEY_DATA);
 					currMaxId = (BigDecimal) result.get(RESULT_KEY_MAXID);
@@ -552,6 +567,7 @@ public class IndexServiceImpl implements IndexService {
 				idxMeta.getIdxShardList().remove(idxShard);
 			}
 		}
+		idxMeta.setLocked(Boolean.FALSE);
 		this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
 		publistIndexMetaWriteEvent(idxMeta);
 		
