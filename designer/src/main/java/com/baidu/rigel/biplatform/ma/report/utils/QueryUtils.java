@@ -71,6 +71,7 @@ import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
@@ -80,6 +81,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
+import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -158,9 +160,33 @@ public final class QueryUtils {
             // TODO 需要开发通用工具包 将常量定义到通用工具包中
             questionModel.getRequestParams().put("NEED_OTHERS", "1");
         }
+//        putSliceConditionIntoParams (queryAction, questionModel);
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
     }
+
+//    /**
+//     * 
+//     * @param queryAction
+//     * @param questionModel
+//     */
+//    private static void putSliceConditionIntoParams(QueryAction queryAction, QuestionModel questionModel) {
+//        if (queryAction.getSlices () != null && !queryAction.getSlices ().isEmpty ()) {
+//            for (Map.Entry<Item, Object> entry : queryAction.getSlices ().entrySet ()) {
+//                String olapElementId = entry.getKey ().getOlapElementId ();
+//                Object value = entry.getValue ();
+//                if (value instanceof String[]) {
+//                    StringBuilder rs = new StringBuilder();
+//                    for (String str : (String[]) value) {
+//                        rs.append (str + ",");
+//                    }
+//                    questionModel.getRequestParams().put(olapElementId, rs.toString ());
+//                } else {
+//                    questionModel.getRequestParams().put(olapElementId, value.toString ());
+//                }
+//            }
+//        }
+//    }
     
 //    /**
 //     * 
@@ -715,6 +741,10 @@ public final class QueryUtils {
                 chart.setTopType(topSetting.getTopType().name());
                 chart.setAreaId(area.getId());
             }
+            FormatModel formatModel = area.getFormatModel ();
+            if (formatModel != null && formatModel.getDataFormat () != null) {
+                addDataFormatInfo(chart, formatModel.getDataFormat ());
+            }
             final Map<String, String> dimMap = Maps.newConcurrentMap();
             String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);
@@ -758,6 +788,19 @@ public final class QueryUtils {
 //	            	}
 //            }
         } 
+    }
+
+    private static void addDataFormatInfo(DIReportChart chart,
+            Map<String, String> dataFormat) {
+        if (chart.getSeriesData () == null || chart.getSeriesData ().isEmpty ()) {
+            return;
+        }
+        for (SeriesDataUnit seriesData : chart.getSeriesData ()) {
+            if (seriesData == null) {
+                continue;
+            }
+            seriesData.setFormat (dataFormat.get (seriesData.getyAxisName ()));
+        }
     }
 
     /**

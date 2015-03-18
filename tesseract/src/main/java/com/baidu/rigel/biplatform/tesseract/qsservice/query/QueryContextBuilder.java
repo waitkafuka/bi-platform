@@ -26,8 +26,10 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
@@ -37,7 +39,9 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
+import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
@@ -50,6 +54,7 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.MetaDataService;
+import com.baidu.rigel.biplatform.tesseract.meta.impl.CallbackDimensionMemberServiceImpl;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.google.common.collect.Lists;
@@ -75,6 +80,10 @@ public class QueryContextBuilder {
     
     @Resource
     private MetaDataService metaDataService;
+    
+    
+    @Autowired
+    private CallbackDimensionMemberServiceImpl callbackDimensionService;
     
     
     public static Map<String, String> getRequestParams(QuestionModel questionModel, Cube cube) {
@@ -208,24 +217,66 @@ public class QueryContextBuilder {
             return null;
         }
         Map<String, Set<String>> filterValues = new HashMap<>();
+        
+        Dimension dimension = cube.getDimensions().get(dimCondition.getMetaName());
+        boolean hasCallbackLevel = false;
+        int callbackLevelIndex = 0;
+        List<String> callbackParams = null;
+        List<Level> levels = Lists.newArrayList(dimension.getLevels().values());
+        for(int i = 0; i < levels.size(); i++) {
+            if(levels.get(i).getType().equals(LevelType.CALL_BACK)) {
+                hasCallbackLevel = true;
+                callbackLevelIndex = i;
+                callbackParams = new ArrayList<>();
+                break;
+            }
+        }
+        
+        
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())) {
                 logger.info("filter axises ignore all member filter");
                 return null;
             }
-            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-            if (member != null) {
-                String querySource = member.getLevel().getFactTableColumn();
-                Set<String> nodes =
-                        CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
-                                .getQueryNodes();
-                if (filterValues.containsKey(querySource)) {
-                    filterValues.get(querySource).addAll(nodes);
-                } else {
-                    filterValues.put(querySource, nodes);
-                }
+            String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
+            if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
+                callbackParams.add(names[names.length - 1]);
+                continue;
             } else {
-                logger.warn("can not found member by query data:{}", queryData);
+                MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
+                if (member != null) {
+                    String querySource = member.getLevel().getFactTableColumn();
+                    Set<String> nodes =
+                            CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
+                                    .getQueryNodes();
+                    if (filterValues.containsKey(querySource)) {
+                        filterValues.get(querySource).addAll(nodes);
+                    } else {
+                        filterValues.put(querySource, nodes);
+                    }
+                } else {
+                    logger.warn("can not found member by query data:{}", queryData);
+                }
+            }
+        }
+        if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
+            Map<String, String> newParams = new HashMap<>(params);
+            newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
+            List<MiniCubeMember> callbackMembers = callbackDimensionService.getMembers(cube, levels.get(callbackLevelIndex), dataSourceInfo, null, newParams);
+            String querySource = null;
+            if(CollectionUtils.isNotEmpty(callbackMembers)) {
+                for(MiniCubeMember member : callbackMembers) {
+                    querySource = member.getLevel().getFactTableColumn();
+                    Set<String> nodes =
+                            CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
+                                    .getQueryNodes();
+                            if (filterValues.containsKey(querySource)) {
+                                filterValues.get(querySource).addAll(nodes);
+                            } else {
+                                filterValues.put(querySource, nodes);
+                            }
+                    
+                }
             }
         }
 
@@ -262,46 +313,91 @@ public class QueryContextBuilder {
             logger.info("cost:{}ms,in build default member:{}",System.currentTimeMillis() - current, dimCondition);
             current = System.currentTimeMillis();
         }
+        Dimension dimension = cube.getDimensions().get(dimCondition.getMetaName());
+        boolean hasCallbackLevel = false;
+        int callbackLevelIndex = 0;
+        List<String> callbackParams = null;
+        List<Level> levels = Lists.newArrayList(dimension.getLevels().values());
+        for(int i = 0; i < levels.size(); i++) {
+            if(levels.get(i).getType().equals(LevelType.CALL_BACK)) {
+                hasCallbackLevel = true;
+                callbackLevelIndex = i;
+                callbackParams = new ArrayList<>();
+                break;
+            }
+        }
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
-            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-
-            MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
-            List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
-            boolean isCallBack = member.getLevel().getType().equals(LevelType.CALL_BACK);
-            // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点
-            if (queryData.isExpand() || isCallBack) {
-                List<MiniCubeMember> children = Lists.newArrayList();
-                try {
-                    children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
-                } catch (Exception e) {
-                    // TODO NONE 需要确认是否有问题 目前测试没有看出问题
+            String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
+            
+            if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
+                callbackParams.add(names[names.length - 1]);
+                continue;
+            } else {
+                MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
+                
+                MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
+                List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
+                // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点,
+                // FIXME  需要考虑展开的下层是一个Callback层级的情况，这里未测试
+                if (queryData.isExpand()) {
+                    List<MiniCubeMember> children = Lists.newArrayList();
+                    try {
+                        children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
+                    } catch (Exception e) {
+                        // TODO NONE 需要确认是否有问题 目前测试没有看出问题
+                    }
+                    if (CollectionUtils.isNotEmpty(children)) {
+                        memberNode.setSummary(true);
+                        children.forEach((child) -> {
+                            MemberNodeTree childNode = new MemberNodeTree(nodeTree);
+                            buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
+                            childNodes.add(childNode);
+//                        member.getQueryNodes().addAll(child.getQueryNodes());
+                        });
+                    }
                 }
-                if (CollectionUtils.isNotEmpty(children)) {
-                    memberNode.setSummary(true);
+                // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
+                if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
+                    buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
+                    memberNode.setChildren(childNodes);
+                    nodeTree.getChildren().add(memberNode);
+//                return memberNode;
+                } else {
+                    nodeTree.getChildren().addAll(childNodes);
+                }
+            }
+            
+        }
+        if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
+            Map<String, String> newParams = new HashMap<>(params);
+            newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
+            List<MiniCubeMember> callbackMembers = callbackDimensionService.getMembers(cube, levels.get(callbackLevelIndex), dataSourceInfo, null, newParams);
+            if(CollectionUtils.isNotEmpty(callbackMembers)) {
+                if(callbackMembers.size() == 1) {
+                    List<Member> children = callbackMembers.get(0).getChildren();
+                    MemberNodeTree parentNode = new MemberNodeTree(nodeTree);
                     children.forEach((child) -> {
                         MemberNodeTree childNode = new MemberNodeTree(nodeTree);
+                        buildMemberNodeByMember(dataSourceInfo, cube, childNode, (MiniCubeMember) child, params);
+                        parentNode.getChildren().add(childNode);
+                    });
+                    nodeTree.getChildren().add(parentNode);
+                } else {
+                    callbackMembers.forEach((child) -> {
+                        MemberNodeTree childNode = new MemberNodeTree(nodeTree);
                         buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
-                        childNodes.add(childNode);
-//                        member.getQueryNodes().addAll(child.getQueryNodes());
+                        nodeTree.getChildren().add(childNode);
                     });
                 }
             }
-            // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
-            if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
-                memberNode.setChildren(childNodes);
-                nodeTree.getChildren().add(memberNode);
-//                return memberNode;
-            } else {
-                nodeTree.getChildren().addAll(childNodes);
-            }
-            logger.info("cost:{}ms,in build query data:{}",System.currentTimeMillis() - current, queryData);
-            current = System.currentTimeMillis();
         }
         // 非DESC的都按ASC排序。
         nodeTree.sort(dimCondition.getMemberSortType());
+        logger.info("cost:{}ms,in build dimCondition:{}",System.currentTimeMillis() - current, dimCondition);
         return nodeTree;
     }
+    
+    
 
     /**
      * 根据维值创建查询树的节点

@@ -601,10 +601,10 @@ public class QueryDataResource extends BaseResource {
              */
             
         }
-        Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
-        for (Map.Entry<String, Object> entry : runtimeParams.entrySet ()) {
-            runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
-        }
+//        for (Map.Entry<String, Object> entry : runtimeParams.entrySet ()) {
+//            runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
+//        }
+//        Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
                 "Fail Getting VM of Report", "");
@@ -854,7 +854,7 @@ public class QueryDataResource extends BaseResource {
         } catch (QueryModelBuildException e1) {
             logger.info("构建问题模型失败！", e1);
             return ResourceUtils.getErrorResult("构建问题模型失败！", 1);
-        } catch (MiniCubeQueryException e1) {
+        } catch (Exception e1) {
             logger.info("查询数据失败！", e1);
             return ResourceUtils.getErrorResult("没有查询到相关数据", 1);
         }
@@ -888,11 +888,7 @@ public class QueryDataResource extends BaseResource {
             } else {
                 resultMap.put("pivottable", table);
             }
-            resultMap.put("rowCheckMin", 1);
-            resultMap.put("rowCheckMax", 5);
-            resultMap.put("reportTemplateId", reportId);
-            resultMap.put("totalSize", table.getDataRows());
-            resultMap.put("currentSize", table.getDataSourceRowBased().size());
+            setTableResultProperty (reportId, table, resultMap);
             List<Map<String, String>> mainDims = Lists.newArrayList();
             
             LogicModel logicModel = targetArea.getLogicModel ();
@@ -1281,16 +1277,27 @@ public class QueryDataResource extends BaseResource {
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
         resultMap.put("pivottable", table);
-        resultMap.put("rowCheckMin", 1);
-        resultMap.put("rowCheckMax", 5);
-        resultMap.put("reportTemplateId", reportId);
-        resultMap.put("totalSize", table.getActualSize());
-        resultMap.put("currentSize", table.getDataSourceRowBased().size());
-        
+        setTableResultProperty (reportId, table, resultMap);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
                 "Fail Getting VM of Report", resultMap);
         logger.info("[INFO]Successfully execute drill operation. cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
+    }
+
+    private void setTableResultProperty(String reportId, PivotTable table, Map<String, Object> resultMap) {
+        resultMap.put("rowCheckMin", 1);
+        resultMap.put("rowCheckMax", 5);
+        resultMap.put("reportTemplateId", reportId);
+        if (table.getActualSize () <= 1) {
+            resultMap.put("totalSize", table.getActualSize());
+        } else {
+            resultMap.put("totalSize", table.getActualSize() - 1);
+        }
+        if (table.getDataSourceRowBased().size() <= 1) {
+            resultMap.put("currentSize", table.getDataSourceRowBased().size());
+        } else {
+            resultMap.put("currentSize", table.getDataSourceRowBased().size() - 1);
+        }
     }
 
     /**
@@ -1462,9 +1469,8 @@ public class QueryDataResource extends BaseResource {
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
                 // TODO 临时解决方案，此处应将查询条件设置到QuestionModel中
             DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
-            resultMap.put("pivottable", table);
-            resultMap.put("rowCheckMin", 1);
-            resultMap.put("rowCheckMax", 5);
+//            resultMap.put("rowCheckMin", 1);
+//            resultMap.put("rowCheckMax", 5);
             if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
                 logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
             }
@@ -1484,9 +1490,8 @@ public class QueryDataResource extends BaseResource {
             } else {
                 resultMap.remove ("mainDimNodes");
             }
-            resultMap.put("reportTemplateId", reportId);
-            resultMap.put("totalSize", table.getActualSize());
-            resultMap.put("currentSize", table.getDataSourceRowBased().size());
+            resultMap.put("pivottable", table);
+            setTableResultProperty (reportId, table, resultMap);
         } 
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
                 "Fail Getting VM of Report", resultMap);
@@ -1670,11 +1675,7 @@ public class QueryDataResource extends BaseResource {
         } else {
             resultMap.put("pivottable", table);
         }
-        resultMap.put("rowCheckMin", 1);
-        resultMap.put("rowCheckMax", 5);
-        resultMap.put("reportTemplateId", reportId);
-        resultMap.put("totalSize", table.getDataRows());
-        resultMap.put("currentSize", table.getDataSourceRowBased().size());
+        setTableResultProperty (reportId, table, resultMap);
         context.getQueryStatus().add(rs);
         reportModelCacheManager.updateAreaContext(areaId, context);
         logger.info("[INFO]successfully execute sort by measure. cost {} ms", (System.currentTimeMillis() - begin));

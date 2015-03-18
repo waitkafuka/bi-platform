@@ -306,10 +306,11 @@ public final class DataModelUtils {
         
         // build cellDataSetRowBased;
         List<List<CellData>> rowBasedData = transColumnBasedData2RowBasedData(columnBasedData);
-        pTable.setDataSourceRowBased(rowBasedData);
-        
-        // build cellDataSetColumnBased;
-        pTable.setDataSourceColumnBased(columnBasedData);
+        if (rowBasedData.size () > 1) {
+            pTable.setDataSourceRowBased(rowBasedData);
+            // build cellDataSetColumnBased;
+            pTable.setDataSourceColumnBased(columnBasedData);
+        }
         
         // build stat;
         pTable.setDataColumns(pTable.getDataSourceColumnBased().size());
@@ -448,6 +449,9 @@ public final class DataModelUtils {
         data.setFormattedValue("I,III.DD");
         if (value != null) {
             value = value.setScale(8, RoundingMode.HALF_UP);
+            data.setV(value);
+        } else {
+            value = BigDecimal.ZERO;
             data.setV(value);
         }
         return data;

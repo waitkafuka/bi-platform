@@ -26,6 +26,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo;
@@ -126,13 +127,21 @@ public class ChartBuildServiceImpl implements ChartBuildService {
 //            if (data != null) {
 //                Collections.addAll(tmp, data.getData());
 //            }
+        
 //        });
+        List<BigDecimal> rs = Lists.newArrayList();
+        if (reportChart.getSeriesData () == null && reportChart.getSeriesData ().size()  == 0) {
+            return rs;
+        }
+        if (reportChart.getSeriesData ().get (0) == null) {
+            return rs;
+        }
         Collections.addAll (tmp, reportChart.getSeriesData ().get (0).getData ());
         BigDecimal[] tmpArray = tmp.stream().filter(num -> { return num != null; } ).sorted ().toArray(BigDecimal[] :: new);
 //        tmp.clear();
 //        Collections.addAll(tmp, tmpArray);
 //        Collections.sort(tmp);
-        List<BigDecimal> rs = Lists.newArrayList();
+        rs = Lists.newArrayList();
         if (tmpArray.length >= 2) {
             rs.add(tmpArray[tmpArray.length - 1]);
             rs.add(tmpArray[0]);
@@ -245,8 +254,8 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         seriesUnit.setName(col.getCaption());
         seriesUnit.setType(info.getType().getName());
         seriesUnit.setFormat(col.getFormat());
-//        seriesUnit.setProperties(genDataCaptions(rowHeadFields));
-        seriesUnit.setyAxisName(info.getyAxisName());
+        String[] measuerNames = MetaNameUtil.parseUnique2NameArray (col.getUniqueName ());
+        seriesUnit.setyAxisName (measuerNames[measuerNames.length - 1]);
         return seriesUnit;
     }
 
@@ -276,9 +285,11 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         SeriesDataUnit seriesUnit = new SeriesDataUnit();
         seriesUnit.setData(getDataFromCells(columnData));
         seriesUnit.setName(col.getCaption());
+        String[] measuerNames = MetaNameUtil.parseUnique2NameArray (col.getUniqueName ());
+        seriesUnit.setyAxisName (measuerNames[measuerNames.length - 1]);
         seriesUnit.setType(info.getType().getName());
         seriesUnit.setFormat(col.getFormat());
-        seriesUnit.setyAxisName(info.getyAxisName());
+//        seriesUnit.setyAxisName(info.getyAxisName());
         return seriesUnit;
     }
 

@@ -23,10 +23,17 @@
     var attachEvent = xutil.dom.attachEvent;
     var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
-    // 统一设置图例字体样式
-    var textStyle = {
-        fontFamily: '微软雅黑',
-        fontSize: '12'
+    // 图空间样式设置
+    var styleConfiguration = {
+        textStyle: {
+            fontFamily: '微软雅黑',
+            fontSize: '12'
+        },
+        lineStyle: {
+            color: '#00AEF3',
+            type: 'solid',
+            width: 1
+        }
     };
 
     /**
@@ -357,6 +364,7 @@
                     }
                 }
                 else if (ser.type === 'line') {
+                    ser.yAxisIndex = 0;
                     ser.symbol = 'none'; // 线图上的点的形状
                     if (isInArray(ser.name, defaultMeasures)) {
                         tempData.push(ser);
@@ -395,6 +403,7 @@
                     series.push(ser);
                 }
                 else if (ser.type === 'line') {
+                    ser.yAxisIndex = 0;
                     tempData.push(ser);
                 }
                 else if (ser.type === 'map') {
@@ -460,9 +469,11 @@
             data: this._aXAxis.data,
             // 设置x轴字体样式
             axisLabel: {
-                textStyle: textStyle
+                textStyle: styleConfiguration.textStyle
             }
         };
+        // 设置x轴颜色
+        xAxis.axisLine.lineStyle = styleConfiguration.lineStyle;
         if (this._aXAxis.type === 'date') {
             xAxis.showDataType = 'date';
         }
@@ -551,7 +562,11 @@
                     return resultStr;
                 };
                 // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
-                yAxisOption.axisLabel.textStyle = textStyle;
+                yAxisOption.axisLabel.textStyle = styleConfiguration.textStyle;
+                // y轴颜色设定
+                yAxisOption.axisLine = yAxisOption.axisLine || {};
+                yAxisOption.axisLine.lineStyle = styleConfiguration.lineStyle;
+
                 yAxisOption.splitNumber = 5;
                 yAxis.push(yAxisOption);
             }
@@ -649,7 +664,7 @@
         legend.data = data;
         if (this._chartType === 'line') {
             // 更改折线图图例字体
-            legend.textStyle = textStyle;
+            legend.textStyle = styleConfiguration.textStyle;
             options.legend = legend;
         }
     };
@@ -743,7 +758,7 @@
             toolTip.formatter = '{a} <br/>{b} : {c} ({d}%)';
             toolTip.trigger = 'item';
             // 设置提示字体
-            toolTip.textStyle =textStyle;
+            toolTip.textStyle =styleConfiguration.textStyle;
         }
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
@@ -751,7 +766,37 @@
                 return mapToolTipFunc(data, options.series);
             };
             // 设置提示字体
-            toolTip.textStyle =textStyle;
+            toolTip.textStyle = styleConfiguration.textStyle;
+        }
+        else if (this._chartType === 'bar') {
+            toolTip.trigger = 'axis';
+            toolTip.formatter =  function(data, ticket, callback) {
+                var res = data[0][1];
+                for (var i = 0, l = data.length; i < l; i++) {
+                    var valueFormat = options.series[i].format;
+                    var valueLable = data[i][2];
+                    // Y轴调到右边需要数据翻转 晓强
+                    if (me._chartType === 'bar') {
+                        valueLable = -1 * valueLable;
+                    }
+                    // 当发现图数据有配置format属性时，按format所示进行展示
+                    // 当没有format的时候，展示原值
+                    if (valueFormat) {
+                        valueLable = formatNumber(
+                                valueLable,
+                                valueFormat,
+                                null,
+                                null,
+                                true
+                        );
+                    }
+                    
+                    res += '<br/>' + data[i][0] + ' : ' + valueLable;
+                }
+                return res;
+            };
+            // 设置提示字体
+            toolTip.textStyle = styleConfiguration.textStyle;
         }
         else {
             toolTip.trigger = 'axis';
@@ -787,7 +832,7 @@
                 }
                 return res;
             };
-            toolTip.textStyle = textStyle;
+            toolTip.textStyle = styleConfiguration.textStyle;
         }
         options.tooltip = toolTip;
     };
@@ -936,7 +981,7 @@
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable: true,
                 // 设置地图值域字体
-                textStyle: textStyle
+                textStyle: styleConfiguration.textStyle
             };
         }
         if (this._chartType === 'pie') {
