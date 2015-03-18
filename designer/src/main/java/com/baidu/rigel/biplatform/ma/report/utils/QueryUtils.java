@@ -796,6 +796,9 @@ public final class QueryUtils {
             return;
         }
         for (SeriesDataUnit seriesData : chart.getSeriesData ()) {
+            if (seriesData == null) {
+                continue;
+            }
             seriesData.setFormat (dataFormat.get (seriesData.getyAxisName ()));
         }
     }
