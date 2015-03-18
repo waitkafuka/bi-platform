@@ -269,7 +269,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     // 先获取parentMember所属的Level
                     if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
                         expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+                        // TODO 这里得修改下，如果是Callback的话，查询的应该是Member对应的leafID，后续sh
+                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+                        expression.getQueryValues().add(qo);
 
                     } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
                         MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
@@ -290,7 +292,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
                 if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
                     expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+                    QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+                    expression.getQueryValues().add(qo);
                 } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
                     MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
                     expression = new Expression(parentLevel.getSource());
@@ -436,11 +439,11 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         String[] rs = new String[uniqueNameList.length];
         String[] tmp = null;
         for (int index = 0; index < rs.length; ++index) {
-            if (!MetaNameUtil.isUniqueName (uniqueNameList[index])) {
-                rs[index] = uniqueNameList[index];
-            } else {
+            if (MetaNameUtil.isUniqueName (uniqueNameList[index])) {
                 tmp = MetaNameUtil.parseUnique2NameArray (uniqueNameList[index]);
                 rs[index] = tmp[tmp.length - 1];
+            } else if(StringUtils.isBlank(uniqueNameList[index]))  {
+                rs[index] = uniqueNameList[index];
             }
         }
         return rs;
@@ -497,7 +500,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     // 先获取parentMember所属的Level
                     if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
                         expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+                        expression.getQueryValues().add(qo);
 
                     } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
                         MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
@@ -518,7 +522,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
                 if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
                     expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+                    QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+                    expression.getQueryValues().add(qo);
                 } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
                     MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
                     expression = new Expression(parentLevel.getSource());
