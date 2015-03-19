@@ -424,6 +424,8 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
                     curr.setNodeState(NodeState.NODE_UNAVAILABLE);
                     curr.setLastStateUpdateTime(currTime);
                     this.saveOrUpdateNodeInfo(curr);
+                    LOGGER.warn(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "markClusterBadNode",
+                            "[mark: "+curr.getNodeKey()+" as bad node]"));
                 }
             }
         }
