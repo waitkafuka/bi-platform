@@ -399,7 +399,14 @@ public class IndexServiceImpl implements IndexService {
 		if ((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexInterval)) {
 			idxMeta.setLocked(Boolean.TRUE);
 			this.indexMetaService.saveIndexMetaLocally(idxMeta);
-		}else {			
+		}else {
+			LOGGER.info(String.format(
+					LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS,
+					"doIndexByIndexAction",
+					"[indexMeta:" + indexMeta.getIndexMetaId() + ", Locked:"
+							+ idxMeta.getLocked() + ", last update:"
+							+ idxMeta.getIdxVersion() + " ,indexInterval:"
+							+ this.indexInterval + "]","[skip index]"));
 			return ;
 		}		
 		
