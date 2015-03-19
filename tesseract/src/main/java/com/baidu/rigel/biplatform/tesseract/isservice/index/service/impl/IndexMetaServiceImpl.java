@@ -32,6 +32,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -82,6 +83,9 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
      */
     @Resource(name = "isNodeService")
     private IsNodeService isNodeService;
+    
+    @Value("${index.indexInterval}")
+    private int indexInterval;
     
     /**
      * DEFAULT_BLOCK_COUNT，默认每次申请索引块数
@@ -637,7 +641,11 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
     public IndexMeta mergeIndexMeta(IndexMeta indexMeta) {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "mergeIndexMeta",
             "[IndexMeta:" + indexMeta + "]"));
-        IndexMeta idxMeta = indexMeta;
+        IndexMeta idxMeta = this.getIndexMetaByIndexMetaId(indexMeta.getIndexMetaId(), indexMeta.getStoreKey());
+        if(idxMeta==null){
+        	idxMeta=indexMeta;
+        }
+        
         if (idxMeta == null || idxMeta.getStoreKey().equals("")) {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
                 "mergeIndexMeta", "[IndexMeta:" + indexMeta + "]"));
@@ -689,6 +697,11 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             }
         }
         
+        
+        if((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexInterval)){
+        	idxMeta.setLocked(Boolean.FALSE);
+        	
+        }
         // 更新索引元数据
         this.saveOrUpdateIndexMeta(idxMeta);
         

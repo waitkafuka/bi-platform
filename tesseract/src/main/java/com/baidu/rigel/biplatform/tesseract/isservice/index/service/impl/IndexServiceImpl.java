@@ -406,7 +406,7 @@ public class IndexServiceImpl implements IndexService {
 					"[indexMeta:" + indexMeta.getIndexMetaId() + ", Locked:"
 							+ idxMeta.getLocked() + ", last update:"
 							+ idxMeta.getIdxVersion() + " ,indexInterval:"
-							+ this.indexInterval + "]","[skip index]"));
+							+ this.indexInterval + ",test (System.currentTimeMillis()-idxMeta.getIdxVersion()):"+(System.currentTimeMillis()-idxMeta.getIdxVersion())+"]","[skip index]"));
 			return ;
 		}		
 		
