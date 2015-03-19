@@ -1418,7 +1418,7 @@ public class QueryDataResource extends BaseResource {
         
         ResultSet result;
         try {
-            result = reportModelQueryService.queryDatas(model, action, true, false, securityKey);
+            result = reportModelQueryService.queryDatas(model, action, true, false, queryParams, securityKey);
         } catch (DataSourceOperationException | QueryModelBuildException | MiniCubeQueryException e1) {
             logger.error(e1.getMessage(), e1);
             return ResourceUtils.getErrorResult("查询出错", 1);

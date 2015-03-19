@@ -442,7 +442,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             if (MetaNameUtil.isUniqueName (uniqueNameList[index])) {
                 tmp = MetaNameUtil.parseUnique2NameArray (uniqueNameList[index]);
                 rs[index] = tmp[tmp.length - 1];
-            } else if(StringUtils.isBlank(uniqueNameList[index]))  {
+            } else if(!StringUtils.isBlank(uniqueNameList[index]))  {
                 rs[index] = uniqueNameList[index];
             }
         }
