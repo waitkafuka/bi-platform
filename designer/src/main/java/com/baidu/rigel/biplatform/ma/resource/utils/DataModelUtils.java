@@ -1028,29 +1028,34 @@ public final class DataModelUtils {
             return;
         }
         
+//        if (CollectionUtils.isEmpty(dataFormat) && CollectionUtils.isEmpty (formatModel.getToolTips ())) {
+//            return;
+//        }
         Map<String, String> dataFormat = formatModel.getDataFormat();
-        if (CollectionUtils.isEmpty(dataFormat)) {
-            return;
+        Map<String, String> toolTips = formatModel.getToolTips ();
+        
+        List<ColDefine> colDefineList = table.getColDefine ();
+        for (ColDefine define : colDefineList) {
+            String uniqueName = define.getUniqueName();
+            uniqueName = MetaNameUtil.parseUnique2NameArray (define.getUniqueName ())[1];
+            if (dataFormat != null) {
+                String formatStr = dataFormat.get("defaultFormat");
+                if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
+                    formatStr = dataFormat.get(uniqueName);
+                }
+                if (!StringUtils.isEmpty(formatStr)) {
+                    define.setFormat(formatStr);
+                }
+            }
+            if (toolTips != null) {
+                String toolTip = toolTips.get(uniqueName);
+                if (StringUtils.isEmpty(toolTip)) {
+                    toolTip = uniqueName;
+                }
+                define.setToolTip(toolTip);
+            }
         }
         
-        List<List<CellData>> colDatas = table.getDataSourceColumnBased();
-        for (int i = 0; i < colDatas.size(); ++i) {
-            ColDefine define = table.getColDefine().get(i);
-            String uniqueName = define.getUniqueName();
-            String formatStr = dataFormat.get("defaultFormat");
-            uniqueName = uniqueName.replace("[", "").replace("]", "").replace("Measure", "").replace(".", "");
-            if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
-                formatStr = dataFormat.get(uniqueName);
-            }
-            if (!StringUtils.isEmpty(formatStr)) {
-                define.setFormat(formatStr);
-            }
-            String toolTip = formatModel.getToolTips().get(uniqueName);
-            if (StringUtils.isEmpty(toolTip)) {
-                toolTip = uniqueName;
-            }
-            define.setToolTip(toolTip);
-        }
     }
 
     /**

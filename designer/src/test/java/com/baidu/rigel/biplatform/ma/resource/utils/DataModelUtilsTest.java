@@ -18,14 +18,19 @@ package com.baidu.rigel.biplatform.ma.resource.utils;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 import com.google.common.collect.Lists;
 
 /**
@@ -54,14 +59,15 @@ public class DataModelUtilsTest {
      */
     @Test
     public void testTransDataModel2PivotTableWithHideWhiteRow() throws Exception {
-//        DataModel dataModel = Mockito.mock(DataModel.class);
+        DataModel dataModel = Mockito.mock(DataModel.class);
+        Cube cube = Mockito.mock (Cube.class);
         long begin = System.currentTimeMillis();
-//        DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, true);
+        DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, true);
         long end = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
-//        DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, false);
+        DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
         long endAnohter = System.currentTimeMillis() - begin;
-//        Assert.assertTrue(end > endAnohter);
+        Assert.assertTrue(end > endAnohter);
     }
     
     /**
@@ -73,8 +79,9 @@ public class DataModelUtilsTest {
         try {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setRowHeadFields(null);
-//            PivotTable table = DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, false);
-//            Assert.assertTrue(table.getRowHeadFields().size() == 0);
+            Cube cube = Mockito.mock (Cube.class);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            Assert.assertTrue(table.getRowHeadFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
@@ -89,8 +96,9 @@ public class DataModelUtilsTest {
         try {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setRowHeadFields(Lists.newArrayList());
-//            PivotTable table = DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, false);
-//            Assert.assertTrue(table.getRowHeadFields().size() == 0);
+            Cube cube = Mockito.mock (Cube.class);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            Assert.assertTrue(table.getRowHeadFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
@@ -105,8 +113,9 @@ public class DataModelUtilsTest {
         try {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setColumnHeadFields(null);
-//            PivotTable table = DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, false);
-//            Assert.assertTrue(table.getColFields().size() == 0);
+            Cube cube = Mockito.mock (Cube.class);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            Assert.assertTrue(table.getColFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
@@ -121,8 +130,9 @@ public class DataModelUtilsTest {
         try {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setColumnHeadFields(Lists.newArrayList());
-//            PivotTable table = DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, false);
-//            Assert.assertTrue(table.getColFields().size() == 0);
+            Cube cube = Mockito.mock (Cube.class);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            Assert.assertTrue(table.getColFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
@@ -143,7 +153,7 @@ public class DataModelUtilsTest {
         for (int i = 0; i < 10; ++i) {
             HeadField header = new HeadField(null);
             header.setCaption(cols[i]);
-            header.setValue("column_" + i);
+            header.setValue("[Measures].[column_" + i + "]");
             columnHeader.add(header);
         }
         dataModel.setColumnHeadFields(columnHeader);
@@ -151,7 +161,7 @@ public class DataModelUtilsTest {
         for (int i = 0; i < 10; ++i) {
             HeadField header = new HeadField(null);
             header.setCaption(trades[i]);
-            header.setValue("row_" + i);
+            header.setValue("[Dmension].[row_" + i + "]");
             rowHeader.add(header);
         }
         dataModel.setRowHeadFields(rowHeader);
@@ -166,9 +176,199 @@ public class DataModelUtilsTest {
             datas.add(cellDatas);
         }
         dataModel.setColumnBaseData(datas);
-//        PivotTable pivotTable = DataModelUtils.transDataModel2PivotTable(dataModel, true, 100, false);
-//        Assert.assertNotNull(pivotTable);
-//        Assert.assertEquals(1, pivotTable.getColFields().size());
-//        Assert.assertEquals(10, pivotTable.getRowHeadFields().size());
+        Cube cube = Mockito.mock (Cube.class);
+        PivotTable pivotTable = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+        Assert.assertNotNull(pivotTable);
+        Assert.assertEquals(1, pivotTable.getColFields().size());
+        Assert.assertEquals(10, pivotTable.getRowHeadFields().size());
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDecorateTableWithNullTable () {
+        FormatModel formatModel = new FormatModel ();
+        Map<String, String> dataFormat = formatModel.getDataFormat ();
+        dataFormat.put ("a", "1");
+        try {
+            DataModelUtils.decorateTable (formatModel, null);
+            Assert.fail ();
+        } catch (Exception e) {
+            
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDecorateTableWithNullData () {
+        FormatModel formatModel = new FormatModel ();
+        PivotTable table = Mockito.mock (PivotTable.class);
+        Mockito.doReturn (null).when(table).getColDefine ();
+        formatModel.getDataFormat ().put ("a", "1");
+        try {
+            DataModelUtils.decorateTable (formatModel, table);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDecorateTableWithEmptyFormate () {
+        FormatModel formatModel = new FormatModel ();
+        PivotTable table = Mockito.mock (PivotTable.class);
+        Mockito.doReturn (Lists.newArrayList ()).when(table).getColDefine ();
+        try {
+            DataModelUtils.decorateTable (formatModel, table);
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDecorateTable () {
+        FormatModel formatModel = new FormatModel ();
+        PivotTable table = new PivotTable();
+        List<ColDefine> newArrayList = Lists.newLinkedList ();
+        ColDefine colDefine = new ColDefine ();
+        colDefine.setCaption ("test");
+        colDefine.setUniqueName ("[Measures].[a]");
+        newArrayList.add (colDefine);
+        table.setColDefine (newArrayList);
+        formatModel.getDataFormat ().put ("a", "abc");
+        try {
+            DataModelUtils.decorateTable (formatModel, table);
+            Assert.assertEquals ("abc", table.getColDefine ().get (0).getFormat ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDecorateTableWithToolTips () {
+        FormatModel formatModel = new FormatModel ();
+        PivotTable table = new PivotTable();
+        List<ColDefine> newArrayList = Lists.newLinkedList ();
+        ColDefine colDefine = new ColDefine ();
+        colDefine.setCaption ("test");
+        colDefine.setUniqueName ("[Measures].[a]");
+        newArrayList.add (colDefine);
+        table.setColDefine (newArrayList);
+        formatModel.getToolTips ().put ("a", "abc");
+        try {
+            DataModelUtils.decorateTable (formatModel, table);
+            Assert.assertEquals ("abc", table.getColDefine ().get (0).getToolTip ());
+            Assert.assertNull (table.getColDefine ().get (0).getFormat ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testDecorateTableWithEmptyToolTips () {
+        FormatModel formatModel = new FormatModel ();
+        PivotTable table = new PivotTable();
+        List<ColDefine> newArrayList = Lists.newLinkedList ();
+        ColDefine colDefine = new ColDefine ();
+        colDefine.setCaption ("test");
+        colDefine.setUniqueName ("[Measures].[a]");
+        newArrayList.add (colDefine);
+        table.setColDefine (newArrayList);
+        try {
+            DataModelUtils.decorateTable (formatModel, table);
+            Assert.assertEquals ("a", table.getColDefine ().get (0).getToolTip ());
+            Assert.assertNull (table.getColDefine ().get (0).getFormat ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testDecorateTableWithDefaultFormat () {
+        FormatModel formatModel = new FormatModel ();
+        formatModel.getDataFormat ().put ("defaultFormat", "abc");
+        PivotTable table = new PivotTable();
+        List<ColDefine> newArrayList = Lists.newLinkedList ();
+        ColDefine colDefine = new ColDefine ();
+        colDefine.setCaption ("test");
+        colDefine.setUniqueName ("[Measures].[a]");
+        newArrayList.add (colDefine);
+        table.setColDefine (newArrayList);
+        try {
+            DataModelUtils.decorateTable (formatModel, table);
+            Assert.assertEquals ("a", table.getColDefine ().get (0).getToolTip ());
+            Assert.assertEquals ("abc", table.getColDefine ().get (0).getFormat ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testMergedataModelWithRowNum () {
+        DataModel dataModel = Mockito.mock (DataModel.class);
+        DataModel otherDataModel = Mockito.mock (DataModel.class);
+        
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, -1);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+        
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, Integer.MAX_VALUE);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, dataModel.getRowHeadFields ().size ());
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testMerageDataModelWithNullModel () {
+        DataModel dataModel = Mockito.mock (DataModel.class);
+        DataModel otherDataModel = Mockito.mock (DataModel.class);
+        try {
+            DataModelUtils.merageDataModel (null, otherDataModel, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+        try {
+            DataModelUtils.merageDataModel (dataModel, null, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testMerageDataModelWithEmptyChildren () {
+        DataModel dataModel = Mockito.mock (DataModel.class);
+        DataModel otherDataModel = Mockito.mock (DataModel.class);
+        dataModel.setRowHeadFields (null);
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+        dataModel = Mockito.mock (DataModel.class);
+        otherDataModel.setRowHeadFields (null);
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
     }
 }
