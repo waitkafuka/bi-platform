@@ -348,7 +348,6 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_FORM_CLASS.$handleAsync = function(input, value, callback) {
-        // TODO:
         var name = input.$di('getDef').name;
         var arg = {};
 

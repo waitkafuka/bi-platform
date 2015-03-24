@@ -158,7 +158,7 @@ $namespace('di.config');
 
     // 表单
 //    URL_SET.FORM_DATA = '/reportTemplate/initParams.action';
-    URL_SET.FORM_ASYNC_DATA = '/reports/members/#{componentId}'; // TODO:维度树获取子节点
+    URL_SET.FORM_ASYNC_DATA = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
     URL_SET.FORM_DATA = '/reports/#{reportId}/init_params';
     URL_SET.FORM_UPDATE_CONTEXT = '/reports/#{reportId}/runtime/context';
 
