@@ -356,8 +356,8 @@ $namespace('di.shared.ui');
             this.getModel(),
             'ASYNC_DATA',
             {
-                paramName: name,
-                arg: value
+                componentId: name,
+                uniqueName: value
             },
             null,
             {
