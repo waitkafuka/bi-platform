@@ -261,17 +261,7 @@ $namespace('di.shared.ui');
      */
     DI_FORM_CLASS.$renderAsync = function(data, ejsonObj, options) {
         var args = options.args;
-        args.callback(data[args.input.$di('getDef').name] || {});
-    };
-
-    /**
-     * 渲染同步
-     *
-     * @protected
-     */
-    DI_FORM_CLASS.$renderAsync = function(data, ejsonObj, options) {
-        var args = options.args;
-        args.callback(data[args.input.$di('getDef').name] || {});
+        args.callback(ejsonObj.data[args.input.$di('getDef').name] || {});
     };
 
     /**
@@ -358,6 +348,7 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_FORM_CLASS.$handleAsync = function(input, value, callback) {
+        // TODO:
         var name = input.$di('getDef').name;
         var arg = {};
 

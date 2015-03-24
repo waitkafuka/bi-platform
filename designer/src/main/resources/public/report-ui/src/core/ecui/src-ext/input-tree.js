@@ -70,7 +70,7 @@
                 var childs;
                 
                 if (options.value) {
-                    UI_INPUT_CONTROL_CLASS.setValue.call(this, options.value);
+                    UI_INPUT_CONTROL_CLASS .setValue.call(this, options.value);
                 }
 
                 childs = children(el);

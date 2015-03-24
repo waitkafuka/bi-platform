@@ -16,6 +16,7 @@ define([
         'report/edit/canvas/comp-setting-liteolap-template',
         'report/edit/canvas/comp-setting-chart-template',
         'report/edit/canvas/vui-setting-select-template',
+        'report/edit/canvas/ecui-input-tree-setting-template',
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/default-selected-range-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
@@ -36,6 +37,7 @@ define([
         compSettingLITEOLAPTemplate,
         compSettingChartTemplate,
         vuiSettingSelectTemplate,
+        ecuiInputTreeSettingTemplate,
         defaultSelectedTimeSettingTemplate,
         defaultSelectedRangeTimeSettingTemplate,
         dataFormatSettingTemplate,
@@ -562,6 +564,9 @@ define([
                         break;
                     case 'SELECT' :
                         template = vuiSettingSelectTemplate;
+                        break;
+                    case 'ECUI_INPUT_TREE':
+                        template = ecuiInputTreeSettingTemplate;
                         break;
 //                    case 'MULTISELECT' :
 //                        template = vuiSettingSelectTemplate;
@@ -1107,6 +1112,30 @@ define([
                 this.model.canvasModel.saveJsonVm();
             },
             /**
+             * 添加完成数据项之后要做的特殊dom处理-下拉树
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddEcuiInputTreeCompAxis: function (option) {
+                var compId = this.getActiveCompId();
+                var id = option.$item.attr('data-id');
+                var editCompModel = this.canvasView.editCompView.model;
+                var entityDefs = editCompModel.canvasModel.reportJson.entityDefs;
+
+                for (var i = 0, len = entityDefs.length; i < len; i++) {
+                    if (entityDefs[i].compId == compId) {
+                        entityDefs[i].dimId = id;
+                    }
+                }
+                this.model.canvasModel.saveJsonVm();
+            },
+            /**
              * 添加完成数据项之后要做的特殊dom处理-表格
              *
              * @param {Object} option 配置参数
@@ -1176,6 +1205,10 @@ define([
                         break;
                     case 'TABLE':
                         newType = 'Table';
+                        break;
+                    case 'ECUI_INPUT_TREE':
+                        newType = 'EcuiInputTree';
+                        break;
                 }
                 return newType;
             },

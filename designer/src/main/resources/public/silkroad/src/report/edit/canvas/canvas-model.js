@@ -301,6 +301,7 @@ define(
                                 || arr[i].clzKey === 'RANGE_CALENDAR'
                                 || arr[i].clzKey === 'ECUI_SELECT'
                                 || arr[i].clzKey === 'ECUI_MULTI_SELECT'
+                                || arr[i].clzKey === 'ECUI_INPUT_TREE'
                             )
                         ) {
                             that._deleteCompFromForm(arr[i].id);
