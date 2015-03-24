@@ -141,6 +141,7 @@ public class FileUtils {
     public static void deleteFile(File target) {
         if (target.isFile() && target.exists()) {
             target.delete();
+            LOGGER.warn("delete file:"+target.getAbsolutePath());
             return;
         }
         File[] fileArr = target.listFiles();
