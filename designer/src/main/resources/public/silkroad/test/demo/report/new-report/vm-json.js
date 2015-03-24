@@ -1732,7 +1732,7 @@ define(function () {
                         "id": "snpt1.cpnt-form1-vu-1399874275096_96",
                         "clzType": "VUI",
                         "clzKey": "ECUI_INPUT_TREE",
-                        "name": "pos",
+                        "name": "38f9387fd4261d805c33f9d866f0d780",
                         "cfgOpt": { "async": true }
                     },
                     {
