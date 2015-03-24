@@ -216,8 +216,10 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         long currDiskSize = FileUtils.getDiskSize (indexMsg.getIdxPath ());
         BigDecimal currMaxId = null;
         // 读取数据建索引
+        
+        long count=0;
         if (currDiskSize < indexMsg.getBlockSize ()) {
-            while (data.next () && currDiskSize < indexMsg.getBlockSize ()) {
+            while (( currDiskSize < indexMsg.getBlockSize ()) && data.next ()) {
                 Document doc = new Document ();
                 String[] fieldNameArr = data.getFieldNameArray ();
                 for (String select : fieldNameArr) {
@@ -228,7 +230,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                     doc.add (new StringField (select, data.getString (select),
                             Field.Store.NO));
                 }
-                
+                count++;
                 idxWriter.addDocument (doc);
                 
                 if ((currDiskSize + idxWriter.ramBytesUsed ()) > indexMsg
@@ -246,7 +248,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         
         logger.info (String.format (
                 LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
-                "IndexServerHandler", " finish index "));
+                "IndexServerHandler", " finish index "+count+" record"));
         String feedBackIndexServicePath = null;
         String feedBackIndexFilePath = null;
         // 如果当前分片写满了 or 是当前数据的最后一片，释放indexWriter\设置服务路径
