@@ -33,7 +33,8 @@
             color: '#00AEF3',
             type: 'solid',
             width: 1
-        }
+        },
+        mapLocation: {}
     };
 
     /**
@@ -587,7 +588,7 @@
             }
         }
         if (this._chartType === 'bar') {
-            // 用来接遍历数据
+            // 数据为空时横轴显示修改 博学
             var xAxisSeries = [];
             var xAxisData = [];
             // 为0的数据个数
@@ -954,8 +955,8 @@
                 // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
                 // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
-                    x: 43,
-                    x2: 20,
+                    x: 80,
+                    x2: 80,
                     y: 50,
                     borderWidth: 0
                 }
@@ -976,7 +977,7 @@
             options.dataRange = {
                 min: this._mapMinValue,
                 max: this._mapMaxValue,
-                x: 'left',
+                x: 80,
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable: true,
