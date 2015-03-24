@@ -716,6 +716,7 @@ public final class QueryUtils {
             MiniCubeDimension tmp = (MiniCubeDimension) DeepcopyUtils.deepCopy(dim);
             LinkedHashMap<String, Level> tmpLevel = Maps.newLinkedHashMap();
             dim.getLevels().values().forEach(level -> {
+                level.setDimension (dim);
                 tmpLevel.put(level.getName(), level);
             });
             tmp.setLevels(tmpLevel);

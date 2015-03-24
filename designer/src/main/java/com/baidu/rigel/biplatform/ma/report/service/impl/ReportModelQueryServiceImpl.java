@@ -134,6 +134,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         Level[] parentLevels = dim.getLevels().values().toArray(new Level[0]);
         List<Member> rootMembers = null;
         try {
+            parentLevels[0].setDimension (dim);
             rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
             logger.error("Exception happened when getMemebers of dim " + dim.getName(), e);

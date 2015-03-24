@@ -354,7 +354,7 @@ public class DataModelUtilsTest {
     }
     
     @Test
-    public void testMerageDataModelWithEmptyChildren () {
+    public void testMerageDataModelWithNullChildren () {
         DataModel dataModel = Mockito.mock (DataModel.class);
         DataModel otherDataModel = Mockito.mock (DataModel.class);
         dataModel.setRowHeadFields (null);
@@ -369,6 +369,174 @@ public class DataModelUtilsTest {
             DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
             Assert.fail ();
         } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testMerageDataModelWithEmptyChildren () {
+        DataModel dataModel = Mockito.mock (DataModel.class);
+        DataModel otherDataModel = Mockito.mock (DataModel.class);
+        dataModel.setRowHeadFields (Lists.newArrayList ());
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+        dataModel = Mockito.mock (DataModel.class);
+        otherDataModel.setRowHeadFields (Lists.newArrayList ());
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testMergeDataModel() {
+        DataModel dataModel = new DataModel();
+        DataModel otherDataModel = new DataModel();
+        List<HeadField> rowHeadFields = Lists.newArrayList ();
+        HeadField headField = new HeadField();
+        rowHeadFields.add (headField);
+        dataModel.setRowHeadFields (rowHeadFields);
+        otherDataModel.setRowHeadFields (rowHeadFields);
+        try {
+            DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+        } catch (Exception e) {
+            e.printStackTrace ();
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testMergeDataModelWithData () {
+        DataModel dataModel = new DataModel();
+        DataModel otherDataModel = new DataModel();
+        List<HeadField> rowHeadFields = Lists.newArrayList ();
+        HeadField headField = new HeadField();
+        rowHeadFields.add (headField);
+        dataModel.setRowHeadFields (rowHeadFields);
+        List<List<BigDecimal>> columnBaseData = Lists.newArrayList ();
+        List<BigDecimal> datas = Lists.newArrayList ();
+        datas.add (BigDecimal.ZERO);
+        datas.add (BigDecimal.ONE);
+        columnBaseData.add (datas);
+        dataModel.setColumnBaseData (columnBaseData);
+        otherDataModel.setRowHeadFields (rowHeadFields);
+        otherDataModel.setColumnBaseData (columnBaseData);
+        try {
+            DataModel rs = DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.assertEquals (1, rs.getColumnBaseData ().size ());
+            Assert.assertEquals (3, rs.getColumnBaseData ().get (0).size ());
+        } catch (Exception e) {
+            e.printStackTrace ();
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testMergeDataModelEmptyData () {
+        DataModel dataModel = new DataModel();
+        DataModel otherDataModel = new DataModel();
+        List<HeadField> rowHeadFields = Lists.newArrayList ();
+        dataModel.setRowHeadFields (rowHeadFields);
+        otherDataModel.setRowHeadFields (rowHeadFields);
+        try {
+             DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testMergeDataModelEmptyRowHead () {
+        DataModel dataModel = new DataModel();
+        DataModel otherDataModel = new DataModel();
+        List<HeadField> rowHeadFields = Lists.newArrayList ();
+        HeadField headField = new HeadField();
+        rowHeadFields.add (headField);
+        dataModel.setRowHeadFields (rowHeadFields);
+        otherDataModel.setRowHeadFields (rowHeadFields);
+        try {
+            DataModel rs = DataModelUtils.merageDataModel (dataModel, otherDataModel, 0);
+            Assert.assertEquals (0, rs.getColumnBaseData ().size());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testRmDataFromDataModelWithNull () {
+        try {
+            DataModelUtils.removeDataFromDataModel (null, 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testRmDataFromDataModelWrongRow () {
+        try {
+            DataModelUtils.removeDataFromDataModel (new DataModel(), -1);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+        try {
+            DataModelUtils.removeDataFromDataModel (new DataModel(), Integer.MAX_VALUE);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testRmDataFromDataModelEmptyHeader () {
+        try {
+            DataModelUtils.removeDataFromDataModel (new DataModel(), 0);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testRmDataFromDataModelHeader () {
+        DataModel dataModel = new DataModel();
+        List<HeadField> rowHeadFields = Lists.newArrayList ();
+        HeadField headField = new HeadField();
+        rowHeadFields.add (headField);
+        dataModel.setRowHeadFields (rowHeadFields);
+        try {
+            DataModel rs = DataModelUtils.removeDataFromDataModel (dataModel, 0);
+            Assert.assertEquals (0, rs.getColumnBaseData ().size());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testRmDataFromDataModel () {
+        DataModel dataModel = new DataModel();
+        List<HeadField> rowHeadFields = Lists.newArrayList ();
+        HeadField headField = new HeadField();
+        headField.getChildren ().add (new HeadField());
+        rowHeadFields.add (new HeadField());
+        dataModel.setRowHeadFields (rowHeadFields);
+        try {
+            List<List<BigDecimal>> columnBaseData = Lists.newArrayList ();
+            List<BigDecimal> datas = Lists.newArrayList ();
+            datas.add (BigDecimal.ZERO);
+            datas.add (BigDecimal.ONE);
+            columnBaseData.add (datas);
+            dataModel.setColumnBaseData (columnBaseData);
+            DataModel rs = DataModelUtils.removeDataFromDataModel (dataModel, 0);
+            Assert.assertEquals (1, rs.getColumnBaseData ().get (0).size ());
+        } catch (Exception e) {
+            Assert.fail ();
         }
     }
 }
