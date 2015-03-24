@@ -565,7 +565,7 @@ define([
                     case 'SELECT' :
                         template = vuiSettingSelectTemplate;
                         break;
-                    case 'ECUI_INPUT_TREE':
+                    case 'SINGLE_DROP_DOWN_TREE':
                         template = ecuiInputTreeSettingTemplate;
                         break;
 //                    case 'MULTISELECT' :
@@ -1122,7 +1122,7 @@ define([
              * @param {$HTMLElement} option.$item 数据项dom
              * @public
              */
-            afterAddEcuiInputTreeCompAxis: function (option) {
+            afterAddSingleDropDownTreeCompAxis: function (option) {
                 var compId = this.getActiveCompId();
                 var id = option.$item.attr('data-id');
                 var editCompModel = this.canvasView.editCompView.model;
@@ -1206,8 +1206,8 @@ define([
                     case 'TABLE':
                         newType = 'Table';
                         break;
-                    case 'ECUI_INPUT_TREE':
-                        newType = 'EcuiInputTree';
+                    case 'SINGLE_DROP_DOWN_TREE':
+                        newType = 'SingleDropDownTree';
                         break;
                 }
                 return newType;
