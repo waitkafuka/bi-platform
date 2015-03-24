@@ -294,6 +294,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             return false;
         }
         for (String file : listFile) {
+            if (file.contains (".")) {
+                continue;
+            }
             String[] tmpArray = file.split (FILE_SPLIT_REG);
             if (name.equals (tmpArray[0]) || name.equals(tmpArray[1]) 
                     || String.valueOf (tmpArray[1].hashCode ()).equals (name)) {

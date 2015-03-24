@@ -221,6 +221,7 @@ public class QueryDataResource extends BaseResource {
                     try {
                         values = Lists.newArrayList();
                         params.remove (dim.getId ());
+                        params.put (Constants.LEVEL_KEY, "1");
                         List<Member> members = reportModelQueryService
                                 .getMembers(tmpCube, 
                                 tmpCube.getDimensions().get(dim.getName()), params, securityKey).get(0);
@@ -868,8 +869,8 @@ public class QueryDataResource extends BaseResource {
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
-        	
-        	DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+            
+            DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
             /**
              * 每次查询以后，清除选中行，设置新的
              */
@@ -897,7 +898,7 @@ public class QueryDataResource extends BaseResource {
             }
             if (logicModel.getRows ().length >= 2) {
                 Map<String, String> root =  genRootDimCaption(table);
-                	areaContext.setCurBreadCrumPath(root);
+                    areaContext.setCurBreadCrumPath(root);
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                     if (!root.get("uniqName").toLowerCase().contains("all")) {
@@ -946,23 +947,23 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
 
-	private boolean isPieChart(Map<String, String> chartType) {
-		for (String chart : chartType.values()) {
-			if (ChartShowType.PIE.name().toLowerCase().equals(chart)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private boolean isPieChart(Map<String, String> chartType) {
+        for (String chart : chartType.values()) {
+            if (ChartShowType.PIE.name().toLowerCase().equals(chart)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-	private boolean isTimeDimOnFirstCol(ReportDesignModel model,
-			ExtendArea targetArea, QueryAction action) {
-		Item item = action.getRows().keySet().toArray(new Item[0])[0];
-		OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
-		        targetArea.getCubeId(), item.getOlapElementId());
-		boolean timeLine = element instanceof TimeDimension;
-		return timeLine;
-	}
+    private boolean isTimeDimOnFirstCol(ReportDesignModel model,
+            ExtendArea targetArea, QueryAction action) {
+        Item item = action.getRows().keySet().toArray(new Item[0])[0];
+        OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
+                targetArea.getCubeId(), item.getOlapElementId());
+        boolean timeLine = element instanceof TimeDimension;
+        return timeLine;
+    }
 
     /**
      * 
@@ -1897,7 +1898,7 @@ public class QueryDataResource extends BaseResource {
                 indNames = request.getParameter("indNames").split(",");
             }
             try {
-            	areaContext.getParams().put(Constants.CHART_SELECTED_MEASURE, index);
+                areaContext.getParams().put(Constants.CHART_SELECTED_MEASURE, index);
                 action = queryBuildService.generateChartQueryAction(model, areaId, 
                             areaContext.getParams(), indNames, runTimeModel);
                 if (action != null) {
@@ -1907,7 +1908,7 @@ public class QueryDataResource extends BaseResource {
                 boolean timeLine = isTimeDimOnFirstCol(model, targetArea, action);
                 boolean isPieChart = isPieChart(getChartTypeWithExtendArea(model, targetArea));
                 if (!timeLine && isPieChart) {
-                	action.setNeedOthers(true);
+                    action.setNeedOthers(true);
                 }
             } catch (QueryModelBuildException e) {
                 String msg = "没有配置时间维度，不能使用liteOlap趋势分析图！";
@@ -1916,7 +1917,7 @@ public class QueryDataResource extends BaseResource {
                 return ResourceUtils.getCorrectResult(msg, chart);
             }
         } else {
-        	throw new UnsupportedOperationException("未支持的操作");
+            throw new UnsupportedOperationException("未支持的操作");
         }
         
         /**
@@ -1990,16 +1991,69 @@ public class QueryDataResource extends BaseResource {
      * @param runTimeModel
      * @return ReportDesignModel
      */
-	private ReportDesignModel getRealModel(String reportId, ReportRuntimeModel runTimeModel) {
-		ReportDesignModel model;
-		Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
-		Object preview = runTimeModel.getContext().get("reportPreview");
-		if ((isEditor != null && isEditor.toString().equals("true")) 
-		        || (preview != null && preview.toString().equals("true"))) {
-		    model = reportModelCacheManager.getReportModel(reportId);
-		} else {
-		    model = getDesignModelFromRuntimeModel(reportId);
-		}
-		return model;
-	}
+    private ReportDesignModel getRealModel(String reportId, ReportRuntimeModel runTimeModel) {
+        ReportDesignModel model;
+        Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
+        Object preview = runTimeModel.getContext().get("reportPreview");
+        if ((isEditor != null && isEditor.toString().equals("true")) 
+                || (preview != null && preview.toString().equals("true"))) {
+            model = reportModelCacheManager.getReportModel(reportId);
+        } else {
+            model = getDesignModelFromRuntimeModel(reportId);
+        }
+        return model;
+    }
+    
+    /**
+     * 依据
+     */
+    @RequestMapping(value = "/{reportId}/members/{areaId}", method = { RequestMethod.POST })
+    public ResponseResult getMemberWithParent(@PathVariable("reportId") String reportId,
+            @PathVariable("areaId")String areaId, HttpServletRequest request) {
+        long begin = System.currentTimeMillis();
+        logger.info("[INFO]--- ---begin init params with report id {}", reportId);
+        String currentUniqueName = request.getParameter("uniqueName");
+        final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
+        final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
+        Map<String, String> params = Maps.newHashMap();
+        runtimeModel.getContext().getParams().forEach((k, v) -> {
+            params.put(k,v == null ? "" : v.toString());
+        }); 
+        ExtendArea area = model.getExtendById(areaId);
+        if (area != null && isQueryComp(area.getType())
+                && !area.listAllItems().isEmpty()) {
+            Item item = area.listAllItems().values().toArray(new Item[0])[0];
+            Cube cube = model.getSchema().getCubes().get(area.getCubeId());
+            Cube tmpCube = QueryUtils.transformCube(cube);
+            String dimId = item.getOlapElementId();
+            Dimension dim = cube.getDimensions().get(dimId);
+            if (dim != null) {
+                List<Map<String, String>> values;
+                try {
+                    values = Lists.newArrayList();
+                    params.remove (dim.getId ());
+                    List<Member> members = reportModelQueryService
+                            .getMembers(tmpCube, currentUniqueName, params, securityKey);
+                    members.forEach(m -> {
+                        Map<String, String> tmp = Maps.newHashMap();
+                        tmp.put("value", m.getUniqueName());
+                        tmp.put("text", m.getCaption());
+                        values.add(tmp);
+                    });
+                    Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
+                    datasource.put("datasource", values);
+                    datas.put(areaId, datasource);
+                } catch (Exception e) {
+                    logger.info(e.getMessage(), e);
+                } // end catch
+            } // end if dim != null
+        } // end if area != null
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setData(datas);
+        rs.setStatusInfo("OK");
+        logger.info("[INFO]--- --- successfully query member, cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
 }

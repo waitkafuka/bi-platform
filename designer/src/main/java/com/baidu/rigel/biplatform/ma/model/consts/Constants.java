@@ -99,4 +99,6 @@ public interface Constants {
      */
     String CHART_SELECTED_MEASURE = "chartSelectedMeasureIndex";
     
+    String LEVEL_KEY = "level_class";
+    
 }

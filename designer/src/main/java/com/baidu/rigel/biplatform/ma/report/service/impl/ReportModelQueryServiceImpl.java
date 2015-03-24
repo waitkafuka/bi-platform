@@ -136,12 +136,12 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         try {
             rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
-            logger.error("Exception happened when getMemebers of dim " + dim.getName(),
-                    e);
+            logger.error("Exception happened when getMemebers of dim " + dim.getName(), e);
             throw e;
         }
         members.add(rootMembers);
-        if (parentLevels.length > 1) {
+        // 1.equeals(params.get(level)) 只取当前层级
+        if (parentLevels.length > 1 && !"1".equals (params.get (Constants.LEVEL_KEY))) {
             for (int i = 1; i < parentLevels.length; ++i) {
                 List<Member> tmpMember = Lists.newArrayList();
                 for (Member m : rootMembers) {
@@ -293,5 +293,26 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             }
         }
         return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Member> getMembers(Cube cube, String uniqueName,
+            Map<String, String> params, String securityKey) {
+        DataSourceDefine dsDefine = null;
+        try {
+            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+        } catch (DataSourceOperationException e) {
+            logger.error("Fail in Finding datasource define. ", e);
+            throw new RuntimeException(e);
+        }
+        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
+        Member member = cube.lookUp (dsInfo, uniqueName, params);
+        if (member != null) {
+            return member.getChildMembers (cube, dsInfo, params);
+        }
+        return Lists.newArrayList ();
     }  
 }
