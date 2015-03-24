@@ -79,6 +79,8 @@ $namespace('di.config');
                 DIALOG.alert(LANG.SAD_FACE + statusInfo);
                 break;
             case 1: // 返回html错误页面的情况
+                DIALOG.alert(LANG.SAD_FACE + ejsonObj.statusInfo);
+                break;
             case 403: // 403错误
             case 404: // 404错误
             case 405: // 405错误

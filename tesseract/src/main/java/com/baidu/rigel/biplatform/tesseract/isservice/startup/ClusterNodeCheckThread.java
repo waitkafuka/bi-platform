@@ -18,6 +18,8 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.startup;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -81,10 +83,10 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     }
     
     public void start() {
-//        ExecutorService executor = Executors.newSingleThreadExecutor();
-//        executor.execute(() -> run());
-//        Executors.newScheduledThreadPool(1)
-//            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> run());
+        Executors.newScheduledThreadPool(1)
+            .scheduleAtFixedRate(this, checkInterval, 20000, TimeUnit.MILLISECONDS);
     }
     
     /*
@@ -110,12 +112,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
             this.isNodeService.saveOrUpdateNodeInfo(udpateNode);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update self state", "end"));
-            // save node image
- //           this.isNodeService.saveNodeImage(udpateNode);
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                "update localImage", "success"));
-//            udpateNode=null;
-//            node=null;
+            
             // check others
             
             Lock lock = this.storeManger.getClusterLock();
@@ -135,9 +132,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
                 }
             }
             
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                "wait & sleep", "sleep " + this.checkInterval));
-//                Thread.sleep(this.checkInterval);
+            
             
         } catch (Exception e) {
             LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_EXCEPTION,

@@ -188,6 +188,11 @@ public class SearchIndexServiceImpl implements SearchService {
 
             List<SearchIndexResultSet> idxShardResultSetList = new ArrayList<SearchIndexResultSet>();
             for (IndexShard idxShard : idxMeta.getIdxShardList()) {
+            	
+            	if(idxShard.getIdxState().equals(IndexState.INDEX_UNINIT)){
+            		continue;
+            	}
+            	
                 completionService.submit(new Callable<SearchIndexResultSet>() {
                     
                     @Override
