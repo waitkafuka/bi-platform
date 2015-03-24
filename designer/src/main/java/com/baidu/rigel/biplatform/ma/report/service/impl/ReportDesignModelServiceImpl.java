@@ -488,6 +488,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                         || area.getType() == ExtendAreaType.MULTISELECT
                         || area.getType() == ExtendAreaType.TEXT
                         || area.getType() == ExtendAreaType.H_BUTTON
+                        || area.getType () == ExtendAreaType.SINGLE_DROP_DOWN_TREE
                         || QueryUtils.isFilterArea(area.getType())) {
                     continue;
                 }  
