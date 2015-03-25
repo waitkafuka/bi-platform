@@ -524,7 +524,7 @@ public class DataModelUtilsTest {
         List<HeadField> rowHeadFields = Lists.newArrayList ();
         HeadField headField = new HeadField();
         headField.getChildren ().add (new HeadField());
-        rowHeadFields.add (new HeadField());
+        rowHeadFields.add (headField);
         dataModel.setRowHeadFields (rowHeadFields);
         try {
             List<List<BigDecimal>> columnBaseData = Lists.newArrayList ();
@@ -533,7 +533,7 @@ public class DataModelUtilsTest {
             datas.add (BigDecimal.ONE);
             columnBaseData.add (datas);
             dataModel.setColumnBaseData (columnBaseData);
-            DataModel rs = DataModelUtils.removeDataFromDataModel (dataModel, 0);
+            DataModel rs = DataModelUtils.removeDataFromDataModel (dataModel, 1);
             Assert.assertEquals (1, rs.getColumnBaseData ().get (0).size ());
         } catch (Exception e) {
             Assert.fail ();
