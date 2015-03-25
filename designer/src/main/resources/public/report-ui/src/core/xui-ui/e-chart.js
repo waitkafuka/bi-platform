@@ -48,6 +48,11 @@
             fontSize: '12',
             color: '#000'
         },
+        // 地图值域色阶
+        dataRangeColor : [
+            '#F06112',
+            '#29B2DC'
+        ],
         // 轴线
         lineStyle: {
             color: '#00AEF3',
@@ -1022,7 +1027,8 @@
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable: true,
                 // 设置地图值域字体
-                textStyle: styleConfiguration.dataRangeStyle
+                textStyle: styleConfiguration.dataRangeStyle,
+                color: styleConfiguration.dataRangeColor
             };
         }
         if (this._chartType === 'pie') {
