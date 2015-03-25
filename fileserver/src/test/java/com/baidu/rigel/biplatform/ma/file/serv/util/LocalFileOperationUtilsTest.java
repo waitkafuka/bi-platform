@@ -16,15 +16,13 @@
 package com.baidu.rigel.biplatform.ma.file.serv.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 
 /**
@@ -34,8 +32,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author david.wang
  * @version 1.0.0.1
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(LocalFileOperationUtils.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(LocalFileOperationUtils.class)
 public class LocalFileOperationUtilsTest {
     
     /**
@@ -65,12 +63,10 @@ public class LocalFileOperationUtilsTest {
      */
     @Test
     public void testCreateFile() throws Exception {
-        File file = PowerMockito.mock(File.class);
-        Mockito.when(file.mkdir()).thenReturn(true);
-        Mockito.when(file.createNewFile()).thenReturn(true);
-        PowerMockito.whenNew(File.class).withAnyArguments().thenReturn(file);
+        new File(dir + "/test").delete ();
         boolean rs = LocalFileOperationUtils.createFile(dir + "/test");
         Assert.assertTrue(rs);
+        Assert.assertTrue(new File(dir + "/test").delete ());
     }
     
     /**
@@ -131,10 +127,19 @@ public class LocalFileOperationUtilsTest {
     @Test
     public void testMvWithExistTargetFile() {
         File file = PowerMockito.mock(File.class);
+        File f = new File (dir + "/test");
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
+        }
         Mockito.when(file.exists()).thenReturn(true);
         Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test", dir + "/test_bak", false);
         Assert.assertNotNull(rs);
-        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertTrue (new File (dir + "/test_bak").delete ());
     }
     
     /**
@@ -142,9 +147,6 @@ public class LocalFileOperationUtilsTest {
      */
     @Test
     public void testMvWithCreatTargetFileFailed() throws Exception {
-        File file = PowerMockito.mock(File.class);
-        Mockito.when(file.exists()).thenReturn(false);
-        Mockito.when(file.createNewFile()).thenReturn(false);
         Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test", dir + "/test_bak", true);
         Assert.assertNotNull(rs);
         Assert.assertEquals("fail", rs.get("result"));
@@ -168,12 +170,18 @@ public class LocalFileOperationUtilsTest {
      */
     @Test
     public void testMv() throws Exception {
-        File file = PowerMockito.mock(File.class);
-        Mockito.when(file.exists()).thenReturn(true);
-        Mockito.when(file.createNewFile()).thenReturn(true);
+        File f = new File (dir + "/test");
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
+        }
         Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test", dir + "/test_bak", true);
         Assert.assertNotNull(rs);
-        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertTrue (new File(dir + "/test_bak").delete ());
     }
     
     /**
@@ -182,12 +190,19 @@ public class LocalFileOperationUtilsTest {
      */
     @Test
     public void testCopy() throws Exception {
-        File src = PowerMockito.mock(File.class);
-        Mockito.when(src.exists()).thenReturn(true);
-        Mockito.when(src.createNewFile()).thenReturn(true);
+        File f = new File (dir + "/test");
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
+        }
         Map<String, Object> rs = LocalFileOperationUtils.copy(dir + "/test", dir + "/test_cp", true);
         Assert.assertNotNull(rs);
-        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertTrue (new File (dir + "/test_cp").delete ());
+        new File (dir + "/test").delete();
     }
     
 }

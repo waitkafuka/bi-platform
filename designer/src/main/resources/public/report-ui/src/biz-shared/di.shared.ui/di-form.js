@@ -348,7 +348,6 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_FORM_CLASS.$handleAsync = function(input, value, callback) {
-        // TODO:
         var name = input.$di('getDef').name;
         var arg = {};
 
@@ -356,8 +355,8 @@ $namespace('di.shared.ui');
             this.getModel(),
             'ASYNC_DATA',
             {
-                paramName: name,
-                arg: value
+                componentId: name,
+                uniqueName: value
             },
             null,
             {

@@ -94,7 +94,7 @@ public class QueryContextBuilder {
 			questionModel.getQueryConditions().forEach((k, v) -> {
 				Dimension dim = cube.getDimensions().get(k);
 				MiniCube miniCube = (MiniCube) cube;
-				if (dim != null && dim.getTableName().equals(miniCube.getSource())) {
+				if (dim != null && miniCube.getSource().equals (dim.getTableName())) {
 				    DimensionCondition cond = (DimensionCondition) v;
 				    StringBuilder sb = new StringBuilder();
 				    List<QueryData> queryDataNodes = cond.getQueryDataNodes();

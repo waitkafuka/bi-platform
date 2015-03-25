@@ -203,6 +203,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
             data = new SearchIndexResultSet (
                     ((SearchIndexResultSet) indexMsg.getDataBody ()).getMeta (),
                     dataProcess.size ());
+            data.setDataList(dataProcess);
         }
         
         if (data == null) {

@@ -518,6 +518,8 @@
         // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的相反） - 晓强
         if (this._chartType === 'bar') {
             xAxis.position = 'right';
+            // 当图形为条形图时，暂时将动画关掉，以避免条形从左向右铺开的动画效果 update by majun
+            options.animation = false;
             options.grid.x = 20;
             options.grid.x2 = 130;
 
@@ -1000,7 +1002,6 @@
                     borderWidth: 0
                 }
             }
-
             this.$setupDataRoom(options);
             // 可视数据区DataRoom影响距y2的值 - 晓强
             if (options.grid && options.dataZoom) {
