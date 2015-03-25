@@ -454,6 +454,10 @@ public class DataModelUtilsTest {
         DataModel otherDataModel = new DataModel();
         List<HeadField> rowHeadFields = Lists.newArrayList ();
         HeadField headField = new HeadField();
+        headField.setCaption ("a");
+        HeadField child = new HeadField();
+        child.setCaption ("b");
+        headField.getChildren ().add(child);
         rowHeadFields.add (headField);
         dataModel.setRowHeadFields (rowHeadFields);
         otherDataModel.setRowHeadFields (rowHeadFields);
@@ -537,6 +541,53 @@ public class DataModelUtilsTest {
             Assert.assertEquals (1, rs.getColumnBaseData ().get (0).size ());
         } catch (Exception e) {
             Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void testConvert2StringWithEmptyModel () {
+        try {
+            Cube cube = Mockito.mock (Cube.class);
+            DataModelUtils.convertDataModel2CsvString (cube, null);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testConvert2StrWithEmptyCube () {
+        try {
+            DataModel dataModel = new DataModel();
+            List<HeadField> rowHeadFields = Lists.newArrayList ();
+            HeadField headField = new HeadField();
+            headField.setCaption ("test");
+            headField.setNodeUniqueName ("[test].[test]");
+            dataModel.setRowHeadFields (rowHeadFields);
+            String str = DataModelUtils.convertDataModel2CsvString (null, dataModel);
+            Assert.assertEquals ("", str);
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testConvert2Str () {
+        try {
+            Cube cube = Mockito.mock (Cube.class);
+            DataModel dataModel = new DataModel();
+            List<HeadField> rowHeadFields = Lists.newArrayList ();
+            HeadField headField = new HeadField();
+            headField.setCaption ("a");
+            headField.setValue ("[dim].[a]");
+            rowHeadFields.add (headField);
+            dataModel.setRowHeadFields (rowHeadFields);
+            List<List<BigDecimal>> columnBaseData = Lists.newArrayList ();
+            List<BigDecimal> datas = Lists.newArrayList ();
+            datas.add (BigDecimal.ZERO);
+            columnBaseData.add (datas);
+            dataModel.setColumnBaseData (columnBaseData);
+            String str = DataModelUtils.convertDataModel2CsvString (cube, dataModel);
+            Assert.assertEquals ("dim,a,0\r\n", str);
+        } catch (Exception e) {
         }
     }
 }
