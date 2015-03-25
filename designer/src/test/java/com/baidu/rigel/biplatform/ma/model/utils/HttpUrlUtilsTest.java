@@ -48,10 +48,9 @@ public class HttpUrlUtilsTest {
     @Test
     public void testGetBaseUrlWithQuestionMark () {
         try {
-            String rs = HttpUrlUtils.getBaseUrl ("");
+            HttpUrlUtils.getBaseUrl ("http://localhost/abc?a?b");
             Assert.fail ();
         } catch (Exception e) {
-            
         }
     }
     
