@@ -34,7 +34,7 @@ import com.baidu.rigel.biplatform.ma.file.serv.util.LocalFileOperationUtils;
  * @author david.wang
  * @version 1.0.0.1
  */
-@RunWith(PowerMockRunner.class)
+//@RunWith(PowerMockRunner.class)
 public class LocalFileOperationServiceTest {
     
     /**
