@@ -54,4 +54,22 @@ public class HttpUrlUtilsTest {
         }
     }
     
+    @Test
+    public void testGetBaseUrl () {
+        try {
+            String rs = HttpUrlUtils.getBaseUrl ("http://localhost/abc?a?b");
+            Assert.assertEquals ("http://localhost/abc", rs);
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testGetParamsWithNull () {
+        try {
+            HttpUrlUtils.getParams (null);
+            Assert.fail ();
+        } catch (Exception e) {
+            
+        }
+    }
 }

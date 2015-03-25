@@ -63,10 +63,6 @@ public class LocalFileOperationUtilsTest {
      */
     @Test
     public void testCreateFile() throws Exception {
-        File file = PowerMockito.mock(File.class);
-        Mockito.when(file.mkdir()).thenReturn(true);
-        Mockito.when(file.createNewFile()).thenReturn(true);
-        PowerMockito.whenNew(File.class).withAnyArguments().thenReturn(file);
         new File(dir + "/test").delete ();
         boolean rs = LocalFileOperationUtils.createFile(dir + "/test");
         Assert.assertTrue(rs);
@@ -132,13 +128,12 @@ public class LocalFileOperationUtilsTest {
     public void testMvWithExistTargetFile() {
         File file = PowerMockito.mock(File.class);
         File f = new File (dir + "/test");
-        if (!f.exists ()) {
-            try {
-                f.createNewFile ();
-            } catch (IOException e) {
-                e.printStackTrace ();
-                Assert.fail ();
-            }
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
         }
         Mockito.when(file.exists()).thenReturn(true);
         Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test", dir + "/test_bak", false);
@@ -176,13 +171,12 @@ public class LocalFileOperationUtilsTest {
     @Test
     public void testMv() throws Exception {
         File f = new File (dir + "/test");
-        if (!f.exists ()) {
-            try {
-                f.createNewFile ();
-            } catch (IOException e) {
-                e.printStackTrace ();
-                Assert.fail ();
-            }
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
         }
         Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test", dir + "/test_bak", true);
         Assert.assertNotNull(rs);
@@ -197,13 +191,12 @@ public class LocalFileOperationUtilsTest {
     @Test
     public void testCopy() throws Exception {
         File f = new File (dir + "/test");
-        if (!f.exists ()) {
-            try {
-                f.createNewFile ();
-            } catch (IOException e) {
-                e.printStackTrace ();
-                Assert.fail ();
-            }
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
         }
         Map<String, Object> rs = LocalFileOperationUtils.copy(dir + "/test", dir + "/test_cp", true);
         Assert.assertNotNull(rs);
