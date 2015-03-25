@@ -63,8 +63,8 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testGetFileAttributesWithUnexistFile() {
-        new File (dir + "/test").delete ();
-        Map<String, Object> rs = service.getFileAttributes(dir + "/test");
+        new File (dir + "/test.txt").delete ();
+        Map<String, Object> rs = service.getFileAttributes(dir + "/test.txt");
         Assert.assertNotNull(rs);
         Assert.assertEquals("fail", rs.get("result"));
         Assert.assertEquals("文件不存在", rs.get("msg"));
@@ -112,8 +112,8 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testRmUnexistFile() {
-        new File (dir + "/test").delete ();
-        Map<String, Object> rs = service.rm(dir + "/test");
+        new File (dir + "/test.txt").delete ();
+        Map<String, Object> rs = service.rm(dir + "/test.txt");
         Assert.assertNotNull(rs);
         Assert.assertEquals("fail", rs.get("result"));
         Assert.assertEquals("删除文件不存在", rs.get("msg"));
@@ -137,7 +137,7 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testRm() {
-        File file = new  File (dir + "/test");
+        File file = new  File (dir + "/test.txt");
         if (!file.exists ()) {
             try {
                 file.createNewFile ();
@@ -145,11 +145,11 @@ public class LocalFileOperationServiceTest {
                 Assert.fail ();
             }
         }
-        Map<String, Object> rs = service.rm(dir + "/test");
+        Map<String, Object> rs = service.rm(dir + "/test.txt");
         Assert.assertNotNull(rs);
         Assert.assertEquals("success", rs.get("result"));
         Assert.assertEquals("文件删除成功", rs.get("msg"));
-        Assert.assertFalse (new File (dir + "/test").exists ());
+        Assert.assertFalse (new File (dir + "/test.txt").exists ());
     }
     
     /**
@@ -254,11 +254,12 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testWriteWithEmptyContent() {
-        Map<String, Object> rs = service.write(dir + "/test", null, true);
+        new File (dir + "/test.txt").delete ();
+        Map<String, Object> rs = service.write(dir + "/test.txt", null, true);
         Assert.assertNotNull(rs);
         Assert.assertEquals("fail", rs.get("result"));
         Assert.assertEquals("文件内容为空", rs.get("msg"));
-        service.rm(dir + "/test");
+        new File(dir + "/test.txt").delete ();
     }
     
     /**
@@ -266,10 +267,17 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testWriteWithNotOverride() {
+        new File (dir + "/test.txt").delete ();
+        try {
+            new File (dir + "/test.txt").createNewFile ();
+        } catch (IOException e) {
+            Assert.fail ();
+        }
         Map<String, Object> rs = service.write(dir, new byte[10], false);
         Assert.assertNotNull(rs);
         Assert.assertEquals("fail", rs.get("result"));
         Assert.assertEquals("该文件已经存在", rs.get("msg"));
+        new File (dir + "/test.txt").delete ();
     }
     
     /**
@@ -277,13 +285,12 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testWrite() {
-        File f = new File (dir + "/test");
-        f.delete ();
-        Map<String, Object> rs = service.write(dir + "/test", new byte[10], false);
+        new File (dir + "/test.txt").delete ();
+        Map<String, Object> rs = service.write(dir + "/test.txt", new byte[10], false);
         Assert.assertNotNull(rs);
         Assert.assertEquals("success", rs.get("result"));
         Assert.assertEquals("新文件写入成功", rs.get("msg"));
-        new File(dir + "/test").delete ();
+        new File (dir + "/test.txt").delete ();
     }
     
     /**
@@ -326,8 +333,11 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testMv() {
-        Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test", "/test_mv", true);
+        new File (dir + "/test.txt").delete ();
+        Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test.txt", "/test_mv.txt", true);
         Assert.assertNotNull(rs);
+        Assert.assertFalse (new File (dir + "/test.txt").exists ());
+        new File (dir + "/test_mv.txt").delete ();
     }
     
     /**
@@ -335,7 +345,14 @@ public class LocalFileOperationServiceTest {
      */
     @Test
     public void testCopy() {
-        Map<String, Object> rs = LocalFileOperationUtils.copy(dir + "/test", "/test_cp", true);
+        new File (dir + "/test.txt").delete ();
+        try {
+            new File (dir + "/test.txt").createNewFile ();
+        } catch (IOException e) {
+            Assert.fail ();
+        }
+        Map<String, Object> rs = LocalFileOperationUtils.copy(dir + "/test.txt", "/test_cp.txt", true);
         Assert.assertNotNull(rs);
+        new File (dir + "/test.txt").delete ();
     }
 }
