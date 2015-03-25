@@ -20,10 +20,8 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.baidu.rigel.biplatform.ma.file.serv.service.FileLocation;
 import com.baidu.rigel.biplatform.ma.file.serv.util.LocalFileOperationUtils;
