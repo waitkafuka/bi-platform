@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -520,15 +521,22 @@ public class IndexServiceImpl implements IndexService {
 								|| idxAction
 										.equals(IndexAction.INDEX_MERGE_NORMAL)) {
 							currIdxShardIdx++;
+							if(idxAction.equals(IndexAction.INDEX_MERGE_NORMAL)){
+								idxAction=IndexAction.INDEX_MERGE;
+							}							
 							if(currIdxShardIdx>=idxMeta.getIdxShardList().size()){
 								idxAction=IndexAction.INDEX_NORMAL;
 							}
 						} else {
 							currIdxShardIdx = -1;
+							if (!idxAction.equals(IndexAction.INDEX_MOD)
+									&& !idxAction
+											.equals(IndexAction.INDEX_MERGE_NORMAL)) {
+								idxAction = IndexAction.INDEX_NORMAL;
+							}
 						}
 
-					}
-					if (idxAction.equals(IndexAction.INDEX_MERGE)) {
+					}else if (idxAction.equals(IndexAction.INDEX_MERGE)) {
 						idxAction = IndexAction.INDEX_MERGE_NORMAL;
 					} else if (!idxAction.equals(IndexAction.INDEX_MOD)
 							&& !idxAction
@@ -565,7 +573,21 @@ public class IndexServiceImpl implements IndexService {
 			idxMeta.setIdxState(IndexState.INDEX_AVAILABLE);
 		}
 
-		for (IndexShard idxShard : idxMeta.getIdxShardList()) {
+//		for (IndexShard idxShard : idxMeta.getIdxShardList()) {
+//			if (idxShard.isUpdate()) {
+//				String servicePath = idxShard.getFilePath();
+//				String bakFilePath = idxShard.getIdxFilePath();
+//				idxShard.setIdxFilePath(servicePath);
+//				idxShard.setFilePath(bakFilePath);
+//				idxShard.setIdxState(IndexState.INDEX_AVAILABLE);
+//			} else if (idxAction.equals(IndexAction.INDEX_MERGE)) {
+//				idxMeta.getIdxShardList().remove(idxShard);
+//			}
+//		}
+		
+		Iterator<IndexShard> idxShardIt=idxMeta.getIdxShardList().iterator();
+		while(idxShardIt.hasNext()){
+			IndexShard idxShard=idxShardIt.next();
 			if (idxShard.isUpdate()) {
 				String servicePath = idxShard.getFilePath();
 				String bakFilePath = idxShard.getIdxFilePath();
@@ -573,9 +595,11 @@ public class IndexServiceImpl implements IndexService {
 				idxShard.setFilePath(bakFilePath);
 				idxShard.setIdxState(IndexState.INDEX_AVAILABLE);
 			} else if (idxAction.equals(IndexAction.INDEX_MERGE)) {
-				idxMeta.getIdxShardList().remove(idxShard);
+				idxShardIt.remove();
 			}
 		}
+		
+		
 		idxMeta.setLocked(Boolean.FALSE);
 		this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
 		publistIndexMetaWriteEvent(idxMeta);
