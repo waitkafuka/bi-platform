@@ -102,14 +102,16 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
             // get lock
         try {
             Node node = this.applicationContext.getBean(Node.class);
-            Node udpateNode = this.isNodeService.getNodeByCurrNode(node);
-            
+            Node updateNode = this.isNodeService.getNodeByCurrNode(node);
+			if (updateNode == null) {
+				updateNode = node;
+			}
             // update self state
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update self state", "begin"));
-            udpateNode.setNodeState(NodeState.NODE_AVAILABLE);
-            udpateNode.setLastStateUpdateTime(System.currentTimeMillis());
-            this.isNodeService.saveOrUpdateNodeInfo(udpateNode);
+            updateNode.setNodeState(NodeState.NODE_AVAILABLE);
+            updateNode.setLastStateUpdateTime(System.currentTimeMillis());
+            this.isNodeService.saveOrUpdateNodeInfo(updateNode);
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                 "update self state", "end"));
             
