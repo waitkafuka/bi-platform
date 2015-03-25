@@ -226,9 +226,15 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
     }
     
     public Lock getClusterLock() {
-        Lock lock = this.hazelcast.getLock("hzLock");
+        return this.getClusterLock("hzLock");
+    }
+
+    @Override
+    public Lock getClusterLock(String lockName) {
+        Lock lock = this.hazelcast.getLock(lockName);
         
         return lock;
+        
     }
     
 }
