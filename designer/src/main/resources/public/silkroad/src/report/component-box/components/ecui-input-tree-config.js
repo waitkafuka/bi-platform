@@ -38,8 +38,8 @@ define(
         }
 
         return {
-            type: 'ECUI_INPUT_TREE',
-            iconClass: 'ecui-input-tree',
+            type: 'SINGLE_DROP_DOWN_TREE',
+            iconClass: 'single-drop-down-tree',
             caption: '下拉树',
             defaultWidth: 300,
             defaultHeight: 33,

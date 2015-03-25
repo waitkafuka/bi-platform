@@ -32,13 +32,16 @@ import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
@@ -54,6 +57,7 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResul
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * sql类型维度维值获取实现
@@ -414,7 +418,11 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         for (Dimension dim : dims) {
             // 过滤条件中包含当前维度表其他列的过滤条件，因此将过滤条件应用到当前维度成员查询上 此处暂时不考虑维度组
             String filterValue = params.get (dim.getId ());
-            if (StringUtils.isNotBlank (filterValue) && dimTable.equals (dim.getTableName ()) && !dim.getId ().equals (level.getDimension ().getId ())) {
+            if (StringUtils.isBlank (filterValue)) {
+                continue;
+            }
+            if (dimTable.equals (dim.getTableName ()) 
+                    && !dim.getId ().equals (level.getDimension ().getId ())) {
                 MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
                 Expression expression = new Expression(dimLevel.getSource ());
                 // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
@@ -423,6 +431,22 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     Set<String> leafNodes = Sets.newHashSet ();
                     leafNodes.add (tmp);
                     QueryObject queryObject = new QueryObject(tmp, leafNodes);
+                    expression.getQueryValues ().add (queryObject);
+                }
+                expressionList.add (expression);
+            } else if (dim instanceof TimeDimension && dimTable.equals (((MiniCube) cube).getSource())) {
+                // 此处只考虑了时间维度表和事实表同一张表情况，其他情况暂时不考虑
+                Map<String, String> filterMap = AnswerCoreConstant.GSON.fromJson (filterValue, 
+                        new TypeToken<Map<String, String>>(){
+                        }.getType());
+                TimeRangeDetail detail = new TimeRangeDetail(filterMap.get ("start"), filterMap.get ("end"));
+                String[] days = detail.getDays ();
+                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
+                Expression expression = new Expression(dimLevel.getSource ());
+                for (String day :days) {
+                    Set<String> leafNodes = Sets.newHashSet ();
+                    leafNodes.add (day);
+                    QueryObject queryObject = new QueryObject(day, leafNodes);
                     expression.getQueryValues ().add (queryObject);
                 }
                 expressionList.add (expression);

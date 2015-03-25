@@ -33,7 +33,8 @@
             color: '#00AEF3',
             type: 'solid',
             width: 1
-        }
+        },
+        mapLocation: {}
     };
 
     /**
@@ -480,6 +481,8 @@
         // 如果是柱状图Y轴放右边（条形图X轴和Y周和其他的相反） - 晓强
         if (this._chartType === 'bar') {
             xAxis.position = 'right';
+            // 当图形为条形图时，暂时将动画关掉，以避免条形从左向右铺开的动画效果 update by majun
+            options.animation = false;
             options.grid.x = 20;
             options.grid.x2 = 130;
 
@@ -587,7 +590,7 @@
             }
         }
         if (this._chartType === 'bar') {
-            // 用来接遍历数据
+            // 数据为空时横轴显示修改 博学
             var xAxisSeries = [];
             var xAxisData = [];
             // 为0的数据个数
@@ -954,13 +957,12 @@
                 // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
                 // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
                 options.grid = {
-                    x: 43,
-                    x2: 20,
+                    x: 80,
+                    x2: 80,
                     y: 50,
                     borderWidth: 0
                 }
             }
-
             this.$setupDataRoom(options);
             // 可视数据区DataRoom影响距y2的值 - 晓强
             if (options.grid && options.dataZoom) {
@@ -976,7 +978,7 @@
             options.dataRange = {
                 min: this._mapMinValue,
                 max: this._mapMaxValue,
-                x: 'left',
+                x: 80,
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable: true,
