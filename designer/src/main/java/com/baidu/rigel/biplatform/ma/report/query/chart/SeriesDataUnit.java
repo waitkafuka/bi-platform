@@ -56,6 +56,11 @@ public class SeriesDataUnit implements Serializable {
     private String yAxisName;
     
     /**
+     * 当前指标数据对应颜色
+     */
+    private String colorDefine;
+    
+    /**
      * 地图数据对应地域信息，后期考虑此处模型逻辑是否合法
      */
     private String[][] properties;
@@ -117,6 +122,20 @@ public class SeriesDataUnit implements Serializable {
      */
     public void setProperties(String[][] properties) {
         this.properties = properties;
+    }
+
+    /**
+     * @return the colorDefine
+     */
+    public String getColorDefine() {
+        return colorDefine;
+    }
+
+    /**
+     * @param colorDefine the colorDefine to set
+     */
+    public void setColorDefine(String colorDefine) {
+        this.colorDefine = colorDefine;
     }
     
 }

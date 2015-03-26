@@ -53,9 +53,10 @@ public class MiniCubeSqlConnectionTest {
      * @throws IOException
      */
     @Test
+    @Ignore
     public void testQuery() throws IOException {
 
-        File f = new File("c:/json.txt");
+        File f = new File("c:/qm.txt");
         BufferedReader br = new BufferedReader(new FileReader(f));
         StringBuilder sb = new StringBuilder();
         String lineStr = null;
@@ -111,6 +112,7 @@ public class MiniCubeSqlConnectionTest {
         
 //        MiniCubeSqlConnection connection = (MiniCubeSqlConnection) MiniCubeDriverManager.getConnection(question.getDataSourceInfo());
 //        DataModel dm = connection.query(question);
+//        System.out.println(AnswerCoreConstant.GSON.toJson(dm));
         
         
     }

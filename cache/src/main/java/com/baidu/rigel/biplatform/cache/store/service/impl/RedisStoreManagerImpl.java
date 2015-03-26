@@ -118,6 +118,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     @Override
     public void postEvent(EventObject event) throws Exception {
         redisson.getTopic(topicKey).publish(event);
+        log.info("post topic into redis key:{},event:{}", topicKey, event);
     }
 
     /*
@@ -152,6 +153,11 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
             lockKey = cachePrefix + "_" + redisProperties.getLockName();
         }
         redisson.getTopic(topicKey).addListener(new RedisTopicListener());
+    }
+
+    @Override
+    public Lock getClusterLock(String lockName) {
+        return redisson.getLock(lockName);
     }
 
 }

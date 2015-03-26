@@ -16,6 +16,8 @@
 package com.baidu.rigel.biplatform.cache.redis.listener;
 
 import org.redisson.core.MessageListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
@@ -28,12 +30,16 @@ import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
  */
 public class RedisTopicListener implements MessageListener<Object>{
 
-    
+    /** 
+     * log
+     */
+    private Logger log = LoggerFactory.getLogger(RedisTopicListener.class);
     
     @Override
     public void onMessage(Object msg) {
         if(msg != null) {
             ApplicationContextHelper.getContext().publishEvent((ApplicationEvent)msg);
+            log.info("receive topic msg:{}, and publish into spring context.", msg);
         }
     }
     
