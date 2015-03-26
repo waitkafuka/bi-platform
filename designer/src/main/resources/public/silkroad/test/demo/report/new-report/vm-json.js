@@ -1715,7 +1715,7 @@ define(function () {
                             "confirm": "snpt1.vu-form1-confirm1"
                         },
                         "dataOpt": {
-                            "submitMode": "CONFIRM"
+                            "submitMode": "IMMEDIATE"
                         },
                         "reportTemplateId": "RTPL_VIRTUAL_ID"
                     },

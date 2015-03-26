@@ -11,6 +11,8 @@ define([
         'dialog',
         'constant',
         'report/edit/canvas/edit-comp-model',
+        'report/edit/canvas/chart-setting/chart-setting-view',
+        // html模板区域
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
         'report/edit/canvas/comp-setting-liteolap-template',
@@ -20,7 +22,6 @@ define([
         'report/edit/canvas/default-selected-time-setting-template',
         'report/edit/canvas/default-selected-range-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
-        'report/edit/canvas/topn-setting-template',
         'report/edit/canvas/comp-relation-event-setting-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
@@ -32,6 +33,8 @@ define([
         dialog,
         Constant,
         EditCompModel,
+        ChartSettingView,
+        // html模板区域
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
         compSettingLITEOLAPTemplate,
@@ -41,7 +44,6 @@ define([
         defaultSelectedTimeSettingTemplate,
         defaultSelectedRangeTimeSettingTemplate,
         dataFormatSettingTemplate,
-        topnSettingTemplate,
         compRelationEventSettingTemplate,
         FloatWindow,
         indMenuTemplate,
@@ -55,7 +57,6 @@ define([
                 'click .j-report': 'removeCompEditBar',
                 'click .j-set-default-time': 'openTimeSettingDialog',
                 'click .j-set-data-format': 'getDataFormatList',
-                'click .j-set-topn': 'getTopnList',
                 'click .j-set-relation': 'setCompRelationEvent',
                 'click .j-norm-info-depict': 'getNormInfoDepict',
                 'click .item .j-icon-chart': 'showChartList',
@@ -491,7 +492,7 @@ define([
              * @constructor
              */
             initialize: function (option) {
-                this.model = new EditCompModel({
+                var model = this.model = new EditCompModel({
                     canvasModel: option.canvasView.model,
                     reportId: option.reportId
                 });
@@ -532,7 +533,8 @@ define([
                     data.reportCompId = reportCompId;
                     compMold && (data.compMold = compMold);
                     var html = template.render(data);
-                    that.$el.find('.j-con-comp-setting').html(html);
+                    var $compSetting = that.$el.find('.j-con-comp-setting');
+                    $compSetting.html(html);
                     that.initLineAccept(compType);
                     $shell.addClass('active').mouseout();
                     // 初始化横轴和纵轴数据项的顺序调整
@@ -540,6 +542,8 @@ define([
 
                     // 调整画布大小
                     that.canvasView.parentView.ueView.setSize();
+
+                    that._initChartSettingView($compSetting[0]);
                 });
             },
 
@@ -1487,72 +1491,6 @@ define([
             },
 
             /**
-             * 获取topn数据信息
-             *
-             * @param {event} event 点击事件
-             * @public
-             */
-            getTopnList: function (event) {
-                var that = this;
-                var compId = that.getActiveCompId();
-
-                that.model.getTopnList(compId, openTopnDialog);
-                function openTopnDialog(data) {
-                    var html;
-                    if (!data.indList) {
-                        dialog.alert('没有指标');
-                        return;
-                    }
-                    html = topnSettingTemplate.render(
-                        data
-                    );
-                    dialog.showDialog({
-                        title: 'topn设置',
-                        content: html,
-                        dialog: {
-                            width: 340,
-                            height: 300,
-                            resizable: false,
-                            buttons: [
-                                {
-                                    text: '提交',
-                                    click: function () {
-                                        saveTopnFormInfo($(this));
-                                    }
-                                },
-                                {
-                                    text: '取消',
-                                    click: function () {
-                                        $(this).dialog('close');
-                                    }
-                                }
-                            ]
-                        }
-                    });
-                }
-
-                /**
-                 * 保存数据格式
-                 */
-                function saveTopnFormInfo($dialog) {
-                    var selects = $('.topn-indlist').find('select');
-                    var $input = $('.topn-indlist').find('input');
-                    var data = {};
-
-                    selects.each(function () {
-                        var $this = $(this);
-                        var name = $this.attr('name');
-                        data[name] = $this.val();
-                    });
-                    data[$input.attr('name')] = $input.val();
-                    that.model.saveTopnInfo(compId, data, function () {
-                        $dialog.dialog('close');
-                        that.canvasView.showReport();
-                    });
-                }
-            },
-
-            /**
              * 获取指标描述信息，并弹框展现
              *
              * @param {event} event 点击事件
@@ -1735,6 +1673,22 @@ define([
                 this.model.canvasModel.saveJsonVm(
 //                    this.canvasView.showReport.call(this.canvasView)
                 );
+            },
+            /**
+             * 下拉卡框添加默认值公共函数
+             *
+             * @param {HTMLEelement} 图形编辑区的dom元素
+             * @private
+             */
+            _initChartSettingView: function (el) {
+                if(this.chartSettingView) {
+                    this.chartSettingView.destroy();
+                }
+                this.chartSettingView = new ChartSettingView({
+                    el: el,
+                    reportId: this.model.reportId,
+                    canvasView: this.canvasView
+                });
             }
         });
 
