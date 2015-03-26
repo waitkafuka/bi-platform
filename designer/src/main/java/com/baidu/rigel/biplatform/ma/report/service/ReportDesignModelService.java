@@ -158,4 +158,11 @@ public interface ReportDesignModelService {
      */
     void updateAreaColorFormat(ExtendArea area, String colorFormat);
 
+    /**
+     * 
+     * @param area
+     * @param positions
+     */
+    void updateAreaPositionDef(ExtendArea area, String positions);
+
 }

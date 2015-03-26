@@ -52,6 +52,11 @@ public class FormatModel implements Serializable {
      * 指标颜色定义
      */
     private Map<String, String> colorFormat = Maps.newHashMap ();
+    
+    /**
+     * 指标位置定义
+     */
+    private Map<String, String> positions = Maps.newHashMap ();
 
     /**
      * @return the dataFormat
@@ -91,18 +96,24 @@ public class FormatModel implements Serializable {
         this.dataFormat = Maps.newHashMap();
         this.conditionFormat = Maps.newHashMap();
         this.toolTips = Maps.newHashMap();
+        this.colorFormat = Maps.newHashMap ();
     }
 
     public void removeItem(String id) {
         this.getDataFormat().remove(id);
         this.getToolTips().remove(id);
         this.getConditionFormat().remove(id);
+        this.getColorFormat ().remove (id);
+        this.getPositions ().remove (id);
     }
 
     public void init(String name) {
         this.getDataFormat().put(name, null);
         this.getToolTips().put(name, name);
         this.getConditionFormat().put(name, null);
+        this.getColorFormat ().put (name, null);
+        this.getPositions ().put (name, "0");
+        
     }
 
     /**
@@ -121,5 +132,23 @@ public class FormatModel implements Serializable {
     public void setColorFormat(Map<String, String> colorFormat) {
         this.colorFormat = colorFormat;
     }
+
+    /**
+     * @return the positions
+     */
+    public Map<String, String> getPositions() {
+        if (this.positions == null) {
+            this.positions = Maps.newHashMap ();
+        }
+        return positions;
+    }
+
+    /**
+     * @param positions the positions to set
+     */
+    public void setPositions(Map<String, String> positions) {
+        this.positions = positions;
+    }
+    
     
 }

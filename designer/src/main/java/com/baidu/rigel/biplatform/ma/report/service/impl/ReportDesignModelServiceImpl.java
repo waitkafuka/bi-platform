@@ -696,5 +696,15 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         Map<String, String> format = GsonUtils.fromJson (colorFormat, HashMap.class);
         area.getFormatModel ().setColorFormat (format);
     }
+
+    @Override
+    public void updateAreaPositionDef(ExtendArea area, String positions) {
+        if (StringUtils.isEmpty (positions)) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, String> positionMap = GsonUtils.fromJson (positions, HashMap.class);
+        area.getFormatModel ().setColorFormat (positionMap);
+    }
     
 }
