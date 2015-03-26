@@ -47,6 +47,11 @@ public class FormatModel implements Serializable {
      * 指标提示信息
      */
     private Map<String, String> toolTips = Maps.newHashMap();
+    
+    /**
+     * 指标颜色定义
+     */
+    private Map<String, String> colorFormat = Maps.newHashMap ();
 
     /**
      * @return the dataFormat
@@ -99,4 +104,22 @@ public class FormatModel implements Serializable {
         this.getToolTips().put(name, name);
         this.getConditionFormat().put(name, null);
     }
+
+    /**
+     * @return the colorFormat
+     */
+    public Map<String, String> getColorFormat() {
+        if (this.colorFormat == null) {
+            return Maps.newHashMap ();
+        }
+        return colorFormat;
+    }
+
+    /**
+     * @param colorFormat the colorFormat to set
+     */
+    public void setColorFormat(Map<String, String> colorFormat) {
+        this.colorFormat = colorFormat;
+    }
+    
 }
