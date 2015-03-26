@@ -27,14 +27,54 @@
     var styleConfiguration = {
         textStyle: {
             fontFamily: '微软雅黑',
-            fontSize: '12'
+            fontSize: '12',
+            color: '#636363'
         },
+        // 图例
+        legendStyle: {
+            fontFamily: '微软雅黑',
+            fontSize: '12',
+            color: '#000'
+        },
+        // tips
+        tooltips: {
+            fontFamily: '微软雅黑',
+            fontSize: '12',
+            color: '#fff'
+        },
+        // 地图值域
+        dataRangeStyle : {
+            fontFamily: '微软雅黑',
+            fontSize: '12',
+            color: '#000'
+        },
+        // 地图值域色阶
+        dataRangeColor : [
+            '#F06112',
+            '#29B2DC'
+        ],
+        // 轴线
         lineStyle: {
             color: '#00AEF3',
             type: 'solid',
-            width: 1
+            width: 2
         },
-        mapLocation: {}
+        // 网格线
+        splitLine : {
+            show:true,
+            lineStyle: {
+                color: '#EEEEEE',
+                type: 'solid',
+                width: 1
+            }
+        },
+        // 网格区域
+        splitArea : {
+            show: true,
+            areaStyle:{
+                color:['rgba(255, 255, 255, 0)','rgba(237, 237, 237, 0.3)']
+            }
+        }
     };
 
     /**
@@ -471,7 +511,9 @@
             // 设置x轴字体样式
             axisLabel: {
                 textStyle: styleConfiguration.textStyle
-            }
+            },
+            // x方向网格线 - 博学
+            splitLine : styleConfiguration.splitLine
         };
         // 设置x轴颜色
         xAxis.axisLine.lineStyle = styleConfiguration.lineStyle;
@@ -530,15 +572,16 @@
                     yAxisOption = {};
                     yAxisOption.name = option.title.text;
                     yAxisOption.type = 'value';
-                    yAxisOption.splitArea = { show : true };
-                    yAxisOption.splitNumber = 5;
+                    // 设置y轴网格 - 博学
+                    yAxisOption.splitArea = styleConfiguration.splitArea;
+                    yAxisOption.splitLine = styleConfiguration.splitLine;
+                    yAxisOption.zlevel = 2;
                     yAxis.push(yAxisOption);
                 }
             }
             else {
                 yAxisOption = {};
                 yAxisOption.type = 'value';
-                yAxisOption.splitArea = { show : true };
 
                 // y轴添加单位 - 晓强
                 yAxisOption.axisLabel = yAxisOption.axisLabel || {};
@@ -569,8 +612,9 @@
                 // y轴颜色设定
                 yAxisOption.axisLine = yAxisOption.axisLine || {};
                 yAxisOption.axisLine.lineStyle = styleConfiguration.lineStyle;
-
-                yAxisOption.splitNumber = 5;
+                // 设置y轴网格 - 博学
+                yAxisOption.splitArea = styleConfiguration.splitArea;
+                yAxisOption.splitLine = styleConfiguration.splitLine;
                 yAxis.push(yAxisOption);
             }
             if (this._isAddYxis && yAxis.length <= 1) {
@@ -667,7 +711,7 @@
         legend.data = data;
         if (this._chartType === 'line') {
             // 更改折线图图例字体
-            legend.textStyle = styleConfiguration.textStyle;
+            legend.textStyle = styleConfiguration.legendStyle;
             options.legend = legend;
         }
     };
@@ -761,7 +805,7 @@
             toolTip.formatter = '{a} <br/>{b} : {c} ({d}%)';
             toolTip.trigger = 'item';
             // 设置提示字体
-            toolTip.textStyle =styleConfiguration.textStyle;
+            toolTip.textStyle =styleConfiguration.tooltips;
         }
         else if (this._chartType === 'map') {
             toolTip.trigger = 'item';
@@ -769,7 +813,7 @@
                 return mapToolTipFunc(data, options.series);
             };
             // 设置提示字体
-            toolTip.textStyle = styleConfiguration.textStyle;
+            toolTip.textStyle = styleConfiguration.tooltips;
         }
         else if (this._chartType === 'bar') {
             toolTip.trigger = 'axis';
@@ -798,8 +842,8 @@
                 }
                 return res;
             };
-            // 设置提示字体
-            toolTip.textStyle = styleConfiguration.textStyle;
+            // 设置提示字体 - 博学
+            toolTip.textStyle = styleConfiguration.tooltips;
         }
         else {
             toolTip.trigger = 'axis';
@@ -835,7 +879,7 @@
                 }
                 return res;
             };
-            toolTip.textStyle = styleConfiguration.textStyle;
+            toolTip.textStyle = styleConfiguration.tooltips;
         }
         options.tooltip = toolTip;
     };
@@ -983,7 +1027,8 @@
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable: true,
                 // 设置地图值域字体
-                textStyle: styleConfiguration.textStyle
+                textStyle: styleConfiguration.dataRangeStyle,
+                color: styleConfiguration.dataRangeColor
             };
         }
         if (this._chartType === 'pie') {

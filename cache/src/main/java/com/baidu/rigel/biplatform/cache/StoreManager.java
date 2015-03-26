@@ -121,4 +121,7 @@ public interface StoreManager {
      */
     Lock getClusterLock();
     
+    
+    Lock getClusterLock(String lockName);
+    
 }
