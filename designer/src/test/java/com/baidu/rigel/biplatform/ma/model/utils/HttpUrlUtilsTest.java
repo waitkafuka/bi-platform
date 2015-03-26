@@ -15,8 +15,12 @@
  */
 package com.baidu.rigel.biplatform.ma.model.utils;
 
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.google.common.collect.Maps;
 
 /**
  *Description:
@@ -70,6 +74,80 @@ public class HttpUrlUtilsTest {
             Assert.fail ();
         } catch (Exception e) {
             
+        }
+    }
+    
+    @Test
+    public void testGetParamsWithUrl () {
+        try {
+            Assert.assertEquals (0, HttpUrlUtils.getParams ("http://localhpost").size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void tetGetParams () {
+        try {
+            Assert.assertEquals (1, HttpUrlUtils.getParams ("http://localhpost?a=b").size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+    
+    @Test
+    public void tetGetParamsFailed () {
+        try {
+            HttpUrlUtils.getParams ("http://localhpost?a==b");
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void tetGetParamsFailed2 () {
+        try {
+            HttpUrlUtils.getParams ("http://localhpost??a=b").size ();
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testGenerateTotalUrlWithNullParam () {
+        try {
+             HttpUrlUtils.generateTotalUrl ("http://", null);
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testGenerateTotalUrlWithNullUrl () {
+        try {
+             HttpUrlUtils.generateTotalUrl (null, Maps.newHashMap ());
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testGenerateTotalUrl () {
+        try {
+            Map<String, String> params = Maps.newHashMap ();
+            params.put ("a", "b");
+             String rs = HttpUrlUtils.generateTotalUrl ("http://localhost/abc", params);
+            String realUrl = "http://localhost/abc?a=b";
+            Assert.assertEquals (realUrl, rs);
+            rs = HttpUrlUtils.generateTotalUrl ("http://localhost/abc?", params);
+            Assert.assertEquals (realUrl, rs);
+            params.put ("c", "d");
+            rs = HttpUrlUtils.generateTotalUrl ("http://localhost/abc?", params);
+            Assert.assertEquals (realUrl + "&c=d", rs);
+            params.put ("e", "");
+            rs = HttpUrlUtils.generateTotalUrl ("http://localhost/abc?", params);
+            Assert.assertEquals (realUrl + "&c=d", rs);
+        } catch (Exception e) {
         }
     }
 }
