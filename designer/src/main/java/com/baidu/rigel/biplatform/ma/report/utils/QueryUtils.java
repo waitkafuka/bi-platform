@@ -747,6 +747,15 @@ public final class QueryUtils {
             if (formatModel != null && formatModel.getDataFormat () != null) {
                 addDataFormatInfo(chart, formatModel.getDataFormat ());
             }
+            Map<String, String> colorFormat = formatModel.getColorFormat ();
+            if (colorFormat != null && !colorFormat.isEmpty () && chart.getSeriesData () != null) {
+                for (SeriesDataUnit data : chart.getSeriesData ()) {
+                    if (data == null) {
+                        continue;
+                    }
+                    data.setColorDefine (colorFormat.get (data.getyAxisName ()));
+                }
+            }
             final Map<String, String> dimMap = Maps.newConcurrentMap();
             String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);
