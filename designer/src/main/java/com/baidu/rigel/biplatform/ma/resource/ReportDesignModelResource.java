@@ -1553,4 +1553,60 @@ public class ReportDesignModelResource extends BaseResource {
                 GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
     }
+    
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/position",
+            method = { RequestMethod.POST })
+    public ResponseResult updateAreaMeasurePosition(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        String positions = request.getParameter(Constants.POSITION);
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaPositionDef(area, positions);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getLogicModel().getTopSetting());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/position",
+            method = { RequestMethod.GET })
+    public ResponseResult getAreaPosition (@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin query measuer top setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getFormatModel () == null) {
+            result.setData (Maps.newHashMap ());
+        } else {
+            result.setData(area.getFormatModel ().getPositions ());
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms", 
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
 }

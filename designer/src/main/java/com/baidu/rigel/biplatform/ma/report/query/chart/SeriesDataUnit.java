@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.ma.report.query.chart;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import org.springframework.util.StringUtils;
+
 /**
  * 
  * @author zhongyi
@@ -59,6 +61,9 @@ public class SeriesDataUnit implements Serializable {
      * 当前指标数据对应颜色
      */
     private String colorDefine;
+    
+    
+    private String position = "0";
     
     /**
      * 地图数据对应地域信息，后期考虑此处模型逻辑是否合法
@@ -137,5 +142,23 @@ public class SeriesDataUnit implements Serializable {
     public void setColorDefine(String colorDefine) {
         this.colorDefine = colorDefine;
     }
+
+    /**
+     * @return the position
+     */
+    public String getPosition() {
+        if (StringUtils.isEmpty (position)) {
+            return "0";
+        }
+        return position;
+    }
+
+    /**
+     * @param position the position to set
+     */
+    public void setPosition(String position) {
+        this.position = position;
+    }
+    
     
 }
