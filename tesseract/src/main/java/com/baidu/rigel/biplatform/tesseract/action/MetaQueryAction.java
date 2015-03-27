@@ -30,6 +30,7 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -105,6 +106,7 @@ public class MetaQueryAction {
             ConfigQuestionModel questionModel =
                     AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY),
                             ConfigQuestionModel.class);
+            setMDCContext(questionModel.getRequestParams().get("_flag"));
             members = null;
             // 普通查询，认为查询相关信息在queryCondition中
             String dimName = null;
@@ -177,6 +179,7 @@ public class MetaQueryAction {
             ConfigQuestionModel questionModel =
                     AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY),
                             ConfigQuestionModel.class);
+            setMDCContext(questionModel.getRequestParams().get("_flag"));
             children = null;
             // 普通查询，认为查询相关信息在queryCondition中
             String uniqueName = null;
@@ -248,6 +251,7 @@ public class MetaQueryAction {
             ConfigQuestionModel questionModel =
                     AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY),
                             ConfigQuestionModel.class);
+            setMDCContext(questionModel.getRequestParams().get("_flag"));
             DataSourceInfo dataSourceInfo = questionModel.getDataSourceInfo();
             if (dataSourceInfo == null) {
                 dataSourceInfo = dataSourcePoolService.getDataSourceInfo(questionModel.getDataSourceInfoKey());
@@ -363,7 +367,7 @@ public class MetaQueryAction {
             ConfigQuestionModel questionModel =
                     AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY),
                             ConfigQuestionModel.class);
-
+            setMDCContext(questionModel.getRequestParams().get("_flag"));
             MetaCondition uniqueNameCondition =
                     questionModel.getQueryConditions().get(MiniCubeConnection.UNIQUENAME_PARAM_KEY);
 
@@ -455,6 +459,12 @@ public class MetaQueryAction {
             return tonNSetting4Chart(result, sortRecord);
         }
         return DataModelUtils.truncModel(result, sortRecord.getRecordSize()); 
+    }
+    
+    private void setMDCContext(String value) {
+        if(StringUtils.isNotBlank(value)) {
+            MDC.put("REQUESTFLAG", value);
+        }
     }
 
     /**
