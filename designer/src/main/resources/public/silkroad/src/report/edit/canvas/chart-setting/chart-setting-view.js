@@ -9,11 +9,13 @@
 define(
     [
         'report/edit/canvas/chart-setting/chart-setting-model',
-        'report/edit/canvas/chart-setting/topn/topn-view'
+        'report/edit/canvas/chart-setting/topn/topn-view',
+        'report/edit/canvas/chart-setting/axis/axis-view'
     ],
     function (
         ChartSettingModel,
-        TopnView
+        TopnView,
+        AxisView
     ) {
         //------------------------------------------
         // 视图类的声明
@@ -45,6 +47,12 @@ define(
                 this.canvasView = option.canvasView;
                 // 挂载topn设置视图
                 this.topnView = new TopnView({
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
+                // 挂载双坐标轴设置视图
+                this.axisView = new AxisView({
                     el: this.el,
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView

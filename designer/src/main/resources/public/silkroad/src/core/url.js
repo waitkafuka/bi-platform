@@ -829,6 +829,34 @@ define(function () {
 
     /**
      * 报表新建（编辑）-edit-setting
+     * 获取双坐标轴设置信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getAxisList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/position';
+    };
+
+    /**
+     * 报表新建（编辑）-edit-setting
+     * 获取topn设置信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getAxisList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/position';
+    };
+
+    /**
+     * 报表新建（编辑）-edit-setting
      * 获取指标提示信息
      *
      * @param {string} reportId 报表id
