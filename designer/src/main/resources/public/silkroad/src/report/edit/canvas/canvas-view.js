@@ -351,6 +351,8 @@ define([
                 that.dragWidthHeight($component, 'H_BUTTON', 33, 33, 67);
                 // 固定查询按钮的高度
                 that.dragWidthHeight($component, 'TIME_COMP', 33, 33, 220);
+                // 固定查询按钮的高度
+                that.dragWidthHeight($component, 'SINGLE_DROP_DOWN_TREE', 33, 33, 210, 210);
                 // 删除参考线-避免重复渲染产生多余的参考线
                 that.removeGuides($component);
                 // 调整后添加参考线
@@ -372,6 +374,8 @@ define([
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minHeight", minHeight);
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "maxHeight", maxHeight);
                 $ele.filter('[data-component-type="' + type + '"]').resizable("option", "minWidth", minWidth);
+                $ele.filter('[data-component-type="' + type + '"]').resizable("option", "maxWidth", maxWidth);
+
             },
 
             /**

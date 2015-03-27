@@ -379,9 +379,17 @@
             ser = { data: [] };
             ser.name = serDef.name || '';
             ser.yAxisIndex = serDef.yAxisIndex || 0;
-            ser.color = serDef.color || void 0;
+            ser.colorDefine = serDef.colorDefine || void 0;
             ser.format = serDef.format || void 0;
             ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
+            ser.itemStyle = {
+                normal: {
+                    color: 'red'
+                }
+            };
+            if (ser.type !== 'map' && ser.colorDefine) {
+                ser.itemStyle.normal.color = ser.colorDefine;
+            }
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;

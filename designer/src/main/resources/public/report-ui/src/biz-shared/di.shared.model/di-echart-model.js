@@ -228,6 +228,7 @@ $namespace('di.shared.model');
             chartData.series = [];
             for (var x = 0, item; item = rawData.seriesData[x]; x ++) {
                 chartData.series[x] = {};
+                chartData.series[x].colorDefine = item.colorDefine;
                 chartData.series[x].format = item.format;
                 chartData.series[x].name = item.name;
                 chartData.series[x].type = item.type;
@@ -337,4 +338,3 @@ $namespace('di.shared.model');
     };
 
 })();
-
