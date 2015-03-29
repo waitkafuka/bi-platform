@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -344,6 +345,14 @@ public class SearchIndexResultSet implements TesseractResultSet<SearchIndexResul
     public Meta getMeta() {
     
         return meta;
+    }
+
+    /**
+     * 批量增加结果
+     * @param indexResultRecords
+     */
+    public synchronized void addAll(SearchIndexResultRecord[] indexResultRecords) {
+        Collections.addAll (this.dataList, indexResultRecords);
     }
 
 }
