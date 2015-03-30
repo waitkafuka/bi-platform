@@ -46,15 +46,17 @@ define(['url', 'core/helper'], function (Url, Helper) {
                     var sourceData = data.data;
                     var targetData = { indList: {} };
                     var inds = indDimList.yAxis;
-                    for(var i = 0, len = inds.length; i < len; i ++) {
-                        var name = inds[i].name;
-                        targetData.indList[name] = {};
-                        targetData.indList[name].caption = inds[i].caption;
-                        if(sourceData.hasOwnProperty(name)) {
-                            targetData.indList[name].color = sourceData[name];
-                        }
-                        else {
-                            targetData.indList[name].color = null;
+                    if(inds) {
+                        for(var i = 0, len = inds.length; i < len; i ++) {
+                            var name = inds[i].name;
+                            targetData.indList[name] = {};
+                            targetData.indList[name].caption = inds[i].caption;
+                            if(sourceData.hasOwnProperty(name)) {
+                                targetData.indList[name].color = sourceData[name];
+                            }
+                            else {
+                                targetData.indList[name].color = null;
+                            }
                         }
                     }
                     func(targetData);
