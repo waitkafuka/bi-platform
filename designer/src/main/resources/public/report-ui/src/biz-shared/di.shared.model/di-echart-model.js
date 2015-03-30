@@ -247,14 +247,13 @@ $namespace('di.shared.model');
                 data: rawData.xAxisCategories
             };
 
-
             // 多y轴的处理
             // 兼容老代码：如果没有多轴的情况，就不进行轴设置
             var yNameMap = {};
             var k;
             var ser;
             for (k = 0; ser = chartData.series[k]; k ++) {
-                yNameMap[ser.yAxisName] = 1;
+                yNameMap[ser.yAxisName] = ser.yAxisIndex;
             }
             k = 0;
 

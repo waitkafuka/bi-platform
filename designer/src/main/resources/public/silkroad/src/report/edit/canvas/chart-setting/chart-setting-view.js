@@ -10,7 +10,7 @@ define(
     [
         'report/edit/canvas/chart-setting/chart-setting-model',
         'report/edit/canvas/chart-setting/topn/topn-view',
-        'report/edit/canvas/chart-setting/axis/axis-view'
+        'report/edit/canvas/chart-setting/axis/axis-view',
         'report/edit/canvas/chart-setting/ind-color/ind-color-view'
     ],
     function (
