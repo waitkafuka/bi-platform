@@ -83,30 +83,35 @@ define(
             _openAxisDialog: function(data) {
                 var that = this;
                 var html = axisSettingTemplate.render(data);
-                //html = axisSettingTemplate.render(data);
-                dialog.showDialog({
-                    title: '双坐标轴设置',
-                    content: html,
-                    dialog: {
-                        width: 340,
-                        height: 200,
-                        resizable: false,
-                        buttons: [
-                            {
-                                text: '提交',
-                                click: function () {
-                                    that._saveAxisFormInfo($(this));
+                var dimNum = data.dim.length;
+                if (dimNum < 2) {
+                    dialog.alert('少于两个指标,无法进行设置', '提示');
+                }
+                else {
+                    dialog.showDialog({
+                        title: '双坐标轴设置',
+                        content: html,
+                        dialog: {
+                            width: 340,
+                            height: 200,
+                            resizable: false,
+                            buttons: [
+                                {
+                                    text: '提交',
+                                    click: function () {
+                                        that._saveAxisFormInfo($(this));
+                                    }
+                                },
+                                {
+                                    text: '取消',
+                                    click: function () {
+                                        $(this).dialog('close');
+                                    }
                                 }
-                            },
-                            {
-                                text: '取消',
-                                click: function () {
-                                    $(this).dialog('close');
-                                }
-                            }
-                        ]
-                    }
-                });
+                            ]
+                        }
+                    });
+                }
             },
             /**
              * 保存双坐标轴设置信息
