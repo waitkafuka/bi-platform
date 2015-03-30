@@ -383,7 +383,7 @@
             ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
             ser.itemStyle = {
                 normal: {
-                    color: 'red'
+                    color: '#A5D6D2'
                 }
             };
             if (ser.type !== 'map' && ser.colorDefine) {

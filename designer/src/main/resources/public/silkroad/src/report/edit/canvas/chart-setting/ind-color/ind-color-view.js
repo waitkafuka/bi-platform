@@ -54,7 +54,7 @@ define(
              */
             getIndColorList: function (event) {
                 var that = this;
-                that.model.getIndColorList(function (data) {
+                that.model.getCompAxis(function (data) {
                     that._openIndColorDialog(data);
                 });
             },
@@ -85,7 +85,7 @@ define(
                 var that = this,
                     html;
 
-                if (!data) {
+                if ($.isEmptyObject(data.indList)) {
                     dialog.alert('没有指标');
                     return;
                 }
@@ -115,25 +115,25 @@ define(
                     }
                 });
                 var defaultOption = {
-                    color: "#red",
+                    color: '#A5D6D2',
                     showInput: true,
                     showAlpha: true,
-                    className: "full-spectrum",
+                    className: 'full-spectrum',
                     showInitial: true,
                     showPalette: true,
                     showSelectionPalette: true,
                     maxPaletteSize: 10,
-                    preferredFormat: "hex",
-                    localStorageKey: "spectrum.demo",
+                    preferredFormat: 'hex',
+                    localStorageKey: 'spectrum.demo',
                     showPaletteOnly: true,
                     togglePaletteOnly: true,
                     togglePaletteMoreText: 'more',
                     togglePaletteLessText: 'less',
                     palette: [
-                        [
-                            "rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
-                            "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"]
-                        ]
+                        ['#A5D6D2','#4cc6f7','#C1232B','#B5C334','#FCCE10'],
+                        ['#E87C25','#27727B','#FAD860','#F3A43B','#60C0DD'],
+                        ['#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0']
+                    ]
                 };
                 var texts = $('.ind-color').find('input');
                 texts.each(function() {
@@ -146,11 +146,12 @@ define(
                     }
                     $(this).spectrum(option);
                 });
+                $('.sp-input').focusin(function (e) {e.stopPropagation()});
             },
             /**
              * 保存topn设置信息
              *
-             * @param {￥HTMLElement} $dialog 弹出框$el元素
+             * @param {$HTMLElement} $dialog 弹出框$el元素
              * @private
              */
             _saveIndColorInfo: function ($dialog) {

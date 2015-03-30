@@ -16,42 +16,48 @@ define(['url', 'core/helper'], function (Url, Helper) {
         defaults: {},
         initialize: function () { },
         /**
+         * 获取组件的数据关联配置（指标、维度、切片）
+         *
+         * @param {string} compId 组件id
+         * @param {Function} success 数据load完成后的回调函数
+         * @public
+         */
+        getCompAxis: function (func) {
+            var that = this;
+            $.ajax({
+                url: Url.getCompAxis(this.get('reportId'), this.get('compId')),
+                success: function (data) {
+                    that.getIndColorList(data.data, func);
+                }
+            });
+        },
+        /**
          * 获取数指标颜色设置数据
          *
          * @param {Function} success 回调函数
          * @public
          */
-        getIndColorList: function (success) {
+        getIndColorList: function (indDimList, func) {
+            var that = this;
             $.ajax({
-                url: Url.getIndColorList(this.get('reportId'), this.get('compId')),
+                url: Url.getIndColorList(that.get('reportId'), that.get('compId')),
                 type: 'get',
                 success: function (data) {
                     var sourceData = data.data;
-                    var targetData;
-                    var indList;
-
-                    if (!$.isObjectEmpty(sourceData)) {
-                        // 组合数据格式列表项
-                        targetData = {indList: {}};
-                        /**
-                         * 后端返回的数据格式，name:format
-                         * 需要组合成的数据格式：name: { format: '', caption: ''}
-                         * 获取左侧所有指标，遍历,为了获取caption
-                         *
-                         */
-                        indList = Helper.getIndList();
-                        for(var i = 0, iLen = indList.length; i < iLen; i ++) {
-                            var name = indList[i].name;
-                            if (sourceData.hasOwnProperty(name)) {
-                                var formatObj = {
-                                    color: sourceData[name],
-                                    caption: indList[i].caption
-                                };
-                                targetData.indList[name] = formatObj;
-                            }
+                    var targetData = { indList: {} };
+                    var inds = indDimList.yAxis;
+                    for(var i = 0, len = inds.length; i < len; i ++) {
+                        var name = inds[i].name;
+                        targetData.indList[name] = {};
+                        targetData.indList[name].caption = inds[i].caption;
+                        if(sourceData.hasOwnProperty(name)) {
+                            targetData.indList[name].color = sourceData[name];
+                        }
+                        else {
+                            targetData.indList[name].color = null;
                         }
                     }
-                    success(targetData);
+                    func(targetData);
                 }
             });
         },
