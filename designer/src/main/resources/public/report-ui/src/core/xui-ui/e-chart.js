@@ -378,7 +378,6 @@
                 : 1;
             ser = { data: [] };
             ser.name = serDef.name || '';
-            ser.yAxisIndex = serDef.yAxisIndex || 0;
             ser.colorDefine = serDef.colorDefine || void 0;
             ser.format = serDef.format || void 0;
             ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
@@ -413,7 +412,10 @@
                     }
                 }
                 else if (ser.type === 'line') {
-                    ser.yAxisIndex = Number(serDef.yAxisIndex) || 0;
+                    // 在有两个以上的指标时进行双轴设定 - 博学
+                    if (this._aSeries.length > 1) {
+                        ser.yAxisIndex = serDef.yAxisIndex || 0;
+                    }
                     ser.symbol = 'none'; // 线图上的点的形状
                     if (isInArray(ser.name, defaultMeasures)) {
                         tempData.push(ser);
@@ -676,12 +678,12 @@
             options.yAxis = yAxis;
         }
         if (this._chartType === 'line') {
+            // 超过两个指标时进行y轴格式设定 - 博学
+            // TODO: 此部分逻辑需要简化
             if (options.series.length > 1) {
                 // 多于两个指标时显示双y轴
-
                 yAxisOption = {};
                 yAxisOption.type = 'value';
-
                 // y轴添加单位 - 晓强
                 yAxisOption.axisLabel = yAxisOption.axisLabel || {};
                 yAxisOption.axisLabel.formatter = function (value) {
@@ -703,7 +705,6 @@
                             resultStr = (value / y).toFixed(0) + '亿';
                         }
                     }
-
                     return resultStr;
                 };
                 // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
@@ -716,8 +717,11 @@
                 yAxisOption.splitLine = styleConfiguration.splitLine;
                 yAxis.push(yAxisOption);
                 yAxis[1] = yAxis[0];
+                options.yAxis = yAxis;
             }
-            options.yAxis = yAxis;
+            else {
+                options.yAxis = yAxis;
+            }
         }
     };
     /**
