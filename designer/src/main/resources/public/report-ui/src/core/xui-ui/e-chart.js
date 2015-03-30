@@ -381,14 +381,15 @@
             ser.colorDefine = serDef.colorDefine || void 0;
             ser.format = serDef.format || void 0;
             ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
-            if ((ser.type !== 'map' || ser.type !== 'pie') && ser.colorDefine) {
-                ser.itemStyle.normal.color = ser.colorDefine;
+            if (ser.type !== 'map' && ser.type !== 'pie') {
                 ser.itemStyle = {
                     normal: {
                         color: '#A5D6D2'
                     }
                 };
-                ser.itemStyle.normal.color = ser.colorDefine;
+                if (ser.colorDefine) {
+                    ser.itemStyle.normal.color = ser.colorDefine;
+                }
             }
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
