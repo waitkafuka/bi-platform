@@ -61,7 +61,7 @@ public class TimeRangeDetail {
     public TimeRangeDetail(String start, String end) {
         super();
         this.start = start.replace ("-", "");
-        this.end = start.replace ("-", "");
+        this.end = end.replace ("-", "");
     }
 
     /**
