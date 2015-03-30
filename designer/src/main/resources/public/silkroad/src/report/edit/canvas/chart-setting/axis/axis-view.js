@@ -84,8 +84,11 @@ define(
                 var that = this;
                 var html = axisSettingTemplate.render(data);
                 var dimNum = data.dim.length;
-                if (dimNum < 2) {
+                if (dimNum === 1) {
                     dialog.alert('少于两个指标,无法进行设置', '提示');
+                }
+                else if (dimNum === 0) {
+                    dialog.alert('没有指标', '提示');
                 }
                 else {
                     dialog.showDialog({
