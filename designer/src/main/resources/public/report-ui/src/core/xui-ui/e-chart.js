@@ -381,12 +381,13 @@
             ser.colorDefine = serDef.colorDefine || void 0;
             ser.format = serDef.format || void 0;
             ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
-            ser.itemStyle = {
-                normal: {
-                    color: '#A5D6D2'
-                }
-            };
-            if (ser.type !== 'map' && ser.colorDefine) {
+            if ((ser.type !== 'map' || ser.type !== 'pie') && ser.colorDefine) {
+                ser.itemStyle.normal.color = ser.colorDefine;
+                ser.itemStyle = {
+                    normal: {
+                        color: '#A5D6D2'
+                    }
+                };
                 ser.itemStyle.normal.color = ser.colorDefine;
             }
             (serDef.id !== null) && (ser.id = serDef.id);
