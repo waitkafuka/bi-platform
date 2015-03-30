@@ -708,6 +708,35 @@
 /*@end*/
 
 /**
+ * @name                      :双坐标轴设置
+ * @author                    :weiboxue
+ * @email                     :wbx_901118@sina.com
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :暂无
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.axis-setting {
+    display: block;
+    margin-top: 15px;
+    padding: 0 10px 0 10px;
+    font-size: 12px;
+    font-family: '微软雅黑';
+}
+.axis-setting-dim div {
+    display: inline-block;
+    margin-left: 5px;
+    margin-top: 10px;
+    height: 20px;
+}
+.axis-setting-checkbox {
+    vertical-align: bottom;
+}
+
+/*@end*/
+
+/**
  * @name                      :组件关联关系设置
  * @author                    :lizhantong
  * @email                     :lztlovely@126.com

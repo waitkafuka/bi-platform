@@ -704,7 +704,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         }
         @SuppressWarnings("unchecked")
         Map<String, String> positionMap = GsonUtils.fromJson (positions, HashMap.class);
-        area.getFormatModel ().setColorFormat (positionMap);
+        area.getFormatModel ().setPositions(positionMap);
     }
     
 }

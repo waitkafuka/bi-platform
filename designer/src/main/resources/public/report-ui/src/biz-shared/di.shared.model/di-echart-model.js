@@ -233,6 +233,8 @@ $namespace('di.shared.model');
                 chartData.series[x].name = item.name;
                 chartData.series[x].type = item.type;
                 chartData.series[x].yAxisName = item.yAxisName;
+                // 双y轴数据设置
+                chartData.series[x].yAxisIndex = item.position;
                 chartData.series[x].data = [];
                 for (var y = 0, yLen = item.data.length; y < yLen; y ++) {
                     chartData.series[x].data[y] = item.data[y] ? item.data[y] : 0;

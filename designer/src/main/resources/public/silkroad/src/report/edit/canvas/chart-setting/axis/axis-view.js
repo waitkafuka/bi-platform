@@ -1,29 +1,34 @@
 /**
- * @file: 报表新建（编辑）-- 图形组件编辑模块 -- 指标颜色设置模块视图
- * @author: lizhantong
+ * @file: 报表新建（编辑）-- 图形组件编辑模块 -- 双坐标轴设置模块view
+ * @author: weiboxue
  * @depend:
- * @date: 2015-03-26
+ * @date: 2015-03-27
  */
 
 define(
     [
         'dialog',
-        'report/edit/canvas/chart-setting/ind-color/ind-color-model',
-        'report/edit/canvas/chart-setting/ind-color/ind-color-setting-template',
-        'spectrum'
+        'report/edit/canvas/chart-setting/axis/axis-model',
+        'report/edit/canvas/chart-setting/axis/axis-setting-template'
     ],
     function (
         dialog,
-        IndColorModel,
-        indColorSettingTemplate
+        AxisModel,
+        axisSettingTemplate
     ) {
+
+        //------------------------------------------
+        // 引用
+        //------------------------------------------
+
+        var confirm = dialog.confirm;
 
         //------------------------------------------
         // 视图类的声明
         //------------------------------------------
         var View = Backbone.View.extend({
             events: {
-                'click .j-set-ind-color': 'getIndColorList'
+                'click .j-set-axis': 'setDoubleAxis'
             },
             //------------------------------------------
             // 公共方法区域
@@ -39,23 +44,22 @@ define(
              */
             initialize: function (option) {
                 var that = this;
-
-                that.model = new IndColorModel({
+                that.model = new AxisModel({
                     canvasModel: option.canvasView.model,
                     reportId: option.reportId
                 });
                 this.model.set('compId', this.$el.find('.j-comp-setting').attr('data-comp-id'));
             },
             /**
-             * 获取topn数据信息
+             * 获取双坐标轴数据信息
              *
              * @param {event} event 点击事件
              * @public
              */
-            getIndColorList: function (event) {
+            setDoubleAxis: function (event) {
                 var that = this;
-                that.model.getIndColorList(function (data) {
-                    that._openIndColorDialog(data);
+                that.model.getAxisList(function (data) {
+                    that._openAxisDialog(data);
                 });
             },
             /**
@@ -70,39 +74,28 @@ define(
                 // 在这里没有把el至为empty，因为在点击图行编辑时，会把图形编辑区域重置，无需在这里
                 this.$el.unbind();
             },
-
-            //------------------------------------------
-            // 私有方法区域
-            //------------------------------------------
-
             /**
-             * 打开topn设置弹出框
+             * 打开双坐标轴设置弹出框
              *
              * @param {Object} data
              * @private
              */
-            _openIndColorDialog: function(data) {
-                var that = this,
-                    html;
-
-                if (!data) {
-                    dialog.alert('没有指标');
-                    return;
-                }
-
-                html = indColorSettingTemplate.render(data);
+            _openAxisDialog: function(data) {
+                var that = this;
+                var html = axisSettingTemplate.render(data);
+                //html = axisSettingTemplate.render(data);
                 dialog.showDialog({
-                    title: '指标颜色设置',
+                    title: '双坐标轴设置',
                     content: html,
                     dialog: {
                         width: 340,
-                        height: 300,
+                        height: 200,
                         resizable: false,
                         buttons: [
                             {
                                 text: '提交',
                                 click: function () {
-                                    that._saveIndColorInfo($(this));
+                                    that._saveAxisFormInfo($(this));
                                 }
                             },
                             {
@@ -114,55 +107,29 @@ define(
                         ]
                     }
                 });
-                var defaultOption = {
-                    color: "#red",
-                    showInput: true,
-                    showAlpha: true,
-                    className: "full-spectrum",
-                    showInitial: true,
-                    showPalette: true,
-                    showSelectionPalette: true,
-                    maxPaletteSize: 10,
-                    preferredFormat: "hex",
-                    localStorageKey: "spectrum.demo",
-                    showPaletteOnly: true,
-                    togglePaletteOnly: true,
-                    togglePaletteMoreText: 'more',
-                    togglePaletteLessText: 'less',
-                    palette: [
-                        [
-                            "rgb(0, 0, 0)", "rgb(67, 67, 67)", "rgb(102, 102, 102)",
-                            "rgb(204, 204, 204)", "rgb(217, 217, 217)","rgb(255, 255, 255)"]
-                        ]
-                };
-                var texts = $('.ind-color').find('input');
-                texts.each(function() {
-                    var ind = data.indList[$(this).attr('name')];
-                    var color;
-                    ind && (color = ind.color)
-                    var option =  $.extend(true, {}, defaultOption);
-                    if (color) {
-                        option.color = color;
-                    }
-                    $(this).spectrum(option);
-                });
             },
             /**
-             * 保存topn设置信息
+             * 保存双坐标轴设置信息
              *
              * @param {￥HTMLElement} $dialog 弹出框$el元素
              * @private
              */
-            _saveIndColorInfo: function ($dialog) {
-                var texts = $('.ind-color').find('input');
+            _saveAxisFormInfo: function ($dialog) {
+                var checkboxs = $('.axis-setting-checkbox');
                 var data = {};
-
-                texts.each(function () {
+                // 数据结构构造
+                checkboxs.each(function () {
                     var $this = $(this);
                     var name = $this.attr('name');
-                    data[name] = $this.val();
+                    if ($this.is(":checked")) {
+                        data[name] = '1';
+                    }
+                    else {
+                        data[name] = '0';
+                    }
                 });
-                this.model.saveIndColorInfo(data, function () {
+
+                this.model.saveAxisInfo(data, function () {
                     $dialog.dialog('close');
                     window.dataInsight.main.canvas.showReport();
                 });
