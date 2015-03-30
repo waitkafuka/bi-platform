@@ -583,7 +583,6 @@
 /**
  * @name                      :数据格式设置
  * @author                    :lizhantong
- * @email                     :lztlovely@126.com
  * @version                   :1.0
  * @type                      :扩展类
  * @explain                   :数据格式设置模块
@@ -630,6 +629,45 @@
 .data-format-black {
     text-align: center;
     margin: 0 auto;
+}
+/*@end*/
+
+/**
+ * @name                      :图形指标颜色设置
+ * @author                    :lizhantong
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :数据格式设置模块
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.ind-color {
+    width: 300px;
+}
+.ind-color .ind-color-alone {
+    padding: 10px 10px;
+}
+.ind-color-alone > span {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+.ind-color-alone .ind-color-alone-ind {
+    float: left;
+    margin-top: 10px;
+}
+.ind-color-alone-ind > span {
+    width: 110px;
+    float: left;
+    text-align: right;
+    line-height: 25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.ind-color-alone-ind > input {
+    float: left;
 }
 /*@end*/
 

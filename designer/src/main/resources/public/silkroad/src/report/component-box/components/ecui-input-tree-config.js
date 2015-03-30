@@ -41,7 +41,7 @@ define(
             type: 'SINGLE_DROP_DOWN_TREE',
             iconClass: 'single-drop-down-tree',
             caption: '下拉树',
-            defaultWidth: 300,
+            defaultWidth: 210,
             defaultHeight: 33,
             defaultValue: 'false',
             vm: {

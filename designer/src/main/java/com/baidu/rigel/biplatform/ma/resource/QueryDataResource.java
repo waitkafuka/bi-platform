@@ -958,6 +958,9 @@ public class QueryDataResource extends BaseResource {
 
     private boolean isTimeDimOnFirstCol(ReportDesignModel model,
             ExtendArea targetArea, QueryAction action) {
+    	if (action.getRows().isEmpty()) {
+    		return false;
+    	}
         Item item = action.getRows().keySet().toArray(new Item[0])[0];
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                 targetArea.getCubeId(), item.getOlapElementId());

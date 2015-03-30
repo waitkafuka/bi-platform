@@ -11,11 +11,13 @@ define(
         'report/edit/canvas/chart-setting/chart-setting-model',
         'report/edit/canvas/chart-setting/topn/topn-view',
         'report/edit/canvas/chart-setting/axis/axis-view'
+        'report/edit/canvas/chart-setting/ind-color/ind-color-view'
     ],
     function (
         ChartSettingModel,
         TopnView,
-        AxisView
+        AxisView,
+        IndColorView
     ) {
         //------------------------------------------
         // 视图类的声明
@@ -51,9 +53,15 @@ define(
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView
                 });
+                this.indColorView = new IndColorView({
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
                 // 挂载双坐标轴设置视图
                 this.axisView = new AxisView({
-                    el: this.el,
+                	// 挂载指标颜色设置视图
+                	el: this.el,
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView
                 });
