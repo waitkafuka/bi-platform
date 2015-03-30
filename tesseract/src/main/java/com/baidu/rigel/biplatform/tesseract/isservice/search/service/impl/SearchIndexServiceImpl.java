@@ -21,6 +21,9 @@ package com.baidu.rigel.biplatform.tesseract.isservice.search.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 
 import javax.annotation.Resource;
 
@@ -40,6 +43,7 @@ import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchEx
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexState;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
@@ -112,7 +116,7 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public SearchIndexResultSet query(QueryRequest query) throws IndexAndSearchException {
-//        ExecutorCompletionService<SearchIndexResultSet> completionService = new ExecutorCompletionService<>(taskExecutor);
+        ExecutorCompletionService<SearchIndexResultSet> completionService = new ExecutorCompletionService<>(taskExecutor);
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard
@@ -182,86 +186,48 @@ public class SearchIndexServiceImpl implements SearchService {
             LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " before prepare get record.");
             current = System.currentTimeMillis();
 
-            final List<SearchIndexResultSet> idxShardResultSetList = 
-                    new ArrayList<SearchIndexResultSet>(idxMeta.getIdxShardList ().size ());
-            idxMeta.getIdxShardList ().parallelStream ().filter (idxShard -> 
-                !idxShard.getIdxState().equals(IndexState.INDEX_UNINIT) 
-            ).forEach (idxShard -> {
+            List<SearchIndexResultSet> idxShardResultSetList = new ArrayList<SearchIndexResultSet>();
+            for (IndexShard idxShard : idxMeta.getIdxShardList()) {
+            	
+            	if(idxShard.getIdxState().equals(IndexState.INDEX_UNINIT)){
+            		continue;
+            	}
+            	
+                completionService.submit(new Callable<SearchIndexResultSet>() {
+                    
+                    @Override
+                    public SearchIndexResultSet call() throws Exception {
+                        try {
+                            long current = System.currentTimeMillis();
+                            Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
+                            searchNode.searchRequestCountAdd();
+                            isNodeService.saveOrUpdateNodeInfo(searchNode);
+                            LOGGER.info("begin search in shard:{}", idxShard);
+                            SearchIndexResultSet result = (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();
+                            searchNode.searchrequestCountSub();
+                            isNodeService.saveOrUpdateNodeInfo(searchNode);
+                            LOGGER.info("compelete search in shard:{},take:{} ms",idxShard, System.currentTimeMillis() - current);
+                            return result;
+                        } catch (Exception e) {
+                            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                                    IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
+                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
+                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION);
+                        }
+                        
+                    }
+                });
+            }
+            for(int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
                 try {
-//                  current = System.currentTimeMillis();
-                  long begin = System.currentTimeMillis ();
-                  Node searchNode = 
-                          isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
-                  searchNode.searchRequestCountAdd();
-                  isNodeService.saveOrUpdateNodeInfo(searchNode);
-                  LOGGER.info("begin search in shard:{}", idxShard);
-                  idxShardResultSetList.add (
-                          (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody());
-                  searchNode.searchrequestCountSub();
-                  isNodeService.saveOrUpdateNodeInfo(searchNode);
-                  LOGGER.info("[INFO] === === === compelete search in shard:{},take:{} ms",
-                          idxShard, System.currentTimeMillis() - begin);
-              } catch (Exception e) {
-                  throw new RuntimeException(new IndexAndSearchException(
-                          TesseractExceptionUtils.getExceptionMessage(
-                          IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
-                          IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
-                          IndexAndSearchExceptionType.NETWORK_EXCEPTION));
-              }
-            });
-//            for (IndexShard idxShard : idxMeta.getIdxShardList()) {
-//            	
-//            	if(idxShard.getIdxState().equals(IndexState.INDEX_UNINIT)){
-//            		continue;
-//            	}
-//            	
-//                completionService.submit(new Callable<SearchIndexResultSet>() {
-//                    
-//                    @Override
-//                    public SearchIndexResultSet call() throws Exception {
-//                        try {
-//                            long current = System.currentTimeMillis();
-//                            Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
-//                            searchNode.searchRequestCountAdd();
-//                            isNodeService.saveOrUpdateNodeInfo(searchNode);
-//                            LOGGER.info("begin search in shard:{}", idxShard);
-//                            SearchIndexResultSet result = (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();
-//                            searchNode.searchrequestCountSub();
-//                            isNodeService.saveOrUpdateNodeInfo(searchNode);
-//                            LOGGER.info("compelete search in shard:{},take:{} ms",idxShard, System.currentTimeMillis() - current);
-//                            return result;
-//                        } catch (Exception e) {
-//                            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-//                                    IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
-//                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
-//                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION);
-//                        }
-//                        
-//                    }
-//                });
-//            }
-//            idxMeta.getIdxShardList().parallelStream ().forEach (idMeta -> {
-//                try {
-//                    idxShardResultSetList.add(completionService.take().get());
-//                } catch (InterruptedException | ExecutionException e) {
-//                    throw new RuntimeException (
-//                            new IndexAndSearchException (TesseractExceptionUtils.getExceptionMessage (
-//                            IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
-//                            IndexAndSearchExceptionType.NETWORK_EXCEPTION),
-//                            e,
-//                            IndexAndSearchExceptionType.NETWORK_EXCEPTION));
-//                }
-//            });
-//            for(int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
-//                try {
-//                    idxShardResultSetList.add(completionService.take().get());
-//                } catch (InterruptedException | ExecutionException e) {
-//                    throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-//                            IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
-//                            IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
-//                            IndexAndSearchExceptionType.NETWORK_EXCEPTION);
-//                }
-//            }
+                    idxShardResultSetList.add(completionService.take().get());
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                            IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
+                            IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
+                            IndexAndSearchExceptionType.NETWORK_EXCEPTION);
+                }
+            }
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                     "merging result from multiple index"));
             result = mergeResultSet(idxShardResultSetList, query);

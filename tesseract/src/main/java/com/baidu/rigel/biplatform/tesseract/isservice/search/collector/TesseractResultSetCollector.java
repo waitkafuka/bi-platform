@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.lucene.index.AtomicReader;
@@ -32,11 +30,6 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResul
  *
  */
 public class TesseractResultSetCollector extends Collector {
-    
-    /**
-     * 后续考虑优化线程池配置管理
-     */
-    private static final ExecutorService service = Executors.newFixedThreadPool (1);
     
     /**
      * dimFields
@@ -60,8 +53,6 @@ public class TesseractResultSetCollector extends Collector {
      * cacheDoubleValuesMap
      */
     private Map<Integer,Map<String, FieldCache.Doubles>> cacheDoubleValuesMap;
-    
-    
     
     /**
      * resultDocBaseDocIdMap
@@ -178,8 +169,7 @@ public class TesseractResultSetCollector extends Collector {
             return result;
         }
         
-//        Map<String, FieldCache.Doubles> currDoubleValuesMap = null; //new HashMap<String, FieldCache.Doubles>();
-//        Map<String, BinaryDocValues> currBinaryDocValuesMap = null; //new HashMap<String, BinaryDocValues>();
+
         long begin = System.currentTimeMillis ();
         this.resultDocBaseDocIdMap.keySet().parallelStream ().forEach (docBase -> {
            Map<String, FieldCache.Doubles> currDoubleValuesMap = this.cacheDoubleValuesMap.get(docBase);
@@ -211,28 +201,9 @@ public class TesseractResultSetCollector extends Collector {
               record.setGroupBy(groupBy);
               result.addRecord(record);
           }
-//            final Integer[] docIds = this.resultDocBaseDocIdMap.get(docBase).toArray (new Integer[0]);
-//            int gropByNumSize = docIds.length + 1;
-//            @SuppressWarnings("unchecked")
-//            Future<SearchIndexResultRecord[]>[] resultRecordList = new Future[docIds.length / gropByNumSize + 1];
-//            for (int i = 0, j = 0; i < docIds.length; ) {
-//                int endIndex = i + gropByNumSize;
-//                if (endIndex > docIds.length) {
-//                    endIndex = docIds.length;
-//                }
-//                resultRecordList[j++] = 
-//                        service.submit (new ResultRecordBuildTask (i, endIndex, docIds, docBase, groupByFields));
-//                i += gropByNumSize;
-//            }
-//            
-//            for (Future<SearchIndexResultRecord[]> f : resultRecordList) {
-//                try {
-//                    result.addAll (f.get ());
-//                } catch (Exception e) {
-//                     throw new RuntimeException ("查询请求超时");
-//                }
-//            }
         });
+//      Map<String, FieldCache.Doubles> currDoubleValuesMap = null; //new HashMap<String, FieldCache.Doubles>();
+//      Map<String, BinaryDocValues> currBinaryDocValuesMap = null; //new HashMap<String, BinaryDocValues>();
 //        for(Integer currDocBase : this.resultDocBaseDocIdMap.keySet()){
 //            currDoubleValuesMap = this.cacheDoubleValuesMap.get(currDocBase);
 //            currBinaryDocValuesMap = this.cacheBinaryDocValuesMap.get(currDocBase);

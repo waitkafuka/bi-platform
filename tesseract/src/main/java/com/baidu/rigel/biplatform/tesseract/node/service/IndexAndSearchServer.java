@@ -192,7 +192,7 @@ public class IndexAndSearchServer {
                 + "ms");
             this.isRunning = true;
             
-            serverChannelFuture.channel().closeFuture().sync().channel();
+            serverChannelFuture.channel().closeFuture().sync(); //.channel();
             
         } finally {
             workerGroup.shutdownGracefully();
