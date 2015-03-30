@@ -1,6 +1,6 @@
 /**
  * @file: 报表新建（编辑）-- 图形组件编辑模块 -- 双坐标轴设置模块view
- * @author: 魏博学
+ * @author: weiboxue
  * @depend:
  * @date: 2015-03-27
  */
