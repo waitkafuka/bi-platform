@@ -2,37 +2,37 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,measureId=$data.measureId,$each=$utils.$each,indList=$data.indList,$ind=$data.$ind,$index=$data.$index,$escape=$utils.$escape,topTypeList=$data.topTypeList,$option=$data.$option,key=$data.key,topType=$data.topType,recordSize=$data.recordSize,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    measureId: \'\',\n    reocrdSize: \'\',\n    topType: \'\',\n    indList: [\n\n    ],\n    topTypeList: {\n        desc: bottom,\n        asc: top,\n        none: none\n    }\n};\n-->\n<div class="topn-indlist">\n    <div class="topn-indlist-item">\n        <span>指标选择：</span>\n        <select name="measureId">\n            <option value=""\n            ';
+        var $utils=template.utils,$helpers=$utils.$helpers,measureId=$data.measureId,$each=$utils.$each,indList=$data.indList,$ind=$data.$ind,$index=$data.$index,$escape=$utils.$escape,topTypeList=$data.topTypeList,$option=$data.$option,key=$data.key,topType=$data.topType,recordSize=$data.recordSize,$out='';$out+='<!--\r\n数据例子：\r\nvar demoData = {\r\n    measureId: \'\',\r\n    reocrdSize: \'\',\r\n    topType: \'\',\r\n    indList: [\r\n\r\n    ],\r\n    topTypeList: {\r\n        desc: bottom,\r\n        asc: top,\r\n        none: none\r\n    }\r\n};\r\n-->\r\n<div class="topn-indlist">\r\n    <div class="topn-indlist-item">\r\n        <span>指标选择：</span>\r\n        <select name="measureId">\r\n            <option value=""\r\n            ';
         if(!measureId){
         $out+=' selected="selected" ';
         }
-        $out+='>请选择</option>\n            ';
+        $out+='>请选择</option>\r\n            ';
         $each(indList,function($ind,$index){
-        $out+='\n            <option value=';
+        $out+='\r\n            <option value=';
         $out+=$escape($ind.id);
-        $out+='\n            ';
+        $out+='\r\n            ';
         if(measureId && $ind.id === measureId){
         $out+=' selected="selected" ';
         }
         $out+='>';
         $out+=$escape($ind.caption);
-        $out+='\n            </option>\n            ';
+        $out+='\r\n            </option>\r\n            ';
         });
-        $out+='\n        </select>\n    </div>\n    <div class="topn-indlist-item">\n        <span>排序方式：</span>\n        <select name="topType">\n            ';
+        $out+='\r\n        </select>\r\n    </div>\r\n    <div class="topn-indlist-item">\r\n        <span>排序方式：</span>\r\n        <select name="topType">\r\n            ';
         $each(topTypeList,function($option,key){
-        $out+='\n            <option value=';
+        $out+='\r\n            <option value=';
         $out+=$escape(key);
-        $out+='\n            ';
+        $out+='\r\n            ';
         if(topType && key === topType){
-        $out+='\n            selected="selected"\n            ';
+        $out+='\r\n            selected="selected"\r\n            ';
         }
         $out+='>';
         $out+=$escape($option);
-        $out+='\n            </option>\n            ';
+        $out+='\r\n            </option>\r\n            ';
         });
-        $out+='\n        </select>\n    </div>\n    <div class="topn-indlist-item">\n        <span>请输入条数：</span>\n        <input type="text" name="recordSize" value="';
+        $out+='\r\n        </select>\r\n    </div>\r\n    <div class="topn-indlist-item">\r\n        <span>请输入条数：</span>\r\n        <input type="text" name="recordSize" value="';
         $out+=$escape(recordSize);
-        $out+='"/>\n    </div>\n</div>\n';
+        $out+='"/>\r\n    </div>\r\n</div>\r\n';
         return $out;
     }
     return { render: anonymous };

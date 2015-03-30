@@ -291,7 +291,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                    compileContext.getVariablesResult().clear();
                    compileContext.setVariablesResult(categoryVariableVal.get(parentName));
 //                   compileContext.getVariablesResult().put(entry.getKey(), categoryVariableVal.get(parentName));
-                   calCulateDatas.put(parentName, ((ListComputeResult)compileContext.getNode().getResult(compileContext)).getData());
+                   calCulateDatas.put(parentName, ListComputeResult.transfer(compileContext.getNode().getResult(compileContext), rowLeafs.size()).getData());
                }
            }
            
