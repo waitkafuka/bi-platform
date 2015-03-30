@@ -371,7 +371,10 @@
         var seryKind = {};
         var tempData = [];
         var xAxis = this._aXAxis;
-
+        var colors =  [
+            '#A5D6D2', '#C1232B', '#B5C334', '#4cc6f7','#FCCE10',
+            '#E87C25', '#27727B', '#FAD860', '#F3A43B', '#60C0DD'
+        ];
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
                 ? seryKind[serDef.type] + 1
@@ -384,7 +387,7 @@
             if (ser.type !== 'map' && ser.type !== 'pie') {
                 ser.itemStyle = {
                     normal: {
-                        color: '#A5D6D2'
+                        color: colors[i]
                     }
                 };
                 if (ser.colorDefine) {
