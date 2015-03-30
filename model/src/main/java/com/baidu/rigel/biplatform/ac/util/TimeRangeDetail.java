@@ -60,8 +60,8 @@ public class TimeRangeDetail {
      */
     public TimeRangeDetail(String start, String end) {
         super();
-        this.start = start;
-        this.end = end;
+        this.start = start.replace ("-", "");
+        this.end = end.replace ("-", "");
     }
 
     /**

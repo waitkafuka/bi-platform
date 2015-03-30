@@ -17,6 +17,8 @@ package com.baidu.rigel.biplatform.tesseract.node.service;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -282,7 +284,6 @@ public class IndexAndSearchClient {
         try {
             if (b != null) {
                 channel = b.connect(address, port).sync().channel();
-                
                 logger.info("getChannelByAddressAndPort:connect server success [address=" + address
                     + "][port=" + port + "]");
             }
@@ -574,12 +575,12 @@ public class IndexAndSearchClient {
         channel.pipeline().addLast(handler);
         
         channel.writeAndFlush(message);
-        channel.closeFuture().sync();
+        channel.closeFuture().sync ();
         
-       
         returnMessage = handler.getMessage();
         
         handler.setMessage(null);
+        channel.close ();
         
         logger.info("executeAction:[NettyAction=" + action + "][Message=" + message + "][Handler="
             + handler + "] success");

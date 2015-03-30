@@ -974,7 +974,7 @@ public final class DataModelUtils {
         List<List<BigDecimal>> datas = transData(newDataModel.getColumnBaseData());
         List<List<BigDecimal>> newDatas = Lists.newArrayList();
         for (int i = 0; i < datas.size(); ++i) {
-            if (i >= rowNum && i <= childSize + rowNum) {
+            if (i > rowNum && i <= childSize + rowNum) {
                 continue;
             }
             newDatas.add(datas.get(i));

@@ -442,7 +442,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 TimeRangeDetail detail = new TimeRangeDetail(filterMap.get ("start"), filterMap.get ("end"));
                 String[] days = detail.getDays ();
                 MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
-                Expression expression = new Expression(dimLevel.getSource ());
+                Expression expression = new Expression(dimLevel.getFactTableColumn ());
                 for (String day :days) {
                     Set<String> leafNodes = Sets.newHashSet ();
                     leafNodes.add (day);

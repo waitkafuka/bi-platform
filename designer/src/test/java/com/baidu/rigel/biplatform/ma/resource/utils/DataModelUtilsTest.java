@@ -538,7 +538,7 @@ public class DataModelUtilsTest {
             columnBaseData.add (datas);
             dataModel.setColumnBaseData (columnBaseData);
             DataModel rs = DataModelUtils.removeDataFromDataModel (dataModel, 1);
-            Assert.assertEquals (1, rs.getColumnBaseData ().get (0).size ());
+            Assert.assertEquals (2, rs.getColumnBaseData ().get (0).size ());
         } catch (Exception e) {
             Assert.fail ();
         }
