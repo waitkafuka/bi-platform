@@ -679,43 +679,8 @@
         }
         if (this._chartType === 'line') {
             // 超过两个指标时进行y轴格式设定 - 博学
-            // TODO: 此部分逻辑需要简化
             if (options.series.length > 1) {
                 // 多于两个指标时显示双y轴
-                yAxisOption = {};
-                yAxisOption.type = 'value';
-                // y轴添加单位 - 晓强
-                yAxisOption.axisLabel = yAxisOption.axisLabel || {};
-                yAxisOption.axisLabel.formatter = function (value) {
-                    var resultStr;
-                    // 确定可以转换成数字
-                    if (!Number.isNaN(value/1)) {
-                        // Y轴调到右边需要数据翻转
-                        if (that._chartType === 'bar') {
-                            value = -1 * value;
-                        }
-                        resultStr = value;
-                        var w = 10000;
-                        var y = 1000000000;
-
-                        if (value >= w && value <= y) {
-                            resultStr = (value / w).toFixed(0) + '万';
-                        }
-                        else if (value >= y) {
-                            resultStr = (value / y).toFixed(0) + '亿';
-                        }
-                    }
-                    return resultStr;
-                };
-                // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
-                yAxisOption.axisLabel.textStyle = styleConfiguration.textStyle;
-                // y轴颜色设定
-                yAxisOption.axisLine = yAxisOption.axisLine || {};
-                yAxisOption.axisLine.lineStyle = styleConfiguration.lineStyle;
-                // 设置y轴网格 - 博学
-                yAxisOption.splitArea = styleConfiguration.splitArea;
-                yAxisOption.splitLine = styleConfiguration.splitLine;
-                yAxis.push(yAxisOption);
                 yAxis[1] = yAxis[0];
                 options.yAxis = yAxis;
             }
