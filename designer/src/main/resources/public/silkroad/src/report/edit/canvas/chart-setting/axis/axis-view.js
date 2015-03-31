@@ -58,7 +58,7 @@ define(
              */
             setDoubleAxis: function (event) {
                 var that = this;
-                that.model.getAxisList(function (data) {
+                that.model.getCompAxis(function (data) {
                     that._openAxisDialog(data);
                 });
             },

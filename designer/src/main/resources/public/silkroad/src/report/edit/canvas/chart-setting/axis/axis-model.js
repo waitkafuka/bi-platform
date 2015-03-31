@@ -35,30 +35,52 @@ define(['url'], function (Url) {
             });
         },
         /**
+         * 获取组件的数据关联配置（指标、维度、切片）
+         *
+         * @param {string} compId 组件id
+         * @param {Function} success 数据load完成后的回调函数
+         * @public
+         */
+        getCompAxis: function (func) {
+            var that = this;
+            $.ajax({
+                url: Url.getCompAxis(this.get('reportId'), this.get('compId')),
+                success: function (data) {
+                    that.getAxisList(data.data, func);
+                }
+            });
+        },
+        /**
          * 获取双坐标轴设置信息
          *
          * @param {Function} success 回调函数
          * @public
          */
-        getAxisList: function (success) {
+        getAxisList: function (indDimList, success) {
             var that = this;
             $.ajax({
                 url: Url.getAxisList(that.get('reportId'), that.get('compId')),
                 type: 'get',
                 success: function (data) {
-                    var dimData = data.data;
-                    // 当前指标容器
-                    var dimList = [];
-                    // 设定为默认设置
-                    for (var i in dimData) {
-                        var object = {};
-                        object.caption = i;
-                        object.axis = dimData[i];
-                        dimList.push(object);
+                    var sourceData = data.data;
+                    var targetData = { dim: [] };
+                    var inds = indDimList.candInds;
+                    if(inds) {
+                        for(var i = 0, len = inds.length; i < len; i ++) {
+                            var name = inds[i].name;
+                            var obj = {};
+                            obj.caption = inds[i].caption;
+                            obj.name = inds[i].name;
+                            if(sourceData.hasOwnProperty(name)) {
+                                obj.axis = sourceData[name];
+                            }
+                            else {
+                                obj.axis = '0';
+                            }
+                            targetData.dim.push(obj);
+                        }
                     }
-                    var list = {};
-                    list.dim = dimList;
-                    success(list);
+                    success(targetData);
                 }
             });
         }

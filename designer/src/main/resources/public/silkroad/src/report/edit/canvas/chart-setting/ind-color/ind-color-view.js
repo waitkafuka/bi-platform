@@ -114,6 +114,10 @@ define(
                         ]
                     }
                 });
+                var colors =  [
+                    '#A5D6D2', '#4cc6f7', '#C1232B', '#B5C334', '#FCCE10',
+                    '#E87C25', '#27727B', '#FAD860', '#F3A43B', '#60C0DD'
+                ];
                 var defaultOption = {
                     color: '#A5D6D2',
                     showInput: true,
@@ -125,26 +129,28 @@ define(
                     maxPaletteSize: 10,
                     preferredFormat: 'hex',
                     localStorageKey: 'spectrum.demo',
-                    showPaletteOnly: true,
-                    togglePaletteOnly: true,
-                    togglePaletteMoreText: 'more',
-                    togglePaletteLessText: 'less',
+//                    showPaletteOnly: true,
+//                    togglePaletteOnly: true,
+//                    togglePaletteMoreText: 'more',
+//                    togglePaletteLessText: 'less',
                     palette: [
-                        ['#A5D6D2','#4cc6f7','#C1232B','#B5C334','#FCCE10'],
-                        ['#E87C25','#27727B','#FAD860','#F3A43B','#60C0DD'],
-                        ['#D7504B','#C6E579','#F4E001','#F0805A','#26C0C0']
+                        ['#A5D6D2', '#C1232B', '#B5C334', '#4cc6f7','#FCCE10'],
+                        ['#E87C25', '#27727B', '#FAD860', '#F3A43B', '#60C0DD'],
+                        ['#D7504B', '#C6E579', '#F4E001', '#F0805A', '#26C0C0']
                     ]
                 };
                 var texts = $('.ind-color').find('input');
-                texts.each(function() {
+                texts.each(function(i) {
                     var ind = data.indList[$(this).attr('name')];
                     var color;
                     ind && (color = ind.color)
                     var option =  $.extend(true, {}, defaultOption);
+                    option.color = colors[i];
                     if (color) {
                         option.color = color;
                     }
                     $(this).spectrum(option);
+                    $(this).attr('color',  option.color);
                 });
                 $('.sp-input').focusin(function (e) {e.stopPropagation()});
             },
@@ -161,7 +167,7 @@ define(
                 texts.each(function () {
                     var $this = $(this);
                     var name = $this.attr('name');
-                    data[name] = $this.val();
+                    data[name] = ($this.val() === '') ? $this.attr('color') : $this.val();
                 });
                 this.model.saveIndColorInfo(data, function () {
                     $dialog.dialog('close');

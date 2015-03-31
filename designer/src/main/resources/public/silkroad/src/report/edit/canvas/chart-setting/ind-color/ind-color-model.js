@@ -45,7 +45,7 @@ define(['url', 'core/helper'], function (Url, Helper) {
                 success: function (data) {
                     var sourceData = data.data;
                     var targetData = { indList: {} };
-                    var inds = indDimList.yAxis;
+                    var inds = indDimList.candInds;
                     if(inds) {
                         for(var i = 0, len = inds.length; i < len; i ++) {
                             var name = inds[i].name;
