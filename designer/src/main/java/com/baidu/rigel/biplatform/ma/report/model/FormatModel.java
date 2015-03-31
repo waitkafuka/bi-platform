@@ -113,7 +113,6 @@ public class FormatModel implements Serializable {
         this.getConditionFormat().put(name, null);
         this.getColorFormat ().put (name, null);
         this.getPositions ().put (name, "0");
-        
     }
 
     /**

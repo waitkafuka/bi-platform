@@ -269,22 +269,29 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
     }
 
     private boolean needSummary(QuestionModel questionModel) {
+        boolean needSummary = false;
         for (AxisMeta meta : questionModel.getAxisMetas().values()) {
             if (meta.getAxisType() == AxisType.ROW) {
                 for (String str : meta.getCrossjoinDims()) {
+                    if (needSummary) {
+                        break;
+                    }
                     DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
-                    if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
-                        return false;
+                    // 当前节点无过滤条件
+                    if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty() && !needSummary) {
+                        continue;
                     } else {
                         List<QueryData> queryDatas = condition.getQueryDataNodes();
                         for (QueryData queryData : queryDatas) {
+                            // all节点自身带有合计节点
                             if (MetaNameUtil.isAllMemberName(queryData.getUniqueName())) {
-                                return false;
+                                continue;
                             } else {
-                                // TODO 这里需要修改
+//                                // TODO 这里需要修改
                                 String[] tmp = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
                                 if (tmp[tmp.length - 1].contains(":")) {
-                                    return false;
+                                    needSummary =  true;
+                                    break;
                                 }
                             }
                         }
@@ -293,7 +300,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                 break;
             }
         }
-        return true;
+        return needSummary;
     }
 
     /**

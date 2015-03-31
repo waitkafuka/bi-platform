@@ -306,7 +306,7 @@ public final class DataModelUtils {
         
         // build cellDataSetRowBased;
         List<List<CellData>> rowBasedData = transColumnBasedData2RowBasedData(columnBasedData);
-        if (rowBasedData.size () > 1) {
+        if (rowBasedData.size () > 1 || !hasSumRow (rowFields)) {
             pTable.setDataSourceRowBased(rowBasedData);
             // build cellDataSetColumnBased;
             pTable.setDataSourceColumnBased(columnBasedData);
@@ -322,6 +322,20 @@ public final class DataModelUtils {
         // PivotTableUtils.addSummaryRowHead(pTable);
         pTable.setOthers (oriDataModel.getOthers ());
         return pTable;
+    }
+
+    private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {
+        if (rowFields == null) {
+            return false;
+        }
+        if (CollectionUtils.isEmpty (rowFields)) {
+            return false;
+        }
+        if (CollectionUtils.isEmpty (rowFields.get (0))) {
+            return false;
+        }
+        RowHeadField firstRow = rowFields.get (0).get (0);
+        return firstRow.getV () != null && firstRow.getV ().contains ("合计");
     }
 
 //	private static boolean hasDataOnFirstCol(DataModel dataModel) {
