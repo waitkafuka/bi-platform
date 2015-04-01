@@ -281,7 +281,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                             if (MetaNameUtil.isAllMemberName(queryData.getUniqueName())) {
                                 return false;
                             } else {
-                                // TODO 这里需要修改
+                                // TODO 这里需要修改 需要修改为可配置方式
                                 String[] tmp = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
                                 if (tmp[tmp.length - 1].contains(":")) {
                                     return false;
