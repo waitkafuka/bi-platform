@@ -101,4 +101,8 @@ public interface Constants {
     
     String LEVEL_KEY = "level_class";
     
+    String COLOR_FORMAT = "colorFormat";
+
+    String POSITION = "position";
+    
 }

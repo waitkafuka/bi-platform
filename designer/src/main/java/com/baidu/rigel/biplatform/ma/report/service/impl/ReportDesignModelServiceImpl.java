@@ -674,7 +674,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             return false;
         }
         String idTarget = id + Constants.FILE_NAME_SEPERATOR;
-        String nameTarget = Constants.FILE_NAME_SEPERATOR + name + Constants.FILE_NAME_SEPERATOR;
+        String nameTarget = Constants.FILE_NAME_SEPERATOR + name.hashCode () + Constants.FILE_NAME_SEPERATOR;
         for (String file : listFile) {
             // 名称相同，id不相同
             if (!file.startsWith(idTarget) && file.contains(nameTarget)) {
@@ -682,6 +682,29 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
             }
         }
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void updateAreaColorFormat(ExtendArea area, String colorFormat) {
+        if (StringUtils.isEmpty (colorFormat)) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, String> format = GsonUtils.fromJson (colorFormat, HashMap.class);
+        area.getFormatModel ().setColorFormat (format);
+    }
+
+    @Override
+    public void updateAreaPositionDef(ExtendArea area, String positions) {
+        if (StringUtils.isEmpty (positions)) {
+            return;
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, String> positionMap = GsonUtils.fromJson (positions, HashMap.class);
+        area.getFormatModel ().setPositions(positionMap);
     }
     
 }

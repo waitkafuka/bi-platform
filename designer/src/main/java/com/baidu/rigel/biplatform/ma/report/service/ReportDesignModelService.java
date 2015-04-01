@@ -151,4 +151,18 @@ public interface ReportDesignModelService {
      */
     boolean isNameExist(String name, String id);
 
+    /**
+     * 
+     * @param area
+     * @param colorFormat
+     */
+    void updateAreaColorFormat(ExtendArea area, String colorFormat);
+
+    /**
+     * 
+     * @param area
+     * @param positions
+     */
+    void updateAreaPositionDef(ExtendArea area, String positions);
+
 }

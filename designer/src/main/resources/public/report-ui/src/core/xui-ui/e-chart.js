@@ -371,17 +371,29 @@
         var seryKind = {};
         var tempData = [];
         var xAxis = this._aXAxis;
-
+        var colors =  [
+            '#A5D6D2', '#C1232B', '#B5C334', '#4cc6f7','#FCCE10',
+            '#E87C25', '#27727B', '#FAD860', '#F3A43B', '#60C0DD'
+        ];
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
                 ? seryKind[serDef.type] + 1
                 : 1;
             ser = { data: [] };
             ser.name = serDef.name || '';
-            ser.yAxisIndex = serDef.yAxisIndex || 0;
-            ser.color = serDef.color || void 0;
+            ser.colorDefine = serDef.colorDefine || void 0;
             ser.format = serDef.format || void 0;
             ser.type = (serDef.type === 'column' ? 'bar' : serDef.type);
+            if (ser.type !== 'map' && ser.type !== 'pie') {
+                ser.itemStyle = {
+                    normal: {
+                        color: colors[i]
+                    }
+                };
+                if (ser.colorDefine) {
+                    ser.itemStyle.normal.color = ser.colorDefine;
+                }
+            }
             (serDef.id !== null) && (ser.id = serDef.id);
             // TODO:这个data需要后端注意一下数据格式
             ser.data = serDef.data;
@@ -405,7 +417,10 @@
                     }
                 }
                 else if (ser.type === 'line') {
-                    ser.yAxisIndex = 0;
+                    // 在有两个以上的指标时进行双轴设定 - 博学
+                    if (this._aSeries.length > 1) {
+                        ser.yAxisIndex = serDef.yAxisIndex || 0;
+                    }
                     ser.symbol = 'none'; // 线图上的点的形状
                     if (isInArray(ser.name, defaultMeasures)) {
                         tempData.push(ser);
@@ -575,7 +590,6 @@
                     // 设置y轴网格 - 博学
                     yAxisOption.splitArea = styleConfiguration.splitArea;
                     yAxisOption.splitLine = styleConfiguration.splitLine;
-                    yAxisOption.zlevel = 2;
                     yAxis.push(yAxisOption);
                 }
             }
@@ -665,8 +679,19 @@
             }
             options.xAxis = yAxis;
         }
-        if (this._chartType === 'column' || this._chartType === 'line') {
+        if (this._chartType === 'column') {
             options.yAxis = yAxis;
+        }
+        if (this._chartType === 'line') {
+            // 超过两个指标时进行y轴格式设定 - 博学
+            if (options.series.length > 1) {
+                // 多于两个指标时显示双y轴
+                yAxis[1] = yAxis[0];
+                options.yAxis = yAxis;
+            }
+            else {
+                options.yAxis = yAxis;
+            }
         }
     };
     /**
@@ -1019,6 +1044,9 @@
         }
         else if (this._chartType === 'map') {
             // TODO:需要后端返回最大最小值
+            if (this._mapMinValue) {
+                this._mapMinValue = 0;
+            }
             options.dataRange = {
                 min: this._mapMinValue,
                 max: this._mapMaxValue,

@@ -72,7 +72,8 @@ public class AggregateCompute {
         int arraySize = dataList.get(0).getFieldArraySize();
         
         long current = System.currentTimeMillis();
-        Map<String, SearchIndexResultRecord> groupResult = dataList.parallelStream().collect(Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy,
+        Map<String, SearchIndexResultRecord> groupResult = dataList.parallelStream().collect(
+                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy,
                 Collectors.reducing(new SearchIndexResultRecord(new Serializable[arraySize], null), (x,y) ->{
                     SearchIndexResultRecord var = new SearchIndexResultRecord(new Serializable[arraySize], y.getGroupBy());
                     try {
@@ -90,7 +91,9 @@ public class AggregateCompute {
                         throw new RuntimeException(e);
                     }
                     return var;
-                })));
+                })
+            )
+        );
         LOGGER.info("group agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
         result.addAll(groupResult.values());
         

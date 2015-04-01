@@ -228,10 +228,13 @@ $namespace('di.shared.model');
             chartData.series = [];
             for (var x = 0, item; item = rawData.seriesData[x]; x ++) {
                 chartData.series[x] = {};
+                chartData.series[x].colorDefine = item.colorDefine;
                 chartData.series[x].format = item.format;
                 chartData.series[x].name = item.name;
                 chartData.series[x].type = item.type;
                 chartData.series[x].yAxisName = item.yAxisName;
+                // 双y轴数据设置
+                chartData.series[x].yAxisIndex = item.position;
                 chartData.series[x].data = [];
                 for (var y = 0, yLen = item.data.length; y < yLen; y ++) {
                     chartData.series[x].data[y] = item.data[y] ? item.data[y] : 0;
@@ -244,14 +247,13 @@ $namespace('di.shared.model');
                 data: rawData.xAxisCategories
             };
 
-
             // 多y轴的处理
             // 兼容老代码：如果没有多轴的情况，就不进行轴设置
             var yNameMap = {};
             var k;
             var ser;
             for (k = 0; ser = chartData.series[k]; k ++) {
-                yNameMap[ser.yAxisName] = 1;
+                yNameMap[ser.yAxisName] = ser.yAxisIndex;
             }
             k = 0;
 
@@ -337,4 +339,3 @@ $namespace('di.shared.model');
     };
 
 })();
-

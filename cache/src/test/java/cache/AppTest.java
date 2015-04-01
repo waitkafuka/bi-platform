@@ -24,131 +24,121 @@ public class AppTest {
     
     @Test
     public void testRedisson() throws InterruptedException {
-        Config config = new Config();
-        config.useSentinelConnection()
-            .setMasterName("biplatform_master")
-            .addSentinelAddress("10.57.204.73:8379")
-            .addSentinelAddress("10.57.204.72:8379")
-            
-            .setPassword("biplatform");
-        config.setCodec(new SerializationCodec());
-
-        Redisson redisson = Redisson.create(config);
-        
-        RTopic<String> topic = redisson.getTopic("topic");
-        
-        topic.addListener(new MessageListener<String>() {
-            
-            @Override
-            public void onMessage(String msg) {
-               System.out.println("get message:" + msg);
-                
-            }
-        });
-        
-        topic.publish("message publish");
-        
-        System.err.println("publish message");
-        
-        
-        
-        
-        
-        
-        RQueue<ApplicationEvent> queue = redisson.getQueue("queue");
-//        queue.add(new ContextRefreshedEvent(null) );
-//        queue.add(new ContextRefreshedEvent(null) );
-        
-        Thread t1 = new Thread(new GetFromQueue(queue));
-        
-        Thread t2 = new Thread(new GetFromQueue(queue));
-        
-        t1.start();
-        t2.start();
-        
-        Thread.sleep(30000);
-        
-        redisson.shutdown();
+//        
+//
+//        Redisson redisson = Redisson.create(config);
+//        
+//        RTopic<String> topic = redisson.getTopic("topic");
+//        
+//        topic.addListener(new MessageListener<String>() {
+//            
+//            @Override
+//            public void onMessage(String msg) {
+//               System.out.println("get message:" + msg);
+//                
+//            }
+//        });
+//        
+//        topic.publish("message publish");
+//        
+//        System.err.println("publish message");
+//        
+//        
+//        
+//        
+//        
+//        
+//        RQueue<ApplicationEvent> queue = redisson.getQueue("queue");
+////        queue.add(new ContextRefreshedEvent(null) );
+////        queue.add(new ContextRefreshedEvent(null) );
+//        
+//        Thread t1 = new Thread(new GetFromQueue(queue));
+//        
+//        Thread t2 = new Thread(new GetFromQueue(queue));
+//        
+//        t1.start();
+//        t2.start();
+//        
+//        Thread.sleep(30000);
+//        
+//        redisson.shutdown();
     }
     
     
-    private class GetFromQueue implements Runnable {
-
-        RQueue<ApplicationEvent> queue;
-        
-        /** 
-         * 构造函数
-         */
-        public GetFromQueue(RQueue<ApplicationEvent> queue) {
-            super();
-            this.queue = queue;
-        }
-
-        @Override
-        public void run() {
-            while(true) {
-                ApplicationEvent event = queue.poll();
-                if(event != null) {
-                    System.out.println("get event from queue by thread:" + Thread.currentThread() + " event:" + event);
-                    
-                }
-                
-            }
-        }
-        
-    }
+//    private class GetFromQueue implements Runnable {
+//
+//        RQueue<ApplicationEvent> queue;
+//        
+//        /** 
+//         * 构造函数
+//         */
+//        public GetFromQueue(RQueue<ApplicationEvent> queue) {
+//            super();
+//            this.queue = queue;
+//        }
+//
+//        @Override
+//        public void run() {
+//            while(true) {
+//                ApplicationEvent event = queue.poll();
+//                if(event != null) {
+//                    System.out.println("get event from queue by thread:" + Thread.currentThread() + " event:" + event);
+//                    
+//                }
+//                
+//            }
+//        }
+//        
+//    }
 
     
     @Test
     public void testSentinelJedis() {
-        RedisSentinelConfiguration config = new RedisSentinelConfiguration();
-        config.setMaster("biplatform_master");
-        config.sentinel("10.57.204.73", 8379);
-        config.sentinel("10.57.204.72", 8379);
-        
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
-
-        GenericObjectPoolConfig poolConfig1 = new GenericObjectPoolConfig();
-        poolConfig1.setMaxTotal(300);
-
-        Set<String> sentinels = new HashSet<>();
-        sentinels.add("10.57.204.73:8379");
-        sentinels.add("10.57.204.72:8379");
-        
-        
-        JedisSentinelPool sentinelPool = new JedisSentinelPool(config.getMaster().getName(), sentinels, poolConfig1);
-        System.out.println("Current master: " + sentinelPool.getCurrentHostMaster().toString());
-        
-        JedisConnectionFactory factory = new JedisConnectionFactory(config);
-        factory.setPoolConfig(poolConfig);
-        
-        
-        Jedis jedis = sentinelPool.getResource();
-        System.out.println(jedis.getClient().getHost());
-        
-//        jedis.auth("biplatform");
-        jedis.set("key", "value");
-        
-        System.out.println(jedis.get("key"));
-        sentinelPool.returnResource(jedis);
-        
-        Thread t = new Thread(new Runnable() {
-            
-            @Override
-            public void run() {
-                
-                System.out.println("start listen..");
-//                System.out.println(jedis.get("key".getBytes()));
-                Jedis jedis1 = new Jedis(sentinelPool.getCurrentHostMaster().getHost(),sentinelPool.getCurrentHostMaster().getPort());
-                jedis1.auth("biplatform");
-                System.out.println("prepare jedis:" + jedis1);
-                System.out.println(jedis1.get("key"));
-//                jedis1.subscribe(new PrintListener(), "channel");
-//                jedis1.close();
-            }
-        });
-        
-        t.start();
+//        RedisSentinelConfiguration config = new RedisSentinelConfiguration();
+//        
+//        
+//        JedisPoolConfig poolConfig = new JedisPoolConfig();
+//
+//        GenericObjectPoolConfig poolConfig1 = new GenericObjectPoolConfig();
+//        poolConfig1.setMaxTotal(300);
+//
+//        Set<String> sentinels = new HashSet<>();
+//        
+//        
+//        
+//        JedisSentinelPool sentinelPool = new JedisSentinelPool(config.getMaster().getName(), sentinels, poolConfig1);
+//        System.out.println("Current master: " + sentinelPool.getCurrentHostMaster().toString());
+//        
+//        JedisConnectionFactory factory = new JedisConnectionFactory(config);
+//        factory.setPoolConfig(poolConfig);
+//        
+//        
+//        Jedis jedis = sentinelPool.getResource();
+//        System.out.println(jedis.getClient().getHost());
+//        
+////        jedis.auth("biplatform");
+//        jedis.set("key", "value");
+//        
+//        System.out.println(jedis.get("key"));
+//        sentinelPool.returnResource(jedis);
+//        
+//        Thread t = new Thread(new Runnable() {
+//            
+//            @Override
+//            public void run() {
+//                
+//                System.out.println("start listen..");
+////                System.out.println(jedis.get("key".getBytes()));
+//                Jedis jedis1 = new Jedis(sentinelPool.getCurrentHostMaster().getHost(),sentinelPool.getCurrentHostMaster().getPort());
+//                jedis1.auth("biplatform");
+//                System.out.println("prepare jedis:" + jedis1);
+//                System.out.println(jedis1.get("key"));
+////                jedis1.subscribe(new PrintListener(), "channel");
+////                jedis1.close();
+//            }
+//        });
+//        
+//        t.start();
         
 //        Jedis jedis2 = sentinelPool.getResource();
 //        
@@ -167,7 +157,7 @@ public class AppTest {
 //            
 //        }
         
-        System.out.println("publish end");
+//        System.out.println("publish end");
 //        sentinelPool.returnResource(jedis2);
 //        
 //        

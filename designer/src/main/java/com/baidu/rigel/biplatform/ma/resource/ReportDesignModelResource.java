@@ -1194,7 +1194,11 @@ public class ReportDesignModelResource extends BaseResource {
         ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = model.getExtendById(areaId);
-        result.setData(area.getLogicModel().getTopSetting());
+        if (area.getLogicModel () == null) {
+            result.setData (Maps.newHashMap ());
+        } else {
+            result.setData(area.getLogicModel().getTopSetting());
+        }
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 
@@ -1492,5 +1496,117 @@ public class ReportDesignModelResource extends BaseResource {
             return ResourceUtils.getCorrectResult ("修改成功,需重新发布才能影响生产环境", null);
         }
         return ResourceUtils.getErrorResult ("修改失败", 1) ;
+    }
+    
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/colorformat",
+            method = { RequestMethod.POST })
+    public ResponseResult updateAreaColorformat(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        String colorFormat = request.getParameter(Constants.COLOR_FORMAT);
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaColorFormat(area, colorFormat);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getLogicModel().getTopSetting());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/colorformat",
+            method = { RequestMethod.GET })
+    public ResponseResult getAreaColorFormat (@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin query measuer top setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getFormatModel () == null) {
+            result.setData (Maps.newHashMap ());
+        } else {
+            result.setData(area.getFormatModel ().getColorFormat ());
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms", 
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/position",
+            method = { RequestMethod.POST })
+    public ResponseResult updateAreaMeasurePosition(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        String positions = request.getParameter(Constants.POSITION);
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaPositionDef(area, positions);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setData(area.getLogicModel().getTopSetting());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/position",
+            method = { RequestMethod.GET })
+    public ResponseResult getAreaPosition (@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin query measuer top setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getFormatModel () == null) {
+            result.setData (Maps.newHashMap ());
+        } else {
+            result.setData(area.getFormatModel ().getPositions ());
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms", 
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
     }
 }

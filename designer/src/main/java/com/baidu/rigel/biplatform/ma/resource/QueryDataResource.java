@@ -229,6 +229,9 @@ public class QueryDataResource extends BaseResource {
                             Map<String, String> tmp = Maps.newHashMap();
                             tmp.put("value", m.getUniqueName());
                             tmp.put("text", m.getCaption());
+                            if (dim.getLevels ().size () <= 1 ) {
+                                tmp.put ("isLeaf", "1");
+                            }
                             MiniCubeMember realMember = (MiniCubeMember) m;
                             if (realMember.getParent() != null) {
                                 tmp.put("parent", realMember.getParent().getUniqueName());
@@ -958,6 +961,9 @@ public class QueryDataResource extends BaseResource {
 
     private boolean isTimeDimOnFirstCol(ReportDesignModel model,
             ExtendArea targetArea, QueryAction action) {
+        if (action.getRows ().isEmpty ()) {
+            return false;
+        }
         Item item = action.getRows().keySet().toArray(new Item[0])[0];
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                 targetArea.getCubeId(), item.getOlapElementId());
@@ -2013,6 +2019,7 @@ public class QueryDataResource extends BaseResource {
         long begin = System.currentTimeMillis();
         logger.info("[INFO]--- ---begin init params with report id {}", reportId);
         String currentUniqueName = request.getParameter("uniqueName");
+        int level = MetaNameUtil.parseUnique2NameArray (currentUniqueName).length - 1;
         final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
         final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
@@ -2039,6 +2046,7 @@ public class QueryDataResource extends BaseResource {
                         Map<String, String> tmp = Maps.newHashMap();
                         tmp.put("value", m.getUniqueName());
                         tmp.put("text", m.getCaption());
+                        tmp.put ("isLeaf", Boolean.toString (level < dim.getLevels ().size ()));
                         values.add(tmp);
                     });
                     Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();

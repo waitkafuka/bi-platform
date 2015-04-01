@@ -385,6 +385,7 @@
         superObj.$setText(con.getText());
         UI_INPUT_TREE_FLUSH(superObj);
         this.getParent().hide();
+        triggerEvent(superObj, 'change', null, [con.getValue()]);
     }
 
     UI_INPUT_TREE_LAYER_TREE_CLASS.onexpand = function (item, callback) {
