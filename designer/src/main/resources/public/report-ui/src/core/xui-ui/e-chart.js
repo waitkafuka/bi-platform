@@ -1044,6 +1044,9 @@
         }
         else if (this._chartType === 'map') {
             // TODO:需要后端返回最大最小值
+            if (this._mapMinValue) {
+                this._mapMinValue = 0;
+            }
             options.dataRange = {
                 min: this._mapMinValue,
                 max: this._mapMaxValue,
