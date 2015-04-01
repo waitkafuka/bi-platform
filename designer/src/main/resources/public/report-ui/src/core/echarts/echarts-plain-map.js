@@ -1,3 +1,7 @@
+/**
+ * 该文件存储的为echarts2.2.1最新版未压缩的源码  update by majun
+ */
+
 (function(_global){
 var require, define;
 (function () {
