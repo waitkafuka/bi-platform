@@ -69,7 +69,14 @@ define([
              */
             addReport: function () {
                 var that = this;
-
+                // 更换link里面的路径
+//                $('.link-skin').attr(
+//                    'href', 'asset/di/css/-di-product-debug.css'
+//                );
+                // 更换线上link里面的路径
+                $('.link-skin').attr(
+                    'href', 'asset/di/css/-di-product-min.css'
+                );
                 this.openSetNameDialog({
                     title: '添加报表',
                     data: {
