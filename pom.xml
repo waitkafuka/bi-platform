@@ -76,7 +76,6 @@
 		<module>tesseract</module>
 		<module>parser</module>
 		<module>cache</module>
-    <module>mq</module>
   </modules>
 
 	<dependencyManagement>
