@@ -93,6 +93,12 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeLevel queryLevel = (MiniCubeLevel) level;
         // 发出的查询SQL类似 select name,caption from dim_table where pid = 1 and parentValue=0 group by name,caption
         QueryRequest nameQuery = buildQueryRequest(cube, queryLevel, parentMember, dataSourceInfo);
+        MiniCube miniCube = (MiniCube) cube;
+        boolean dimTableNotBlank = StringUtils.isNotBlank (queryLevel.getDimTable ());
+        // 退化维 这里需要增加distinct 设置
+        if (dimTableNotBlank && queryLevel.getDimTable ().equals (miniCube.getSource ())) {
+            nameQuery.setDistinct (true);
+        }
         String filterDimKey = params.get(QueryContextBuilder.FILTER_DIM_KEY);
         if (StringUtils.isNotEmpty(filterDimKey)) {
             nameQuery.setWhere(genWhere(nameQuery.getWhere(), filterDimKey, params));

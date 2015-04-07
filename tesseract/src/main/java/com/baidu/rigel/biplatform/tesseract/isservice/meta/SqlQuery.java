@@ -63,7 +63,7 @@ public class SqlQuery {
 	 */
 	private static final String LIMITMAP_KEY_LIMITEND = "limitEnd";
 
-	/**
+    /**
 	 * groupBy
 	 */
 	private Set<String> groupBy;
@@ -72,6 +72,11 @@ public class SqlQuery {
 	 * orderBy
 	 */
 	private Set<String> orderBy;
+	
+	/**
+	 * 
+	 */
+	private boolean distinct = false;
 
 	/**
 	 * getter method for property selectList
@@ -209,10 +214,12 @@ public class SqlQuery {
 		// 处理select
 		if (this.selectList != null) {
 			sb.append("select");
+			if (this.distinct) {
+			    sb.append (" distinct ");
+			}
 			// if (!StringUtils.isEmpty(this.idName)) {
 			// sb.append(" " + this.idName + ",");
 			// }
-
 			for (int i = 0; i < selectList.size(); i++) {
 				String select = selectList.get(i);
 				sb.append(" ");
@@ -323,4 +330,19 @@ public class SqlQuery {
 		this.groupBy = groupBy;
 	}
 
+    /**
+     * @return the distinct
+     */
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    /**
+     * @param distinct the distinct to set
+     */
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
+    }
+
+    
 }

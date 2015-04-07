@@ -86,6 +86,11 @@ public class QueryRequest implements Serializable {
      * useIndex 是否使用索引
      */
     private boolean useIndex = true;
+    
+    /**
+     * 实否使用distinct 只有在退化维查询成员时为true，其他情况为false
+     */
+    private boolean distinct = false;
 
     /**
      * getter method for property dataSourceInfo
@@ -415,4 +420,20 @@ public class QueryRequest implements Serializable {
         return true;
     }
 
+    /**
+     * @return the distinct
+     */
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    /**
+     * @param distinct the distinct to set
+     */
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
+    }
+
+    
+    
 }
