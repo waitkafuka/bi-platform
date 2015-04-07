@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.file.serv.service.impl;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
@@ -25,7 +26,6 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 
 import com.baidu.rigel.biplatform.ma.file.serv.service.FileLocation;
-import com.baidu.rigel.biplatform.ma.file.serv.util.LocalFileOperationUtils;
 
 /**
  * 
@@ -88,12 +88,13 @@ public class LocalFileOperationServiceTest {
      * 
      */
     @Test
-    public void testGetFileAttribute() {
-        File file = PowerMockito.mock(File.class);
-        Mockito.when(file.exists()).thenReturn(true);
-        Mockito.when(file.isDirectory()).thenReturn(true);
-        Map<String, Object> rs = service.getFileAttributes(dir);
+    public void testGetFileAttribute() throws IOException {
+        File file = new File (dir + "/test.txt");
+        file.createNewFile();
+        Map<String, Object> rs = service.getFileAttributes(dir + "/test.txt");
         Assert.assertNotNull(rs);
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertEquals("file", rs.get("type"));
     }
     
     /**
@@ -237,6 +238,30 @@ public class LocalFileOperationServiceTest {
         new File (dir + "/test/test").delete ();
         new File (dir + "/test").delete ();
     }
+    /**
+     * 
+     */
+    @Test
+    public void testMkdirsExist() {
+    	new File (dir + "/test/test").delete();
+    	new File (dir + "/test/test").mkdirs();
+        Map<String, Object> rs = service.mkdirs(dir + "/test/test");
+        Assert.assertNotNull(rs);
+        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("创建目录失败", rs.get("msg"));
+        new File (dir + "/test/test").delete();
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void tetMkdirsWithInvalidePath() {
+        Map<String, Object> rs = service.mkdirs(".");
+        Assert.assertNotNull(rs);
+        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("目标地址不能为[.]或者[..]", rs.get("msg"));
+    }
     
     /**
      * 
@@ -284,6 +309,18 @@ public class LocalFileOperationServiceTest {
      * 
      */
     @Test
+    public void testWriteWithFilenameEndWithBlash() {
+    	new File (dir + "/test/").delete ();
+    	Map<String, Object> rs = service.write(dir + "/test/", new byte[10], false);
+        Assert.assertNotNull(rs);
+        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("新文件创建失败", rs.get("msg"));
+        new File (dir + "/test/").delete ();
+    }
+    /**
+     * 
+     */
+    @Test
     public void testWrite() {
         new File (dir + "/test.txt").delete ();
         Map<String, Object> rs = service.write(dir + "/test.txt", new byte[10], false);
@@ -321,6 +358,19 @@ public class LocalFileOperationServiceTest {
      * 
      */
     @Test
+    public void testLsWithFilePath() throws IOException {
+    	File file = new File(dir + "/test.txt");
+    	file.createNewFile();
+    	Map<String, Object> rs = service.ls(dir + "/test.txt");
+        Assert.assertNotNull(rs);
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertEquals("请求文件列表成功", rs.get("msg"));
+        file.delete();
+    }
+    /**
+     * 
+     */
+    @Test
     public void testLs() {
         Map<String, Object> rs = service.ls(dir);
         Assert.assertNotNull(rs);
@@ -332,27 +382,72 @@ public class LocalFileOperationServiceTest {
      * 
      */
     @Test
-    public void testMv() {
-        new File (dir + "/test.txt").delete ();
-        Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test.txt", "/test_mv.txt", true);
+    public void testReadWithInvalidFilename() throws IOException{
+    	new File (dir + "/test.txt").createNewFile();
+    	Map<String, Object> rs = service.read("\test.txt");
         Assert.assertNotNull(rs);
-        Assert.assertFalse (new File (dir + "/test.txt").exists ());
-        new File (dir + "/test_mv.txt").delete ();
+        Assert.assertEquals("fail", rs.get("result"));
+        Assert.assertEquals("请求文件失败", rs.get("msg"));
+        new File (dir + "/test.txt").delete();
     }
     
     /**
      * 
      */
     @Test
-    public void testCopy() {
-        new File (dir + "/test.txt").delete ();
+    public void testRead() throws IOException {
+    	File file = new File(dir + "/test.txt");
+    	file.createNewFile();
+    	FileOutputStream fileOutputStream = new FileOutputStream(file);
+    	fileOutputStream.write(new byte[1024]);
+    	
+    	Map<String, Object> rs = service.read("test.txt");
+        Assert.assertNotNull(rs);
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertEquals("请求文件成功", rs.get("msg"));
+        
+        fileOutputStream.close();
+        file.delete();
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testMv() throws Exception {
+        File f = new File (dir + "/test.txt");
+        f.delete ();
         try {
-            new File (dir + "/test.txt").createNewFile ();
+            f.createNewFile ();
         } catch (IOException e) {
+            e.printStackTrace ();
             Assert.fail ();
         }
-        Map<String, Object> rs = LocalFileOperationUtils.copy(dir + "/test.txt", "/test_cp.txt", true);
+        Map<String, Object> rs = service.mv(dir + "/test.txt", dir + "/test_bak.txt", true);
         Assert.assertNotNull(rs);
-        new File (dir + "/test.txt").delete ();
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertTrue (new File(dir + "/test_bak.txt").delete ());
     }
+    
+    /**
+     * 
+     * @throws Exception
+     */
+    @Test
+    public void testCopy() throws Exception {
+        File f = new File (dir + "/test.txt");
+        f.delete ();
+        try {
+            f.createNewFile ();
+        } catch (IOException e) {
+            e.printStackTrace ();
+            Assert.fail ();
+        }
+        Map<String, Object> rs = service.copy(dir + "/test.txt", dir + "/test_cp.txt", true);
+        Assert.assertNotNull(rs);
+        Assert.assertEquals("success", rs.get("result"));
+        Assert.assertTrue (new File (dir + "/test_cp.txt").delete ());
+        new File (dir + "/test.txt").delete();
+    }
+    
 }

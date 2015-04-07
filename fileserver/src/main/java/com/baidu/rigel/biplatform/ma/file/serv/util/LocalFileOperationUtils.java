@@ -223,7 +223,6 @@ public final class LocalFileOperationUtils {
                 rs = newFile.createNewFile();
             } catch (IOException e) {
                 LOG.error(e.getMessage(), e);
-                return null;
             }
             // 新文件不存在，首先进行创建
             if (!rs) {
