@@ -2322,6 +2322,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 }
 .ui-table-head-font {
     margin-left: 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .ui-table-head-drag {
@@ -2354,6 +2357,14 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 
 .ui-table-expand-background {
     /*background-color: #F6F6F5;*/
+}
+
+.ui-table-locked-head th {
+    display: block;
+    overflow: hidden;
+}
+.ui-table-locked-head .ui-table-head-font {
+    display: block;
 }
 /** 
  * Pager

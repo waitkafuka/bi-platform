@@ -347,8 +347,20 @@ _eInput - 多选项的INPUT对象
                 return false;
             }
         }
+        // /* TODO:1把此行的单行注释去掉，把else里面的内容更换
         this.$getSection('Options').hide();
         triggerEvent(this, 'change');
+        /*/
+        var allValue = this.getValue();
+        if(allValue.length > 0) {
+            this.$getSection('Options').hide();
+            triggerEvent(this, 'change');
+
+        }
+        else {
+            alert('请至少选择一项');
+        }
+        //*/
         event.exit();
     };
 
@@ -473,6 +485,7 @@ _eInput - 多选项的INPUT对象
                 res.push(selectItems[i]._eInput.value);
             }
         }
+        ///* TODO:1把下面这一大段注释掉便可
         // 如果有全选按钮，且一个都没选中，那么传的值为所有的值
         if (this._bSelectAllBtn && res.length === 0) {
             items = this.getItems();
@@ -480,6 +493,8 @@ _eInput - 多选项的INPUT对象
                 res.push(items[i]._eInput.value);
             }
         }
+        /*/
+        //*/
         return res;
     };
 
@@ -540,22 +555,6 @@ _eInput - 多选项的INPUT对象
         UI_MULTI_SELECT_FLUSH_TEXT(this);
     };
 
-//    /**
-//     * 为全选按钮重命名
-//     * @public
-//     *
-//     * @param {Array/String} values 控件被选中的值列表
-//     */
-//    UI_MULTI_SELECT_CLASS.setSelectAllText = function (text) {
-//        // FIXME:实现非常不好，需要优化
-//        var list = this.getItems(),
-//            html = list[0]._eBody.innerHTML;
-//        if (list.length > 0) {
-//            list[0]._sTip = text;
-//            list[0]._sValue = text;
-//            list[0]._eBody.innerHTML = html.replace(selectAllText, text);
-//        }
-//    };
 
 //{/if}//
 //{if 0}//

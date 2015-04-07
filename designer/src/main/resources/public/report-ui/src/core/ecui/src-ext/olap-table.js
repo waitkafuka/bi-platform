@@ -638,6 +638,9 @@
             tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</span>';
             //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
+        else {
+            dragStr += '<span class="' + type + '-head-drag"></span>';
+        }
         //attrStr.push('title='+"'我就想试试title的字能有多长'");
         innerStr = this.$renderCellInner('HCELL', null, wrap, attrStr, classStr, styleStr); // 列头文本
         // 如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
@@ -671,6 +674,7 @@
      * @protected
      */
     UI_OLAP_TABLE_CLASS.$renderRowHCell = function(html, colDefItem, wrap, x, y, rowDefine) {
+        // TODO:添加drag区域
         var type = this.getType();
         var classStr = [type + '-rowhcell'];
         var styleStr = [];

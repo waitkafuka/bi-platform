@@ -327,6 +327,9 @@
     font-size: 12px;
     font-weight: bold;
     margin-right: 7px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 .ui-table-hcell-sort-desc {
     background-image: url(img/icon-hcell-desc.png);
@@ -400,6 +403,9 @@
 }
 .ui-table-row-selected .ui-table-rowhcell{
 	background: #FFF;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 /* 表格内部数据外框样式 */
 .ui-table-cell-infor {
@@ -460,4 +466,11 @@ tr > td:last-child:after{
 /* 解决表头第一块区域左侧边框线错位问题 */
 .ui-table-locked-head th:first-child {
     border-left: 1px solid #E7F9FE;
+}
+.ui-table-locked-head th {
+    display: block;
+    overflow: hidden;
+}
+.ui-table-locked-head .ui-table-head-font {
+    display: block;
 }

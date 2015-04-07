@@ -548,7 +548,8 @@
         // ddd = new Date();
 
         UI_TABLE_CLASS.init.call(this);
-//        this.headDrag.call(this);
+        // this.headDrag.call(this); // 右侧表格列拖拽
+        this.headFixedColumnDrag.call(this);
     };
     /**
      * 为表格添加可供拖拽的虚线，顺便绑定拖拽事件
@@ -677,6 +678,136 @@
         }
     };
 
+    /**
+     * 表格锁定列的拖拽
+     *
+     * @const
+     * @type {string}
+     */
+    UI_LOCKED_TABLE_CLASS.headFixedColumnDrag = function () {
+        var me = this,
+            type = me.getType(),
+            mainEl = me.$di('getEl'),
+            lockedHeadEl = dom.getElementsByClass(mainEl, 'div', type + '-locked-head')[0],
+            lockedLayoutEl = dom.getElementsByClass(mainEl, 'div', type + '-locked-layout')[0],
+            dragBoxEl = createDom(type + '-drag-box', null, 'div'), // 拖拽接触点模块
+            dotLineEl,
+            disX = 0, // 这个距离是鼠标点击虚线时的位置，距离虚线左侧的距离
+            curHeadTh,
+            difLeft, // 虚线移动的距离
+            oldPosLeft, // 表格元素居左的距离
+            mainElLeft = dom.getPosition(mainEl).left;
+
+        dragBoxEl.innerHTML = ''
+            + '<span class="' + type +'-dot-box-drag"></span>'
+            + '<span class="' + type + '-dot-box-line" ></span>';
+        mainEl.appendChild(dragBoxEl);
+
+        // 设置虚线高度
+        dotLineEl = dom.getElementsByClass(dragBoxEl, 'span', type + '-dot-box-line')[0];
+        setStyle(dotLineEl, 'height', this.$$height + 'px');
+
+        if (lockedHeadEl) {
+            attachEvent(lockedHeadEl, 'mouseover', headMouseOver);
+            attachEvent(mainEl, 'mouseleave', function () {
+                setStyle(dragBoxEl, 'display', 'none');
+            });
+            attachEvent(lockedLayoutEl, 'mouseleave', function () {
+                setStyle(dragBoxEl, 'display', 'none');
+            });
+            attachEvent(dragBoxEl, 'mousedown', dragBoxMouseDown);
+        }
+
+        // 表头mouseover时，把拖拽接触点模块定位到触发元素旁
+        function headMouseOver(ev) {
+            var oEv = ev || window.event;
+            var target = oEv.target || oEv.srcElement;
+
+            if (hasClass(target, type + '-head-drag')) {
+                curHeadTh = dom.getParent(target);
+                setStyle(dragBoxEl, 'left', (dom.getPosition(target).left - mainElLeft) + 'px');
+                setStyle(dragBoxEl, 'top', '0px');
+                setStyle(dragBoxEl, 'display', 'block');
+            }
+        }
+
+        // 虚线点击事件，先计算disX（具体看定义），再注册移动与松开事件
+        function dragBoxMouseDown(ev) {
+            var oEv = ev || window.event;
+            // 全局捕获,生成了一个透明的层:用来解决IE8之前选中拖的BUG
+            if (dragBoxEl.setCapture) {
+                dragBoxEl.setCapture();
+            }
+            oldPosLeft = oEv.clientX;
+            disX = oEv.clientX - dragBoxEl.offsetLeft;
+            attachEvent(document, 'mousemove', dragBoxMouseMove);
+            attachEvent(document, 'mouseup', dragBoxMouseUp);
+            return false; // 阻止浏览器去做其他事情
+        }
+
+        // 虚线移动事件
+        // TODO:虚线移动的最大位置与最小位置的判断
+        function dragBoxMouseMove(ev) {
+            var oEv = ev || window.event;
+            var lineLeft = oEv.clientX - disX;
+            setStyle(dragBoxEl, 'left', lineLeft + 'px');
+            difLeft = oEv.clientX - oldPosLeft;
+        }
+
+        // 拖拽接触点松开事件
+        function dragBoxMouseUp(ev) {
+            setStyle(dragBoxEl, 'display', 'none');
+            detachEvent(document, 'mousemove', dragBoxMouseMove);
+            detachEvent(document, 'mouseup', dragBoxMouseUp);
+
+            if (dragBoxEl.releaseCapture) {
+                dragBoxEl.releaseCapture(); // 释放捕获
+            }
+            resetTableWidth();
+        }
+
+        // 重设表格宽度
+        function resetTableWidth() {
+            // 重设表头锁定部分宽度
+            var headTableEl = dom.first(
+                    dom.getElementsByClass(mainEl, 'div', type + '-locked-head')[0]
+            );
+            setStyle(headTableEl, 'width', (parseInt(headTableEl.style.width) + difLeft) + 'px');
+
+            // 重设表格锁定部分宽度
+            var tableLayoutEl = dom.first(
+                dom.first(
+                    dom.getElementsByClass(mainEl, 'div', type + '-locked-layout')[0]
+                )
+            );
+            setStyle(tableLayoutEl, 'width', (parseInt(tableLayoutEl.style.width) + difLeft) + 'px');
+
+            // 重设表头中拖拽列宽度
+            setStyle(curHeadTh, 'width', (parseInt(curHeadTh.style.width) + difLeft) + 'px');
+            // 重设表格锁定部分中拖拽列宽度
+            var colIndex = dom.getAttribute(curHeadTh, 'data-cell-pos').split('-')[0];
+            var rows = dom.children(
+                dom.first(tableLayoutEl)
+            );
+            for (var rIndex in rows) {
+                var row = rows[rIndex];
+                var cols = dom.children(row);
+                for (var cIndex in cols) {
+                    var col = cols[cIndex];
+                    var cellPos = dom.getAttribute(col, 'data-cell-pos');
+                    var curIndex;
+                    if (cellPos) {
+                        curIndex = cellPos.split('-')[0];
+                    }
+                    if (curIndex === colIndex) {
+                        setStyle(col, 'width', (parseInt(col.style.width) + difLeft) + 'px');
+                    }
+                }
+            }
+            me.cache(getStyle(me._eMain));
+            me.resize();
+        }
+    };
     /**
      * @override
      */
