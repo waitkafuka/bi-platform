@@ -38,6 +38,7 @@ import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -70,7 +71,7 @@ public class DataModelBuilder {
     /**
      * tesseractResultSet 查询结果
      */
-    private TesseractResultSet tesseractResultSet;
+    private TesseractResultSet<SearchIndexResultRecord> tesseractResultSet;
 
     /**
      * queryContext 查询信息
@@ -87,7 +88,7 @@ public class DataModelBuilder {
      * 
      * @param tesseractResultSet
      */
-    public DataModelBuilder(TesseractResultSet tesseractResultSet, QueryContext queryContext) {
+    public DataModelBuilder(TesseractResultSet<SearchIndexResultRecord> tesseractResultSet, QueryContext queryContext) {
         if (tesseractResultSet == null) {
             log.warn("tesseractResultSet is null,return table head");
 //            throw new IllegalArgumentException("tesseractResultSet is null");
@@ -170,13 +171,17 @@ public class DataModelBuilder {
 
         // 结构是 列 行，指标 值
         Map<String, Map<String, BigDecimal>> data = Maps.newHashMap();
+        SearchIndexResultRecord record = null;
         while (this.tesseractResultSet.next()) {
+            record = (SearchIndexResultRecord) this.tesseractResultSet.getCurrentRecord();
             StringBuilder oneLine = new StringBuilder();
             for (MemberTreePropResult rowHeadName : rowHeadNames) {
                 
                 for(String prop : rowHeadName.queryPropers.keySet()) {
                     String value = tesseractResultSet.getString(prop);
-                    if (rowHeadName.queryPropers.get(prop).isEmpty() || rowHeadName.queryPropers.get(prop).contains(value)) {
+                    if (rowHeadName.queryPropers.get(prop).isEmpty() 
+                            || (rowHeadName.queryPropers.get(prop).contains(value) 
+                            && value.equals(record.getGroupBy()))) {
                         oneLine.append(prop);
                         oneLine.append(PROP_KEY_SPLIT);
                         oneLine.append(value);
@@ -297,7 +302,6 @@ public class DataModelBuilder {
          * @return the queryPropers 
          */
         public Map<String, Set<String>> getQueryPropers() {
-        
             return queryPropers;
         }
 
