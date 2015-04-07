@@ -194,6 +194,11 @@ public class QueryRequestUtil {
             result.setLimitMap(query.getLimit().getStart(), query.getLimit().getSize());
         }
         
+        /**
+         * 添加distinct 约束
+         */
+        result.setDistinct (query.isDistinct ());
+        
         // 处理select
         // getQueryProperties
         Set<String> selectList = Sets.newLinkedHashSet();
