@@ -1344,14 +1344,7 @@ public class QueryDataResource extends BaseResource {
         String condition = request.getParameter("lineUniqueName");
         
 //        String uniqueName = request.getParameter("uniqueName");
-        ReportDesignModel model;
-        try {
-            model = this.getDesignModelFromRuntimeModel(reportId); 
-                    // reportModelCacheManager.getReportModel(reportId);
-        } catch (CacheOperationException e) {
-            logger.info("[INFO] Can not find such model in cache. Report Id: " + reportId, e);
-            return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
-        }
+        
         ReportRuntimeModel runTimeModel = null;
         try {
             runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
@@ -1361,6 +1354,14 @@ public class QueryDataResource extends BaseResource {
         // TODO 这里调用需要考虑是否必须，按照正常逻辑，此处runtimeModel已经初始化完毕
         if (runTimeModel == null) {
             runTimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
+        }
+        ReportDesignModel model;
+        try {
+            model = runTimeModel.getModel ();
+                    // reportModelCacheManager.getReportModel(reportId);
+        } catch (CacheOperationException e) {
+            logger.info("[INFO] Can not find such model in cache. Report Id: " + reportId, e);
+            return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
         }
         ExtendArea targetArea = model.getExtendById(areaId);
         /**

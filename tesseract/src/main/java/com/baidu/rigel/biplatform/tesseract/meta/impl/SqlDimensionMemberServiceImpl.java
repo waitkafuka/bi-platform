@@ -442,6 +442,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 expressionList.add (expression);
             } else if (dim instanceof TimeDimension && dimTable.equals (((MiniCube) cube).getSource())) {
                 // 此处只考虑了时间维度表和事实表同一张表情况，其他情况暂时不考虑
+                if (!filterValue.contains ("start") && !filterValue.contains ("end")) {
+                    continue;
+                }
                 Map<String, String> filterMap = AnswerCoreConstant.GSON.fromJson (filterValue, 
                         new TypeToken<Map<String, String>>(){
                         }.getType());

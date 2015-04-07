@@ -273,13 +273,13 @@ public class LogicModel implements Serializable {
      */
     private Map<String, Item> collectItems(boolean needSelDimMeasures) {
         Map<String, Item> allItems = new LinkedHashMap<String, Item>();
-        allItems.putAll(this.columns);
-        allItems.putAll(this.rows);
-        allItems.putAll(this.slices);
         if (needSelDimMeasures) {
             allItems.putAll(this.getSelectionDims());
             allItems.putAll(this.getSelectionMeasures());
         }
+        allItems.putAll(this.columns);
+        allItems.putAll(this.rows);
+        allItems.putAll(this.slices);
         return allItems;
     }
     
