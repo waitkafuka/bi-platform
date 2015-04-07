@@ -44,8 +44,8 @@ public class SearchIndexResultSet implements TesseractResultSet<SearchIndexResul
      */
 	public SearchIndexResultSet(Meta meta, Integer size) {
 		super();
-		this.meta = meta;		
-		this.dataList=new ArrayList<SearchIndexResultRecord>(size);
+		this.meta = meta;
+		this.dataList = Collections.synchronizedList (new ArrayList<SearchIndexResultRecord>(size));
 //		this.currIdx=0;
 	}
 	

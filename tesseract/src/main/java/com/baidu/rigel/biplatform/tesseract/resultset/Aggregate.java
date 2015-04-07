@@ -17,10 +17,8 @@ package com.baidu.rigel.biplatform.tesseract.resultset;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
-import com.google.common.collect.Lists;
 
 /**
  * 聚集计算

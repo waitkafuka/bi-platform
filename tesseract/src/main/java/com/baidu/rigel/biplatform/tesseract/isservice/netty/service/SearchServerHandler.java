@@ -100,9 +100,6 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         SearchRequestMessage searchReqeustMessage = (SearchRequestMessage) msg;
         
         String idxPath = searchReqeustMessage.getIdxPath();
-        SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath,true);
-        IndexSearcher is = null;
-        is = searcherManager.acquire();
         
         QueryRequest queryRequest = (QueryRequest) searchReqeustMessage.getMessageBody();
         Query queryAll = QueryRequestUtil.transQueryRequest2LuceneQuery(queryRequest);
@@ -121,8 +118,11 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         
         
         SearchIndexResultSet searchResult = null;
+        IndexSearcher is = null;
         long current = System.currentTimeMillis();
+        SearcherManager searcherManager = IndexSearcherFactory.getInstance().getSearcherManager(idxPath,true);
         try {
+            is = searcherManager.acquire();
             QueryWrapperFilter filter = new QueryWrapperFilter(queryAll);
             
             logger.info("cost " + (System.currentTimeMillis() - current) + " in trans QUERY --> filter:");
@@ -138,9 +138,7 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
 //                dimFieldList.toArray(new String[0]), measureFieldList.toArray(new String[0]), groupBy);
             
             logger.info("cost " + (System.currentTimeMillis() - gcurrent) + " in init TesseractResultRecordCollector ");
-            
             is.search(new MatchAllDocsQuery(), filter, collector);
-            
             searchResult = collector.buildResultSet(groupBy);
 //            for (int docId : collector.getResultDocIdList()) {
 //                Document doc = is.getIndexReader().document(docId);
