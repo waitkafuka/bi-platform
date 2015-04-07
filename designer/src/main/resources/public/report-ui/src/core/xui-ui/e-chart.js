@@ -842,6 +842,11 @@
         }
         else if (this._chartType === 'bar') {
             toolTip.trigger = 'axis';
+            // 设置鼠标hover之后，隐藏掉图形的坐标轴显示线 update by majun
+            var axisPointer = {
+                    type : 'none'
+                }
+            toolTip.axisPointer = axisPointer;
             toolTip.formatter =  function(data, ticket, callback) {
                 var res = data[0][1];
                 for (var i = 0, l = data.length; i < l; i++) {
