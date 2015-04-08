@@ -16,9 +16,6 @@
 package com.baidu.rigel.biplatform.ma.rt;
 
 import java.io.Serializable;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.context.ApplicationContext;
 
 
 /**
@@ -31,56 +28,56 @@ import org.springframework.context.ApplicationContext;
 @Deprecated
 public final class Context implements Serializable {
 
-    /**
-     * Context.java -- long
-     * description:
-     */
-    private static final long serialVersionUID = -8040634498675056473L;
-    
-    /**
-     * spring application，每个运行时包含一个全局的ApplicationContext
-     */
-    private ApplicationContext appContext;
-    
-    /**
-     * global params
-     */
-    private ConcurrentHashMap<String, Object> globalParams = 
-        new ConcurrentHashMap<String, Object>();
-    
 //    /**
-//     * 
+//     * Context.java -- long
+//     * description:
 //     */
-//    private ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = 
-//                new ConcurrentHashMap<String, ExtendAreaContext>();
-    
-    /**
-     * 构造函数
-     * @param context ApplicationContext
-     */
-    public Context(ApplicationContext context) {
-        this.appContext = context;
-    }
-    
-    /**
-     *  获取当前运行时上下文环境对应的spring 运行时
-     * @return ApplicationContext spring运行时
-     */
-    public ApplicationContext getApplicationContext() {
-        return appContext;
-    }
-
-    /**
-     * @return the globalParams
-     */
-    public ConcurrentHashMap<String, Object> getGlobalParams() {
-        return globalParams;
-    }
-
-    /**
-     * @param globalParams the globalParams to set
-     */
-    public void setGlobalParams(ConcurrentHashMap<String, Object> globalParams) {
-        this.globalParams = globalParams;
-    }    
+//    private static final long serialVersionUID = -8040634498675056473L;
+//    
+//    /**
+//     * spring application，每个运行时包含一个全局的ApplicationContext
+//     */
+//    private ApplicationContext appContext;
+//    
+//    /**
+//     * global params
+//     */
+//    private ConcurrentHashMap<String, Object> globalParams = 
+//        new ConcurrentHashMap<String, Object>();
+//    
+////    /**
+////     * 
+////     */
+////    private ConcurrentHashMap<String, ExtendAreaContext> localCtxMap = 
+////                new ConcurrentHashMap<String, ExtendAreaContext>();
+//    
+//    /**
+//     * 构造函数
+//     * @param context ApplicationContext
+//     */
+//    public Context(ApplicationContext context) {
+//        this.appContext = context;
+//    }
+//    
+//    /**
+//     *  获取当前运行时上下文环境对应的spring 运行时
+//     * @return ApplicationContext spring运行时
+//     */
+//    public ApplicationContext getApplicationContext() {
+//        return appContext;
+//    }
+//
+//    /**
+//     * @return the globalParams
+//     */
+//    public ConcurrentHashMap<String, Object> getGlobalParams() {
+//        return globalParams;
+//    }
+//
+//    /**
+//     * @param globalParams the globalParams to set
+//     */
+//    public void setGlobalParams(ConcurrentHashMap<String, Object> globalParams) {
+//        this.globalParams = globalParams;
+//    }    
 }

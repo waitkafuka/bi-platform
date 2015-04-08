@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.rt;
+package com.baidu.rigel.biplatform.ma.report.model;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
@@ -23,9 +23,6 @@ import java.util.Set;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
-import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
-import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

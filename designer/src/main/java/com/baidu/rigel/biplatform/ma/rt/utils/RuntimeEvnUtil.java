@@ -15,15 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ma.rt.utils;
 
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.springframework.context.ApplicationContext;
-
-import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
-import com.baidu.rigel.biplatform.ma.rt.Context;
-import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
-import com.google.common.collect.Lists;
 
 /**
  * 工具类：用于提供运行时环境初始化、运行时上下文操作等
@@ -38,92 +29,92 @@ public final class RuntimeEvnUtil {
      */
 //    private static final Logger LOG = LoggerFactory.getLogger(RuntimeEvnUtil.class);
     
-    /**
-     * 构造函数
-     */
-    private RuntimeEvnUtil() {
-    }
-    
-    /**
-     * 内部上下文类，包含全局上下文context，以及区域上下文列表
-     */
-    public class ContextEntity {
-        /**
-         * 全局上下文
-         */
-        private Context context;
-        /**
-         * 区域上下文列表
-         */
-        private List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
-        /**
-         * 
-         * 构造函数
-         */
-        public ContextEntity() {
-            
-        }
-        /**
-         * 
-         * getContext
-         * @return
-         */
-        public Context getContext() {           
-            return context;            
-        }
-        /**
-         * 
-         * setContext
-         * @param context
-         */
-        public void setContext(Context context) {           
-            this.context = context;           
-        }
-        /**
-         * 
-         * getExtendAreaContextLists
-         * @return
-         */
-        public List<ExtendAreaContext> getExtendAreaContextLists() {            
-            return extendAreaContextLists;           
-        }
-        /**
-         * 
-         * setExtendAreaContextLists
-         * @param extendAreaContextLists
-         */
-        public void setExtendAreaContextLists(List<ExtendAreaContext> extendAreaContextLists) {            
-            this.extendAreaContextLists = extendAreaContextLists;          
-        }
-    }
+//    /**
+//     * 构造函数
+//     */
+//    private RuntimeEvnUtil() {
+//    }
+//    
+//    /**
+//     * 内部上下文类，包含全局上下文context，以及区域上下文列表
+//     */
+//    public class ContextEntity {
+//        /**
+//         * 全局上下文
+//         */
+//        private Context context;
+//        /**
+//         * 区域上下文列表
+//         */
+//        private List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
+//        /**
+//         * 
+//         * 构造函数
+//         */
+//        public ContextEntity() {
+//            
+//        }
+//        /**
+//         * 
+//         * getContext
+//         * @return
+//         */
+//        public Context getContext() {           
+//            return context;            
+//        }
+//        /**
+//         * 
+//         * setContext
+//         * @param context
+//         */
+//        public void setContext(Context context) {           
+//            this.context = context;           
+//        }
+//        /**
+//         * 
+//         * getExtendAreaContextLists
+//         * @return
+//         */
+//        public List<ExtendAreaContext> getExtendAreaContextLists() {            
+//            return extendAreaContextLists;           
+//        }
+//        /**
+//         * 
+//         * setExtendAreaContextLists
+//         * @param extendAreaContextLists
+//         */
+//        public void setExtendAreaContextLists(List<ExtendAreaContext> extendAreaContextLists) {            
+//            this.extendAreaContextLists = extendAreaContextLists;          
+//        }
+//    }
     /**
      * 根据报表id初始化报表对应运行时上下文
      * @param designModel 报表模型
      * @param params 全局初始化参数
      * @return Context 运行时上下文
      */
-    public static final Context initRuntimeEvn(ReportDesignModel designModel, 
-        ApplicationContext applicationContext, ConcurrentHashMap<String,Object> params) {
-//        ContextEntity contextEntity = new RuntimeEvnUtil().new ContextEntity();
-        // 上下文信息
-        Context context = new Context(applicationContext);
-        context.setGlobalParams(params);
-//        contextEntity.setContext(context);
-//        
-//        // 局部上下文参数
-//        List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
-//        // 获取扩展区域列表
-//        ExtendArea[] extendAreas = designModel.getExtendAreaList();
-//        if (extendAreas != null) {
-//            // 遍历扩展区，获取每个扩展区的上下文信息
-//            for (ExtendArea extendArea : extendAreas) {
-//                ExtendAreaContext localContext = getLocalContextOfExtendArea(extendArea, designModel);
-//                extendAreaContextLists.add(localContext);
-//            }
-//        }
-//        contextEntity.setExtendAreaContextLists(extendAreaContextLists);
-        return context;
-    }
+//    public static final Context initRuntimeEvn(ReportDesignModel designModel, 
+//        ApplicationContext applicationContext, ConcurrentHashMap<String,Object> params) {
+////        ContextEntity contextEntity = new RuntimeEvnUtil().new ContextEntity();
+//        // 上下文信息
+//        Context context = new Context(applicationContext);
+//        context.setGlobalParams(params);
+////        contextEntity.setContext(context);
+////        
+////        // 局部上下文参数
+////        List<ExtendAreaContext> extendAreaContextLists = Lists.newArrayList();
+////        // 获取扩展区域列表
+////        ExtendArea[] extendAreas = designModel.getExtendAreaList();
+////        if (extendAreas != null) {
+////            // 遍历扩展区，获取每个扩展区的上下文信息
+////            for (ExtendArea extendArea : extendAreas) {
+////                ExtendAreaContext localContext = getLocalContextOfExtendArea(extendArea, designModel);
+////                extendAreaContextLists.add(localContext);
+////            }
+////        }
+////        contextEntity.setExtendAreaContextLists(extendAreaContextLists);
+//        return context;
+//    }
     
 //    /**
 //     * 初始化扩展区域上下文

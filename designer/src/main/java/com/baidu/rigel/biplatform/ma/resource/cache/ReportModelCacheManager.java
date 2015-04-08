@@ -21,12 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
-import com.baidu.rigel.biplatform.ma.rt.Context;
-import com.baidu.rigel.biplatform.ma.rt.ExtendAreaContext;
 
 /**
  * 
@@ -257,32 +256,32 @@ public class ReportModelCacheManager {
         }
         return (ExtendAreaContext) cacheManagerForReource.getFromCache(String.valueOf(key));
     }
-    
-    /**
-     * 更新全局上下文
-     * @param areaId 区域id
-     * @param context 区域上下文
-     */
-    public void updateContext(String reportId, Context context) {
-        int key = genContextKey(reportId);
-        cacheManagerForReource.setToCache(String.valueOf(key), context);
-    }
+//    
+//    /**
+//     * 更新全局上下文
+//     * @param areaId 区域id
+//     * @param context 区域上下文
+//     */
+//    public void updateContext(String reportId, Context context) {
+//        int key = genContextKey(reportId);
+//        cacheManagerForReource.setToCache(String.valueOf(key), context);
+//    }
 
-    /**
-     * 全局context的id
-     * @param reportId
-     * @return int
-     */
-    private int genContextKey(String reportId) {
-        int key = new StringBuilder()
-                .append(reportId)
-                .append("_^-^_")
-                .append(ContextManager.getSessionId())
-                .append("_^-^_")
-                .append(ContextManager.getProductLine())
-                .toString().hashCode();
-        return key;
-    }
+//    /**
+//     * 全局context的id
+//     * @param reportId
+//     * @return int
+//     */
+//    private int genContextKey(String reportId) {
+//        int key = new StringBuilder()
+//                .append(reportId)
+//                .append("_^-^_")
+//                .append(ContextManager.getSessionId())
+//                .append("_^-^_")
+//                .append(ContextManager.getProductLine())
+//                .toString().hashCode();
+//        return key;
+//    }
     
     /**
      * 

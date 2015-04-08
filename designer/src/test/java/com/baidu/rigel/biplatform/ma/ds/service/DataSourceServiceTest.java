@@ -18,21 +18,14 @@ package com.baidu.rigel.biplatform.ma.ds.service;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.impl.DataSourceServiceImpl;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
-import com.baidu.rigel.biplatform.ma.model.utils.DBInfoReader;
 
 /**
  * 
