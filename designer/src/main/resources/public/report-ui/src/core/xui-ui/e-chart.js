@@ -412,6 +412,7 @@
                     }
                 }
                 else if (ser.type === 'pie') {
+                	// 将饼图的开始绘图位置改为3点钟方向，以避免指标太多，显示拥挤的问题 update by majun
                 	ser.startAngle = 360;
                     if (isInArray(ser.name, defaultMeasures)) {
                         series.push(ser);
@@ -457,6 +458,7 @@
                     series.push(ser);
                 }
                 else if (ser.type === 'pie') {
+                	// 将饼图的开始绘图位置改为3点钟方向，以避免指标太多，显示拥挤的问题 update by majun
                 	ser.startAngle=360;
                     series.push(ser);
                 }
