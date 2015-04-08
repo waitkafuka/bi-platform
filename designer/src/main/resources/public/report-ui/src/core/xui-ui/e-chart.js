@@ -373,7 +373,7 @@
         var xAxis = this._aXAxis;
         var colors =  [
             '#A5D6D2', '#C1232B', '#B5C334', '#4cc6f7','#FCCE10',
-            '#E87C25', '#27727B', '#FAD860', '#F3A43B', '#60C0DD'
+            '#E87C25', '#27727B', '#FAD860', '#F3A43B','#60C0DD'
         ];
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
@@ -412,6 +412,7 @@
                     }
                 }
                 else if (ser.type === 'pie') {
+                	ser.startAngle = 360;
                     if (isInArray(ser.name, defaultMeasures)) {
                         series.push(ser);
                     }
@@ -456,6 +457,7 @@
                     series.push(ser);
                 }
                 else if (ser.type === 'pie') {
+                	ser.startAngle=360;
                     series.push(ser);
                 }
                 else if (ser.type === 'line') {
@@ -1045,7 +1047,7 @@
 
             this.$setupToolBox(options);
             this.$setupYAxis(options);
-            this.$setupXAxis(options);
+           // this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
             // TODO:需要后端返回最大最小值
