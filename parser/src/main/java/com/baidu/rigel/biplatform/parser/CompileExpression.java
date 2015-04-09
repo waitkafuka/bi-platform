@@ -56,7 +56,7 @@ public class CompileExpression {
      * @param pattern
      * @param variablePre
      */
-    public static Map<String, String> compileExpressionByPattern(String expression, Pattern pattern) {
+    static Map<String, String> compileExpressionByPattern(String expression, Pattern pattern) {
         Map<String, String> result = new LinkedHashMap<String, String>(1);
         
         Matcher matcher = pattern.matcher(expression);
@@ -82,7 +82,7 @@ public class CompileExpression {
         return result;
     }
     
-    public static CompileContext resolveSections(Map<String, String> sections) throws InvokeFunctionException{
+    static CompileContext resolveSections(Map<String, String> sections) throws InvokeFunctionException{
         
         CompileSection complieSection = new CompileSection(sections);
         

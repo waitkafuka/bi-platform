@@ -20,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Stack;
 import java.util.regex.Pattern;
 
@@ -213,14 +214,49 @@ public class CompileSection {
             }
             if(node.getOperation().getPriority() >= calcNode.getOperation().getPriority()) {
                 node.setRight(tokenNode);
-                calcNode.setLeft(node);
-                // 移除
                 nodes.pop();
+                nodeProcess(nodes, node, calcNode);
             } else {
                 calcNode.setLeft(tokenNode);
+                nodes.push(calcNode);
             }
-            nodes.push(calcNode);
         }
+    }
+    
+    
+    
+    /** 
+     * nodeProcess 处理节点塞入时候，运算符优先级
+     * @param nodes
+     * @param tokenNode
+     * @param calcNode
+     */
+    private void nodeProcess(Stack<Node> nodes, CalculateNode tokenNode, CalculateNode calcNode) {
+        Objects.requireNonNull(calcNode, "calc node can not be null");
+        if(nodes.isEmpty()) {
+            calcNode.setLeft(tokenNode);
+        } else {
+            if(tokenNode.getOperation().getPriority() == calcNode.getOperation().getPriority()) {
+                calcNode.setLeft(tokenNode);
+            } else {
+                Node node = nodes.pop();
+                
+                if(node.getNodeType().equals(NodeType.Calculate)) {
+                    CalculateNode newNode = (CalculateNode) node;
+                    if(calcNode.getOperation().getPriority() <= newNode.getOperation().getPriority()) {
+                        newNode.setRight(tokenNode);
+                        calcNode.setLeft(newNode);
+                    } else {
+                        nodeProcess(nodes, newNode, calcNode);
+                    }
+                } else {
+                    calcNode.setLeft(tokenNode);
+                }
+            }
+            
+            
+        }
+        nodes.push(calcNode);
     }
     
     
