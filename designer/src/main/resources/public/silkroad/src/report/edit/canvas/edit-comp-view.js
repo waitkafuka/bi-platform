@@ -851,6 +851,15 @@ define([
                     alert('只能拖一个维度或者维度组');
                     return;
                 }
+                if (compType === 'CASCADE_SELECT' && $('.data-axis-line .item').length >= 1) {
+                    alert('只能拖一个维度组');
+                    return;
+                }
+                // 级联下拉框只能拖入维度
+                if (compType === 'CASCADE_SELECT' && $draggedUi.attr('data-group') !== 'item-group') {
+                    alert('只能拖维度组');
+                    return;
+                }
                 var $spans = $item.find('span');
                 // 维度组
                 if ($item.hasClass('j-group-title')) {
@@ -1163,12 +1172,29 @@ define([
                 var id = option.$item.attr('data-id');
                 var editCompModel = this.canvasView.editCompView.model;
                 var entityDefs = editCompModel.canvasModel.reportJson.entityDefs;
-
+                var allDim = window.dataInsight.main.model.attributes.dimList;
+                var groupItem = [];
+                var selectAllDim = {};
+                for (var i = 0; i < allDim.length; i ++) {
+                    if (allDim[i].id === option.oLapElementId) {
+                        groupItem = allDim[i].levels;
+                    }
+                }
+                if (groupItem.length === 0) {
+                    selectAllDim = {};
+                }
+                else {
+                    for (var i = 0; i < groupItem.length; i ++) {
+                        selectAllDim[i + 1] = groupItem[i].caption;
+                    }
+                }
                 for (var i = 0, len = entityDefs.length; i < len; i++) {
                     if (entityDefs[i].compId == compId) {
                         entityDefs[i].dimId = id;
+                        entityDefs[i].selectAllDim = selectAllDim;
                     }
                 }
+                console.log(selectAllDim);
                 this.model.canvasModel.saveJsonVm();
             },
             /**

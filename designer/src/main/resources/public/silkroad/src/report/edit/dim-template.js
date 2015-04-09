@@ -36,7 +36,7 @@ define(['template'], function (template) {
         $out+=$escape($item.id);
         $out+='">\r\n    <div class="group-title hover-bg j-olap-element j-group-title" title="编辑维度组" data-id="';
         $out+=$escape($item.id);
-        $out+='">\r\n        <span class="icon-letter icon-fold j-icon-fold fs-18">－</span>\r\n        <span class="item-text ellipsis j-item-text">';
+        $out+='" data-group="item-group">\r\n        <span class="icon-letter icon-fold j-icon-fold fs-18">－</span>\r\n        <span class="item-text ellipsis j-item-text">';
         $out+=$escape($item.caption);
         $out+='</span>\r\n        <span class="icon-letter icon-group j-edit-dim-group">E</span>\r\n    </div>\r\n    ';
         $each($item.levels,function($item,$index){
