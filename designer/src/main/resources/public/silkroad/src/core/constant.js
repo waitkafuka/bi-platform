@@ -61,7 +61,8 @@ define(function () {
         EUUI_INPUT_TREE: '-vu-form-ecui-input-tree',
         CHART: '-vu-chart',
         TABLE: '-vu-table',
-        H_BUTTON: '-vu-confirm'
+        H_BUTTON: '-vu-confirm',
+        CASCADE_SELECT: '-vu-cascade-select'
     };
 
     return {
