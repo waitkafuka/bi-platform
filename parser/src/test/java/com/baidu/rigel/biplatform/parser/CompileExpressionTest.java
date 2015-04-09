@@ -239,18 +239,18 @@ public class CompileExpressionTest {
     public void testCompileWithVariable () {
         try {
             CompileContext context = CompileExpression.compile ("(${a} - 1) * (3 + 2)");
-//            Map<Condition, Set<String>> conditionVariables = new HashMap<> ();
-//            Set<String> variable = new HashSet<String> ();
-//            variable.add ("a");
-//            conditionVariables.put (EmptyCondition.getInstance (), variable);
-//            context.setConditionVariables (conditionVariables);
-//            Map<Condition, Map<String, ComputeResult>> variablesResult = new HashMap<> ();
-//            Map<String, ComputeResult> result = new HashMap<> ();
-//            result.put ("a", new SingleComputeResult (1));
-//            variablesResult.put (EmptyCondition.getInstance (), result);
-//            context.setVariablesResult (variablesResult);
+            Map<Condition, Set<String>> conditionVariables = new HashMap<> ();
+            Set<String> variable = new HashSet<String> ();
+            variable.add ("${a}");
+            conditionVariables.put (EmptyCondition.getInstance (), variable);
+            context.setConditionVariables (conditionVariables);
+            Map<Condition, Map<String, ComputeResult>> variablesResult = new HashMap<> ();
+            Map<String, ComputeResult> result = new HashMap<> ();
+            result.put ("${a}", new SingleComputeResult (1));
+            variablesResult.put (EmptyCondition.getInstance (), result);
+            context.setVariablesResult (variablesResult);
             Assert.assertEquals ("(${a} - 1) * (3 + 2)", context.getExpression ());
-//            Assert.assertEquals ("0", context.getNode ().getResult (context).toString ());
+            Assert.assertEquals ("0", context.getNode ().getResult (context).toString ());
         } catch (Exception e) {
             Assert.fail ();
         }
