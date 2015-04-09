@@ -17,6 +17,7 @@ define([
         'report/edit/canvas/comp-setting-time-template',
         'report/edit/canvas/comp-setting-liteolap-template',
         'report/edit/canvas/comp-setting-chart-template',
+        'report/edit/canvas/comp-setting-caselect-template',
         'report/edit/canvas/vui-setting-select-template',
         'report/edit/canvas/ecui-input-tree-setting-template',
         'report/edit/canvas/default-selected-time-setting-template',
@@ -39,6 +40,7 @@ define([
         compSettingTimeTemplate,
         compSettingLITEOLAPTemplate,
         compSettingChartTemplate,
+        compCascadeSelectTemplate,
         vuiSettingSelectTemplate,
         ecuiInputTreeSettingTemplate,
         defaultSelectedTimeSettingTemplate,
@@ -572,6 +574,9 @@ define([
                     case 'SINGLE_DROP_DOWN_TREE':
                         template = ecuiInputTreeSettingTemplate;
                         break;
+                    case 'CASCADE_SELECT':
+                        template = compCascadeSelectTemplate;
+                        break;
 //                    case 'MULTISELECT' :
 //                        template = vuiSettingSelectTemplate;
 //                        break;
@@ -794,6 +799,9 @@ define([
                 delete json.dateKey[letter];
                 //json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
                 this.model.canvasModel.saveReport();
+            },
+            afterDeleteCascadeSelectCompAxis: function (option) {
+
             },
             afterDeleteChartCompAxis: function (option) {
 
@@ -1140,6 +1148,30 @@ define([
                 this.model.canvasModel.saveJsonVm();
             },
             /**
+             * 添加完成数据项之后要做的特殊dom处理-下拉树
+             *
+             * @param {Object} option 配置参数
+             * @param {string} option.compType 组件类型
+             * @param {string} option.oLapElemenType 数据项类型
+             * @param {string} option.oLapElemenId 数据项id
+             * @param {string} option.axisType 轴类型
+             * @param {$HTMLElement} option.$item 数据项dom
+             * @public
+             */
+            afterAddCascadeSelectCompAxis: function (option) {
+                var compId = this.getActiveCompId();
+                var id = option.$item.attr('data-id');
+                var editCompModel = this.canvasView.editCompView.model;
+                var entityDefs = editCompModel.canvasModel.reportJson.entityDefs;
+
+                for (var i = 0, len = entityDefs.length; i < len; i++) {
+                    if (entityDefs[i].compId == compId) {
+                        entityDefs[i].dimId = id;
+                    }
+                }
+                this.model.canvasModel.saveJsonVm();
+            },
+            /**
              * 添加完成数据项之后要做的特殊dom处理-表格
              *
              * @param {Object} option 配置参数
@@ -1212,6 +1244,9 @@ define([
                         break;
                     case 'SINGLE_DROP_DOWN_TREE':
                         newType = 'SingleDropDownTree';
+                        break;
+                    case 'CASCADE_SELECT':
+                        newType = 'CascadeSelect';
                         break;
                 }
                 return newType;

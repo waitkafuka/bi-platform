@@ -125,7 +125,8 @@
                             "ECUI_SUGGEST",
                             "ECUI_INPUT",
                             "MULTI_CHECKBOX",
-                            "SIMPLE_RADIO"
+                            "SIMPLE_RADIO",
+                            "CASCADE_SELECT"
                         ],
                         "confirm": [
                             "BUTTON",
@@ -457,6 +458,13 @@
                     "adapterMethod": { "create": "ecuiCreate", "dispose": "ecuiDispose" },
                     "adapterPath": "di.shared.adapter.EcuiPagerVUIAdapter",
                     "caption": "分页控件"
+                },
+                {
+                    "clzKey": "CASCADE_SELECT",
+                    "clzType": "VUI",
+                    "adapterMethod": { "create": "xuiCreate", "dispose": "xuiDispose" },
+                    "clzPath": "di.shared.vui.CascadeSelect",
+                    "caption": "级联下拉框"
                 }
             ]
 
