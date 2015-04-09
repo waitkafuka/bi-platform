@@ -189,7 +189,7 @@ public class LocalFileOperationUtilsTest {
     public void testMvWithInvalidTargetFilename() throws Exception {
         File f = new File (dir + "/test.txt");
         f.createNewFile();
-        Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test.txt", dir + "/|test_bak.txt", true);
+        Map<String, Object> rs = LocalFileOperationUtils.mv(dir + "/test.txt", "ggg/jjj/test_bak.txt", true);
         Assert.assertNotNull(rs);
         Assert.assertEquals("fail", rs.get("result"));
         Assert.assertEquals("新文件创建失败",rs.get("msg"));
