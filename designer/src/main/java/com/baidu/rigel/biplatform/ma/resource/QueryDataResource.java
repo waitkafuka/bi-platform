@@ -75,6 +75,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
+import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel.DrillDownAction;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.query.chart.ChartShowType;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
@@ -1218,6 +1219,8 @@ public class QueryDataResource extends BaseResource {
             reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
             runTimeModel.getContext().put(uniqueName, action);
+            runTimeModel.setLinkedQueryAction (action);
+            
             /**
              * 把下钻的值存下来
              * TODO 临时放在这里，需要重新考虑
@@ -1280,6 +1283,10 @@ public class QueryDataResource extends BaseResource {
         } 
         areaContext.getQueryStatus().add(result);
         // 更新局部区域参数，避免漏掉当前请求查询的
+        
+        // 清除展开、折叠方式下钻查询历史纪录
+        runTimeModel.getDrillDownQueryHistory ().clear ();
+        
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
@@ -1441,6 +1448,8 @@ public class QueryDataResource extends BaseResource {
             if (type.equals("expand")) {
 //                ResultSet result = reportModelQueryService.queryDatas(model, action, true);
                 logger.info ("[INFO] --- --- --- ---" + result.getDataModel ());
+                runTimeModel.getDrillDownQueryHistory ().put (condition, 
+                        new ReportRuntimeModel.DrillDownAction(action, rowNum));
                 DataModel newDataModel = DataModelUtils.merageDataModel(previousResult.getDataModel(), 
                         result.getDataModel(), rowNum);
                 table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, false, 0, false);
@@ -1454,6 +1463,7 @@ public class QueryDataResource extends BaseResource {
                         areaId, previousContext.getParams());
                 runTimeModel.updateDatas(recordAction, result);
             } else { //上卷或者折叠操作
+                runTimeModel.getDrillDownQueryHistory ().remove (condition);
                 DataModel newModel = DataModelUtils.removeDataFromDataModel(previousResult.getDataModel(), rowNum);
                 table = DataModelUtils.transDataModel2PivotTable(cube, newModel, false, 0, false);
                 result = new ResultSet();
@@ -1805,9 +1815,14 @@ public class QueryDataResource extends BaseResource {
         
         ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
         areaContext.getParams().put(Constants.NEED_LIMITED, false);
-        QueryAction action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
+        QueryAction action = model.getLinkedQueryAction ();
+        if (action == null) {
+            action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
+        }
         if (action != null) {
             action.setChartQuery(false);
+        } else {
+            throw new RuntimeException("下载失败"); 
         }
         ResultSet queryRs = reportModelQueryService.queryDatas(report, action, true, true,
             areaContext.getParams(), securityKey);
@@ -1825,6 +1840,13 @@ public class QueryDataResource extends BaseResource {
         }); 
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
+        if (model.getDrillDownQueryHistory () != null && !model.getDrillDownQueryHistory ().isEmpty ()) {
+            for (DrillDownAction queryAction : model.getDrillDownQueryHistory ().values ()) {
+                ResultSet subData = reportModelQueryService.queryDatas(report, queryAction.action, true, true,
+                        areaContext.getParams(), securityKey);
+                dataModel = DataModelUtils.merageDataModel (dataModel, subData.getDataModel (), queryAction.rowNum);
+            }
+        }
         String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
         response.setCharacterEncoding("utf-8");

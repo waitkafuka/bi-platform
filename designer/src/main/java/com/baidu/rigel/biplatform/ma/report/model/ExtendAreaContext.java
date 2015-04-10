@@ -381,6 +381,5 @@ public class ExtendAreaContext implements Serializable {
     public void setSelectMeasures(Map<String, Item> selectMeasures) {
         this.selectMeasures = selectMeasures;
     }
-
     
 }
