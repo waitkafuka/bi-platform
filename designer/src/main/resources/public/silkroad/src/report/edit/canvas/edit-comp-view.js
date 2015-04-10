@@ -1194,7 +1194,6 @@ define([
                         entityDefs[i].selectAllDim = selectAllDim;
                     }
                 }
-                console.log(selectAllDim);
                 this.model.canvasModel.saveJsonVm();
             },
             /**
