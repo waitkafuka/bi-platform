@@ -27,6 +27,7 @@ import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
 import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
 import com.baidu.rigel.biplatform.parser.context.StringCondition;
+import com.baidu.rigel.biplatform.parser.exception.IllegalCompileContextException;
 import com.baidu.rigel.biplatform.parser.exception.NodeCompileException;
 import com.baidu.rigel.biplatform.parser.exception.NotAllowedOperationException;
 import com.baidu.rigel.biplatform.parser.node.FunctionNode;
@@ -60,7 +61,7 @@ public class MtdFunNode extends FunctionNode {
     }
     
     public MtdFunNode() {
-        super(1);
+//        super(1);
     }
 
     @Override
@@ -98,12 +99,23 @@ public class MtdFunNode extends FunctionNode {
      * preSetNodeResult
      * @param context
      */
+//    @Override
+//    protected void preSetNodeResult(CompileContext context) {
+//        VariableNode node = (VariableNode) getArgs().get(0);
+//        super.checkCompileContext(context);
+//        Map<String, ComputeResult> result = context.getVariablesResult().get(MTD_CONDITION);
+//        node.setResult(result.get(node.getVariableExp()));
+//    }
+
     @Override
-    protected void preSetNodeResult(CompileContext context) {
-        VariableNode node = (VariableNode) getArgs().get(0);
-        super.checkCompileContext(context);
-        Map<String, ComputeResult> result = context.getVariablesResult().get(MTD_CONDITION);
-        node.setResult(result.get(node.getVariableExp()));
+    public ComputeResult getResult(CompileContext context)
+            throws IllegalCompileContextException {
+        return null;
+    }
+
+    @Override
+    public int getArgsLength() {
+        return 1;
     }
 
 

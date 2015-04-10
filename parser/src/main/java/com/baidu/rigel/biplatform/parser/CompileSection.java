@@ -138,10 +138,16 @@ public class CompileSection {
                     currentToken.setLength(0);
                     break;
                 case '+' : //43
+                    if(currentToken.length () == 0) {
+                        currentToken.append ("0");
+                    }
                     sectionProcess(resolveSectionNodes,resolveToken(currentToken.toString()),new AddCalculateNode());
                     currentToken.setLength(0);
                     break;
                 case '-' : //45
+                    if(currentToken.length () == 0) {
+                        currentToken.append ("0");
+                    }
                     sectionProcess(resolveSectionNodes,resolveToken(currentToken.toString()),new SubtractCalculateNode());
                     currentToken.setLength(0);
                     break;
