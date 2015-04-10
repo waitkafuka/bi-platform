@@ -26,7 +26,9 @@ define(['template'], function (template) {
         }
         $out+='\r\n\r\n    ';
         if(item.type == 'M'){
-        $out+='\r\n    <div class="item j-item" data-type="M">\r\n        <div class="title">月粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="singleDateSetting" value="-1"/>\r\n            <select>\r\n                <option value="D"';
+        $out+='\r\n    <div class="item j-item" data-type="M">\r\n        <div class="title">月粒度设置</div>\r\n        <div class="content">\r\n            <input type="text" name="singleDateSetting" value="';
+        $out+=$escape(item.defaultSelectedVal);
+        $out+='"/>\r\n            <select>\r\n                <option value="D"';
         if(item.defaultSelectedUnit == 'D'){
         $out+=' selected';
         }

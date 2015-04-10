@@ -33,7 +33,7 @@
     <div class="item j-item" data-type="M">
         <div class="title">月粒度设置</div>
         <div class="content">
-            <input type="text" name="singleDateSetting" value="-1"/>
+            <input type="text" name="singleDateSetting" value="{{item.defaultSelectedVal}}"/>
             <select>
                 <option value="D"{{if item.defaultSelectedUnit == 'D'}} selected{{/if}}>日</option>
                 <option value="W"{{if item.defaultSelectedUnit == 'W'}} selected{{/if}}>周</option>
