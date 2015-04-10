@@ -115,6 +115,13 @@ public class ReportRuntimeModel implements Serializable {
     private Map<String, LinkedList<QueryAction>> queryActions = null;
     
     /**
+     * 下钻查询action 历史纪录
+     */
+    private Map<String, DrillDownAction> drillDownQueryHistory = Maps.newHashMap ();
+
+    private QueryAction linkedQueryAction;
+    
+    /**
      * 构造函数
      * 
      * @param model
@@ -553,6 +560,55 @@ public class ReportRuntimeModel implements Serializable {
     public void init(ReportDesignModel model, boolean force, boolean inEdit) {
         this.init(model, force);
         this.getContext().put(Constants.IN_EDITOR, true);
+    }
+
+    /**
+     * @return the drillDownQueryHistory
+     */
+    public Map<String, DrillDownAction> getDrillDownQueryHistory() {
+        if (this.drillDownQueryHistory == null) {
+            this.drillDownQueryHistory = Maps.newHashMap ();
+        }
+        return drillDownQueryHistory;
+    }
+
+    /**
+     * @param drillDownQueryHistory the drillDownQueryHistory to set
+     */
+    public void setDrillDownQueryHistory(
+            Map<String, DrillDownAction> drillDownQueryHistory) {
+        this.drillDownQueryHistory = drillDownQueryHistory;
+    }
+    
+    public static class DrillDownAction implements Serializable {
+        
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 8254446539213186133L;
+
+        public final QueryAction action;
+        
+        public final int rowNum;
+
+        public DrillDownAction(QueryAction action, int rowNum) {
+            super ();
+            this.action = action;
+            this.rowNum = rowNum;
+        }
+        
+        
+    }
+
+    public void setLinkedQueryAction(QueryAction action) {
+        this.linkedQueryAction = action;
+    }
+
+    /**
+     * @return the linkedQueryAction
+     */
+    public QueryAction getLinkedQueryAction() {
+        return linkedQueryAction;
     }
     
     
