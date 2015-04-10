@@ -48,7 +48,7 @@ import com.baidu.rigel.biplatform.parser.util.ParserConstant;
  * @version  2014年12月18日 
  * @since jdk 1.8 or after
  */
-public class CompileSection {
+class CompileSection {
     
     
     /** 

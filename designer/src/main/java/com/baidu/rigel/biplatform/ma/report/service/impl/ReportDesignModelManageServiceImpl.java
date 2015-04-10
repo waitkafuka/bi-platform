@@ -358,6 +358,7 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
     private boolean isQueryCompArea(ExtendAreaType type) {
         return type == ExtendAreaType.SELECT
                 || type == ExtendAreaType.MULTISELECT
+                || type == ExtendAreaType.CASCADE_SELECT
                 || type == ExtendAreaType.SINGLE_DROP_DOWN_TREE;
     }
     

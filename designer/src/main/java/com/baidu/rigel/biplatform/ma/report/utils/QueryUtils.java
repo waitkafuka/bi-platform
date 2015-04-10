@@ -696,6 +696,7 @@ public final class QueryUtils {
         return type == ExtendAreaType.TIME_COMP 
                 || type == ExtendAreaType.SELECT 
                 || type == ExtendAreaType.MULTISELECT
+                || type == ExtendAreaType.CASCADE_SELECT
                 || type == ExtendAreaType.SINGLE_DROP_DOWN_TREE;
     }
 
