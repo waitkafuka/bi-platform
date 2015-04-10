@@ -288,6 +288,70 @@ public class CompileExpressionTest {
         
     }
     
+    @Test
+    public void testCompileWithBaseUdf1 () {
+        try {
+            RegisterFunction.register ("udf2", UserDefFunction2.class);
+        } catch (RegisterFunctionException e) {
+            Assert.fail ();
+        }
+        CompileContext context = CompileExpression.compile ("udf2(-1, -2)");
+        Assert.assertEquals ("udf2(-1, -2)", context.getExpression ());
+        Assert.assertEquals ("-3", context.getNode ().getResult (context).toString ());
+        
+        context = CompileExpression.compile ("udf2(+1, 2)");
+        Assert.assertEquals ("udf2(+1, 2)", context.getExpression ());
+        Assert.assertEquals ("3", context.getNode ().getResult (context).toString ());
+        
+    }
+    
+    /**
+     * 
+     * Description: base udf for test
+     * @author david.wang
+     *
+     */
+    public static class UserDefFunction2 extends FunctionNode {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -2557343941040637669L;
+
+        public UserDefFunction2 () {
+        }
+        
+        @Override
+        public String getName () {
+            return "udf2";
+        }
+
+        @Override
+        public Map<Condition, Set<String>> mergeCondition(Node node) {
+            return node.collectVariableCondition ();
+        }
+
+        @Override
+        protected BigDecimal compute(BigDecimal arg1, BigDecimal arg2) {
+            return BigDecimal.ZERO.subtract (arg1);
+        }
+        
+        @Override
+        public ComputeResult getResult(CompileContext context) throws IllegalCompileContextException {
+            Node args = getArgs ().get (0);
+            Node args2 = getArgs().get (1);
+            SingleComputeResult rs = (SingleComputeResult) args.getResult (context);
+            SingleComputeResult rs1 = (SingleComputeResult) args2.getResult (context);
+            return new SingleComputeResult (rs.getData ().add (rs1.getData ()));
+        }
+        
+        @Override
+        public int getArgsLength() {
+            return 2;
+        }
+        
+    }
+    
     /**
      * 
      * Description: base udf for test

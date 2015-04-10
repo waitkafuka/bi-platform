@@ -120,6 +120,11 @@ public class RegisterFunctionTest {
     
     private static class SubFunctionNode extends FunctionNode {
 
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -7429155671800569579L;
+
         @Override
         public String getName() {
             return null;
