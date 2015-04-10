@@ -44,7 +44,8 @@ public class RegisterFunction {
     /** 
      * functionNames 注册的函数名称
      */
-    private static Map<String, Constructor<? extends FunctionNode>> functionNames = new HashMap<String, Constructor<? extends FunctionNode>>();
+    private static Map<String, Constructor<? extends FunctionNode>> functionNames = 
+        new HashMap<String, Constructor<? extends FunctionNode>>();
     
     
     /** 
@@ -55,7 +56,8 @@ public class RegisterFunction {
      * @throws ClassNotFoundException
      * @throws RegisterFunctionException
      */
-    public static boolean register(String functionName, String funClass) throws ClassNotFoundException, RegisterFunctionException {
+    public static boolean register(String functionName, String funClass) 
+        throws ClassNotFoundException, RegisterFunctionException {
         if(functionNames.containsKey(functionName)) {
             return false;
         }
@@ -80,9 +82,17 @@ public class RegisterFunction {
     public static boolean register(String functionName, Class<?> funClass) throws RegisterFunctionException {
         try {
             // get array constructor
-            functionNames.put(functionName.toLowerCase(), funClass.asSubclass(FunctionNode.class).getConstructor());
+            if(functionNames.containsKey(functionName)) {
+                return false;
+            }
+            if (funClass == null) {
+                throw new IllegalArgumentException("function class can not be empty by function name:" + functionName);
+            }
+            functionNames.put(functionName.toLowerCase(), 
+                funClass.asSubclass(FunctionNode.class).getConstructor());
         } catch (NoSuchMethodException | SecurityException e) {
-            LOG.error("Register function:{} by class:{} catch error,error message:{}", functionName, funClass, e.getMessage());
+            LOG.error("Register function:{} by class:{} catch error,error message:{}", 
+                functionName, funClass, e.getMessage());
             throw new RegisterFunctionException(functionName, funClass.getName(), e.getMessage());
         }
         

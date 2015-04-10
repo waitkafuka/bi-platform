@@ -5,10 +5,13 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;
 
+import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
+import com.baidu.rigel.biplatform.parser.exception.IllegalCompileContextException;
 import com.baidu.rigel.biplatform.parser.exception.NodeCompileException;
 import com.baidu.rigel.biplatform.parser.node.FunctionNode;
 import com.baidu.rigel.biplatform.parser.node.Node;
+import com.baidu.rigel.biplatform.parser.result.ComputeResult;
 import com.baidu.rigel.biplatform.parser.result.SingleComputeResult;
 import com.baidu.rigel.biplatform.parser.util.ParserConstant;
 
@@ -28,12 +31,29 @@ public class RateFunNode extends FunctionNode {
     }
     
     public RateFunNode() {
-        super(2);
     }
 
     @Override
     public String getName() {
         return "Rate";
+    }
+
+    /*
+     * 默认实现的函数的结果集处理方案
+     * 
+     */
+    @Override
+    public ComputeResult getResult(CompileContext context) throws IllegalCompileContextException {
+        //预处理下函数的参数，比如从context中根据函数的条件获取变量的值
+        preSetNodeResult(context);
+        processNodes(getArgs(), context);
+        if(this.result == null) {
+            this.result = new SingleComputeResult();
+        }
+        return this.result;
+    }
+    
+    protected void preSetNodeResult(CompileContext context) {
     }
 
     @Override
@@ -65,6 +85,11 @@ public class RateFunNode extends FunctionNode {
                 throw new NodeCompileException(this, "rate function denominator can not be zero.");
             }
         }
+    }
+
+    @Override
+    public int getArgsLength() {
+        return 2;
     }
 
 }

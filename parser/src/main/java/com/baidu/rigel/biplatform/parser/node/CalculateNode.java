@@ -146,7 +146,6 @@ public abstract class CalculateNode extends AbstractNode {
      * @return the left 
      */
     public Node getLeft() {
-    
         return left;
     }
 

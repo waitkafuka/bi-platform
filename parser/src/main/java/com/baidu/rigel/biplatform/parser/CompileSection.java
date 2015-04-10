@@ -48,7 +48,7 @@ import com.baidu.rigel.biplatform.parser.util.ParserConstant;
  * @version  2014年12月18日 
  * @since jdk 1.8 or after
  */
-public class CompileSection {
+class CompileSection {
     
     
     /** 
@@ -138,10 +138,16 @@ public class CompileSection {
                     currentToken.setLength(0);
                     break;
                 case '+' : //43
+                    if(currentToken.length () == 0) {
+                        currentToken.append ("0");
+                    }
                     sectionProcess(resolveSectionNodes,resolveToken(currentToken.toString()),new AddCalculateNode());
                     currentToken.setLength(0);
                     break;
                 case '-' : //45
+                    if(currentToken.length () == 0) {
+                        currentToken.append ("0");
+                    }
                     sectionProcess(resolveSectionNodes,resolveToken(currentToken.toString()),new SubtractCalculateNode());
                     currentToken.setLength(0);
                     break;

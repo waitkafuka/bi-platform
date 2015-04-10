@@ -16,6 +16,7 @@
  */
 package com.baidu.rigel.biplatform.parser.node;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,7 +33,6 @@ import com.baidu.rigel.biplatform.parser.context.Condition;
 import com.baidu.rigel.biplatform.parser.exception.IllegalCompileContextException;
 import com.baidu.rigel.biplatform.parser.exception.IllegalFunctionArgumentException;
 import com.baidu.rigel.biplatform.parser.result.ComputeResult;
-import com.baidu.rigel.biplatform.parser.result.SingleComputeResult;
 
 
 /** 
@@ -54,21 +54,21 @@ public abstract class FunctionNode extends AbstractNode {
      */
     private List<Node> args;
     
-    private int argsLength;
+//    private int argsLength;
 
     /** 
      * 构造函数
      */
     public FunctionNode(Node... nodes) {
         this.args = Arrays.asList(nodes);
-        this.argsLength = nodes.length;
+//        this.argsLength = nodes.length;
     }
     
     
-    public FunctionNode(int length) {
-        super();
-        this.argsLength = length;
-    }
+//    public FunctionNode(int length) {
+//        super();
+//        this.argsLength = length;
+//    }
     
     /** 
      * 返回函数的名称
@@ -146,25 +146,29 @@ public abstract class FunctionNode extends AbstractNode {
      * 
      */
     @Override
-    public ComputeResult getResult(CompileContext context) throws IllegalCompileContextException {
-        //预处理下函数的参数，比如从context中根据函数的条件获取变量的值
-        preSetNodeResult(context);
-        processNodes(args, context);
-        if(this.result == null) {
-            this.result = new SingleComputeResult();
-        }
-        return this.result;
-    }
+    public abstract ComputeResult getResult(CompileContext context) throws IllegalCompileContextException; 
+//    {
+//        //预处理下函数的参数，比如从context中根据函数的条件获取变量的值
+//        preSetNodeResult(context);
+//        processNodes(args, context);
+//        if(this.result == null) {
+//            this.result = new SingleComputeResult();
+//        }
+//        return this.result;
+//    }
 
-    
-    /** 
-     * 函数的参数如果需要特殊设置，覆盖此方法
-     * preSetNodeResult
-     * @param context
-     */
-    protected void preSetNodeResult(CompileContext context) {
-        
+    @Override
+    protected BigDecimal compute(BigDecimal arg1, BigDecimal arg2) {
+        throw new UnsupportedOperationException ();
     }
+//    /** 
+//     * 函数的参数如果需要特殊设置，覆盖此方法
+//     * preSetNodeResult
+//     * @param context
+//     */
+//    protected void preSetNodeResult(CompileContext context) {
+//        
+//    }
     
     /** 
      * 校验函数的参数，并且处理函数的参数节点
@@ -174,8 +178,8 @@ public abstract class FunctionNode extends AbstractNode {
      */
     @Override
     public void check() {
-        if(getArgs().size() != this.argsLength) {
-            throw new IllegalFunctionArgumentException(this.getName(),this.args,this.argsLength);
+        if(getArgs().size() != this.getArgsLength ()) {
+            throw new IllegalFunctionArgumentException(this.getName(),this.args,this.getArgsLength ());
         }
         if(CollectionUtils.isNotEmpty(this.args)) {
             for (Node node : args) {
@@ -198,20 +202,20 @@ public abstract class FunctionNode extends AbstractNode {
      * 获取 argsLength 
      * @return the argsLength 
      */
-    public int getArgsLength() {
-    
-        return argsLength;
-    }
+    public abstract int getArgsLength() ;
+//    {
+//     
+//        return argsLength;
+//    }
 
 
     /** 
      * 设置 argsLength 
      * @param argsLength the argsLength to set 
      */
-    public void setArgsLength(int argsLength) {
-    
-        this.argsLength = argsLength;
-    }
+//    public void setArgsLength(int argsLength) {
+//        this.argsLength = argsLength;
+//    }
 
 }
 

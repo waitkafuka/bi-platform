@@ -481,17 +481,23 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         for (ExtendArea area : model.getExtendAreaList()) {
             try {
                 // 忽略此类区域
-                if (area.getType() == ExtendAreaType.LITEOLAP_TABLE
-                        || area.getType() == ExtendAreaType.SELECTION_AREA 
-                        || area.getType() == ExtendAreaType.LITEOLAP_CHART
-                        || area.getType() == ExtendAreaType.SELECT
-                        || area.getType() == ExtendAreaType.MULTISELECT
-                        || area.getType() == ExtendAreaType.TEXT
-                        || area.getType() == ExtendAreaType.H_BUTTON
-                        || area.getType () == ExtendAreaType.SINGLE_DROP_DOWN_TREE
+//                if (area.getType() != ExtendAreaType.TABLE
+//                        || area.getType() != ExtendAreaType.SELECTION_AREA 
+//                        || area.getType() == ExtendAreaType.LITEOLAP_CHART
+//                        || area.getType() == ExtendAreaType.SELECT
+//                        
+//                        || area.getType() == ExtendAreaType.MULTISELECT
+//                        || area.getType() == ExtendAreaType.TEXT
+//                        || area.getType() == ExtendAreaType.H_BUTTON
+//                        || area.getType () == ExtendAreaType.SINGLE_DROP_DOWN_TREE
+//                        || QueryUtils.isFilterArea(area.getType())) {
+//                    continue;
+//                }  
+                if ((area.getType() != ExtendAreaType.TABLE
+                        && area.getType() != ExtendAreaType.CHART)
                         || QueryUtils.isFilterArea(area.getType())) {
                     continue;
-                }  
+                }
                 Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
                 cubes.add(cube);
             } catch (QueryModelBuildException e) {

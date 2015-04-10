@@ -43,7 +43,6 @@ abstract class TesseractRateFunction extends RateFunNode {
     private static final long serialVersionUID = -4597180338628840464L;
     
     public TesseractRateFunction() {
-        this.setArgsLength(1);
     }
     
     /**
@@ -98,5 +97,8 @@ abstract class TesseractRateFunction extends RateFunNode {
         }
     }
 
-    
+    @Override
+    public int getArgsLength() {
+        return 1;
+    }
 }

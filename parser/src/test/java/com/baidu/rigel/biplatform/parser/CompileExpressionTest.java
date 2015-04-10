@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.parser;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -26,6 +27,10 @@ import org.junit.Test;
 import com.baidu.rigel.biplatform.parser.context.CompileContext;
 import com.baidu.rigel.biplatform.parser.context.Condition;
 import com.baidu.rigel.biplatform.parser.context.EmptyCondition;
+import com.baidu.rigel.biplatform.parser.exception.IllegalCompileContextException;
+import com.baidu.rigel.biplatform.parser.exception.RegisterFunctionException;
+import com.baidu.rigel.biplatform.parser.node.FunctionNode;
+import com.baidu.rigel.biplatform.parser.node.Node;
 import com.baidu.rigel.biplatform.parser.node.Node.NodeType;
 import com.baidu.rigel.biplatform.parser.result.ComputeResult;
 import com.baidu.rigel.biplatform.parser.result.SingleComputeResult;
@@ -196,6 +201,16 @@ public class CompileExpressionTest {
             Assert.assertEquals (NodeType.Calculate, context.getNode ().getNodeType ());
             Assert.assertEquals ("8", context.getNode ().getResult (context).toString ());
             
+            context = CompileExpression.compile ("-3 - 1");
+            Assert.assertEquals ("-3 - 1", context.getExpression ());
+            Assert.assertEquals (NodeType.Calculate, context.getNode ().getNodeType ());
+            Assert.assertEquals ("-4", context.getNode ().getResult (context).toString ());
+            
+            context = CompileExpression.compile ("-3 - (-1)");
+            Assert.assertEquals ("-3 - (-1)", context.getExpression ());
+            Assert.assertEquals (NodeType.Calculate, context.getNode ().getNodeType ());
+            Assert.assertEquals ("-2", context.getNode ().getResult (context).toString ());
+            
             context = CompileExpression.compile ("3 - 1 * 3 + 2");
             Assert.assertEquals ("3 - 1 * 3 + 2", context.getExpression ());
             Assert.assertEquals (NodeType.Calculate, context.getNode ().getNodeType ());
@@ -239,20 +254,84 @@ public class CompileExpressionTest {
     public void testCompileWithVariable () {
         try {
             CompileContext context = CompileExpression.compile ("(${a} - 1) * (3 + 2)");
-//            Map<Condition, Set<String>> conditionVariables = new HashMap<> ();
-//            Set<String> variable = new HashSet<String> ();
-//            variable.add ("a");
-//            conditionVariables.put (EmptyCondition.getInstance (), variable);
-//            context.setConditionVariables (conditionVariables);
-//            Map<Condition, Map<String, ComputeResult>> variablesResult = new HashMap<> ();
-//            Map<String, ComputeResult> result = new HashMap<> ();
-//            result.put ("a", new SingleComputeResult (1));
-//            variablesResult.put (EmptyCondition.getInstance (), result);
-//            context.setVariablesResult (variablesResult);
+            Map<Condition, Set<String>> conditionVariables = new HashMap<> ();
+            Set<String> variable = new HashSet<String> ();
+            variable.add ("${a}");
+            conditionVariables.put (EmptyCondition.getInstance (), variable);
+            context.setConditionVariables (conditionVariables);
+            Map<Condition, Map<String, ComputeResult>> variablesResult = new HashMap<> ();
+            Map<String, ComputeResult> result = new HashMap<> ();
+            result.put ("${a}", new SingleComputeResult (1));
+            variablesResult.put (EmptyCondition.getInstance (), result);
+            context.setVariablesResult (variablesResult);
             Assert.assertEquals ("(${a} - 1) * (3 + 2)", context.getExpression ());
-//            Assert.assertEquals ("0", context.getNode ().getResult (context).toString ());
+            Assert.assertEquals ("0", context.getNode ().getResult (context).toString ());
         } catch (Exception e) {
             Assert.fail ();
         }
     }
+    
+    @Test
+    public void testCompileWithBaseUdf () {
+        try {
+            RegisterFunction.register ("udf", UserDefFunction.class);
+        } catch (RegisterFunctionException e) {
+            Assert.fail ();
+        }
+        CompileContext context = CompileExpression.compile ("udf(-1)");
+        Assert.assertEquals ("udf(-1)", context.getExpression ());
+        Assert.assertEquals ("1", context.getNode ().getResult (context).toString ());
+        
+        context = CompileExpression.compile ("udf(+1)");
+        Assert.assertEquals ("udf(+1)", context.getExpression ());
+        Assert.assertEquals ("-1", context.getNode ().getResult (context).toString ());
+        
+    }
+    
+    /**
+     * 
+     * Description: base udf for test
+     * @author david.wang
+     *
+     */
+    public static class UserDefFunction extends FunctionNode {
+
+        /**
+         * 
+         */
+        private static final long serialVersionUID = -2557343941040637669L;
+
+        public UserDefFunction() {
+        }
+        
+        @Override
+        public String getName() {
+            return "udf";
+        }
+
+        @Override
+        public Map<Condition, Set<String>> mergeCondition(Node node) {
+            return node.collectVariableCondition ();
+        }
+
+        @Override
+        protected BigDecimal compute(BigDecimal arg1, BigDecimal arg2) {
+            return BigDecimal.ZERO.subtract (arg1);
+        }
+        
+        @Override
+        public ComputeResult getResult(CompileContext context) throws IllegalCompileContextException {
+            Node args = getArgs ().get (0);
+            SingleComputeResult rs = (SingleComputeResult) args.getResult (context);
+            return new SingleComputeResult (BigDecimal.ZERO.subtract (rs.getData ()));
+        }
+        
+        @Override
+        public int getArgsLength() {
+            return 1;
+        }
+        
+    }
+    
+    
 }

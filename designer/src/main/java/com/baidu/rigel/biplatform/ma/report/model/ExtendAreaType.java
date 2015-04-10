@@ -92,5 +92,10 @@ public enum ExtendAreaType {
     /**
      * LiteOlap组件
      */
-    LITEOLAP;
+    LITEOLAP,
+    
+    /**
+     * 联动部件
+     */
+    CASCADE_SELECT;
 }
