@@ -467,10 +467,10 @@ tr > td:last-child:after{
 .ui-table-locked-head th:first-child {
     border-left: 1px solid #E7F9FE;
 }
-.ui-table-locked-head th {
-    display: block;
-    overflow: hidden;
-}
+/*.ui-table-locked-head th {*/
+    /*display: block;*/
+    /*overflow: hidden;*/
+/*}*/
 .ui-table-locked-head .ui-table-head-font {
     display: block;
 }

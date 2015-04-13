@@ -257,6 +257,7 @@
     *display: inline;
     *zoom: 1;
     vertical-align: middle;
+    float: left;
 }
 .ui-download-btn .ui-button-left:hover{
     background: url(img/download.png) no-repeat;
@@ -264,6 +265,7 @@
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
     color: black;
+    float: right;
 }
 .ui-download-btn .ui-button-text:before {
     content: ' ';
