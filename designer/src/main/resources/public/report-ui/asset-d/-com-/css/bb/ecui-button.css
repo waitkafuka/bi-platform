@@ -266,6 +266,7 @@
     vertical-align: middle;
     color: black;
     float: right;
+    height: 15px;
 }
 .ui-download-btn .ui-button-text:before {
     content: ' ';
