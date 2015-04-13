@@ -136,7 +136,7 @@ public class QueryContextBuilder {
             AxisMeta axisMeta = null;
             AxisType axisType = AxisType.COLUMN;
             Map<String, String> requestParams = questionModel.getRequestParams();
-			while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
+            while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
                 if (CollectionUtils.isNotEmpty(axisMeta.getCrossjoinDims())) {
                     int i = 0;
                     for (String dimName : axisMeta.getCrossjoinDims()) {
