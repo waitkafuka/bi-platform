@@ -284,52 +284,73 @@ public class QueryRequestUtil {
 //    }
     
     
+    
+    static class PullUpProperties {
+        String childField;
+        
+        String pullupField;
+        
+        String pullupValue;
+
+        
+        /** 
+         * 构造函数
+         */
+        public PullUpProperties(String pullupField, String pullupValue) {
+            this.pullupField = pullupField;
+            this.pullupValue = pullupValue;
+        }
+        
+    }
+    
     /** 
      * collectAllMem
      * @param queryContext
      * @return
      */
-    private static Map<String, String> collectAllMem(QueryContext queryContext) {
-        Map<String,String> allDimVal = new HashMap<String, String>();
+    private static List<PullUpProperties> collectAllMem(QueryContext queryContext) {
+        List<PullUpProperties> results = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(queryContext.getColumnMemberTrees())) {
             queryContext.getColumnMemberTrees().forEach(tree -> {
-                allDimVal.putAll(coolectAllMem(tree));
+                PullUpProperties properties = coolectAllMem(tree);
+                if(properties != null) {
+                    results.add(properties);
+                }
             });
         }
         
         if (CollectionUtils.isNotEmpty(queryContext.getRowMemberTrees())) {
             queryContext.getRowMemberTrees().forEach(tree -> {
-                allDimVal.putAll(coolectAllMem(tree));
+                PullUpProperties properties = coolectAllMem(tree);
+                if(properties != null) {
+                    results.add(properties);
+                }
             });
         }
         
-        return allDimVal;
+        return results;
     }
     
-    
-    
     /** 
      * coolectAllMem
      * @param memberNodeTree
      * @return
      */
-    
-    /** 
-     * coolectAllMem
-     * @param memberNodeTree
-     * @return
-     */
-    private static Map<String, String> coolectAllMem(MemberNodeTree memberNodeTree) {
-        Map<String,String> allDimVal = new HashMap<String, String>();
-        if (memberNodeTree.isSummary()) {
-            allDimVal.put(memberNodeTree.getQuerySource(), memberNodeTree.getName());
-            return allDimVal;
+    private static PullUpProperties coolectAllMem(MemberNodeTree memberNodeTree) {
+        PullUpProperties result = null;
+        if (StringUtils.isNotBlank(memberNodeTree.getName()) && memberNodeTree.getChildren().size() >= 1) {
+            result = new PullUpProperties(memberNodeTree.getQuerySource(), memberNodeTree.getName());
+            result.childField = memberNodeTree.getChildren().get(0).getQuerySource();
+            if(result.pullupField.equals(result.childField)) {
+                result.childField = null;
+            }
+            return result;
         } else {
             if(memberNodeTree.getChildren().size() == 1) {
                 return coolectAllMem(memberNodeTree.getChildren().get(0));
             }
-            return allDimVal;
         }
+        return result;
     }
     
     
@@ -340,7 +361,7 @@ public class QueryRequestUtil {
         long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
             .transQueryRequest2LeafMap(query);
-        Map<String,String> allDimVal = collectAllMem(queryContext);
+        List<PullUpProperties> allDimVal = collectAllMem(queryContext);
         
         
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
@@ -407,22 +428,43 @@ public class QueryRequestUtil {
             return dataSet;
         }
         
-        
-        
-        if(MapUtils.isNotEmpty(allDimVal)){
-//            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);
-            for(String properties : allDimVal.keySet()){
+        if(CollectionUtils.isNotEmpty(allDimVal)) {
+            for(PullUpProperties properties : allDimVal) {
+                
+                List<String> groupList0 = new ArrayList<>(groupList);
+                if(StringUtils.isNotBlank(properties.childField)) {
+                    groupList0.remove(properties.childField);
+                }
                 LinkedList<SearchIndexResultRecord> summaryCalcList = new LinkedList<SearchIndexResultRecord>();
                 for(SearchIndexResultRecord record : transList){
                     SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy(record);
-                    vRecord.setField(meta.getFieldIndex(properties), allDimVal.get(properties));
-//                    generateGroupBy(vRecord, groupList, meta);
-                    vRecord.setGroupBy(allDimVal.get(properties));
+                    vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
+                    
+                    
+                    generateGroupBy(vRecord, groupList0, meta);
+//                    vRecord.setGroupBy(properties.pullupValue); 
                     summaryCalcList.add(vRecord);
                 }
                 transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
             }
         }
+        
+//        
+//        
+//        if(MapUtils.isNotEmpty(allDimVal)){
+////            List<ResultRecord> preResultList = DeepcopyUtils.deepCopy(transList);
+//            for(String properties : allDimVal.keySet()){
+//                LinkedList<SearchIndexResultRecord> summaryCalcList = new LinkedList<SearchIndexResultRecord>();
+//                for(SearchIndexResultRecord record : transList){
+//                    SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy(record);
+//                    vRecord.setField(meta.getFieldIndex(properties), allDimVal.get(properties));
+//                    generateGroupBy(vRecord, groupList, meta);
+////                    vRecord.setGroupBy(allDimVal.get(properties));
+//                    summaryCalcList.add(vRecord);
+//                }
+//                transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
+//            }
+//        }
         dataSet.setDataList(transList);
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " aggregator leaf.");
         return dataSet;
@@ -475,17 +517,19 @@ public class QueryRequestUtil {
     
     public static void generateGroupBy(SearchIndexResultRecord record, List<String> groups, Meta meta) throws NoSuchFieldException{
         if(CollectionUtils.isNotEmpty(groups)){
-            String groupBy = "";
             Serializable field = null;
+            List<String> fields = new ArrayList<>();
             for(String name : meta.getFieldNameArray()){
                 if(groups.contains(name)){
                     field = record.getField(meta.getFieldIndex(name));
                     if(field != null) {
-                        groupBy += field.toString() + ",";
+                        fields.add(field.toString());
                     }
                 }
             }
-            record.setGroupBy(groupBy);
+            if(CollectionUtils.isNotEmpty(fields)) {
+                record.setGroupBy(StringUtils.join(fields, ","));
+            }
         }
     }
     

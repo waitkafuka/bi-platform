@@ -448,6 +448,7 @@ public class QueryDataResource extends BaseResource {
         builder.append("<body>");
         builder.append(vm);
         
+        builder.append ("<script type='text/javascript' src='/silkroad/dep/jquery-1.11.1.min.js'></script>");
         builder.append("<script src='/silkroad/asset/" + theme + "/-di-product-min.js'>");
         builder.append("</script>");
         builder.append(js);
@@ -1239,11 +1240,11 @@ public class QueryDataResource extends BaseResource {
             }
             String[] drillName = new String[]{drillTargetUniqueName};
             oriQueryParams.putAll(request.getParameterMap());
+            oriQueryParams.put(row.getOlapElementId(), drillName);
             /**
              * update context
              */
             Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
-            queryParams.put(row.getOlapElementId(), drillName);
             
             // TODO 仔细思考一下逻辑
             reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
