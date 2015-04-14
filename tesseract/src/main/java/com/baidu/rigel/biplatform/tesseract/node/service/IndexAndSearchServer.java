@@ -39,8 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.CopyIndexInfoReturnHandler;
-import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.CopyIndexServerHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.FileServerHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.IndexServerHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.SearchServerHandler;
@@ -172,8 +170,6 @@ public class IndexAndSearchServer {
                     pipeline.addLast(IndexServerHandler.getChannelHandler());
                     pipeline.addLast(SearchServerHandler.getChannelHandler());
                     pipeline.addLast(FileServerHandler.getChannelHandler());
-                    pipeline.addLast(CopyIndexServerHandler.getChannelHandler());
-                    pipeline.addLast(CopyIndexInfoReturnHandler.getChannelHandler());
                     
                 }
                 

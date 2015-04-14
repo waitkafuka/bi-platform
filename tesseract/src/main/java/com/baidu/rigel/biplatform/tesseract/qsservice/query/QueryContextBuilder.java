@@ -326,6 +326,31 @@ public class QueryContextBuilder {
                 break;
             }
         }
+        
+        Map<Level, List<String>> tmp = Maps.newConcurrentMap ();
+        for (QueryData queryData : dimCondition.getQueryDataNodes()) {
+            String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
+            if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
+                callbackParams.add(names[names.length - 1]);
+                continue;
+            } else {
+                Level level = levels.get (names.length - 2);
+                if (tmp.containsKey (level)) {
+                    tmp.get (level).add (queryData.getUniqueName ());
+                } else {
+                    List<String> list = Lists.newArrayList ();
+                    list.add (queryData.getUniqueName ());
+                    tmp.put (level, list);
+                }
+            }
+        }    
+        
+        tmp.keySet ().stream ().map (level -> {
+           List<String> datas = tmp.get (levels);
+           
+           return null;
+        });
+        
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
             
@@ -333,6 +358,7 @@ public class QueryContextBuilder {
                 callbackParams.add(names[names.length - 1]);
                 continue;
             } else {
+                
                 MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
                 
                 MemberNodeTree memberNode = new MemberNodeTree(nodeTree);

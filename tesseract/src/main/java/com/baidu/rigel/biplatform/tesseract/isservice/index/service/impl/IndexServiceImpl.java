@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
@@ -63,9 +62,11 @@ import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.ServerFeedbackMessage;
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
+import com.baidu.rigel.biplatform.tesseract.node.meta.NodeState;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
+import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
@@ -101,12 +102,6 @@ public class IndexServiceImpl implements IndexService {
 	
 	@Value("${index.indexInterval}")
     private int indexInterval;
-	
-	@Value("${index.copyIdxTimeOut}")
-	private int copyIdxTimeOut;
-	
-	@Value("${index.copyIdxCheckInterval}")
-	private int copyIdxCheckInterval;
 
 	/**
 	 * indexMetaService
@@ -134,11 +129,6 @@ public class IndexServiceImpl implements IndexService {
 	 */
 
 	private IndexAndSearchClient isClient;
-	
-	/*
-	 * 索引副本拷贝任务执行结果
-	 */
-	private ConcurrentHashMap<String,List<String>> copyIndexTaskResult;
 
 	/**
 	 * Constructor by no param
@@ -307,7 +297,7 @@ public class IndexServiceImpl implements IndexService {
 	@Override
 	public void updateIndexByDataSourceKey(String dataSourceKey, String[] factTableNames,
 			Map<String, Map<String, BigDecimal>> dataSetMap)
-			throws Exception {
+			throws IndexAndSearchException {
 
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
 				"updateIndexByDataSourceKey", dataSourceKey));
@@ -362,14 +352,17 @@ public class IndexServiceImpl implements IndexService {
 			try {
 				doIndexByIndexAction(meta, idxAction, tableDataSetMap);
 			} catch (Exception e) {
-				LOGGER.warn(String.format(
+				LOGGER.info(String.format(
 						LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
 						"updateIndexByDataSourceKey",
 						"DataSourceKey:[" + dataSourceKey + "] FactTable:["
 								+ meta.getFacttableName() + "] IndexMetaId:["
-								+ meta.getIndexMetaId() + "]"),e);
-				
-				throw e;
+								+ meta.getIndexMetaId() + "]"));
+				String message = TesseractExceptionUtils.getExceptionMessage(
+						IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
+						IndexAndSearchExceptionType.INDEX_EXCEPTION);
+				throw new IndexAndSearchException(message, e.getCause(),
+						IndexAndSearchExceptionType.INDEX_EXCEPTION);
 			}
 		}
 		try {
@@ -558,8 +551,6 @@ public class IndexServiceImpl implements IndexService {
 			maxDataIdMap.put(tableName, currMaxId);
 
 		}
-		
-		this.LOGGER.info("FINISH INDEX AND BEGIN TO SET METADATA");
 
 		if (!idxAction.equals(IndexAction.INDEX_MOD)) {
 			// 除了修订的情况外，init merge update都需要保存上次索引后的最大id
@@ -605,33 +596,15 @@ public class IndexServiceImpl implements IndexService {
 				idxShard.setIdxState(IndexState.INDEX_AVAILABLE);
 				if(idxAction.equals(IndexAction.INDEX_MOD) && (idxShard.getShardId() < idxMeta.getIdxShardList().size())){
 					idxShard.setFull(Boolean.TRUE);
-				}	
-				
-				
-				if(IndexShard.getDefaultShardReplicaNum()>1){
-					//获取副本拷贝情况				
-					List<String> replicaNodeKeyList=this.getCopyIndexTaskInfo(idxShard.getShardName(), this.copyIdxTimeOut);
-					if(!CollectionUtils.isEmpty(replicaNodeKeyList)){
-						idxShard.setReplicaNodeKeyList(replicaNodeKeyList);
-					}else{
-						idxShard.setReplicaNodeKeyList(new ArrayList<String>());
-					}
-				}		
-				
-				
+				}
 			} else if (idxAction.equals(IndexAction.INDEX_MERGE)) {
 				idxShardIt.remove();
 			}
 		}
 		
 		
-		
-		
 		idxMeta.setLocked(Boolean.FALSE);
-		LOGGER.info("INDEX FIN,SAVING METAS");
 		this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
-		
-		LOGGER.info("TO PUBLISH INDEXMETA WRITE LOCALLY EVENT");
 		publistIndexMetaWriteEvent(idxMeta);
 		
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
@@ -639,36 +612,6 @@ public class IndexServiceImpl implements IndexService {
 						+ idxAction + "]"));
 		return;
 
-	}
-	
-	/**
-	 * 检查分片副本拷贝情况
-	 * @param shardName 分片名
-	 * @param timeOut 超时时间
-	 * @return List<String>
-	 * @throws InterruptedException
-	 */
-	private List<String> getCopyIndexTaskInfo(String shardName,int timeOut) throws InterruptedException{
-		int copyTaskTimeOut=timeOut;
-		if(copyTaskTimeOut<=0){
-			copyTaskTimeOut=TesseractConstant.DEFAULT_COPYINDEX_TIMEOUT;
-		}
-		int checkInterval=this.copyIdxCheckInterval;
-		if(checkInterval<=0){
-			checkInterval=TesseractConstant.DEFAULT_COOPYINDEX_CHECKINTERVAL;
-		}
-		List<String> result=null;
-		
-		long curr=System.currentTimeMillis();
-		
-		while((System.currentTimeMillis()-curr) < copyTaskTimeOut){
-			if(this.copyIndexTaskResult.get(shardName)!=null){
-				result=this.copyIndexTaskResult.get(shardName);
-				break;
-			}
-			Thread.sleep(checkInterval);
-		}
-		return result;
 	}
 
 	/**
@@ -763,13 +706,13 @@ public class IndexServiceImpl implements IndexService {
 	 * @param lastPiece
 	 *            是否是最后一片数据
 	 * @return Map<String,Object>
-	 * @throws IndexAndSearchException 
-	 * 
+	 * @throws IndexAndSearchException
+	 *             可能抛出的异常
 	 * 
 	 */
 	public Map<String, Object> writeIndex(TesseractResultSet data,
 			IndexAction idxAction, IndexShard idxShard, boolean lastPiece,
-			String idName) throws IndexAndSearchException  {
+			String idName) throws IndexAndSearchException {
 
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
 				"writeIndex", "[data:" + data + "][idxAction:" + idxAction
@@ -789,9 +732,7 @@ public class IndexServiceImpl implements IndexService {
 
 		if (idxShard.isFull() || lastPiece) {
 			// 设置提供服务的目录：
-			String absoluteIdxFilePath = message.getIdxServicePath();
-			String targetFilePath=idxShard.getFilePath();
-			
+			String absoluteIdxFilePath = message.getIdxServicePath();			
 			idxShard.setUpdate(Boolean.TRUE);
 			// 启动数据copy线程拷贝数据到备分节点上
 			
@@ -813,19 +754,36 @@ public class IndexServiceImpl implements IndexService {
 				}
 
 			}
+
 			
-			assignedNodeMap=this.isNodeService.getNodeMapByNodeKey(idxShard.getClusterName(), idxShard.getReplicaNodeKeyList(), true);
-			if(!MapUtils.isEmpty(assignedNodeMap)){
-				List<Node> toNodeList=new ArrayList<Node>();
-				toNodeList.addAll(assignedNodeMap.values());
-				
-				try {
-					ServerFeedbackMessage bMessage=this.isClient.startIndexDataCopy(idxShard.getShardName(),absoluteIdxFilePath, targetFilePath, node, toNodeList);
-					
-				} catch (Exception e) {
-					LOGGER.warn("Exception occured when start to copy index to other nodes",e);
+
+			for (Node currNode : assignedNodeMap.values()) {
+				int retryTimes = 0;
+				// 拷贝到指定的目录
+				String targetFilePath = idxShard.getAbsoluteFilePath(currNode.getIndexBaseDir());
+				ServerFeedbackMessage backMessage = null;
+				while (retryTimes < TesseractConstant.RETRY_TIMES) {
+					backMessage = isClient.copyIndexDataToRemoteNode(
+							absoluteIdxFilePath, targetFilePath, true, currNode);
+					if (backMessage.getResult().equals(FileUtils.SUCC)) {
+						currNode.setNodeState(NodeState.NODE_AVAILABLE);
+						this.isNodeService.saveOrUpdateNodeInfo(currNode);
+						LOGGER.info(String
+								.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+										"writeIndex", "copy index success to "
+												+ currNode));
+						break;
+					} else {
+						LOGGER.info(String
+								.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
+										"writeIndex", "retry copy index to "
+												+ currNode));
+						retryTimes++;
+					}
+
 				}
-			}			
+
+			}
 		}
 
 		Map<String, Object> result = new HashMap<String, Object>();
@@ -927,22 +885,6 @@ public class IndexServiceImpl implements IndexService {
 		return new IndexMetaIsNullException(sb.toString());
 	}
 
-	
-
-	/*
-	 * (non-Javadoc)
-	 * @see com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexService#setCopyIndexTaskResult(java.lang.String, java.util.List)
-	 */
-	public void setCopyIndexTaskResult(String shardName,List<String> succList) {
-		if(this.copyIndexTaskResult == null){
-			this.copyIndexTaskResult=new ConcurrentHashMap<String,List<String>>();
-		}
-		this.copyIndexTaskResult.put(shardName, succList);
-		
-	}
-
-	
-	
 
 
     

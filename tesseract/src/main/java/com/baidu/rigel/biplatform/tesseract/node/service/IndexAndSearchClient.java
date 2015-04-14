@@ -17,6 +17,8 @@ package com.baidu.rigel.biplatform.tesseract.node.service;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -36,28 +38,22 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import com.baidu.rigel.biplatform.ac.util.Md5Util;
-import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
+import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.FileClientHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.IndexClientHandler;
 import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.SearchClientHandler;
-import com.baidu.rigel.biplatform.tesseract.isservice.netty.service.ServerFeedBackClientHandler;
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.netty.message.NettyAction;
-import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.CopyIndexMessage;
-import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.CopyIndexResultMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.SearchRequestMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.SearchResultMessage;
@@ -389,83 +385,6 @@ public class IndexAndSearchClient {
     	return sb.toString();
     }
     
-    public ServerFeedbackMessage startIndexDataCopy(String shardName,String srcFilePath , String targetFilePath, Node fromNode,List<Node> toNodeList) throws Exception{
-		logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-				"startIndexDataCopy", "[srcFilePath:" + srcFilePath
-						+ "][targetFilePath:" + targetFilePath + "][fromNode:" + fromNode + "][toNodeList:"+toNodeList+"]"));
-
-		if(StringUtils.isEmpty(srcFilePath) || StringUtils.isEmpty(targetFilePath) || fromNode == null || CollectionUtils.isEmpty(toNodeList)){
-			logger.warn(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-	                "startIndexDataCopy", "[srcFilePath:" + srcFilePath
-					+ "][targetFilePath:" + targetFilePath + "][fromNode:" + fromNode + "][toNodeList:"+toNodeList+"]"));
-	            throw new IllegalArgumentException();
-		}
-		NettyAction action=NettyAction.NETTY_ACTION_START_COPYINDEX;
-		MessageHeader mh=new MessageHeader(action);
-		CopyIndexMessage cim=new CopyIndexMessage(shardName,mh,srcFilePath,targetFilePath,toNodeList);
-		ServerFeedBackClientHandler handler=new ServerFeedBackClientHandler();
-		AbstractMessage bMessage=null;
-		ServerFeedbackMessage backMessage = null;
-		try {
-			bMessage = this.executeAction(action, cim, handler, fromNode);			
-		} catch (Exception e) {
-			logger.error("startIndexDataCopy Exception", e.getCause());
-			throw e;
-		}
-		
-		if (bMessage instanceof ServerFeedbackMessage) {
-            backMessage = (ServerFeedbackMessage) bMessage;
-        } else {
-            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                IndexAndSearchExceptionType.INDEX_EXCEPTION),
-                ((ServerExceptionMessage) bMessage).getCause(),
-                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
-        }
-		
-		return backMessage;
-    }
-    
-    
-    public ServerFeedbackMessage returnIndexDataCopyInfo(String shardName,List<String> succList,Node node) throws Exception{
-		logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
-				"returnIndexDataCopyInfo", "[shardName:" + shardName
-						+ "][succList:" + succList + "][node:" + node + "]"));
-
-		if(StringUtils.isEmpty(shardName) || node == null){
-			logger.warn(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-					"returnIndexDataCopyInfo", "[shardName:" + shardName
-							+ "][succList:" + succList + "][node:" + node + "]"));
-	            throw new IllegalArgumentException();
-		}
-		NettyAction action=NettyAction.NETTY_ACTION_RETURN_COPYINDEX_FEEDBACK;
-		MessageHeader mh=new MessageHeader(action);
-		CopyIndexResultMessage cirm=new CopyIndexResultMessage(shardName,mh,succList);
-		ServerFeedBackClientHandler handler=new ServerFeedBackClientHandler();
-		AbstractMessage bMessage=null;
-		ServerFeedbackMessage backMessage = null;
-		try {
-			bMessage = this.executeAction(action, cirm, handler, node);			
-		} catch (Exception e) {
-			logger.error("returnIndexDataCopyInfo Exception", e.getCause());
-			throw e;
-		}
-		
-		if (bMessage instanceof ServerFeedbackMessage) {
-            backMessage = (ServerFeedbackMessage) bMessage;
-        } else {
-            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
-                IndexAndSearchExceptionType.INDEX_EXCEPTION),
-                ((ServerExceptionMessage) bMessage).getCause(),
-                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
-        }
-		
-		return backMessage;
-    }
-    
-    
-    
     
     /**
      * copyIndexDataToRemoteNode 拷贝索引数据到其它节点
@@ -477,7 +396,7 @@ public class IndexAndSearchClient {
      * @throws IndexAndSearchException
      */
     public ServerFeedbackMessage copyIndexDataToRemoteNode(String filePath, String targetFilePath, boolean replace,
-        Node node) throws Exception {
+        Node node) throws IndexAndSearchException {
         logger.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
             "copyIndexDataToRemoteNode", "[filePath:" + filePath + "][replace:" + replace
                 + "][Node:" + node + "]"));
@@ -494,9 +413,9 @@ public class IndexAndSearchClient {
         	tmpBaseDirFile.mkdirs();
         }
         // 压缩
-        String compressedFilePath = tmpBaseDir + Md5Util.encode(filePath)+"_"+System.currentTimeMillis() + ".tar.gz";
+        String compressedFilePath = tmpBaseDir +System.currentTimeMillis() + ".tar.gz";
         File compressedFile = new File(compressedFilePath);
-        FileUtils.deleteFile(compressedFile);
+        compressedFile.deleteOnExit();
         
         try {
             compressedFilePath = FileUtils.doCompressFile(filePath,compressedFilePath);
@@ -521,10 +440,6 @@ public class IndexAndSearchClient {
         ByteBuffer rBuffer = ByteBuffer.allocate(TesseractConstant.FILE_BLOCK_SIZE);
         ServerFeedbackMessage backMessage = null;
         boolean isFirst = true;
-        boolean isLast = false;
-        int idx=0;
-        
-        logger.info("STARTING TO SEND FILE :"+ (targetFilePath + File.separator + fin.getName()));
         try {
             while (true) {
                 rBuffer.clear();
@@ -533,7 +448,7 @@ public class IndexAndSearchClient {
                 if (r == -1) {
                     break;
                 }
-                
+                boolean isLast = false;
                 if (rBuffer.position() < rBuffer.capacity()) {
                     isLast = true;
                 }
@@ -541,7 +456,8 @@ public class IndexAndSearchClient {
                 
                 NettyAction action = NettyAction.NETTY_ACTION_COPYFILE;
                 MessageHeader mh = new MessageHeader(action);
-                SendFileMessage sfm = new SendFileMessage(mh, rBuffer.array(), targetFilePath, fin.getName());
+                SendFileMessage sfm = new SendFileMessage(mh, rBuffer.array(), targetFilePath
+                        + File.separator + fin.getName());
                 if (isFirst) {
                     sfm.setFirst(isFirst);
                     isFirst=false;
@@ -550,9 +466,8 @@ public class IndexAndSearchClient {
                 }
                 
                 sfm.setLast(isLast);
-                sfm.setIdx(idx++);
 
-                ServerFeedBackClientHandler handler = new ServerFeedBackClientHandler();
+                FileClientHandler handler = new FileClientHandler();
                 AbstractMessage bMessage = this.executeAction(action, sfm, handler, node);
                 
                 if (bMessage instanceof ServerFeedbackMessage) {
@@ -575,14 +490,18 @@ public class IndexAndSearchClient {
                 
             }
         } catch (Exception e) {
-        	logger.warn("Exception occured",e);
-            throw e;
+            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
+                IndexAndSearchExceptionType.INDEX_EXCEPTION), e.getCause(),
+                IndexAndSearchExceptionType.INDEX_EXCEPTION);
         } finally {
             try {
                 fcin.close();
             } catch (IOException e) {
-            	logger.warn("Exception occured",e);
-                throw e;
+                throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                    IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
+                    IndexAndSearchExceptionType.INDEX_EXCEPTION), e.getCause(),
+                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
             }
         }
         return backMessage;
@@ -654,13 +573,6 @@ public class IndexAndSearchClient {
         Channel channel = null;
         channel = this.getChannelByAddressAndPort(node.getAddress(), node.getPort());
         channel.pipeline().addLast(handler);
-        
-        //写入源节点
-        
-        Node fromNode=((IsNodeService)ApplicationContextHelper.getContext().getBean("isNodeService")).getCurrentNode();
-        if(message!=null){
-        	message.getMessageHeader().setFromNode(fromNode);
-        }        
         
         channel.writeAndFlush(message);
         channel.closeFuture().sync ();
