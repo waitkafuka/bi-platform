@@ -612,7 +612,6 @@ public class FileUtils {
         String decompressedFileName = outFileName;
         
         File inFile = new File(inFileName);
-        inFile.setReadOnly();
         if (StringUtils.isEmpty(decompressedFileName)) {
             // not specified outFileName
             StringBuilder sb = new StringBuilder();
@@ -624,13 +623,6 @@ public class FileUtils {
             decompressedFileName = sb.toString();
         }
         File outFile = new File(decompressedFileName);
-        //清理解压目录
-        if(outFile.exists() && outFile.isDirectory()){
-        	LOGGER.info("############################################################################");
-        	LOGGER.info("#############OUTFile:"+outFile.getAbsolutePath()+"###########################");
-        	FileUtils.deleteFile(outFile);
-        }
-        
         if (!outFile.exists()) {
             outFile.mkdirs();
         }

@@ -1018,8 +1018,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
 	            "[idxMetaList.size:"+idxMetaList+"][clusterName:"+clusterName+"]"));
 		if(!CollectionUtils.isEmpty(idxMetaList) && !StringUtils.isEmpty(clusterName)){
 			for(IndexMeta idxMeta:idxMetaList){
-				
-				IndexMeta remoteMeta=this.getIndexMetaByCubeId(idxMeta.getCubeIdSet().toArray(new String[0])[0], idxMeta.getStoreKey());				
+				IndexMeta remoteMeta=this.getIndexMetaByCubeId(idxMeta.getCubeIdSet().toArray(new String[0])[0], IndexMeta.getDataStoreName());				
 				if(remoteMeta==null){
 					//1. 集群中不存在，则直接恢复
 					this.saveOrUpdateIndexMeta(idxMeta);

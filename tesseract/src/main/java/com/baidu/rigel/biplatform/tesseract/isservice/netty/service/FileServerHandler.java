@@ -62,7 +62,7 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
      * 当前handler支持的操作NETTY_ACTION_COPYFILE
      */
     private static final NettyAction ACTION_SUPPORT = NettyAction.NETTY_ACTION_COPYFILE;
-    private static final NettyAction ACTION_FEEDBACK = NettyAction.NETTY_ACTION_SERVER_FEEDBACK;
+    private static final NettyAction ACTION_FEEDBACK = NettyAction.NETTY_ACTION_COPYFILE_FEEDBACK;
     
     /**
      * 单例
@@ -133,18 +133,14 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
      * 
      * return false; }
      * 
-     * 
-     * @throws IOException 
+     * @throws IndexAndSearchException
      **/
     @Override
     public void messageReceived(ChannelHandlerContext ctx, Object msg)
-        throws IndexAndSearchException, IOException {
+        throws IndexAndSearchException {
         LOGGER.info("get message from client " + msg);
         SendFileMessage sendFileMessage = (SendFileMessage) msg;
-        
-        LOGGER.info("GET "+sendFileMessage.getIdx()+" MSG");
-        
-        MessageHeader messageHeader = new MessageHeader(NettyAction.NETTY_ACTION_SERVER_FEEDBACK);
+        MessageHeader messageHeader = new MessageHeader(NettyAction.NETTY_ACTION_COPYFILE_FEEDBACK);
         
         if (sendFileMessage == null || StringUtils.isEmpty(sendFileMessage.getTargetFilePath())) {
             ServerFeedbackMessage backMessage = new ServerFeedbackMessage(messageHeader,
@@ -152,15 +148,7 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
             ctx.writeAndFlush(backMessage);
         }
         String targetFilePath=sendFileMessage.getTargetFilePath();
-        String fileName=sendFileMessage.getFileName();
-        
-        File targetDir=new File(targetFilePath);
-        if(targetDir.exists() && sendFileMessage.isFirst()){
-        	FileUtils.deleteFile(targetDir);
-        }
-        
-        
-        File fout = new File(targetDir.getParent()+File.separator+"tmp"+File.separator+fileName);
+        File fout = new File(targetFilePath);
         if (fout.exists() && sendFileMessage.isFirst()) {
             fout.delete();
         }else if(!fout.getParentFile().exists()){
@@ -198,24 +186,20 @@ public class FileServerHandler extends AbstractChannelInboundHandler {
             }
             
         }
-        MessageHeader mh=new MessageHeader(NettyAction.NETTY_ACTION_SERVER_FEEDBACK);
-        String result=FileUtils.SUCC;
-        String message="copy success";
-        
-        
         if(sendFileMessage.isLast()){
             try {
-            	String resultFilePath=null;
-            	resultFilePath=FileUtils.doUncompressFile(fout.getAbsolutePath(), targetFilePath);
-            	if(StringUtils.isEmpty(resultFilePath)){
-                	result=FileUtils.FAIL;
-                }
+                FileUtils.doUncompressFile(targetFilePath, null);
             } catch (IOException e) {
-            	LOGGER.warn("Exception occured",e);
-                throw e;
+                throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                    IndexAndSearchException.INDEXEXCEPTION_MESSAGE,
+                    IndexAndSearchExceptionType.INDEX_EXCEPTION), e.getCause(),
+                    IndexAndSearchExceptionType.INDEX_EXCEPTION);
             }
         }
         
+        MessageHeader mh=new MessageHeader(NettyAction.NETTY_ACTION_COPYFILE_FEEDBACK);
+        String result=FileUtils.SUCC;
+        String message="copy success";
         ServerFeedbackMessage backMessage=new ServerFeedbackMessage(mh,result,message);
         
         ctx.writeAndFlush(backMessage);
