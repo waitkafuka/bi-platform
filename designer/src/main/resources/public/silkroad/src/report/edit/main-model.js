@@ -79,7 +79,8 @@ define(['url'], function (Url) {
                     map = {
                         'SUM': 'S',
                         'COUNT': 'C',
-                        'AVERAGE': 'A'
+                        'AVERAGE': 'A',
+                        'DISTINCT_COUNT': 'D'
                     };
                     that.set({
                         indList: {
