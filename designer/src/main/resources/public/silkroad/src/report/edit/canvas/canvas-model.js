@@ -435,10 +435,10 @@ define(
                 this.$reportVm.find('[data-comp-id=' + paramObj.compId + ']').css({
                     width: paramObj.width,
                     height: paramObj.height
-                }).find('.vu-table').height(parseInt(paramObj.height) - 77);
+                }).find('.vu-table').height(parseInt(paramObj.height) - 89);
                 //}).find('.vu-table').height(parseInt(paramObj.height) - 130);
-                // 上下小零件的总高度94（=40+19+35） + 30的padding-top
-                // 面包屑18 + 下载文案24 + 35（需要查一下）
+                // 上下小零件的总高度94（=40+19+35） + 39的padding-top
+                // 面包屑18 + 下载文案24 + 39 + 3（添加下载文案下边距3像素-测量得到）（需要查一下）
                 this.saveJsonVm();
             },
 
