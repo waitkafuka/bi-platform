@@ -708,7 +708,6 @@ define([
                     function () {
                         var $item = $target.parent();
                         var oLapElementId = $item.attr('data-id');
-
                         $target.parent().remove();
                         that.afterDeleteCompAxis({
                             oLapElementId: oLapElementId,
