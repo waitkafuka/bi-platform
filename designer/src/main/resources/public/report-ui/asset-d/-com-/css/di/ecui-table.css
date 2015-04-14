@@ -366,10 +366,10 @@
     /*background-color: #F6F6F5;*/
 }
 
-.ui-table-locked-head th {
-    display: block;
-    overflow: hidden;
-}
+/*.ui-table-locked-head th {*/
+    /*display: block;*/
+    /*overflow: hidden;*/
+/*}*/
 .ui-table-locked-head .ui-table-head-font {
     display: block;
 }

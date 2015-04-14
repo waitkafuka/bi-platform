@@ -161,6 +161,7 @@ $namespace('di.config');
     URL_SET.FORM_ASYNC_DATA = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
     URL_SET.FORM_DATA = '/reports/#{reportId}/init_params';
     URL_SET.FORM_UPDATE_CONTEXT = '/reports/#{reportId}/runtime/context';
+    URL_SET.FORM_CASCADE_GETLEVEL = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
 
     // PIVOIT表（透视表）
 //    URL_SET.OLAP_TABLE_DATA = '/reportTemplate/table/transform.action';

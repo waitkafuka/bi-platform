@@ -84,7 +84,7 @@ _eInput - 多选项的INPUT对象
                     this._sTextAll = options.textAll;
                 }
                 if (options.textNone) {
-                    this._sTextNone = options.textNone;
+                    this._sTextNone = '请至少选择一项' || options.textNone;
                 }
                 if (options.maxSelected) {
                     this._nMaxSelected = options.maxSelected;
@@ -347,7 +347,7 @@ _eInput - 多选项的INPUT对象
                 return false;
             }
         }
-        // /* TODO:1把此行的单行注释去掉，把else里面的内容更换
+        /* TODO:1把此行的单行注释去掉，把else里面的内容更换
         this.$getSection('Options').hide();
         triggerEvent(this, 'change');
         /*/
@@ -358,7 +358,8 @@ _eInput - 多选项的INPUT对象
 
         }
         else {
-            alert('请至少选择一项');
+            // alert('请至少选择一项');
+            // control.$getSection('Text').setContent('请至少选择一项');
         }
         //*/
         event.exit();
@@ -485,7 +486,7 @@ _eInput - 多选项的INPUT对象
                 res.push(selectItems[i]._eInput.value);
             }
         }
-        ///* TODO:1把下面这一大段注释掉便可
+        /* TODO:1把下面这一大段注释掉便可
         // 如果有全选按钮，且一个都没选中，那么传的值为所有的值
         if (this._bSelectAllBtn && res.length === 0) {
             items = this.getItems();

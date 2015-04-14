@@ -74,7 +74,8 @@ $namespace('di.shared.model');
         {
             DATA: URL.fn('FORM_DATA'),
             ASYNC_DATA: URL.fn('FORM_ASYNC_DATA'),
-            UPDATE_CONTEXT: URL.fn('FORM_UPDATE_CONTEXT')
+            UPDATE_CONTEXT: URL.fn('FORM_UPDATE_CONTEXT'),
+            CASCADE_GETLEVEL: URL.fn('FORM_CASCADE_GETLEVEL')
         }
     );    
 
@@ -86,7 +87,8 @@ $namespace('di.shared.model');
         {
             DATA: 'DI_FORM_MODEL_DATA_' + getUID(),
             ASYNC_DATA: 'DI_FORM_MODEL_ASYNC_DATA_' + getUID(),
-            UPDATE_CONTEXT: 'DI_FORM_MODEL_UPDATE_CONTEXT_' + getUID()
+            UPDATE_CONTEXT: 'DI_FORM_MODEL_UPDATE_CONTEXT_' + getUID(),
+            CASCADE_GETLEVEL: 'DI_FORM_MODEL_CASCADE_GETLEVEL_' + getUID()
         }
     );
 
@@ -122,6 +124,9 @@ $namespace('di.shared.model');
             },
             UPDATE_CONTEXT: function (options) {
                 return this._fCommonParamGetter(options.args.param);
+            },
+            CASCADE_GETLEVEL: function (options) {
+                return this._fCommonParamGetter(options.args.param);
             }
         }
     );
@@ -140,6 +145,9 @@ $namespace('di.shared.model');
                 return (data || {}).params || {};
             },
             UPDATE_CONTEXT: function (data, ejsonObj, options) {
+                return (data || {}).params || {};
+            },
+            CASCADE_GETLEVEL: function (data, ejsonObj, options) {
                 return (data || {}).params || {};
             }
         }

@@ -12,8 +12,8 @@ define([
         'report/component-box/components/select-config',
         'report/component-box/components/text-config',
         'report/component-box/components/h-button-config',
-        'report/component-box/components/ecui-input-tree-config'
-        //'report/component-box/components/cascade-select-config'
+        'report/component-box/components/ecui-input-tree-config',
+        'report/component-box/components/cascade-select-config'
     ],
     function (
         tableConfig,
@@ -24,8 +24,8 @@ define([
         selectConfig,
         textConfig,
         hbtnConfig,
-        ecuiInputTreeConfig
-        //cascadeSelectConfig
+        ecuiInputTreeConfig,
+        cascadeSelectConfig
     ) {
         var rootId = 'snpt';
 
@@ -79,8 +79,8 @@ define([
                             liteolapConfig,
                             textConfig,
                             hbtnConfig,
-                            ecuiInputTreeConfig
-                            //cascadeSelectConfig
+                            ecuiInputTreeConfig,
+                            cascadeSelectConfig
                         ]
                     }
                 ],

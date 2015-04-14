@@ -14,13 +14,14 @@
 <div class="foot ta-c j-foot">&copy; 版权信息</div>
 <script type="text/javascript" src="src/common/ZeroClipboard.js"></script>
 <script type="text/javascript" src="dep/require-2.1.11.js"></script>
+<script type="text/javascript" src="dep/jquery-1.11.1.min.js"></script>
 <script src="/silkroad/asset/di/-di-product-debug.js"></script>
 <script type="text/javascript">
     require.config({
         baseUrl: 'src/',  //本地模拟为src，线上版问asset
         paths: {
             'underscore': '../dep/underscore-1.6.0.min',
-            'jquery': '../dep/jquery-1.11.1.min',
+//            'jquery': '../dep/jquery-1.11.1.min',
             'backbone': '../dep/backbone-1.1.2.min',
             'template': '../dep/template-3.0.0.min',
             'jqueryui': '../dep/jquery-ui.custom-1.10.4',
@@ -36,25 +37,25 @@
                     'jqueryui'
                 ]
             },
-            'jqueryui': {
-                'deps': [
-                    'jquery'
-                ]
-            },
-            'jquerydi': {
-                'deps': [
-                    'jquery'
-                ]
-            },
-            'spectrum':{
-                'deps': [
-                    'jquery'
-                ]
-            },
+//            'jqueryui': {
+//                'deps': [
+//                    'jquery'
+//                ]
+//            },
+//            'jquerydi': {
+//                'deps': [
+//                    'jquery'
+//                ]
+//            },
+//            'spectrum':{
+//                'deps': [
+//                    'jquery'
+//                ]
+//            },
             'backbone': {
                 deps: [
                     'underscore',
-                    'jquery',
+//                    'jquery',
                     'jquerydi',
                     'template'
                 ]
