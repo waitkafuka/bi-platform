@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -367,6 +368,14 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         QueryAction.MeasureOrderDesc orderDesc = genOrderDesc (targetLogicModel, context, action, cube);
         logger.info ("[INFO] -------- order desc = " + orderDesc);
         action.setMeasureOrderDesc(orderDesc);
+        // remove dumplated conditions
+        Iterator<Item> it = action.getSlices ().keySet ().iterator ();
+        while (it.hasNext ()) {
+            Item item = it.next ();
+            if (action.getColumns ().containsKey (item)) {
+                it.remove ();
+            }
+        }
         return action;
     }
 
