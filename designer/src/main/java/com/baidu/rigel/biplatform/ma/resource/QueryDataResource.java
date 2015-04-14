@@ -865,8 +865,8 @@ public class QueryDataResource extends BaseResource {
         }
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
+        Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
         try {
-            Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
             table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
         } catch (PivotTableParseException e) {
             logger.info(e.getMessage(), e);
@@ -901,7 +901,8 @@ public class QueryDataResource extends BaseResource {
                 logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
             }
             if (logicModel.getRows ().length >= 2) {
-                Map<String, String> root =  genRootDimCaption(table);
+                Map<String, String> root =  genRootDimCaption(table, logicModel, 
+                        areaContext.getParams(), cube);
                     areaContext.setCurBreadCrumPath(root);
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
@@ -1053,15 +1054,23 @@ public class QueryDataResource extends BaseResource {
     /**
      * 
      * @param table
+     * @param logicModel 
+     * @param params 
      * @return Map<String, String>
      * 
      */
-    private Map<String, String> genRootDimCaption(PivotTable table) {
-        RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
-        String uniqueName = rowHeadField.getUniqueName();
+    private Map<String, String> genRootDimCaption(PivotTable table, LogicModel logicModel, Map<String, Object> params, Cube cube) {
+        Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
-        String realUniqueName = uniqueName.replace("}", "").replace("{", "");
-        root.put("uniqName", realUniqueName);
+        if (params.containsKey (item.getOlapElementId ())) {
+            root.put("uniqName", params.get (item.getOlapElementId ()).toString ());
+        } else {
+            String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
+            root.put ("uniqName", uniqueName);
+        }
+        RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
+//        String uniqueName = rowHeadField.getUniqueName();
+//        String realUniqueName = uniqueName.replace("}", "").replace("{", "");
         root.put("showName", rowHeadField.getV());
         return root;
     }
@@ -1180,21 +1189,41 @@ public class QueryDataResource extends BaseResource {
         if (targetLogicModel == null) {
             targetLogicModel = new LogicModel();
         }
-        /**
-         * 找到下载的维度节点
-         */
-        String[] uniqNames = com.baidu.rigel.biplatform.ac.util.
-                DataModelUtils.parseNodeUniqueNameToNodeValueArray(uniqueName);
-        if (uniqNames == null || uniqNames.length == 0) {
-            String msg = String.format("Fail in drill down. UniqueName param is empty.");
-            logger.error(msg);
-            return ResourceUtils.getErrorResult(msg, 1);
-        }
+        
         QueryAction action = null; //(QueryAction) runTimeModel.getContext().get(uniqueName);
-        String drillTargetUniqueName = uniqNames[uniqNames.length - 1];
-        logger.info("[INFO] drillTargetUniqueName : {}", drillTargetUniqueName);
-        boolean isRoot = drillTargetUniqueName.toLowerCase().contains("all");
-        if (action == null) {
+        boolean isRoot = false;
+        String drillTargetUniqueName = null;
+        if (uniqueName.contains (",")) {
+            isRoot = true;
+            String[] uniqueNameArray = uniqueName.split (",");
+            String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueNameArray[0]);
+            Map<String, Item> store = runTimeModel.getUniversalItemStore().get(logicModelAreaId);
+            if (CollectionUtils.isEmpty(store)) {
+                String msg = "The item map of area (" + logicModelAreaId + ") is Empty!";
+                logger.error(msg);
+                throw new RuntimeException(msg);
+            }
+            Item row = store.get(dimName);
+            Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, Maps.newHashMap ());
+            queryParams.put(row.getOlapElementId(), uniqueNameArray);
+            
+            // TODO 仔细思考一下逻辑
+            reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
+            action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
+        } else {
+            /**
+             * 找到下载的维度节点
+             */
+            String[] uniqNames = com.baidu.rigel.biplatform.ac.util.
+                    DataModelUtils.parseNodeUniqueNameToNodeValueArray(uniqueName);
+            if (uniqNames == null || uniqNames.length == 0) {
+                String msg = String.format("Fail in drill down. UniqueName param is empty.");
+                logger.error(msg);
+                return ResourceUtils.getErrorResult(msg, 1);
+            }
+            drillTargetUniqueName = uniqNames[uniqNames.length - 1];
+            logger.info("[INFO] drillTargetUniqueName : {}", drillTargetUniqueName);
+            isRoot = drillTargetUniqueName.toLowerCase().contains("all");
             Map<String, String[]> oriQueryParams = Maps.newHashMap();
             
             String dimName = MetaNameUtil.getDimNameFromUniqueName(drillTargetUniqueName);
@@ -1208,28 +1237,29 @@ public class QueryDataResource extends BaseResource {
             if (row == null) {
                 throw new IllegalStateException("未找到下钻节点 -" + dimName);
             }
-            oriQueryParams.putAll(request.getParameterMap());
             String[] drillName = new String[]{drillTargetUniqueName};
-            oriQueryParams.put(row.getOlapElementId(), drillName);
+            oriQueryParams.putAll(request.getParameterMap());
             /**
              * update context
              */
             Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
+            queryParams.put(row.getOlapElementId(), drillName);
+            
             // TODO 仔细思考一下逻辑
             reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
-            runTimeModel.getContext().put(uniqueName, action);
-            runTimeModel.setLinkedQueryAction (action);
-            
             /**
              * 把下钻的值存下来
              * TODO 临时放在这里，需要重新考虑
              */
             if (row != null && queryParams.containsKey(row.getOlapElementId())) {
                 action.getDrillDimValues().put(row,
-                    queryParams.get(row.getOlapElementId()));
+                        queryParams.get(row.getOlapElementId()));
             }
         }
+//        runTimeModel.getContext().put(uniqueName, action);
+        runTimeModel.setLinkedQueryAction (action);
+            
         ResultSet result;
         try {
             result = reportModelQueryService.queryDatas(model, action, true, true, securityKey);
@@ -1260,7 +1290,8 @@ public class QueryDataResource extends BaseResource {
              * TODO 考虑一下这样的逻辑是否应该放到resource中
              */
             List<Map<String, String>> mainDims = Lists.newArrayList();
-            do {
+            while (drillTargetUniqueName != null 
+                    && !drillTargetUniqueName.toLowerCase().contains("all")) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName);
@@ -1270,12 +1301,11 @@ public class QueryDataResource extends BaseResource {
                 dims3.put("showName", showName);
                 mainDims.add(dims3);
                 drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
-            } while (drillTargetUniqueName != null 
-                && !drillTargetUniqueName.toLowerCase().contains("all"));
-            if (!isRoot) {
+            } 
+//            if (!isRoot) {
                 Map<String, String> root = areaContext.getCurBreadCrumPath();
                 mainDims.add(root);
-            }
+//            }
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);
