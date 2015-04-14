@@ -85,6 +85,11 @@ $namespace('di.shared.ui');
             if (o.$di('getDef').clzKey === 'RANGE_CALENDAR'){
                 o.attach('calChangeDate', this.$handleChange, this);
             }
+            // 级联下拉框
+            if (o.$di('getDef').clzKey === 'CASCADE_SELECT'){
+                o.attach('cascadeGetNextLevel', this.$cascadeGetNextLevel, this);
+                o.attach('cascadeSelectChange', this.$handleChange, this);
+            }
         }
 
         // 创建“确认”控件
@@ -121,7 +126,12 @@ $namespace('di.shared.ui');
             ['sync.result.UPDATE_CONTEXT', this.$renderUpdateContext, this],
             ['sync.result.UPDATE_CONTEXT', this.$handleDataLoaded, this],
             ['sync.error.UPDATE_CONTEXT', this.$handleUpdateContextError, this],
-            ['sync.complete.UPDATE_CONTEXT', this.$syncEnable, this, 'UPDATE_CONTEXT']
+            ['sync.complete.UPDATE_CONTEXT', this.$syncEnable, this, 'UPDATE_CONTEXT'],
+
+            ['sync.preprocess.CASCADE_GETLEVEL', this.$syncDisable, this, 'CASCADE_GETLEVEL'],
+            ['sync.result.CASCADE_GETLEVEL', this.$cascadeGetNextLevelSuccess, this],
+            ['sync.error.CASCADE_GETLEVEL', this.$handleDataError, this],
+            ['sync.complete.CASCADE_GETLEVEL', this.$syncEnable, this, 'CASCADE_GETLEVEL']
         );
 
         // 绑定控件事件
@@ -233,12 +243,14 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_FORM_CLASS.$renderMain = function(data, ejsonObj, options) {
-
         var setDataOpt = { diEvent: this.$diEvent(options) };
         var inputs = this._aInput;
+        var hasCascadeSelect = false;
         // 设置数据并渲染
-        for (var i = 0, input; i < inputs.length; i++ ) {
+        for (var i = 0, input, clzKey; i < inputs.length; i++ ) {
             input = inputs[i];
+            clzKey = input.$di('getDef').clzKey;
+            (clzKey === 'CASCADE_SELECT') && (hasCascadeSelect = true);
             var curData = buildData(ejsonObj.data, input);
             input.$di(
                 'setData',
@@ -246,12 +258,14 @@ $namespace('di.shared.ui');
                 setDataOpt
             );
         }
-        this.$sync(
-            this.getModel(),
-            'UPDATE_CONTEXT',
-            buildContextParam(this)
-        );
-
+        if (!hasCascadeSelect) {
+            // 如果有级联下拉框，就在级联下拉框框中触发context请求
+            this.$sync(
+                this.getModel(),
+                'UPDATE_CONTEXT',
+                buildContextParam(this)
+            );
+        }
     };
 
     /**
@@ -339,6 +353,23 @@ $namespace('di.shared.ui');
         if (this._oOptions.submitMode == 'IMMEDIATE') {
             this.$submit();
         }
+    };
+
+    DI_FORM_CLASS.$cascadeGetNextLevel = function(option) {
+        this.$sync(
+            this.getModel(),
+            'CASCADE_GETLEVEL',
+            option.param,
+            null,
+            {
+                callback: option.callback,
+                input: option.input
+            }
+        );
+    };
+
+    DI_FORM_CLASS.$cascadeGetNextLevelSuccess = function(status, ejsonObj, options) {
+        options.args.callback.call(options.args.input, ejsonObj.data);
     };
 
     /**
@@ -490,6 +521,10 @@ $namespace('di.shared.ui');
                 dataValue.start = dataValue.start.replace(new RegExp("/","gm"),'-');
                 dataValue.end = dataValue.end.replace(new RegExp("/","gm"),'-');
                 options[dateKey] = JSON.stringify(dataValue);
+            }
+            else if (clzKey === 'CASCADE_SELECT') {
+                name = input.$di('getDef').name;
+                options[input.$di('getDef').dimId] = that.$di('getValue')[name];
             }
             else {
                 if (clzKey !== 'H_BUTTON') {

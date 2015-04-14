@@ -31,6 +31,40 @@ define(function () {
         'map': false
     };
     /**
+     * 只能拖拽一个维度的组件类型
+     *
+     * @const
+     * @type {string}
+     */
+    var DRAG_SINGLE_DIM = [
+        'SELECT',
+        'SINGLE_DROP_DOWN_TREE'
+    ];
+    /**
+     * form关联的vui
+     *
+     * @const
+     * @type {string}
+     */
+    var FORM_VUI_REF = [
+        'X_CALENDAR',
+        'RANGE_CALENDAR',
+        'ECUI_SELECT',
+        'ECUI_MULTI_SELECT',
+        'ECUI_INPUT_TREE',
+        'CASCADE_SELECT'
+    ];
+
+    /**
+     * 只能拖拽一个维度组
+     *
+     * @const
+     * @type {string}
+     */
+    var DRAG_SINGLE_DIMGROUP = [
+        'CASCADE_SELECT'
+    ];
+    /**
      * 单个图类型
      * 只能是单种图，不能是组合
      *
@@ -61,8 +95,7 @@ define(function () {
         EUUI_INPUT_TREE: '-vu-form-ecui-input-tree',
         CHART: '-vu-chart',
         TABLE: '-vu-table',
-        H_BUTTON: '-vu-confirm',
-        CASCADE_SELECT: '-vu-cascade-select'
+        H_BUTTON: '-vu-confirm'
     };
 
     return {
@@ -70,6 +103,9 @@ define(function () {
         CHART_TYPES: CHART_TYPES,
         COMPONENT_ID_SUFFIX: COMPONENT_ID_SUFFIX,
         SINGLE_CHART: SINGLE_CHART,
-        COMBINATION_CHART: COMBINATION_CHART
+        COMBINATION_CHART: COMBINATION_CHART,
+        DRAG_SINGLE_DIM: DRAG_SINGLE_DIM,
+        DRAG_SINGLE_DIMGROUP: DRAG_SINGLE_DIMGROUP,
+        FORM_VUI_REF: FORM_VUI_REF
     };
 });

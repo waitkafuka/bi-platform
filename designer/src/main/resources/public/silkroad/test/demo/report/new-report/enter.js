@@ -59,7 +59,8 @@ define(['backbone', 'dialog'], function (Backbone, dialog) {
         require(['report/component-combination/enter', vmJsonPath], function(component, VmJson) {
             // var vmJsomObject = VmJson.handsonTable;
             //var vmJsomObject = VmJson.dateChart;
-             var vmJsomObject = VmJson.treeChart;
+//             var vmJsomObject = VmJson.treeChart;
+            var vmJsomObject = VmJson.table;
             //var vmJsomObject = VmJson.twoTable;
             //var vmJsomObject = VmJson.liteolapTableChart;
             if (cmmp) {
