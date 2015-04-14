@@ -367,7 +367,7 @@ public class QueryContextBuilder {
                 }
             }
             
-        }
+        } 
         if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
             Map<String, String> newParams = new HashMap<>(params);
             newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
