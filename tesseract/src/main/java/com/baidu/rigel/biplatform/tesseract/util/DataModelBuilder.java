@@ -106,18 +106,21 @@ public class DataModelBuilder {
          * get the order of row head
          */
         List<List<String>> rowNodeName = new ArrayList<List<String>>();
-        List<MemberTreePropResult> rowHeadNames = getHeadNameByOrder(queryContext.getRowMemberTrees(), 
+        List<MemberNodeTree> rowMemberTrees = queryContext.getRowMemberTrees();
+        List<MemberTreePropResult> rowHeadNames = getHeadNameByOrder(rowMemberTrees, 
             rowNodeName, isContainsCallbackMeasure);
 
         /**
          * get the order of col head
          */
         List<List<String>> columnNodeName = new ArrayList<List<String>>();
-        List<MemberTreePropResult> colHeadNames = getHeadNameByOrder(queryContext.getColumnMemberTrees(), 
+        List<MemberNodeTree> columnMemberTrees = queryContext.getColumnMemberTrees();
+        List<MemberTreePropResult> colHeadNames = getHeadNameByOrder(columnMemberTrees, 
             columnNodeName, false);
         // 构造交叉后的行列取数的KEY
         List<String> rowAxisKeys = generateAxisKeys(rowNodeName, null);
-        List<String> columnAxisKeys = generateAxisKeys(columnNodeName, queryContext.getQueryMeasures());
+        List<MiniCubeMeasure> queryMeasures = queryContext.getQueryMeasures();
+        List<String> columnAxisKeys = generateAxisKeys(columnNodeName, queryMeasures);
 
         if(this.tesseractResultSet != null){
             Map<String, Map<String, BigDecimal>> parseData = null;
@@ -153,9 +156,9 @@ public class DataModelBuilder {
         }
 
         dataModel.setColumnBaseData(columnBaseDatas);
-        dataModel.setColumnHeadFields(buildAxisHeadFields(queryContext.getColumnMemberTrees(),
-                queryContext.getQueryMeasures()));
-        dataModel.setRowHeadFields(buildAxisHeadFields(queryContext.getRowMemberTrees(), null));
+        dataModel.setColumnHeadFields(buildAxisHeadFields(columnMemberTrees,
+                queryMeasures));
+        dataModel.setRowHeadFields(buildAxisHeadFields(rowMemberTrees, null));
 
         return dataModel;
     }

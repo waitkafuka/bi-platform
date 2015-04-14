@@ -307,10 +307,16 @@ public final class QueryUtils {
                         if (drillValue != null && tmpValue.equals(drillValue)) {
                             data.setExpand(true);
                         } else if ((item.getPositionType() == PositionType.X 
-                            || item.getPositionType() == PositionType.S)
+                                || item.getPositionType() == PositionType.S)
                                 && queryAction.isChartQuery()) {
-                            data.setExpand(true);
-                            data.setShow(false);
+                            // 修正图形查询方式
+                            if (MetaNameUtil.isAllMemberUniqueName (data.getUniqueName ())) {
+                                data.setExpand(true);
+                                data.setShow(false);
+                            } else {
+                                data.setExpand (false);
+                                data.setShow (true);
+                            }
                         }
                         // 修正展开方式
                         if (item.getParams().get(Constants.LEVEL) != null) {

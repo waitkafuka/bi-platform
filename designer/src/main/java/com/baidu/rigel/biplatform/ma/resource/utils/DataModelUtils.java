@@ -368,21 +368,22 @@ public final class DataModelUtils {
      */
     private static String[] getDimCaptions(Cube cube, List<HeadField> rowHeadFields) {
         List<String> captions = Lists.newArrayList();
-        for (HeadField headField : rowHeadFields) {
-            if (!CollectionUtils.isEmpty(headField.getNodeList())) {
-                Collections.addAll(captions, getDimCaptions(cube, headField.getNodeList()));
-            }
-            String uniqueName = headField.getNodeUniqueName();
-            // TODO 这里有问题，需要重新考虑
-            if ("合计".equals(headField.getCaption())) {
-                uniqueName = headField.getChildren().get(0).getValue();
-            } else {
-                uniqueName = headField.getValue();
-//                captions.add(headField.getCaption());
-            }
-            String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
-            captions.add(getDimensionCaptionByName(cube, dimName));
+        HeadField headField = rowHeadFields.get (0);
+        //for (HeadField headField : rowHeadFields) {
+        if (!CollectionUtils.isEmpty(headField.getNodeList())) {
+            Collections.addAll(captions, getDimCaptions(cube, headField.getNodeList()));
         }
+        String uniqueName = headField.getNodeUniqueName();
+        // TODO 这里有问题，需要重新考虑
+        if ("合计".equals(headField.getCaption())) {
+            uniqueName = headField.getChildren().get(0).getValue();
+        } else {
+            uniqueName = headField.getValue();
+//                captions.add(headField.getCaption());
+        }
+        String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
+        captions.add(getDimensionCaptionByName(cube, dimName));
+//        }
         return captions.toArray(new String[0]);
     }
 

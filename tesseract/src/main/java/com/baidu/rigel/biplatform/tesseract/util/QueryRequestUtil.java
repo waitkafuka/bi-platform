@@ -416,7 +416,7 @@ public class QueryRequestUtil {
                 for(SearchIndexResultRecord record : transList){
                     SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy(record);
                     vRecord.setField(meta.getFieldIndex(properties), allDimVal.get(properties));
-//                    generateGroupBy(vRecord, groupList);
+//                    generateGroupBy(vRecord, groupList, meta);
                     vRecord.setGroupBy(allDimVal.get(properties));
                     summaryCalcList.add(vRecord);
                 }

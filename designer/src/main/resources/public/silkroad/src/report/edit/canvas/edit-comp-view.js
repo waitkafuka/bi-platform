@@ -773,7 +773,7 @@ define([
             },
 
             /**
-             * 删除完成LiteOlap组件的数据项之后要做的特殊dom处理
+             * 删除完成时间组件的数据项之后要做的特殊dom处理
              *
              * @param {Object} option 配置参数
              * @public
@@ -1387,6 +1387,7 @@ define([
                     // 可做逻辑拆分，将部分代码拆分到model中
                     var deSwitchConfig = compBoxModel.getComponentData('TIME_COMP').deSwitchConfig;
                     var renderTemplateData = deSwitchConfig(compData[0].dataSetOpt.timeTypeOpt);
+                    console.log(renderTemplateData);
                     var html = defaultSelectedTimeSettingTemplate.render({
                         list: renderTemplateData
                     });

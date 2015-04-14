@@ -101,7 +101,7 @@ class StarModelBuilder {
                 continue;
             }
             String dimTableName = dimension.getTableName();
-            if (dimTableName.equals(factTableName)) {
+            if (dimTableName == null || dimTableName.equals(factTableName)) {
                 continue;
             }
             // 同一个维度表中的列，只需要加入维度表中就可以了

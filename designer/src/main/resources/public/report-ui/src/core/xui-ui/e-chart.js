@@ -1040,6 +1040,8 @@
                     y: 50,
                     borderWidth: 0
                 }
+                // 当不为饼图时，都需要设置x轴属性，否则图形都显示不出来 updata by majun
+                this.$setupXAxis(options);
             }
             this.$setupDataRoom(options);
             // 可视数据区DataRoom影响距y2的值 - 晓强
@@ -1049,7 +1051,6 @@
 
             this.$setupToolBox(options);
             this.$setupYAxis(options);
-           // this.$setupXAxis(options);
         }
         else if (this._chartType === 'map') {
             // TODO:需要后端返回最大最小值

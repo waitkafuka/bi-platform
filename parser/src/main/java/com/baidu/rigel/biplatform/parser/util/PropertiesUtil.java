@@ -44,7 +44,7 @@ public class PropertiesUtil {
      * @return
      * @throws UnsupportedEncodingException
      */
-    public static String toString(Properties props, String comment, String encoding)
+    private static String toString(Properties props, String comment, String encoding)
             throws UnsupportedEncodingException {
         ByteArrayOutputStream baos = null;
         try {

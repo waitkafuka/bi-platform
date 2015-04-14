@@ -136,7 +136,7 @@ public class QueryContextBuilder {
             AxisMeta axisMeta = null;
             AxisType axisType = AxisType.COLUMN;
             Map<String, String> requestParams = questionModel.getRequestParams();
-			while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
+            while (axisType != null && (axisMeta = cloneQuestionModel.getAxisMetas().get(axisType)) != null) {
                 if (CollectionUtils.isNotEmpty(axisMeta.getCrossjoinDims())) {
                     int i = 0;
                     for (String dimName : axisMeta.getCrossjoinDims()) {
@@ -367,7 +367,7 @@ public class QueryContextBuilder {
                 }
             }
             
-        }
+        } 
         if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
             Map<String, String> newParams = new HashMap<>(params);
             newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
