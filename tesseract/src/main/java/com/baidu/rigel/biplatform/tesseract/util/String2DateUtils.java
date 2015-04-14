@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.tesseract.util;
 
+import java.io.File;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -41,6 +43,26 @@ public class String2DateUtils {
             
         }
         return result;
+    }
+    
+    /**
+     * 
+     * concatIndexBaseDir
+     * 
+     * @param filePath
+     *            相对路径
+     * @param nodeIndexBaseDir
+     *            节点数据根路径
+     * @return String
+     */
+    public static String concatIndexBaseDir(String filePath, String nodeIndexBaseDir) {
+        StringBuilder sb = new StringBuilder();
+        if (!StringUtils.isEmpty(nodeIndexBaseDir)) {
+            sb.append(nodeIndexBaseDir);
+            sb.append(File.separator);
+        }
+        sb.append(filePath);
+        return sb.toString();
     }
     
 }
