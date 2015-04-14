@@ -17,8 +17,6 @@ package com.baidu.rigel.biplatform.tesseract.netty.message;
 
 import java.io.Serializable;
 
-import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
-
 /**
  * MessageHeader 消息头
  * 
@@ -35,10 +33,6 @@ public class MessageHeader implements Serializable {
      * action
      */
     private NettyAction action;
-    /**
-     * 消息源信息
-     */
-    private Node fromNode;
     /**
      * md5sum
      */
@@ -109,21 +103,5 @@ public class MessageHeader implements Serializable {
     public String toString() {
         return "MessageHeader [action=" + action + ", md5sum=" + md5sum + "]";
     }
-
-	/**
-	 * @return the fromNode
-	 */
-	public Node getFromNode() {
-		return fromNode;
-	}
-
-	/**
-	 * @param fromNode the fromNode to set
-	 */
-	public void setFromNode(Node fromNode) {
-		this.fromNode = fromNode;
-	}
-    
-    
     
 }

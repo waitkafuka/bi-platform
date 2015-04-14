@@ -18,7 +18,6 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.netty.service;
 
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
@@ -33,13 +32,12 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.ServerFeedba
  * @author lijin
  *
  */
-@Sharable
-public class ServerFeedBackClientHandler extends AbstractChannelInboundHandler {
+public class FileClientHandler extends AbstractChannelInboundHandler {
     
     /**
      * 支持的action
      */
-    private static final NettyAction ACTION_SUPPORT = NettyAction.NETTY_ACTION_SERVER_FEEDBACK;
+    private static final NettyAction ACTION_SUPPORT = NettyAction.NETTY_ACTION_COPYFILE_FEEDBACK;
     /**
      * 返回消息的action
      */
@@ -50,7 +48,7 @@ public class ServerFeedBackClientHandler extends AbstractChannelInboundHandler {
     /**
      * Constructor by
      */
-    public ServerFeedBackClientHandler() {
+    public FileClientHandler() {
         super(ACTION_SUPPORT, ACTION_FEEDBACK);
         
     }

@@ -24,7 +24,6 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
-import com.baidu.rigel.biplatform.tesseract.util.String2DateUtils;
 
 /**
  * IndexShard
@@ -41,7 +40,7 @@ public class IndexShard implements Serializable {
     /**
      * 默认复本数
      */
-    private static final int DEFAULT_SHARD_REPLICA_NUM = 2;
+    private static final int DEFAULT_SHARD_REPLICA_NUM = 1;
     
     /**
      * 当前分片数据是否有变动
@@ -220,7 +219,7 @@ public class IndexShard implements Serializable {
     }
     
     public String getAbsoluteFilePath(String nodeIndexBaseDir) {
-        return String2DateUtils.concatIndexBaseDir(this.filePath, nodeIndexBaseDir);
+        return this.concatIndexBaseDir(this.filePath, nodeIndexBaseDir);
     }
     
     
@@ -274,7 +273,7 @@ public class IndexShard implements Serializable {
     
     public String getAbsoluteIdxFilePath(String nodeIndexBaseDir) {
         
-        return String2DateUtils.concatIndexBaseDir(this.idxFilePath, nodeIndexBaseDir);
+        return this.concatIndexBaseDir(this.idxFilePath, nodeIndexBaseDir);
     }
     
     
@@ -371,7 +370,25 @@ public class IndexShard implements Serializable {
         this.idxState = idxState;
     }
     
-   
+    /**
+     * 
+     * concatIndexBaseDir
+     * 
+     * @param filePath
+     *            相对路径
+     * @param node
+     *            节点
+     * @return String
+     */
+    private String concatIndexBaseDir(String filePath, String nodeIndexBaseDir) {
+        StringBuilder sb = new StringBuilder();
+        if (!StringUtils.isEmpty(nodeIndexBaseDir)) {
+            sb.append(nodeIndexBaseDir);
+            sb.append(File.separator);
+        }
+        sb.append(filePath);
+        return sb.toString();
+    }
     
     private String trimIndexBaseDir(String absolutePath, Node node) {
         String result = null;
