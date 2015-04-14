@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
  * @author lijin
  *
  */
-public class String2DateUtils {
+public class StringTools {
     /**
      * 
      * 获取日期字符串类型

@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
-import com.baidu.rigel.biplatform.tesseract.util.String2DateUtils;
+import com.baidu.rigel.biplatform.tesseract.util.StringTools;
 
 /**
  * IndexShard
@@ -220,7 +220,7 @@ public class IndexShard implements Serializable {
     }
     
     public String getAbsoluteFilePath(String nodeIndexBaseDir) {
-        return String2DateUtils.concatIndexBaseDir(this.filePath, nodeIndexBaseDir);
+        return StringTools.concatIndexBaseDir(this.filePath, nodeIndexBaseDir);
     }
     
     
@@ -274,7 +274,7 @@ public class IndexShard implements Serializable {
     
     public String getAbsoluteIdxFilePath(String nodeIndexBaseDir) {
         
-        return String2DateUtils.concatIndexBaseDir(this.idxFilePath, nodeIndexBaseDir);
+        return StringTools.concatIndexBaseDir(this.idxFilePath, nodeIndexBaseDir);
     }
     
     

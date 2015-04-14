@@ -25,7 +25,7 @@ import java.util.Queue;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.exception.NotSupportedDateFormatException;
 import com.baidu.rigel.biplatform.tesseract.util.DateFormatType;
-import com.baidu.rigel.biplatform.tesseract.util.String2DateUtils;
+import com.baidu.rigel.biplatform.tesseract.util.StringTools;
 
 /**
  * 
@@ -142,7 +142,7 @@ public class SearchResultSet implements TesseractResultSet<ResultRecord> {
     private Date convert2Date(Object field) throws NotSupportedDateFormatException, ParseException {
         String dateStr = (String) field;
 
-        DateFormatType dateType = String2DateUtils.dateFormatType(dateStr);
+        DateFormatType dateType = StringTools.dateFormatType(dateStr);
         if (dateType == null) {
             throw new NotSupportedDateFormatException();
         }

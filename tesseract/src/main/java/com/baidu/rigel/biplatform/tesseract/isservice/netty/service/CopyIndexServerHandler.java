@@ -27,7 +27,7 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.ServerFeedba
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
-import com.baidu.rigel.biplatform.tesseract.util.String2DateUtils;
+import com.baidu.rigel.biplatform.tesseract.util.StringTools;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -136,7 +136,7 @@ public class CopyIndexServerHandler extends AbstractChannelInboundHandler {
         List<String> succList=new ArrayList<String>();
         if(!CollectionUtils.isEmpty(toNodeList)){        	
         	for(Node toNode:toNodeList){
-        		String currTargetFilePath=String2DateUtils.concatIndexBaseDir(targetFilePath, toNode.getIndexBaseDir());        		
+        		String currTargetFilePath=StringTools.concatIndexBaseDir(targetFilePath, toNode.getIndexBaseDir());        		
         		completionService.submit(new Callable<ServerFeedbackMessage>(){
 					@Override
 					public ServerFeedbackMessage call() throws Exception {
