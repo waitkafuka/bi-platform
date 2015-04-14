@@ -6980,7 +6980,6 @@ ol {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  margin-right: 10px;
 }
 
 .dk-select, .dk-select-multi {
@@ -6989,7 +6988,9 @@ ol {
   vertical-align: middle;
   line-height: 1.5em;
   width: 200px;
-  cursor: pointer; }
+  cursor: pointer;
+  margin-right: 10px;
+}
 
 .dk-selected {
   width: 100%;
@@ -6999,9 +7000,10 @@ ol {
   background-color: white;
   border: 1px solid #CCCCCC;
   border-radius: 0.4em;
-  padding: 7px 5px;
+  padding: 5px 5px;
   -o-text-overflow: ellipsis;
-  text-overflow: ellipsis; }
+  text-overflow: ellipsis;
+}
   .dk-selected:before, .dk-selected:after {
     content: '';
     display: block;
