@@ -345,8 +345,10 @@ public class QueryContextBuilder {
             }
         }    
         
-        tmp.forEach ((k, v) -> {
-            
+        tmp.keySet ().stream ().map (level -> {
+           List<String> datas = tmp.get (levels);
+           
+           return null;
         });
         
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {

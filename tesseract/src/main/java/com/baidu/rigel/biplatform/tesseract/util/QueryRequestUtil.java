@@ -442,7 +442,7 @@ public class QueryRequestUtil {
                     
                     
                     generateGroupBy(vRecord, groupList0, meta);
-//                    vRecord.setGroupBy(allDimVal.get(properties)); 
+//                    vRecord.setGroupBy(properties.pullupValue); 
                     summaryCalcList.add(vRecord);
                 }
                 transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
@@ -517,17 +517,19 @@ public class QueryRequestUtil {
     
     public static void generateGroupBy(SearchIndexResultRecord record, List<String> groups, Meta meta) throws NoSuchFieldException{
         if(CollectionUtils.isNotEmpty(groups)){
-            String groupBy = "";
             Serializable field = null;
+            List<String> fields = new ArrayList<>();
             for(String name : meta.getFieldNameArray()){
                 if(groups.contains(name)){
                     field = record.getField(meta.getFieldIndex(name));
                     if(field != null) {
-                        groupBy += field.toString() + ",";
+                        fields.add(field.toString());
                     }
                 }
             }
-            record.setGroupBy(groupBy);
+            if(CollectionUtils.isNotEmpty(fields)) {
+                record.setGroupBy(StringUtils.join(fields, ","));
+            }
         }
     }
     
