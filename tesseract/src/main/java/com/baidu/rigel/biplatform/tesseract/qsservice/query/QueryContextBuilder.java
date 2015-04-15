@@ -345,11 +345,20 @@ public class QueryContextBuilder {
             }
         }    
         
-        tmp.keySet ().stream ().map (level -> {
-           List<String> datas = tmp.get (levels);
-           
-           return null;
-        });
+        Map<String, MiniCubeMember> memberRepository = Maps.newConcurrentMap ();
+        for (Level level : tmp.keySet ()) {
+            List<String> datas = tmp.get (level);
+            try {
+                List<MiniCubeMember> rs = metaDataService.lookUp (dataSourceInfo, cube, datas, params);
+                if (rs != null) {
+                    for (MiniCubeMember m : rs) {
+                        memberRepository.put (m.getUniqueName (), m);
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace ();
+            }
+        }
         
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
@@ -358,9 +367,10 @@ public class QueryContextBuilder {
                 callbackParams.add(names[names.length - 1]);
                 continue;
             } else {
-                
-                MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-                
+                MiniCubeMember member = memberRepository.get (queryData.getUniqueName ());
+                if (member == null) {
+                    member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
+                }
                 MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
                 List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
                 // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点,
@@ -456,25 +466,25 @@ public class QueryContextBuilder {
             }
         } else {
             // TODO 后续考虑维度预加载
-            List<MiniCubeMember> children = null;
-            try {
-                children = metaDataService.getChildren(dataSource, cube, member, params);
-            } catch (Exception e) {
-                logger.warn(e.getMessage(), e);
-            }
-            if (CollectionUtils.isNotEmpty(children)) {
-                node.setHasChildren(true);
-            }
-//            Dimension dim = member.getLevel().getDimension();
-//            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
-//            for (int i = 0; i < levelNames.size(); i++) {
-//                if (member.getLevel().getName().equals(levelNames.get(i))) {
-//                    if (i < levelNames.size() - 1) {
-//                        node.setHasChildren(true);
-//                    }
-//                    break;
-//                }
+//            List<MiniCubeMember> children = null;
+//            try {
+//                children = metaDataService.getChildren(dataSource, cube, member, params);
+//            } catch (Exception e) {
+//                logger.warn(e.getMessage(), e);
 //            }
+//            if (CollectionUtils.isNotEmpty(children)) {
+//                node.setHasChildren(true);
+//            }
+            Dimension dim = member.getLevel().getDimension();
+            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
+            for (int i = 0; i < levelNames.size(); i++) {
+                if (member.getLevel().getName().equals(levelNames.get(i))) {
+                    if (i < levelNames.size() - 1) {
+                        node.setHasChildren( member.getQueryNodes ().size () > 1);
+                    }
+                    break;
+                }
+            }
         }
 
     }

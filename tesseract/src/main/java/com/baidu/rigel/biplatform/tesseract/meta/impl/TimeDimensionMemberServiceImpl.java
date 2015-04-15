@@ -895,4 +895,11 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         }
         return members;
     }
+
+    @Override
+    public List<MiniCubeMember> getMemberFromLevelByNames(
+            DataSourceInfo dataSourceInfo, Cube cube, Level level,
+            Map<String, String> params, List<String> uniqueNameList) {
+        return Lists.newArrayList ();
+    }
 }

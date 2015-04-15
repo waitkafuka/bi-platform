@@ -210,4 +210,11 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         return result;
     }
 
+    @Override
+    public List<MiniCubeMember> getMemberFromLevelByNames(
+            DataSourceInfo dataSourceInfo, Cube cube, Level level,
+            Map<String, String> params, List<String> uniqueNameList) {
+        throw new UnsupportedOperationException ();
+    }
+
 }
