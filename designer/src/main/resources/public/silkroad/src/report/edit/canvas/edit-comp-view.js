@@ -797,7 +797,7 @@ define([
                 delete json.dataSetOpt.timeTypeOpt[letter];
                 delete json.dateKey[letter];
                 //json.name = json.dateKey[json.dataSetOpt.timeTypeList[0].value];
-                this.model.canvasModel.saveReport();
+                this.model.canvasModel.saveJsonVm();
             },
             afterDeleteCascadeSelectCompAxis: function (option) {
 
