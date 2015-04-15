@@ -71,7 +71,7 @@ public class UpdateIndexByDatasourceKeyListener implements
             String dataSourceKey = event.getDataSourceKey();
             try {
                 this.indexService.updateIndexByDataSourceKey(dataSourceKey,event.getDataSetNames(), event.getDataSetMap());
-            } catch (IndexAndSearchException e) {
+            } catch (Exception e) {
                 LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
                     "UpdateIndexByDatasourceKeyListener.onApplicationEvent", event), e);
                

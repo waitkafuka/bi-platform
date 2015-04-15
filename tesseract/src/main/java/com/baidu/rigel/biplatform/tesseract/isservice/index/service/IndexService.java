@@ -55,7 +55,15 @@ public interface IndexService {
      * @param dataSourceKey 数据源信息
      * @param factTableNames 事实表信息
      * @param dataSetMap 待修订的事实表及起始ID信息
-     * @throws IndexAndSearchException
+     * 
+     * @throws Exception 
      */
-    void updateIndexByDataSourceKey(String dataSourceKey,String[] factTableNames, Map<String,Map<String,BigDecimal>> dataSetMap) throws IndexAndSearchException;
+    void updateIndexByDataSourceKey(String dataSourceKey,String[] factTableNames, Map<String,Map<String,BigDecimal>> dataSetMap) throws  Exception;
+    
+    /**
+     * 暂存分片拷贝结果信息
+     * @param shardName 分片名
+     * @param succList 成功的nodeKeyList
+     */
+    void setCopyIndexTaskResult(String shardName,List<String> succList) ;
 }

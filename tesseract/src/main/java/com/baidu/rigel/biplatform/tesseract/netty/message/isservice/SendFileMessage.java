@@ -37,6 +37,10 @@ public class SendFileMessage extends AbstractMessage {
      */
     private static final long serialVersionUID = 5485286046850992147L;
     /**
+     * idx
+     */
+    private int idx;
+    /**
      * 当前发送的字节
      */
     private byte[] content;
@@ -44,6 +48,11 @@ public class SendFileMessage extends AbstractMessage {
      * 目标路径
      */
     private String targetFilePath;
+    
+    /**
+     * 文件名
+     */
+    private String fileName;
     
     /**
      * 是否是最后一片
@@ -60,10 +69,11 @@ public class SendFileMessage extends AbstractMessage {
      * 
      * @param messageHeader
      */
-    public SendFileMessage(MessageHeader messageHeader, byte[] content, String targetFilePath) {
+    public SendFileMessage(MessageHeader messageHeader, byte[] content, String targetFilePath , String fileName) {
         super(messageHeader);
         this.content = content;
         this.targetFilePath = targetFilePath;
+        this.fileName=fileName;
         this.messageHeader.setMd5sum(Md5Util.encode(new String(this.content)));
     }
     
@@ -168,5 +178,36 @@ public class SendFileMessage extends AbstractMessage {
     public void setFirst(boolean isFirst) {
         this.isFirst = isFirst;
     }
+
+	/**
+	 * @return the idx
+	 */
+	public int getIdx() {
+		return idx;
+	}
+
+	/**
+	 * @param idx the idx to set
+	 */
+	public void setIdx(int idx) {
+		this.idx = idx;
+	}
+
+	/**
+	 * @return the fileName
+	 */
+	public String getFileName() {
+		return fileName;
+	}
+
+	/**
+	 * @param fileName the fileName to set
+	 */
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	
+	
+    
     
 }

@@ -49,6 +49,11 @@ public class ServerFeedbackMessage extends AbstractMessage {
     private StringBuilder msgAll;
     
     /**
+     * 返回消息的节点key
+     */
+    private String nodeKey;
+    
+    /**
      * Constructor by
      * 
      * @param messageHeader
@@ -116,5 +121,21 @@ public class ServerFeedbackMessage extends AbstractMessage {
     public void setMsg(String msg) {
         this.msg = msg;
     }
+
+	/**
+	 * @return the nodeKey
+	 */
+	public String getNodeKey() {
+		return nodeKey;
+	}
+
+	/**
+	 * @param nodeKey the nodeKey to set
+	 */
+	public void setNodeKey(String nodeKey) {
+		this.nodeKey = nodeKey;
+	}
+    
+    
     
 }
