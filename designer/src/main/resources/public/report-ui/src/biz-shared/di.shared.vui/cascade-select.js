@@ -144,18 +144,18 @@ $namespace('di.shared.vui');
             compId = me._compId,
             dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
 
-        data = data[compId].datasource;
+        data && data[compId] && (data = data[compId].datasource);
+        // 先移除掉触发者以后的所有下拉框
+        for (var i = dif - 1; i >= 0; i --) {
+            var _cur = me._curIndex + (dif - i);
+            var selId = compId + '-' + _cur;
+            $('.dk-select').each(function() {
+                if($(this).attr('id').indexOf(selId) > 0) {
+                    $(this).remove();
+                }
+            });
+        }
         if (data instanceof Array && dif !== 0) {
-            // 先移除掉触发者以后的所有下拉框
-            for (var i = dif - 1; i >= 0; i --) {
-                var _cur = me._curIndex + (dif - i);
-                var selId = compId + '-' + _cur;
-                $('.dk-select').each(function() {
-                    if($(this).attr('id').indexOf(selId) > 0) {
-                        $(this).remove();
-                    }
-                });
-            }
             // 渲染触发者的下一个下拉框
             var selElId = compId + '-' + (++ me._curIndex);
             var html = ['<select id="', selElId, '">'];
@@ -175,7 +175,7 @@ $namespace('di.shared.vui');
                     change: function() {
                         me._curIndex = x;
                         me._selValue = this.value;
-                        if(me._curIndex < me._allSel - 1) {
+                        if (me._curIndex < me._allSel - 1) {
                             me.getNextLevel(this.value);
                         }
                         else {
@@ -196,6 +196,9 @@ $namespace('di.shared.vui');
             else {
                 me.notify('cascadeSelectChange');
             }
+        }
+        else {
+            me.notify('cascadeSelectChange');
         }
     };
 

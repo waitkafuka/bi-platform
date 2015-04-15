@@ -397,6 +397,7 @@
 /* 数据展示居左 */
 .ui-table-head-th-content {
     text-align: left;
+    display: inline;
 }
 .ui-table-expand-background {
     background-color: #F6F6F5;
@@ -473,4 +474,7 @@ tr > td:last-child:after{
 /*}*/
 .ui-table-locked-head .ui-table-head-font {
     display: block;
+}
+.ui-table-locked-head table {
+    width: 100%;
 }
