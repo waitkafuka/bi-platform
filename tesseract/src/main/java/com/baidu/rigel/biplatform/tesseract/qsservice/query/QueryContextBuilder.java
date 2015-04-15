@@ -466,25 +466,25 @@ public class QueryContextBuilder {
             }
         } else {
             // TODO 后续考虑维度预加载
-//            List<MiniCubeMember> children = null;
-//            try {
-//                children = metaDataService.getChildren(dataSource, cube, member, params);
-//            } catch (Exception e) {
-//                logger.warn(e.getMessage(), e);
-//            }
-//            if (CollectionUtils.isNotEmpty(children)) {
-//                node.setHasChildren(true);
-//            }
-            Dimension dim = member.getLevel().getDimension();
-            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
-            for (int i = 0; i < levelNames.size(); i++) {
-                if (member.getLevel().getName().equals(levelNames.get(i))) {
-                    if (i < levelNames.size() - 1) {
-                        node.setHasChildren( member.getQueryNodes ().size () > 1);
-                    }
-                    break;
-                }
+            List<MiniCubeMember> children = null;
+            try {
+                children = metaDataService.getChildren(dataSource, cube, member, params);
+            } catch (Exception e) {
+                logger.warn(e.getMessage(), e);
             }
+            if (CollectionUtils.isNotEmpty(children)) {
+                node.setHasChildren(true);
+            }
+//            Dimension dim = member.getLevel().getDimension();
+//            List<String> levelNames = Lists.newArrayList(dim.getLevels().keySet());
+//            for (int i = 0; i < levelNames.size(); i++) {
+//                if (member.getLevel().getName().equals(levelNames.get(i))) {
+//                    if (i < levelNames.size() - 1) {
+//                        node.setHasChildren( member.isHasChildren ());
+//                    }
+//                    break;
+//                }
+//            }
         }
 
     }

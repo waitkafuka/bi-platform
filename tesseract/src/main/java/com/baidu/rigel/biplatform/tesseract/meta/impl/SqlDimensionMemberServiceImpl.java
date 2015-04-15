@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -174,7 +175,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             long current = System.currentTimeMillis();
             Map<String, MiniCubeMember> members = new TreeMap<String, MiniCubeMember>();
             while (resultSet.next()) {
-            	
+            
                 SearchIndexResultRecord record = resultSet.getCurrentRecord();
                 String value = record.getField(resultSet.getMeta().getFieldIndex(queryLevel.getSource())).toString();
                 if (StringUtils.isBlank(value)) {
@@ -183,7 +184,6 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     // return;
                 }
                 MiniCubeMember member = members.get(value);
-
                 if (member == null) {
                     member = new MiniCubeMember(value);
                     members.put(member.getName(), member);
@@ -317,7 +317,17 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             }
         }
         queryRequest.setWhere(where);
-
+        
+        // 如果当前level 不是最后一层level，则在查询中增加下一层levle所在列 
+        Dimension dim = queryLevel.getDimension ();
+        List<Level> levels = Arrays.asList (dim.getLevels ().values ().toArray (new Level[0]));
+        int index = levels.indexOf (queryLevel);
+        if (index < levels.size () - 1) {
+            Level nextLevel = levels.get (index + 1);
+            if (queryLevel.getDimTable ().equals (nextLevel.getDimTable ())) {
+                queryRequest.getSelect ().getQueryProperties ().add(0, nextLevel.getName ());
+            }
+        }
         return queryRequest;
     }
 
