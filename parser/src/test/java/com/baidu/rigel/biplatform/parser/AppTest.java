@@ -28,8 +28,7 @@ import com.baidu.rigel.biplatform.parser.util.ParserConstant;
  * Unit test for simple App.
  */
 @SuppressWarnings("deprecation")
-public class AppTest 
-{
+public class AppTest {
     
     
     @Test
@@ -106,7 +105,7 @@ public class AppTest
             context.setVariablesResult(varResult);
             
             
-            System.out.println("compute result: " + context.getNode().getResult(context)); ;
+//            System.out.println("compute result: " + context.getNode().getResult(context)); ;
             
         } catch (InvokeFunctionException e) {
             // TODO Auto-generated catch block
