@@ -697,9 +697,9 @@
             difLeft, // 虚线移动的距离
             oldPosLeft, // 表格元素居左的距离
             mainElLeft = dom.getPosition(mainEl).left,
-            maxBoundary = mainElLeft + mainEl.offsetWidth,
+            maxBoundary = mainElLeft + mainEl.offsetWidth - 10,
             minBoundary = mainElLeft;
-        maxBoundary = me._uVScrollbar ? maxBoundary - me._uVScrollbar.$$width : maxBoundary;
+        maxBoundary = me._uVScrollbar.isShow() ? maxBoundary - me._uVScrollbar.$$width : maxBoundary;
         dragBoxEl.innerHTML = ''
             + '<span class="' + type +'-dot-box-drag"></span>'
             + '<span class="' + type + '-dot-box-line" ></span>';
@@ -748,15 +748,21 @@
         }
 
         // 虚线移动事件
-        // TODO:虚线移动的最大位置与最小位置的判断
         function dragBoxMouseMove(ev) {
             var oEv = ev || window.event;
-            if (oEv.clientX > maxBoundary || oEv.clientX < minBoundary) {
-                return;
+            var cliX = oEv.clientX;
+            if (cliX > maxBoundary) {
+                console.log('return---clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
+                cliX = maxBoundary;
             }
-            var lineLeft = oEv.clientX - disX;
+            else if (cliX < minBoundary) {
+                console.log('return---clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
+                cliX = minBoundary;
+            }
+            console.log('clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
+            var lineLeft = cliX - disX;
             setStyle(dragBoxEl, 'left', lineLeft + 'px');
-            difLeft = oEv.clientX - oldPosLeft;
+            difLeft = cliX - oldPosLeft;
         }
 
         // 拖拽接触点松开事件
@@ -768,6 +774,9 @@
             if (dragBoxEl.releaseCapture) {
                 dragBoxEl.releaseCapture(); // 释放捕获
             }
+//            if (difLeft !== 0) {
+//                resetTableWidth();
+//            }
             resetTableWidth();
         }
 
@@ -775,9 +784,9 @@
         function resetTableWidth() {
             // 重设表头锁定部分宽度
             var headTableEl = dom.first(
-                    dom.getElementsByClass(mainEl, 'div', type + '-locked-head')[0]
+                dom.getElementsByClass(mainEl, 'div', type + '-locked-head')[0]
             );
-            setStyle(headTableEl, 'width', (parseInt(headTableEl.style.width) + difLeft) + 'px');
+            setStyle(headTableEl, 'width', (parseInt(headTableEl.offsetWidth) + difLeft) + 'px');
 
             // 重设表格锁定部分宽度
             var tableLayoutEl = dom.first(
@@ -785,10 +794,14 @@
                     dom.getElementsByClass(mainEl, 'div', type + '-locked-layout')[0]
                 )
             );
-            setStyle(tableLayoutEl, 'width', (parseInt(tableLayoutEl.style.width) + difLeft) + 'px');
+            setStyle(tableLayoutEl, 'width', (parseInt(tableLayoutEl.offsetWidth) + difLeft) + 'px');
 
+            var curHeadWidth = (parseInt(curHeadTh.style.width) + difLeft <= 0)
+                ? 1
+                : parseInt(curHeadTh.style.width) + difLeft;
+            curHeadWidth = (curHeadWidth <= 0) ? 1: curHeadWidth;
             // 重设表头中拖拽列宽度
-            setStyle(curHeadTh, 'width', (parseInt(curHeadTh.style.width) + difLeft) + 'px');
+            setStyle(curHeadTh, 'width', curHeadWidth + 'px');
             // 重设表格锁定部分中拖拽列宽度
             var colIndex = dom.getAttribute(curHeadTh, 'data-cell-pos').split('-')[0];
             var rows = dom.children(
@@ -800,12 +813,14 @@
                 for (var cIndex in cols) {
                     var col = cols[cIndex];
                     var cellPos = dom.getAttribute(col, 'data-cell-pos');
-                    var curIndex;
+                    var curIndex = null;
                     if (cellPos) {
                         curIndex = cellPos.split('-')[0];
                     }
+                    var colWidth = parseInt(col.style.width) + difLeft;
+                    colWidth = (colWidth <= 0) ? 1 : colWidth;
                     if (curIndex === colIndex) {
-                        setStyle(col, 'width', (parseInt(col.style.width) + difLeft) + 'px');
+                        setStyle(col, 'width', colWidth + 'px');
                     }
                 }
             }
