@@ -146,6 +146,7 @@ public class IndexServiceImpl implements IndexService {
 	public IndexServiceImpl() {
 		super();
 		this.isClient = IndexAndSearchClient.getNodeClient();
+		this.copyIndexTaskResult=new ConcurrentHashMap<String,List<String>>();
 	}
 
 	/*
