@@ -206,7 +206,7 @@ public interface DimensionMemberService extends BeanFactoryAware {
         Level level = levels.get (names.length - 2);
         boolean hasAllMember = false;
         for (String uniqueName : uniqueNameList) {
-            if (MetaNameUtil.isAllMemberName (uniqueName)) {
+            if (MetaNameUtil.isAllMemberUniqueName (uniqueName)) {
                 hasAllMember = true;
                 break;
             }
@@ -214,6 +214,7 @@ public interface DimensionMemberService extends BeanFactoryAware {
         if (hasAllMember && !level.getType().equals(LevelType.CALL_BACK)) {
             List<MiniCubeMember> rs = Lists.newArrayList ();
             rs.add ((MiniCubeMember) targetDim.getAllMember());
+            return rs;
         }
         return getDimensionMemberServiceByLevelType(level.getType()).getMemberFromLevelByNames(
                 dataSourceInfo,

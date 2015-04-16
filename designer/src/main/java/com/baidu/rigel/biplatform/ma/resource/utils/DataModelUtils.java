@@ -368,6 +368,9 @@ public final class DataModelUtils {
      */
     private static String[] getDimCaptions(Cube cube, List<HeadField> rowHeadFields) {
         List<String> captions = Lists.newArrayList();
+        if (CollectionUtils.isEmpty (rowHeadFields)) {
+            return new String[]{};
+        }
         HeadField headField = rowHeadFields.get (0);
         //for (HeadField headField : rowHeadFields) {
         if (!CollectionUtils.isEmpty(headField.getNodeList())) {
