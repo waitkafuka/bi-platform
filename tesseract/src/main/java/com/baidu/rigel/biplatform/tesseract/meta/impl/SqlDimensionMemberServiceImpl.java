@@ -359,7 +359,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         try {
             // 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
-            result = this.buildMembersFromCellSet (resultSet, queryLevel, parent, dataSourceInfo, cube).get(0);
+            List<MiniCubeMember> memberResultList = this.buildMembersFromCellSet (resultSet, queryLevel, parent, dataSourceInfo, cube);
+            result = CollectionUtils.isEmpty (memberResultList) ? null : memberResultList.get(0);
 //            if(!resultSet.next()){
 //                    log.error("no result return by query:" + queryRequest);
 ////                    throw new MetaException("no result return by query:" + queryRequest);
