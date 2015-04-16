@@ -118,7 +118,6 @@ public class AggregateCompute {
             )
         );
         
-        System.out.println(groupResult);
         LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
         if(CollectionUtils.isNotEmpty(countIndex)) {
             groupResult.values().forEach(record -> {
