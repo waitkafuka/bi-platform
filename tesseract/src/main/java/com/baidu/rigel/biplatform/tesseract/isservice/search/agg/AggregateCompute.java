@@ -80,8 +80,8 @@ public class AggregateCompute {
         int defaultSize = (int) (dataList.size() > 100 ? dataList.size() * 0.01 : dataList.size());
         
         Map<String, SearchIndexResultRecord> groupResult = stream.collect(
-                Collectors.groupingBy(SearchIndexResultRecord::getGroupBy,
-                Collectors.reducing(SearchIndexResultRecord.of(defaultSize), (x,y) ->{
+                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, 
+                Collectors.reducing(SearchIndexResultRecord.of(arraySize), (x,y) ->{
                     if(!y.getGroupBy().equals(x.getGroupBy())) {
                         x = SearchIndexResultRecord.of(arraySize);
                         x.setGroupBy(y.getGroupBy());
@@ -96,7 +96,7 @@ public class AggregateCompute {
                             index = i + dimSize;
                             if (measure.getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
                                 if(!x.getDistinctMeasures().containsKey(i)) {
-                                    x.getDistinctMeasures().put(i, new HashSet<>(1000));
+                                    x.getDistinctMeasures().put(i, new HashSet<>(defaultSize));
                                 }
                                 
                                 if(y.getDistinctMeasures().containsKey(i)) {
@@ -106,7 +106,7 @@ public class AggregateCompute {
                                 }
                                 
                             } else {
-                                x.setField(i+dimSize, measure.getAggregator().aggregate(x.getField(index), y.getField(index)));
+                                x.setField(index, measure.getAggregator().aggregate(x.getField(index), y.getField(index)));
                             }
                         }
                     } catch (Exception e) {
@@ -117,6 +117,8 @@ public class AggregateCompute {
                 })
             )
         );
+        
+        System.out.println(groupResult);
         LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
         if(CollectionUtils.isNotEmpty(countIndex)) {
             groupResult.values().forEach(record -> {

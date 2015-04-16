@@ -53,7 +53,7 @@ public enum Aggregator {
     {
         @Override
         public Serializable aggregate(Serializable src1, Serializable src2) {
-            if(src1 == null || src2 == null) {
+            if(src1 == null ) {
                 return 1;
             }else {
                 return Integer.parseInt(src1.toString()) + 1;
