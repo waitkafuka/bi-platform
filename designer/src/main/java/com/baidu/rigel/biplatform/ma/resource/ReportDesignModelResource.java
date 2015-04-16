@@ -299,7 +299,7 @@ public class ReportDesignModelResource extends BaseResource {
             return rs;
         }
         
-        if (!NameCheckUtils.checkName (name)) {
+        if (NameCheckUtils.isInvalidName (name)) {
             rs.setStatus(1);
             rs.setStatusInfo("名称格式非法");
             logger.debug("name too length ：" + name);
@@ -835,7 +835,7 @@ public class ReportDesignModelResource extends BaseResource {
 //        model.getExtendById(areaId).getFormatModel().getToolTips().remove(element.getId());
         if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 0) {
             model.getExtendById(areaId).getFormatModel().reset();
-        }
+        }        
         /**
          * 配置端，在修改Item以后，需要重新初始化上下文
          */
@@ -1468,7 +1468,7 @@ public class ReportDesignModelResource extends BaseResource {
     public ResponseResult updateReportName(@PathVariable("id") String id, HttpServletRequest request,
             @PathVariable("name") String name) {
         // check name
-        if (!NameCheckUtils.checkName (name)) {
+        if (NameCheckUtils.isInvalidName (name)) {
             return ResourceUtils.getErrorResult ("名称非法", ResponseResult.FAILED);
         }
         if (reportDesignModelService.isNameExist (name, id)) {

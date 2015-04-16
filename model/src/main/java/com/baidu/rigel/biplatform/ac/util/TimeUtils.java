@@ -467,7 +467,12 @@ public class TimeUtils {
                 if (dayOfMonth < 10) {
                     day = "0" + day;
                 }
-                end = "" + cal.get(Calendar.YEAR) + (cal.get(Calendar.MONTH) + 1) + day;
+                int month = cal.get(Calendar.MONTH) + 1;
+                if (month < 10 ) {
+                	end = cal.get(Calendar.YEAR) + "0" + month + day;
+                } else {
+                	end = cal.get(Calendar.YEAR) + month + day;
+                }
                 break;
             case TimeDay:
                 break;
@@ -504,7 +509,12 @@ public class TimeUtils {
             if (dayOfMonth < 10) {
                 day = "0" + day;
             }
-            end = "" + calNow.get(Calendar.YEAR) + (calNow.get(Calendar.MONTH) + 1) + day;
+            int month = calNow.get(Calendar.MONTH) + 1;
+            if (month < 10 ) {
+            	end = "" + calNow.get(Calendar.YEAR) + "0" + month + day;         	
+            } else {
+            	end = "" + calNow.get(Calendar.YEAR) + month + day; 
+            }
         }
         return end;
     }

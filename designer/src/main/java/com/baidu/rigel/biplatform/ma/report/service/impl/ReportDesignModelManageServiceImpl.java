@@ -310,10 +310,11 @@ public class ReportDesignModelManageServiceImpl implements ReportDesignModelMana
                         for (Item item : items.keySet()) {
                             if (item.getId().equals(itemId)) {
                                 logicModel.getTimeDimensions().remove(item);
+                                area.removeSelectDimItem(itemId);
                                 break;
                             }
                         }
-                        area.getLogicModel().removeRow(olapElementId);
+                        area.removeItem(itemId);
                     } else if (isQueryCompArea(area.getType())) {
                     	area.getLogicModel().removeRow(olapElementId);
                     	area.getLogicModel().getSelectionDims().remove(olapElementId);
