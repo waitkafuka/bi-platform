@@ -109,7 +109,7 @@ define(
                     ]
                 },
                 "M": {
-                    "selMode": "MULTIPLE",
+                    "selMode": "SINGLE",
                     "date": [
                         "-1M",
                         "-2M"

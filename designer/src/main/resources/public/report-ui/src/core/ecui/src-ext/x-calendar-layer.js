@@ -145,9 +145,9 @@
         selMode: 'SINGLE',
         timeType: 'D',
         selModeList: [
-            { text: '单选', value: 'SINGLE', prompt: '单项选择' },
-            { text: '范围多选', value: 'RANGE', prompt: '范围选择，点击一下选择开始值，再点击一下选择结束值' },
-            { text: '任意多选', value: 'MULTIPLE', prompt: '可以选择离散的多项' }
+            { text: '单选', value: 'SINGLE', prompt: '单项选择' }
+//            { text: '范围多选', value: 'RANGE', prompt: '范围选择，点击一下选择开始值，再点击一下选择结束值' },
+//            { text: '任意多选', value: 'MULTIPLE', prompt: '可以选择离散的多项' }
         ]
     };
 
