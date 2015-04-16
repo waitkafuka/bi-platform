@@ -2366,6 +2366,9 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 .ui-table-locked-head .ui-table-head-font {
     display: block;
 }
+.ui-table-locked-head table {
+    width: 100%;
+}
 /** 
  * Pager
  */ 
@@ -7139,15 +7142,15 @@ ol {
     border-left-color: #3297fd; }
 
 .dk-select-disabled {
-  opacity: 0.6;
-  color: #BBBBBB;
-  cursor: not-allowed; }
-  .dk-select-disabled .dk-selected:hover, .dk-select-disabled .dk-selected:focus {
+    opacity: 0.6;
+    color: #BBBBBB;
+    cursor: not-allowed; }
+.dk-select-disabled .dk-selected:hover, .dk-select-disabled .dk-selected:focus {
     border-color: inherit; }
-    .dk-select-disabled .dk-selected:hover:before, .dk-select-disabled .dk-selected:focus:before {
-      border-top-color: inherit; }
-    .dk-select-disabled .dk-selected:hover:after, .dk-select-disabled .dk-selected:focus:after {
-      border-left-color: inherit; }
+.dk-select-disabled .dk-selected:hover:before, .dk-select-disabled .dk-selected:focus:before {
+    border-top-color: inherit; }
+.dk-select-disabled .dk-selected:hover:after, .dk-select-disabled .dk-selected:focus:after {
+    border-left-color: inherit; }
 
 select[data-dkcacheid] {
-  display: none; }
+    display: none; }

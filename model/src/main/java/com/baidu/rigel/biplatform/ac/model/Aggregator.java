@@ -15,6 +15,9 @@
  */
 package com.baidu.rigel.biplatform.ac.model;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+
 /**
  * 指标汇总类型
  * 
@@ -25,25 +28,66 @@ public enum Aggregator {
     /**
      * SUM
      */
-    SUM, // 加和
-    
+    SUM // 加和
+
+    {
+        @Override
+        public Serializable aggregate(Serializable src1, Serializable src2) {
+            if(src2 == null) {
+                return src1; 
+            }
+            if(src1 == null) {
+                return src2;
+            }
+            BigDecimal arg1 = src1 instanceof BigDecimal ? (BigDecimal) src1 : new BigDecimal(src1.toString());
+            BigDecimal arg2 = src2 instanceof BigDecimal ? (BigDecimal) src2 : new BigDecimal(src2.toString());
+            return arg1.add(arg2);
+
+        }
+    },
     /**
      * COUNT
      */
-    COUNT, // 计数
-    
+    COUNT // 计数
+
+    {
+        @Override
+        public Serializable aggregate(Serializable src1, Serializable src2) {
+            if(src1 == null ) {
+                return 1;
+            }else {
+                return Integer.parseInt(src1.toString()) + 1;
+            }
+
+        }
+    },
     /**
      * DISTINCT_COUNT
      */
-    DISTINCT_COUNT, // 去重计数
+    DISTINCT_COUNT {
+        @Override
+        public Serializable aggregate(Serializable src1, Serializable src2) {
+            return 0;
+        }
+        
+    }, // 去重计数
     /**
      * CALCULATED
      */
-    CALCULATED, // 计算类型指标
-    
-    
-//    /**
-//     * 平均值
-//     */
-//    AVERAGE;
+    CALCULATED // 计算类型指标
+    {
+        @Override
+        public Serializable aggregate(Serializable src1, Serializable src2) {
+            throw new UnsupportedOperationException("unsupported aggregator:" + CALCULATED);
+            
+        }
+    };
+
+    // /**
+    // * 平均值
+    // */
+    // AVERAGE;
+
+
+    public abstract Serializable aggregate(Serializable src1, Serializable src2);
 }

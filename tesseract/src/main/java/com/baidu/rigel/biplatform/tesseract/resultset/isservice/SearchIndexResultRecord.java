@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 
@@ -44,6 +46,12 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
      */
     private String groupBy;
     
+    
+    /** 
+     * distinctMeasures
+     */
+    private ConcurrentHashMap<Integer, Set<Serializable>> distinctMeasures = new ConcurrentHashMap<>();
+    
     /**
      * 构造方法
      * 
@@ -59,18 +67,29 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
         
     }
     
+    
+    public SearchIndexResultRecord(int fieldLength) {
+        this.fieldArray = new Serializable[fieldLength];
+    }
+    
+    
+    public static SearchIndexResultRecord of(int fieldLength){
+        return new SearchIndexResultRecord(fieldLength);
+    }
+    
    
     
     /*
      * (non-Javadoc)
      * @see com.baidu.rigel.biplatform.tesseract.resultset.isservice.TesseractResultRecord#getField(int)
      */
-    public Serializable getField(int columnIndex) throws NoSuchFieldException {
+    public Serializable getField(int columnIndex)  {
         if (this.fieldArray != null && columnIndex < this.fieldArray.length) {
             return fieldArray[columnIndex];
         }
         System.out.println(this.toString());
-        throw new NoSuchFieldException("FieldIndex:" + columnIndex);
+        throw new IllegalArgumentException("FieldIndex:" + columnIndex);
+//        throw new NoSuchFieldException("FieldIndex:" + columnIndex);
     }
     
     
@@ -108,41 +127,51 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
     
     
 
-    /* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + Arrays.hashCode(fieldArray);
-		result = prime * result + ((groupBy == null) ? 0 : groupBy.hashCode());
-		return result;
-	}
+    
+    /*
+     * (non-Javadoc) 
+     * @see java.lang.Object#hashCode() 
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((distinctMeasures == null) ? 0 : distinctMeasures.hashCode());
+        result = prime * result + Arrays.hashCode(fieldArray);
+        result = prime * result + ((groupBy == null) ? 0 : groupBy.hashCode());
+        return result;
+    }
 
 
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		SearchIndexResultRecord other = (SearchIndexResultRecord) obj;
-		if (!Arrays.equals(fieldArray, other.fieldArray))
-			return false;
-		if (groupBy == null) {
-			if (other.groupBy != null)
-				return false;
-		} else if (!groupBy.equals(other.groupBy))
-			return false;
-		return true;
-	}
+	
+    /*
+     * (non-Javadoc) 
+     * @see java.lang.Object#equals(java.lang.Object) 
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SearchIndexResultRecord other = (SearchIndexResultRecord) obj;
+        if (distinctMeasures == null) {
+            if (other.distinctMeasures != null)
+                return false;
+        } else if (!distinctMeasures.equals(other.distinctMeasures))
+            return false;
+        if (!Arrays.equals(fieldArray, other.fieldArray))
+            return false;
+        if (groupBy == null) {
+            if (other.groupBy != null)
+                return false;
+        } else if (!groupBy.equals(other.groupBy))
+            return false;
+        return true;
+    }
 
 
 
@@ -167,6 +196,28 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
             return this.fieldArray.length;
         }
         return 0;
+    }
+
+
+
+    /** 
+     * 获取 distinctMeasures 
+     * @return the distinctMeasures 
+     */
+    public ConcurrentHashMap<Integer, Set<Serializable>> getDistinctMeasures() {
+    
+        return distinctMeasures;
+    }
+
+
+
+    /** 
+     * 设置 distinctMeasures 
+     * @param distinctMeasures the distinctMeasures to set 
+     */
+    public void setDistinctMeasures(ConcurrentHashMap<Integer, Set<Serializable>> distinctMeasures) {
+    
+        this.distinctMeasures = distinctMeasures;
     }
     
 }

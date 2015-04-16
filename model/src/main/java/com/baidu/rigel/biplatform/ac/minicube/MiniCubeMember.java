@@ -107,7 +107,7 @@ public class MiniCubeMember extends OlapElementDef implements Member {
      * queryNodes 实际用于查询的节点
      */
     private Set<String> queryNodes;
-
+    
     /**
      * construct with member name
      * 
@@ -317,4 +317,5 @@ public class MiniCubeMember extends OlapElementDef implements Member {
     public List<Member> getChildren() {
         return this.children;
     }
+
 }

@@ -276,6 +276,16 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
         storeManager.putEvent(updateEvent);
         
     }
+
+    @Override
+    public List<MiniCubeMember> lookUp(DataSourceInfo dataSourceInfo,
+            Cube cube, List<String> uniqueNameList, Map<String, String> params)
+            throws Exception {
+        MetaDataService.checkCube(cube);
+        MetaDataService.checkDataSourceInfo(dataSourceInfo);
+        DimensionMemberService memberService = dimensionMemberServiceMap.get(DimensionMemberService.SQL_MEMBER_SERVICE);
+        return memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params);
+    }
     
 
 }

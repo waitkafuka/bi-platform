@@ -15,20 +15,23 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.search.agg;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
-import com.baidu.rigel.biplatform.tesseract.resultset.Aggregate;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -61,44 +64,82 @@ public class AggregateCompute {
             LOGGER.info("no need to group.");
             return dataList;
         }
-        List<SearchIndexResultRecord> result = new ArrayList<SearchIndexResultRecord>();
         
-//        Set<Integer> countIndex = Sets.newHashSet();
-//        for (int i = 0 ; i < queryMeasures.size() ; i++) {
-//            if (queryMeasures.get(i).getAggregator().equals(Aggregator.COUNT)) {
-//                countIndex.add(dimSize + i);
-//            }
-//        }
+        Set<Integer> countIndex = Sets.newHashSet();
+        for (int i = 0 ; i < queryMeasures.size() ; i++) {
+            if (queryMeasures.get(i).getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
+                countIndex.add(i);
+            }
+        }
+        
         int arraySize = dataList.get(0).getFieldArraySize();
         
         long current = System.currentTimeMillis();
-        Map<String, SearchIndexResultRecord> groupResult = dataList.parallelStream().collect(
-                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy,
-                Collectors.reducing(new SearchIndexResultRecord(new Serializable[arraySize], null), (x,y) ->{
-                    SearchIndexResultRecord var = new SearchIndexResultRecord(new Serializable[arraySize], y.getGroupBy());
-                    try {
+        Stream<SearchIndexResultRecord> stream = dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
+        
+        int defaultSize = (int) (dataList.size() > 100 ? dataList.size() * 0.01 : dataList.size());
+        
+        Map<String, SearchIndexResultRecord> groupResult = stream.collect(
+                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, 
+                Collectors.reducing(SearchIndexResultRecord.of(arraySize), (x,y) ->{
+                    if(!y.getGroupBy().equals(x.getGroupBy())) {
+                        x = SearchIndexResultRecord.of(arraySize);
+                        x.setGroupBy(y.getGroupBy());
                         for(int i = 0; i < dimSize; i++) {
-                            var.setField(i, y.getField(i));
+                            x.setField(i, y.getField(i));
                         }
+                    }
+                    try {
                         int index = dimSize;
                         for(int i = 0; i < queryMeasures.size(); i++){
                             QueryMeasure measure = queryMeasures.get(i);
                             index = i + dimSize;
-                            var.setField(i+dimSize, Aggregate.aggregate(x.getField(index), y.getField(index), measure.getAggregator()));
+                            if (measure.getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
+                                if(!x.getDistinctMeasures().containsKey(i)) {
+                                    x.getDistinctMeasures().put(i, new HashSet<>(defaultSize));
+                                }
+                                
+                                if(y.getDistinctMeasures().containsKey(i)) {
+                                    x.getDistinctMeasures().get(i).addAll(y.getDistinctMeasures().get(i));
+                                } else if(y.getField(index) != null) {
+                                    x.getDistinctMeasures().get(i).add(y.getField(index));
+                                }
+                                
+                            } else {
+                                x.setField(index, measure.getAggregator().aggregate(x.getField(index), y.getField(index)));
+                            }
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
                         throw new RuntimeException(e);
                     }
-                    return var;
+                    return x;
                 })
             )
         );
-        LOGGER.info("group agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
-        result.addAll(groupResult.values());
         
-        return result;
+        LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
+        if(CollectionUtils.isNotEmpty(countIndex)) {
+            groupResult.values().forEach(record -> {
+                for (int index : countIndex) {
+                    if(record.getDistinctMeasures() != null && record.getDistinctMeasures().containsKey(index)) {
+                        record.setField(dimSize + index, record.getDistinctMeasures().get(index).size());
+                    }
+                }
+            });
+//            LOGGER.info("distinct agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
+                
+                
+//                Map<String, Set<Serializable>> counts = dataList.stream().collect(Collectors.groupingBy(SearchIndexResultRecord::getGroupBy,
+//                        Collectors.mapping(record -> record.getField(index),Collectors.toSet())));
+//                for(String key : counts.keySet()) {
+//                    groupResult.get(key).getDistinctMeasures().put(index, counts.get(key));
+//                    groupResult.get(key).setField(dimSize + index, counts.get(key).size());
+//                }
+        }
+        return new ArrayList<>(groupResult.values());
     }
+    
 
     /**
      * @param resultQ

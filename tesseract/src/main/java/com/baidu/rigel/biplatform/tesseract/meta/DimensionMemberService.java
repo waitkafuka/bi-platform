@@ -181,4 +181,48 @@ public interface DimensionMemberService extends BeanFactoryAware {
         dimensionMemberServiceMap.putAll(listBeanFactory.getBeansOfType(DimensionMemberService.class));
     }
 
+    public default List<MiniCubeMember> lookUpByNames (DataSourceInfo dataSourceInfo, Cube cube,
+            List<String> uniqueNameList, Map<String, String> params) throws Exception {
+        if (cube == null) {
+            throw new IllegalArgumentException("cube can not be null.");
+        }
+
+        String[] names = MetaNameUtil.parseUnique2NameArray(uniqueNameList.get (0));
+        if (names == null || names.length < 1) {
+            throw new IllegalArgumentException("param uniqueName is not member unique name:" + uniqueNameList);
+        }
+        // 如果是Time开头的，默认就是时间维度
+        // TODO 不能这么判断，需要根据UniqueName中的维度名称获取到维度
+        // if(names[0].startsWith(TimeDimension.DEFAULT_TIME_DIMENSION_NAME)){
+        // return TimeDimensionUtils.processTimeMember(cube, names);
+        // }
+        Dimension targetDim = null;
+        targetDim = cube.getDimensions().get(names[0]);
+        if (targetDim == null) {
+            throw new MetaException("can not found dimension by uniqueName:" + uniqueNameList + " in cube:" + cube);
+        }
+
+        List<Level> levels = Lists.newArrayList(targetDim.getLevels().values());
+        Level level = levels.get (names.length - 2);
+        boolean hasAllMember = false;
+        for (String uniqueName : uniqueNameList) {
+            if (MetaNameUtil.isAllMemberUniqueName (uniqueName)) {
+                hasAllMember = true;
+                break;
+            }
+        }
+        if (hasAllMember && !level.getType().equals(LevelType.CALL_BACK)) {
+            List<MiniCubeMember> rs = Lists.newArrayList ();
+            rs.add ((MiniCubeMember) targetDim.getAllMember());
+            return rs;
+        }
+        return getDimensionMemberServiceByLevelType(level.getType()).getMemberFromLevelByNames(
+                dataSourceInfo,
+                cube, level, params, uniqueNameList);
+    }
+
+    List<MiniCubeMember> getMemberFromLevelByNames(
+            DataSourceInfo dataSourceInfo, Cube cube, Level level,
+            Map<String, String> params, List<String> uniqueNameList);
+
 }

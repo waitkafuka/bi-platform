@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -47,12 +48,14 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
@@ -448,7 +451,6 @@ public class QueryDataResource extends BaseResource {
         builder.append("<body>");
         builder.append(vm);
         
-        builder.append ("<script type='text/javascript' src='/silkroad/dep/jquery-1.11.1.min.js'></script>");
         builder.append("<script src='/silkroad/asset/" + theme + "/-di-product-min.js'>");
         builder.append("</script>");
         builder.append(js);
@@ -475,6 +477,7 @@ public class QueryDataResource extends BaseResource {
             return "";
         }
         String json = model.getJsonContent();
+        logger.info(json);
         response.setCharacterEncoding("utf-8");
         logger.info("[INFO] query json operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
         return json;
@@ -580,7 +583,17 @@ public class QueryDataResource extends BaseResource {
             String[] value = contextParams.get(key);
             if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
                 String realValue = modifyFilterValue(value[0]);
-                if (StringUtils.hasText(realValue)) {
+                if (realValue != null) {
+                	// 移除运行态模型的Context中的已有时间维度,保证有且仅有一个时间维度
+                	if (realValue.contains("start") && realValue.contains("end") && realValue.contains("gradularity")) {             		
+                		for (Entry<String, Object> tmpEntry : runTimeModel.getContext().getParams().entrySet()) {
+                			String tmpStr = (String) tmpEntry.getValue();
+                			if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
+                				runTimeModel.getContext().removeParam(tmpEntry.getKey());
+                				break;
+                			}
+                		}
+                	}
                     runTimeModel.getContext().put(getRealKey(model, key), realValue);
                 } else {
                     runTimeModel.getContext().removeParam(getRealKey(model, key));
@@ -651,7 +664,7 @@ public class QueryDataResource extends BaseResource {
      */ 
     private String modifyFilterValue(String tmpValue) {
         if (tmpValue.contains("start") && tmpValue.contains("end")) {
-            return tmpValue;
+            return genNewStartAndEnd(tmpValue);
         }
         String[] tmpValueArray = tmpValue.split(",");
         if (tmpValueArray.length == 1) {
@@ -669,13 +682,122 @@ public class QueryDataResource extends BaseResource {
                 if (i <= tmpValueArray.length - 1) {
                     rs.append(",");
                 }
-            }
-            
+            }          
         }
         return rs.toString();
         
     }
 
+    /**
+     * TODO
+     * 重新获取日期的开始和结束 ，add by jiangyichao
+     */
+    private String genNewStartAndEnd(String timeValue) {
+    	String start;
+    	String end;
+    	String result = null;
+//    	String yearStart;
+//    	String yearEnd;
+//    	String monthStart;
+//    	String monthEnd;
+//    	String dayStart;
+//    	String dayEnd;
+//    	Calendar cal;
+//    	String [] startDayOfQuarter = {"0101" , "0401" , "0701", "1001"};
+//    	String [] endDayOfQuarter = {"0331" , "0630" , "0930", "1231"};
+    	try {
+        	JSONObject json = new JSONObject(String.valueOf(timeValue));
+            start = json.getString("start").replace("-", "");
+            end = json.getString("end").replace("-", "");
+            String granularity = json.getString("granularity");
+            // 保证开始时间小于结束时间
+            if (start.compareTo(end) > 0) {
+            	String tmp = start;
+            	start = end;
+            	end = tmp;
+            }
+            Map<String, String> time = null;
+            switch (granularity) {
+            	// 年
+	            case "Y":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeYear);
+//	            	start = start + "0101";
+//	            	end = end + "1231";
+	            	break;
+	            // 季度
+	            case "Q":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeQuarter);
+//	            	String [] tmpStart = start.split("Q");
+//	            	yearStart = tmpStart[0];
+//	            	String quarterStart = tmpStart[1];
+//	            	String [] tmpEnd = end.split("Q");
+//	            	yearEnd = tmpEnd[0];
+//	            	String quarterEnd = tmpEnd[1];
+//	            	
+//	            	start = yearStart + startDayOfQuarter[Integer.valueOf(quarterStart)-1];
+//	            	end = yearEnd + endDayOfQuarter[Integer.valueOf(quarterEnd)-1];
+	            	break;
+	            // 月份
+	            case "M":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeMonth);
+//	            	yearEnd = end.substring(0, 4);
+//	            	monthEnd = end.substring(4);
+//	            	cal = Calendar.getInstance();
+//	            	cal.set(Calendar.YEAR, Integer.valueOf(yearEnd));
+//	            	cal.set(Calendar.MONTH, Integer.valueOf(monthEnd) - 1);
+//	            	dayEnd = String.valueOf(cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+//	            	start = start + "01";
+//	            	end = yearEnd + monthEnd + dayEnd;
+	            	break;
+	            // 星期
+	            case "W":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeWeekly);
+//	            	cal = Calendar.getInstance();
+//	            	yearStart = start.substring(0, 4);
+//	            	monthStart = start.substring(4, 6);
+//	            	dayStart = start.substring(6);
+//	            	cal.set(Calendar.YEAR, Integer.valueOf(yearStart));
+//	            	cal.set(Calendar.MONTH, Integer.valueOf(monthStart) -1 );
+//	            	cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(dayStart));
+//	            	cal.add(Calendar.DAY_OF_MONTH, 6);
+//	            	int month = cal.get(Calendar.MONTH) + 1;
+//	            	if (month < 10 ) {
+//	            		end = "" + cal.get(Calendar.YEAR) + "0" + month + cal.get(Calendar.DAY_OF_MONTH);
+//	            	} else {
+//	            		end = "" + cal.get(Calendar.YEAR) + month + cal.get(Calendar.DAY_OF_MONTH);
+//	            	}
+	            	break;
+	            // 天
+	            case "D":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeDay);
+	            	break;
+	            default:
+	            	break;
+            }
+//            cal = Calendar.getInstance();
+//            int yearNow = cal.get(Calendar.YEAR);
+//            int monthNow = cal.get(Calendar.MONDAY) + 1 ;
+//            int dayNow = cal.get(Calendar.DAY_OF_MONTH);
+//            String dateNow = "" + yearNow;
+//            if (monthNow >= 10 ) {
+//            	dateNow = dateNow + "0" + monthNow + dayNow;
+//            } else {
+//            	dateNow = dateNow + monthNow + dayNow;
+//            }
+//            if (end.compareTo(dateNow) > 0) {
+//            	end = dateNow;
+//            }
+            start = time.get("start");
+            end = time.get("end");
+            json.put("start", start);
+            json.put("end", end);
+            logger.info("start time is [" + start + "],and end time is [" + end + "]");
+            result = json.toString();
+    	} catch (Exception e) {
+    		logger.debug("the input time format is wrong" + timeValue, e);
+    	}
+    	return result;
+    }
     /**
      * 
      * @param model {@link ReportDesignModel}
@@ -1240,11 +1362,11 @@ public class QueryDataResource extends BaseResource {
             }
             String[] drillName = new String[]{drillTargetUniqueName};
             oriQueryParams.putAll(request.getParameterMap());
-            oriQueryParams.put(row.getOlapElementId(), drillName);
             /**
              * update context
              */
             Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
+            queryParams.put(row.getOlapElementId(), drillName);
             
             // TODO 仔细思考一下逻辑
             reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);

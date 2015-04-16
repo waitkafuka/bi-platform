@@ -373,3 +373,6 @@
 .ui-table-locked-head .ui-table-head-font {
     display: block;
 }
+.ui-table-locked-head table {
+    width: 100%;
+}

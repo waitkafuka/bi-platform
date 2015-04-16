@@ -214,4 +214,7 @@ public interface MetaDataService {
         }
 
     }
+
+    List<MiniCubeMember> lookUp(DataSourceInfo dataSourceInfo, Cube cube,
+            List<String> uniqueNameList, Map<String, String> params) throws Exception;
 }

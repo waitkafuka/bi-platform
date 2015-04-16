@@ -631,5 +631,20 @@ public class IndexMeta extends StoreMeta implements Serializable {
        
         return selectList;
     }
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "IndexMeta [clusterName=" + clusterName + ", indexMetaId="
+				+ indexMetaId + ", cubeIdSet=" + cubeIdSet + ", dimSet="
+				+ dimSet + ", measureSet=" + measureSet + ", idxState="
+				+ idxState + ", locked=" + locked + ", idxVersion="
+				+ idxVersion + "]";
+	}
+    
+    
+    
     
 }

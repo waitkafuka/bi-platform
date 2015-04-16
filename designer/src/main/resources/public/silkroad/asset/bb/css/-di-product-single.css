@@ -2516,6 +2516,7 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 /* 数据展示居左 */
 .ui-table-head-th-content {
     text-align: left;
+    display: inline;
 }
 .ui-table-expand-background {
     background-color: #F6F6F5;
@@ -7446,15 +7447,15 @@ ol {
     border-left-color: #3297fd; }
 
 .dk-select-disabled {
-  opacity: 0.6;
-  color: #BBBBBB;
-  cursor: not-allowed; }
-  .dk-select-disabled .dk-selected:hover, .dk-select-disabled .dk-selected:focus {
+    opacity: 0.6;
+    color: #BBBBBB;
+    cursor: not-allowed; }
+.dk-select-disabled .dk-selected:hover, .dk-select-disabled .dk-selected:focus {
     border-color: inherit; }
-    .dk-select-disabled .dk-selected:hover:before, .dk-select-disabled .dk-selected:focus:before {
-      border-top-color: inherit; }
-    .dk-select-disabled .dk-selected:hover:after, .dk-select-disabled .dk-selected:focus:after {
-      border-left-color: inherit; }
+.dk-select-disabled .dk-selected:hover:before, .dk-select-disabled .dk-selected:focus:before {
+    border-top-color: inherit; }
+.dk-select-disabled .dk-selected:hover:after, .dk-select-disabled .dk-selected:focus:after {
+    border-left-color: inherit; }
 
 select[data-dkcacheid] {
-  display: none; }
+    display: none; }

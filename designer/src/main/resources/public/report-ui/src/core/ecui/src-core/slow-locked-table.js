@@ -696,8 +696,10 @@
             curHeadTh,
             difLeft, // 虚线移动的距离
             oldPosLeft, // 表格元素居左的距离
-            mainElLeft = dom.getPosition(mainEl).left;
-
+            mainElLeft = dom.getPosition(mainEl).left,
+            maxBoundary = mainElLeft + mainEl.offsetWidth,
+            minBoundary = mainElLeft;
+        maxBoundary = me._uVScrollbar ? maxBoundary - me._uVScrollbar.$$width : maxBoundary;
         dragBoxEl.innerHTML = ''
             + '<span class="' + type +'-dot-box-drag"></span>'
             + '<span class="' + type + '-dot-box-line" ></span>';
@@ -749,6 +751,9 @@
         // TODO:虚线移动的最大位置与最小位置的判断
         function dragBoxMouseMove(ev) {
             var oEv = ev || window.event;
+            if (oEv.clientX > maxBoundary || oEv.clientX < minBoundary) {
+                return;
+            }
             var lineLeft = oEv.clientX - disX;
             setStyle(dragBoxEl, 'left', lineLeft + 'px');
             difLeft = oEv.clientX - oldPosLeft;

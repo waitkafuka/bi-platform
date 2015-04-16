@@ -846,17 +846,19 @@ define([
                     // 设置单选下拉框默认值
                     that.selectSetAll(checked, allName, compId);
                 }
-                if ($.isInArray(compType, Constant.DRAG_SINGLE_DIM) && $('.data-axis-line .item').length >= 1) {
-                    alert('只能拖一个维度或者维度组');
-                    return;
+                if ($.isInArray(compType, Constant.DRAG_SINGLE_DIM)) {
+                    if ($('.data-axis-line .item').length >= 1) {
+                        alert('只能拖一个维度');
+                        return;
+                    }
                 }
-                // 级联下拉框只能拖入维度组
-                if ($.isInArray(compType, Constant.DRAG_SINGLE_DIMGROUP)
-                    && $('.data-axis-line .item').length >= 1
-                    && $draggedUi.attr('data-group') !== 'item-group'
-                ) {
-                    alert('只能拖一个维度组');
-                    return;
+                else if ($.isInArray(compType, Constant.DRAG_SINGLE_DIMGROUP)) {
+                    if ($draggedUi.attr('data-group') !== 'item-group'
+                        || $('.data-axis-line .item').length >= 1
+                    ) {
+                        alert('只能拖一个维度组');
+                        return;
+                    }
                 }
                 var $spans = $item.find('span');
                 // 维度组

@@ -92,7 +92,7 @@ define([
                 $('.link-skin').attr(
                     'href', 'asset/'
                     + type
-                    + '/css/-di-product-min.css');
+                    + '/css/-di-product-debug.css');
                 $('.skin-menu').hide();
                 // 换肤后刷新报表，完善ecui控件样式更换
                 this.canvasView.showReport();

@@ -582,17 +582,21 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     /**
                      * TODO 考虑月/周/年等
                      */
-                    start = json.getString("start").replace("-", "");
-                    end = json.getString("end").replace("-", "");
+                    start = json.getString("start");
+                    end = json.getString("end");
                     if (item.getParams().get("range") != null && start.equals(end)) {
                         TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(start), 30, 0);
                         start = tail.getStart();
                         end = tail.getEnd();
                     } else {
-                        TimeDimension timeDim = (TimeDimension) element;
-                        Map<String, String> time= TimeUtils.getTimeCondition(start, end, timeDim.getDataTimeType());
-                        start = time.get("start");
-                        end = time.get("end");
+                    	  if (start.contains("-") && end.contains("-")) { 
+                    		  start = start.replace("-", "");
+							  end = end.replace("-", "");	
+							  TimeDimension timeDim = (TimeDimension) element;
+							  Map<String, String> time = TimeUtils.getTimeCondition(start, end,	timeDim.getDataTimeType());
+							  start = time.get("start");
+							  end = time.get("end");
+                    	  }
                     }
                 } catch (Exception e) {
                     logger.warn(

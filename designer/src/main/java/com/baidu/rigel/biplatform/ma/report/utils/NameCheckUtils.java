@@ -34,7 +34,8 @@ public final class NameCheckUtils {
     /**
      * 默认名称匹配规则
      */
-    private static final String DEFAULT_RULE ="[`~!@#$%^&*()+=|{}':;',//[//].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+    private static final String DEFAULT_INVALIDATE_RULE =
+    		"[`~!@#$%^&*()+=|{}':;',//[//].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
     
     /**
      * 构造函数
@@ -48,8 +49,8 @@ public final class NameCheckUtils {
      * @param name
      * @return boolean
      */
-    public static boolean checkName(String name) {
-        return checkNameWithRule(name, DEFAULT_RULE);
+    public static boolean isInvalidName(String name) {
+        return checkNameWithIllegalRule(name, DEFAULT_INVALIDATE_RULE);
     }
     
     /**
@@ -58,21 +59,21 @@ public final class NameCheckUtils {
      * @param ruleRegEx
      * @return boolean
      */
-    public static boolean checkNameWithRule(String name, String ruleRegEx) {
+    public static boolean checkNameWithIllegalRule(String name, String ruleRegEx) {
         if (!StringUtils.hasText (name)) {
-            return false;
+            return true;
         }
         if (name.length () > 250) {
-            return false;
+            return true;
         }
         if (StringUtils.isEmpty (ruleRegEx)) {
-            ruleRegEx = DEFAULT_RULE;
+            ruleRegEx = DEFAULT_INVALIDATE_RULE;
         }
         Pattern p = Pattern.compile (ruleRegEx);
         Matcher m = p.matcher (name);
         if (m.find ()) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 }

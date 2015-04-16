@@ -40,7 +40,7 @@ define(
             type: 'CASCADE_SELECT',
             iconClass: 'cascade-select',
             caption: '级联下拉框',
-            defaultWidth: 300,
+            defaultWidth: 450,
             defaultHeight: 33,
             defaultValue: 'false',
             vm: {
