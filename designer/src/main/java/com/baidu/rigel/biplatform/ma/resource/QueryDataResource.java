@@ -585,9 +585,9 @@ public class QueryDataResource extends BaseResource {
                 String realValue = modifyFilterValue(value[0]);
                 if (realValue != null) {
                 	// 移除运行态模型的Context中的已有时间维度,保证有且仅有一个时间维度
-                	if (realValue.contains("start") && realValue.contains("end") && realValue.contains("gradularity")) {             		
+                	if (realValue.contains("start") && realValue.contains("end") && realValue.contains("granularity")) {             		
                 		for (Entry<String, Object> tmpEntry : runTimeModel.getContext().getParams().entrySet()) {
-                			String tmpStr = (String) tmpEntry.getValue();
+                			String tmpStr = String.valueOf(tmpEntry.getValue());
                 			if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
                 				runTimeModel.getContext().removeParam(tmpEntry.getKey());
                 				break;
