@@ -60,14 +60,18 @@ public interface QueryContextSplitService {
     }
 
     /**
-     * 拆分接口
+     * 拆分接口:
+     *  1.根据上次的拆分策略，取得当前拆分策略
+     *  2. 根据拆分策略进行拆分
+     *  3. 返回拆分结果
      * 
      * @param cube cube信息，主要获取指标信息
      * @param queryContext 问题模型转换处理的查询条件，包括维值树，过滤条件，查询指标等。
      * @param preSplitStrategy 上次的拆分类型
      * @return 拆分后的结果
      */
-    QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, Cube cube, QueryContext queryContext, QueryContextSplitStrategy preSplitStrategy);
+    QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, Cube cube, QueryContext queryContext,
+         QueryContextSplitStrategy preSplitStrategy);
     
     
     /** 

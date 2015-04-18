@@ -81,14 +81,19 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
     private QueryContextBuilder queryContextBuilder;
     
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, Cube cube, QueryContext queryContext,
+    public QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, Cube cube, 
+            QueryContext queryContext,
             QueryContextSplitStrategy preSplitStrategy) {
         QueryContextSplitStrategy splitStrategy = QueryContextSplitStrategy.getNextStrategy(preSplitStrategy);
         // 如果下一次拆分已经没有可拆分的了，那么说明已经不需要再进行拆分了
         if (splitStrategy != null) {
             if (splitStrategy.equals(QueryContextSplitStrategy.MeasureType)) {
                 return splitByMeasureTypeStrategy(question, dsInfo, cube, queryContext);
+                // TODO 后续实现
 //            } else if (splitStrategy.equals(QueryContextSplitStrategy.Column)) {
 //                return splitByColumnStrategy(queryContext);
 //            } else {
@@ -212,23 +217,34 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         if(splitResult == null || splitResult.getConditionQueryContext().size() != splitResult.getDataModels().size()) {
             throw new IllegalSplitResultException(splitResult, "splitResult is null or condition size not equal", "MERGE_MODEL");
         }
+        /**
+         * 注意：如果分组策略只有一种，这里不能直接返回，需要对计算列进行处理
+         */
+        final DataModel dataModel = new DataModel();
         
-        DataModel dataModel = new DataModel();
-        dataModel.setColumnHeadFields(DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getColumnMemberTrees(),
+        // 根据原生查询请求信息，构建行列信息，与TesseractResultSet到DataModel的流程类似
+        dataModel.setColumnHeadFields(
+                DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getColumnMemberTrees(),
                 splitResult.getOriQueryContext().getQueryMeasures()));
-        dataModel.setRowHeadFields(DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getRowMemberTrees(), null));
+        dataModel.setRowHeadFields(
+            DataModelBuilder.buildAxisHeadFields(splitResult.getOriQueryContext().getRowMemberTrees(), null));
+        
         List<HeadField> rowLeafs = DataModelUtils.getLeafNodeList(dataModel.getRowHeadFields());
         
-        // 条件，指标UniqueName，父节点UniqueName，数据
-        Map<Condition, Map<String, Map<String, List<BigDecimal>>>> dataModelDatas = new HashMap<Condition, Map<String,Map<String,List<BigDecimal>>>>(splitResult.getDataModels().size());
+        // 条件，指标UniqueName，父节点的NodeUniqueName，数据
+        Map<Condition, Map<String, Map<String, List<BigDecimal>>>> dataModelDatas = 
+                new HashMap<Condition, Map<String,Map<String,List<BigDecimal>>>>(splitResult.getDataModels().size());
         if(!dataModelDatas.containsKey(EmptyCondition.getInstance())) {
             dataModelDatas.put(EmptyCondition.getInstance(), new HashMap<>());
         }
+        
+        // 将DataModel的data按照condition分类
         splitResult.getDataModels().forEach((con, dm) -> {
             boolean isCallbackCondition = con.equals(CallbackCondition.getInstance());
             con = isCallbackCondition ? EmptyCondition.getInstance() : con;
-            // 先把数据按照列封装了
+            // 先把数据按照列封装了：将数据放入列头，方便处理并且保证数据在处理过程中不发生变化
             DataModelUtils.fillFieldData(dm, FillDataType.COLUMN);
+            // 获取column field的叶子节点值
             List<HeadField> columnFields = DataModelUtils.getLeafNodeList(dm.getColumnHeadFields());
             Map<String, Map<String, List<BigDecimal>>> dataModelData = null;
             if(dataModelDatas.containsKey(con)) {
@@ -239,6 +255,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
             
             // 存放叶子节点信息
             for(HeadField field : columnFields) {
+                // 当前节点为列维度的最底层节点，如果指标在列上，则为指标元定义
                 if(!dataModelData.containsKey(field.getValue())) {
                     dataModelData.put(field.getValue(), new HashMap<>());
                 }
@@ -260,6 +277,7 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
            Map<String, List<BigDecimal>> calCulateDatas = new HashMap<>();
            Map<String, Map<Condition, Map<String, ComputeResult>>> categoryVariableVal = new HashMap<>();
            if (MapUtils.isNotEmpty(compileContext.getConditionVariables())) {
+               // compileContext.getConditionVariables().entrySet() 的map中value的Set为表达式引用的指标名称
                for(Entry<Condition,Set<String>> entry : compileContext.getConditionVariables().entrySet()) {
                    Map<String, Map<String, List<BigDecimal>>> dataModelData = dataModelDatas.get(entry.getKey());
                    if(dataModelData == null) {
@@ -267,6 +285,8 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                    }
                    // parentNode uniqueName, varName, data
                    if (CollectionUtils.isNotEmpty(entry.getValue())) {
+                       // 遍历表达式引用的指标名称，计算当前表达式引用的指标值
+                       // TODO 
                        for(String var : entry.getValue()) {
                            String name = MetaNameUtil.generateMeasureUniqueName(PlaceHolderUtils.getKeyFromPlaceHolder(var));
                            if (!dataModelData.containsKey(name)) {
@@ -279,11 +299,13 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                                if (!categoryVariableVal.get(parentNodeUniqueName).containsKey(entry.getKey())) {
                                    categoryVariableVal.get(parentNodeUniqueName).put(entry.getKey(), new HashMap<>());
                                }
-                               categoryVariableVal.get(parentNodeUniqueName).get(entry.getKey()).put(var, new ListComputeResult(dataModelData.get(name).get(parentNodeUniqueName)));
+                               categoryVariableVal.get(parentNodeUniqueName).get(entry.getKey())
+                                   .put(var, new ListComputeResult(dataModelData.get(name).get(parentNodeUniqueName)));
                            }
                        }
                    } else {
-                       constantResult.put(measureName, ListComputeResult.transfer(compileContext.getNode().getResult(null), rowLeafs.size()).getData());
+                       constantResult.put(measureName, 
+                           ListComputeResult.transfer(compileContext.getNode().getResult(null), rowLeafs.size()).getData());
                    }
                }
                for(String parentName : categoryVariableVal.keySet()) {
@@ -291,7 +313,8 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                    compileContext.getVariablesResult().clear();
                    compileContext.setVariablesResult(categoryVariableVal.get(parentName));
 //                   compileContext.getVariablesResult().put(entry.getKey(), categoryVariableVal.get(parentName));
-                   calCulateDatas.put(parentName, ListComputeResult.transfer(compileContext.getNode().getResult(compileContext), rowLeafs.size()).getData());
+                   calCulateDatas.put(parentName, 
+                       ListComputeResult.transfer(compileContext.getNode().getResult(compileContext), rowLeafs.size()).getData());
                }
            }
            
@@ -349,7 +372,6 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         }
         
     }
-    
     
 
 }
