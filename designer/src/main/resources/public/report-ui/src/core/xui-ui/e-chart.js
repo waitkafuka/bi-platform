@@ -91,7 +91,7 @@
                 this._sType = 'xui-e-chart';
                 addClass(el, this._sType);
                 var type = this._sType;
-                // FIXME:优化，header估计得干掉
+                // TODO:优化，header估计得干掉
                 el.innerHTML = [
                     '<div class="' + type + '-header"></div>',
                     '<div class="' + type + '-content"></div>'
@@ -299,6 +299,8 @@
                     })(i);
                 }
             }
+            // 重设图形区域（头部和内容）
+            me._eContent.style.height = (me.el.offsetHeight - me._eHeader.offsetHeight) + 'px';
         }
     };
 
@@ -1037,7 +1039,7 @@
                 options.grid = {
                     x: 80,
                     x2: 80,
-                    y: 50,
+                    y: 20,
                     borderWidth: 0
                 }
                 // 当不为饼图时，都需要设置x轴属性，否则图形都显示不出来 updata by majun
