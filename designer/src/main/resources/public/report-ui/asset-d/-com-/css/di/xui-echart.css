@@ -7,9 +7,11 @@
     z-index:0;
 }
 .xui-e-chart-header {
-    position: absolute;
-    top: 14px;
-    left: 18px;
+    /*position: absolute;*/
+    /*top: 14px;*/
+    /*left: 80px;*/
+    float: left;
+    width: 100%;
     z-index: 999;
 }
 .xui-e-chart-title {
@@ -47,9 +49,11 @@
     background-position:-42px -385px;
 }
 .xui-e-chart-content {
-    height:100%;
+    float: left;
+    width: 100%;
 }
 .xui-e-chart-empty {
+    float: left;
     width: 99%;
     height: 98%;
     text-align: center;
@@ -87,6 +91,8 @@
 }
 .echarts-candidate {
     float: left;
+    padding-left: 80px;
+    padding-top: 14px;
 }
 .echarts-candidate label {
     float: left;

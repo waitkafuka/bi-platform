@@ -493,6 +493,7 @@ public class SendMail {
             } else {
                 throw new Exception("没有指定收件人地址");
             }
+            
 //            // 指定抄送
 //            if (copyTo != null) {
 //                msg.addRecipients(javax.mail.Message.RecipientType.CC,

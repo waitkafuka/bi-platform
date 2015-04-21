@@ -23,6 +23,7 @@ import javax.annotation.Resource;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
@@ -120,6 +121,9 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     @Value("${biplatform.ma.auth.register.mail.subjectForOpenService}")
     private String openServiceSubject;
     
+    @Value("${biplatform.ma.auth.register.mail.sender.password}")
+    private String mailSenderPassowrd;
+    
     /**
      * @{inheritDoc}
      */
@@ -139,6 +143,10 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             sendMail.setNeedAuth(false);
             // 设置发送方名字
             sendMail.setUserName(mailSender);
+            // 设置发送邮件用户密码
+            if (!StringUtils.isEmpty (mailSenderPassowrd)) {
+                sendMail.setPassword (mailSenderPassowrd);
+            }
             // 设置发送内容和格式
             sendMail.setBody(makeUpRegisterMailContent(user, hostAddress, magicStr), SendMail.HTML);
             // 发送

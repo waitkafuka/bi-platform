@@ -229,6 +229,15 @@ public class QueryServiceImpl implements QueryService {
 
     
 
+    /**
+     * 
+     * TODO  需要后续扩展，目前未实现
+     *  根据QueryContext判断当前分组策略是否合理
+     *  
+     * @param context 当前查询上下文
+     * @param needSummary 
+     * @return 当前分组之后的QueryContext的结果集笛卡尔积
+     */
     private int stateQueryContextConditionCount(QueryContext context, boolean needSummary) {
         if (context == null) {
             throw new IllegalArgumentException("querycontext is null.");
