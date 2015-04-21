@@ -158,28 +158,39 @@ public class DataModelBuilder {
         dataModel.setColumnBaseData(columnBaseDatas);
         dataModel.setColumnHeadFields(buildAxisHeadFields(columnMemberTrees,
                 queryMeasures));
+        // 构建RowHeadField
         dataModel.setRowHeadFields(buildAxisHeadFields(rowMemberTrees, null));
 
         return dataModel;
     }
 
     /**
-     * 解析ResultSet转换成按照单元格数据
      * 
+     * 解析ResultSet转换成按照单元格数据,此方法生成的结果集为宽表模型
      * @return 将ResultSet转换成的单元格数据
      * @throws Exception 取数的异常
+     * 
      */
-    private Map<String, Map<String, BigDecimal>> parseResultSet(List<MemberTreePropResult> rowHeadNames, List<MemberTreePropResult> colHeadNames)
+    private Map<String, Map<String, BigDecimal>> parseResultSet(List<MemberTreePropResult> rowHeadNames, 
+            List<MemberTreePropResult> colHeadNames)
             throws Exception {
 
         // 结构是 列 行，指标 值
+        /**
+         * data.key - 行的元数据的交叉值：比如dist与product交叉，dist维度值为:[1,2], product值为[3,4],data.key = [dist^_^1_+_product^_^3, ... ...] 
+         * data.value的map的key -- 列的元数据的交叉值 比如date与m1(指标字段名称)，date值为[2011,2012],交叉结果[date^_^2011_+_m1,......]
+         * dava.value的map的value -- 单元格的具体数值
+         */
         Map<String, Map<String, BigDecimal>> data = Maps.newHashMap();
         SearchIndexResultRecord record = null;
+        // 按行遍历结果集，构建基于单元格的数据模型
         while (this.tesseractResultSet.next()) {
+            
             record = (SearchIndexResultRecord) this.tesseractResultSet.getCurrentRecord();
             StringBuilder oneLine = new StringBuilder();
+            
+            // 构建行轴元数据key的交叉值
             for (MemberTreePropResult rowHeadName : rowHeadNames) {
-                
                 for(String prop : rowHeadName.queryPropers.keySet()) {
                     String value = tesseractResultSet.getString(prop);
                     if (rowHeadName.queryPropers.get(prop).isEmpty() 
@@ -198,6 +209,8 @@ public class DataModelBuilder {
             }else{
                 oneLine.append(BLANK_ROW);
             }
+            
+            // 构建列轴元数据的交叉key
             Map<String, BigDecimal> colValues = Maps.newHashMap();
             StringBuilder oneColumn = new StringBuilder();
             for (MemberTreePropResult colHeadName : colHeadNames) {
@@ -213,18 +226,31 @@ public class DataModelBuilder {
                 }
                 
             }
+            
+            // 获取单元格值
             for (MiniCubeMeasure measure : queryContext.getQueryMeasures()) {
                 StringBuilder columnKey = new StringBuilder();
                 columnKey.append(oneColumn);
                 columnKey.append(measure.getName());
                 colValues.put(columnKey.toString(), tesseractResultSet.getBigDecimal(measure.getDefine()));
             }
+            
+            // 单行数据构建完毕
             data.put(oneLine.toString(), colValues);
         }
 
         return data;
     }
 
+    /**
+     * 依据维度成员以及指标定义构建行轴或者列轴的key字段
+     * 比如：地区产品交叉作为数据集的行，输入参数格式为：
+     * [[北京， 上海]，[食品，家电，玩具]]
+     * 返回结果[北京_+_食品，北京_+_家电，......, 上海_+_食品，......]
+     * @param nodeNames 交叉维度名称
+     * @param measures 如果取行轴标示，值为空(后续行列转置可能会有不同)
+     * @return List<String> 按照顺序生成的轴的key
+     */
     private List<String> generateAxisKeys(List<List<String>> nodeNames, List<MiniCubeMeasure> measures) {
         List<String> axisKeys = new ArrayList<String>();
         if (CollectionUtils.isNotEmpty(nodeNames)) {
