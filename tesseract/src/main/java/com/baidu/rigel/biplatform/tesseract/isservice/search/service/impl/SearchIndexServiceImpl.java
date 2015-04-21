@@ -46,6 +46,7 @@ import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexState;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
+import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
@@ -53,6 +54,7 @@ import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
@@ -231,6 +233,7 @@ public class SearchIndexServiceImpl implements SearchService {
             LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                     "merging result from multiple index"));
             result = mergeResultSet(idxShardResultSetList, query);
+            
             StringBuilder sb = new StringBuilder();
             sb.append("cost :").append(System.currentTimeMillis() - current)
                     .append(" in get result record,result size:").append(result.size()).append(" shard size:")
@@ -265,6 +268,9 @@ public class SearchIndexServiceImpl implements SearchService {
         resultList.forEach(set -> {
             result.getDataList().addAll(set.getDataList()); 
         });
+        // TODO 需要验证是否合理 合并完数据后需要再次进行结果集合并
+        List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
+        result.setDataList (rs);
         return result;
 
     }
