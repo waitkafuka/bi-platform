@@ -6,9 +6,7 @@ import java.sql.PreparedStatement;
 import java.util.List;
 
 import org.apache.log4j.Logger;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
@@ -23,13 +21,6 @@ public class DBInfoReaderTest {
 	 */
 	private static final Logger LOG  = Logger.getLogger(DBInfoReaderTest.class);
 	
-	/**
-	 * 
-	 */
-	@Before
-	public void testBefore() {
-		LOG.info("before " + DatasourceType.H2.getPrefix());
-	}
 	/**
 	 * 
 	 */
@@ -117,13 +108,5 @@ public class DBInfoReaderTest {
     	} catch (Exception e) {
     		e.printStackTrace();
     	}
-	}
-	
-	/**
-	 * 
-	 */
-	@After
-	public void testEnum() {
-		LOG.info("after " + DatasourceType.H2.getDriver());
 	}
 }
