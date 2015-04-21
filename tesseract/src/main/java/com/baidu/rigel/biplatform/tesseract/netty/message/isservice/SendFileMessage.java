@@ -74,7 +74,7 @@ public class SendFileMessage extends AbstractMessage {
         this.content = content;
         this.targetFilePath = targetFilePath;
         this.fileName=fileName;
-        this.messageHeader.setMd5sum(Md5Util.encode(new String(this.content)));
+        this.messageHeader.setMd5sum("1");
     }
     
     /*
@@ -98,7 +98,7 @@ public class SendFileMessage extends AbstractMessage {
     @Override
     public String getMessageBodyMd5sum() {
         if (this.content != null) {
-            return Md5Util.encode(new String(this.content));
+            return "1";
         }
         return null;
     }

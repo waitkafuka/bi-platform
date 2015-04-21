@@ -144,8 +144,13 @@ public class CopyIndexServerHandler extends AbstractChannelInboundHandler {
 						int retryTimes=0;
 						ServerFeedbackMessage backMessage = null;
 						while (retryTimes < TesseractConstant.RETRY_TIMES) {
-							backMessage = isClient.copyIndexDataToRemoteNode(srcFilePath, currTargetFilePath, true, toNode);
-							if (backMessage.getResult().equals(FileUtils.SUCC)) {						
+							try{
+								backMessage = isClient.copyIndexDataToRemoteNode(srcFilePath, currTargetFilePath, true, toNode);
+							}catch(Exception e){
+								logger.warn("exception occured when copy index data to remote node",e);
+							}
+							
+							if (backMessage!=null && backMessage.getResult().equals(FileUtils.SUCC)) {						
 								logger.info(String
 										.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
 												"writeIndex", "copy index success to "
@@ -160,6 +165,13 @@ public class CopyIndexServerHandler extends AbstractChannelInboundHandler {
 								retryTimes++;
 							}
 
+						}
+						if(backMessage==null){
+							
+							MessageHeader mh=new MessageHeader(ACTION_FEEDBACK);
+					        String result=FileUtils.FAIL;
+					        String message="copy failed";
+					        backMessage=new ServerFeedbackMessage(mh,result,message);
 						}
 						return backMessage;
 					}
