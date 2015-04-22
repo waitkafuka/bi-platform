@@ -89,13 +89,5 @@ public class TesseractConstant {
      */
     public static final String NEED_OTHERS_VALUE = "1";
     
-    /**
-     * 默认检查副本拷贝情况超时时间
-     */
-    public static final int DEFAULT_COPYINDEX_TIMEOUT=600000;
     
-    /**
-     * 默认检查副本拷贝情况间隔时间
-     */
-    public static final int DEFAULT_COOPYINDEX_CHECKINTERVAL=100000;
 }

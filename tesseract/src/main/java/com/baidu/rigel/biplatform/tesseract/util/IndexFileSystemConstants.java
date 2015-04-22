@@ -31,12 +31,32 @@ public class IndexFileSystemConstants {
     /**
      * FETCH_SIZE_FROM_DATASOURCE
      */
-    public static final long FETCH_SIZE_FROM_DATASOURCE = 1000000;
+    public static final long FETCH_SIZE_FROM_DATASOURCE = 10000;
     
     /**
      * INDEX_DATA_TOTAL_IN_LIMITEDMODEL
      */
     public static final long INDEX_DATA_TOTAL_IN_LIMITEDMODEL = 1000;
+    
+    /**
+     * 默认复本数
+     */
+    public static final int DEFAULT_SHARD_REPLICA_NUM = 2;
+    
+    /**
+     * 默认检查副本拷贝情况超时时间
+     */
+    public static final int DEFAULT_COPYINDEX_TIMEOUT=600000;
+    
+    /**
+     * 默认检查副本拷贝情况间隔时间
+     */
+    public static final int DEFAULT_COOPYINDEX_CHECKINTERVAL=100000;
+    
+    /**
+     * 默认一个索引元数据建索引的间隔
+     */
+    public static final int DEFAULT_INDEX_INTERVAL=1800000;
     
     /**
      * FACTTABLE_KEY
