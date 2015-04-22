@@ -141,6 +141,11 @@ public class SearchIndexServiceImpl implements SearchService {
             result = queryWithDatabase (query);
         } else {
             result = queryWithIndex (query, idxMeta);
+         // 多个分片，需要进行再次进行agg计算
+            if (idxMeta.getIdxShardList ().size () > 1) {
+                List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
+                result.setDataList (rs);
+            }
         }
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
@@ -173,12 +178,6 @@ public class SearchIndexServiceImpl implements SearchService {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                 "merging result from multiple index"));
         result = mergeResultSet(idxShardResultSetList, query);
-     // 多个分片，需要进行再次进行agg计算
-        if (idxMeta.getIdxShardList ().size () > 1) {
-            List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
-            result.setDataList (rs);
-        }
-
         StringBuilder sb = new StringBuilder();
         sb.append("cost :").append(System.currentTimeMillis() - current)
         .append(" in get result record,result size:").append(result.size()).append(" shard size:")
