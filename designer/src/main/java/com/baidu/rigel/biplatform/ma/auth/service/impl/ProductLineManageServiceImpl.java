@@ -126,10 +126,12 @@ public class ProductLineManageServiceImpl implements ProductLineManageService {
             }
             for (String file : fileList) {
                 String realName = file.split(NAME_PWD_SEPERATOR)[0];
+                String userName = name.split(NAME_PWD_SEPERATOR)[0];
                 if (hasPwd) {
                     realName = file;
+                    userName = name;
                 }
-                if (realName.equals(name)) {
+                if (realName.equals(userName)) {
                     return true;
                 }
             }
