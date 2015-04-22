@@ -118,7 +118,6 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public SearchIndexResultSet query(QueryRequest query) throws IndexAndSearchException {
-        ExecutorCompletionService<SearchIndexResultSet> completionService = new ExecutorCompletionService<>(taskExecutor);
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard
@@ -129,126 +128,170 @@ public class SearchIndexServiceImpl implements SearchService {
         // 7. return
 
         if (query == null || StringUtils.isEmpty(query.getCubeId())) {
-            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query
-                    + "]"));
-            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                    IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
-                    IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
-                    IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
+            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query + "]"));
+            throw new IndexAndSearchException(getExceptionMessage (),
+                IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
         }
         IndexMeta idxMeta =
-                this.idxMetaService.getIndexMetaByCubeId(query.getCubeId(), query.getDataSourceInfo()
-                        .getDataSourceKey());
+                idxMetaService
+                .getIndexMetaByCubeId(query.getCubeId(), query.getDataSourceInfo().getDataSourceKey());
 
         SearchIndexResultSet result = null;
-        long current = System.currentTimeMillis();
-        if (idxMeta == null
-                || idxMeta.getIdxState().equals(IndexState.INDEX_UNAVAILABLE)
-                || idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT)
-                || !query.isUseIndex()
-                || (query.getFrom() != null && query.getFrom().getFrom() != null && !idxMeta.getDataDescInfo()
-                        .getTableNameList().contains(query.getFrom().getFrom()))
-                || !indexMetaContains(idxMeta, query)) {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "use database"));
-            // index does not exist or unavailable,use db query
-            SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
-            SqlDataSourceWrap dataSourceWrape = null;
-            try {
-                dataSourceWrape =
-                        (SqlDataSourceWrap) this.dataSourcePoolService.getDataSourceByKey(query.getDataSourceInfo());
-            } catch (DataSourceException e) {
-                LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query
-                        + "]", e));
-                throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                        IndexAndSearchException.QUERYEXCEPTION_MESSAGE, IndexAndSearchExceptionType.SQL_EXCEPTION), e,
-                        IndexAndSearchExceptionType.SQL_EXCEPTION);
-            }
-            if (dataSourceWrape == null) {
-                throw new IllegalArgumentException();
-            }
-
-            long limitStart = 0;
-            long limitSize = 0;
-            if (query.getLimit() != null) {
-                limitStart = query.getLimit().getStart();
-                if (query.getLimit().getSize() > 0) {
-                    limitSize = query.getLimit().getSize();
-                }
-                
-            }
-            SearchIndexResultSet currResult =
-                    this.dataQueryService.queryForListWithSQLQueryAndGroupBy(sqlQuery, dataSourceWrape, limitStart,
-                            limitSize, query);
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "db return "
-                    + currResult.size() + " records"));
-            result = currResult;
+        if (queryUseDatabase (query, idxMeta)) {
+            result = queryWithDatabase (query);
         } else {
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "use index"));
+            result = queryWithIndex (query, idxMeta);
+        }
 
-            LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " before prepare get record.");
-            current = System.currentTimeMillis();
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
+                "merging final result"));
 
-            List<SearchIndexResultSet> idxShardResultSetList = new ArrayList<SearchIndexResultSet>();
-            for (IndexShard idxShard : idxMeta.getIdxShardList()) {
-            	
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
+        return result;
+    }
+
+    private String getExceptionMessage() {
+        return TesseractExceptionUtils.getExceptionMessage(
+                IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
+                IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
+    }
+
+    /**
+     * 根据查询请求通过索引查询数据
+     * @param query 查询请求
+     * @param idxMeta 索引元数据信息
+     * @return SearchIndexResultSet
+     * @throws IndexAndSearchException
+     */
+    private SearchIndexResultSet queryWithIndex(QueryRequest query, IndexMeta idxMeta) throws IndexAndSearchException {
+        SearchIndexResultSet result;
+        long current = System.currentTimeMillis();
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "use index"));
+//        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " before prepare get record.");
+//            current = System.currentTimeMillis();
+        List<SearchIndexResultSet> idxShardResultSetList = executeQueryWithIndex (query, idxMeta);
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
+                "merging result from multiple index"));
+        result = mergeResultSet(idxShardResultSetList, query);
+     // 多个分片，需要进行再次进行agg计算
+        if (idxMeta.getIdxShardList ().size () > 1) {
+            List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
+            result.setDataList (rs);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("cost :").append(System.currentTimeMillis() - current)
+        .append(" in get result record,result size:").append(result.size()).append(" shard size:")
+        .append(idxShardResultSetList.size());
+        
+        LOGGER.info(sb.toString());
+        return result;
+    }
+
+    private List<SearchIndexResultSet> executeQueryWithIndex(QueryRequest query, IndexMeta idxMeta)
+        throws IndexAndSearchException {
+        ExecutorCompletionService<SearchIndexResultSet> completionService = 
+            new ExecutorCompletionService<>(taskExecutor);
+        for (IndexShard idxShard : idxMeta.getIdxShardList()) {
             	if(idxShard.getIdxState().equals(IndexState.INDEX_UNINIT)){
-            		continue;
+            	    continue;
             	}
-            	
-                completionService.submit(new Callable<SearchIndexResultSet>() {
-                    
-                    @Override
-                    public SearchIndexResultSet call() throws Exception {
-                        try {
-                            long current = System.currentTimeMillis();
-                            Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
-                            searchNode.searchRequestCountAdd();
-                            isNodeService.saveOrUpdateNodeInfo(searchNode);
-                            LOGGER.info("begin search in shard:{}", idxShard);
-                            SearchIndexResultSet result = (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();
-                            searchNode.searchrequestCountSub();
-                            isNodeService.saveOrUpdateNodeInfo(searchNode);
-                            LOGGER.info("compelete search in shard:{},take:{} ms",idxShard, System.currentTimeMillis() - current);
-                            return result;
-                        } catch (Exception e) {
-                            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
-                                    IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
-                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
-                                    IndexAndSearchExceptionType.NETWORK_EXCEPTION);
-                        }
-                        
-                    }
-                });
+            final Callable<SearchIndexResultSet> queryTask = genQueryTask (query, idxMeta, idxShard);
+            completionService.submit(queryTask);
+        }
+        List<SearchIndexResultSet> idxShardResultSetList = buildResultListWithTask (completionService, idxMeta);
+        return idxShardResultSetList;
+    }
+
+    private List<SearchIndexResultSet> buildResultListWithTask(
+            ExecutorCompletionService<SearchIndexResultSet> completionService,
+            IndexMeta idxMeta) throws IndexAndSearchException {
+        List<SearchIndexResultSet> idxShardResultSetList = new ArrayList<SearchIndexResultSet>();
+        for(int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
+            try {
+                idxShardResultSetList.add(completionService.take().get());
+            } catch (InterruptedException | ExecutionException e) {
+                throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                        IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
+                        IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
+                        IndexAndSearchExceptionType.NETWORK_EXCEPTION);
             }
-            for(int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
+        }
+        return idxShardResultSetList;
+    }
+
+    private Callable<SearchIndexResultSet> genQueryTask(QueryRequest query,
+        IndexMeta idxMeta, IndexShard idxShard) {
+        return new Callable<SearchIndexResultSet>() {
+            
+            @Override
+            public SearchIndexResultSet call() throws Exception {
                 try {
-                    idxShardResultSetList.add(completionService.take().get());
-                } catch (InterruptedException | ExecutionException e) {
+                    long current = System.currentTimeMillis();
+                    Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
+                    searchNode.searchRequestCountAdd();
+                    isNodeService.saveOrUpdateNodeInfo(searchNode);
+                    LOGGER.info("begin search in shard:{}", idxShard);
+                    SearchIndexResultSet result = (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();
+                    searchNode.searchrequestCountSub();
+                    isNodeService.saveOrUpdateNodeInfo(searchNode);
+                    LOGGER.info("compelete search in shard:{},take:{} ms",idxShard, System.currentTimeMillis() - current);
+                    return result;
+                } catch (Exception e) {
                     throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                             IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
                             IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,
                             IndexAndSearchExceptionType.NETWORK_EXCEPTION);
                 }
+                
             }
-            LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
-                    "merging result from multiple index"));
-            result = mergeResultSet(idxShardResultSetList, query);
-            
-            StringBuilder sb = new StringBuilder();
-            sb.append("cost :").append(System.currentTimeMillis() - current)
-                    .append(" in get result record,result size:").append(result.size()).append(" shard size:")
-                    .append(idxShardResultSetList.size());
+        };
+    }
 
-            LOGGER.info(sb.toString());
-            current = System.currentTimeMillis();
+    private SearchIndexResultSet queryWithDatabase(QueryRequest query)
+            throws IndexAndSearchException {
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "use database"));
+        // index does not exist or unavailable,use db query
+        SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
+        SqlDataSourceWrap dataSourceWrape = null;
+        try {
+            dataSourceWrape =
+                    (SqlDataSourceWrap) this.dataSourcePoolService.getDataSourceByKey(query.getDataSourceInfo());
+        } catch (DataSourceException e) {
+            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query
+                    + "]", e));
+            throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
+                    IndexAndSearchException.QUERYEXCEPTION_MESSAGE, IndexAndSearchExceptionType.SQL_EXCEPTION), e,
+                    IndexAndSearchExceptionType.SQL_EXCEPTION);
+        }
+        if (dataSourceWrape == null) {
+            throw new IllegalArgumentException();
         }
 
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
-                "merging final result"));
-        
+        long limitStart = 0;
+        long limitSize = 0;
+        if (query.getLimit() != null) {
+            limitStart = query.getLimit().getStart();
+            if (query.getLimit().getSize() > 0) {
+                limitSize = query.getLimit().getSize();
+            }
+        }
+        SearchIndexResultSet currResult =
+                this.dataQueryService.queryForListWithSQLQueryAndGroupBy(sqlQuery, dataSourceWrape, limitStart,
+                        limitSize, query);
+        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "db return "
+                + currResult.size() + " records"));
+        return currResult;
+    }
 
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
-        return result;
+    private boolean queryUseDatabase(QueryRequest query, IndexMeta idxMeta) {
+        return idxMeta == null
+                || idxMeta.getIdxState().equals(IndexState.INDEX_UNAVAILABLE)
+                || idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT)
+                || !query.isUseIndex()
+                || (query.getFrom() != null && query.getFrom().getFrom() != null && !idxMeta.getDataDescInfo()
+                        .getTableNameList().contains(query.getFrom().getFrom()))
+                || !indexMetaContains(idxMeta, query);
     }
 
     /**
@@ -268,11 +311,7 @@ public class SearchIndexServiceImpl implements SearchService {
         resultList.forEach(set -> {
             result.getDataList().addAll(set.getDataList()); 
         });
-        // TODO 需要验证是否合理 合并完数据后需要再次进行结果集合并
-        List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
-        result.setDataList (rs);
         return result;
-
     }
     
     /**
