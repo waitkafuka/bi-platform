@@ -36,8 +36,8 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
@@ -274,7 +274,7 @@ public class DataSourceResource extends BaseResource {
         }
         define.setDbUser(request.getParameter("dbUser"));
         define.setDbPwd(request.getParameter("dbPwd"));
-        define.setType(DatasourceType.valueOf(request.getParameter("type")));
+        define.setDataSourceType(DataSourceType.valueOf("H2"));
     }
     
     /**

@@ -18,8 +18,8 @@ import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 /**
  * 
  * @author jiangyichao
@@ -327,8 +327,8 @@ public class DataSourceServiceImplTest {
     	}
     	// 创建数据源定义对象
     	DataSourceDefine dataSourceDefine = new DataSourceDefine();
-    	DatasourceType.H2.setPrefix("jdbc:h2:mem://");
-    	dataSourceDefine.setType(DatasourceType.H2);
+    	DataSourceType.H2.setPrefix("jdbc:h2:mem://");
+    	dataSourceDefine.setDataSourceType(DataSourceType.H2);
     	dataSourceDefine.setDbUser(username);
     	dataSourceDefine.setDbPwd(passwordEncrypt);
     	dataSourceDefine.setDbInstance(dbInstance);
@@ -346,7 +346,7 @@ public class DataSourceServiceImplTest {
     		Assert.assertNotNull(e);
     	}
     	// 设置正确的数据库前缀
-    	DatasourceType.H2.setPrefix("jdbc:h2:tcp://");    	
+    	DataSourceType.H2.setPrefix("jdbc:h2:tcp://");    	
     }
     
     /**
@@ -446,8 +446,8 @@ public class DataSourceServiceImplTest {
     	
     	// 创建数据源定义对象
     	DataSourceDefine dataSourceDefine = new DataSourceDefine();
-    	DatasourceType.H2.setPrefix("jdbc:h2:mem://");
-    	dataSourceDefine.setType(DatasourceType.H2);
+    	DataSourceType.H2.setPrefix("jdbc:h2:mem://");
+    	dataSourceDefine.setDataSourceType(DataSourceType.H2);
     	dataSourceDefine.setDbUser(username);
     	dataSourceDefine.setId(dbID);
     	dataSourceDefine.setDbPwd(passwordEncrypt);
@@ -500,6 +500,6 @@ public class DataSourceServiceImplTest {
     	}
     	
     	// 设置正确的数据库前缀
-    	DatasourceType.H2.setPrefix("jdbc:h2:tcp://"); 
+    	DataSourceType.H2.setPrefix("jdbc:h2:tcp://"); 
     }
 }

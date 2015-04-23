@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.ma.model.ds;
 
 import java.io.Serializable;
 
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 
 /**
@@ -50,11 +49,6 @@ public class DataSourceDefine implements Serializable {
     private String productLine;
     
     /**
-     * 数据库类型
-     */
-    private DatasourceType type = DatasourceType.MYSQL;
-    
-    /**
      * 数据库用户名称
      */
     private String dbUser;
@@ -82,7 +76,7 @@ public class DataSourceDefine implements Serializable {
     /**
      * 数据来源类型
      */
-    private SourceType sourceType = SourceType.RELATION_DATABASE;
+    private DataSourceType dataSourceType = DataSourceType.MYSQL;
     
     public String getId() {
         return id;
@@ -107,15 +101,7 @@ public class DataSourceDefine implements Serializable {
     public void setProductLine(String productLine) {
         this.productLine = productLine;
     }
-    
-    public DatasourceType getType() {
-        return type;
-    }
-    
-    public void setType(DatasourceType type) {
-        this.type = type;
-    }
-    
+        
     public String getDbUser() {
         return dbUser;
     }
@@ -186,21 +172,21 @@ public class DataSourceDefine implements Serializable {
     }
 
     /**
-     * @return the dataSourceType
+     * @return the sourceType
      */
-    public SourceType getDataSourceType() {
-        if (this.sourceType == null) {
-            return SourceType.RELATION_DATABASE;
+    public DataSourceType getDataSourceType() {
+        if (this.dataSourceType == null) {
+            return DataSourceType.MYSQL;
         }
-        return this.sourceType;
+        return this.dataSourceType;
     }
 
     /**
-     * @param dataSourceType the dataSourceType to set
+     * @param sourceType the sourceType to set
      */
-    public void setDataSourceType(SourceType sourceType) {
-        if (sourceType != null) {
-            this.sourceType = sourceType;
+    public void setDataSourceType(DataSourceType dataSourceType) {
+        if (dataSourceType != null) {
+            this.dataSourceType = dataSourceType;
         }
     }
     

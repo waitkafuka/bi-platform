@@ -9,8 +9,8 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.comm.util.ConfigUtil;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -65,7 +65,7 @@ public class DataSourceDefineUtilTest {
         ds.setProductLine("productline");
         ds.setHostAndPort("127.0.0.1:3306");
         ds.setDbInstance("db");
-        ds.setType(DatasourceType.MYSQL);
+        ds.setDataSourceType(DataSourceType.MYSQL);
         // 使用未加密密码，导致抛出异常
         try {
         	DataSourceDefineUtil.parseToDataSourceInfo(ds, security);
@@ -79,13 +79,13 @@ public class DataSourceDefineUtilTest {
         
         // Oracle数据库
         sqlDataSource.setDataBase(DataBase.ORACLE);
-        ds.setType(DatasourceType.ORACLE);
+        ds.setDataSourceType(DataSourceType.ORACLE);
         sqlDataSource.setJdbcUrls(Lists.newArrayList("jdbc:oracle:thin:127.0.0.1:3306:db"));
         Assert.assertEquals(sqlDataSource, DataSourceDefineUtil.parseToDataSourceInfo(ds, security));
         
         // H2数据库
         sqlDataSource.setDataBase(DataBase.H2);
-        ds.setType(DatasourceType.H2);
+        ds.setDataSourceType(DataSourceType.H2);
         sqlDataSource.setJdbcUrls(Lists.newArrayList("jdbc:h2:tcp://127.0.0.1:3306/db"));
         Assert.assertEquals(sqlDataSource, DataSourceDefineUtil.parseToDataSourceInfo(ds, security));
         

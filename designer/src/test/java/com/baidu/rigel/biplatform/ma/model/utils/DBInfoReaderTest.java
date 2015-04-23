@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
 import com.google.common.collect.Lists;
@@ -52,13 +52,13 @@ public class DBInfoReaderTest {
     		DBInfoReader dbInfoReader = null;
     		// 使用错误用户名和密码
     		try {
-    			dbInfoReader = DBInfoReader.build(DatasourceType.H2, "wrongName", passwordEncrypt, url, securityKey);    			
+    			dbInfoReader = DBInfoReader.build(DataSourceType.H2, "wrongName", passwordEncrypt, url, securityKey);    			
     		} catch(Exception e) {
     			Assert.assertNotNull(e);
     		}
     		
     		// 使用正确的用户名和密码
-    		dbInfoReader = DBInfoReader.build(DatasourceType.H2, username, passwordEncrypt, url, securityKey);
+    		dbInfoReader = DBInfoReader.build(DataSourceType.H2, username, passwordEncrypt, url, securityKey);
     		dbInfoReader.getDataBaseInformations();
     		Assert.assertNotNull(dbInfoReader);
     		
@@ -97,14 +97,14 @@ public class DBInfoReaderTest {
     			dbInfoReader.closeConn();
     		}
     		// 修改驱动名称，使其报异常
-    		DatasourceType.H2.setDriver("this is not the right driver");
+    		DataSourceType.H2.setDriver("this is not the right driver");
     		try {
-    			dbInfoReader = DBInfoReader.build(DatasourceType.H2, username, passwordEncrypt, url, securityKey);    			
+    			dbInfoReader = DBInfoReader.build(DataSourceType.H2, username, passwordEncrypt, url, securityKey);    			
     		} catch(Exception e) {
     			Assert.assertNotNull(e);
     		}
     		// 重新设置正确的driver
-    		DatasourceType.H2.setDriver("org.h2.Driver");
+    		DataSourceType.H2.setDriver("org.h2.Driver");
     	} catch (Exception e) {
     		e.printStackTrace();
     	}

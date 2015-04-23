@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderService;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
@@ -49,8 +51,6 @@ import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
 import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
-import com.baidu.rigel.biplatform.ma.model.utils.DBInfoReader;
-import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
@@ -229,20 +229,18 @@ public class DimConfigResource extends BaseResource {
                 logger.error(msg, e);
                 return ResourceUtils.getErrorResult(msg, 1);
             }
-            DBInfoReader reader = null;
+            DataSourceInfoReaderService dsInfoReaderService = null;
             String tableName = cubeTable.getName();
             if (cubeTable.isMutilple() && CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
                 tableName = cubeTable.getRegExpTables().get(0);
             }
             List<ColumnInfo> cols = null;
             try {
-                reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-                cols = reader.getColumnInfos(tableName);
-            } finally {
-                if (reader != null) {
-                    reader.closeConn(); 
-                }
+                dsInfoReaderService = DataSourceInfoReaderServiceFactory.
+                		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                cols = dsInfoReaderService.getColumnInfos(ds, securityKey, tableName);
+            } catch(Exception e) {
+            	logger.error("fail to get columninfos from datasource", e);
             }
             if (CollectionUtils.isEmpty(cols)) {
                 String msg = String.format("不能从表%s中获取字段！", tableName);
@@ -456,15 +454,14 @@ public class DimConfigResource extends BaseResource {
             return;
         }
         List<ColumnInfo> cols = null;
-        DBInfoReader reader = null;
+        DataSourceInfoReaderService dsInfoReaderService = null;
         try {
-            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-            cols = reader.getColumnInfos(starModel.getFactTable().getName());
-        } finally {
-            if (reader != null) {
-                reader.closeConn(); 
-            }
+            dsInfoReaderService = DataSourceInfoReaderServiceFactory.
+            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+            cols = dsInfoReaderService.getColumnInfos(ds, securityKey, starModel.getFactTable().getName());
+        } catch (Exception e) {
+            logger.error("[ERROR] --- --- --- --- fail to get columnInfos from datasource : {}", e.getMessage());
+            logger.error("[ERROR] --- --- --- --- stackTrace :", e);
         }
         if (cols == null || cols.isEmpty()) {
             return;

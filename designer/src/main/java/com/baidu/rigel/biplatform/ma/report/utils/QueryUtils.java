@@ -235,7 +235,7 @@ public final class QueryUtils {
             jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
         } catch (Exception e) {
         }
-        ds.setDataBase(DataBase.valueOf(dsDefine.getType().name()));
+        ds.setDataBase(DataBase.valueOf(dsDefine.getDataSourceType().name()));
         ds.setJdbcUrls(jdbcUrls);
         return ds;
     }

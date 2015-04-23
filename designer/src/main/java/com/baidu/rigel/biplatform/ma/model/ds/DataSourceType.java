@@ -13,16 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.model.consts;
+package com.baidu.rigel.biplatform.ma.model.ds;
 
 /**
- * 数据源的类型
  * 
- * @author zhongyi
+ * 数据来源类型
+ * @author david.wang
  *
- *         2014-7-29
  */
-public enum DatasourceType {
+public enum DataSourceType {    
+    /**
+     * excel 文件
+     */
+    EXCEL("", "", ""), 
+    
+    /**
+     * csv 文件
+     */
+    CSV("", "", ""),
+    
+    /**
+     * 普通文本文件
+     */
+    TXT("", "", ""),
+    
+    /**
+     * HDFS文件系统
+     */
+    HDFS("", "", ""),
+    
+    /**
+     * 列式数据存储介质
+     */
+    COL_DATABASE("", "", ""),
     /**
      * MYSQL
      */
@@ -68,7 +91,7 @@ public enum DatasourceType {
      * @param driver
      *            驱动
      */
-    private DatasourceType(String driver, String prefix, String div) {
+    private DataSourceType(String driver, String prefix, String div) {
         this.setDriver(driver);
         this.setPrefix(prefix);
         this.setDiv(div);

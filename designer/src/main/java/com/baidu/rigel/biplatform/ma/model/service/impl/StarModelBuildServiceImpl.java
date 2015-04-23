@@ -27,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.TimeType;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderService;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -43,8 +45,6 @@ import com.baidu.rigel.biplatform.ma.model.meta.TimeDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
 import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
-import com.baidu.rigel.biplatform.ma.model.utils.DBInfoReader;
-import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.TimeTypeAdaptorUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.RelationTableView;
@@ -119,26 +119,25 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         if (ds == null) {
             return Lists.newArrayList();
         }
-        String pwd = ds.getDbPwd();
-        DBInfoReader reader = null;
+        DataSourceInfoReaderService dsInfoReaderService = null;
         try {
-            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-            List<TableInfo> tables = reader.getAllTableInfos();
+            dsInfoReaderService = DataSourceInfoReaderServiceFactory.
+            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+            List<TableInfo> tables = dsInfoReaderService.getAllTableInfos(ds, securityKey);
             List<RelationTableView> relationTables = Lists.newArrayList();
             for (TableInfo table : tables) {
                 RelationTableView relation = new RelationTableView();
                 relation.setId(table.getId());
                 relation.setName(table.getName());
-                List<ColumnInfo> cols = reader.getColumnInfos(table.getId());
+                List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, table.getId());
                 relation.setFields(cols);
                 relationTables.add(relation);
             }
             return relationTables;
-        } finally {
-            if (reader != null) {
-                reader.closeConn(); 
-            }
+        } catch(Exception e) {
+            LOG.error("[ERROR] --- --- --- --- fail to get columnInfos from datasource : {}", e.getMessage());
+            LOG.error("[ERROR] --- --- --- --- stackTrace :", e);
+        	throw new DataSourceOperationException(e);
         }
         
     }
@@ -365,10 +364,10 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
             return Lists.newArrayList();
         }
         
-        DBInfoReader reader = null;
+        DataSourceInfoReaderService dsInfoReaderService = null;
         try {
-            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            dsInfoReaderService = DataSourceInfoReaderServiceFactory.
+            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
             for (NormalDimDetail detail : normal.getChildren()) {
                 StandardDimTableMetaDefine stand = new StandardDimTableMetaDefine();
                 ReferenceDefine reference = new ReferenceDefine();
@@ -377,14 +376,13 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
                 stand.setReference(reference);
                 stand.setName(detail.getRelationTable());
                 
-                List<ColumnInfo> cols = reader.getColumnInfos(detail.getRelationTable());
+                List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, detail.getRelationTable());
                 stand.addColumns(parseToDefine(cols));
                 standMetaDefines.add(stand);
             }
-        } finally {
-            if (reader != null) {
-                reader.closeConn();
-            }
+        } catch (Exception e) {
+        	LOG.error("fail to get columnInfos from datasource");
+        	throw new DataSourceOperationException(e);
         }
         return standMetaDefines;
     }

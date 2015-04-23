@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderService;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -32,8 +34,6 @@ import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
 import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
-import com.baidu.rigel.biplatform.ma.model.utils.DBInfoReader;
-import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.RegExUtils;
 import com.google.common.collect.Lists;
 
@@ -68,21 +68,18 @@ public class CubeBuildServiceImpl implements CubeBuildService {
     @Override
     public List<TableInfo> getAllTable(String dsId, String securityKey) throws DataSourceOperationException {
         DataSourceDefine ds = null;
-        DBInfoReader reader = null;
+        DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             ds = dsService.getDsDefine(dsId);
-            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-            List<TableInfo> tables = reader.getAllTableInfos();
+            dsInfoReaderService = DataSourceInfoReaderServiceFactory.
+            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+            List<TableInfo> tables = dsInfoReaderService.getAllTableInfos(ds, securityKey);
             return tables;
         } catch (Exception e) {
-            logger.error("Fail in get ds by id: " + dsId, e);
+            logger.error("[ERROR] --- --- --- --- Fail in read ds by id: " + dsId + ": {}", e.getMessage());
+            logger.error("[ERROR] --- --- --- --- stackTrace :", e);
             throw new DataSourceOperationException(e);
-        } finally {
-            if (reader != null) {
-                reader.closeConn();
-            }
-        }
+        } 
     }
     
     /*
@@ -106,10 +103,10 @@ public class CubeBuildServiceImpl implements CubeBuildService {
             logger.info("can not get datasource define with id : " + dsId, e);
             throw e;
         }
-        DBInfoReader reader = null;
+        DataSourceInfoReaderService dsInfoReaderService = null;
         try {
-            reader = DBInfoReader.build(ds.getType(), ds.getDbUser(), ds.getDbPwd(),
-                    DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
+            dsInfoReaderService = DataSourceInfoReaderServiceFactory.
+            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
             for (String key : tableMap.keySet()) {
                 String[] tables = tableMap.get(key);
                 FactTableMetaDefine tableMeta = null;
@@ -119,7 +116,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                         tableMeta.setCubeId(table);
                         tableMeta.setName(table);
                         tableMeta.setMutilple(false);
-                        List<ColumnInfo> cols = reader.getColumnInfos(table);
+                        List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, table);
                         addColumnToTableMeta(tableMeta, cols);
                         tableMetas.add(tableMeta);
                     }
@@ -131,16 +128,16 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                     tableMeta.setRegExp(key);
                     if (tables != null && tables.length > 0) {
                         String tableExample = tables[0];
-                        List<ColumnInfo> cols = reader.getColumnInfos(tableExample);
+                        List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, tableExample);
                         addColumnToTableMeta(tableMeta, cols);
                     }
                     tableMetas.add(tableMeta);
                 }
             }
-        } finally {
-            if (reader != null) {
-                reader.closeConn();
-            }
+        } catch (Exception e) {
+            logger.error("[ERROR] --- --- --- --- Fail in read ds by id: " + dsId + ": {}", e.getMessage());
+            logger.error("[ERROR] --- --- --- --- stackTrace :", e);
+            throw new DataSourceOperationException(e);
         }
         return tableMetas;
     }

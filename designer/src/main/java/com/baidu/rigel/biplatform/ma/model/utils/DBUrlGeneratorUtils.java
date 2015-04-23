@@ -22,8 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.exception.DBInfoReadException;
 
 /**
@@ -58,10 +58,10 @@ public final class DBUrlGeneratorUtils {
         if (ds == null) {
             throw new DBInfoReadException("Datasource can not be null! ");
         }
-        DatasourceType type = ds.getType();
+        DataSourceType type = ds.getDataSourceType();
         String connUrl = type.getPrefix() + ds.getHostAndPort() + type.getDiv() + ds.getDbInstance();
         if (StringUtils.hasText(ds.getEncoding())) {
-            if (type == DatasourceType.MYSQL || type == DatasourceType.MYSQL_DBPROXY) {
+            if (type == DataSourceType.MYSQL || type == DataSourceType.MYSQL_DBPROXY) {
                 connUrl = connUrl + "?useUniCode=true&characterEncoding=" + ds.getEncoding();
             }
         }

@@ -25,7 +25,7 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.comm.util.ConfigUtil;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
@@ -82,7 +82,7 @@ public final class DataSourceDefineUtil {
      */
     public static SqlDataSourceInfo parseToDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
         SqlDataSourceInfo dsInfo = new SqlDataSourceInfo(dsDefine.getId());
-        dsInfo.setDataBase(parseToDataBase(dsDefine.getType()));
+        dsInfo.setDataBase(parseToDataBase(dsDefine.getDataSourceType()));
         dsInfo.setDBProxy(true);
         try {
             dsInfo.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
@@ -105,7 +105,7 @@ public final class DataSourceDefineUtil {
         return dsInfo;
     }
     
-    private static DataBase parseToDataBase(DatasourceType dsType) {
+    private static DataBase parseToDataBase(DataSourceType dsType) {
         switch (dsType) {
             case MYSQL:
                 return DataBase.MYSQL;

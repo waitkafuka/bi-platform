@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.ds.service.impl;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -32,13 +33,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceConnectionService;
+import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
-import com.baidu.rigel.biplatform.ma.model.utils.DBInfoReader;
-import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 
 /**
@@ -166,32 +167,25 @@ public class DataSourceServiceImpl implements DataSourceService {
      */
     @Override
     public boolean isValidateConn(DataSourceDefine ds, String securityKey) {
-        DBInfoReader dBInfoReader = null; // new DBInfoReader();
+    	DataSourceConnectionService<?> dsConnService = null;
         try {
-                // 创建数据库连接，如果不抛出异常，说明连接字符串正确，返回true
-            dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), 
-                        ds.getDbPwd(),
-                        DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-            return true;
-               
+        	// 获取数据源连接，如果不抛出异常，说明连接字符串有效，返回true；
+            dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(ds.getDataSourceType());
+            boolean result = dsConnService.isValidateDataSource(ds, securityKey);
+            if (result) {
+            	return true;
+            }           
+            // 如果第一次验证失败，需对密码进行加密后重新验证
+            String pwd = AesUtil.getInstance().encryptAndUrlEncoding(ds.getDbPwd(), securityKey);                
+            // dirty solution 兼容原有数据源定义 
+            // 对密码进行加密
+            ds.setDbPwd(pwd);
+            return  dsConnService.isValidateDataSource(ds, securityKey);             	
         } catch (Exception e) {
-            try {
-                String pwd = AesUtil.getInstance().encryptAndUrlEncoding(ds.getDbPwd(), securityKey);
-                dBInfoReader = DBInfoReader.build(ds.getType(), ds.getDbUser(), pwd,
-                        DBUrlGeneratorUtils.getConnUrl(ds), securityKey);
-                // dirty solution 兼容原有数据源定义 
-                ds.setDbPwd(pwd);
-                return true;
-            } catch (Exception e1) {
-                logger.error(e1.getMessage());
-                throw new RuntimeException(e1);
-            }
-        } finally {
-            // 关闭数据库连接
-            if (dBInfoReader != null) {
-                dBInfoReader.closeConn();
-            }
-        }
+			logger.error(e.getMessage());
+			throw new RuntimeException(e);
+        } 
     }
     
     /**

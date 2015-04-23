@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
-import com.baidu.rigel.biplatform.ma.model.consts.DatasourceType;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.exception.DBInfoReadException;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
@@ -71,7 +71,7 @@ public class DBInfoReader {
      * @param securityKey 
      * @return reader对象
      */
-    public static DBInfoReader build(DatasourceType type, String user, String password,
+    public static DBInfoReader build(DataSourceType type, String user, String password,
         String url, String securityKey) {
         DBInfoReader reader = new DBInfoReader();
         DatabaseMetaData dbMetaData = null;
