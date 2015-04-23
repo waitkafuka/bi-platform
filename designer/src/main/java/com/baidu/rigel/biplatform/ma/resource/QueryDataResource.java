@@ -1186,10 +1186,10 @@ public class QueryDataResource extends BaseResource {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
-            root.put("uniqName", params.get (item.getOlapElementId ()).toString ());
+            root.put("uniqName", "@" + params.get (item.getOlapElementId ()).toString () + "@");
         } else {
             String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
-            root.put ("uniqName", uniqueName);
+            root.put ("uniqName", "@" + uniqueName  + "@");
         }
         RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
 //        String uniqueName = rowHeadField.getUniqueName();
@@ -1278,6 +1278,8 @@ public class QueryDataResource extends BaseResource {
         long begin = System.currentTimeMillis();
         logger.info("[INFO]------ begin drill down operation");
         String uniqueName = request.getParameter("uniqueName");
+        boolean isRoot = uniqueName.startsWith ("@") && uniqueName.endsWith ("@");
+        uniqueName = uniqueName.replace ("@", "");
         ReportDesignModel model;
         try {
             model = this.getDesignModelFromRuntimeModel(reportId);
@@ -1314,10 +1316,9 @@ public class QueryDataResource extends BaseResource {
         }
         
         QueryAction action = null; //(QueryAction) runTimeModel.getContext().get(uniqueName);
-        boolean isRoot = false;
         String drillTargetUniqueName = null;
         if (uniqueName.contains (",")) {
-            isRoot = true;
+//            isRoot = true;
             String[] uniqueNameArray = uniqueName.split (",");
             String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueNameArray[0]);
             Map<String, Item> store = runTimeModel.getUniversalItemStore().get(logicModelAreaId);
@@ -1346,7 +1347,7 @@ public class QueryDataResource extends BaseResource {
             }
             drillTargetUniqueName = uniqNames[uniqNames.length - 1];
             logger.info("[INFO] drillTargetUniqueName : {}", drillTargetUniqueName);
-            isRoot = drillTargetUniqueName.toLowerCase().contains("all");
+//            isRoot = drillTargetUniqueName.toLowerCase().contains("all");
             Map<String, String[]> oriQueryParams = Maps.newHashMap();
             
             String dimName = MetaNameUtil.getDimNameFromUniqueName(drillTargetUniqueName);
@@ -1375,9 +1376,10 @@ public class QueryDataResource extends BaseResource {
              * 把下钻的值存下来
              * TODO 临时放在这里，需要重新考虑
              */
-            if (row != null && queryParams.containsKey(row.getOlapElementId())) {
-                action.getDrillDimValues().put(row,
-                        queryParams.get(row.getOlapElementId()));
+            if (!isRoot) {
+                action.getDrillDimValues().put(row, drillTargetUniqueName);
+            } else {
+                action.getDrillDimValues().remove (row);
             }
         }
 //        runTimeModel.getContext().put(uniqueName, action);
