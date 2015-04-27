@@ -106,7 +106,7 @@ public class QueryRequestBuilder {
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
         	if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
-        		int size = nodeTrees.size();
+            int size = nodeTrees.size();
         		request.getWhere().setBetween(new Between());
         		request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
     			request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
