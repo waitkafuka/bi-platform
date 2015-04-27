@@ -48,9 +48,10 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.netty.message.NettyAction;
 import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
+
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -168,24 +169,24 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         }
         
         IndexWriter idxWriter = IndexWriterFactory.getIndexWriter (indexMsg.getIdxPath ());
-        SearchIndexResultSet data = null;
+        IndexDataResultSet data = null;
         
         if (indexMsg.getMessageHeader ().getAction ().equals (NettyAction.NETTY_ACTION_MOD)) {
             // 索引修订
             // S1:查找索引中存在的数据
             // Queue<ResultRecord>
             // dataQ=((SearchResultSet)indexMsg.getDataBody()).getResultQ();
-            List<SearchIndexResultRecord> dataQ = ((SearchIndexResultSet) indexMsg
+            List<IndexDataResultRecord> dataQ = ((IndexDataResultSet) indexMsg
                     .getDataBody ()).getDataList ();
-            Iterator<SearchIndexResultRecord> it = dataQ.iterator ();
+            Iterator<IndexDataResultRecord> it = dataQ.iterator ();
             
-            List<SearchIndexResultRecord> dataProcess = new ArrayList<SearchIndexResultRecord> ();
+            List<IndexDataResultRecord> dataProcess = new ArrayList<IndexDataResultRecord> ();
             List<Query> deleteQueryList = new ArrayList<Query> ();
             while (it.hasNext ()) {
-                SearchIndexResultRecord currRecord = it.next ();
+            	IndexDataResultRecord currRecord = it.next ();
                 // 查询
                 Query query = existInIndex (currRecord, indexMsg.getIdxPath (), indexMsg.getIdName (),
-                        ((SearchIndexResultSet) indexMsg.getDataBody ()).getMeta ());
+                        ((IndexDataResultSet) indexMsg.getDataBody ()).getMeta ());
                 if (query != null) {
                     // 如果存在，则从队列中删除
                     dataProcess.add (currRecord);
@@ -200,14 +201,14 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                 idxWriter.commit ();
             }
             // S3:设置需要重建索引的数据
-            data = new SearchIndexResultSet (
-                    ((SearchIndexResultSet) indexMsg.getDataBody ()).getMeta (),
+            data = new IndexDataResultSet (
+                    ((IndexDataResultSet) indexMsg.getDataBody ()).getMeta (),
                     dataProcess.size ());
             data.setDataList(dataProcess);
         }
         
         if (data == null) {
-            data = (SearchIndexResultSet) indexMsg.getDataBody ();
+            data = (IndexDataResultSet) indexMsg.getDataBody ();
         }
         
         logger.info (String.format (
@@ -298,7 +299,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                 "IndexServerHandler"));
     }
     
-    private Query existInIndex(SearchIndexResultRecord currRecord,
+    private Query existInIndex(IndexDataResultRecord currRecord,
             String idxPath, String queryField, Meta meta) throws Exception {
         Query result = null;
         SearcherManager searcherManager = IndexSearcherFactory.getInstance ()

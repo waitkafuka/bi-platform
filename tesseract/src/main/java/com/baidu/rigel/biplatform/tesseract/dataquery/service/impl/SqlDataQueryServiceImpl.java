@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.dataquery.service.impl;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,6 +40,8 @@ import com.baidu.rigel.biplatform.tesseract.dataquery.service.DataQueryService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultRecord;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
@@ -107,9 +110,25 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
      * javax.sql.DataSource, long, long)
      */
     @Override
-    public SearchIndexResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, DataSource dataSource, long limitStart,
-            long limitEnd) {
-        return querySqlList(sqlQuery, dataSource, limitStart, limitEnd);
+    public IndexDataResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, DataSource dataSource, long limitStart,
+            long limitEnd) throws IOException {
+    	
+    	SearchIndexResultSet data=querySqlList(sqlQuery, dataSource, limitStart, limitEnd);
+    	
+    	long curr=System.currentTimeMillis();
+    	IndexDataResultSet result=null;
+    	if(data != null) {
+    		result=new IndexDataResultSet(data.getMeta(),data.size());        	        	
+        	
+        	for(SearchIndexResultRecord sr:data.getDataList()){
+        		IndexDataResultRecord ir=new IndexDataResultRecord(sr.getFieldArray(),sr.getGroupBy());
+        		result.addRecord(ir);
+        	}
+        	
+    	}
+    	System.out.println("DATA TRANSFER COST : "+(System.currentTimeMillis()-curr)+" ms");
+    	return result;
+    	
     }
     
     

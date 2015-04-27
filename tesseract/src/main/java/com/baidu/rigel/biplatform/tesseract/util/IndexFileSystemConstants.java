@@ -31,7 +31,7 @@ public class IndexFileSystemConstants {
     /**
      * FETCH_SIZE_FROM_DATASOURCE
      */
-    public static final long FETCH_SIZE_FROM_DATASOURCE = 10000;
+    public static final long FETCH_SIZE_FROM_DATASOURCE = 1000000;
     
     /**
      * INDEX_DATA_TOTAL_IN_LIMITEDMODEL
