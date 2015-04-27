@@ -37,7 +37,7 @@ import com.google.common.collect.Sets;
  * 
  * 聚集计算
  * 
- * @author lijin
+ * @author lijin   
  *
  */
 public class AggregateCompute {
