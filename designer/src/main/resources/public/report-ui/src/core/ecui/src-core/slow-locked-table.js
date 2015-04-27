@@ -752,14 +752,14 @@
             var oEv = ev || window.event;
             var cliX = oEv.clientX;
             if (cliX > maxBoundary) {
-                console.log('return---clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
+                //console.log('return---clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
                 cliX = maxBoundary;
             }
             else if (cliX < minBoundary) {
-                console.log('return---clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
+                //console.log('return---clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
                 cliX = minBoundary;
             }
-            console.log('clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
+            //console.log('clientX:' + cliX + ';maxBoundary:' + maxBoundary + ';minBoundary:' + minBoundary);
             var lineLeft = cliX - disX;
             setStyle(dragBoxEl, 'left', lineLeft + 'px');
             difLeft = cliX - oldPosLeft;

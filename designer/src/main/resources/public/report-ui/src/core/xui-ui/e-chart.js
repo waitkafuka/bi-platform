@@ -299,8 +299,6 @@
                     })(i);
                 }
             }
-            // 重设图形区域（头部和内容）
-            me._eContent.style.height = (me.el.offsetHeight - me._eHeader.offsetHeight) + 'px';
         }
     };
 
@@ -789,7 +787,7 @@
             this._chartType === 'column'
             || this._chartType === 'bar'
             || this._chartType === 'line'
-            ) {
+        ) {
             dataZoom.show = false;
             var xNums = categories.data ? categories.data.length : 0;
             var enableSelectRange = false;
@@ -1004,16 +1002,18 @@
      * @public
      */
     UI_E_CHART_CLASS.$createChart = function (options) {
-        var that = this;
-        this._oChart = echarts.init(this._eContent);
-        this._oChart.setOption(options);
-        this._oChart.on(echarts.config.EVENT.CLICK, chartClick);
+        var me = this;
+        // 重设图形区域（头部和内容）
+        me._eContent.style.height = (me.el.offsetHeight - me._eHeader.offsetHeight) + 'px';
+        me._oChart = echarts.init(this._eContent);
+        me._oChart.setOption(options);
+        me._oChart.on(echarts.config.EVENT.CLICK, chartClick);
         function chartClick(args) {
             var o = {
                 name: args.name,
-                dimMap: that._dimMap
+                dimMap: me._dimMap
             };
-            that.notify('chartClick', o);
+            me.notify('chartClick', o);
         }
     };
     /**

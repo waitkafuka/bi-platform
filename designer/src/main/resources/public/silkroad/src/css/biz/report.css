@@ -937,3 +937,46 @@
     font-size: 14px;
     width: 100%;
 }
+
+/**
+ * @name                      :图形指标颜色设置
+ * @author                    :lizhantong
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :数据格式设置模块
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.text-align-set {
+    width: 300px;
+}
+.text-align-set .text-align-set-area {
+    float: left;
+    margin-top: 10px;
+}
+.text-align-set-area > label {
+    float: left;
+    width: 100%;
+    font-weight: bold;
+}
+.text-align-set-area .text-align-set-item {
+    float: left;
+    margin-top: 10px;
+}
+.text-align-set-item > label {
+    float: left;
+    width: 110px;
+    text-align: right;
+    line-height: 20px;
+    height: 20px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.text-align-set-item > select {
+    float: left;
+    width: 150px;
+    line-height: 20px;
+    height: 20px;
+}
+/*@end*/

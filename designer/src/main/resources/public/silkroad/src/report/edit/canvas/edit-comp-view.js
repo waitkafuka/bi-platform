@@ -12,6 +12,7 @@ define([
         'constant',
         'report/edit/canvas/edit-comp-model',
         'report/edit/canvas/chart-setting/chart-setting-view',
+        'report/edit/canvas/table-setting/table-setting-view',
         // html模板区域
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
@@ -35,6 +36,7 @@ define([
         Constant,
         EditCompModel,
         ChartSettingView,
+        TableSettingView,
         // html模板区域
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
@@ -544,8 +546,7 @@ define([
 
                     // 调整画布大小
                     that.canvasView.parentView.ueView.setSize();
-
-                    that._initChartSettingView($compSetting[0]);
+                    that['_init' + compType + 'SettingView'] && (that['_init' + compType + 'SettingView']($compSetting[0]));
                 });
             },
 
@@ -1739,16 +1740,32 @@ define([
                 );
             },
             /**
-             * 下拉卡框添加默认值公共函数
+             * 初始化图形设置区域视图
              *
              * @param {HTMLEelement} 图形编辑区的dom元素
              * @private
              */
-            _initChartSettingView: function (el) {
+            _initCHARTSettingView: function (el) {
                 if(this.chartSettingView) {
                     this.chartSettingView.destroy();
                 }
                 this.chartSettingView = new ChartSettingView({
+                    el: el,
+                    reportId: this.model.reportId,
+                    canvasView: this.canvasView
+                });
+            },
+            /**
+             * 初始化表格设置区域视图
+             *
+             * @param {HTMLEelement} 表格编辑区的dom元素
+             * @private
+             */
+            _initTABLESettingView: function (el) {
+                if(this.tableSettingView) {
+                    this.tableSettingView.destroy();
+                }
+                this.tableSettingView = new TableSettingView({
                     el: el,
                     reportId: this.model.reportId,
                     canvasView: this.canvasView
