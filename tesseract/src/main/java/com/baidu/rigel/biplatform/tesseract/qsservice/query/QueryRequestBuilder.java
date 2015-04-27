@@ -31,6 +31,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Between;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.From;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Limit;
@@ -104,8 +105,22 @@ public class QueryRequestBuilder {
             expressions = new HashMap<String, Expression>();
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
+        	if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
+        		int size = nodeTrees.size();
+        		request.getWhere().setBetween(new Between());
+        		request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
+    			request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
+    			request.getWhere().getBetween().setEnd(nodeTrees.get(size - 1).getName());
+        	}
             for (MemberNodeTree node : nodeTrees) {
                 if (StringUtils.isNotBlank(node.getQuerySource()) && !MetaNameUtil.isAllMemberName(node.getName())) {
+                	if(node.isTime() && node.getChildren().size() > 1) {
+                		request.getWhere().setBetween(new Between());
+                		request.getWhere().getBetween().setProperties(node.getQuerySource());
+                		int size = node.getChildren().size(); 
+            			request.getWhere().getBetween().setStart(node.getChildren().get(0).getName());
+            			request.getWhere().getBetween().setEnd(node.getChildren().get(size - 1).getName());
+                	}
                     request.selectAndGroupBy(node.getQuerySource());
                     Expression expression = expressions.get(node.getQuerySource());
                     if (expression == null) {

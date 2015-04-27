@@ -214,7 +214,19 @@ public class QueryRequestUtil {
         // 处理where
         Map<String, List<String>> andCondition = transQueryRequestAndList2Map(query);
         List<String> whereList = new ArrayList<String>();
+        String betweenStr = null;
+        if(query.getWhere().getBetween() != null) {
+        	betweenStr = query.getWhere().getBetween().getProperties();
+        	selectList.add(betweenStr);
+        	result.getSqlFunction().put(betweenStr, "DATE_FORMAT(" + betweenStr + ", \"%Y%m%d\") as " + betweenStr);
+        	whereList.add(query.getWhere().getBetween().toString());
+        }
+        
+        
         for (String key : andCondition.keySet()) {
+        	if(key.equals(betweenStr)) {
+        		continue;
+        	}
             selectList.add(key);
             StringBuilder sb = new StringBuilder();
             sb.append(key);
