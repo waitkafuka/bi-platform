@@ -443,7 +443,7 @@ public final class DataModelUtils {
                     rowHead.setDrillByLink(false);
                     if (i == 0 && rowHead.getIndent () == 0) {
                         rowHead.setExpand (null);
-                    }
+                    } 
                 }
             }
         }
