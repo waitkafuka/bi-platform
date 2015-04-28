@@ -68,6 +68,45 @@ public class IndexMetaWriteImageEvent extends ApplicationEvent {
 		
 		return this.idxMeta;
 	}
+
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((idxMeta == null) ? 0 : idxMeta.hashCode ());
+        return result;
+    }
+
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass () != obj.getClass ()) {
+            return false;
+        }
+        IndexMetaWriteImageEvent other = (IndexMetaWriteImageEvent) obj;
+        if (idxMeta == null) {
+            if (other.idxMeta != null) {
+                return false;
+            }
+        } else if (!idxMeta.equals (other.idxMeta)) {
+            return false;
+        }
+        return true;
+    }
+	
 	
 
 }
