@@ -46,7 +46,6 @@ import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexState;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
-import com.baidu.rigel.biplatform.tesseract.isservice.search.agg.AggregateCompute;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService;
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
@@ -54,7 +53,6 @@ import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
-import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
@@ -141,11 +139,11 @@ public class SearchIndexServiceImpl implements SearchService {
             result = queryWithDatabase (query);
         } else {
             result = queryWithIndex (query, idxMeta);
-         // 多个分片，需要进行再次进行agg计算
-            if (idxMeta.getIdxShardList ().size () > 1) {
-                List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
-                result.setDataList (rs);
-            }
+//         // 多个分片，需要进行再次进行agg计算
+//            if (idxMeta.getIdxShardList ().size () > 1) {
+//                List<SearchIndexResultRecord> rs = AggregateCompute.aggregate (result.getDataList (), query);
+//                result.setDataList (rs);
+//            }
         }
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",

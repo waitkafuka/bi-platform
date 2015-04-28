@@ -573,80 +573,58 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             }
                 
             // 时间维度特殊处理
-            if (value != null && element instanceof TimeDimension 
-                && !value.toString().toLowerCase().contains("all")) {
-                String start;
-                String end;
-                try {
-                    JSONObject json = new JSONObject(String.valueOf(value));
-                    /**
-                     * TODO 考虑月/周/年等
-                     */
-                    start = json.getString("start");
-                    end = json.getString("end");
-                    if (item.getParams().get("range") != null && start.equals(end)) {
-                        TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(start), 30, 0);
-                        start = tail.getStart();
-                        end = tail.getEnd();
-                    } else {
-                    	  if (start.contains("-") && end.contains("-")) { 
-                    		  start = start.replace("-", "");
-							  end = end.replace("-", "");	
-							  TimeDimension timeDim = (TimeDimension) element;
-							  Map<String, String> time = TimeUtils.getTimeCondition(start, end,	timeDim.getDataTimeType());
-							  start = time.get("start");
-							  end = time.get("end");
-                    	  }
-                    }
-                } catch (Exception e) {
-                    logger.warn(
-                            "Time Condition not Correct. Maybe from row."
-                            + " Try to use it as UniqueName. Time: " + value, e);
-                    if (value instanceof String[]) {
-                        String[] dates = (String[]) value;
-                        /**
-                         * TODO 如果有多选时间，把第一个时间和最后一个时间作为start和end，不支持间断时间
-                         * 以后要考虑重构，支持间断时间
-                         */
-                        start = parseToDate(dates[0]);
-                        end = parseToDate(dates[dates.length - 1]);
-                    } else {
-                        start = parseToDate(String.valueOf(value));
-                        end = parseToDate(String.valueOf(value));
-                    }
+            if (element instanceof TimeDimension) {
+                final Date now = new Date();
+                if (value != null && !value.toString().toLowerCase().contains("all")) {
                     
-                }
-                TimeRangeDetail range = new TimeRangeDetail(start, end);
-                if (timeRange && start.equals(end)) {
-                    /**
-                     * 如果是时间区域，并且时间参数中起始和结束相同，把时间扩展为start过去一个月以来的数据
-                     */
-                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-                    Date startDate = new Date();
-                    try {
-                        startDate = df.parse(start);
-                    } catch (ParseException e) {
-                        logger.error("Date Format Error. Use current date instead. ", e);
+                    String[] dataRange = getDateRangeCond (item, element, value);
+                    
+                    String start = dataRange[0];
+                    String end = dataRange[1];
+                    TimeRangeDetail range = new TimeRangeDetail(dataRange[0] , dataRange[1]);
+                    if (timeRange && start.equals(end)) {
+                        /**
+                         * 如果是时间区域，并且时间参数中起始和结束相同，把时间扩展为start过去一个月以来的数据
+                         */
+                        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+                        Date startDate = now;
+                        try {
+                            startDate = df.parse(start);
+                        } catch (ParseException e) {
+                            logger.error("Date Format Error. Use current date instead. ", e);
+                        }
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTime(startDate);
+                        calendar.add(Calendar.MONTH, -1);
+                        range = new TimeRangeDetail(df.format(calendar.getTime()), end);
                     }
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTime(startDate);
-                    calendar.add(Calendar.MONTH, -1);
-                    range = new TimeRangeDetail(df.format(calendar.getTime()), end);
+                    String[] days = new String[range.getDays().length];
+                    StringBuilder message = new StringBuilder();
+                    for (int i = 0; i < days.length; i++) {
+                        days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
+                        message.append(" " + days[i]);
+                    }
+                    value = days;
+                    itemValues.put(item, value);
+                    logger.debug("[DEBUG] --- ---" + message);
+                } else {
+                    itemValues.put (item, value);
                 }
-                /**
-                 * TODO 
-                 * modify by jiangyichao at 2014-11-10
-                 *  仅处理单选
-                 */
-                String[] days = new String[range.getDays().length];
-                StringBuilder message = new StringBuilder();
-                for (int i = 0; i < days.length; i++) {
-                    days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
-                    message.append(" " + days[i]);
-                }
-                value = days;
-                itemValues.put(item, value);
-                logger.debug("[DEBUG] --- ---" + message);
+//                else {
+//                    // 如果时间条件为空，默认增加时间条件为当前时间前推一个月的时间
+//                    TimeRangeDetail range = getMonthRangDetailWithNow (now);
+//                    String[] days = new String[range.getDays().length];
+//                    StringBuilder message = new StringBuilder();
+//                    for (int i = 0; i < days.length; i++) {
+//                        days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
+//                        message.append(" " + days[i]);
+//                    }
+//                    value = days;
+//                    // TODO 设置展开方式
+//                    item.getParams ().put ("needSummary", 1);
+//                    itemValues.put(item, value);
+//                }
+                
             } else if (value instanceof String && !StringUtils.isEmpty(value)) {
                 itemValues.put(item, value.toString().split(","));
             } else {
@@ -655,6 +633,58 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         }
         return itemValues;
     }
+
+    private String[] getDateRangeCond(Item item, OlapElement element, Object value) {
+        String[] dataRange = new String[2];
+        try {
+            JSONObject json = new JSONObject(String.valueOf(value));
+            /**
+             * TODO 考虑月/周/年等
+             */
+            dataRange[0] = json.getString("start");
+            dataRange[1] = json.getString("end");
+            if (item.getParams().get("range") != null && dataRange[0].equals(dataRange[1] )) {
+                TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(dataRange[0] ), 30, 0);
+                dataRange[0]  = tail.getStart();
+                dataRange[1]  = tail.getEnd();
+            } else {
+                  if (dataRange[0] .contains("-") && dataRange[1] .contains("-")) { 
+                      dataRange[0]  = dataRange[0] .replace("-", "");
+                      dataRange[0]  = dataRange[1] .replace("-", "");   
+                      TimeDimension timeDim = (TimeDimension) element;
+                      Map<String, String> time = 
+                              TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , timeDim.getDataTimeType());
+                      dataRange[0] = time.get("start");
+                      dataRange[1] = time.get("end");
+                  }
+            }
+        } catch (Exception e) {
+            logger.warn("Time Condition not Correct. Maybe from row." + " Try to use it as UniqueName. Time: " + value, e);
+            if (value instanceof String[]) {
+                String[] dates = (String[]) value;
+                /**
+                 * TODO 如果有多选时间，把第一个时间和最后一个时间作为start和end，不支持间断时间
+                 * 以后要考虑重构，支持间断时间
+                 */
+                dataRange[0] = parseToDate(dates[0]);
+                dataRange[1] = parseToDate(dates[dates.length - 1]);
+            } else {
+                dataRange[0] = parseToDate(String.valueOf(value));
+                dataRange[1] = parseToDate(String.valueOf(value));
+            }
+            
+        }
+        return dataRange;
+    }
+
+//    private TimeRangeDetail getMonthRangDetailWithNow(final Date now) {
+//        Calendar calendar = Calendar.getInstance();
+//        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+//        calendar.setTime(now);
+//        calendar.add(Calendar.MONTH, -1);
+//        TimeRangeDetail range = new TimeRangeDetail(df.format(calendar.getTime()), df.format (now));
+//        return range;
+//    }
     
     private String parseToDate(String uniqueName) {
         String[] valueParts = StringUtils.split(uniqueName, "].[");

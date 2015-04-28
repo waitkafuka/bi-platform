@@ -712,9 +712,9 @@ public class QueryDataResource extends BaseResource {
             String granularity = json.getString("granularity");
             // 保证开始时间小于结束时间
             if (start.compareTo(end) > 0) {
-            	String tmp = start;
-            	start = end;
-            	end = tmp;
+                String tmp = start;
+                start = end;
+                end = tmp;
             }
             Map<String, String> time = null;
             switch (granularity) {

@@ -93,8 +93,21 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
      * 节点实际查询使用的叶子ID列表
      */
     private Set<String> leafIds;
+    
+    
+    private boolean isTime;
+    
 
-    /**
+    public boolean isTime() {
+		return isTime;
+	}
+
+	public void setTime(boolean isTime) {
+		this.isTime = isTime;
+	}
+
+
+	/**
      * construct with
      * 
      * @param parent

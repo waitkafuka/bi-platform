@@ -153,14 +153,14 @@ public class TesseractResultSetCollector extends Collector {
         this.docBase = context.docBase;
         this.reader = context.reader();
 //        this.docBaseAndReadMap.put (this.docBase, this.reader);
-        Map<String, FieldCache.Doubles> currDoubleValuesMap=new ConcurrentHashMap<String, FieldCache.Doubles>();        
+        Map<String, FieldCache.Doubles> currDoubleValuesMap=new HashMap<String, FieldCache.Doubles>();        
         for (String measure : measureFields) {
             currDoubleValuesMap.put(measure,
                     FieldCache.DEFAULT.getDoubles(this.reader, measure, false));
         }
         this.cacheDoubleValuesMap.put(this.docBase, currDoubleValuesMap);
         
-        Map<String, BinaryDocValues> currBinaryDocValuesMap=new ConcurrentHashMap<String, BinaryDocValues>();
+        Map<String, BinaryDocValues> currBinaryDocValuesMap=new HashMap<String, BinaryDocValues>();
         for (String dim : dimFields) {
             currBinaryDocValuesMap.put(dim, FieldCache.DEFAULT.getTerms(this.reader, dim, false));
         }

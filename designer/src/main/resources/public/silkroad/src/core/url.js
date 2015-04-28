@@ -839,6 +839,19 @@ define(function () {
         return getExtendAreaBaseUrl(reportId, compId)
             + '/colorformat';
     };
+    /**
+     * 报表新建（编辑）- 表格编辑 - 文本对齐设置
+     * 获取文本对齐相关信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getTextAlignList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/textALign';
+    };
 
     /**
      * 报表新建（编辑）-edit-setting

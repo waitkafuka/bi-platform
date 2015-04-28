@@ -446,6 +446,7 @@ public class QueryContextBuilder {
     private void buildMemberNodeByMember(DataSourceInfo dataSource, 
             Cube cube, MemberNodeTree node, MiniCubeMember member, Map<String, String> params) {
         node.setCaption(member.getCaption());
+        node.setTime(member.getLevel().getDimension().isTimeDimension());
         if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
             node.setLeafIds(member.getQueryNodes());
         } else {
