@@ -65,7 +65,7 @@ public class RedisQueueListener implements ApplicationListener<ContextRefreshedE
                     log.warn("get event error:{}", e);
                 }
             }
-        }).start();;
+        }).start();
         log.info("start redis queue thread success.");
     }
 
