@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.dataquery.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.SqlQuery;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 
 /**
@@ -58,10 +60,11 @@ public interface DataQueryService {
      *            limit第一个参数
      * @param limitEnd
      *            limit第二个参数
-     * @return TesseractResultSet
+     * @return IndexDataResultSet
+     * @throws IOException 
      */
-    SearchIndexResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, DataSource dataSource,
-        long limitStart, long limitEnd);
+    IndexDataResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, DataSource dataSource,
+        long limitStart, long limitEnd) throws IOException;
     
     
     /**

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -87,6 +88,9 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
     @Value("${index.indexInterval}")
     private int indexInterval;
     
+    @Value("${index.shardReplicaNum}")
+	private int shardReplicaNum;
+    
     /**
      * DEFAULT_BLOCK_COUNT，默认每次申请索引块数
      */
@@ -121,6 +125,27 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
          */
         PRODUCT_LINE // 产品线
     }
+    
+    
+    @PostConstruct
+	public void initConfig() {
+
+		LOGGER.info("Checking and set config");
+		if (this.shardReplicaNum <= 0) {
+			this.shardReplicaNum = IndexFileSystemConstants.DEFAULT_SHARD_REPLICA_NUM;
+		}
+
+		if (this.indexInterval <= 0) {
+			this.indexInterval = IndexFileSystemConstants.DEFAULT_INDEX_INTERVAL;
+		}
+
+		LOGGER
+				.info("After check and set config,now config is :[shardReplicaNum:"
+						+ this.shardReplicaNum
+						+ "][indexInterval:"
+						+ this.indexInterval + "]");
+	}
+
     
     /*
      * (non-Javadoc)
@@ -213,7 +238,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             }
             idxMeta.setMeasureSet(measureSet);
             
-            idxMeta.setReplicaNum(IndexShard.getDefaultShardReplicaNum());
+            idxMeta.setReplicaNum(this.shardReplicaNum);
             idxMeta.setDataSourceInfo(dataSourceInfo);
             idxMeta.setDataDescInfo(dataDescInfo);
             

@@ -469,9 +469,9 @@ public class TimeUtils {
                 }
                 int month = cal.get(Calendar.MONTH) + 1;
                 if (month < 10 ) {
-                	end = cal.get(Calendar.YEAR) + "0" + month + day;
+                    end = cal.get(Calendar.YEAR) + "0" + month + day;
                 } else {
-                	end = cal.get(Calendar.YEAR) + month + day;
+                    end = cal.get(Calendar.YEAR) + "" + month + day;
                 }
                 break;
             case TimeDay:

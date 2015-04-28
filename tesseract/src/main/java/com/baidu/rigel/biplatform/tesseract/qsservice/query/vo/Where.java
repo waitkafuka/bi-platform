@@ -47,8 +47,18 @@ public class Where implements Serializable {
      * orList or 条件列表
      */
     private List<Expression> orList;
+    
+    private Between between;
 
-    /**
+    public Between getBetween() {
+		return between;
+	}
+
+	public void setBetween(Between between) {
+		this.between = between;
+	}
+
+	/**
      * getter method for property andList
      * 
      * @return the andList

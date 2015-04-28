@@ -38,10 +38,7 @@ public class IndexShard implements Serializable {
      * serialVersionUID
      */
     private static final long serialVersionUID = -7727279768348029673L;
-    /**
-     * 默认复本数
-     */
-    private static final int DEFAULT_SHARD_REPLICA_NUM = 2;
+    
     
     /**
      * 当前分片数据是否有变动
@@ -71,6 +68,7 @@ public class IndexShard implements Serializable {
      * 数据复本所在的节点KEY
      */
     private List<String> replicaNodeKeyList;
+    
     
     
     /**
@@ -248,14 +246,7 @@ public class IndexShard implements Serializable {
         return serialVersionUID;
     }
     
-    /**
-     * getter method for property defaultShardReplicaNum
-     * 
-     * @return the defaultShardReplicaNum
-     */
-    public static int getDefaultShardReplicaNum() {
-        return DEFAULT_SHARD_REPLICA_NUM;
-    }
+    
     
     /**
      * getter method for property idxFilePath

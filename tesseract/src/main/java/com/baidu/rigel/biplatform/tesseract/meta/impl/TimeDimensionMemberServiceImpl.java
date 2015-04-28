@@ -160,8 +160,9 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         List<MiniCubeMember> members = Lists.newArrayList();
         Calendar calNow = Calendar.getInstance();
         Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.MONTH, Calendar.JANUARY);
-        cal.set(Calendar.DAY_OF_MONTH, 1);
+        cal.add (Calendar.MONTH,  -1);
+//        cal.set(Calendar.MONTH, Calendar.JANUARY);
+//        cal.set(Calendar.DAY_OF_MONTH, 1);
         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
         while (cal.before(calNow) || (cal.compareTo(calNow) == 0)) {
             String day = sf.format(cal.getTime());

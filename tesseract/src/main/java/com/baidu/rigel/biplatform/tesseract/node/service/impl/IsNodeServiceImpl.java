@@ -81,6 +81,9 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
 	            "assignFreeNodeForReplica", "[blockCount:" + blockCount + "][nodeKey:" + nodeKey + "]"));
 	        List<Node> currentNodeList = getNodeListByClusterName(clusterName);
+	        if(CollectionUtils.isEmpty(currentNodeList) || currentNodeList.size()==1 ){
+	        	return new HashMap<String,Node>();
+	        }
 	        sortNodeListByFreeBlockCount(currentNodeList);
 	        Map<String,Node> result = new HashMap<String,Node>();
 	        if (blockCount < 1) {
