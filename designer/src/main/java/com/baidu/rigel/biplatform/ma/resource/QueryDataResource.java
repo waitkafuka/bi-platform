@@ -2177,14 +2177,14 @@ public class QueryDataResource extends BaseResource {
      */
     private ReportDesignModel getRealModel(String reportId, ReportRuntimeModel runTimeModel) {
         ReportDesignModel model;
-        Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
-        Object preview = runTimeModel.getContext().get("reportPreview");
-        if ((isEditor != null && isEditor.toString().equals("true")) 
-                || (preview != null && preview.toString().equals("true"))) {
-            model = reportModelCacheManager.getReportModel(reportId);
-        } else {
+//        Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
+//        Object preview = runTimeModel.getContext().get("reportPreview");
+//        if ((isEditor != null && isEditor.toString().equals("true")) 
+//                || (preview != null && preview.toString().equals("true"))) {
+//            model = reportModelCacheManager.getReportModel(reportId);
+//        } else {
             model = getDesignModelFromRuntimeModel(reportId);
-        }
+//        }
         return model;
     }
     
