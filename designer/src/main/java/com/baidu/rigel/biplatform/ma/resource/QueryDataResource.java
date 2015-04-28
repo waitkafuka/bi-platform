@@ -820,7 +820,8 @@ public class QueryDataResource extends BaseResource {
          * 查询区域的时候，会按照当前的参数更新区域上下文
          */
         QueryContext localContext = runTimeModel.getLocalContextByAreaId(areaId);
-        localContext.reset ();
+//        localContext.reset ();
+        
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的区域上下文参数
@@ -1929,6 +1930,7 @@ public class QueryDataResource extends BaseResource {
             updateLocalContext(dimId, model, selectedDims, chartAreaId);
             updateLocalContext(dimId, model, selectedDims, tableAreaId);
         }
+        
         this.reportModelCacheManager.updateRunTimeModelToCache(reportId, model);
         ResponseResult rs = ResourceUtils.getCorrectResult("successfully", null);
         return rs;

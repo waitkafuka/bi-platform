@@ -49,6 +49,7 @@ import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
@@ -225,6 +226,8 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
 //            questionModel.setPageInfo(pageInfo);
             if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
                 questionModel.setNeedSummary(false);
+            } else if (model.getExtendById (action.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
+                questionModel.setNeedSummary (false);
             } else {
                 questionModel.setNeedSummary(needSummary(questionModel));
             }
