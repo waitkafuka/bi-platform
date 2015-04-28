@@ -92,7 +92,7 @@
 }
 .echarts-candidate {
     float: left;
-    padding-left: 80px;
+    /*padding-left: 80px;*/
     padding-top: 14px;
 }
 .echarts-candidate label {

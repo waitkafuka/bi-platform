@@ -64,7 +64,7 @@ define(['url'], function (Url) {
                                 targetData.indList[name].textAlign = sourceData[name];
                             }
                             else {
-                                targetData.indList[name].textAlign = 'center';
+                                targetData.indList[name].textAlign = 'left';
                             }
                         }
                     }
@@ -77,7 +77,7 @@ define(['url'], function (Url) {
                                 targetData.dimList[name].align = sourceData[name];
                             }
                             else {
-                                targetData.dimList[name].align = 'center';
+                                targetData.dimList[name].align = 'left';
                             }
                         }
                     }

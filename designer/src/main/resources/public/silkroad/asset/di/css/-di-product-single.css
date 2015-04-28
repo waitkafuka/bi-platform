@@ -2138,34 +2138,38 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     display: block;
     text-align: center;
 }
-.ui-table-expanded-icon-left {
-    background-position: -16px -151px;
-    display: block;
-    text-align: left;
-}
-.ui-table-expanded-icon-right {
-    background-position: -16px -151px;
-    display: block;
-    text-align: right;
-}
+/*.ui-table-expanded-icon-left {*/
+    /*background-position: -16px -151px;*/
+    /*display: block;*/
+    /*text-align: left;*/
+/*}*/
+/*.ui-table-expanded-icon-right {*/
+    /*background-position: -16px -151px;*/
+    /*display: block;*/
+    /*text-align: right;*/
+/*}*/
 .ui-table-collapsed-icon {
      background-position: -25px -151px;
      display: block;
      text-align: center;
  }
-.ui-table-collapsed-icon-left {
-    background-position: -25px -151px;
-    display: block;
-    text-align: left;
-}
-.ui-table-collapsed-icon-right {
-    background-position: -25px -151px;
-    display: block;
-    text-align: right;
-}
+/*.ui-table-collapsed-icon-left {*/
+    /*background-position: -25px -151px;*/
+    /*display: block;*/
+    /*text-align: left;*/
+/*}*/
+/*.ui-table-collapsed-icon-right {*/
+    /*background-position: -25px -151px;*/
+    /*display: block;*/
+    /*text-align: right;*/
+/*}*/
 /*.ui-table-default-icon {*/
     /*padding-left: 9px;*/
 /*}*/
+/*这句样式对表格层级显示可能有问题，会多一些padding-left，到时候需要注意下*/
+.ui-table-expand-background .ui-table-default-icon{
+    padding-left: 15px;
+}
 .ui-table-default-icon {
     padding-left: 0;
 }
@@ -3232,7 +3236,7 @@ li {
 }
 .echarts-candidate {
     float: left;
-    padding-left: 80px;
+    /*padding-left: 80px;*/
     padding-top: 14px;
 }
 .echarts-candidate label {

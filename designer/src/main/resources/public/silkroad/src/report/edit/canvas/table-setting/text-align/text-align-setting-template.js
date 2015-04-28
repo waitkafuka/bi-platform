@@ -22,27 +22,27 @@ define(['template'], function (template) {
         });
         $out+='\r\n            </select>\r\n        </div>\r\n        ';
         });
-        $out+='\r\n    </div>\r\n    <div class="text-align-set-area">\r\n        <label>对各维度文本进行单独设置</label>\r\n        ';
+        $out+='\r\n    </div>\r\n    <!--<div class="text-align-set-area">-->\r\n        <!--<label>对各维度文本进行单独设置</label>-->\r\n        <!--';
         $each(dimList,function($dim,name){
-        $out+='\r\n        <div class="text-align-set-item">\r\n            <label>';
+        $out+='-->\r\n        <!--<div class="text-align-set-item">-->\r\n            <!--<label>';
         $out+=$escape($dim.caption);
-        $out+='：</label>\r\n            <select name="';
+        $out+='：</label>-->\r\n            <!--<select name="';
         $out+=$escape(name);
-        $out+='">\r\n                ';
+        $out+='">-->\r\n                <!--';
         $each(options,function($option,optionKey){
-        $out+='\r\n                <option value=';
+        $out+='-->\r\n                <!--<option value=';
         $out+=$escape(optionKey);
-        $out+='\r\n                ';
+        $out+='-->\r\n                <!--';
         if($dim.align && optionKey === $dim.align){
-        $out+=' selected="selected"\r\n                ';
+        $out+=' selected="selected"-->\r\n                <!--';
         }
         $out+='>';
         $out+=$escape($option);
-        $out+='</option>\r\n                ';
+        $out+='</option>-->\r\n                <!--';
         });
-        $out+='\r\n            </select>\r\n        </div>\r\n        ';
+        $out+='-->\r\n            <!--</select>-->\r\n        <!--</div>-->\r\n        <!--';
         });
-        $out+='\r\n    </div>\r\n</div>\r\n';
+        $out+='-->\r\n    <!--</div>-->\r\n</div>\r\n';
         return $out;
     }
     return { render: anonymous };

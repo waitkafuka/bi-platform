@@ -612,7 +612,7 @@
         var dragStr = '';
 
         wrap = objWrap(wrap);
-        var align = wrap.align || 'center';
+        var align = wrap.align || 'left';
         if (align) {
             classStr.push(type + '-cell-align-' + align);
         }
@@ -688,7 +688,7 @@
         var innerStr;
 
         wrap = objWrap(wrap);
-        var align = wrap.align || 'center';
+        var align = wrap.align || 'left';
         if (align) {
             classStr.push(type + '-cell-align-' + align);
         }
@@ -780,7 +780,7 @@
                 }
             }
         }
-        var align = wrap.align || 'center';
+        var align = wrap.align || 'left';
         if (align) {
             classStr.push(type + '-cell-align-' + align);
         }

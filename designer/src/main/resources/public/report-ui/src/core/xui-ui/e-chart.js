@@ -289,6 +289,10 @@
                     }
                 );
                 me._eCandidateBox = domChildren(me._eHeader)[0];
+                // 重新设置单选按钮位置区域居中
+                var candWidth = me._eCandidateBox.offsetWidth;
+                var headWidth = me._eHeader.offsetWidth;
+                me._eCandidateBox.style.marginLeft = (headWidth - candWidth) / 2 + 'px';
                 var inputRadios = me._eCandidateBox.getElementsByTagName('input');
 
                 for (var i = 0, iLen = inputRadios.length; i < iLen; i ++) {
