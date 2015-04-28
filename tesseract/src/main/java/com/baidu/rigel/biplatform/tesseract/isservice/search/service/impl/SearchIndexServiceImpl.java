@@ -225,7 +225,7 @@ public class SearchIndexServiceImpl implements SearchService {
         return idxShardResultSetList;
     }
     
-    private Node getFreeSearchNodeByIndexShard(IndexShard idxShard,String clusterName){
+    private synchronized Node getFreeSearchNodeByIndexShard(IndexShard idxShard,String clusterName){
     	List<Node> idxShardNodeList=this.isNodeService.getAvailableNodeListByIndexShard(idxShard, clusterName);
     	
     	Collection<Node> nodeLeft=CollectionUtils.disjunction(idxShardNodeList, this.nodeKeyQueue);
