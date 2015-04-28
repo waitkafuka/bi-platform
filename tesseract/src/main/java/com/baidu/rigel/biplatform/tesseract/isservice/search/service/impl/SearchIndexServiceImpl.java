@@ -19,9 +19,12 @@
 package com.baidu.rigel.biplatform.tesseract.isservice.search.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 
@@ -98,6 +101,11 @@ public class SearchIndexServiceImpl implements SearchService {
     
     @Autowired
     private TaskExecutor taskExecutor;
+    
+    /**
+     * nodeKeyQueue 
+     */
+    private ConcurrentLinkedQueue<Node> nodeKeyQueue = new ConcurrentLinkedQueue<Node>();
     
     
     /**
@@ -216,6 +224,40 @@ public class SearchIndexServiceImpl implements SearchService {
         }
         return idxShardResultSetList;
     }
+    
+    private Node getFreeSearchNodeByIndexShard(IndexShard idxShard,String clusterName){
+    	List<Node> idxShardNodeList=this.isNodeService.getAvailableNodeListByIndexShard(idxShard, clusterName);
+    	
+    	Collection<Node> nodeLeft=CollectionUtils.disjunction(idxShardNodeList, this.nodeKeyQueue);
+    	Node result=null;
+    	Iterator<Node> it=null;
+    	if(!CollectionUtils.isEmpty(nodeLeft)){
+    		//取第一个
+    		//塞到nodeKeyQueue尾
+    		it=nodeLeft.iterator();
+    		if(it.hasNext()){
+    			result=it.next();
+    		}
+    		
+    	}else {
+    		it=this.nodeKeyQueue.iterator();
+    		while(it.hasNext()){
+    			Node node = it.next();
+    			if(idxShardNodeList.indexOf(node) != -1){
+    				it.remove();
+    				result=node;
+    				break;
+    			}
+    		}
+    	}
+    	if(result!=null){
+    		this.nodeKeyQueue.add(result);
+    	}
+    	return result;
+    	
+    	
+    	
+    }
 
     private Callable<SearchIndexResultSet> genQueryTask(QueryRequest query,
         IndexMeta idxMeta, IndexShard idxShard) {
@@ -225,13 +267,11 @@ public class SearchIndexServiceImpl implements SearchService {
             public SearchIndexResultSet call() throws Exception {
                 try {
                     long current = System.currentTimeMillis();
-                    Node searchNode = isNodeService.getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());
-                    searchNode.searchRequestCountAdd();
-                    isNodeService.saveOrUpdateNodeInfo(searchNode);
-                    LOGGER.info("begin search in shard:{}", idxShard);
-                    SearchIndexResultSet result = (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();
-                    searchNode.searchrequestCountSub();
-                    isNodeService.saveOrUpdateNodeInfo(searchNode);
+                    Node searchNode = getFreeSearchNodeByIndexShard(idxShard,idxMeta.getClusterName());                    
+                    
+                    LOGGER.info("begin search in shard:{},node:{}", idxShard.getShardName(),searchNode.getNodeKey());
+                    SearchIndexResultSet result = (SearchIndexResultSet) isClient.search(query, idxShard, searchNode).getMessageBody();                    
+                    
                     LOGGER.info("compelete search in shard:{},take:{} ms",idxShard, System.currentTimeMillis() - current);
                     return result;
                 } catch (Exception e) {
