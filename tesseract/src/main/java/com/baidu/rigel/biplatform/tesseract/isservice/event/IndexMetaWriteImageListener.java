@@ -25,55 +25,56 @@ import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
  */
 @Service
 public class IndexMetaWriteImageListener implements
-		ApplicationListener<IndexMetaWriteImageEvent> {
-	@Resource
-	private IndexMetaService idxMetaService; 
-	
-	@Resource
-	private IsNodeService isNodeService;
-	/**
+        ApplicationListener<IndexMetaWriteImageEvent> {
+    @Resource
+    private IndexMetaService idxMetaService; 
+    
+    @Resource
+    private IsNodeService isNodeService;
+    /**
      * LOGGER
      */
     private static final Logger LOGGER = LoggerFactory
         .getLogger(IndexMetaWriteImageListener.class);
 
-	@Override
-	public void onApplicationEvent(IndexMetaWriteImageEvent event) {
-		LOGGER.info(String.format(
-				LogInfoConstants.INFO_PATTERN_ON_LISTENER_BEGIN,
-				"IndexMetaWriteImageListener.onApplicationEvent", event));
-		if (event == null || event.getIdxMeta() == null) {
-			LOGGER.info(String.format(
-					LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
-					"IndexMetaWriteImageListener.onApplicationEvent", event));
-			throw new IllegalArgumentException();
-		}else {
-			IndexMeta idxMeta=event.getIdxMeta();
-			Node currNode=this.isNodeService.getCurrentNode();
-			String idxMetaFileBase=currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath();
-			File idxMetaFileDir=new File(idxMetaFileBase);
-			if(!FileUtils.isEmptyDir(idxMetaFileDir)){				
-				Iterator<IndexShard> it=idxMeta.getIdxShardList().iterator();				
-				while(it.hasNext()){
-					IndexShard idxShard=it.next();
-					File shardFile=new File(idxMetaFileBase+idxShard.getShardName());
-					if(FileUtils.isEmptyDir(shardFile)){
-						it.remove();
-					}
-				}
-				
-				try {
-					this.idxMetaService.saveIndexMetaLocally(idxMeta);
-				} catch (Exception e) {
-					LOGGER.error("Exception occur while saving idxMeta to local with idxMetaId:"+idxMeta.getIndexMetaId()+"", e);
-				}
-			}
-		}
-		
-		LOGGER.info(String.format(
-				LogInfoConstants.INFO_PATTERN_ON_LISTENER_END,
-				"IndexMetaWriteImageListener.onApplicationEvent", event));
+    @Override
+    public void onApplicationEvent(IndexMetaWriteImageEvent event) {
+        LOGGER.info(String.format(
+                LogInfoConstants.INFO_PATTERN_ON_LISTENER_BEGIN,
+                "IndexMetaWriteImageListener.onApplicationEvent", event));
+        if (event == null || event.getIdxMeta() == null) {
+            LOGGER.info(String.format(
+                    LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION,
+                    "IndexMetaWriteImageListener.onApplicationEvent", event));
+            return;
+            //throw new IllegalArgumentException();
+        }else {
+            IndexMeta idxMeta=event.getIdxMeta();
+            Node currNode=this.isNodeService.getCurrentNode();
+            String idxMetaFileBase=currNode.getIndexBaseDir()+idxMeta.getIndexMetaFileDirPath();
+            File idxMetaFileDir=new File(idxMetaFileBase);
+            if(!FileUtils.isEmptyDir(idxMetaFileDir)){                
+                Iterator<IndexShard> it=idxMeta.getIdxShardList().iterator();                
+                while(it.hasNext()){
+                    IndexShard idxShard=it.next();
+                    File shardFile=new File(idxMetaFileBase+idxShard.getShardName());
+                    if(FileUtils.isEmptyDir(shardFile)){
+                        it.remove();
+                    }
+                }
+                
+                try {
+                    this.idxMetaService.saveIndexMetaLocally(idxMeta);
+                } catch (Exception e) {
+                    LOGGER.error("Exception occur while saving idxMeta to local with idxMetaId:"+idxMeta.getIndexMetaId()+"", e);
+                }
+            }
+        }
+        
+        LOGGER.info(String.format(
+                LogInfoConstants.INFO_PATTERN_ON_LISTENER_END,
+                "IndexMetaWriteImageListener.onApplicationEvent", event));
 
-	}
+    }
 
 }

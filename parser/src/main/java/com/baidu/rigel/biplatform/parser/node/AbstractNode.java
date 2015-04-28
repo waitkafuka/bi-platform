@@ -124,7 +124,7 @@ public abstract class AbstractNode implements Node {
                 }
                 setResult(new ListComputeResult(multiResults));
             } else {
-                setResult(new SingleComputeResult(singleResult));
+                setResult(new SingleComputeResult(computeData(BigDecimal.ZERO, singleResult)));
             }
         }
     }
