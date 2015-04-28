@@ -131,6 +131,19 @@ $.getTargetElement = function (id, entityArray) {
     return target;
 };
 
+//获取到含有当前id的组件实例
+//TODO:写注释
+$.getVuiTargetElement = function (id, entityArray) {
+ var target;
+ for (var i = 0, iLen = entityArray.length; i < iLen; i ++) {
+     if (entityArray[i].clzType === 'VUI' && entityArray[i].id === id) {
+         target = entityArray[i];
+         break;
+     }
+ }
+ return target;
+};
+
 // 获取到含有当前id的组件实例的clzType
 $.getTargetElementClzType = function (id, entityArray) {
     return $.getTargetElement(id, entityArray).clzType;
