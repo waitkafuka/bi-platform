@@ -214,6 +214,8 @@ define([
                     // 获取到选中的待关联组件
                     var $chks = $('input[name="comp-thumbnail"]');
                     var compIdArry = [];
+                    // 当前编辑组件是否与别的组件有关联的标识
+                    var hasInteractions = false;
                     //var selCompIdArr = [];
                     $chks.each(function () {
                         var $this = $(this);
@@ -227,6 +229,7 @@ define([
                         idObj.id = $(this).val();
                         compIdArry.push(idObj);
                     });
+                    
                     // 循环遍历组件，往reportJson中添加关联关系
                     for (var x = 0, xLen = compIdArry.length; x < xLen; x++) {
                         // 获取被关联组件的json配置信息
@@ -264,6 +267,9 @@ define([
                             // 如果勾选，就添加关联关系
                             if (compIdArry[x].checked) {
                                 curEntity.interactions.push(intTemp);
+                                
+                                // 只要设置关联时，不管被关联方是一个组件还是两个组件，只有有关联，hasInteractions就需要被设置为true。 update by majun 
+                                hasInteractions = true;
                             }
                         }
                         // 如果不存在事件关联
@@ -279,6 +285,8 @@ define([
                     activeEntity.outParam.dimId = dimValue[0];
                     activeEntity.outParam.dimName = dimValue[1];
                     activeEntity.outParam.level = $('.j-comp-relation-event-out-param-level').val();
+                    
+                    changeTableCheckType(activeEntity,hasInteractions);
                     // TODO:保存json，关闭窗口
                     // 保存vm与json，保存成功后展示报表
                     that.model.canvasModel.saveJsonVm(
@@ -288,7 +296,21 @@ define([
                         }
                     );
                 }
-
+                
+                // 在设置表图关联时，改变表格行选中时的选中动作，目前只支持行单选，如果表格没有和别的组件关联，rowCheckMode直接置为SELECTONLY。 update by majun
+                function changeTableCheckType(activeEntity,hasInteractions) {
+                	if (activeEntity.vuiRef.mainTable) {
+                		var vuiTableId = activeEntity.vuiRef.mainTable;
+                		var tableVuiDef = $.getVuiTargetElement(vuiTableId, entityDefs);
+                		if (tableVuiDef.dataOpt.rowCheckMode) {
+                			tableVuiDef.dataOpt.rowCheckMode = 'SELECT';
+                			if(!hasInteractions) {
+                				tableVuiDef.dataOpt.rowCheckMode = 'SELECTONLY';
+                			}
+                		}
+                	}
+                }
+                
                 // 添加缩略图
                 function appendThumbnail($this) {
                     var tW = $this.width();
