@@ -70,6 +70,7 @@ import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
@@ -998,7 +999,7 @@ public class QueryDataResource extends BaseResource {
         }
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             
-            DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+            DataModelUtils.decorateTable(getFormatModel (model, targetArea), table);
             /**
              * 每次查询以后，清除选中行，设置新的
              */
@@ -1074,6 +1075,13 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
+    }
+
+    private FormatModel getFormatModel(ReportDesignModel model, ExtendArea targetArea) {
+        if (targetArea.getType () == ExtendAreaType.TABLE) {
+            return targetArea.getFormatModel();
+        }
+        return model.getExtendById (targetArea.getReferenceAreaId ()).getFormatModel ();
     }
 
     private boolean isPieChart(Map<String, String> chartType) {
@@ -1445,7 +1453,7 @@ public class QueryDataResource extends BaseResource {
         
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+        DataModelUtils.decorateTable(getFormatModel (model, targetArea), table);
         resultMap.put("pivottable", table);
         setTableResultProperty (reportId, table, resultMap);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
@@ -1642,7 +1650,7 @@ public class QueryDataResource extends BaseResource {
         
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
                 // TODO 临时解决方案，此处应将查询条件设置到QuestionModel中
-            DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+            DataModelUtils.decorateTable(getFormatModel (model, targetArea), table);
 //            resultMap.put("rowCheckMin", 1);
 //            resultMap.put("rowCheckMax", 5);
             if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
@@ -2183,9 +2191,9 @@ public class QueryDataResource extends BaseResource {
 //        Object preview = runTimeModel.getContext().get("reportPreview");
 //        if ((isEditor != null && isEditor.toString().equals("true")) 
 //                || (preview != null && preview.toString().equals("true"))) {
-//            model = reportModelCacheManager.getReportModel(reportId);
+//            model = DeepcopyUtils.deepCopy (reportModelCacheManager.getReportModel(reportId));
 //        } else {
-            model = getDesignModelFromRuntimeModel(reportId);
+        model = getDesignModelFromRuntimeModel(reportId);
 //        }
         return model;
     }
