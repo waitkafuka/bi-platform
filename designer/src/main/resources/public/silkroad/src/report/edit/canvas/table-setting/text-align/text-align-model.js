@@ -50,18 +50,18 @@ define(['url'], function (Url) {
                             'center': '居中',
                             'right': '居右'
                         },
-                        dimList: {},
                         indList: {}
                     };
                     var inds = indDimList.yAxis;
-                    var dims = indDimList.xAxis;
-                    if(inds) {
-                        for(var i = 0, len = inds.length; i < len; i ++) {
+                    if (inds) {
+                        for (var i = 0, len = inds.length; i < len; i ++) {
                             var name = inds[i].name;
                             targetData.indList[name] = {};
                             targetData.indList[name].caption = inds[i].caption;
-                            if(sourceData && sourceData.hasOwnProperty(name)) {
-                                targetData.indList[name].align = sourceData[name];
+                            if (sourceData
+                                && sourceData.indList
+                                && sourceData.indList.hasOwnProperty(name)) {
+                                targetData.indList[name].align = sourceData.indList[name];
                             }
                             else {
                                 targetData.indList[name].align = 'left';
