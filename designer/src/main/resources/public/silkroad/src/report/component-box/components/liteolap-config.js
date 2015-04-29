@@ -114,6 +114,9 @@ define([
                 },
                 hasTableMeta: true
             });
+            // 这里需要把从table-config集成过来的olap-table的rowCheckMode由原有的SELECTONLY改为SELECT，不然表图联动会不起作用，updata by majun
+            tableRenderData[1].dataOpt.rowCheckMode = 'SELECT';
+            
             var chartRenderData = chartModel.processRenderData({
                 rootId: dynamicData.rootId,
                 serverData: {
