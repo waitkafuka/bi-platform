@@ -1,7 +1,7 @@
-package com.baidu.rigel.biplatform.ma.datasource.service;
+package com.baidu.rigel.biplatform.ma.ds.service;
 
-import com.baidu.rigel.biplatform.ma.datasource.service.impl.RelationDBInfoReaderServiceImpl;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.impl.RelationDBInfoReaderServiceImpl;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 /**
  * 数据源信息读取服务DataSourceInfoReader的实例化工厂类

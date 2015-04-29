@@ -1,4 +1,4 @@
-package com.baidu.rigel.biplatform.ma.datasource.service.impl;
+package com.baidu.rigel.biplatform.ma.ds.service.impl;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
-import com.baidu.rigel.biplatform.ma.datasource.exception.DsConnectionException;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceConnectionService;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceConnectionServiceFactory;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderService;
+import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.meta.BaseInfo;
@@ -92,7 +92,7 @@ public class RelationDBInfoReaderServiceImpl implements
 			}
 		}catch (DataSourceOperationException e) {
 			LOG.error("[ERROR] --- --- --- --- get ds connection instance error : {}", e.getMessage());
-		} catch (DsConnectionException e) {
+		} catch (DataSourceConnectionException e) {
 			LOG.error("[ERROR] --- --- --- --- connection to ds error : {}", e.getMessage());
 		} catch (SQLException e) {
 			LOG.error("[ERROR] --- --- --- --- get db databaseMetadata error: {}", e.getMessage());
@@ -100,7 +100,7 @@ public class RelationDBInfoReaderServiceImpl implements
 			if (dsConnService != null && conn != null) {
 				try {
 					dsConnService.closeConnection(conn);
-				} catch (DsConnectionException e) {
+				} catch (DataSourceConnectionException e) {
 					LOG.error("[ERROR] --- --- --- --- close db connection error: {}", e.getMessage());
 				}
 			}

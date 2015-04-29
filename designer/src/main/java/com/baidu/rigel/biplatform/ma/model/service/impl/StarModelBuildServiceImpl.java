@@ -27,9 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.TimeType;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderService;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.CallbackDimTableMetaDefine;

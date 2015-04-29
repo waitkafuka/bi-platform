@@ -33,13 +33,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceConnectionService;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 
 /**
@@ -245,7 +246,14 @@ public class DataSourceServiceImpl implements DataSourceService {
     private DataSourceDefine buildResult(String file) throws FileServiceException {
         
         byte[] content = (byte[]) fileService.read(genDsFilePath(file));
-        return (DataSourceDefine) SerializationUtils.deserialize(content);
+        DataSourceDefine ds = null;
+        try {
+        	ds = (DataSourceDefine) SerializationUtils.deserialize(content);
+        } catch(ClassCastException e) {
+        	DataSourceGroupDefine dsG = (DataSourceGroupDefine) SerializationUtils.deserialize(content);
+        	ds = dsG.getActiveDataSource();
+        }
+        return ds;
     }
     
     /**

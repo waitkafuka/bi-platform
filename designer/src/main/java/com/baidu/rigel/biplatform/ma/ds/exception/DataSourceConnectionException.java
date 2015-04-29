@@ -1,11 +1,11 @@
-package com.baidu.rigel.biplatform.ma.datasource.exception;
+package com.baidu.rigel.biplatform.ma.ds.exception;
 
 /**
  * 数据源连接异常类
  * @author jiangyichao
  *
  */
-public class DsConnectionException extends Exception {
+public class DataSourceConnectionException extends Exception {
 
 	/**
 	 * 序列id
@@ -16,7 +16,7 @@ public class DsConnectionException extends Exception {
 	 * 含有异常信息的构造函数
 	 * @param msg 异常信息
 	 */
-	public DsConnectionException (String msg) {
+	public DataSourceConnectionException (String msg) {
 		super(msg);
 	}
 	
@@ -25,14 +25,14 @@ public class DsConnectionException extends Exception {
 	 * @param msg 异常信息
 	 * @param e 异常对象
 	 */
-	public DsConnectionException (String msg, Exception e) {
+	public DataSourceConnectionException (String msg, Exception e) {
 		super(msg, e);
 	}
 	
 	/**
 	 * 无参异常构造函数
 	 */
-	public DsConnectionException () {
+	public DataSourceConnectionException () {
 		super();
 	}
 }

@@ -36,7 +36,7 @@ public interface ProductLineRegisterService {
      * 发送开通服务信息到用户
      * @param user
      * @param serviceType 服务类型，1代表线上服务，0代表线下服务
-     * @return 1代表发送成功，0代表发送失败
+     * @return 0代表发送成功,-1代表发送失败
      */
     public int sendOpenServiceMsgToUser(ProductlineInfo user, int serviceType);
     /**

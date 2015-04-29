@@ -43,9 +43,11 @@ import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
@@ -93,13 +95,19 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         // For Mock
         // List<Member> members = MockUtils.mockMembers(level);
         DataSourceDefine dsDefine = null;
+        DataSourceInfo dsInfo = null;
         try {
             dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
+        } catch (DataSourceConnectionException e) {
+        	logger.error("Fail in parse datasource to datasourceInfo.", e);
+        	throw new DataSourceOperationException(e);
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         List<Member> members;
         try {
             members = level.getMembers(cube, dsInfo, params);
@@ -168,13 +176,19 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             Member parent, Level level, Map<String, String> params, String securityKey)
             throws MiniCubeQueryException, DataSourceOperationException {
         DataSourceDefine dsDefine = null;
+        DataSourceInfo dsInfo = null;
         try {
             dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
+        } catch (DataSourceConnectionException e) {
+        	logger.error("Fail in parse datasource to datsourceInfo.", e);
+        	throw new DataSourceOperationException(e);
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         List<Member> members = parent.getChildMembers(cube, dsInfo, params);
         for (Member m : members) {
             MiniCubeMember member = (MiniCubeMember) m;
@@ -208,13 +222,19 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         // For Mock
         // DataModel dataModel = MockUtils.mockDataModel();
         DataSourceDefine dsDefine;
+        DataSourceInfo dsInfo;
         try {
             dsDefine = dataSourceService.getDsDefine(model.getDsId());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
+        } catch (DataSourceConnectionException e) {
+            logger.error("Fail in parse datasource to datasourceInfo. ", e);
+            throw new DataSourceOperationException(e);
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
         try {
@@ -303,13 +323,19 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
     public List<Member> getMembers(Cube cube, String uniqueName,
             Map<String, String> params, String securityKey) {
         DataSourceDefine dsDefine = null;
+        DataSourceInfo dsInfo = null;
         try {
             dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
             throw new RuntimeException(e);
+        } catch (DataSourceConnectionException e) {
+        	logger.error("Fail in parse datasource to datasourceInfo.", e);
+        	throw new RuntimeException(e);
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         Member member = cube.lookUp (dsInfo, uniqueName, params);
         if (member != null) {
             return member.getChildMembers (cube, dsInfo, params);

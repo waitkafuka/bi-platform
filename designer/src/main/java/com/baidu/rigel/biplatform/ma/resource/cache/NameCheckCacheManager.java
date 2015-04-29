@@ -93,7 +93,21 @@ public class NameCheckCacheManager {
         return true;
     }
     
-    
+    /**
+     * 检测当前id是否正在使用
+     * @param dsGroupName 数据源组名称
+     * @param dsName 数据源名称
+     * @return
+     */
+    public boolean existsDSName(String dsGroupName, String dsName) {
+    	String productLine = ContextManager.getProductLine();
+    	String key = CacheKeyGenerator.generateJointedKey(productLine, dsGroupName, dsName);
+    	Object sign = cacheManagerForReource.getFromCache(key);
+    	if (sign == null) {
+    		return false;
+    	}
+    	return true;
+    }
     /**
      * 添加正在使用的数据源id到缓存
      * @param dsName
@@ -108,6 +122,20 @@ public class NameCheckCacheManager {
         }
     }
 
+    /**
+     * 添加正在使用的数据源id到缓存
+     * @param dsGroupName
+     * @param dsName
+     */
+    public void userDSName(String dsGroupName, String dsName) {
+    	String productLine = ContextManager.getProductLine();
+        String key = CacheKeyGenerator.generateJointedKey(productLine, dsGroupName, dsName);
+        try {
+            cacheManagerForReource.setToCache(key, 1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
     /**
      * 
      * @param resource

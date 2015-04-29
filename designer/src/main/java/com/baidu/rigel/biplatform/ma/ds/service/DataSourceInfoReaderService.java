@@ -1,4 +1,4 @@
-package com.baidu.rigel.biplatform.ma.datasource.service;
+package com.baidu.rigel.biplatform.ma.ds.service;
 
 import java.util.List;
 

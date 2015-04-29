@@ -77,7 +77,7 @@ public class DataSourceDefine implements Serializable {
      * 数据来源类型
      */
     private DataSourceType dataSourceType = DataSourceType.MYSQL;
-    
+        
     public String getId() {
         return id;
     }
@@ -188,7 +188,5 @@ public class DataSourceDefine implements Serializable {
         if (dataSourceType != null) {
             this.dataSourceType = dataSourceType;
         }
-    }
-    
-    
+    }    
 }

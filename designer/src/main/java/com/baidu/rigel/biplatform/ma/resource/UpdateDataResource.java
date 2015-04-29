@@ -31,8 +31,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.google.common.collect.Maps;
@@ -81,7 +82,9 @@ public class UpdateDataResource extends BaseResource {
         String[] factTableArray = factTables.split(",");
         ResponseResult rs = new ResponseResult();
         DataSourceDefine ds = dsService.getDsDefine(dsName);
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(ds, securityKey);
+        DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+        		getDataSourceConnectionServiceInstance(ds.getDataSourceType());
+        DataSourceInfo dsInfo = dsConnService.parseToDataSourceInfo(ds, securityKey);
         Map<String, Map<String, String>> conds = Maps.newHashMap();
         for (String factTable : factTableArray) {
             String str = request.getParameter(factTable);

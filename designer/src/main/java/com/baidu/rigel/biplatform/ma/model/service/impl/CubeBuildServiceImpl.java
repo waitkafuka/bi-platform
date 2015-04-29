@@ -24,9 +24,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderService;
-import com.baidu.rigel.biplatform.ma.datasource.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;

@@ -108,6 +108,7 @@ public class CubeTableResource extends BaseResource {
     public ResponseResult saveCubeTables(@PathVariable("id") String reportId,
             HttpServletRequest request) {
         String dsId = request.getParameter("dataSourceId");
+        // String dsGroupId = request.getParameter("dataSourceGroupId");
         /**
          * check ds
          */
@@ -143,6 +144,8 @@ public class CubeTableResource extends BaseResource {
         }
         report.setSchema(schema);
         report.setDsId(dsId);
+        // report.setDsGroupId(dsGroupId);
+        
         reportModelCacheManager.updateReportModelToCache(reportId, report);
         report = reportModelCacheManager.getReportModel(reportId);
         logger.info("put Schema model to cache");

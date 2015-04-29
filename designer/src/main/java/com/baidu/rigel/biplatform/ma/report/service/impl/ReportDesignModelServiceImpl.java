@@ -41,9 +41,11 @@ import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.ds.util.DataSourceDefineUtil;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
@@ -470,13 +472,19 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
          * 发布
          */
         DataSourceDefine dsDefine;
+        DataSourceInfo dsInfo;
         try {
             dsDefine = dsService.getDsDefine(model.getDsId());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
+        } catch (DataSourceConnectionException e) {
+        	logger.error("Fail in parse datasource to datasourceInfo.", e);
+        	throw new DataSourceOperationException(e);
         }
-        DataSourceInfo dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsDefine, securityKey);
         List<Cube> cubes = Lists.newArrayList();
         for (ExtendArea area : model.getExtendAreaList()) {
             try {

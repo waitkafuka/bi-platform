@@ -123,7 +123,7 @@ public class ReportDesignModel implements Serializable {
      * 报表参数映射关系
      */
     private Map<String, ReportParam> params = Maps.newHashMap();
-    
+       
     public String getId() {
         return id;
     }
@@ -139,7 +139,7 @@ public class ReportDesignModel implements Serializable {
     public void setDsId(String dsId) {
         this.dsId = dsId;
     }
-    
+        
     public String getName() {
         return name;
     }

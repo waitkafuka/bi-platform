@@ -51,10 +51,6 @@
 		    </exclusions>
 		</dependency>
 		
-		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-log4j</artifactId>
-		</dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -106,6 +102,14 @@
             <type>jar</type>
             <scope>test</scope>
         </dependency>
+        <!-- add springframe test -->
+        <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>4.1.4.RELEASE</version>
+			<type>jar</type>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
     
 </project>
