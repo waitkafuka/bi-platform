@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.tesseract.qsservice.query;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +110,7 @@ public class QueryRequestBuilder {
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
             if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
                 int size = nodeTrees.size();
+                Collections.sort (nodeTrees);
                 request.getWhere().setBetween(new Between());
                 request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
                 request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
