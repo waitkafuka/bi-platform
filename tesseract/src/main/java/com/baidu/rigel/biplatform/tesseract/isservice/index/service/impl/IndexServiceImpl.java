@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -107,6 +108,9 @@ public class IndexServiceImpl implements IndexService {
 	
 	@Value("${index.copyIdxCheckInterval}")
 	private int copyIdxCheckInterval;
+	
+	@Value("${index.shardReplicaNum}")
+	private int shardReplicaNum;
 
 	/**
 	 * indexMetaService
@@ -147,6 +151,33 @@ public class IndexServiceImpl implements IndexService {
 		super();
 		this.isClient = IndexAndSearchClient.getNodeClient();
 		this.copyIndexTaskResult=new ConcurrentHashMap<String,List<String>>();
+		
+	}
+	
+	@PostConstruct
+	public void initConfig() {
+
+		this.LOGGER.info("Checking and set config");
+		if (this.shardReplicaNum <= 0) {
+			this.shardReplicaNum = IndexFileSystemConstants.DEFAULT_SHARD_REPLICA_NUM;
+		}
+		if (this.copyIdxCheckInterval <= 0) {
+			this.copyIdxCheckInterval = IndexFileSystemConstants.DEFAULT_COOPYINDEX_CHECKINTERVAL;
+		}
+		if (this.copyIdxTimeOut <= 0) {
+			this.copyIdxTimeOut = IndexFileSystemConstants.DEFAULT_COPYINDEX_TIMEOUT;
+		}
+		if (this.indexInterval <= 0) {
+			this.indexInterval = IndexFileSystemConstants.DEFAULT_INDEX_INTERVAL;
+		}
+
+		this.LOGGER
+				.info("After check and set config,now config is :[shardReplicaNum:"
+						+ this.shardReplicaNum
+						+ "][copyIdxCheckInterval:"
+						+ this.copyIdxCheckInterval
+						+ "][copyIdxTimeOut:"
+						+ this.copyIdxTimeOut + "][indexInterval:"+this.indexInterval+"]");
 	}
 
 	/*
@@ -609,7 +640,8 @@ public class IndexServiceImpl implements IndexService {
 				}	
 				
 				
-				if(IndexShard.getDefaultShardReplicaNum()>1){
+				if(this.shardReplicaNum>1 && !CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList()) && idxShard.getReplicaNodeKeyList().size() > 0){
+//				if(IndexShard.getDefaultShardReplicaNum()>1){	
 					//获取副本拷贝情况				
 					List<String> replicaNodeKeyList=this.getCopyIndexTaskInfo(idxShard.getShardName(), this.copyIdxTimeOut);
 					if(!CollectionUtils.isEmpty(replicaNodeKeyList)){
@@ -652,12 +684,9 @@ public class IndexServiceImpl implements IndexService {
 	private List<String> getCopyIndexTaskInfo(String shardName,int timeOut) throws InterruptedException{
 		int copyTaskTimeOut=timeOut;
 		if(copyTaskTimeOut<=0){
-			copyTaskTimeOut=TesseractConstant.DEFAULT_COPYINDEX_TIMEOUT;
+			copyTaskTimeOut=this.copyIdxTimeOut;
 		}
-		int checkInterval=this.copyIdxCheckInterval;
-		if(checkInterval<=0){
-			checkInterval=TesseractConstant.DEFAULT_COOPYINDEX_CHECKINTERVAL;
-		}
+		
 		List<String> result=null;
 		
 		long curr=System.currentTimeMillis();
@@ -667,7 +696,10 @@ public class IndexServiceImpl implements IndexService {
 				result=this.copyIndexTaskResult.get(shardName);
 				break;
 			}
-			Thread.sleep(checkInterval);
+			Thread.sleep(this.copyIdxCheckInterval);
+		}
+		if((System.currentTimeMillis()-curr)>=copyTaskTimeOut && CollectionUtils.isEmpty(result)){
+			this.LOGGER.info("getCopyIndexTaskInfo time out,shardName:"+shardName);
 		}
 		return result;
 	}
@@ -799,7 +831,7 @@ public class IndexServiceImpl implements IndexService {
 			Map<String,Node> assignedNodeMap=new HashMap<String,Node>();
 			if (CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList())) {
 				
-				assignedNodeMap=this.isNodeService.assignFreeNodeForReplica(IndexShard.getDefaultShardReplicaNum() - 1,
+				assignedNodeMap=this.isNodeService.assignFreeNodeForReplica(this.shardReplicaNum - 1,
 								idxShard.getNodeKey(),idxShard.getClusterName());
 
 				if (MapUtils.isNotEmpty(assignedNodeMap)) {
@@ -811,6 +843,8 @@ public class IndexServiceImpl implements IndexService {
 						replicaNodeKeyList.addAll(assignedNodeMap.keySet());
 					}					
 					idxShard.setReplicaNodeKeyList(replicaNodeKeyList);
+				}else{
+					this.LOGGER.info("can not assign free replica node for shard:"+idxShard.getShardName());
 				}
 
 			}

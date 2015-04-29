@@ -612,7 +612,10 @@
         var dragStr = '';
 
         wrap = objWrap(wrap);
-
+        var align = wrap.align || 'left';
+        if (align) {
+            classStr.push(type + '-cell-align-' + align);
+        }
         span.push(wrap.colspan ? ' colspan="' + wrap.colspan + '" ' : '');
         span.push(wrap.rowspan ? ' rowspan="' + wrap.rowspan + '" ' : '');
 
@@ -635,7 +638,7 @@
         }
         // 如果是维度列，就不显示tooltip图标
         if (!wrap.colSpan) {
-            tooltipTag += '<span class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</span>';
+            tooltipTag += '<div class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</div>';
             //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         else {
@@ -647,13 +650,15 @@
         // 不然文本过多的话会显示不全
         // TODO:如果是最后一个，就不加drag
         // var useBag = dom.ieVersion < 8;
-
+        var sortStr = '';
+        sortStr = classSortStr ? '<div class="'+ classSortStr + '"></div>' : '';
+        var headThContentClas = type + '-head-th-content';
         var strThContent = (innerStr === '')
             ? ''
             : (
-                '<div class="' + type + '-head-th-content">'
-                + '<span class="'+ type + '-head-font">' + innerStr + '</span>'
-                + '<span class="'+ classSortStr + '"></span>'
+                '<div class="' + headThContentClas + '">'
+                + '<div class="'+ type + '-head-font">' + innerStr + '</div>'
+                + sortStr
                 + tooltipTag
                 + '</div>'
                 + dragStr
@@ -683,7 +688,10 @@
         var innerStr;
 
         wrap = objWrap(wrap);
-
+        var align = wrap.align || 'left';
+        if (align) {
+            classStr.push(type + '-cell-align-' + align);
+        }
         span.push(wrap.colspan ?  ' colspan="' + wrap.colspan  +  '" ' : '');
         span.push(wrap.rowspan ?  ' rowspan="' + wrap.rowspan  +  '" ' : '');
         // 先为左侧添加背景色
@@ -772,7 +780,7 @@
                 }
             }
         }
-        var align = colDefItem.align || this._oStyle.defaultCCellAlign;
+        var align = wrap.align || 'left';
         if (align) {
             classStr.push(type + '-cell-align-' + align);
         }
@@ -787,7 +795,6 @@
             classStr,
             styleStr
         );
-
         html.push(
             '<td ',
                 attrStr.join(' '), ' ',
@@ -795,7 +802,8 @@
                 '" class="', classStr.join(' '),
             '">',
             //'<div class="ui-table-cell-infor">' + innerStr + '</div><div class="ui-table-cell-empty"></div>',
-            '<div class="ui-table-cell-text">' + innerStr + '</div>',
+
+            '<div class="' + type + '-cell-text">' + innerStr + '</div>',
             '</td>'
         );
     };
@@ -877,7 +885,8 @@
             clz = type + '-e-c-icon ' + type
                 + (!wrap.expand ? '-expanded-icon ' : '-collapsed-icon ');
             value = [
-                    '<div style="' + indentStyle + ' text-align:left;" class="'
+                    // '<div style="' + indentStyle + ' text-align:left;" class="'
+                    '<div style="' + indentStyle + '" class="'
                     + type + '-tree-item">',
                     '<div class="' + clz + '"></div>',
                 value,
@@ -885,8 +894,9 @@
             ].join('');
         }
         else if (indentStyle) {
-            value = '<div class="' + type + '-default-icon" style="' + indentStyle
-                + 'text-align:left;">' + value + '</div>';
+            value = '<div class="' + type + '-default-icon " style="' + indentStyle
+//                + 'text-align:left;">' + value + '</div>';
+                + '">' + value + '</div>';
         }
 
         return value;

@@ -64,29 +64,34 @@ class RrDenominatorConditionProcessHandler  extends RateConditionProcessHandler 
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(firstDayOfTimeRange);
-        // 将时间调整为上一统计周期最后一天
-        cal.add(Calendar.DAY_OF_YEAR, -1);
+//        cal.add(Calendar.DAY_OF_YEAR, -1);
         TimeRangeDetail timeRange = null;
         switch (timeType) {
             case TimeDay:
                 MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
                 int size = 0;
+                cal.add(Calendar.DAY_OF_YEAR, -7);
                 if (condition instanceof DimensionCondition) {
                     DimensionCondition dimCondition = (DimensionCondition) condition;
                     size = dimCondition.getQueryDataNodes().size();
                 }
+                // 取一周之前的天
                 timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);
                 break;
             case TimeWeekly:
+                cal.add (Calendar.WEEK_OF_YEAR, -4);
                 timeRange = TimeUtils.getWeekDays(cal.getTime());
                 break;
             case TimeMonth:
+                cal.add (Calendar.YEAR, -1);
                 timeRange = TimeUtils.getMonthDays(cal.getTime());
                 break;
             case TimeQuarter:
+                cal.add (Calendar.YEAR, -1);
                 timeRange = TimeUtils.getQuarterDays(cal.getTime());
                 break;
             case TimeYear:
+                cal.add (Calendar.YEAR, -1);
                 timeRange = TimeUtils.getYearDays(cal.getTime());
                 break;
             default:

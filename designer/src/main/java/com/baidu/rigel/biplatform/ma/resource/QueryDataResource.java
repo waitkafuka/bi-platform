@@ -70,6 +70,7 @@ import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
@@ -712,9 +713,9 @@ public class QueryDataResource extends BaseResource {
             String granularity = json.getString("granularity");
             // 保证开始时间小于结束时间
             if (start.compareTo(end) > 0) {
-            	String tmp = start;
-            	start = end;
-            	end = tmp;
+                String tmp = start;
+                start = end;
+                end = tmp;
             }
             Map<String, String> time = null;
             switch (granularity) {
@@ -820,7 +821,8 @@ public class QueryDataResource extends BaseResource {
          * 查询区域的时候，会按照当前的参数更新区域上下文
          */
         QueryContext localContext = runTimeModel.getLocalContextByAreaId(areaId);
-        localContext.reset ();
+//        localContext.reset ();
+        
         for (String key : contextParams.keySet()) {
             /**
              * 更新runtimeModel的区域上下文参数
@@ -997,7 +999,7 @@ public class QueryDataResource extends BaseResource {
         }
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             
-            DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+            DataModelUtils.decorateTable(getFormatModel (model, targetArea), table);
             /**
              * 每次查询以后，清除选中行，设置新的
              */
@@ -1073,6 +1075,13 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
+    }
+
+    private FormatModel getFormatModel(ReportDesignModel model, ExtendArea targetArea) {
+        if (targetArea.getType () == ExtendAreaType.TABLE) {
+            return targetArea.getFormatModel();
+        }
+        return model.getExtendById (targetArea.getReferenceAreaId ()).getFormatModel ();
     }
 
     private boolean isPieChart(Map<String, String> chartType) {
@@ -1444,7 +1453,7 @@ public class QueryDataResource extends BaseResource {
         
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+        DataModelUtils.decorateTable(getFormatModel (model, targetArea), table);
         resultMap.put("pivottable", table);
         setTableResultProperty (reportId, table, resultMap);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report",
@@ -1519,8 +1528,7 @@ public class QueryDataResource extends BaseResource {
         }
         ReportDesignModel model;
         try {
-            model = runTimeModel.getModel ();
-                    // reportModelCacheManager.getReportModel(reportId);
+            model = DeepcopyUtils.deepCopy (runTimeModel.getModel ());
         } catch (CacheOperationException e) {
             logger.info("[INFO] Can not find such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
@@ -1641,7 +1649,7 @@ public class QueryDataResource extends BaseResource {
         
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
                 // TODO 临时解决方案，此处应将查询条件设置到QuestionModel中
-            DataModelUtils.decorateTable(targetArea.getFormatModel(), table);
+            DataModelUtils.decorateTable(getFormatModel (model, targetArea), table);
 //            resultMap.put("rowCheckMin", 1);
 //            resultMap.put("rowCheckMax", 5);
             if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
@@ -1929,6 +1937,7 @@ public class QueryDataResource extends BaseResource {
             updateLocalContext(dimId, model, selectedDims, chartAreaId);
             updateLocalContext(dimId, model, selectedDims, tableAreaId);
         }
+        
         this.reportModelCacheManager.updateRunTimeModelToCache(reportId, model);
         ResponseResult rs = ResourceUtils.getCorrectResult("successfully", null);
         return rs;
@@ -2177,14 +2186,14 @@ public class QueryDataResource extends BaseResource {
      */
     private ReportDesignModel getRealModel(String reportId, ReportRuntimeModel runTimeModel) {
         ReportDesignModel model;
-        Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
-        Object preview = runTimeModel.getContext().get("reportPreview");
-        if ((isEditor != null && isEditor.toString().equals("true")) 
-                || (preview != null && preview.toString().equals("true"))) {
-            model = reportModelCacheManager.getReportModel(reportId);
-        } else {
-            model = getDesignModelFromRuntimeModel(reportId);
-        }
+//        Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
+//        Object preview = runTimeModel.getContext().get("reportPreview");
+//        if ((isEditor != null && isEditor.toString().equals("true")) 
+//                || (preview != null && preview.toString().equals("true"))) {
+//            model = DeepcopyUtils.deepCopy (reportModelCacheManager.getReportModel(reportId));
+//        } else {
+        model = getDesignModelFromRuntimeModel(reportId);
+//        }
         return model;
     }
     

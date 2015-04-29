@@ -61,6 +61,7 @@
     padding: 0 20px 0 20px;
     /*border-bottom: 1px solid #CCC;*/
 }
+
 /*.ui-table-rowhcell:before {*/
     /*content: ' ';*/
     /*font-size: 0;*/
@@ -114,9 +115,6 @@
 .ui-table-row-selected .ui-table-ccell {
     background: #FFF;
 }
-.ui-table-ccell {
-    text-align: center;
-}
 /*.ui-table-row {
     cursor: pointer;
 }
@@ -126,9 +124,9 @@
 .ui-table-row-hover .ui-table-rowhcell {
     background: #DCEFD1;
 }*/
-.ui-table-cell-align-right {
-    text-align: left;
-}
+/*.ui-table-cell-align-right {*/
+    /*text-align: left;*/
+/*}*/
 .ui-table-cell-align-center {
     text-align: center;
 }
@@ -158,6 +156,10 @@
     display: none;
     margin-top: 6px;
     /*float: left;*/
+}
+/*这句样式对表格层级显示可能有问题，会多一些padding-left，到时候需要注意下*/
+.ui-table-expand-background .ui-table-default-icon{
+    padding-left: 15px;
 }
 .ui-table-expanded-icon {
     background-position: -16px -151px;
@@ -305,62 +307,64 @@
     background-position: -10px -106px;
 }
 .ui-table-head-tips {
+    display: inline-block;
     width: 15px;
     height: 15px;
-    line-height: 15px;
-    display: inline-block;
     background: url("img/icon-help-normal.png");
+    vertical-align: middle;
 }
 .ui-table-head-tips:hover {
     width: 15px;
     height: 15px;
-    line-height: 15px;
     display: inline-block;
     background: url("img/icon-help-hover.png");
+    vertical-align: middle;
 }
-.ui-table-heade-th-content {
-    text-align: center;
+.ui-table-head-th-content {
     height: 30px;
 }
 .ui-table-head-font {
-    color: #727272;
-    font-size: 12px;
-    font-weight: bold;
-    margin-right: 7px;
+    /*margin-right: 7px;*/
+    display: inline-block;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    vertical-align: middle;
+    color: #727272;
+    font-size: 12px;
+    font-weight: bold;
+
 }
 .ui-table-hcell-sort-desc {
     background-image: url(img/icon-hcell-desc.png);
     background-repeat: no-repeat;
-    width: 8px;
-    height: 18px;
     display: inline-block;
+    margin-left: 5px;
+    width: 8px;
+    height: 15px;
     color: #E7F9FE;
     vertical-align: middle;
-    margin-right: 4px;
 }
 .ui-table-hcell-sort-asc {
     background-image: url(img/icon-hcell-asc.png);
     background-repeat: no-repeat;
-    width: 8px;
     display: inline-block;
-    height: 18px;
+    margin-left: 5px;
+    width: 8px;
+    height: 15px;
     color: #E7F9FE;
     vertical-align: middle;
-    margin-right: 4px;
 }
 .ui-table-hcell-sort,
 .ui-table-hcell-sort-none {
     background-image: url(img/icon-hcell-sort.png);
     background-repeat: no-repeat;
-    width: 8px;
     display: inline-block;
-    height: 18px;
+    margin-left: 5px;
+    width: 8px;
+    height: 15px;
     color: #E7F9FE;
     vertical-align: middle;
-    margin-right: 4px;
 }
 .ui-table-heade-th-content span {
     padding: 0;
@@ -393,11 +397,6 @@
     top: 0px;
     right: 0px;
     border-right: 1px dashed #CCCCCC;
-}
-/* 数据展示居左 */
-.ui-table-head-th-content {
-    text-align: left;
-    display: inline;
 }
 .ui-table-expand-background {
     background-color: #F6F6F5;
@@ -453,18 +452,18 @@ tr > td:last-child:after{
 }
 /* 内容区域左侧10px边距 */
 .ui-table-cell-text {
-    margin-left: -10px;
+    /*margin-left: -10px;*/
 }
 /* 表头内容区域10px左边距 */
 .ui-table-head
 .ui-table-head-font  {
-    margin-left: -10px;
+    /*margin-left: -10px;*/
 }
 /* 汇总行字体加粗 */
 .ui-table-expand-font {
     font-weight: bold;
 }
-/* 解决表头第一块区域左侧边框线错位问题 */
+/* 解决表头第一块区域左侧边框线错位 问题 */
 .ui-table-locked-head th:first-child {
     border-left: 1px solid #E7F9FE;
 }
@@ -477,4 +476,15 @@ tr > td:last-child:after{
 }
 .ui-table-locked-head table {
     width: 100%;
+}
+
+
+.ui-table-cell-align-center {
+    text-align: center;
+}
+.ui-table-cell-align-left {
+    text-align: left;
+}
+.ui-table-cell-align-right {
+    text-align: right;
 }

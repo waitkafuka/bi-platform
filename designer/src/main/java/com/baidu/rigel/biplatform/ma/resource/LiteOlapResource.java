@@ -240,6 +240,7 @@ public class LiteOlapResource {
         }
 //        reportModelCacheManager.updateReportModelToCache(reportId, model);
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+//        runTimeModel.setModel (model);
         runTimeModel.updateDimStores(model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");

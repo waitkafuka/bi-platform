@@ -197,10 +197,20 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
         }
         return 0;
     }
+    
+    
 
 
 
-    /** 
+    /**
+	 * @return the fieldArray
+	 */
+	public Serializable[] getFieldArray() {
+		return fieldArray;
+	}
+
+
+	/** 
      * 获取 distinctMeasures 
      * @return the distinctMeasures 
      */

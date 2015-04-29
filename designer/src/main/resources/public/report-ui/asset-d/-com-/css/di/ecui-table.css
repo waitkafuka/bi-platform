@@ -77,8 +77,6 @@
     padding: 0 33px 0 0;
 }
 .ui-table-rowhcell {
-    text-align: center;
-    text-align: left;
     color: #333;
 }
 /* 解决ie7下（固定列）单元格自动换行的问题（强制所有文字不换行，溢出隐藏） */
@@ -100,6 +98,7 @@
 .ui-table-row-selected .ui-table-ccell {
     background: #FFFF99;
 }
+
 /*.ui-table-row {
     cursor: pointer;
 }
@@ -109,12 +108,12 @@
 .ui-table-row-hover .ui-table-rowhcell {
     background: #DCEFD1;
 }*/
-.ui-table-cell-align-right {
-    text-align: right;
-}
-.ui-table-cell-align-center {
-    text-align: center;
-}
+/*.ui-table-cell-align-right {*/
+    /*text-align: right;*/
+/*}*/
+/*.ui-table-cell-align-center {*/
+    /*text-align: center;*/
+/*}*/
 .ui-table-cell-link {
     color: #0F7DD2;
     text-decoration: none;
@@ -144,13 +143,42 @@
 .ui-table-expanded-icon {
     background-position: -16px -151px;
     display: block;
+    text-align: center;
 }
+/*.ui-table-expanded-icon-left {*/
+    /*background-position: -16px -151px;*/
+    /*display: block;*/
+    /*text-align: left;*/
+/*}*/
+/*.ui-table-expanded-icon-right {*/
+    /*background-position: -16px -151px;*/
+    /*display: block;*/
+    /*text-align: right;*/
+/*}*/
 .ui-table-collapsed-icon {
-    background-position: -25px -151px;
-    display: block;
+     background-position: -25px -151px;
+     display: block;
+     text-align: center;
+ }
+/*.ui-table-collapsed-icon-left {*/
+    /*background-position: -25px -151px;*/
+    /*display: block;*/
+    /*text-align: left;*/
+/*}*/
+/*.ui-table-collapsed-icon-right {*/
+    /*background-position: -25px -151px;*/
+    /*display: block;*/
+    /*text-align: right;*/
+/*}*/
+/*.ui-table-default-icon {*/
+    /*padding-left: 9px;*/
+/*}*/
+/*这句样式对表格层级显示可能有问题，会多一些padding-left，到时候需要注意下*/
+.ui-table-expand-background .ui-table-default-icon{
+    padding-left: 15px;
 }
 .ui-table-default-icon {
-    padding-left: 9px;
+    padding-left: 0;
 }
 /* 表格纵向滚动条 */
 .ui-table .ui-vscrollbar {
@@ -265,7 +293,7 @@
 .ui-table-head-tips {
     width: 15px;
     height: 15px;
-    margin-left: 7px;
+    margin-left: 5px;
     background: #999;
     border-radius: 8px;
     line-height: 15px;
@@ -290,48 +318,50 @@
 .ui-table-hcell-sort-desc {
     background-image: url(img/icon-hcell-desc.png);
     background-repeat: no-repeat;
-    width: 8px;
-    height: 18px;
     display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+    width: 8px;
+    height: 15px;
     color: #E7F9FE;
-    position: absolute;
-    right: 0;
-    padding-right: 12px;
-    top: 7px;
 }
 .ui-table-hcell-sort-asc {
     background-image: url(img/icon-hcell-asc.png);
     background-repeat: no-repeat;
-    width: 8px;
     display: inline-block;
-    height: 18px;
+    vertical-align: middle;
+    margin-left: 5px;
+    width: 8px;
+    height: 15px;
     color: #E7F9FE;
-    position: absolute;
-    right: 0;
-    padding-right: 12px;
-    top: 7px;
 }
 .ui-table-hcell-sort,
 .ui-table-hcell-sort-none {
     background-image: url(img/icon-hcell-sort.png);
     background-repeat: no-repeat;
-    width: 8px;
     display: inline-block;
-    height: 18px;
+    vertical-align: middle;
+    margin-left: 5px;
+    width: 8px;
+    height: 15px;
     color: #E7F9FE;
-    position: absolute;
-    right: 0;
-    padding-right: 12px;
-    top: 7px;
+    /*position: absolute;*/
+    /*right: 0;*/
+    /*padding-right: 12px;*/
+    /*top: 7px;*/
 }
 .ui-table-heade-th-content span {
     padding: 0;
 }
 .ui-table-head-font {
-    margin-left: 5px;
+    /*margin-left: 5px;*/
+    display: inline-block;
+    vertical-align: middle;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+    height: 15px;
+    line-height: 15px;
 }
 
 .ui-table-head-drag {
@@ -375,4 +405,14 @@
 }
 .ui-table-locked-head table {
     width: 100%;
+}
+
+.ui-table-cell-align-center {
+    text-align: center;
+}
+.ui-table-cell-align-left {
+    text-align: left;
+}
+.ui-table-cell-align-right {
+    text-align: right;
 }

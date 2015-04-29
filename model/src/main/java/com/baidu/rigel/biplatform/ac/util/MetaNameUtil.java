@@ -126,6 +126,7 @@ public class MetaNameUtil {
      * @return 字符串数组
      */
     public static String[] parseUnique2NameArray(String uniqueName) {
+        // 需要处理
         if (!isUniqueName(uniqueName)) {
             throw new IllegalArgumentException("uniqueName is illegal:" + uniqueName);
         }

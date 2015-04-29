@@ -217,8 +217,11 @@ public class QueryServiceImpl implements QueryService {
                 }
 
             }
+            long beforeBuildCurr=System.currentTimeMillis();
             
             result = new DataModelBuilder(resultSet, queryContext).build(false);
+            
+            logger.info("cost :" + (System.currentTimeMillis() - beforeBuildCurr) + " to build DataModel.");
         } catch (IndexAndSearchException e) {
             logger.error("query occur when search queryRequest：" + queryContext, e);
             throw new MiniCubeQueryException(e);

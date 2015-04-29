@@ -15,6 +15,8 @@
  */
 package com.baidu.rigel.biplatform.tesseract.qsservice.query;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.model.MemberNodeTree;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Between;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.From;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Limit;
@@ -104,8 +107,22 @@ public class QueryRequestBuilder {
             expressions = new HashMap<String, Expression>();
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
+            if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
+                int size = nodeTrees.size();
+                request.getWhere().setBetween(new Between());
+                request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
+                request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
+                request.getWhere().getBetween().setEnd(nodeTrees.get(size - 1).getName());
+            }
             for (MemberNodeTree node : nodeTrees) {
                 if (StringUtils.isNotBlank(node.getQuerySource()) && !MetaNameUtil.isAllMemberName(node.getName())) {
+                    if(node.isTime() && node.getChildren().size() > 1) {
+                         request.getWhere().setBetween(new Between());
+                         request.getWhere().getBetween().setProperties(node.getQuerySource());
+                        int size = node.getChildren().size(); 
+                        request.getWhere().getBetween().setStart(node.getChildren().get(0).getName());
+                        request.getWhere().getBetween().setEnd(node.getChildren().get(size - 1).getName());
+                    }
                     request.selectAndGroupBy(node.getQuerySource());
                     Expression expression = expressions.get(node.getQuerySource());
                     if (expression == null) {
@@ -113,6 +130,15 @@ public class QueryRequestBuilder {
                         expressions.put(node.getQuerySource(), expression);
                     }
                     expression.getQueryValues().add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
+                } else if (MetaNameUtil.isAllMemberName(node.getName()) && node.isTime ()) {
+                    // 查询条件为时间条件，并且查询节点为all节点，此处默认取一个整月的数据，需要测试是否影响趋势图
+                    request.getWhere().setBetween(new Between());
+                    request.getWhere().getBetween().setProperties(node.getQuerySource());
+                    SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
+                    Calendar cal = Calendar.getInstance ();
+                    request.getWhere().getBetween().setEnd(sf.format (cal.getTime ()));
+                    cal.add (Calendar.MONTH, -1);
+                    request.getWhere().getBetween().setStart (sf.format (cal.getTime ()));
                 }
                 if (CollectionUtils.isNotEmpty(node.getChildren())) {
                     buildSelectAndGroupBy(node.getChildren(), request, expressions);

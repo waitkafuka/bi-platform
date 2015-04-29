@@ -124,6 +124,7 @@ public class IndexSearcherFactory {
             File indexFile = new File(idxPath);
             if (indexFile.exists()) {
                 Directory directory = FSDirectory.open(indexFile);
+                LOGGER.info("CURRENT DIRECTORY TYPE :"+directory.getClass());
                 
                 searcherManager = new SearcherManager(directory,
                         this.new TesseractSearcherFactory());

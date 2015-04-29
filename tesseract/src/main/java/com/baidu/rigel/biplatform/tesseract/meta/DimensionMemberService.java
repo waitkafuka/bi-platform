@@ -147,6 +147,7 @@ public interface DimensionMemberService extends BeanFactoryAware {
             MiniCubeMember member =
                     getDimensionMemberServiceByLevelType(level.getType()).getMemberFromLevelByName(dataSourceInfo,
                             cube, level, name, result, params);
+            // TODO 需要进一步处理 解决查询维度数据为空情况
             if (member == null) {
                 throw new MetaException("can not get name:" + name + "from level:" + level);
             }

@@ -36,6 +36,17 @@ public class SqlQuery {
 	 * 查询字段
 	 */
 	private List<String> selectList;
+	
+	
+	private Map<String,String> sqlFunction = new HashMap<String, String>();
+	public Map<String, String> getSqlFunction() {
+		return sqlFunction;
+	}
+
+	public void setSqlFunction(Map<String, String> sqlFunction) {
+		this.sqlFunction = sqlFunction;
+	}
+
 	/**
 	 * idName
 	 */
@@ -223,7 +234,7 @@ public class SqlQuery {
 			for (int i = 0; i < selectList.size(); i++) {
 				String select = selectList.get(i);
 				sb.append(" ");
-				sb.append(select);
+				sb.append(sqlFunction.containsKey(select)? sqlFunction.get(select) : select);
 				if (i < selectList.size() - 1) {
 					sb.append(",");
 				}

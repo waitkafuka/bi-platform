@@ -31,58 +31,63 @@ import org.springframework.core.io.support.PropertiesLoaderUtils;
  */
 public class ConfigInfoUtils {
 
-    
-    /** 
-     * LOG 
-     */
-    private static Logger LOG = LoggerFactory.getLogger(ConfigInfoUtils.class);
-    
-    private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
-    
-    /**
-     * serverAddress
-     */
-    private static String SERVERADDRESS = null;
+	/**
+	 * LOG
+	 */
+	private static Logger LOG = LoggerFactory.getLogger(ConfigInfoUtils.class);
 
-    static {
-        FileInputStream inStream = null;
-        try {
-            String answerCoreConfFile = System.getProperty ("ac.config.location");
-            Properties properties = new Properties();
-            inStream = new FileInputStream(answerCoreConfFile);
-            properties.load (inStream);
-//            Properties properties = PropertiesLoaderUtils.loadAllProperties(answerCoreConfFile);
-            SERVERADDRESS = properties.getProperty("server.tesseract.address",DEFAULT_SERVER_ADDRESS);
-            LOG.info("load serveraddress from properties:{}",SERVERADDRESS);
-        } catch (IOException e) {
-            LOG.error (e.getMessage (), e);
-            throw new IllegalStateException ("不能获取ac配置文件");
-        } finally {
-            if (inStream != null) {
-                try {
-                    inStream.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
+	private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
 
-    /**
-     * 设置服务器地址
-     * 
-     * @param serverAddress Tesseract服务器地址
-     */
-    public static void setServerAddress(String serverAddress) {
-        ConfigInfoUtils.SERVERADDRESS = serverAddress;
-    }
+	/**
+	 * serverAddress
+	 */
+	private static String SERVERADDRESS = null;
 
-    /**
-     * get sERVERADDRESS
-     * 
-     * @return the sERVERADDRESS
-     */
-    public static String getServerAddress() {
-        return SERVERADDRESS;
-    }
-    
+	static {
+		FileInputStream inStream = null;
+		try {
+			// String answerCoreConfFile = System
+			//		.getProperty("ac.config.location");
+			// Don't commit
+			String answerCoreConfFile = "D:/temp/ac.properties";
+			Properties properties = new Properties();
+			inStream = new FileInputStream(answerCoreConfFile);
+			properties.load(inStream);
+			// Properties properties =
+			// PropertiesLoaderUtils.loadAllProperties(answerCoreConfFile);
+			SERVERADDRESS = properties.getProperty("server.tesseract.address",
+					DEFAULT_SERVER_ADDRESS);
+			LOG.info("load serveraddress from properties:{}", SERVERADDRESS);
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+			throw new IllegalStateException("不能获取ac配置文件");
+		} finally {
+			if (inStream != null) {
+				try {
+					inStream.close();
+				} catch (IOException e) {
+				}
+			}
+		}
+	}
+
+	/**
+	 * 设置服务器地址
+	 * 
+	 * @param serverAddress
+	 *            Tesseract服务器地址
+	 */
+	public static void setServerAddress(String serverAddress) {
+		ConfigInfoUtils.SERVERADDRESS = serverAddress;
+	}
+
+	/**
+	 * get sERVERADDRESS
+	 * 
+	 * @return the sERVERADDRESS
+	 */
+	public static String getServerAddress() {
+		return SERVERADDRESS;
+	}
+
 }
