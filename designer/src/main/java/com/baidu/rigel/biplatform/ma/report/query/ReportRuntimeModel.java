@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.TimeCondition;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
@@ -201,9 +202,9 @@ public class ReportRuntimeModel implements Serializable {
 //        }
         context = new QueryContext();
         isInited = true;
-        this.model = model;
-        updateLogicModels(model);
-        updateDimStores(model);
+        this.model =  DeepcopyUtils.deepCopy (model);
+        updateLogicModels(this.model);
+        updateDimStores(this.model);
     }
     
     /**
@@ -304,7 +305,7 @@ public class ReportRuntimeModel implements Serializable {
     }
     
     public void updateDimStores(ReportDesignModel model) {
-        this.model = model;
+        this.model = DeepcopyUtils.deepCopy (model);
         ExtendArea[] areas = model.getExtendAreaList();
         if (areas == null || areas.length == 0) {
             return;

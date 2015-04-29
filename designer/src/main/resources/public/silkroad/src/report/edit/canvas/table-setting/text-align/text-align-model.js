@@ -95,7 +95,7 @@ define(['url'], function (Url) {
             var compId = this.get('compId');
             var formData = {
                 areaId: compId,
-                colorFormat: JSON.stringify(data)
+                textFormat: JSON.stringify(data)
             };
             $.ajax({
                 url: Url.getTextAlignList(this.get('reportId'), compId),

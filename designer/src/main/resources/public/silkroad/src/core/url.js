@@ -850,7 +850,7 @@ define(function () {
      */
     Url.getTextAlignList = function (reportId, compId) {
         return getExtendAreaBaseUrl(reportId, compId)
-            + '/textALign';
+            + '/textAlign';
     };
 
     /**
