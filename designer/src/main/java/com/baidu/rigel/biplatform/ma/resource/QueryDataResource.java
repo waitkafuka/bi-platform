@@ -1528,8 +1528,7 @@ public class QueryDataResource extends BaseResource {
         }
         ReportDesignModel model;
         try {
-            model = runTimeModel.getModel ();
-                    // reportModelCacheManager.getReportModel(reportId);
+            model = DeepcopyUtils.deepCopy (runTimeModel.getModel ());
         } catch (CacheOperationException e) {
             logger.info("[INFO] Can not find such model in cache. Report Id: " + reportId, e);
             return ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
