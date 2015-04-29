@@ -116,7 +116,7 @@ public abstract class AbstractNode implements Node {
                     }
                 }
             }
-            if(CollectionUtils.isNotEmpty(multiResults)) {
+            if(multiResults != null) {
                 if(singleResult != null) {
                     for (int i = 0; i < multiResults.size(); i++) {
                         multiResults.set(i, computeData(multiResults.get(i), singleResult));
@@ -124,7 +124,7 @@ public abstract class AbstractNode implements Node {
                 }
                 setResult(new ListComputeResult(multiResults));
             } else {
-                setResult(new SingleComputeResult(computeData(BigDecimal.ZERO, singleResult)));
+                setResult(new SingleComputeResult(singleResult));
             }
         }
     }
@@ -162,8 +162,14 @@ public abstract class AbstractNode implements Node {
      * @return
      */
     private BigDecimal computeData(BigDecimal arg1, BigDecimal arg2) {
-        if(arg1 == null || arg2 == null) {
+        if(arg1 == null && arg2 == null) {
             return null;
+        }
+        if (arg1 == null) {
+            arg1 = BigDecimal.ZERO;
+        }
+        if (arg2 == null) {
+            arg2 = BigDecimal.ZERO;
         }
         return compute(arg1, arg2);
     }

@@ -564,14 +564,14 @@ public final class DataModelUtils {
         }
         // List<String> allMemUniqNameList=getAllMemUniqNameList(rowHeadFields);
         // int rowWidth=DataModelUtils.getLeafFileds(rowHeadFields).size();
-        
         List<HeadField> leafFileds = DataModelUtils.getLeafNodeList(rowHeadFields);
         // hasStoredMap用于记录已经存过的rowField
         Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
         SimpleDateFormat src = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat target = new SimpleDateFormat("yyyy-MM-dd");
         List<HeadField> ancestorFileds = null;
-        for (HeadField filed : leafFileds) {
+        for (int j = 0; j < leafFileds.size (); ++j) {
+            HeadField filed = leafFileds.get (j);
             ancestorFileds = getHeadListOutofHead(filed);
             Collections.reverse(ancestorFileds);
             List<RowHeadField> idxRowField = new ArrayList<RowHeadField>();
@@ -611,7 +611,11 @@ public final class DataModelUtils {
                  */
                 if (!headField.isHasChildren()) {
                     rowField.setExpand(null);
-                } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
+                } else if (CollectionUtils.isEmpty (headField.getChildren ()) 
+                        && headField.getParentLevelField () == null && headField.getParent () == null) {
+                    rowField.setExpand (null);
+                } 
+                else if (!CollectionUtils.isEmpty(headField.getChildren())) {
                     if (headField.getLeafSize() == 0 && headField.getParent() == null
                             && headField.getParentLevelField() == null) {
                         rowField.setExpand(null);
@@ -621,7 +625,7 @@ public final class DataModelUtils {
                 } else {
                     rowField.setExpand(true);
                 }
-                rowField.setDrillByLink(false);
+                rowField.setDrillByLink (false);
                 rowField.setDimName((String) headField.getExtInfos().get(EXT_INFOS_MEM_DIMNAME));
                 rowField.setIndent(getIndentOfHeadField(headField, 0));
                 rowField.setValueAll(transStrList2Str(getAllCaptionofHeadField(headField), "-", true));

@@ -612,7 +612,7 @@
         var dragStr = '';
 
         wrap = objWrap(wrap);
-        var align = wrap.align || 'left';
+        var align = colDefItem.align || 'left';
         if (align) {
             classStr.push(type + '-cell-align-' + align);
         }
@@ -780,7 +780,7 @@
                 }
             }
         }
-        var align = wrap.align || 'left';
+        var align = colDefItem.align || 'left';
         if (align) {
             classStr.push(type + '-cell-align-' + align);
         }
@@ -822,7 +822,7 @@
      */
     UI_OLAP_TABLE_CLASS.$renderCellInner = function(
         cellType, defItem, wrap, attrStr, classStr, styleStr
-        ) {
+    ) {
         var indentStyle = '';
         var clz = '';
         var type = this.getType();

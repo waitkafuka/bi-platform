@@ -276,6 +276,7 @@ public class MetaQueryAction {
                         AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.SPLITSTRATEGY_PARAM_KEY),
                                 QueryContextSplitStrategy.class);
             }
+            LOG.info("cost:" + (System.currentTimeMillis() - current) + " prepare to execute query.");
             
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
             
