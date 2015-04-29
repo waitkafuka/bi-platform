@@ -106,7 +106,7 @@
         <dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>4.1.4.RELEASE</version>
+			<version>4.1.4.RELEASE</version><!--$NO-MVN-MAN-VER$-->
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
