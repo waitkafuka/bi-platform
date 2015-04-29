@@ -88,10 +88,6 @@ define(
                     dialog.alert('没有指标');
                     return;
                 }
-                if ($.isEmptyObject(data.dimList)) {
-                    dialog.alert('没有维度');
-                    return;
-                }
 
                 html = textAlignSettingTemplate.render(data);
                 dialog.showDialog({
