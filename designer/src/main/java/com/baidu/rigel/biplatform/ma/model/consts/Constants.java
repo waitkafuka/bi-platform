@@ -105,4 +105,9 @@ public interface Constants {
 
     String POSITION = "position";
     
+    /**
+     * 文本对齐样式定义
+     */
+    String ALIGN_FORMAT = "alignFormat";
+    
 }

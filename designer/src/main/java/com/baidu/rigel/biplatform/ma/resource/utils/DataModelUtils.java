@@ -1054,6 +1054,7 @@ public final class DataModelUtils {
 //        }
         Map<String, String> dataFormat = formatModel.getDataFormat();
         Map<String, String> toolTips = formatModel.getToolTips ();
+        Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
         
         List<ColDefine> colDefineList = table.getColDefine ();
         for (ColDefine define : colDefineList) {
@@ -1074,6 +1075,13 @@ public final class DataModelUtils {
                     toolTip = uniqueName;
                 }
                 define.setToolTip(toolTip);
+            }
+            if (textAlignFormat != null) {
+            	String align = textAlignFormat.get(uniqueName);
+				if (StringUtils.isEmpty(align)){
+					align = "left";
+				}
+				define.setAlign(align);
             }
         }
         

@@ -721,4 +721,16 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         area.getFormatModel ().setPositions(positionMap);
     }
     
+    /**
+     * @{inheritDoc}
+     */
+    @Override
+    public void updateAreaTextAlignFormat(ExtendArea area, String textAlignFormat) {
+    	if (StringUtils.isEmpty(textAlignFormat)) {
+    		return;
+    	}
+        @SuppressWarnings("unchecked")
+        Map<String, String> textAlignFormatMap = GsonUtils.fromJson (textAlignFormat, HashMap.class);
+        area.getFormatModel ().setPositions(textAlignFormatMap);
+    }
 }

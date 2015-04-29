@@ -1567,6 +1567,68 @@ public class ReportDesignModelResource extends BaseResource {
         return result;
     }
     
+    
+    
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/textAlign",
+            method = { RequestMethod.POST })
+    public ResponseResult updateAreaTextAlignformat(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        String textAlignFormat = request.getParameter(Constants.ALIGN_FORMAT);
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updateAreaTextAlignFormat(area, textAlignFormat);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        // result.setData(area.getLogicModel().getTopSetting());
+        result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
+        return result;
+    }
+    
+    
+    /**
+     * 获取表格文本对齐样式
+     * @param reportId 报表id
+     * @param areaId 区域id
+     * @param request http请求
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/textAlign",
+            method = { RequestMethod.GET })
+    public ResponseResult getAreaTextAlignFormat(@PathVariable("id") String reportId, 
+    		@PathVariable("areaId") String areaId, HttpServletRequest request) {
+    	ResponseResult rs = new ResponseResult();
+        logger.info("begin get text align format");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getFormatModel () == null) {
+            result.setData (Maps.newHashMap ());
+        } else {
+            result.setData(area.getFormatModel ().getTextAlignFormat());
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        logger.info("[INFO]query measure setting result {}, cose {} ms", 
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+    	return rs;
+    }
+    
+    
     @RequestMapping(value = "/{id}/extend_area/{areaId}/position",
             method = { RequestMethod.POST })
     public ResponseResult updateAreaMeasurePosition(@PathVariable("id") String reportId,

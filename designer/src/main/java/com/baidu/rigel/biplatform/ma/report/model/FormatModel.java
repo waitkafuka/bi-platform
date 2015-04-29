@@ -59,6 +59,10 @@ public class FormatModel implements Serializable {
     private Map<String, String> positions = Maps.newHashMap ();
 
     /**
+     * 表格指标对齐定义
+     */
+    private Map<String, String> textAlignFormat = Maps.newHashMap();
+    /**
      * @return the dataFormat
      */
     public Map<String, String> getDataFormat() {
@@ -97,6 +101,7 @@ public class FormatModel implements Serializable {
         this.conditionFormat = Maps.newHashMap();
         this.toolTips = Maps.newHashMap();
         this.colorFormat = Maps.newHashMap ();
+        this.textAlignFormat = Maps.newHashMap();
     }
 
     public void removeItem(String id) {
@@ -105,6 +110,7 @@ public class FormatModel implements Serializable {
         this.getConditionFormat().remove(id);
         this.getColorFormat ().remove (id);
         this.getPositions ().remove (id);
+        this.getTextAlignFormat().remove(id);
     }
 
     public void init(String name) {
@@ -113,6 +119,7 @@ public class FormatModel implements Serializable {
         this.getConditionFormat().put(name, null);
         this.getColorFormat ().put (name, null);
         this.getPositions ().put (name, "0");
+        this.getTextAlignFormat().put(name, "left");
     }
 
     /**
@@ -149,5 +156,23 @@ public class FormatModel implements Serializable {
         this.positions = positions;
     }
     
+    /**
+     * 设置文本对齐样式
+     * @param textAlignFormat
+     */
+    public void setTextAlignFormat(Map<String, String> textAlignFormat) {
+    	this.textAlignFormat = textAlignFormat;
+    }
+    
+    /**
+     * 获取文件对齐样式
+     * @return 文件对齐样式
+     */
+    public Map<String, String> getTextAlignFormat() {
+    	if (this.textAlignFormat == null) {
+    		this.textAlignFormat = Maps.newHashMap();
+    	}
+    	return textAlignFormat;
+    }
     
 }

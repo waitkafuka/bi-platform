@@ -164,5 +164,12 @@ public interface ReportDesignModelService {
      * @param positions
      */
     void updateAreaPositionDef(ExtendArea area, String positions);
+    
+    /**
+     * 更新区域文本对齐样式
+     * @param area 区域
+     * @param textAlignFormat 对齐样式
+     */
+    void updateAreaTextAlignFormat(ExtendArea area, String textAlignFormat);
 
 }

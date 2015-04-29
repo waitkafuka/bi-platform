@@ -71,6 +71,11 @@ public class ColDefine implements Serializable {
     private String toolTip;
 
     /**
+     * 文本对齐
+     */
+    private String align;
+    
+    /**
      * @return the uniqueName
      */
     public String getUniqueName() {
@@ -165,5 +170,19 @@ public class ColDefine implements Serializable {
         this.toolTip = toolTip;
     }
 
+    /**
+     * 
+     * @return the align
+     */
+    public String getAlign() {
+    	return align;
+    }
     
+    /**
+     * 
+     * @param align 对齐方式
+     */
+    public void setAlign(String align) {
+    	this.align = align;
+    }
 }
