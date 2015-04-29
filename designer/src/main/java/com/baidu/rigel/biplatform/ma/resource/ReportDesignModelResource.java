@@ -421,6 +421,7 @@ public class ReportDesignModelResource extends BaseResource {
             rs.setData(model);
             rs.setStatus(0);
             rs.setStatusInfo(SUCCESS);
+            updateRuntimeModel(model);
             logger.info("save operation successfully");
         } catch (ReportModelOperationException e) {
             logger.error(e.getMessage(), e);
@@ -455,6 +456,7 @@ public class ReportDesignModelResource extends BaseResource {
         reportModelCacheManager.updateReportModelToCache(id, model);
         rs.setStatus(0);
         rs.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return rs;
     }
     
@@ -519,6 +521,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatus(0);
         result.setData(areas.get(0));
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1003,6 +1006,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatus(0);
         result.setData(model);
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1039,6 +1043,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setData(area.getFormatModel().getToolTips());
         result.setStatusInfo(SUCCESS);
         result.setStatus(0);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1075,6 +1080,7 @@ public class ReportDesignModelResource extends BaseResource {
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
         result.setData(area.getFormatModel().getDataFormat());
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1175,6 +1181,7 @@ public class ReportDesignModelResource extends BaseResource {
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
         result.setData(area.getLogicModel().getTopSetting());
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1230,6 +1237,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatusInfo(SUCCESS);
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 
                 GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1340,6 +1348,7 @@ public class ReportDesignModelResource extends BaseResource {
         result.setStatus(0);
         result.setData(model);
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1394,6 +1403,7 @@ public class ReportDesignModelResource extends BaseResource {
         }
         model.setTheme(type);
         reportModelCacheManager.updateReportModelToCache(id, model);
+        updateRuntimeModel(model);
         ResponseResult rs = getResult(SUCCESS, "can not get mode define info", model);
         logger.info("query operation rs is : " + rs.toString());
         return rs;
@@ -1426,6 +1436,7 @@ public class ReportDesignModelResource extends BaseResource {
             		model.setVmContent(vm);
             }
             reportDesignModelService.saveOrUpdateModel(model);
+            updateRuntimeModel(model);
         } catch (Exception e) {
             logger.error("There are no such model in cache. Report Id: " + reportId, e);
             return "error";
@@ -1493,6 +1504,7 @@ public class ReportDesignModelResource extends BaseResource {
             if (modelInCache) {
                 reportModelCacheManager.updateReportModelToCache (id, model);
             }
+            updateRuntimeModel(model);
             return ResourceUtils.getCorrectResult ("修改成功,需重新发布才能影响生产环境", null);
         }
         return ResourceUtils.getErrorResult ("修改失败", 1) ;
@@ -1523,6 +1535,7 @@ public class ReportDesignModelResource extends BaseResource {
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
         result.setData(area.getLogicModel().getTopSetting());
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1579,6 +1592,7 @@ public class ReportDesignModelResource extends BaseResource {
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
         result.setData(area.getLogicModel().getTopSetting());
         result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
         return result;
     }
     
@@ -1608,5 +1622,16 @@ public class ReportDesignModelResource extends BaseResource {
         logger.info("[INFO]query measuer setting result {}, cose {} ms", 
                 GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
+    }
+    
+    protected void updateRuntimeModel (ReportDesignModel model) {
+        if (model != null) {
+            ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (model.getId ());
+            if (runtimeModel == null) {
+                runtimeModel = new ReportRuntimeModel (model.getId ());
+            }
+            runtimeModel.init (model, true);
+            reportModelCacheManager.updateRunTimeModelToCache (model.getId (), runtimeModel);
+        }
     }
 }
