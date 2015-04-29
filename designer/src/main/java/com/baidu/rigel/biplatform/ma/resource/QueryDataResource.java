@@ -987,6 +987,8 @@ public class QueryDataResource extends BaseResource {
         } catch (Exception e1) {
             logger.info("查询数据失败！", e1);
             return ResourceUtils.getErrorResult("没有查询到相关数据", 1);
+        } catch (Throwable t) {
+            return ResourceUtils.getErrorResult("没有查询到相关数据", 1);
         }
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
