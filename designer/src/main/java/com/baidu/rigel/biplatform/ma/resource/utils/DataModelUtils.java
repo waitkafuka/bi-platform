@@ -611,7 +611,8 @@ public final class DataModelUtils {
                  */
                 if (!headField.isHasChildren()) {
                     rowField.setExpand(null);
-                } else if (CollectionUtils.isEmpty (headField.getChildren ()) && headField.getParentLevelField () == null) {
+                } else if (CollectionUtils.isEmpty (headField.getChildren ()) 
+                        && headField.getParentLevelField () == null && headField.getParent () == null) {
                     rowField.setExpand (null);
                 } 
                 else if (!CollectionUtils.isEmpty(headField.getChildren())) {
