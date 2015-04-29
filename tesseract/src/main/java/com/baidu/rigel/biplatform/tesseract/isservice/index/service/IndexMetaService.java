@@ -158,4 +158,11 @@ public interface IndexMetaService {
      */
     IndexMeta getIndexMetaByIndexMetaId(String idxMetaId, String storeKey);
     
+    /**
+     * 判断当前分片是否已满
+     * @param idxShard
+     * @return boolean
+     */
+    boolean isIndexShardFull(IndexShard idxShard);
+    
 }
