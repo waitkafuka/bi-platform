@@ -307,11 +307,15 @@ public class IndexShard implements Serializable {
      * 
      * @return the isFull
      */
-    public boolean isFull() {
-        if ((isFull == false) && this.diskSize >= IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE) {
-            isFull = true;
-        }
-        return isFull;
+//    public boolean isFull() {
+//        if ((isFull == false) && this.diskSize >= IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE) {
+//            isFull = true;
+//        }
+//        return isFull;
+//    }
+    
+    public boolean getFull(){
+    	return this.isFull;
     }
     
     /**
