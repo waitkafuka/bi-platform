@@ -278,13 +278,19 @@ public class MetaQueryAction {
             }
             
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
+            
+            long curr=System.currentTimeMillis();
             if (dataModel != null) {
                 if (questionModel.isFilterBlank()) {
                     DataModelUtils.filterBlankRow(dataModel);
+                    LOG.info("cost:" + (System.currentTimeMillis() - curr) + " filterBlankRow.");
                 }
+                curr=System.currentTimeMillis();
                 dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
                         questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
+                LOG.info("cost:" + (System.currentTimeMillis() - curr) + " sortAandTrunc.");
             }
+            
             LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             return ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
 
