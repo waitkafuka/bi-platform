@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
+import com.baidu.rigel.biplatform.tesseract.config.IndexConfig;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchExceptionType;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
@@ -68,7 +69,6 @@ import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
-import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
@@ -97,6 +97,8 @@ public class IndexAndSearchClient {
      */
     private static IndexAndSearchClient INSTANCE;
     
+    
+    
     /**
      * 私有构造函数
      */
@@ -118,8 +120,11 @@ public class IndexAndSearchClient {
             }
         });
         
+       	
         logger.info("IndexAndSearchClient init finished");
     }
+    
+    
     
     /**
      * getNodeClient
@@ -129,6 +134,7 @@ public class IndexAndSearchClient {
         if (INSTANCE == null) {
             INSTANCE = new IndexAndSearchClient();
         }
+        
         return INSTANCE;
     }
     
@@ -319,6 +325,10 @@ public class IndexAndSearchClient {
      */
     public IndexMessage index(TesseractResultSet data, IndexAction idxAction, IndexShard idxShard,Node node,
         String idName, boolean lastPiece) throws IndexAndSearchException {
+    	
+    	IndexConfig indexConfig=(IndexConfig)ApplicationContextHelper.getContext().getBean("indexConfig");
+    	
+    	
         logger.info("index:[data=" + data + "][idxAction=" + idxAction + "][idxShard=" + idxShard
             + "][idName:" + idName + "] start");
         if (data == null || idxShard == null || StringUtils.isEmpty(idxShard.getFilePath())
@@ -342,7 +352,7 @@ public class IndexAndSearchClient {
         IndexMessage message = new IndexMessage(messageHeader, data);
         message.setIdxPath(idxShard.getAbsoluteFilePath(node.getIndexBaseDir()));
         message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath(node.getIndexBaseDir()));
-        message.setBlockSize(IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE);
+        message.setBlockSize(indexConfig.getIdxShardSize());
         message.setIdName(idName);
         message.setLastPiece(lastPiece);
 
@@ -680,6 +690,11 @@ public class IndexAndSearchClient {
     public void shutDown() {
         this.b.group().shutdownGracefully();
     }
+
+
+
+	
+    
     
 
 }

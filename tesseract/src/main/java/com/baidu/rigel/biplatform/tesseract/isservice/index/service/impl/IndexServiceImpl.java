@@ -37,13 +37,14 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.tesseract.config.IndexConfig;
 import com.baidu.rigel.biplatform.tesseract.dataquery.service.DataQueryService;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
@@ -68,7 +69,6 @@ import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
-import com.baidu.rigel.biplatform.tesseract.util.TesseractConstant;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -100,17 +100,24 @@ public class IndexServiceImpl implements IndexService {
 	 */
 	private static final String RESULT_KEY_MAXID = "RESULT_KEY_MAXID";
 	
-	@Value("${index.indexInterval}")
-    private int indexInterval;
+	@Resource
+	private IndexConfig indexConfig;
 	
-	@Value("${index.copyIdxTimeOut}")
-	private int copyIdxTimeOut;
 	
-	@Value("${index.copyIdxCheckInterval}")
-	private int copyIdxCheckInterval;
-	
-	@Value("${index.shardReplicaNum}")
-	private int shardReplicaNum;
+//	@Value("${index.indexInterval}")
+//    private int indexInterval;
+//	
+//	@Value("${index.copyIdxTimeOut}")
+//	private int copyIdxTimeOut;
+//	
+//	@Value("${index.copyIdxCheckInterval}")
+//	private int copyIdxCheckInterval;
+//	
+//	@Value("${index.shardReplicaNum}")
+//	private int shardReplicaNum;
+//	
+//	@Value("${index.indexShardSize}")
+//    private long idxShardSize;
 
 	/**
 	 * indexMetaService
@@ -154,31 +161,35 @@ public class IndexServiceImpl implements IndexService {
 		
 	}
 	
-	@PostConstruct
-	public void initConfig() {
-
-		this.LOGGER.info("Checking and set config");
-		if (this.shardReplicaNum <= 0) {
-			this.shardReplicaNum = IndexFileSystemConstants.DEFAULT_SHARD_REPLICA_NUM;
-		}
-		if (this.copyIdxCheckInterval <= 0) {
-			this.copyIdxCheckInterval = IndexFileSystemConstants.DEFAULT_COOPYINDEX_CHECKINTERVAL;
-		}
-		if (this.copyIdxTimeOut <= 0) {
-			this.copyIdxTimeOut = IndexFileSystemConstants.DEFAULT_COPYINDEX_TIMEOUT;
-		}
-		if (this.indexInterval <= 0) {
-			this.indexInterval = IndexFileSystemConstants.DEFAULT_INDEX_INTERVAL;
-		}
-
-		this.LOGGER
-				.info("After check and set config,now config is :[shardReplicaNum:"
-						+ this.shardReplicaNum
-						+ "][copyIdxCheckInterval:"
-						+ this.copyIdxCheckInterval
-						+ "][copyIdxTimeOut:"
-						+ this.copyIdxTimeOut + "][indexInterval:"+this.indexInterval+"]");
-	}
+//	@PostConstruct
+//	public void initConfig() {
+//
+//		this.LOGGER.info("Checking and set config");
+//		if (this.shardReplicaNum <= 0) {
+//			this.shardReplicaNum = IndexFileSystemConstants.DEFAULT_SHARD_REPLICA_NUM;
+//		}
+//		if (this.copyIdxCheckInterval <= 0) {
+//			this.copyIdxCheckInterval = IndexFileSystemConstants.DEFAULT_COOPYINDEX_CHECKINTERVAL;
+//		}
+//		if (this.copyIdxTimeOut <= 0) {
+//			this.copyIdxTimeOut = IndexFileSystemConstants.DEFAULT_COPYINDEX_TIMEOUT;
+//		}
+//		if (this.indexInterval <= 0) {
+//			this.indexInterval = IndexFileSystemConstants.DEFAULT_INDEX_INTERVAL;
+//		}
+//		
+//		if (this.idxShardSize <= 0){
+//			this.idxShardSize = IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE;
+//		}
+//
+//		this.LOGGER
+//				.info("After check and set config,now config is :[shardReplicaNum:"
+//						+ this.shardReplicaNum
+//						+ "][copyIdxCheckInterval:"
+//						+ this.copyIdxCheckInterval
+//						+ "][copyIdxTimeOut:"
+//						+ this.copyIdxTimeOut + "][indexInterval:"+this.indexInterval+"]");
+//	}
 
 	/*
 	 * (non-Javadoc)
@@ -428,7 +439,7 @@ public class IndexServiceImpl implements IndexService {
 	 * @param dataMap 修订数据时，提供修订的起止范围
 	 * @throws Exception 有可能抛出异常
 	 */
-	private void doIndexByIndexAction(IndexMeta indexMeta,
+	public void doIndexByIndexAction(IndexMeta indexMeta,
 			IndexAction idxAction, Map<String, BigDecimal> dataMap)
 			throws Exception {
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
@@ -436,7 +447,7 @@ public class IndexServiceImpl implements IndexService {
 						+ "][idxAction:" + idxAction + "]"));
 		IndexMeta idxMeta = this.indexMetaService.getIndexMetaByIndexMetaId(indexMeta.getIndexMetaId(), indexMeta.getStoreKey());
 		
-		if ((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexInterval)) {
+		if ((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexConfig.getIndexInterval())) {
 			idxMeta.setLocked(Boolean.TRUE);
 			this.indexMetaService.saveIndexMetaLocally(idxMeta);
 		}else {
@@ -446,7 +457,7 @@ public class IndexServiceImpl implements IndexService {
 					"[indexMeta:" + indexMeta.getIndexMetaId() + ", Locked:"
 							+ idxMeta.getLocked() + ", last update:"
 							+ idxMeta.getIdxVersion() + " ,indexInterval:"
-							+ this.indexInterval + ",test (System.currentTimeMillis()-idxMeta.getIdxVersion()):"+(System.currentTimeMillis()-idxMeta.getIdxVersion())+"]","[skip index]"));
+							+ this.indexConfig.getIndexInterval() + ",test (System.currentTimeMillis()-idxMeta.getIdxVersion()):"+(System.currentTimeMillis()-idxMeta.getIdxVersion())+"]","[skip index]"));
 			return ;
 		}		
 		
@@ -552,7 +563,7 @@ public class IndexServiceImpl implements IndexService {
 					currResult = (TesseractResultSet) result.get(RESULT_KEY_DATA);
 					currMaxId = (BigDecimal) result.get(RESULT_KEY_MAXID);
 					currIdxShard = (IndexShard) result.get(RESULT_KEY_INDEXSHARD);
-					if (currIdxShard.isFull() || isLastPiece) {
+					if (this.indexMetaService.isIndexShardFull(currIdxShard) || isLastPiece) {
 						// 设置当前分片的状态为内容已变更
 						currIdxShard = null;
 						if (idxAction.equals(IndexAction.INDEX_MOD)
@@ -640,10 +651,10 @@ public class IndexServiceImpl implements IndexService {
 				}	
 				
 				
-				if(this.shardReplicaNum>1 && !CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList()) && idxShard.getReplicaNodeKeyList().size() > 0){
+				if(this.indexConfig.getShardReplicaNum()>1 && !CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList()) && idxShard.getReplicaNodeKeyList().size() > 0){
 //				if(IndexShard.getDefaultShardReplicaNum()>1){	
 					//获取副本拷贝情况				
-					List<String> replicaNodeKeyList=this.getCopyIndexTaskInfo(idxShard.getShardName(), this.copyIdxTimeOut);
+					List<String> replicaNodeKeyList=this.getCopyIndexTaskInfo(idxShard.getShardName(), this.indexConfig.getCopyIdxTimeOut());
 					if(!CollectionUtils.isEmpty(replicaNodeKeyList)){
 						idxShard.setReplicaNodeKeyList(replicaNodeKeyList);
 					}else{
@@ -684,7 +695,7 @@ public class IndexServiceImpl implements IndexService {
 	private List<String> getCopyIndexTaskInfo(String shardName,int timeOut) throws InterruptedException{
 		int copyTaskTimeOut=timeOut;
 		if(copyTaskTimeOut<=0){
-			copyTaskTimeOut=this.copyIdxTimeOut;
+			copyTaskTimeOut=IndexFileSystemConstants.DEFAULT_COPYINDEX_TIMEOUT;
 		}
 		
 		List<String> result=null;
@@ -696,7 +707,7 @@ public class IndexServiceImpl implements IndexService {
 				result=this.copyIndexTaskResult.get(shardName);
 				break;
 			}
-			Thread.sleep(this.copyIdxCheckInterval);
+			Thread.sleep(this.indexConfig.getCopyIdxCheckInterval());
 		}
 		if((System.currentTimeMillis()-curr)>=copyTaskTimeOut && CollectionUtils.isEmpty(result)){
 			this.LOGGER.info("getCopyIndexTaskInfo time out,shardName:"+shardName);
@@ -757,7 +768,7 @@ public class IndexServiceImpl implements IndexService {
 		}
 		for (int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
 			if (idxMeta.getIdxShardList().get(i) != null
-					&& !idxMeta.getIdxShardList().get(i).isFull()) {
+					&& !this.indexMetaService.isIndexShardFull(idxMeta.getIdxShardList().get(i))) {
 				result = i;
 				break;
 			}
@@ -820,7 +831,7 @@ public class IndexServiceImpl implements IndexService {
 
 		idxShard.setDiskSize(message.getDiskSize());
 
-		if (idxShard.isFull() || lastPiece) {
+		if (this.indexMetaService.isIndexShardFull(idxShard) || lastPiece) {
 			// 设置提供服务的目录：
 			String absoluteIdxFilePath = message.getIdxServicePath();
 			String targetFilePath=idxShard.getFilePath();
@@ -831,7 +842,7 @@ public class IndexServiceImpl implements IndexService {
 			Map<String,Node> assignedNodeMap=new HashMap<String,Node>();
 			if (CollectionUtils.isEmpty(idxShard.getReplicaNodeKeyList())) {
 				
-				assignedNodeMap=this.isNodeService.assignFreeNodeForReplica(this.shardReplicaNum - 1,
+				assignedNodeMap=this.isNodeService.assignFreeNodeForReplica(this.indexConfig.getShardReplicaNum() - 1,
 								idxShard.getNodeKey(),idxShard.getClusterName());
 
 				if (MapUtils.isNotEmpty(assignedNodeMap)) {
