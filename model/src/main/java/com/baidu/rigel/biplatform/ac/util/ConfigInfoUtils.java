@@ -21,7 +21,6 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 /**
  * 服务器配置信息，暂时只有Tesseract服务器地址配置
@@ -46,10 +45,8 @@ public class ConfigInfoUtils {
 	static {
 		FileInputStream inStream = null;
 		try {
-			// String answerCoreConfFile = System
-			//		.getProperty("ac.config.location");
-			// Don't commit
-			String answerCoreConfFile = "D:/temp/ac.properties";
+			 String answerCoreConfFile = System
+					.getProperty("ac.config.location");
 			Properties properties = new Properties();
 			inStream = new FileInputStream(answerCoreConfFile);
 			properties.load(inStream);

@@ -1610,22 +1610,23 @@ public class ReportDesignModelResource extends BaseResource {
             method = { RequestMethod.GET })
     public ResponseResult getAreaTextAlignFormat(@PathVariable("id") String reportId, 
     		@PathVariable("areaId") String areaId, HttpServletRequest request) {
-    	ResponseResult rs = new ResponseResult();
         logger.info("begin get text align format");
         long begin = System.currentTimeMillis();
         ResponseResult result = new ResponseResult();
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = model.getExtendById(areaId);
+        Map<String, Object> data = Maps.newHashMap();
         if (area.getFormatModel () == null) {
-            result.setData (Maps.newHashMap ());
+        	data.put("indList", Maps.newHashMap());
         } else {
-            result.setData(area.getFormatModel ().getTextAlignFormat());
+        	data.put("indList", area.getFormatModel ().getTextAlignFormat());
         }
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
+        result.setData(data);
         logger.info("[INFO]query measure setting result {}, cose {} ms", 
                 GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
-    	return rs;
+    	return result;
     }
     
     

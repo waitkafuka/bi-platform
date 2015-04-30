@@ -731,6 +731,6 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
     	}
         @SuppressWarnings("unchecked")
         Map<String, String> textAlignFormatMap = GsonUtils.fromJson (textAlignFormat, HashMap.class);
-        area.getFormatModel ().setPositions(textAlignFormatMap);
+        area.getFormatModel ().setTextAlignFormat(textAlignFormatMap);
     }
 }
