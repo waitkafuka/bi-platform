@@ -421,6 +421,17 @@
                     if (isInArray(ser.name, defaultMeasures)) {
                         series.push(ser);
                     }
+                    // 设置饼图的指标描述为微软雅黑
+                    ser.itemStyle = {
+                        normal : {
+                            label : {
+                                textStyle : {
+                                    fontFamily : '微软雅黑',
+                                    fontSize : 14
+                                }
+                            }
+                        }
+                    }
                 }
                 else if (ser.type === 'line') {
                     // 在有两个以上的指标时进行双轴设定 - 博学
@@ -1078,7 +1089,18 @@
         if (this._chartType === 'pie') {
         	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
             options.calculable = false;
+            var colors =  [
+                           '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981','#D97A81',
+                           '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C','#E6D88D'
+                       ];
+            // 饼图每个块的颜色，按照UE给出的标准进行重设
+            options.color = colors;
         }
+        var textStyle = {
+    		fontFamily: '微软雅黑',
+            fontSize: '120px'
+        };
+        
         this.$setupLegend(options);
         return options;
     };
