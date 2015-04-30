@@ -46,6 +46,7 @@ import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.tesseract.config.IndexConfig;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.DataDescInfo;
 import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
@@ -79,17 +80,24 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
      */
     @Resource
     private StoreManager storeManager;
+    
+    @Resource
+    private IndexConfig indexConfig;
     /**
      * isNodeService
      */
     @Resource(name = "isNodeService")
     private IsNodeService isNodeService;
     
-    @Value("${index.indexInterval}")
-    private int indexInterval;
     
-    @Value("${index.shardReplicaNum}")
-	private int shardReplicaNum;
+//    @Value("${index.indexInterval}")
+//    private int indexInterval;
+//    
+//    @Value("${index.shardReplicaNum}")
+//	private int shardReplicaNum;
+//    
+//    @Value("${index.indexShardSize}")
+//    private long idxShardSize;
     
     /**
      * DEFAULT_BLOCK_COUNT，默认每次申请索引块数
@@ -127,24 +135,28 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
     }
     
     
-    @PostConstruct
-	public void initConfig() {
-
-		LOGGER.info("Checking and set config");
-		if (this.shardReplicaNum <= 0) {
-			this.shardReplicaNum = IndexFileSystemConstants.DEFAULT_SHARD_REPLICA_NUM;
-		}
-
-		if (this.indexInterval <= 0) {
-			this.indexInterval = IndexFileSystemConstants.DEFAULT_INDEX_INTERVAL;
-		}
-
-		LOGGER
-				.info("After check and set config,now config is :[shardReplicaNum:"
-						+ this.shardReplicaNum
-						+ "][indexInterval:"
-						+ this.indexInterval + "]");
-	}
+//    @PostConstruct
+//	public void initConfig() {
+//
+//		LOGGER.info("Checking and set config");
+//		if (this.shardReplicaNum <= 0) {
+//			this.shardReplicaNum = IndexFileSystemConstants.DEFAULT_SHARD_REPLICA_NUM;
+//		}
+//
+//		if (this.indexInterval <= 0) {
+//			this.indexInterval = IndexFileSystemConstants.DEFAULT_INDEX_INTERVAL;
+//		}
+//		
+//		if (this.idxShardSize <=0 ){
+//			this.idxShardSize =IndexFileSystemConstants.DEFAULT_INDEX_SHARD_SIZE;
+//		}
+//
+//		LOGGER
+//				.info("After check and set config,now config is :[shardReplicaNum:"
+//						+ this.shardReplicaNum
+//						+ "][indexInterval:"
+//						+ this.indexInterval + "]");
+//	}
 
     
     /*
@@ -238,7 +250,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
             }
             idxMeta.setMeasureSet(measureSet);
             
-            idxMeta.setReplicaNum(this.shardReplicaNum);
+            idxMeta.setReplicaNum(this.indexConfig.getShardReplicaNum());
             idxMeta.setDataSourceInfo(dataSourceInfo);
             idxMeta.setDataDescInfo(dataDescInfo);
             
@@ -723,7 +735,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         }
         
         
-        if((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexInterval)){
+        if((idxMeta.getLocked().equals(Boolean.FALSE)) || ((System.currentTimeMillis()-idxMeta.getIdxVersion()) > this.indexConfig.getIndexInterval())){
         	idxMeta.setLocked(Boolean.FALSE);
         	
         }
@@ -852,7 +864,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
         if (idxMeta != null && idxMeta.getIdxShardList() != null) {
             int i = 0;
             for (; i < idxMeta.getIdxShardList().size(); i++) {
-                if (!idxMeta.getIdxShardList().get(i).isFull()) {
+                if (!this.isIndexShardFull(idxMeta.getIdxShardList().get(i))) {
                     break;
                 }
             }
@@ -1071,6 +1083,18 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
 		}
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "recoverLocalIndexMetaWithCluster",
 	            "[idxMetaList.size:"+idxMetaList+"][clusterName:"+clusterName+"]"));
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService#isIndexShardFull(com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShard)
+	 */
+	@Override
+	public boolean isIndexShardFull(IndexShard idxShard){
+		if ((idxShard.getFull() == false) && idxShard.getDiskSize() >= this.indexConfig.getIdxShardSize()) {
+            idxShard.setFull(Boolean.TRUE);
+        }
+        return idxShard.getFull();
 	}
     
 	

@@ -289,12 +289,14 @@ public class MetaQueryAction {
                 curr=System.currentTimeMillis();
                 dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
                         questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
-                LOG.info("cost:" + (System.currentTimeMillis() - curr) + " sortAandTrunc.");
+                LOG.info("cost:" + (System.currentTimeMillis() - curr) + "ms sortAandTrunc.");
             }
             
             LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
-            return ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
-
+            curr = System.currentTimeMillis();
+            ResponseResult rs = ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
+            LOG.info("cost:" + (System.currentTimeMillis() - curr) + "ms convert dataModel to json");
+            return rs;
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
             // 一般不会出现，出现了说明模型有问题了

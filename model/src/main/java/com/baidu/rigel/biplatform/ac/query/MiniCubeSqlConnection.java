@@ -62,7 +62,10 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
         Map<String, String> params = new HashMap<String, String>();
 
         params.put(QUESTIONMODEL_PARAM_KEY, AnswerCoreConstant.GSON.toJson(questionModel));
+        long curr = System.currentTimeMillis ();
+        log.info("begin execute query with tesseract ");
         String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params);
+        log.info("execute query with tesseract cost {} ms", (System.currentTimeMillis () - curr));
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
             String dataModelJson = responseResult.getData().replace("\\", "");

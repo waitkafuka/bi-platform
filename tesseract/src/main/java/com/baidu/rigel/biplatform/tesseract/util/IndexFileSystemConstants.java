@@ -26,7 +26,10 @@ public class IndexFileSystemConstants {
     /**
      * DEFAULT_INDEX_SHARD_SIZE
      */
-    public static final long DEFAULT_INDEX_SHARD_SIZE = 20 * 1024 * 1024;
+    public static final long DEFAULT_INDEX_SHARD_SIZE = 64;
+    
+    
+    public static final long DEFAULT_INDEX_SHARD_SIZE_UNIT=1024*1024;
     
     /**
      * FETCH_SIZE_FROM_DATASOURCE
