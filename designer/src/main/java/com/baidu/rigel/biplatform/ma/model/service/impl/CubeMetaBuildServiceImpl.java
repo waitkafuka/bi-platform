@@ -33,7 +33,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.utils.RegExUtils;
 import com.google.common.collect.Lists;
 
@@ -44,8 +44,8 @@ import com.google.common.collect.Lists;
  *
  *         2014-8-1
  */
-@Service("cubeBuildService")
-public class CubeBuildServiceImpl implements CubeBuildService {
+@Service("cubeMetaBuildService")
+public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
     
     /**
      * dsService
@@ -56,7 +56,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
     /**
      * logger
      */
-    private Logger logger = LoggerFactory.getLogger(CubeBuildServiceImpl.class);
+    private Logger logger = LoggerFactory.getLogger(CubeMetaBuildServiceImpl.class);
     
     /*
      * (non-Javadoc)

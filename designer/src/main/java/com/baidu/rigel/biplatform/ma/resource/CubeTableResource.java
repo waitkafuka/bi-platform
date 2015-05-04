@@ -35,7 +35,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -69,10 +69,10 @@ public class CubeTableResource extends BaseResource {
     private ReportModelCacheManager reportModelCacheManager;
     
     /**
-     * cubeBuildService
+     * cubeMetaBuildService
      */
     @Resource
-    private CubeBuildService cubeBuildService;
+    private CubeMetaBuildService cubeBuildService;
     
     /**
      * starModelBuildService

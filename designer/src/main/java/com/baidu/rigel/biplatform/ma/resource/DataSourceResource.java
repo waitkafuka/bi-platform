@@ -40,7 +40,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
@@ -72,10 +72,10 @@ public class DataSourceResource extends BaseResource {
     private DataSourceService dsService;
     
     /**
-     * cubeBuildService
+     * cubeMetaBuildService
      */
     @Resource
-    private CubeBuildService cubeBuildService;
+    private CubeMetaBuildService cubeBuildService;
     
     /**
      * reportDesignModelService

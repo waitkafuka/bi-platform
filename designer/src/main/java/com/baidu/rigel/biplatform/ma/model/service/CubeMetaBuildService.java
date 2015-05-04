@@ -28,7 +28,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
  *
  *         2014-7-29
  */
-public interface CubeBuildService {
+public interface CubeMetaBuildService {
     
     /**
      * 获取所有的表

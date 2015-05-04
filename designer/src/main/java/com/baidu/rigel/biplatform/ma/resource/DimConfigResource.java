@@ -49,7 +49,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
 import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
@@ -105,10 +105,10 @@ public class DimConfigResource extends BaseResource {
     private ReportModelCacheManager reportModelCacheManager;
     
     /**
-     * cubeBuildService
+     * cubeMetaBuildService
      */
     @Resource
-    private CubeBuildService cubeBuildService;
+    private CubeMetaBuildService cubeBuildService;
     
     /**
      * starModelBuildService
