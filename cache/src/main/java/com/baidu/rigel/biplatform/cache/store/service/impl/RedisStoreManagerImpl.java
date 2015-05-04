@@ -101,6 +101,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
         redisson.getQueue(queueKey).add(event);
     }
 
+    
     /*
      * (non-Javadoc) 
      * @see com.baidu.rigel.biplatform.cache.StoreManager#getNextEvent() 
