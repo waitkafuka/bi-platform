@@ -108,14 +108,14 @@ public class QueryRequestBuilder {
             expressions = new HashMap<String, Expression>();
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
-            if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
-                int size = nodeTrees.size();
-                Collections.sort (nodeTrees);
-                request.getWhere().setBetween(new Between());
-                request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
-                request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
-                request.getWhere().getBetween().setEnd(nodeTrees.get(size - 1).getName());
-            }
+//            if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
+//                int size = nodeTrees.size();
+//                Collections.sort (nodeTrees);
+//                request.getWhere().setBetween(new Between());
+//                request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
+//                request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
+//                request.getWhere().getBetween().setEnd(nodeTrees.get(size - 1).getName());
+//            }
             for (MemberNodeTree node : nodeTrees) {
                 if (StringUtils.isNotBlank(node.getQuerySource()) && !MetaNameUtil.isAllMemberName(node.getName())) {
                     if(node.isTime() && node.getChildren().size() > 1) {
