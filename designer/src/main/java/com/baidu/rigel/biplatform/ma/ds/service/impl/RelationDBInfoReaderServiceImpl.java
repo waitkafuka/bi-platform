@@ -47,7 +47,7 @@ public class RelationDBInfoReaderServiceImpl implements
 	 * @{inheritDoc}
 	 */
 	@Override
-	public List<ColumnInfo> getColumnInfos(DataSourceDefine ds, String securityKey, String tableId) {
+	public List<ColumnInfo> getAllColumnInfos(DataSourceDefine ds, String securityKey, String tableId) {
 		return this.getDbMetaData(ds, securityKey, tableId);
 	}
 

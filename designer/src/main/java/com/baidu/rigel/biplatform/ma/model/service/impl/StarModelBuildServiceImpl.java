@@ -129,7 +129,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
                 RelationTableView relation = new RelationTableView();
                 relation.setId(table.getId());
                 relation.setName(table.getName());
-                List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, table.getId());
+                List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, table.getId());
                 relation.setFields(cols);
                 relationTables.add(relation);
             }
@@ -376,7 +376,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
                 stand.setReference(reference);
                 stand.setName(detail.getRelationTable());
                 
-                List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, detail.getRelationTable());
+                List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, detail.getRelationTable());
                 stand.addColumns(parseToDefine(cols));
                 standMetaDefines.add(stand);
             }

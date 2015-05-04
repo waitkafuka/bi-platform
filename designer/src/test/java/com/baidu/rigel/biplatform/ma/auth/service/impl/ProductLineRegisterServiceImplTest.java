@@ -1,10 +1,7 @@
 package com.baidu.rigel.biplatform.ma.auth.service.impl;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -46,8 +43,8 @@ public class ProductLineRegisterServiceImplTest {
 	
 	@Test
 	public void testSendRegisterMsgToAdministrator() {
-		String hostAddress = "127.0.0.1";
-		String magicStr = String.valueOf(System.nanoTime());
+		// String hostAddress = "127.0.0.1";
+		// String magicStr = String.valueOf(System.nanoTime());
 
 		
 	}

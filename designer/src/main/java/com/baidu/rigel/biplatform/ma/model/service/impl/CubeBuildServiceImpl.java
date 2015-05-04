@@ -116,7 +116,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                         tableMeta.setCubeId(table);
                         tableMeta.setName(table);
                         tableMeta.setMutilple(false);
-                        List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, table);
+                        List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, table);
                         addColumnToTableMeta(tableMeta, cols);
                         tableMetas.add(tableMeta);
                     }
@@ -128,7 +128,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                     tableMeta.setRegExp(key);
                     if (tables != null && tables.length > 0) {
                         String tableExample = tables[0];
-                        List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, tableExample);
+                        List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, tableExample);
                         addColumnToTableMeta(tableMeta, cols);
                     }
                     tableMetas.add(tableMeta);

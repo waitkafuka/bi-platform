@@ -238,7 +238,7 @@ public class DimConfigResource extends BaseResource {
             try {
                 dsInfoReaderService = DataSourceInfoReaderServiceFactory.
                 		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
-                cols = dsInfoReaderService.getColumnInfos(ds, securityKey, tableName);
+                cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, tableName);
             } catch(Exception e) {
             	logger.error("fail to get columninfos from datasource", e);
             }
@@ -458,7 +458,7 @@ public class DimConfigResource extends BaseResource {
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
             		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
-            cols = dsInfoReaderService.getColumnInfos(ds, securityKey, starModel.getFactTable().getName());
+            cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, starModel.getFactTable().getName());
         } catch (Exception e) {
             logger.error("[ERROR] --- --- --- --- fail to get columnInfos from datasource : {}", e.getMessage());
             logger.error("[ERROR] --- --- --- --- stackTrace :", e);
