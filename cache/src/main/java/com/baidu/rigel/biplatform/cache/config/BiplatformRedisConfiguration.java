@@ -256,6 +256,8 @@ public class BiplatformRedisConfiguration {
             return applyProperties(createJedisConnectionFactory());
         }
         
+        
+        
         @Bean
         @ConditionalOnBean(RedisConnectionFactory.class)
         public RedisTemplate<Object, Object> redisTemplate(
@@ -265,7 +267,6 @@ public class BiplatformRedisConfiguration {
             template.setConnectionFactory(redisConnectionFactory);
             return template;
         }
-
         
         @Bean(name="redisCacheManager")
         @ConditionalOnBean(RedisTemplate.class)
@@ -305,7 +306,7 @@ public class BiplatformRedisConfiguration {
         }
         
         @Bean
-        @ConditionalOnMissingBean(name = "redisStoreManager")
+        @ConditionalOnMissingBean(name = "hazelcastStoreManager")
         public HazelcastProperties hazelcastProperties() {
             return new HazelcastProperties();
         }

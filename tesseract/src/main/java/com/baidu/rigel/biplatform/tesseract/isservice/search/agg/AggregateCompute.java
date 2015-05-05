@@ -60,7 +60,7 @@ public class AggregateCompute {
     public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> dataList,
         int dimSize, List<QueryMeasure> queryMeasures) {
         
-        if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList) ||dataList.size() == 1) {
+        if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList)) { // ||dataList.size() == 1) {
             LOGGER.info("no need to group.");
             return dataList;
         }
