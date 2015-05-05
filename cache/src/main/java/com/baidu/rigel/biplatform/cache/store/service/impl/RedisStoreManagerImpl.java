@@ -140,8 +140,9 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
             Gson gson = new GsonBuilder ().create ();
             msg.append (gson.toJson (event));
         }
-        StringRedisTemplate template = 
-            (StringRedisTemplate) ApplicationContextHelper.getContext ().getBean ("template");
+        
+        RedisConnectionFactory factory = ApplicationContextHelper.getContext ().getBean (RedisConnectionFactory.class);
+        StringRedisTemplate template = new StringRedisTemplate(factory);
         template.convertAndSend (topicKey, msg.toString ());
         log.info("post topic into redis key:{},event:{}", topicKey, event);
     }
@@ -210,11 +211,11 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
         return new CountDownLatch(1);
     }
 
-    @Bean
-    @ConditionalOnBean(RedisConnectionFactory.class)
-    StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
-        return new StringRedisTemplate(connectionFactory);
-    }
+//    @Bean
+//    @ConditionalOnBean(RedisConnectionFactory.class)
+//    StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
+//        return new StringRedisTemplate(connectionFactory);
+//    }
     
 }
 
