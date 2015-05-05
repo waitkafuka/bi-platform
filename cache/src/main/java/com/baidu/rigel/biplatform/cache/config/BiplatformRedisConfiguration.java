@@ -20,6 +20,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.redisson.Config;
@@ -45,6 +46,10 @@ import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.listener.PatternTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
@@ -60,6 +65,7 @@ import com.baidu.rigel.biplatform.cache.store.service.HazelcastNoticePort;
 import com.baidu.rigel.biplatform.cache.store.service.HazelcastQueueItemListener;
 import com.baidu.rigel.biplatform.cache.store.service.LocalEventListenerThread;
 import com.baidu.rigel.biplatform.cache.store.service.impl.HazelcastStoreManager;
+import com.baidu.rigel.biplatform.cache.store.service.impl.MessageReceiver;
 import com.baidu.rigel.biplatform.cache.store.service.impl.RedisStoreManagerImpl;
 import com.baidu.rigel.biplatform.cache.util.MacAddressUtil;
 
@@ -249,7 +255,7 @@ public class BiplatformRedisConfiguration {
             return Redisson.create(getConfig());
         }
         
-        @Bean
+        @Bean (name = "redisConnectionFactory")
         @ConditionalOnProperty(prefix = "config.redis", name = "active", havingValue = "true")
         public RedisConnectionFactory redisConnectionFactory()
                 throws UnknownHostException {
@@ -336,6 +342,35 @@ public class BiplatformRedisConfiguration {
             return new LocalEventListenerThread();
         }
 
+        @Bean
+        @ConditionalOnBean(RedisConnectionFactory.class)
+        RedisMessageListenerContainer container(MessageListenerAdapter adapter) throws Exception {
+            RedisMessageListenerContainer container = new RedisMessageListenerContainer ();
+            container.setConnectionFactory (redisConnectionFactory ());
+            container.addMessageListener (adapter, new PatternTopic (StoreManager.TOPICS));
+            return container;
+        }
+        
+        @Bean
+        MessageListenerAdapter listenerAdapter(MessageReceiver receiver) {
+            return new MessageListenerAdapter (receiver, "receiveMessage");
+        }
+        
+        @Bean
+        MessageReceiver receiver(CountDownLatch latch) {
+            return new MessageReceiver (latch);
+        }
+        
+        @Bean
+        CountDownLatch latch() {
+            return new CountDownLatch (1);
+        }
+        
+        @Bean
+        @ConditionalOnBean(RedisConnectionFactory.class)
+        StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
+            return new StringRedisTemplate (connectionFactory);
+        }
         
         private JedisConnectionFactory createJedisConnectionFactory() {
             JedisConnectionFactory factory = null;
