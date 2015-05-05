@@ -22,6 +22,7 @@ package com.baidu.rigel.biplatform.parser.context;
  * @version  2014年12月24日 
  * @since jdk 1.8 or after
  */
+@Deprecated
 public class DateCondition extends AbstractCondition {
 
     
