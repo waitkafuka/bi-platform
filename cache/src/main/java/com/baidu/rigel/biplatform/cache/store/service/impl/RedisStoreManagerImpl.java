@@ -51,7 +51,6 @@ import com.google.gson.GsonBuilder;
  * @version  2015年2月9日 
  * @since jdk 1.8 or after
  */
-
 public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     
     private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -76,6 +75,13 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     
     private String cachePrefix = "";
     
+    /**
+     * @return the topicKey
+     */
+    public String getTopicKey() {
+        return topicKey;
+    }
+
     /*
      * (non-Javadoc) 
      * @see com.baidu.rigel.biplatform.cache.StoreManager#getDataStore(java.lang.String) 
@@ -132,9 +138,8 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
             Gson gson = new GsonBuilder ().create ();
             msg.append (gson.toJson (event));
         }
-        
-//        RedisConnectionFactory factory = ApplicationContextHelper.getContext ().getBean (RedisConnectionFactory.class);
-        StringRedisTemplate template = ApplicationContextHelper.getContext ().getBean (StringRedisTemplate.class);
+        StringRedisTemplate template = 
+            (StringRedisTemplate) ApplicationContextHelper.getContext ().getBean ("template");
         template.convertAndSend (topicKey, msg.toString ());
         log.info("post topic into redis key:{},event:{}", topicKey, event);
     }
@@ -177,34 +182,6 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     public Lock getClusterLock(String lockName) {
         return redisson.getLock(lockName);
     }
-    
-//    @Bean
-//    RedisMessageListenerContainer container (RedisConnectionFactory factory, MessageListenerAdapter adapter) {
-//        RedisMessageListenerContainer container = new RedisMessageListenerContainer ();
-//        container.setConnectionFactory (factory);
-//        container.addMessageListener (adapter, new PatternTopic(StoreManager.TOPICS));
-//        return container;
-//    }
-//    
-//    @Bean
-//    MessageListenerAdapter listenerAdapter (MessageReceiver receiver) {
-//        return new MessageListenerAdapter (receiver, "receiveMessage");
-//    }
-//    
-//    @Bean
-//    MessageReceiver receiver (CountDownLatch latch) {
-//        return new MessageReceiver(latch);
-//    }
-//    
-//    @Bean
-//    CountDownLatch latch() {
-//        return new CountDownLatch(1);
-//    }
-//
-//    @Bean
-//    StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
-//        return new StringRedisTemplate(connectionFactory);
-//    }
     
 }
 

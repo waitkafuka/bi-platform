@@ -323,7 +323,6 @@ public class BiplatformRedisConfiguration {
             return new HazelcastStoreManager(properties);
         }
         
-        
         @Bean
         @ConditionalOnBean(name="hazelcastStoreManager")
         public HazelcastNoticePort hazelcastNoticePort() {
@@ -344,28 +343,32 @@ public class BiplatformRedisConfiguration {
 
         @Bean
         @ConditionalOnBean(RedisConnectionFactory.class)
-        RedisMessageListenerContainer container(MessageListenerAdapter adapter) throws Exception {
+        RedisMessageListenerContainer container (RedisConnectionFactory factory, MessageListenerAdapter adapter) {
             RedisMessageListenerContainer container = new RedisMessageListenerContainer ();
-            container.setConnectionFactory (redisConnectionFactory ());
-            container.addMessageListener (adapter, new PatternTopic (StoreManager.TOPICS));
+            container.setConnectionFactory (factory);
+            final String topicKey = ((RedisStoreManagerImpl) redisStoreManager ()).getTopicKey();
+            container.addMessageListener (adapter, new PatternTopic(topicKey));
             return container;
         }
         
         @Bean
-        MessageListenerAdapter listenerAdapter(MessageReceiver receiver) {
+        @ConditionalOnBean(RedisConnectionFactory.class)
+        MessageListenerAdapter listenerAdapter (MessageReceiver receiver) {
             return new MessageListenerAdapter (receiver, "receiveMessage");
         }
         
         @Bean
-        MessageReceiver receiver(CountDownLatch latch) {
-            return new MessageReceiver (latch);
+        @ConditionalOnBean(RedisConnectionFactory.class)
+        MessageReceiver receiver (CountDownLatch latch) {
+            return new MessageReceiver(latch);
         }
         
         @Bean
+        @ConditionalOnBean(RedisConnectionFactory.class)
         CountDownLatch latch() {
-            return new CountDownLatch (1);
+            return new CountDownLatch(1);
         }
-        
+
         @Bean
         @ConditionalOnBean(RedisConnectionFactory.class)
         StringRedisTemplate template(RedisConnectionFactory connectionFactory) {
