@@ -75,13 +75,14 @@ public class AggregateCompute {
         int arraySize = dataList.get(0).getFieldArraySize();
         
         long current = System.currentTimeMillis();
-        Stream<SearchIndexResultRecord> stream = 
-            dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
+        Stream<SearchIndexResultRecord> stream = dataList.stream ();
+//            dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
         
         int defaultSize = (int) (dataList.size() > 100 ? dataList.size() * 0.01 : dataList.size());
         
         Map<String, SearchIndexResultRecord> groupResult = stream.collect(
-                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, 
+//                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, 
+                Collectors.groupingBy(SearchIndexResultRecord::getGroupBy, 
                 Collectors.reducing(SearchIndexResultRecord.of(arraySize), (x,y) ->{
                     if(!y.getGroupBy().equals(x.getGroupBy())) {
                         x = SearchIndexResultRecord.of(arraySize);
