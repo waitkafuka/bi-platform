@@ -277,6 +277,7 @@ public class DataSourceResource extends BaseResource {
         define.setDbUser(request.getParameter("dbUser"));
         define.setDbPwd(request.getParameter("dbPwd"));
         define.setDataSourceType(DataSourceType.valueOf(request.getParameter("type")));
+//        define.setDataSourceType(DataSourceType.valueOf("H2"));
     }
     
     /**
