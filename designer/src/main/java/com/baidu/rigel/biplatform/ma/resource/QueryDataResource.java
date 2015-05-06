@@ -821,21 +821,14 @@ public class QueryDataResource extends BaseResource {
 
     private Map<String, Object> updateLocalContextAndReturn(ReportRuntimeModel runTimeModel,
             String areaId, Map<String, String[]> contextParams) {
+        
         /**
          * 查询区域的时候，会按照当前的参数更新区域上下文
          */
         QueryContext localContext = runTimeModel.getLocalContextByAreaId(areaId);
 //        localContext.reset ();
         
-        for (String key : contextParams.keySet()) {
-            /**
-             * 更新runtimeModel的区域上下文参数
-             */
-            String[] value = contextParams.get(key);
-            if (value != null && value.length > 0) {
-                localContext.put(key, value[0]);
-            }
-        }
+        
         /**
          * 查询参数，首先载入全局上下文，再覆盖局部上下文
          */
@@ -853,6 +846,7 @@ public class QueryDataResource extends BaseResource {
                     queryParams.put(key, value);
                 }
             });
+            
             return queryParams;
         }
         /**
@@ -884,6 +878,16 @@ public class QueryDataResource extends BaseResource {
               tmp.put(k, v);
           }
         }); 
+     // 用当前查询参数，覆盖旧参数
+        for (String key : contextParams.keySet()) {
+            /**
+             * 更新runtimeModel的区域上下文参数
+             */
+            String[] value = contextParams.get(key);
+            if (value != null && value.length > 0) {
+                tmp.put(key, value[0]);
+            }
+        }
         return tmp;
     }
     
