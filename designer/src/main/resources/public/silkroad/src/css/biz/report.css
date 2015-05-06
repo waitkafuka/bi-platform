@@ -67,8 +67,13 @@
 }
 .con-data-sources-list .btn-has-icon-data-sources {
     display: block;
-    margin: 3px;
+    margin: 0px 10px;
     padding: 3px 5px 4px 36px;
+}
+.con-data-sources-list .btn-has-icon-data-sources-group {
+    height: 20px;
+    margin-top: 6px;
+    width: 100%;
 }
 .con-set-cube .data-line:hover {
     background-color: #f0f7fc;
