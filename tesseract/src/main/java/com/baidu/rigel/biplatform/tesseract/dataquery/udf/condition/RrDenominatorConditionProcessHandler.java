@@ -70,24 +70,24 @@ class RrDenominatorConditionProcessHandler  extends RateConditionProcessHandler 
             case TimeDay:
                 MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
                 int size = 0;
-                cal.add(Calendar.DAY_OF_YEAR, -7);
+                cal.add(Calendar.DAY_OF_YEAR, -1);
                 if (condition instanceof DimensionCondition) {
                     DimensionCondition dimCondition = (DimensionCondition) condition;
                     size = dimCondition.getQueryDataNodes().size();
                 }
-                // 取一周之前的天
+                // 取昨天
                 timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);
                 break;
             case TimeWeekly:
-                cal.add (Calendar.WEEK_OF_YEAR, -4);
+                cal.add (Calendar.WEEK_OF_YEAR, -1);
                 timeRange = TimeUtils.getWeekDays(cal.getTime());
                 break;
             case TimeMonth:
-                cal.add (Calendar.YEAR, -1);
+                cal.add (Calendar.MONTH, -1);
                 timeRange = TimeUtils.getMonthDays(cal.getTime());
                 break;
             case TimeQuarter:
-                cal.add (Calendar.YEAR, -1);
+                cal.add (Calendar.MONTH, -3);
                 timeRange = TimeUtils.getQuarterDays(cal.getTime());
                 break;
             case TimeYear:

@@ -591,6 +591,10 @@ public class QueryDataResource extends BaseResource {
                 			String tmpStr = String.valueOf(tmpEntry.getValue());
                 			if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
                 				runTimeModel.getContext().removeParam(tmpEntry.getKey());
+                				Map<String, QueryContext> localContext = runTimeModel.getLocalContext ();
+                				localContext.forEach ((k, v) -> {
+                				    v.reset ();
+                				}); 
                 				break;
                 			}
                 		}
