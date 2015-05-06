@@ -275,6 +275,10 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             sendMail.setNeedAuth(false);
             // 设置发送方名字
             sendMail.setUserName(mailSender);
+            // 设置发送邮件用户密码
+            if (!StringUtils.isEmpty (mailSenderPassowrd)) {
+                sendMail.setPassword (mailSenderPassowrd);
+            }
             // 设置发送内容和格式
             sendMail.setBody(makeUpOpenServiceMailContent(user, serviceType), SendMail.HTML);
             // 发送
@@ -308,7 +312,8 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             }
             stringBuilder.append("   服务类型:" + serviceTypeStr);
         } catch (Exception e) {
-            LOG.debug(e.getMessage(), e);
+            throw new IllegalArgumentException("decrypt password happened exception "
+                    + "when send email to administrator");
         }
         stringBuilder.append("</body></html>");
         return stringBuilder.toString();

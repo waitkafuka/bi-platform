@@ -67,6 +67,7 @@
         <maven.checkstyle.plugin.version>2.11</maven.checkstyle.plugin.version>
         <license.maven.plugin.version>2.6</license.maven.plugin.version>
         <biplatform.version>1.4.0-SNAPSHOT</biplatform.version>
+        <junit.version>4.11</junit.version>
 	</properties>
 
 	<modules>
@@ -192,10 +193,15 @@
 	            <version>${org.mockito.version}</version>
 	        </dependency>
 	        <dependency>
-            <groupId>org.powermock</groupId>
-	            <artifactId>powermock-module-junit4</artifactId>
-	            <version>${org.powermock.version}</version>
-	        </dependency>
+		        <groupId>junit</groupId>
+		        <artifactId>junit</artifactId>
+		        <version>${junit.version}</version>
+		    </dependency>
+	        <dependency>
+	               <groupId>org.powermock</groupId>
+		            <artifactId>powermock-module-junit4</artifactId>
+		            <version>${org.powermock.version}</version>
+		   </dependency>
 	        <dependency>
 	            <groupId>org.powermock</groupId>
 	            <artifactId>powermock-api-mockito</artifactId>

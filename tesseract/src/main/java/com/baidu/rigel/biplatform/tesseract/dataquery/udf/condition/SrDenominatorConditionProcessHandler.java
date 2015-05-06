@@ -46,7 +46,7 @@ class SrDenominatorConditionProcessHandler extends RateConditionProcessHandler {
     @Override
     public QueryContext processCondition(QueryContext context) {
         /*
-         * 同比分母计算条件，修改时间条件为同期时间 如果时间粒度是天，则同期时间为去年的当天 如果时间粒度是周，则同期时间为去年的当周
+         * 同比分母计算条件，修改时间条件为同期时间 如果时间粒度是天，则同期时间为前一星期的对应天 如果时间粒度是周，则同期时间为上月的对应周
          * 如果时间粒度是月，则同期时间为去年的当月 如果时间粒度是季度，则统计周期为去年的当季度 如果时间粒度是年，则同期时间为去年
          * 需要QueryContext提供：时间维度定义，当前时间维度过滤条件，此处修改时间范围后，重新设置到查询上下文
          */
@@ -64,40 +64,35 @@ class SrDenominatorConditionProcessHandler extends RateConditionProcessHandler {
         }
         Calendar cal = Calendar.getInstance();
         cal.setTime(firstDayOfTimeRange);
-        // 将时间调整为上年的同天
-        cal.add(Calendar.YEAR, -1);
+//        cal.add(Calendar.YEAR, -1);
         TimeRangeDetail timeRange = null;
         switch (timeType) {
             case TimeDay:
                 MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
                 int size = 0;
+                cal.add(Calendar.DAY_OF_YEAR, -7);
                 if (condition instanceof DimensionCondition) {
                     DimensionCondition dimCondition = (DimensionCondition) condition;
                     size = dimCondition.getQueryDataNodes().size();
                 }
+                // 取昨天
                 timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);
                 break;
             case TimeWeekly:
                 // 星期需要特殊处理
-                try {
-                    SimpleDateFormat sdf = new SimpleDateFormat();
-                    sdf.applyPattern(TimeRangeDetail.FORMAT_STRING);
-                    int weekIndex = TimeUtils.getWeekIndex(sdf.format(firstDayOfTimeRange));
-                    cal.set(Calendar.MONTH, 0);
-                    cal.set(Calendar.DAY_OF_YEAR, 1);
-                    cal.add(Calendar.DAY_OF_YEAR, 7 * weekIndex);
-                    timeRange = TimeUtils.getWeekDays(cal.getTime());
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                cal.add (Calendar.WEEK_OF_YEAR, -4);
+                timeRange = TimeUtils.getWeekDays(cal.getTime());
                 break;
             case TimeMonth:
+                cal.add (Calendar.YEAR, -1);
                 timeRange = TimeUtils.getMonthDays(cal.getTime());
                 break;
             case TimeQuarter:
+                cal.add (Calendar.YEAR, -1);
                 timeRange = TimeUtils.getQuarterDays(cal.getTime());
                 break;
             case TimeYear:
+                cal.add (Calendar.YEAR, -1);
                 timeRange = TimeUtils.getYearDays(cal.getTime());
                 break;
             default:

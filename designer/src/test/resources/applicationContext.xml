@@ -15,9 +15,23 @@
             default-autowire="byName">
 
     <!-- 自动扫描(自动注入)，指明@Service类所在的包路径 -->
-    <context:component-scan base-package="com.baidu.rigel.biplatform.ma.ds.utils*" />
-    
-    <context:annotation-config/>
+    <context:component-scan base-package="com.baidu.rigel.biplatform.ma.*" use-default-filters="false">
+    	<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="regex" expression="com\.baidu\.rigel\.biplatform\.ma\.resource\.cache\..*"/>    	
+    </context:component-scan>
     <!-- <context:property-placeholder/> -->
-    <context:property-placeholder location="classpath:conf/application.properties" />
+    <context:property-placeholder location="file:src/test/resources/application.properties" />
+    <!-- 
+        Default cache configuration
+     
+	<bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+		<property name="caches">
+			<set>
+				<bean
+					class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean"
+					p:name="bi_platform" />
+			</set>
+		</property>
+	</bean>  
+	-->
  </beans>

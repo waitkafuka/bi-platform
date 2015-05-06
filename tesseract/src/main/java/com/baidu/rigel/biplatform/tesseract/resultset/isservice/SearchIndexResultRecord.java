@@ -87,7 +87,7 @@ public class SearchIndexResultRecord implements Serializable,TesseractResultReco
         if (this.fieldArray != null && columnIndex < this.fieldArray.length) {
             return fieldArray[columnIndex];
         }
-        System.out.println(this.toString());
+//        System.out.println(this.toString());
         throw new IllegalArgumentException("FieldIndex:" + columnIndex);
 //        throw new NoSuchFieldException("FieldIndex:" + columnIndex);
     }
