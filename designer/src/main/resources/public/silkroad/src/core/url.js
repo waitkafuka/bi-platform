@@ -16,7 +16,7 @@ define(function () {
 
     var REPORTS = 'reports';
     var DATASOURCES = 'datasources';
-
+    var DATASOURCES_GROUP = 'datasourcesGroup';
     /**
      * 得到运行时的web base
      *
@@ -53,6 +53,18 @@ define(function () {
         return dataSourceId === undefined
             ? (webRoot + DATASOURCES)
             : (webRoot + DATASOURCES + '/' + dataSourceId);
+    }
+    /**
+     * 获取数据源组的基本路径
+     *
+     * @param {string=} dataSourceGroupId 数据源组id
+     * @private
+     * @return {string} 数据源的基本路径
+     */
+    function getDataSourcesGroupBaseUrl(dataSourceGroupId) {
+        return dataSourceGroupId === undefined
+            ? (webRoot + DATASOURCES_GROUP)
+            : (webRoot + DATASOURCES_GROUP + '/' + dataSourceGroupId);
     }
 
     /**
@@ -245,6 +257,17 @@ define(function () {
         return getDataSourcesBaseUrl(dataSourceId) + '/tables';
     };
 
+    /**
+     * 数据源组新建和编辑模块
+     * 数据源组新建
+     *
+     * @param {string} dataSourceId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.addDsGroup = function () {
+        return getDataSourcesGroupBaseUrl();
+    };
 
     /**
      * 报表列表

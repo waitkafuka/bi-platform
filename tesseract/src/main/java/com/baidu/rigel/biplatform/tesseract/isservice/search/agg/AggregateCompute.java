@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BinaryOperator;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -75,47 +77,49 @@ public class AggregateCompute {
         int arraySize = dataList.get(0).getFieldArraySize();
         
         long current = System.currentTimeMillis();
-        Stream<SearchIndexResultRecord> stream = 
-            dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
+        Stream<SearchIndexResultRecord> stream = dataList.stream ();
+//            dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
         
         int defaultSize = (int) (dataList.size() > 100 ? dataList.size() * 0.01 : dataList.size());
         
+        final BinaryOperator<SearchIndexResultRecord> reduceOperation = (x,y) ->{
+            if(!y.getGroupBy().equals(x.getGroupBy())) {
+                x = SearchIndexResultRecord.of(arraySize);
+                x.setGroupBy(y.getGroupBy());
+                for(int i = 0; i < dimSize; i++) {
+                    x.setField(i, y.getField(i));
+                }
+            }
+            try {
+                int index = dimSize;
+                for(int i = 0; i < queryMeasures.size(); i++){
+                    QueryMeasure measure = queryMeasures.get(i);
+                    index = i + dimSize;
+                    if (measure.getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
+                        if(!x.getDistinctMeasures().containsKey(i)) {
+                            x.getDistinctMeasures().put(i, new HashSet<>(defaultSize));
+                        }
+                        
+                        if(y.getDistinctMeasures().containsKey(i)) {
+                            x.getDistinctMeasures().get(i).addAll(y.getDistinctMeasures().get(i));
+                        } else if(y.getField(index) != null) {
+                            x.getDistinctMeasures().get(i).add(y.getField(index));
+                        }
+                        
+                    } else {
+                        x.setField(index, measure.getAggregator().aggregate(x.getField(index), y.getField(index)));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+            return x;
+        };
+        final Collector<SearchIndexResultRecord, ?, SearchIndexResultRecord> reducing = 
+                Collectors.reducing(SearchIndexResultRecord.of(arraySize), reduceOperation);
         Map<String, SearchIndexResultRecord> groupResult = stream.collect(
-                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, 
-                Collectors.reducing(SearchIndexResultRecord.of(arraySize), (x,y) ->{
-                    if(!y.getGroupBy().equals(x.getGroupBy())) {
-                        x = SearchIndexResultRecord.of(arraySize);
-                        x.setGroupBy(y.getGroupBy());
-                        for(int i = 0; i < dimSize; i++) {
-                            x.setField(i, y.getField(i));
-                        }
-                    }
-                    try {
-                        int index = dimSize;
-                        for(int i = 0; i < queryMeasures.size(); i++){
-                            QueryMeasure measure = queryMeasures.get(i);
-                            index = i + dimSize;
-                            if (measure.getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
-                                if(!x.getDistinctMeasures().containsKey(i)) {
-                                    x.getDistinctMeasures().put(i, new HashSet<>(defaultSize));
-                                }
-                                
-                                if(y.getDistinctMeasures().containsKey(i)) {
-                                    x.getDistinctMeasures().get(i).addAll(y.getDistinctMeasures().get(i));
-                                } else if(y.getField(index) != null) {
-                                    x.getDistinctMeasures().get(i).add(y.getField(index));
-                                }
-                                
-                            } else {
-                                x.setField(index, measure.getAggregator().aggregate(x.getField(index), y.getField(index)));
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        throw new RuntimeException(e);
-                    }
-                    return x;
-                })
+                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, reducing
             )
         );
         
