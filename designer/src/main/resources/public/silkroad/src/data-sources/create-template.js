@@ -31,13 +31,24 @@ define(['template'], function (template){
         'ADDRESS_VALIDATE': '请输入正确格式的数据库地址(ip+端口 或 域名)'
 
     };
-
+    var groupNameSelect = '<div class="form-common-line j-data-sources-info-group-name">'
+        +         '<span class="form-common-label">数据源组类型：</span>'
+        +         '<select class="form-common-select" name="groupId">'
+        +         '<select>'
+        +     '</div>';
+    var groupNameInput = '<div class="form-common-line j-data-sources-info-group-name">'
+        +         '<span class="form-common-label">数据源组类型：</span>'
+        +         '<div class="form-common-text form-common-text-big">'
+        +             '<input type="text" name="groupId" value="{{groupName}}" group-id="{{groupId}}" readonly="readonly"/>'
+        +         '</div>'
+        +     '</div>';
     //------------------------------------------
     // html模版
     //------------------------------------------
     // 其他的模板语法 doc\syntax-simple.md
     var html = '<!--模板-添加数据源-->'
         + '<div class="form-common data-sources-create '+ CLASS.J_CREATE_CLASS+ '">'
+        + '{{if groupId}} ' + groupNameInput + ' {{else}}' + groupNameSelect + '{{/if}}'
         +     '<div class="form-common-line">'
         +         '<span class="form-common-label">数据源名称：</span>'
         +         '<div class="form-common-text form-common-text-big">'

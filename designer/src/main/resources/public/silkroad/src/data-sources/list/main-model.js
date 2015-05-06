@@ -57,6 +57,65 @@ define(['url'], function (Url) {
                     success(data.data);
                 }
             });
+        },
+
+        /**
+         * 新建数据源组
+         *
+         * @param {string} dsGroupName 报表样式名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
+        addDsGroup: function (dsGroupName, success) {
+            $.ajax({
+                url: Url.addDsGroup(),
+                type: 'POST',
+                data: {
+                    name: dsGroupName
+                },
+                success: function (data) {
+                    success(data.data.id);
+                }
+            });
+        },
+        /**
+         * 编辑数据源组
+         *
+         * @param {string} dsGroupName 报表样式名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
+        editDsGroup: function (dsGroupId, dsGroupName, success) {
+            $.ajax({
+                url: Url.addDsGroup(),
+                type: 'POST',
+                data: {
+                    groupId: dsGroupId,
+                    groupName: dsGroupName
+                },
+                success: function () {
+                    success();
+                }
+            });
+        },
+        /**
+         * 删除数据源组
+         *
+         * @param {string} dsGroupName 报表样式名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
+        delDsGroup: function (dsGroupId, success) {
+            $.ajax({
+                url: Url.addDsGroup(),
+                type: 'DELETE',
+                data: {
+                    groupId: dsGroupId
+                },
+                success: function () {
+                    success();
+                }
+            });
         }
     });
 
