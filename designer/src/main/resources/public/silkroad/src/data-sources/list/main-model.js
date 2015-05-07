@@ -14,11 +14,25 @@ define(['url'], function (Url) {
          */
         loadDataSourcesList: function () {
             var that = this;
-
             $.ajax({
                 url: Url.loadDsgroupList(),
                 success: function (data) {
                     that.set('dataSourcesList', data.data);
+                }
+            });
+        },
+        /**
+         * 加载数据源列表
+         *
+         * @public
+         */
+        loadDsGroupActive: function () {
+            var that = this;
+
+            $.ajax({
+                url: Url.loadDsGroupActive(),
+                success: function (data) {
+                    that.set('activeDataSourcesList', data.data);
                 }
             });
         },
@@ -107,6 +121,15 @@ define(['url'], function (Url) {
             $.ajax({
                 url:  Url.editDsGroup(dsGroupId),
                 type: 'DELETE',
+                success: function () {
+                    success();
+                }
+            });
+        },
+        changeDataSourceActive: function (dsGroupId, dsId, success) {
+            $.ajax({
+                url:  Url.changeDsActive(dsGroupId, dsId),
+                type: 'POST',
                 success: function () {
                     success();
                 }

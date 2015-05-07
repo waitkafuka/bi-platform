@@ -86,7 +86,6 @@ define(['url'], function (Url) {
                 url = Url.submitDataSourceInfoAdd(data.groupId);
             }
             delete data.groupId;
-            delete data.id;
             data.isEncrypt = this.get('isEncrypt');
             $.ajax({
                 url: url,
@@ -105,7 +104,7 @@ define(['url'], function (Url) {
         loadDataSourcesGroup: function () {
             var that = this;
             $.ajax({
-                url: Url.loadDsgroupList(),
+                url: Url.loadDataSourcesList(),
                 success: function (data) {
                     var tarData = data.data;
                     var resData = [];
