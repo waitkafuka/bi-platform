@@ -114,10 +114,11 @@ define([
              */
             deleteDataSources: function (event) {
                 var that = this;
-                var dataSourcesId = this.getLineId(event);
+                var dsId = this.getLineId(event);
+                var groupId = this.getGroupId(event);
 
                 dialog.confirm('是否确定删除当前数据源', function () {
-                    that.model.deleteDataSources(dataSourcesId);
+                    that.model.deleteDataSources(groupId, dsId);
                 });
             },
 
@@ -183,7 +184,7 @@ define([
             editDataSourcesGroup: function(event) {
                 var that = this;
                 var $curGroup = $(event.target).parent().parent();
-                var $curGroupName = $curGroup.find('a');
+                var $curGroupName = $curGroup.find('label');
                 var groupName = $curGroupName.text();
                 var groupId = $curGroup.attr('data-id');
                 dialog.showDialog({
@@ -259,14 +260,12 @@ define([
                 return $(event.target).parents('.j-root-line').attr('data-id');
             },
             getGroupId: function (event) {
-                return $(event.target).attr('name');
+                return $(event.target).parents('.j-root-line').find('input').attr('name');
             },
             changeDataSourceActive: function(event) {
-                var groupId = $(event).attr('name');
-                var dsId = $(event).parents('.j-root-line').attr('data-id');
-                this.model.changeDataSourceActive(groupId, dsId, function() {
-                    dialog.alert('修改成功');
-                });
+                var groupId = $(event.target).attr('name');
+                var dsId = $(event.target).attr('id').split('-')[1];
+                this.model.changeDataSourceActive(groupId, dsId);
             },
             /**
              * 销毁当前view与其对应的model
