@@ -60,6 +60,7 @@ import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
+import com.baidu.rigel.biplatform.ma.report.service.ReportPublishByJmsService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
@@ -513,14 +514,18 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 continue;
             }
         }
-        new Thread() {
-            public void run() {
-                MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
-                connection.publishCubes(cubes, dsInfo);
-            }
-        }.start();
+//        new Thread() {
+//            public void run() {
+//                MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
+//                connection.publishCubes(cubes, dsInfo);
+//            }
+//        }.start();
+        reportPublishByJmsService.publishReports();
         return true;
     }
+    
+    @Resource
+    private ReportPublishByJmsService reportPublishByJmsService=null;
 
     @Deprecated
     private String getOriReleaseReportLocation(ReportDesignModel model) {

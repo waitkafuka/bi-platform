@@ -3,7 +3,7 @@ package com.baidu.rigel.biplatform.ma.ds.utils;
 import java.io.File;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
@@ -14,7 +14,7 @@ import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
  * @author jiangyichao
  *
  */
-@Component
+@Service
 public final class DataSourceUtil {
 	
 	/**

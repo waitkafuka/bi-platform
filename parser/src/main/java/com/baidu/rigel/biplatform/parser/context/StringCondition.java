@@ -25,6 +25,7 @@ import java.util.Map;
  * @version  2014年12月22日 
  * @since jdk 1.8 or after
  */
+@Deprecated
 public class StringCondition extends AbstractCondition {
     
     /** 

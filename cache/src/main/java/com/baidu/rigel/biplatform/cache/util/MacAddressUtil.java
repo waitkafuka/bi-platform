@@ -58,9 +58,9 @@ public class MacAddressUtil {
      * @throws UnknownHostException 
      */
     public static String getMacAddress(InetAddress ia) throws SocketException, UnknownHostException {
-        if(ia == null) {
-            ia = InetAddress.getLocalHost();
-        }
+//        if(ia == null) {
+//            ia = InetAddress.getLocalHost();
+//        }
         //获取网卡，获取地址
         byte[] mac = NetworkInterface.getByInetAddress(ia).getHardwareAddress();
         StringBuffer sb = new StringBuffer("");
@@ -88,11 +88,10 @@ public class MacAddressUtil {
      * @throws SocketException
      * @throws UnknownHostException 
      */
-    public static String getIpAddress(InetAddress ia) throws UnknownHostException {
-        if(ia == null) {
-            ia = InetAddress.getLocalHost();
-        }
-        
+    private static String getIpAddress(InetAddress ia) throws UnknownHostException {
+//        if(ia == null) {
+//            ia = InetAddress.getLocalHost();
+//        }
         return ia.getHostAddress();
     }
 
