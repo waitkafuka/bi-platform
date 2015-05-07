@@ -165,7 +165,7 @@ define([
                 }
 
                 selector = '.j-root-data-sources-list .j-item.selected';
-                data.dataSourceId = this.$el.find(selector).attr('data-id');
+                data.dataSourceId = this.$el.find(selector).attr('group-id');
 
                 data.selectedTables = [];
                 $selectedTables.each(function () {
