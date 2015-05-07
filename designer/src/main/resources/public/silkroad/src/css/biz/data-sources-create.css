@@ -94,9 +94,15 @@
 .data-source-item-name > input {
     display: inline-block;
     vertical-align: middle;
+    height: 25px;
+    line-height: 25px;
+    cursor: pointer;
 }
 
-.data-source-item-name > a {
+.data-source-item-name > label {
     display: inline-block;
     vertical-align: middle;
+    height: 25px;
+    line-height: 25px;
+    cursor: pointer;
 }

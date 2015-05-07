@@ -207,7 +207,7 @@ define(function () {
      * @return {string} url
      */
     Url.deleteDataSources = function (groupId, dsId) {
-        return getDataSourcesGroupBaseUrl(groupId, dsId);
+        return getDataSourcesBaseUrl(groupId, dsId);
     };
 
     /**
@@ -280,7 +280,7 @@ define(function () {
         return getDataSourcesGroupBaseUrl(groupId);
     };
     Url.changeDsActive = function (groupId, dsId) {
-        return getDataSourcesBaseUrl(groupId, dsId);
+        return getDataSourcesBaseUrl(groupId, dsId) + '/changeActive';
     };
     /**
      * cube设置模块

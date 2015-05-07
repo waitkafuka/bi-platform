@@ -21,7 +21,7 @@
                         <!--{{index + 1}}-->
                     <!--</td>-->
                     <td>
-                        <a class="ellipsis" title="{{$dsGroup.name}}">{{$dsGroup.name}}</a>
+                        <label class="ellipsis" title="{{$dsGroup.name}}">{{$dsGroup.name}}</label>
                     </td>
                     <td>
                         <span class="btn-has-icon btn-has-icon-edit c-p j-edit-data-sources-group">编辑</span>
@@ -35,8 +35,8 @@
                     <!--</td>-->
                     <td>
                         <div class="data-source-item-name">
-                            <input type="radio" class="j-input-datasource" name="{{$dsGroup.id}}" {{if $dsGroup.active === $ds.id}}checked="checked"{{/if}}>
-                            <a class="ellipsis" title="{{$ds.name}}">{{$ds.name}}</a>
+                            <input type="radio" id="input-{{$ds.id}}" class="j-input-data-sources" name="{{$dsGroup.id}}" {{if $dsGroup.active === $ds.id}}checked="checked"{{/if}}>
+                            <label class="ellipsis" title="{{$ds.name}}" for="input-{{$ds.id}}">{{$ds.name}}</label>
                         </div>
 
                     </td>

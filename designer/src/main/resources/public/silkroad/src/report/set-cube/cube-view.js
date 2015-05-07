@@ -126,7 +126,6 @@ define([
              */
             deleteFormLine: function (event) {
                 var $target = $(event.target);
-
                 $target.parents('.j-item').remove();
             },
 
