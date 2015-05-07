@@ -61,9 +61,8 @@ define(['url'], function (Url) {
          */
         getCurrentDsInfo: function () {
             var that = this;
-
             $.ajax({
-                url: Url.getCurrentDataSourceInfo(that.get('id')),
+                url: Url.getCurrentDataSourceInfo(that.get('groupId'), that.get('id')),
                 success: function (data) {
                     that.set('dbData', data.data);
                 }
@@ -82,11 +81,12 @@ define(['url'], function (Url) {
             var isAdd = that.get('isAdd');
 
             if (!isAdd) {
-                url = Url.submitDataSourceInfoUpdate(that.id);
+                url = Url.submitDataSourceInfoUpdate(data.groupId, data.id);
             } else {
-                url = Url.submitDataSourceInfoAdd();
+                url = Url.submitDataSourceInfoAdd(data.groupId);
             }
-
+            delete data.groupId;
+            delete data.id;
             data.isEncrypt = this.get('isEncrypt');
             $.ajax({
                 url: url,
@@ -105,7 +105,7 @@ define(['url'], function (Url) {
         loadDataSourcesGroup: function () {
             var that = this;
             $.ajax({
-                url: Url.loadDataSourcesList(),
+                url: Url.loadDsgroupList(),
                 success: function (data) {
                     var tarData = data.data;
                     var resData = [];

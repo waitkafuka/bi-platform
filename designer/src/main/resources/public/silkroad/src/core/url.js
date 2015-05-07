@@ -16,7 +16,7 @@ define(function () {
 
     var REPORTS = 'reports';
     var DATASOURCES = 'datasources';
-    var DATASOURCES_GROUP = 'datasourcesGroup';
+    var DATASOURCES_GROUP = 'dsgroup';
     /**
      * 得到运行时的web base
      *
@@ -49,10 +49,10 @@ define(function () {
      * @private
      * @return {string} 数据源的基本路径
      */
-    function getDataSourcesBaseUrl(dataSourceId) {
+    function getDataSourcesBaseUrl(groupId, dataSourceId) {
         return dataSourceId === undefined
-            ? (webRoot + DATASOURCES)
-            : (webRoot + DATASOURCES + '/' + dataSourceId);
+            ? (getDataSourcesGroupBaseUrl(groupId) + '/' + DATASOURCES)
+            : (getDataSourcesGroupBaseUrl(groupId) + '/' + DATASOURCES + '/' + dataSourceId);
     }
     /**
      * 获取数据源组的基本路径
@@ -194,8 +194,8 @@ define(function () {
      * @public
      * @return {string} url
      */
-    Url.loadDataSourcesList = function () {
-        return getDataSourcesBaseUrl();
+    Url.loadDsgroupList = function () {
+        return getDataSourcesGroupBaseUrl();
     };
 
     /**
@@ -206,8 +206,8 @@ define(function () {
      * @public
      * @return {string} url
      */
-    Url.deleteDataSources = function (dataSourceId) {
-        return getDataSourcesBaseUrl(dataSourceId);
+    Url.deleteDataSources = function (groupId, dsId) {
+        return getDataSourcesGroupBaseUrl(groupId, dsId);
     };
 
     /**
@@ -218,8 +218,8 @@ define(function () {
      * @public
      * @return {string} url
      */
-    Url.getCurrentDataSourceInfo = function (dataSourceId) {
-        return getDataSourcesBaseUrl(dataSourceId);
+    Url.getCurrentDataSourceInfo = function (groupId, dataSourceId) {
+        return getDataSourcesBaseUrl(groupId, dataSourceId);
     };
 
     /**
@@ -229,8 +229,8 @@ define(function () {
      * @public
      * @return {string} url
      */
-    Url.submitDataSourceInfoAdd = function () {
-        return getDataSourcesBaseUrl();
+    Url.submitDataSourceInfoAdd = function (groupId) {
+        return getDataSourcesBaseUrl(groupId);
     };
 
     /**
@@ -241,8 +241,8 @@ define(function () {
      * @public
      * @return {string} url
      */
-    Url.submitDataSourceInfoUpdate = function (dataSourceId) {
-        return getDataSourcesBaseUrl(dataSourceId);
+    Url.submitDataSourceInfoUpdate = function (groupId, dataSourceId) {
+        return getDataSourcesBaseUrl(groupId, dataSourceId);
     };
 
     /**
@@ -253,8 +253,8 @@ define(function () {
      * @public
      * @return {string} url
      */
-    Url.loadTables = function (dataSourceId) {
-        return getDataSourcesBaseUrl(dataSourceId) + '/tables';
+    Url.loadTables = function (groupId, dataSourceId) {
+        return getDataSourcesBaseUrl(groupId, dataSourceId) + '/tables';
     };
 
     /**
@@ -267,6 +267,17 @@ define(function () {
      */
     Url.addDsGroup = function () {
         return getDataSourcesGroupBaseUrl();
+    };
+    /**
+     * 数据源组新建和编辑模块
+     * 数据源组编辑
+     *
+     * @param {string} dataSourceId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.editDsGroup = function (groupId) {
+        return getDataSourcesGroupBaseUrl(groupId);
     };
 
     /**

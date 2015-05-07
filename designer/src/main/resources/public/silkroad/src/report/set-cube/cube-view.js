@@ -86,7 +86,8 @@ define([
                 $target.addClass('selected');
 
                 this.model.selectedDsId = dsId;
-                this.model.loadFactTableList();
+                var groupId = $('span[data-id=' + dsId + ']').attr('group-id')
+                this.model.loadFactTableList(groupId);
             },
 
             /**

@@ -18,6 +18,8 @@ define(['template'], function (template) {
         }
         $out+='"\r\n                    data-id="';
         $out+=$escape($item.id);
+        $out+='" group-id="';
+        $out+=$escape($dsGroup.id);
         $out+='">';
         $out+=$escape($item.name);
         $out+='</span>\r\n                ';
