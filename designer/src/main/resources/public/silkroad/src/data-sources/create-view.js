@@ -36,6 +36,9 @@ define([
                 if (option.id !== undefined) {
                     modelData.id = option.id;
                 }
+                if (option.groupId !== undefined) {
+                    modelData.groupId = option.groupId;
+                }
                 that.model = new Model(modelData);
                 that.model.set({
                     isAdd: option.isAdd,

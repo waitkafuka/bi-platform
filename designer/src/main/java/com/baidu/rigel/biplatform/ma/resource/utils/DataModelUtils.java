@@ -335,6 +335,9 @@ public final class DataModelUtils {
             return false;
         }
         RowHeadField firstRow = rowFields.get (0).get (0);
+        if (MetaNameUtil.isAllMemberUniqueName (firstRow.getUniqueName ())) {
+            return true;
+        }
         return firstRow.getV () != null && firstRow.getV ().contains ("合计");
     }
 
