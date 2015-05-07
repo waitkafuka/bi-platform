@@ -48,12 +48,12 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
          * @param {boolean} isEdit 是否是编辑状态（如果是编辑状态需要还原之前选中的表）
          * @public
          */
-        loadFactTableList: function (isEdit) {
+        loadFactTableList: function (groupId, isEdit) {
             var that = this;
             var dsId = this.selectedDsId;
             var factTableList = {};
 
-            that.dataSourcesModel.loadTables(dsId, function (data) {
+            that.dataSourcesModel.loadTables(groupId, dsId, function (data) {
                 if (isEdit) {
                     that.loadReportFactTableList(data);
                 }
