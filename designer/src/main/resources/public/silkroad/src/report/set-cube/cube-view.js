@@ -41,7 +41,7 @@ define([
                 this.model = new CubeModel({id: this.id});
                 this.listenTo(
                     this.model,
-                    'change:dataSourcesList',
+                    'change:activeDataSourcesList',
                     function (model, data) {
                         var html = mainTemplate.render({dataSourcesList: data});
                         that.$el.html(html);
@@ -59,7 +59,7 @@ define([
 
                 if (option.edit === true) {
                     that.model.loadSelectedDataSources(function () {
-                        that.model.dataSourcesModel.loadDataSourcesList();
+                        that.model.dataSourcesModel.loadDsGroupActive();
 
                         // 由于只有在编辑状态下 且 刚进来时需要还原
                         // 所以在这里用参数的方式来还原数据
@@ -67,7 +67,7 @@ define([
                     });
                 }
                 else {
-                    that.model.dataSourcesModel.loadDataSourcesList();
+                    that.model.dataSourcesModel.loadDsGroupActive();
                 }
 
                 window.dataInsight.main = this;
@@ -86,7 +86,7 @@ define([
                 $target.addClass('selected');
 
                 this.model.selectedDsId = dsId;
-                var groupId = $('span[data-id=' + dsId + ']').attr('group-id')
+                var groupId = $('span[data-id=' + dsId + ']').attr('group-id');
                 this.model.loadFactTableList(groupId);
             },
 

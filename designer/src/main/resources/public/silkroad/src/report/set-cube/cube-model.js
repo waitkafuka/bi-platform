@@ -18,7 +18,7 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
             that.dataSourcesModel = new DataSourcesModel();
             that.listenToOnce(
                 that.dataSourcesModel,
-                'change:dataSourcesList',
+                'change:activeDataSourcesList',
                 function (model, data) {
                     that._mergeDataSourcesList(data);
                 }
@@ -139,21 +139,21 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
 
             if (opt_selectedId !== undefined) {
                 for (var i = 0, len = data.length; i < len; i++) {
-                    if (data[i].id == opt_selectedId) {
-                        data[i].selected = true;
+                    if (data[i].active.id == opt_selectedId) {
+                        data[i].active.selected = true;
                         break;
                     }
                 }
             }
             // 新建报表走的逻辑，且数据源列表不为空
             else if (data.length > 0) {
-                that.set('dsId', data[0].id);
-                data[0].selected = true;
-                this.selectedDsId = data[0].id;
-                that.loadFactTableList();
+                that.set('dsId', data[0].active.id);
+                data[0].active.selected = true;
+                this.selectedDsId = data[0].active.id;
+                that.loadFactTableList(data[0].id);
             }
 
-            that.set('dataSourcesList', data);
+            that.set('activeDataSourcesList', data);
         },
 
         /**

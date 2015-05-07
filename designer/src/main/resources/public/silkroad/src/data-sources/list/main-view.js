@@ -28,7 +28,8 @@ define([
                 'click .j-edit-data-sources': 'editDataSources',
                 'click .j-add-data-sources-group': 'addDataSourcesGroup',
                 'click .j-edit-data-sources-group': 'editDataSourcesGroup',
-                'click .j-del-data-sources-group': 'delDataSourcesGroup'
+                'click .j-del-data-sources-group': 'delDataSourcesGroup',
+                'click .j-input-data-sources': 'changeDataSourceActive'
             },
 
             /**
@@ -86,6 +87,7 @@ define([
              */
             editDataSources: function (event) {
                 var dataSourcesId = this.getLineId(event);
+                var groupId = this.getGroupId(event);
                 window.dataInsight.main.destroy();
 
                 // 进编辑模块
@@ -97,6 +99,7 @@ define([
                         new DataSourcesCreateView({
                             el: $('.j-main'),
                             id: dataSourcesId,
+                            groupId: groupId,
                             isAdd: false
                         });
                     }
@@ -210,7 +213,7 @@ define([
                                     }
                                     that.model.editDsGroup(
                                         groupId,
-                                        groupName,
+                                        name,
                                         function () {
                                             $this.dialog('close');
                                             $curGroupName.text(name);
@@ -241,7 +244,7 @@ define([
                     that.model.delDsGroup(groupId, function() {
                         $curGroup.remove();
                         $('input[name=' + groupId + ']').each(function() {
-                            $(this).parent().parent().parent().remove();
+                            $(this).parents('.j-root-line').remove();
                         });
                     });
                 });
@@ -254,6 +257,16 @@ define([
              */
             getLineId: function (event) {
                 return $(event.target).parents('.j-root-line').attr('data-id');
+            },
+            getGroupId: function (event) {
+                return $(event.target).attr('name');
+            },
+            changeDataSourceActive: function(event) {
+                var groupId = $(event).attr('name');
+                var dsId = $(event).parents('.j-root-line').attr('data-id');
+                this.model.changeDataSourceActive(groupId, dsId, function() {
+                    dialog.alert('修改成功');
+                });
             },
             /**
              * 销毁当前view与其对应的model

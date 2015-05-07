@@ -195,7 +195,8 @@ public class DataModelBuilder {
                     String value = tesseractResultSet.getString(prop);
                     if (rowHeadName.queryPropers.get(prop).isEmpty() 
                             || (rowHeadName.queryPropers.get(prop).contains(value) 
-                            && value.equals(record.getGroupBy()))) {
+                            && record.getGroupBy ().contains (value))) {
+                            //&& value.equals(record.getGroupBy()))) {
                         oneLine.append(prop);
                         oneLine.append(PROP_KEY_SPLIT);
                         oneLine.append(value);

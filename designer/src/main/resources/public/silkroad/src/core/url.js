@@ -279,7 +279,20 @@ define(function () {
     Url.editDsGroup = function (groupId) {
         return getDataSourcesGroupBaseUrl(groupId);
     };
-
+    Url.changeDsActive = function (groupId, dsId) {
+        return getDataSourcesBaseUrl(groupId, dsId);
+    };
+    /**
+     * cube设置模块
+     * 获取活动的数据源
+     *
+     * @param {string} dataSourceId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.loadDsGroupActive = function () {
+        return getDataSourcesGroupBaseUrl('active');
+    };
     /**
      * 报表列表
      * 获取报表列表url
