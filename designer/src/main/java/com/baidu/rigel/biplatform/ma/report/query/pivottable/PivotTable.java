@@ -28,7 +28,7 @@ import com.google.common.collect.Maps;
  * @author mengran
  * 
  */
-public class PivotTable implements Serializable {
+public class PivotTable extends BaseTable implements Serializable {
     
     /**
      * serialVersionUID
