@@ -10,7 +10,9 @@ define(['template'], function (template) {
         $out+=$escape($dsGroup.id);
         $out+='">';
         $out+=$escape($dsGroup.name);
-        $out+='</div>\r\n                 <span class="btn-has-icon btn-has-icon-data-sources data-line c-p j-item';
+        $out+='</div>\r\n                ';
+        if($dsGroup.active){
+        $out+='\r\n                 <span class="btn-has-icon btn-has-icon-data-sources data-line c-p j-item';
         if($dsGroup.active.selected===true){
         $out+=' selected';
         }
@@ -20,7 +22,9 @@ define(['template'], function (template) {
         $out+=$escape($dsGroup.id);
         $out+='">';
         $out+=$escape($dsGroup.active.name);
-        $out+='</span>\r\n            ';
+        $out+='</span>\r\n                ';
+        }
+        $out+='\r\n            ';
         });
         $out+='\r\n            ';
         if(dataSourcesList.length == 0){
