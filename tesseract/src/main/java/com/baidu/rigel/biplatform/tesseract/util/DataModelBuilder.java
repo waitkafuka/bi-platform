@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.util;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -237,8 +238,9 @@ public class DataModelBuilder {
                 if (data.containsKey (oneLineKey) ) {
                     final BigDecimal oldVal = data.get (oneLineKey).get (columnKey.toString ());
                     if (oldVal != null &&  currentVal != null) {
+                        final Serializable newTmp = measure.getAggregator ().aggregate (oldVal, currentVal);
                         BigDecimal newVal = 
-                                (BigDecimal) measure.getAggregator ().aggregate (oldVal, currentVal);
+                            newTmp instanceof BigDecimal ? (BigDecimal) newTmp : new BigDecimal(newTmp.toString ());
 //                    data.put(columnKey.toString(), newVal);
                         data.get (oneLineKey).put (columnKey.toString (), newVal);
                     } else if (data.containsKey (oneLineKey)) {
