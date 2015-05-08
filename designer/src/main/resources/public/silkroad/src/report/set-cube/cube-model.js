@@ -57,7 +57,7 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
                 if (isEdit) {
                     that.loadReportFactTableList(data);
                 }
-                else if (data.length > 0) {
+                else if (data.length >= 0) {
                     factTableList = {
                         factTables: data
                     };
