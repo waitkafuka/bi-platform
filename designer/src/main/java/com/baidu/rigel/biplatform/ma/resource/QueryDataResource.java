@@ -1042,7 +1042,7 @@ public class QueryDataResource extends BaseResource {
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                     if (!root.get("uniqName").toLowerCase().contains("all")) {
-                        root.put("uniqName", root.get("uniqName"));
+                        root.put("uniqName", this.genRootUniqueName (root.get("uniqName")));
                         root.put("showName", "全部");
     //                        runTimeModel.getContext().put(vertualDimKey, action);
                     }
@@ -1205,16 +1205,25 @@ public class QueryDataResource extends BaseResource {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
-            root.put("uniqName", "@" + params.get (item.getOlapElementId ()).toString () + "@");
+            final String uniqueName = params.get (item.getOlapElementId ()).toString ();
+            
+            root.put("uniqName", genRootUniqueName (uniqueName));
         } else {
             String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
-            root.put ("uniqName", "@" + uniqueName  + "@");
+            root.put ("uniqName", genRootUniqueName (uniqueName));
         }
         RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
 //        String uniqueName = rowHeadField.getUniqueName();
 //        String realUniqueName = uniqueName.replace("}", "").replace("{", "");
         root.put("showName", rowHeadField.getV());
         return root;
+    }
+
+    private String genRootUniqueName(final String uniqueName) {
+        if (uniqueName.endsWith ("@") && uniqueName.startsWith ("@")) {
+            return uniqueName;
+        }
+        return "@" + uniqueName + "@";
     }
     
     /**
@@ -1446,10 +1455,10 @@ public class QueryDataResource extends BaseResource {
                 mainDims.add(dims3);
                 drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
-//            if (!isRoot) {
+            if (!isRoot) {
                 Map<String, String> root = areaContext.getCurBreadCrumPath();
                 mainDims.add(root);
-//            }
+            }
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);
