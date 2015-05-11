@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -96,10 +95,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeLevel queryLevel = (MiniCubeLevel) level;
         // 发出的查询SQL类似 select name,caption from dim_table where pid = 1 and parentValue=0 group by name,caption
         QueryRequest nameQuery = buildQueryRequest(cube, queryLevel, parentMember, dataSourceInfo);
-        MiniCube miniCube = (MiniCube) cube;
-        boolean dimTableNotBlank = StringUtils.isNotBlank (queryLevel.getDimTable ());
-        // 退化维 这里需要增加distinct 设置
-        if (dimTableNotBlank && queryLevel.getDimTable ().equals (miniCube.getSource ())) {
+        if (isFromFactTable (cube, queryLevel)) {
             nameQuery.setDistinct (true);
         }
         String filterDimKey = params.get(QueryContextBuilder.FILTER_DIM_KEY);
@@ -131,6 +127,14 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         log.info("cost:{}ms in get members,size:{}",System.currentTimeMillis() - current, members.size());
         return members;
 
+    }
+
+    private boolean isFromFactTable(Cube cube, MiniCubeLevel queryLevel) {
+        MiniCube miniCube = (MiniCube) cube;
+        boolean dimTableNotBlank = StringUtils.isNotBlank (queryLevel.getDimTable ());
+        // 退化维 这里需要增加distinct 设置
+        final boolean isFromFactTable = dimTableNotBlank && queryLevel.getDimTable ().equals (miniCube.getSource ());
+        return isFromFactTable;
     }
 
     private Where genWhere(Where where, String filterDimKey, Map<String, String> params) {
@@ -359,6 +363,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
 
         try {
             // 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
+            // 维度查询，直接采用distinct
+            if (isFromFactTable (cube, queryLevel)) {
+                queryRequest.setDistinct (true);
+            }
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             List<MiniCubeMember> memberResultList = this.buildMembersFromCellSet (resultSet, queryLevel, parent, dataSourceInfo, cube);
             result = CollectionUtils.isEmpty (memberResultList) ? null : memberResultList.get(0);
@@ -626,6 +634,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         List<MiniCubeMember> members = Lists.newArrayList ();
         try {
             // 这里的查询主要为了校验数据库是否存在，如果不存在抛异常，后续需要对这个加上配置处理。如果不存在可以不抛异常，直接跳过。。
+            // 维度查询，直接采用distinct count
+            if (isFromFactTable (cube, queryLevel)) {
+                queryRequest.setDistinct (true);
+            }
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             members = 
                 buildMembersFromCellSet (resultSet, queryLevel, null, dataSourceInfo, cube);

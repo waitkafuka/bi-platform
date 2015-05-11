@@ -19,6 +19,7 @@
 package com.baidu.rigel.biplatform.tesseract.meta.impl;
 
 import java.math.BigDecimal;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -36,12 +37,15 @@ import org.springframework.cache.Cache;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
@@ -284,7 +288,52 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
         MetaDataService.checkCube(cube);
         MetaDataService.checkDataSourceInfo(dataSourceInfo);
         DimensionMemberService memberService = dimensionMemberServiceMap.get(DimensionMemberService.SQL_MEMBER_SERVICE);
-        return memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params);
+        Dimension dim = null;
+        Level level = null;
+        String dimName = null;
+        String[] dimNameArray = null;
+        Iterator<Level> it = null;
+        Iterator<String> unqNameIt = uniqueNameList.iterator ();
+        String uniqueName = null;
+        List<String> oldNames = DeepcopyUtils.deepCopy (uniqueNameList);
+        List<String> queryUniqueName = Lists.newArrayList ();
+        while (unqNameIt.hasNext ()) {
+            uniqueName = unqNameIt.next ();
+            dimName = MetaNameUtil.getDimNameFromUniqueName (uniqueName);
+            dim = cube.getDimensions ().get (dimName);
+            if (dim.getLevels ().size () > 1) {
+                dimNameArray = MetaNameUtil.parseUnique2NameArray (uniqueName);
+                it = dim.getLevels ().values ().iterator ();
+                for (int i = 0; i < dimNameArray.length - 2; ++i) {
+                    it.next ();
+                }
+                level = it.next ();
+                if (level.getDimTable ().equals (((MiniCube) cube).getSource())) {
+                    unqNameIt.remove ();
+                    queryUniqueName.add(uniqueName.substring (0, uniqueName.lastIndexOf (".")));
+                }
+            }
+        }
+        Iterator<MiniCubeMember> memberIt = null;
+        List<MiniCubeMember> members = Lists.newArrayList ();
+        if (!queryUniqueName.isEmpty ()) {
+            List<MiniCubeMember> parents = memberService.lookUpByNames(dataSourceInfo, cube, queryUniqueName, params);
+            for (MiniCubeMember parent : parents) {
+                members.addAll (memberService.getMembers (cube, level, dataSourceInfo, parent, params));
+            }
+            memberIt = members.iterator ();
+            while (memberIt.hasNext ()) {
+                if (!oldNames.contains (memberIt.next ().getUniqueName ())) {
+                    memberIt.remove ();
+                }
+            }
+        }
+        if (!uniqueNameList.isEmpty ()) {
+            members.addAll (memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params));
+        }
+//        List<MiniCubeMember> members = memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params);
+        
+        return members;
     }
     
 
