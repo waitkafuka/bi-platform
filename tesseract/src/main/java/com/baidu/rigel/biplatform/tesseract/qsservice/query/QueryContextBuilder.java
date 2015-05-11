@@ -188,7 +188,8 @@ public class QueryContextBuilder {
                         queryContext.getFilterExpression().put(measureCon.getMetaName(),
                                 measureCon.getMeasureConditions());
                     }
-                    logger.info("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
+                    logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
+//                    logger.info("cost:{}ms,in build filter",System.currentTimeMillis() - current);
                     current = System.currentTimeMillis();
                 }
             }

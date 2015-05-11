@@ -124,7 +124,7 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public SearchIndexResultSet query(QueryRequest query) throws IndexAndSearchException {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
+        LOGGER.debug(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard
         // 3. trans query to Query that can used for searching
@@ -154,7 +154,7 @@ public class SearchIndexServiceImpl implements SearchService {
 //            }
         }
 
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
+        LOGGER.debug (String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
                 "merging final result"));
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
