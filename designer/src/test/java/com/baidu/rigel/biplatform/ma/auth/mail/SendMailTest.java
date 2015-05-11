@@ -59,7 +59,7 @@ public class SendMailTest {
 		// 邮件服务器地址
 		sendMail.setMailServerHost(mailServer);
 		// 设置是否需要验证
-		sendMail.setNeedAuth(true);
+		sendMail.setNeedAuth(false);
 		// 设置发送方名字
 		sendMail.setUserName(mailSender);
 		// 设置发送邮件用户密码
