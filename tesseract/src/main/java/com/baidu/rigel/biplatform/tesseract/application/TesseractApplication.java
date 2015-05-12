@@ -113,6 +113,7 @@ public class TesseractApplication {
                 protocol.setSessionTimeout ("1000");
                 protocol.setCompressionMinSize (4096);
                 protocol.setMaxKeepAliveRequests (500);
+                protocol.setMaxConnections (1000);
             }
         };
     }
