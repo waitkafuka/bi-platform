@@ -17,11 +17,17 @@ package com.baidu.rigel.biplatform.tesseract.application;
 
 import java.util.function.Function;
 
+import org.apache.catalina.connector.Connector;
+import org.apache.coyote.http11.Http11NioProtocol;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
+import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer;
+import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
@@ -82,5 +88,46 @@ public class TesseractApplication {
 //        CacheManager cacheManager = (CacheManager) context.getBean("redisCacheManager");
 //        
 //        cacheManager.getCache("test").put("key", "val");
+    }
+    
+    @Bean
+    public EmbeddedServletContainerFactory servletContainer () {
+        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory ();
+        tomcat.addConnectorCustomizers (customizer());
+        return tomcat;
+    }
+
+    @Bean
+    public TomcatConnectorCustomizer customizer () {
+        return new TomcatConnectorCustomizer() {
+            
+            @Override
+            public void customize(Connector connector) {
+                connector.setDomain ("test");
+                connector.setProtocol ("org.apache.coyote.http11.Http11NioProtocol");
+                Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler ();
+                protocol.setCompressableMimeType ("application/json");
+                protocol.setCompression ("on");
+                protocol.setMaxThreads (1000);
+                protocol.setMinSpareThreads (100);
+                protocol.setSessionTimeout ("1000");
+                protocol.setCompressionMinSize (4096);
+                protocol.setMaxKeepAliveRequests (500);
+            }
+        };
+    }
+    
+    
+    @Bean
+    public Connector connector() {
+        Connector connector = new Connector ("org.apache.coyote.http11.Http11NioProtocol");
+        connector.setPort (Integer.valueOf (System.getProperty ("server.port")));
+        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler ();
+        protocol.setCompressableMimeType ("application/json");
+        protocol.setCompression ("on");
+        protocol.setMaxThreads (1000);
+        protocol.setMinSpareThreads (50);
+        protocol.setMaxKeepAliveRequests (100);
+        return connector;
     }
 }
