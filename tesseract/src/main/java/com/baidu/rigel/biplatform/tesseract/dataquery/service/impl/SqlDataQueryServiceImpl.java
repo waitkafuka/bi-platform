@@ -115,7 +115,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     	
     	SearchIndexResultSet data=querySqlList(sqlQuery, dataSource, limitStart, limitEnd);
     	
-    	long curr=System.currentTimeMillis();
+//    	long curr=System.currentTimeMillis();
     	IndexDataResultSet result=null;
     	if(data != null) {
     		result=new IndexDataResultSet(data.getMeta(),data.size());        	        	
@@ -126,7 +126,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
         	}
         	
     	}
-    	System.out.println("DATA TRANSFER COST : "+(System.currentTimeMillis()-curr)+" ms");
+//    	System.out.println("DATA TRANSFER COST : "+(System.currentTimeMillis()-curr)+" ms");
     	return result;
     	
     }
@@ -183,7 +183,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
                 resultSet.addRecord(record);
             }
         });
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "querySqlList", "[sqlQuery:" + sqlQuery.toSql()
+        LOGGER.debug(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "querySqlList", "[sqlQuery:" + sqlQuery.toSql()
                 + "][dataSource:" + dataSource + "][limitStart:" + limitStart + "][limitEnd:" + limitEnd + "] cost"
                 + (System.currentTimeMillis() - current + "ms!")));
         return resultSet;
@@ -220,7 +220,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
 
         SearchIndexResultSet resultSet = querySqlList(sqlQuery, dataSource, limitStart, limitEnd);
         
-        LOGGER.info("query sql:" + sqlQuery.toSql() + "result size: " + resultSet.size() + " cost:" + (System.currentTimeMillis() - current));
+        LOGGER.debug("query sql:" + sqlQuery.toSql() + "result size: " + resultSet.size() + " cost:" + (System.currentTimeMillis() - current));
         current = System.currentTimeMillis();
         
         if (CollectionUtils.isEmpty(resultSet.getDataList())) {
@@ -230,7 +230,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
         
         resultSet.setDataList(AggregateCompute.aggregate(resultSet.getDataList(), queryRequest));
         
-        LOGGER.info("group by cost:" + (System.currentTimeMillis() - current));
+        LOGGER.debug("group by cost:" + (System.currentTimeMillis() - current));
 
         return resultSet;
     }
