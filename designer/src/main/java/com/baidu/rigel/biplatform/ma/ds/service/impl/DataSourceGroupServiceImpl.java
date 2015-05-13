@@ -247,11 +247,7 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
 			// 如果仅有一个数据源，将原有数据源组的id赋值给当前活动的数据源
 			if (dsG.listAll().length == 2 ) {
 				DataSourceDefine[] dsS = dsG.listAll();
-				for(DataSourceDefine ds : dsS) {
-					if(ds.getId() != dsG.getId()) {
-						dsG.removeDataSourceDefine(ds);
-					}
-				}
+				dsG.removeDataSourceDefine(dsS[0]);
 				fileService.rm(DataSourceUtil.getDsGroupFileName(dsG));
 				// 写入数据源组文件
 				fileService.write(DataSourceUtil.getDsGroupFileName(dsG),
