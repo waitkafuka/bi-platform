@@ -10,31 +10,35 @@ import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 
 /**
  * 数据源信息读取工厂类
+ * 
  * @author jiangyichao
  *
  */
 public class DataSourceInfoReaderServiceFactoryTest {
-
-	/**
+    
+    /**
 	 * 
 	 */
-	@Test
-	public void test() throws Exception {
-    	DataSourceDefine ds = new DataSourceDefine();
-    	ds.setDataSourceType(DataSourceType.MYSQL);
-    	ds.setDbInstance("testDB");
-    	ds.setDbPwd("test");
-    	ds.setDbUser("test");
-    	ds.setHostAndPort("127.0.0.1:3306");
-    	
-    	Assert.assertNotNull(DataSourceInfoReaderServiceFactory.
-    			getDataSourceInfoReaderServiceInstance(ds.getDataSourceType()));
-    	
-    	try {
-    		ds.setDataSourceType(DataSourceType.CSV);
-    		DataSourceInfoReaderServiceFactory.getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
-    	} catch (DataSourceOperationException e) {
-    		Assert.assertNotNull(e);
-    	}
-	}
+    @Test
+    public void test() throws Exception {
+        DataSourceDefine ds = new DataSourceDefine ();
+        ds.setDataSourceType (DataSourceType.MYSQL);
+        ds.setDbInstance ("testDB");
+        ds.setDbPwd ("test");
+        ds.setDbUser ("test");
+        ds.setHostAndPort ("127.0.0.1:3306");
+        
+        Assert.assertNotNull (DataSourceInfoReaderServiceFactory
+                .getDataSourceInfoReaderServiceInstance (ds
+                .getDataSourceType ().name ()));
+        
+        try {
+            ds.setDataSourceType (DataSourceType.CSV);
+            DataSourceInfoReaderServiceFactory
+                    .getDataSourceInfoReaderServiceInstance (ds
+                    .getDataSourceType ().name ());
+        } catch (DataSourceOperationException e) {
+            Assert.assertNotNull (e);
+        }
+    }
 }

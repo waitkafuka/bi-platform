@@ -122,7 +122,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             List<TableInfo> tables = dsInfoReaderService.getAllTableInfos(ds, securityKey);
             List<RelationTableView> relationTables = Lists.newArrayList();
             for (TableInfo table : tables) {
@@ -367,7 +367,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             for (NormalDimDetail detail : normal.getChildren()) {
                 StandardDimTableMetaDefine stand = new StandardDimTableMetaDefine();
                 ReferenceDefine reference = new ReferenceDefine();
