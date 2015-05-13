@@ -23,7 +23,6 @@ import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
-import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 
 /**
@@ -163,6 +162,9 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
 	@Override
 	public boolean isValidate(DataSourceGroupDefine dsG, String securityKey)
 			throws DataSourceOperationException {
+		if (dsG == null) {
+			return false;
+		}
 		for (DataSourceDefine ds : dsG.getDataSourceList().values()) {
 			if (!dsService.isValidateConn(ds, securityKey)) {
 				return false;
@@ -241,6 +243,20 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
 		DataSourceGroupDefine dsG = null;
 		try {
 			dsG = (DataSourceGroupDefine) SerializationUtils.deserialize(content);
+			// TODO dirty solution
+			// 如果仅有一个数据源，将原有数据源组的id赋值给当前活动的数据源
+			if (dsG.listAll().length == 1 ) {
+				DataSourceDefine ds = dsG.getActiveDataSource();
+				if (dsG.getId() != ds.getId()) {
+					ds.setId(dsG.getId());
+					dsG.removeDataSourceDefine(ds);
+					dsG.addDataSourceDefine(ds);
+					dsG.setActiveDataSource(ds);
+					fileService.rm(DataSourceUtil.getDsGroupFileName(dsG));
+					// 写入数据源组文件
+					fileService.write(DataSourceUtil.getDsGroupFileName(dsG), SerializationUtils.serialize(dsG));					
+				}
+			}
 		} catch (ClassCastException e) {
 			dsG = new DataSourceGroupDefine();
 			DataSourceDefine ds = (DataSourceDefine) SerializationUtils.deserialize(content);
@@ -248,7 +264,7 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
 			fileService.rm(DataSourceUtil.getDsFileName(ds));
 			
 			dsG.setId(ds.getId());
-			ds.setId(UuidGeneratorUtils.generate());
+//			ds.setId(UuidGeneratorUtils.generate());
 			dsG.addDataSourceDefine(ds);
 			dsG.setActiveDataSource(ds);
 
