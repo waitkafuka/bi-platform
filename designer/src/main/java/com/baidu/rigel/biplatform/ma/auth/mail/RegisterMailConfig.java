@@ -79,7 +79,7 @@ public final class RegisterMailConfig {
         InputStream is = null;
         try {
             is = RegisterController.class.getClassLoader()
-                    .getResourceAsStream("conf/register_mail.properties");   
+                    .getResourceAsStream("application.properties");   
             CONFIG.load(new InputStreamReader(is, "utf-8"));
         } catch (Throwable t) {
             throw new RuntimeException(t);

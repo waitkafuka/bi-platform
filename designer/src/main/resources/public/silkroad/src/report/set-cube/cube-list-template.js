@@ -2,7 +2,11 @@ define(['template'], function (template) {
     function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,factTables=$data.factTables,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,prefixs=$data.prefixs,index=$data.index,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n<ul>\r\n    ';
+        var $utils=template.utils,$helpers=$utils.$helpers,factTables=$data.factTables,$each=$utils.$each,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,prefixs=$data.prefixs,index=$data.index,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n';
+        if(factTables.length==0){
+        $out+='\r\n    <div class="empty-data ta-c">暂无数据表</div>\r\n';
+        }else{
+        $out+='\r\n<ul>\r\n    ';
         $each(factTables,function($item,$index){
         $out+='\r\n    <li class="data-line c-p';
         if($item.selected){
@@ -20,7 +24,9 @@ define(['template'], function (template) {
         $out+=$escape($item);
         $out+='"/>\r\n            <span class="form-common-text-validation hide"></span>\r\n            <span class="form-common-btn-extend form-common-btn-extend-absolute j-delete" title="删除">×</span>\r\n        </div>\r\n    </div>\r\n    ';
         });
-        $out+='\r\n    <div class="form-common-line hide j-template">\r\n        <div class="form-common-text form-common-text-big">\r\n            <input type="text" class="" placeholder="分表匹配规则"/>\r\n            <span class="form-common-text-validation hide"></span>\r\n            <span class="form-common-btn-extend form-common-btn-extend-absolute j-delete" title="删除">×</span>\r\n        </div>\r\n    </div>\r\n</div>\r\n\r\n';
+        $out+='\r\n    <div class="form-common-line hide j-template">\r\n        <div class="form-common-text form-common-text-big">\r\n            <input type="text" class="" placeholder="分表匹配规则"/>\r\n            <span class="form-common-text-validation hide"></span>\r\n            <span class="form-common-btn-extend form-common-btn-extend-absolute j-delete" title="删除">×</span>\r\n        </div>\r\n    </div>\r\n</div>\r\n';
+        }
+        $out+='\r\n\r\n\r\n';
         return $out;
     }
     return { render: anonymous };

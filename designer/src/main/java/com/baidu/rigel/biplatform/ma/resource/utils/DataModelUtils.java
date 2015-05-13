@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
 import com.google.common.collect.Lists;
@@ -324,6 +325,32 @@ public final class DataModelUtils {
         return pTable;
     }
 
+    /**
+     * 将DataModel转为PlaneTable平面表
+     * @param cube cube
+     * @param oriDataModel 数据模型
+     * @return
+     */
+    public static PlaneTable transDataModel2PlaneTable(Cube cube, DataModel oriDataModel) {
+        PlaneTable planeTable = new PlaneTable();
+        if (oriDataModel == null) {
+            return planeTable;
+        }
+        // 记录转换时间
+        long current = System.currentTimeMillis();
+        DataModel dataModel = oriDataModel;
+        // 基于列的表信息
+        List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
+        // 基于行的表信息
+        List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
+        
+        // 列头信息
+        List<List<ColField>> colFields = new ArrayList<List<ColField>>();
+        
+        // 列的高度信息
+        int colHeight = getHeightOfHeadFieldList(colHeadFields);
+    	return null;
+    }
     private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {
         if (rowFields == null) {
             return false;

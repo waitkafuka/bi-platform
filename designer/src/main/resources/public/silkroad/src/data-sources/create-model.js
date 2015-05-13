@@ -81,7 +81,7 @@ define(['url'], function (Url) {
             var isAdd = that.get('isAdd');
 
             if (!isAdd) {
-                url = Url.submitDataSourceInfoUpdate(data.groupId, data.id);
+                url = Url.submitDataSourceInfoUpdate(data.groupId, that.get('id'));
             } else {
                 url = Url.submitDataSourceInfoAdd(data.groupId);
             }
@@ -104,7 +104,7 @@ define(['url'], function (Url) {
         loadDataSourcesGroup: function () {
             var that = this;
             $.ajax({
-                url: Url.loadDataSourcesList(),
+                url: Url.loadDsgroupList(),
                 success: function (data) {
                     var tarData = data.data;
                     var resData = [];

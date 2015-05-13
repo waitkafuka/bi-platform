@@ -17,6 +17,8 @@ package com.baidu.rigel.biplatform.ma.resource.cache;
 
 import javax.annotation.Resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 
@@ -37,6 +39,9 @@ import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
  */
 @Service("reportModelCacheManager")
 public class ReportModelCacheManager {
+    
+    private static final Logger LOG = 
+        LoggerFactory.getILoggerFactory ().getLogger (ReportModelCacheManager.class.getName ());
     
     /**
      * cacheManagerForReource
@@ -61,12 +66,14 @@ public class ReportModelCacheManager {
         String key = genReportKey(reportId);
         // ReportDesignModel model = (ReportDesignModel)
         // cacheManagerForReource.getFromCache(key);
+        long begin = System.currentTimeMillis ();
         byte[] modelBytes = (byte[]) cacheManagerForReource.getFromCache(key);
         ReportDesignModel model = (ReportDesignModel) SerializationUtils.deserialize(modelBytes);
         
         if (model == null) {
             throw new CacheOperationException("No such Model in cache!");
         }
+        LOG.info ("get report model from cache cost : {} ms", (System.currentTimeMillis () - begin));
         return model;
     }
     
@@ -122,13 +129,16 @@ public class ReportModelCacheManager {
      */
     public void updateReportModelToCache(String reportId, ReportDesignModel reportModel)
             throws CacheOperationException {
+        long begin = System.currentTimeMillis ();
         String sessionReportKey = genReportKey(reportId);
         try {
             byte[] modelBytes = SerializationUtils.serialize(reportModel);
+            LOG.info ("current model size : " + (modelBytes.length / 1024.0 / 1024.0) + "m");
             cacheManagerForReource.setToCache(sessionReportKey, modelBytes);
         } catch (CacheOperationException e) {
             throw e;
         }
+        LOG.info ("put report model into cache cost {} ms", (System.currentTimeMillis () - begin));
     }
 
     /**
@@ -151,6 +161,7 @@ public class ReportModelCacheManager {
      * @throws CacheOperationException
      */
     public ReportRuntimeModel getRuntimeModel(String reportId) throws CacheOperationException {
+        long begin = System.currentTimeMillis ();
         String sessionId = ContextManager.getSessionId();
         String productLine = ContextManager.getProductLine();
         String runtimeReportKey = CacheKeyGenerator.generateRuntimeReportKey(sessionId, reportId,
@@ -161,6 +172,7 @@ public class ReportModelCacheManager {
         if (runTimeModel == null) {
             throw new CacheOperationException("No such Model in cache!");
         }
+        LOG.info ("get runtimemodel from cache cost : {} ms", (System.currentTimeMillis () - begin));
         return runTimeModel;
     }
     
@@ -196,16 +208,19 @@ public class ReportModelCacheManager {
      */
     public void updateRunTimeModelToCache(String reportId, ReportRuntimeModel newRunTimeModel)
             throws CacheOperationException {
+        long begin = System.currentTimeMillis ();
         String sessionId = ContextManager.getSessionId();
         String productLine = ContextManager.getProductLine();
         String runTimeKey = CacheKeyGenerator.generateRuntimeReportKey(sessionId, reportId,
             productLine);
         try {
             byte[] modelBytes = SerializationUtils.serialize(newRunTimeModel);
+            LOG.info ("current model size : " + (modelBytes.length / 1024.0 / 1024.0) + "m");
             cacheManagerForReource.setToCache(runTimeKey, modelBytes);
         } catch (CacheOperationException e) {
             throw e;
         } 
+        LOG.info ("put model into cache cost : " + (System.currentTimeMillis () - begin) + "ms");
     }
 
     /**

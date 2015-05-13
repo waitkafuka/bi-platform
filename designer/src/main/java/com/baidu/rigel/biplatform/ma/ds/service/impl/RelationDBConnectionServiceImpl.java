@@ -48,6 +48,8 @@ public class RelationDBConnectionServiceImpl implements
             for (char c : pwd.toCharArray()) {
                 pwdStr.append(c >> 1);
             }
+            // 设置数据库连接超时
+            DriverManager.setLoginTimeout(10);
             LOG.info("[INFO]--- --- --- --- connect to database with pwd : {}", pwdStr.toString());
             conn = DriverManager.getConnection(connUrl, dbUser, pwd);
         } catch (ClassNotFoundException e) {

@@ -86,4 +86,12 @@ public class LocalEventListenerThread implements ApplicationContextAware {
 
     }
 
+    /**
+     * @param storeManager the storeManager to set
+     */
+    public void setStoreManager(StoreManager storeManager) {
+        this.storeManager = storeManager;
+    }
+
+    
 }

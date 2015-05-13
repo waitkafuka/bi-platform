@@ -250,6 +250,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         try {
         	ds = (DataSourceDefine) SerializationUtils.deserialize(content);
         } catch(ClassCastException e) {
+        	// 数据源组
         	DataSourceGroupDefine dsG = (DataSourceGroupDefine) SerializationUtils.deserialize(content);
         	ds = dsG.getActiveDataSource();
         }

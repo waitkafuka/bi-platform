@@ -124,7 +124,7 @@ public class SearchIndexServiceImpl implements SearchService {
      */
     @Override
     public SearchIndexResultSet query(QueryRequest query) throws IndexAndSearchException {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
+        LOGGER.debug(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "query", "[query:" + query + "]"));
         // 1. Does all the existed index cover this query
         // 2. get index meta and index shard
         // 3. trans query to Query that can used for searching
@@ -154,8 +154,8 @@ public class SearchIndexServiceImpl implements SearchService {
 //            }
         }
 
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
-                "merging final result"));
+//        LOGGER.debug (String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
+//                "merging final result"));
 
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
@@ -226,37 +226,35 @@ public class SearchIndexServiceImpl implements SearchService {
     }
     
     private synchronized Node getFreeSearchNodeByIndexShard(IndexShard idxShard,String clusterName){
-    	List<Node> idxShardNodeList=this.isNodeService.getAvailableNodeListByIndexShard(idxShard, clusterName);
-    	
-    	Collection<Node> nodeLeft=CollectionUtils.subtract(idxShardNodeList, this.nodeKeyQueue);
-    	Node result=null;
-    	Iterator<Node> it=null;
-    	if(!CollectionUtils.isEmpty(nodeLeft)){
-    		//取第一个
-    		//塞到nodeKeyQueue尾
-    		it=nodeLeft.iterator();
-    		if(it.hasNext()){
-    			result=it.next();
-    		}
-    		
-    	}else {
-    		it=this.nodeKeyQueue.iterator();
-    		while(it.hasNext()){
-    			Node node = it.next();
-    			if(idxShardNodeList.indexOf(node) != -1){
-    				it.remove();
-    				result=node;
-    				break;
-    			}
-    		}
-    	}
-    	if(result!=null){
-    		this.nodeKeyQueue.add(result);
-    	}
-    	return result;
-    	
-    	
-    	
+        	List<Node> idxShardNodeList=this.isNodeService.getAvailableNodeListByIndexShard(idxShard, clusterName);
+        
+        @SuppressWarnings("unchecked")
+        Collection<Node> nodeLeft=CollectionUtils.subtract(idxShardNodeList, this.nodeKeyQueue);
+        	Node result=null;
+        	Iterator<Node> it=null;
+        	if(!CollectionUtils.isEmpty(nodeLeft)){
+        		//取第一个
+        		//塞到nodeKeyQueue尾
+        		it=nodeLeft.iterator();
+        		if(it.hasNext()){
+        			result=it.next();
+        		}
+        		
+        	}else {
+        		it=this.nodeKeyQueue.iterator();
+        		while(it.hasNext()){
+        			Node node = it.next();
+        			if(idxShardNodeList.indexOf(node) != -1){
+        				it.remove();
+        				result=node;
+        				break;
+        			}
+        		}
+        	}
+        	if(result!=null){
+        		this.nodeKeyQueue.add(result);
+        	}
+        	return result;
     }
 
     private Callable<SearchIndexResultSet> genQueryTask(QueryRequest query,
@@ -289,6 +287,7 @@ public class SearchIndexServiceImpl implements SearchService {
             throws IndexAndSearchException {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "use database"));
         // index does not exist or unavailable,use db query
+        long begin = System.currentTimeMillis ();
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
         SqlDataSourceWrap dataSourceWrape = null;
         try {
@@ -316,8 +315,8 @@ public class SearchIndexServiceImpl implements SearchService {
         SearchIndexResultSet currResult =
                 this.dataQueryService.queryForListWithSQLQueryAndGroupBy(sqlQuery, dataSourceWrape, limitStart,
                         limitSize, query);
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "db return "
-                + currResult.size() + " records"));
+        LOGGER.info ("current execute sql is : {} cost {} ms", sqlQuery.toSql (), System.currentTimeMillis () - begin);
+        LOGGER.info("current execute used db return " + currResult.size() + " records");
         return currResult;
     }
 

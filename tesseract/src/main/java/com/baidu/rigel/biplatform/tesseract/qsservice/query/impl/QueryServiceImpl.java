@@ -192,7 +192,7 @@ public class QueryServiceImpl implements QueryService {
         long current = System.currentTimeMillis();
         QueryRequest queryRequest =
                 QueryRequestBuilder.buildQueryRequest(dataSourceInfo, cube, queryContext, useIndex,pageInfo);
-        logger.info("transfer queryContext:{} to queryRequest:{} cost:{} ", queryContext, queryRequest, System.currentTimeMillis() - current);
+//        logger.info("transfer queryContext:{} to queryRequest:{} cost:{} ", queryContext, queryRequest, System.currentTimeMillis() - current);
         if (statDimensionNode(queryContext.getRowMemberTrees(), false, false) == 0
                 || (statDimensionNode(queryContext.getColumnMemberTrees(), false, false) == 0 && CollectionUtils
                         .isEmpty(queryContext.getQueryMeasures()))) {
