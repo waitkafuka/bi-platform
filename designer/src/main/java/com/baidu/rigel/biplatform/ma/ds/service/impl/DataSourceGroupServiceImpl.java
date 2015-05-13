@@ -245,17 +245,17 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
 			dsG = (DataSourceGroupDefine) SerializationUtils.deserialize(content);
 			// TODO dirty solution
 			// 如果仅有一个数据源，将原有数据源组的id赋值给当前活动的数据源
-			if (dsG.listAll().length == 1 ) {
-				DataSourceDefine ds = dsG.getActiveDataSource();
-				if (dsG.getId() != ds.getId()) {
-					ds.setId(dsG.getId());
-					dsG.removeDataSourceDefine(ds);
-					dsG.addDataSourceDefine(ds);
-					dsG.setActiveDataSource(ds);
-					fileService.rm(DataSourceUtil.getDsGroupFileName(dsG));
-					// 写入数据源组文件
-					fileService.write(DataSourceUtil.getDsGroupFileName(dsG), SerializationUtils.serialize(dsG));					
+			if (dsG.listAll().length == 2 ) {
+				DataSourceDefine[] dsS = dsG.listAll();
+				for(DataSourceDefine ds : dsS) {
+					if(ds.getId() != dsG.getId()) {
+						dsG.removeDataSourceDefine(ds);
+					}
 				}
+				fileService.rm(DataSourceUtil.getDsGroupFileName(dsG));
+				// 写入数据源组文件
+				fileService.write(DataSourceUtil.getDsGroupFileName(dsG),
+						SerializationUtils.serialize(dsG));				
 			}
 		} catch (ClassCastException e) {
 			dsG = new DataSourceGroupDefine();
