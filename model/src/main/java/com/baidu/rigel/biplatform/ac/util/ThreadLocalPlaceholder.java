@@ -47,7 +47,7 @@ public abstract class ThreadLocalPlaceholder {
      * 
      * @return
      */
-    public static Map<Object, Object> getThreadMap() {
+    private static Map<Object, Object> getThreadMap() {
 
         // Get Current Thread Map
         Map<Object, Object> threadMap = THREADLOCALRESOURCE.get();
