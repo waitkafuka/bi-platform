@@ -75,8 +75,8 @@ public class RelationDBInfoReaderServiceImpl implements
 					String comment = rs.getString("REMARKS");
 					ColumnInfo info = new ColumnInfo();
 					info.setId(colName);
-	                info.setName(StringUtils.hasText(colName) ? colName : comment);
-	                info.setComment(StringUtils.hasText(comment) ? comment : colName);
+	                info.setName(StringUtils.hasText(comment) ? comment : colName);
+	                info.setComment(comment);
 					lists.add((T) info);
 				}				
 			} else {
@@ -87,8 +87,8 @@ public class RelationDBInfoReaderServiceImpl implements
 	                String tableName = rs.getString("TABLE_NAME");
 	                String comment = rs.getString("REMARKS"); 
 	                info.setId(tableName);
-	                info.setName(StringUtils.hasText(tableName) ? tableName : comment);
-	                info.setComment(StringUtils.hasText(comment) ? comment : tableName);
+	                info.setName(StringUtils.hasText(comment) ? comment : tableName);
+	                info.setComment(comment);
 	                lists.add((T) info);
 	            }
 			}
