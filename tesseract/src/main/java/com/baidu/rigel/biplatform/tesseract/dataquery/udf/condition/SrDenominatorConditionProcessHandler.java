@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 

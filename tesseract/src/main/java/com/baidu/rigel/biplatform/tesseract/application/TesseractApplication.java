@@ -119,16 +119,16 @@ public class TesseractApplication {
     }
     
     
-    @Bean
-    public Connector connector() {
-        Connector connector = new Connector ("org.apache.coyote.http11.Http11NioProtocol");
-        connector.setPort (Integer.valueOf (System.getProperty ("server.port")));
-        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler ();
-        protocol.setCompressableMimeType ("application/json");
-        protocol.setCompression ("on");
-        protocol.setMaxThreads (1000);
-        protocol.setMinSpareThreads (50);
-        protocol.setMaxKeepAliveRequests (100);
-        return connector;
-    }
+//    @Bean
+//    public Connector connector() {
+//        Connector connector = new Connector ("org.apache.coyote.http11.Http11NioProtocol");
+//        connector.setPort (Integer.valueOf (System.getProperty ("server.port")));
+//        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler ();
+//        protocol.setCompressableMimeType ("application/json");
+//        protocol.setCompression ("on");
+//        protocol.setMaxThreads (1000);
+//        protocol.setMinSpareThreads (50);
+//        protocol.setMaxKeepAliveRequests (100);
+//        return connector;
+//    }
 }

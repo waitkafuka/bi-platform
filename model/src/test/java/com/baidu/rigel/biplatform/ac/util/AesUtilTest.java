@@ -129,5 +129,29 @@ public class AesUtilTest {
         }
 
     }
+    
+    @Test
+    public void testEncryptAndUrlEncoding () {
+        try {
+            String rs1 = AesUtil.getInstance ().encryptAndUrlEncoding ("test");
+            String rs2 = AesUtil.getInstance ().encryptAndUrlEncoding ("test", "0000000000000000");
+            Assert.assertEquals (rs1, rs2);
+        } catch (Exception e) {
+            
+        }
+    }
+    
+    @Test
+    public void testDecryptAndUrlEncoding () {
+        try {
+            String rs1 = AesUtil.getInstance ().encryptAndUrlEncoding ("test");
+            String rs2 = AesUtil.getInstance ().decodeAnddecrypt (rs1, "0000000000000000");
+            Assert.assertEquals ("test", rs2);
+            String rs3 = AesUtil.getInstance ().decodeAnddecrypt (rs1);
+            Assert.assertEquals (rs3, "test");
+        } catch (Exception e) {
+            
+        }
+    }
 
 }
