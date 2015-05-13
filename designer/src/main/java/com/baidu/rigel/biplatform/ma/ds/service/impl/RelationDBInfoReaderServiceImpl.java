@@ -65,17 +65,18 @@ public class RelationDBInfoReaderServiceImpl implements
 		Connection conn = null;
 		try {
 			dsConnService = (DataSourceConnectionService<Connection>) DataSourceConnectionServiceFactory.
-					getDataSourceConnectionServiceInstance(DataSourceType.H2);
+					getDataSourceConnectionServiceInstance(DataSourceType.MYSQL);
 			conn = dsConnService.createConnection(ds, securityKey);
 			DatabaseMetaData dbMetaData = conn.getMetaData();
 			if (StringUtils.hasText(tableId)) {
 				ResultSet rs = dbMetaData.getColumns(null, null, tableId, "%");
 				while (rs.next()) {
-					String colId = rs.getString("COLUMN_NAME");
-					String colName = rs.getString("REMARKS");
+					String colName = rs.getString("COLUMN_NAME");
+					String comment = rs.getString("REMARKS");
 					ColumnInfo info = new ColumnInfo();
-					info.setId(colId);
-					info.setName(StringUtils.hasText(colName) ? colName : colId);
+					info.setId(colName);
+	                info.setName(StringUtils.hasText(colName) ? colName : comment);
+	                info.setComment(StringUtils.hasText(comment) ? comment : colName);
 					lists.add((T) info);
 				}				
 			} else {
@@ -86,7 +87,8 @@ public class RelationDBInfoReaderServiceImpl implements
 	                String tableName = rs.getString("TABLE_NAME");
 	                String comment = rs.getString("REMARKS"); 
 	                info.setId(tableName);
-	                info.setName(StringUtils.hasText(comment) ? comment : tableName);
+	                info.setName(StringUtils.hasText(tableName) ? tableName : comment);
+	                info.setComment(StringUtils.hasText(comment) ? comment : tableName);
 	                lists.add((T) info);
 	            }
 			}
