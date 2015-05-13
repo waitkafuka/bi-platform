@@ -30,4 +30,22 @@ public class TableInfo extends BaseInfo {
      */
     private static final long serialVersionUID = -7872089555871805568L;
     
+    /**
+     * 数据库名称
+     */
+    private String dbName;
+
+	/**
+	 * @return the dbName
+	 */
+	public String getDbName() {
+		return dbName;
+	}
+
+	/**
+	 * @param dbName the dbName to set
+	 */
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	}   
 }
