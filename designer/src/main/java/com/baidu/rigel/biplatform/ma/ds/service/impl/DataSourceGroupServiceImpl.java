@@ -24,7 +24,6 @@ import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
-import com.google.common.collect.Maps;
 
 /**
  * 数据源组服务接口实现
@@ -244,22 +243,22 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
 		DataSourceGroupDefine dsG = null;
 		try {
 			dsG = (DataSourceGroupDefine) SerializationUtils.deserialize(content);
-			// TODO dirty solution
-			// 如果仅有一个数据源，将原有数据源组的id赋值给当前活动的数据源
-			if (dsG.listAll().length == 2 ) {
-				Map<String, DataSourceDefine> dsS = dsG.getDataSourceList();
-				Map<String, DataSourceDefine> dsSNew = Maps.newHashMap();
-				for(String key : dsS.keySet()) {
-					if (key == dsG.getId()) {
-						dsSNew.put(key, dsS.get(key));
-					}
-				}
-				dsG.setDataSourceList(dsSNew);
-				fileService.rm(DataSourceUtil.getDsGroupFileName(dsG));
-				// 写入数据源组文件
-				fileService.write(DataSourceUtil.getDsGroupFileName(dsG),
-						SerializationUtils.serialize(dsG));				
-			}
+//			// TODO dirty solution
+//			// 如果仅有一个数据源，将原有数据源组的id赋值给当前活动的数据源
+//			if (dsG.listAll().length == 2 ) {
+//				Map<String, DataSourceDefine> dsS = dsG.getDataSourceList();
+//				Map<String, DataSourceDefine> dsSNew = Maps.newHashMap();
+//				for(String key : dsS.keySet()) {
+//					if (key == dsG.getId()) {
+//						dsSNew.put(key, dsS.get(key));
+//					}
+//				}
+//				dsG.setDataSourceList(dsSNew);
+//				fileService.rm(DataSourceUtil.getDsGroupFileName(dsG));
+//				// 写入数据源组文件
+//				fileService.write(DataSourceUtil.getDsGroupFileName(dsG),
+//						SerializationUtils.serialize(dsG));				
+//			}
 		} catch (ClassCastException e) {
 			dsG = new DataSourceGroupDefine();
 			DataSourceDefine ds = (DataSourceDefine) SerializationUtils.deserialize(content);
