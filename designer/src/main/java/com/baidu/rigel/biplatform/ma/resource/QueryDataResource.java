@@ -638,6 +638,10 @@ public class QueryDataResource extends BaseResource {
     }
     
     private String getParamRealValue(String realValue) {
+    	// modify by yichao.jiang  接收url传递过来的时间参数，并进行转换
+        if (realValue.contains("start") && realValue.contains("end")) {
+            return genNewStartAndEnd(realValue);
+        }
         String[] tmp = realValue.split(",");
         if (tmp.length == 1) {
             if (StringUtils.isEmpty(tmp)) {

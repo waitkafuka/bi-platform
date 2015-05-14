@@ -31,8 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceGroupService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
@@ -91,6 +94,12 @@ public class CubeTableResource extends BaseResource {
      */
     @Resource
     private DataSourceService dsService;
+    
+    /**
+     * dsGService
+     */
+    @Resource
+    private DataSourceGroupService dsGService;
     
     /**
      * nameCheckCacheManager
@@ -173,8 +182,28 @@ public class CubeTableResource extends BaseResource {
         ResponseResult rs = null;
         Map<String, Object> data = Maps.newHashMap();
         if (reportModel != null) {
-            data.put("selected", reportModel.getDsId());
-            rs = ResourceUtils.getCorrectResult("Success", data);
+            try {
+            	DataSourceGroupDefine dsG = dsGService.getDataSourceGroupDefine(reportModel.getDsId()); 
+            	if (dsG == null) {
+                	logger.error("can't get ds group with id " + reportModel.getDsId());
+            		rs = ResourceUtils.getErrorResult("failed", 1);
+            	} else {
+            		DataSourceDefine ds = dsG.getActiveDataSource();
+            		if (ds == null) {
+            			logger.error("can't get report id " + reportModel.getId());
+            			rs = ResourceUtils.getErrorResult("failed", 1);
+            		} else {
+            			// 组的id
+            			data.put("selectedGroupId", reportModel.getDsId());
+            			// 数据源id
+            			data.put("selectedDatasourceId", ds.getId());
+            			rs = ResourceUtils.getCorrectResult("Success", data);            		            			
+            		}
+            	}
+            } catch (DataSourceOperationException e) {
+            	logger.error("can't get ds group with id " + reportModel.getDsId());
+            	rs = ResourceUtils.getErrorResult("failed", 1);
+            }
         } else {
             rs = ResourceUtils.getErrorResult("failed", 1);
         }

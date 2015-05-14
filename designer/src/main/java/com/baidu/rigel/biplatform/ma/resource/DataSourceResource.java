@@ -547,7 +547,7 @@ public class DataSourceResource extends BaseResource {
     			// 检验是否存在使用数据源组中活动数据源的报表
     			DataSourceDefine activeDs = dsG.getActiveDataSource();
     			if (activeDs != null) {
-	                List<String> refReport = reportDesignModelService.lsReportWithDsId(activeDs.getId());
+	                List<String> refReport = reportDesignModelService.lsReportWithDsId(dsG.getId());
 	                if (refReport != null && refReport.size() > 0) {
 	                    rs.setStatus(1);
 	                    rs.setStatusInfo("数据源组[" + dsG.getName() + "]中的活动数据源[" + activeDs.getName() + 
