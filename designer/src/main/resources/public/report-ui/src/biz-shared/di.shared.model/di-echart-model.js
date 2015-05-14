@@ -237,6 +237,9 @@ $namespace('di.shared.model');
                 chartData.series[x].yAxisIndex = item.position;
                 chartData.series[x].data = [];
                 for (var y = 0, yLen = item.data.length; y < yLen; y ++) {
+                    if (item.type === 'pie' && !item.data[y]) {
+                        continue;
+                    }
                     chartData.series[x].data[y] = item.data[y] ? item.data[y] : 0;
                 }
             }
