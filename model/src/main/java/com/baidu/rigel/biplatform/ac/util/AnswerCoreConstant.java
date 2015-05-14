@@ -20,6 +20,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.util.deserialize.CubeDeserialize;
@@ -28,12 +29,14 @@ import com.baidu.rigel.biplatform.ac.util.deserialize.DimensionDeserialize;
 import com.baidu.rigel.biplatform.ac.util.deserialize.LevelDeserialize;
 import com.baidu.rigel.biplatform.ac.util.deserialize.MeasureDeserialize;
 import com.baidu.rigel.biplatform.ac.util.deserialize.MetaConditionDeserialize;
+import com.baidu.rigel.biplatform.ac.util.deserialize.SchemaDeserialize;
 import com.baidu.rigel.biplatform.ac.util.serialize.CubeSerialize;
 import com.baidu.rigel.biplatform.ac.util.serialize.DataSourceInfoSerialize;
 import com.baidu.rigel.biplatform.ac.util.serialize.DimensionSerialize;
 import com.baidu.rigel.biplatform.ac.util.serialize.LevelSerialize;
 import com.baidu.rigel.biplatform.ac.util.serialize.MeasureSerialize;
 import com.baidu.rigel.biplatform.ac.util.serialize.MetaConditionSerialize;
+import com.baidu.rigel.biplatform.ac.util.serialize.SchemaSerialize;
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
@@ -81,9 +84,11 @@ public class AnswerCoreConstant {
         builder.registerTypeAdapter(Dimension.class, new DimensionSerialize());
         builder.registerTypeAdapter(Level.class, new LevelSerialize());
         builder.registerTypeAdapter(Cube.class, new CubeSerialize());
+        builder.registerTypeAdapter(Schema.class, new SchemaSerialize());
         builder.registerTypeAdapter(DataSourceInfo.class, new DataSourceInfoSerialize());
         builder.registerTypeAdapter(Measure.class, new MeasureSerialize());
         builder.registerTypeAdapter(MetaCondition.class, new MetaConditionSerialize());
+        builder.registerTypeAdapter(Schema.class, new SchemaDeserialize());
         GSON = builder.create();
     }
 

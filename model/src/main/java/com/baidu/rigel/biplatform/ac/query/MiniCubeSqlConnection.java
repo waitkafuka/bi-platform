@@ -72,8 +72,9 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
             dataModelJson = dataModelJson.substring(1, dataModelJson.length() - 1);
             DataModel dataModel = JsonUnSeriallizableUtils.dataModelFromJson(dataModelJson);
             StringBuilder sb = new StringBuilder();
-            sb.append("execute query questionModel:").append(questionModel).append(" cost:")
-                    .append(System.currentTimeMillis() - current).append("ms");
+//            sb.append("execute query questionModel:").append(questionModel).append(" cost:")
+            sb.append("execute query questionModel cost:")
+                .append(System.currentTimeMillis() - current).append("ms");
             log.info(sb.toString());
             dataModel.setOthers (responseResult.getStatusInfo ());
             return dataModel;

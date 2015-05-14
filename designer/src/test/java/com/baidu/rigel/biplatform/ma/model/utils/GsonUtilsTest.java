@@ -15,12 +15,14 @@
  */
 package com.baidu.rigel.biplatform.ma.model.utils;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Maps;
+import com.google.gson.reflect.TypeToken;
 
 /**
  *Description:
@@ -73,5 +75,19 @@ public class GsonUtilsTest {
         Map<String, String> data = Maps.newHashMap ();
         data.put ("test", "test");
         Assert.assertEquals ("{\"test\":\"test\"}", GsonUtils.toJson (data));
+    }
+    
+    @Test
+    public void testFromJsonWithTypeWithNullJson () {
+    	Assert.assertNull(GsonUtils.fromJson(null, new TypeToken<String>(){}.getType()));
+    }
+    
+    @Test
+    public void testFromJsonWithType() {
+        Map<String, String> data = Maps.newHashMap ();
+        data.put ("test", "test");
+    	Type type = new TypeToken<Map<String, String>>(){}.getType();
+    	String json = "{\"test\":\"test\"}";
+    	Assert.assertEquals(data, GsonUtils.fromJson(json, type));
     }
 }

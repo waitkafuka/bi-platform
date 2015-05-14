@@ -23,29 +23,35 @@ public class PlaneTable extends BaseTable {
 	private PageInfo pageInfo;
 	
 	/**
-	 * 列上的属性定义
+	 * 平面表列上的属性定义
 	 */
-	private List<ColDefine> colDefs = Lists.newArrayList();
-	
+	private List<PlaneTableColDefine> colDefs = Lists.newArrayList();
+		
 	/**
 	 * 表格列头定义
 	 */
-	private List<List<ColField>> colHeadFields = Lists.newArrayList();
+	private List<List<ColField>> colFields = Lists.newArrayList();
 	
 	/**
-	 * 基于行的数据信息
-	 */
-	private List<List<CellData>> dataSourceRowBased = Lists.newArrayList();
-	
-	/**
-	 * 基于列的数据信息
+	 * 基于列的指标数据信息
 	 */
 	private List<List<CellData>> dataSourceColumnBased = Lists.newArrayList();
-
+	
 	/**
-	 * 
+	 * 基于列的维度数据信息
 	 */
-	private int recordSize;
+	private List<List<String>> dimDataColumnBased = Lists.newArrayList();
+	
+	/**
+	 * 列上的高度
+	 */
+	private int colHeadHeight;
+	
+	/**
+	 * 数据的列数
+	 */
+	private int colSize;
+	
 	/**
 	 * @return the pageInfo
 	 */
@@ -63,45 +69,31 @@ public class PlaneTable extends BaseTable {
 	/**
 	 * @return the colDefs
 	 */
-	public List<ColDefine> getColDefs() {
+	public List<PlaneTableColDefine> getColDefines() {
 		return colDefs;
 	}
 
 	/**
 	 * @param colDefs the colDefs to set
 	 */
-	public void setColDefs(List<ColDefine> colDefs) {
+	public void setColDefines(List<PlaneTableColDefine> colDefs) {
 		this.colDefs = colDefs;
 	}
 
 	/**
-	 * @return the colHeadFields
+	 * @return the colFields
 	 */
-	public List<List<ColField>> getColHeadFields() {
-		return colHeadFields;
+	public List<List<ColField>> getColFields() {
+		return colFields;
 	}
 
 	/**
-	 * @param colHeadFields the colHeadFields to set
+	 * @param colFields the colFields to set
 	 */
-	public void setColHeadFields(List<List<ColField>> colHeadFields) {
-		this.colHeadFields = colHeadFields;
+	public void setColFields(List<List<ColField>> colFields) {
+		this.colFields = colFields;
 	}
-
-	/**
-	 * @return the dataSourceRowBased
-	 */
-	public List<List<CellData>> getDataSourceRowBased() {
-		return dataSourceRowBased;
-	}
-
-	/**
-	 * @param dataSourceRowBased the dataSourceRowBased to set
-	 */
-	public void setDataSourceRowBased(List<List<CellData>> dataSourceRowBased) {
-		this.dataSourceRowBased = dataSourceRowBased;
-	}
-
+	
 	/**
 	 * @return the dataSourceColumnBased
 	 */
@@ -114,5 +106,55 @@ public class PlaneTable extends BaseTable {
 	 */
 	public void setDataSourceColumnBased(List<List<CellData>> dataSourceColumnBased) {
 		this.dataSourceColumnBased = dataSourceColumnBased;
-	}	
+	}
+
+	/**
+	 * @return the colHeadHight
+	 */
+	public int getColHeadHeight() {
+		return colHeadHeight;
+	}
+
+	/**
+	 * @param colHeadHight the colHeadHight to set
+	 */
+	public void setColHeadHight(int colHeadHeight) {
+		this.colHeadHeight = colHeadHeight;
+	}
+
+	/**
+	 * @param colHeadHeight the colHeadHeight to set
+	 */
+	public void setColHeadHeight(int colHeadHeight) {
+		this.colHeadHeight = colHeadHeight;
+	}
+	
+	/**
+	 * @return the dimDataColumnBased
+	 */
+	public List<List<String>> getDimDataColumnBased() {
+		return dimDataColumnBased;
+	}
+
+	/**
+	 * @param dimDataColumnBased the dimDataColumnBased to set
+	 */
+	public void setDimDataColumnBased(List<List<String>> dimDataColumnBased) {
+		this.dimDataColumnBased = dimDataColumnBased;
+	}
+	
+	/**
+	 * @return the colSize
+	 */
+	public int getColSize() {
+		return colSize;
+	}
+
+	/**
+	 * @param colSize the colSize to set
+	 */
+	public void setColSize(int colSize) {
+		this.colSize = colSize;
+	}
+		
 }

@@ -3,7 +3,6 @@ package com.baidu.rigel.biplatform.ma.ds.service.impl;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
@@ -29,11 +28,10 @@ public class DataSourceConnectionServiceFactoryTest {
     	
     	Assert.assertNotNull(DataSourceConnectionServiceFactory.
     			getDataSourceConnectionServiceInstance(ds.getDataSourceType()));
-    	
     	try {
-    		ds.setDataSourceType(DataSourceType.CSV);
+    		ds.setDataSourceType(DataSourceType.COL_DATABASE);
     		DataSourceConnectionServiceFactory.getDataSourceConnectionServiceInstance(ds.getDataSourceType());
-    	} catch (DataSourceOperationException e) {
+    	} catch(Exception e) {
     		Assert.assertNotNull(e);
     	}
 	}

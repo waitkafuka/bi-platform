@@ -30,12 +30,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
-import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
-import com.baidu.rigel.biplatform.ac.util.ResponseResult;
 
 /**
  * 

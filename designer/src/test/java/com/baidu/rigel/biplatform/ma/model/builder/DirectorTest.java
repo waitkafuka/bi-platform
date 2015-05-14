@@ -431,6 +431,7 @@ public class DirectorTest {
     }
     
     /**
+     * 构建星型模型
      * @return
      */
     private StarModel genStarModel() {
@@ -477,6 +478,7 @@ public class DirectorTest {
     }
     
     /**
+     * 构建时间维度表
      * @return
      */
     private List<DimTableMetaDefine> buildDimTablesWithTimeDim() {
@@ -498,6 +500,7 @@ public class DirectorTest {
     }
     
     /**
+     * 构建基本维度表
      * @return
      */
     private List<DimTableMetaDefine> buildBaseDimTables() {
@@ -522,7 +525,7 @@ public class DirectorTest {
     }
     
     /**
-     * 
+     * 使用新的新型模型更新schema
      */
     @Test
     public void testModifyWithNewModel() {
