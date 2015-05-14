@@ -18,28 +18,28 @@ import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 /**
  * 
  * @author jiangyichao
- * DataSourceServiceImpl测试
+ * DataSourceGroupServiceImpl测试
  */
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest(DataSourceServiceImpl.class)
-public class DataSourceServiceImplTest {
+public class DataSourceGroupServiceImplTest {
 	
 	/**
 	 * 日志对象
 	 */
-	private static final Logger LOG = LoggerFactory.getLogger(DataSourceServiceImplTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DataSourceGroupServiceImplTest.class);
 	   /**
-     * dataSourceService
+     * dataSourceGroupService
      */
 	@InjectMocks
-    private DataSourceServiceImpl dataSourceService = new DataSourceServiceImpl();
+    private DataSourceGroupServiceImpl dsGService = new DataSourceGroupServiceImpl();
     
     /**
      * FileService
@@ -47,14 +47,14 @@ public class DataSourceServiceImplTest {
     @Mock
     private FileService fileService;
     
+    @Mock
+	private DataSourceService dsService;
     /**
      * 
      */
     @Before
     public void before() {
     	MockitoAnnotations.initMocks(this);
-       // fileService = Mockito.mock(FileService.class);
-       // dataSourceService.setFileService(fileService);
     }
     
     /**
@@ -64,7 +64,7 @@ public class DataSourceServiceImplTest {
     public void testIsNameExistWithEmptyDir() throws Exception {
         Mockito.doReturn(new String[] {}).when(fileService).ls(Mockito.anyString());
         try {
-            Assert.assertFalse(dataSourceService.isNameExist("test"));
+            Assert.assertFalse(dsGService.isNameExist("test"));
         } catch (Exception e) {
             Assert.assertNotNull(e);
             Assert.fail();
@@ -79,7 +79,7 @@ public class DataSourceServiceImplTest {
 		Mockito.when(fileService.ls(Mockito.anyString())).thenThrow(
 				new FileServiceException(""));
 		try {
-			dataSourceService.isNameExist("test");
+			dsGService.isNameExist("test");
 		} catch (DataSourceOperationException e) {
 			Assert.assertNotNull(e);
 		} catch (Exception e) {
@@ -93,7 +93,7 @@ public class DataSourceServiceImplTest {
     public void testIsNameExistWithNullDir() throws Exception {
         Mockito.doReturn(null).when(fileService).ls(Mockito.anyString());
         try {
-            Assert.assertFalse(dataSourceService.isNameExist("test"));
+            Assert.assertFalse(dsGService.isNameExist("test"));
         } catch (Exception e) {
             Assert.assertNotNull(e);
             Assert.fail();
@@ -107,7 +107,7 @@ public class DataSourceServiceImplTest {
     public void testIsNameExistWithDir() throws Exception {
         Mockito.doReturn(new String[] { "a", "b" }).when(fileService).ls(Mockito.anyString());
         try {
-            Assert.assertFalse(dataSourceService.isNameExist("test"));
+            Assert.assertFalse(dsGService.isNameExist("test"));
         } catch (Exception e) {
             Assert.assertNotNull(e);
             Assert.fail();
@@ -115,13 +115,13 @@ public class DataSourceServiceImplTest {
     }
     
     /**
-     * 
+     * 测试 名称存在
      */
     @Test
     public void testIsNameExist() throws Exception {
         Mockito.doReturn(new String[] { "test", "abcdefg" }).when(fileService).ls(Mockito.anyString());
         try {
-            Assert.assertTrue(dataSourceService.isNameExist("test"));
+            Assert.assertTrue(dsGService.isNameExist("test"));
         } catch (Exception e) {
             Assert.assertNotNull(e);
             Assert.fail();
@@ -129,82 +129,87 @@ public class DataSourceServiceImplTest {
     }
     
     /**
-     * 
+     * 获取数据源组定义，目录为空
      */
     @Test
-    public void testGetDefineWithEmptyDir() throws Exception {
+    public void testGetDsGDefineWithEmptyDir() throws Exception {
 		Mockito.doReturn(new String[] {}).when(fileService).ls(Mockito.anyString());		
-		Assert.assertNull(dataSourceService.getDsDefine("test"));
+		Assert.assertNull(dsGService.getDataSourceGroupDefine("test"));
 	}
     
     /**
-     * 
+     * 获取数据源组定义，目录为null
      */
     @Test
-    public void testGetDefineWithNullDir() throws Exception {
+    public void testGetDsGDefineWithNullDir() throws Exception {
         Mockito.doReturn(null).when(fileService).ls(Mockito.anyString());
-        Assert.assertNull(dataSourceService.getDsDefine("test"));
+        Assert.assertNull(dsGService.getDataSourceGroupDefine("test"));
     }
     
     /**
-     * 
+     * 获取数据源组定义，抛出异常
      */
     @Test
-    public void testGetDefineThrowException() throws Exception {
+    public void testGetDsGDefineThrowException() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenThrow(
     			new FileServiceException("FileServiceException"));
-    	dataSourceService.getDsDefine("test");
+    	dsGService.getDataSourceGroupDefine("test");
     }
     
     /**
-     * 
+     * 文件不存在
      */
     @Test
-    public void testGetDefineFileNotExist() throws Exception {
+    public void testGetDsGDefineFileNotExist() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
-    	Assert.assertNull(dataSourceService.getDsDefine("test_test"));
+    	Assert.assertNull(dsGService.getDataSourceGroupDefine("cde"));
     }
     
     /**
-     * 
+     * 文件存在
      */
     @Test
-    public void testGetDefineWithNameExist() throws Exception {
+    public void testGetDGDefineWithNameExist() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
     			SerializationUtils.serialize(new DataSourceDefine()));
-    	Assert.assertNotNull(dataSourceService.getDsDefine("test"));
+    	Assert.assertNotNull(dsGService.getDataSourceGroupDefine("test"));
     }
     
     
     /**
-     * 
+     * 增加产品线参数后的调用
      */
     @Test
-    public void testGetDefineWithEmptyDirUnderProductLine() throws Exception {
+    public void testGetDsGDefineWithEmptyDirUnderProductLine() throws Exception {
 		Mockito.doReturn(new String[] {}).when(fileService).ls(Mockito.anyString());		
-		Assert.assertNull(dataSourceService.getDsDefine("productLine", "test"));
+		Assert.assertNull(dsGService.getDataSourceGroupDefine("productLine", "test"));
 	}
     
     /**
      * 
      */
     @Test
-    public void testGetDefineWithNullDirUnderProductLine() throws Exception {
+    public void testGetDsGDefineWithNullDirUnderProductLine() throws Exception {
         Mockito.doReturn(null).when(fileService).ls(Mockito.anyString());
-        Assert.assertNull(dataSourceService.getDsDefine("productLine", "test"));
+        Assert.assertNull(dsGService.getDataSourceGroupDefine("productLine", "test"));
     }
     
     /**
      * 
      */
     @Test
-    public void testGetDefineThrowExceptionUnderProductLine() throws Exception {
-    	Mockito.when(fileService.ls(Mockito.anyString())).thenThrow(
+    public void testGetDsGDefineThrowExceptionUnderProductLine() throws Exception {
+    	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(new String[] {"test_test"});
+    	Mockito.when(fileService.read(Mockito.anyString())).thenThrow(
     			new FileServiceException("FileServiceException"));
-    	dataSourceService.getDsDefine("productLine", "test");
+    	try {
+    		dsGService.getDataSourceGroupDefine("productLine", "test");    		
+    	} catch (Exception e) {
+    		Assert.assertNotNull(e);
+    	}
     }
     
     /**
@@ -214,19 +219,19 @@ public class DataSourceServiceImplTest {
     public void testGetDefineFileNotExistUnderProductLine() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
-    	Assert.assertNull(dataSourceService.getDsDefine("productLine", "test_test"));
+    	Assert.assertNull(dsGService.getDataSourceGroupDefine("productLine", "cde_cde"));
     }
     
     /**
      * 
      */
     @Test
-    public void testGetDefineWithNameExistUnderProductLine() throws Exception {
+    public void testGetDsGDefineWithNameExistUnderProductLine() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
     			SerializationUtils.serialize(new DataSourceDefine()));
-    	Assert.assertNotNull(dataSourceService.getDsDefine("productLine", "test"));
+    	Assert.assertNotNull(dsGService.getDataSourceGroupDefine("productLine", "test"));
     }
     
     /**
@@ -235,7 +240,7 @@ public class DataSourceServiceImplTest {
     @Test
     public void testListAllWithNullDir() throws Exception {
         Mockito.doReturn(null).when(fileService).ls("null/null");
-        Assert.assertEquals(0, dataSourceService.listAll().length);
+        Assert.assertEquals(0, dsGService.listAll().length);
     }
     
     /**
@@ -244,28 +249,26 @@ public class DataSourceServiceImplTest {
     @Test
     public void testListAllWithEmptyDir() throws Exception {
         Mockito.doReturn(new String[] {}).when(fileService).ls("null/null");
-        Assert.assertEquals(0, dataSourceService.listAll().length);
+        Assert.assertEquals(0, dsGService.listAll().length);
     }
     
     /**
      * listAll()，获取所有数据源定义
      */
-    @SuppressWarnings("deprecation")
 	@Test
     public void testListAllWithNullDataSourceDefine() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(null);
-    	Assert.assertEquals(new DataSourceDefine[0], dataSourceService.listAll());
+    	Assert.assertArrayEquals(new DataSourceGroupDefine[0], dsGService.listAll());
     }
     
     /**
      * 测试listAll
      */
-    @SuppressWarnings("deprecation")
 	@Test
     public void testListAllWithFileReadException() throws Exception {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(new String[] {"testListAll"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenThrow(new FileServiceException(""));
-    	Assert.assertEquals(new DataSourceDefine[0], dataSourceService.listAll());
+    	Assert.assertArrayEquals(new DataSourceGroupDefine[0], dsGService.listAll());
     }
     
     /**
@@ -276,7 +279,7 @@ public class DataSourceServiceImplTest {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenThrow(
     			new FileServiceException(""));
     	try {
-    		dataSourceService.listAll();
+    		dsGService.listAll();
     	} catch(DataSourceOperationException e) {
     		Assert.assertNotNull(e);
     	} catch(Exception e) {
@@ -291,16 +294,16 @@ public class DataSourceServiceImplTest {
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"testList1", "testList2"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
-    			SerializationUtils.serialize(new DataSourceDefine()));
-    	Assert.assertNotNull(dataSourceService.listAll());
+    			SerializationUtils.serialize(new DataSourceGroupDefine()));
+    	Assert.assertNotNull(dsGService.listAll());
     	
     }
     /**
      * 
      */
     @Test
-    public void testIsValidateConnWithNull() {
-//        Assert.assertFalse(dataSourceService.isValidateConn(null, null));
+    public void testIsValidateConnWithNull() throws Exception {
+        Assert.assertFalse(dsGService.isValidate(null, null));
     }
     
     /**
@@ -308,108 +311,82 @@ public class DataSourceServiceImplTest {
      */
     @Test
     public void testIsValidateConn() throws Exception {
-    	// 数据库连接基本信息，并构建内存数据库H2
-    	String username = "test";
-    	String password = "test";
-    	String dbInstance = "testDB";
-    	String name = "testDB";
     	String securityKey = "0000000000000000";
-    	String passwordEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(password, securityKey);
-    	String url = "jdbc:h2:mem:" + dbInstance + ";";
-    	try {
-    		Class.forName("org.h2.Driver");
-    		Connection conn = DriverManager.getConnection(url,username,password); 
-    		if (conn != null) {
-    			LOG.info("get H2 datasource by username:" + username);    			
-    		}
-    	} catch (Exception e) {
-    		LOG.error(e.getMessage(), e);
-    	}
-    	
+    	Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(false);
     	// 测试空数据源定义对象
     	try {
-    		dataSourceService.isValidateConn(null, securityKey);    		
+    		dsGService.isValidate(null, securityKey);    		
     	} catch(Exception e) {
     		Assert.assertNotNull(e);
     	}
-    	// 创建数据源定义对象
-    	DataSourceDefine dataSourceDefine = new DataSourceDefine();
-    	DataSourceType.H2.setPrefix("jdbc:h2:mem://");
-    	dataSourceDefine.setDataSourceType(DataSourceType.H2);
-    	dataSourceDefine.setDbUser(username);
-    	dataSourceDefine.setDbPwd(passwordEncrypt);
-    	dataSourceDefine.setDbInstance(dbInstance);
-    	dataSourceDefine.setName(name);
-    	dataSourceDefine.setHostAndPort("127.0.0.1:3306");
-    	// dataSourceDefine.setEncoding("utf8");
-    	// 测试合法数据定义
-    	Assert.assertTrue(dataSourceService.isValidateConn(dataSourceDefine, securityKey));
-    	
-    	// 以未加密密码访问
-    	dataSourceDefine.setDbPwd(password);
-    	try {
-    		dataSourceService.isValidateConn(dataSourceDefine, securityKey);    		
-    	} catch (Exception e) {
-    		Assert.assertNotNull(e);
-    	}
-    	// 设置正确的数据库前缀
-    	DataSourceType.H2.setPrefix("jdbc:h2:tcp://");    	
+
+    	DataSourceGroupDefine dsG = new DataSourceGroupDefine();
+    	dsG.setId("id");
+    	dsG.setName("name");
+    	dsG.setProductLine("productLine");
+    	DataSourceDefine ds = new DataSourceDefine();
+    	dsG.addDataSourceDefine(ds);
+    	dsG.setActiveDataSource(ds);
+    	Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(true);
+    	Assert.assertTrue(dsGService.isValidate(dsG, securityKey));
+    	Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(false);
+    	dsGService.isValidate(dsG, securityKey);    		   	
     }
     
     /**
      * 
      */
     @Test
-    public void testRemoveDsWithEmptyDir() throws Exception {
+    public void testRemoveDsGWithEmptyDir() throws Exception {
     	// 空数据源定义
-    	Mockito.when(dataSourceService.getDsDefine(Mockito.anyString())).thenReturn(
+    	Mockito.when(dsGService.getDataSourceGroupDefine(Mockito.anyString())).thenReturn(
     			null);
     	try {
-    		dataSourceService.removeDataSource("test");
+    		dsGService.removeDataSourceGroup("test");
     	} catch (Exception e) {
     		Assert.assertNotNull(e);
     	}
-    	// 数据源删除成功
-    	DataSourceDefine ds = new DataSourceDefine();
-    	ds.setId("test");
+    	// 数据源组删除成功
+    	DataSourceGroupDefine dsG = new DataSourceGroupDefine();
+    	dsG.setId("test");
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
-    			SerializationUtils.serialize(ds));
+    			SerializationUtils.serialize(dsG));
     	Mockito.when(fileService.rm(Mockito.anyString())).thenReturn(true);
-    	Assert.assertTrue(dataSourceService.removeDataSource("test"));
+    	Assert.assertTrue(dsGService.removeDataSourceGroup("test"));
     	
-    	// 数据源删除失败
-    	ds.setId("test");
+    	// 数据源组删除失败
+    	dsG.setId("test");
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
-    			SerializationUtils.serialize(ds));
+    			SerializationUtils.serialize(dsG));
     	Mockito.when(fileService.rm(Mockito.anyString())).thenReturn(false);
-    	Assert.assertFalse(dataSourceService.removeDataSource("test"));
+    	Assert.assertFalse(dsGService.removeDataSourceGroup("test"));
     	
     	// 删除数据源抛出异常
-    	ds.setId("test");
+    	dsG.setId("test");
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
-    			SerializationUtils.serialize(ds));
+    			SerializationUtils.serialize(dsG));
     	Mockito.when(fileService.rm(Mockito.anyString())).thenThrow(
     			new FileServiceException(""));
     	try {
-    		Assert.assertTrue(dataSourceService.removeDataSource("test"));    		
+    		Assert.assertTrue(dsGService.removeDataSourceGroup("test"));    		
     	} catch (Exception e) {
     		Assert.assertNotNull(e);
     	}
     	
     	// 测试read抛出异常
-    	ds.setId("test");
+    	dsG.setId("test");
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_test", "abc_abc"});
     	Mockito.when(fileService.read(Mockito.anyString())).thenThrow(
     			new FileServiceException(""));
     	try {
-    		Assert.assertTrue(dataSourceService.removeDataSource("test"));    		
+    		Assert.assertTrue(dsGService.removeDataSourceGroup("test"));    		
     	} catch (Exception e) {
     		Assert.assertNotNull(e);
     	}
@@ -422,13 +399,13 @@ public class DataSourceServiceImplTest {
     public void testSaveOrUpdateDs() throws Exception {   	
     	// 测试空数据源对象
     	try {
-    		dataSourceService.saveOrUpdateDataSource(null, null);
+    		dsGService.saveOrUpdateDataSourceGroup(null, null);
     	} catch (DataSourceOperationException e) {
     		Assert.assertNotNull(e);
     	}
     	// 测试数据源对象不含有产品线
     	try {
-    		dataSourceService.saveOrUpdateDataSource(new DataSourceDefine(), null);
+    		dsGService.saveOrUpdateDataSourceGroup(new DataSourceGroupDefine(), null);
     	} catch (DataSourceOperationException e) {
     		Assert.assertNotNull(e);
     	}
@@ -462,51 +439,115 @@ public class DataSourceServiceImplTest {
     	dataSourceDefine.setName(name);
     	dataSourceDefine.setHostAndPort("127.0.0.1:3306");
     	dataSourceDefine.setProductLine("productLine");
-    	// 测试数据源名称已经存在
+    	
+    	DataSourceGroupDefine dsG = new DataSourceGroupDefine();
+    	dsG.addDataSourceDefine(dataSourceDefine);
+    	dsG.setActiveDataSource(dataSourceDefine);
+    	dsG.setId(dbID);
+    	dsG.setProductLine("productLine");
+    	dsG.setName(username);
+    	// 测试数据源组名称已经存在
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test", "abc"});
     	try {
-    		dataSourceService.saveOrUpdateDataSource(dataSourceDefine, securityKey);    		
-    	} catch (DataSourceOperationException e) {
-    		Assert.assertNotNull(e);
-    	}
-    	//修改数据库地址，导致连接抛出异常，数据源无法连接
-    	dataSourceDefine.setHostAndPort("127.0.0.10:3306");
-    	try {
-    		dataSourceService.saveOrUpdateDataSource(dataSourceDefine, securityKey);    		
+    		dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey);    		
     	} catch (DataSourceOperationException e) {
     		Assert.assertNotNull(e);
     	}
     	
-    	// 测试数据源有效，并执行保存操作
+    	// 测试数据源组无效，抛出异常
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"abc_abc"});
-    	dataSourceDefine.setHostAndPort("127.0.0.1:3306");
-    	Assert.assertEquals(dataSourceDefine, dataSourceService.saveOrUpdateDataSource(dataSourceDefine, securityKey)); 
+    	Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(false);   	
+    	try {
+    		Assert.assertEquals(dsG, dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey));     		
+    	} catch (Exception e) {
+    		Assert.assertNotNull(e);
+    	}
+    	
+    	
+    	// 测试数据源组有效，并执行保存操作
+    	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
+    			new String[] {"abc_abc"});
+    	Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(true);
+    	
+    	Assert.assertEquals(dsG, dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey)); 
     	
     	// 测试数据源有效，并执行更新操作
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_abc"});
-    	dataSourceDefine.setId("test");
-    	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
-    			SerializationUtils.serialize(dataSourceDefine));
-    	dataSourceDefine.setName("newName");
-    	Assert.assertEquals(dataSourceDefine, dataSourceService.saveOrUpdateDataSource(dataSourceDefine, securityKey)); 
+    	dsG.setId("test");
+    	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(SerializationUtils.serialize(dsG));
     	
-    	// 修改数据源，新名称存在
+    	dsG.setName("newName");
+    	Assert.assertEquals(dsG, dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey)); 
+    	
+    	// 测试数据源有效，并执行更新操作
     	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
     			new String[] {"test_abc", "newName_newName"});
-    	dataSourceDefine.setId("test");
-    	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
-    			SerializationUtils.serialize(dataSourceDefine));
-    	dataSourceDefine.setName("abc");
+    	dsG.setId("test");
+    	dsG.setName(username);
+    	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(SerializationUtils.serialize(dsG));
+    	
+    	dsG.setName("newName");
     	try {
-    		dataSourceService.saveOrUpdateDataSource(dataSourceDefine, securityKey);     		
+    		dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey);    		
     	} catch(Exception e) {
     		Assert.assertNotNull(e);
     	}
     	
-    	// 设置正确的数据库前缀
-    	DataSourceType.H2.setPrefix("jdbc:h2:tcp://"); 
+    	// 修改数据源，抛出异常
+    	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
+    			new String[] {"test_abc", "newName_newName"});
+    	Mockito.when(fileService.write(Mockito.anyString(), 
+    			Mockito.anyObject())).thenThrow(new FileServiceException(""));
+    	dsG.setId("test");
+    	dsG.setName("abc");
+    	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
+    			SerializationUtils.serialize(dsG));
+    	Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(true);
+    	try {
+    		dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey);     		
+    	} catch(Exception e) {
+    		Assert.assertNotNull(e);
+    	}
+    }
+    
+    
+    
+    @Test
+    public void testGetDsDefine() throws Exception {
+    	// 数据库连接基本信息，并构建内存数据库H2
+    	String dbID = "test";
+    	String username = "test";
+    	
+    	// 创建数据源定义对象
+    	DataSourceDefine dataSourceDefine = new DataSourceDefine();
+    	dataSourceDefine.setId(dbID);
+    	dataSourceDefine.setName(username);
+    	dataSourceDefine.setProductLine("productLine");
+    	// 定义数据源组
+    	DataSourceGroupDefine dsG = new DataSourceGroupDefine();
+    	dsG.addDataSourceDefine(dataSourceDefine);
+    	dsG.setActiveDataSource(dataSourceDefine);
+    	dsG.setId(dbID);
+    	dsG.setProductLine("productLine");
+    	dsG.setName(username);
+    	
+    	// 
+    	Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(new String[]{"test_test"});
+    	// 无法获取数据源组对象
+    	Assert.assertNull(dsGService.getDataSourceDefine(dbID, dbID));
+    	// 假定可以读取数据源组对象
+    	Mockito.when(fileService.read(Mockito.anyString())).thenReturn(SerializationUtils.serialize(dsG));
+    	// 获取数据源组的返回结果
+    	DataSourceDefine actual = dsGService.getDataSourceDefine(dbID, dbID);
+    	// 因为DataSourceDefine未覆盖equals方法，故使用此方法验证返回结果
+    	Assert.assertEquals(dataSourceDefine.getId(), actual.getId());
+    	Assert.assertEquals(dataSourceDefine.getName(), actual.getName());
+    	Assert.assertEquals(dataSourceDefine.getProductLine(), actual.getProductLine());
+    	// 验证不存在的子id
+    	Assert.assertNull(dsGService.getDataSourceDefine(dbID, "notexists"));
+    	
     }
 }

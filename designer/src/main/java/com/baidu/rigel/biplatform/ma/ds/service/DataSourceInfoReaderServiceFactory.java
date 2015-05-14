@@ -20,7 +20,6 @@ public class DataSourceInfoReaderServiceFactory {
 				return new RelationDBInfoReaderServiceImpl();
 			// 列式数据库
 			case COL_DATABASE:
-				break;
 			// EXCEL文件
 			case EXCEL:
 			// CSV文件
@@ -34,6 +33,5 @@ public class DataSourceInfoReaderServiceFactory {
 				throw new DataSourceOperationException("unknow datasource type:"
 	                    + dataDourceType);
 		}
-		return null;
 	}
 }
