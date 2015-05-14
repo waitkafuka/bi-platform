@@ -72,7 +72,7 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
         try {
             ds = dsService.getDsDefine(dsId);
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                    getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             List<TableInfo> tables = dsInfoReaderService.getAllTableInfos(ds, securityKey);
             return tables;
         } catch (Exception e) {
@@ -106,7 +106,7 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             for (String key : tableMap.keySet()) {
                 String[] tables = tableMap.get(key);
                 FactTableMetaDefine tableMeta = null;
