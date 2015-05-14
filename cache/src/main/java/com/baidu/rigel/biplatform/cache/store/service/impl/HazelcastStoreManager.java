@@ -124,7 +124,6 @@ public class HazelcastStoreManager implements StoreManager,InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         
-        
         this.hazelcast.getTopic(TOPICS).addMessageListener(hazelcastNoticePort);
         IQueue<EventObject> queue = this.hazelcast.getQueue(EVENT_QUEUE);
         queue.addItemListener(hazelcastQueueItemListener,true);

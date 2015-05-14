@@ -60,7 +60,7 @@ import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
@@ -127,10 +127,10 @@ public class QueryDataResource extends BaseResource {
     private ReportModelCacheManager reportModelCacheManager;
     
     /**
-     * cubeBuildService
+     * cubeMetaBuildService
      */
     @Resource
-    private CubeBuildService cubeBuildService;
+    private CubeMetaBuildService cubeBuildService;
     
     /**
      * starModelBuildService
@@ -591,6 +591,10 @@ public class QueryDataResource extends BaseResource {
                 			String tmpStr = String.valueOf(tmpEntry.getValue());
                 			if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
                 				runTimeModel.getContext().removeParam(tmpEntry.getKey());
+                				Map<String, QueryContext> localContext = runTimeModel.getLocalContext ();
+                				localContext.forEach ((k, v) -> {
+                				    v.reset ();
+                				}); 
                 				break;
                 			}
                 		}
@@ -817,21 +821,14 @@ public class QueryDataResource extends BaseResource {
 
     private Map<String, Object> updateLocalContextAndReturn(ReportRuntimeModel runTimeModel,
             String areaId, Map<String, String[]> contextParams) {
+        
         /**
          * 查询区域的时候，会按照当前的参数更新区域上下文
          */
         QueryContext localContext = runTimeModel.getLocalContextByAreaId(areaId);
 //        localContext.reset ();
         
-        for (String key : contextParams.keySet()) {
-            /**
-             * 更新runtimeModel的区域上下文参数
-             */
-            String[] value = contextParams.get(key);
-            if (value != null && value.length > 0) {
-                localContext.put(key, value[0]);
-            }
-        }
+        
         /**
          * 查询参数，首先载入全局上下文，再覆盖局部上下文
          */
@@ -849,6 +846,7 @@ public class QueryDataResource extends BaseResource {
                     queryParams.put(key, value);
                 }
             });
+            
             return queryParams;
         }
         /**
@@ -880,6 +878,16 @@ public class QueryDataResource extends BaseResource {
               tmp.put(k, v);
           }
         }); 
+     // 用当前查询参数，覆盖旧参数
+        for (String key : contextParams.keySet()) {
+            /**
+             * 更新runtimeModel的区域上下文参数
+             */
+            String[] value = contextParams.get(key);
+            if (value != null && value.length > 0) {
+                tmp.put(key, value[0]);
+            }
+        }
         return tmp;
     }
     
@@ -1034,7 +1042,7 @@ public class QueryDataResource extends BaseResource {
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                     if (!root.get("uniqName").toLowerCase().contains("all")) {
-                        root.put("uniqName", root.get("uniqName"));
+                        root.put("uniqName", this.genRootUniqueName (root.get("uniqName")));
                         root.put("showName", "全部");
     //                        runTimeModel.getContext().put(vertualDimKey, action);
                     }
@@ -1197,16 +1205,25 @@ public class QueryDataResource extends BaseResource {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
-            root.put("uniqName", "@" + params.get (item.getOlapElementId ()).toString () + "@");
+            final String uniqueName = params.get (item.getOlapElementId ()).toString ();
+            
+            root.put("uniqName", genRootUniqueName (uniqueName));
         } else {
             String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
-            root.put ("uniqName", "@" + uniqueName  + "@");
+            root.put ("uniqName", genRootUniqueName (uniqueName));
         }
         RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
 //        String uniqueName = rowHeadField.getUniqueName();
 //        String realUniqueName = uniqueName.replace("}", "").replace("{", "");
         root.put("showName", rowHeadField.getV());
         return root;
+    }
+
+    private String genRootUniqueName(final String uniqueName) {
+        if (uniqueName.endsWith ("@") && uniqueName.startsWith ("@")) {
+            return uniqueName;
+        }
+        return "@" + uniqueName + "@";
     }
     
     /**
@@ -1438,10 +1455,10 @@ public class QueryDataResource extends BaseResource {
                 mainDims.add(dims3);
                 drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
-//            if (!isRoot) {
+            if (!isRoot) {
                 Map<String, String> root = areaContext.getCurBreadCrumPath();
                 mainDims.add(root);
-//            }
+            }
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);

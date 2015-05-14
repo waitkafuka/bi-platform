@@ -33,7 +33,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.ColumnInfo;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.utils.RegExUtils;
 import com.google.common.collect.Lists;
 
@@ -44,8 +44,8 @@ import com.google.common.collect.Lists;
  *
  *         2014-8-1
  */
-@Service("cubeBuildService")
-public class CubeBuildServiceImpl implements CubeBuildService {
+@Service("cubeMetaBuildService")
+public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
     
     /**
      * dsService
@@ -56,7 +56,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
     /**
      * logger
      */
-    private Logger logger = LoggerFactory.getLogger(CubeBuildServiceImpl.class);
+    private Logger logger = LoggerFactory.getLogger(CubeMetaBuildServiceImpl.class);
     
     /*
      * (non-Javadoc)
@@ -72,7 +72,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
         try {
             ds = dsService.getDsDefine(dsId);
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                    getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             List<TableInfo> tables = dsInfoReaderService.getAllTableInfos(ds, securityKey);
             return tables;
         } catch (Exception e) {
@@ -106,7 +106,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             for (String key : tableMap.keySet()) {
                 String[] tables = tableMap.get(key);
                 FactTableMetaDefine tableMeta = null;
@@ -116,7 +116,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                         tableMeta.setCubeId(table);
                         tableMeta.setName(table);
                         tableMeta.setMutilple(false);
-                        List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, table);
+                        List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, table);
                         addColumnToTableMeta(tableMeta, cols);
                         tableMetas.add(tableMeta);
                     }
@@ -128,7 +128,7 @@ public class CubeBuildServiceImpl implements CubeBuildService {
                     tableMeta.setRegExp(key);
                     if (tables != null && tables.length > 0) {
                         String tableExample = tables[0];
-                        List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, tableExample);
+                        List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, tableExample);
                         addColumnToTableMeta(tableMeta, cols);
                     }
                     tableMetas.add(tableMeta);

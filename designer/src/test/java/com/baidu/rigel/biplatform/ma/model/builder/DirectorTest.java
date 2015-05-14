@@ -23,6 +23,7 @@ import org.junit.Test;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ma.model.builder.impl.DirectorImpl;
 import com.baidu.rigel.biplatform.ma.model.meta.CallbackDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
@@ -342,7 +343,7 @@ public class DirectorTest {
     /**
      * 
      */
-//    @Test
+    @Test
     public void testGetSchemaWithTimeDimension() {
         StarModel starModel = new StarModel();
         starModel.setDsId("fact");
@@ -372,13 +373,13 @@ public class DirectorTest {
         Cube cube = schema.getCubes()
                 .values().toArray(new Cube[0])[0];
         Assert.assertEquals(1, cube.getMeasures().size());
-        Assert.assertEquals(2, cube.getDimensions().size());
+        Assert.assertEquals(1, cube.getDimensions().size());
     }
 
     /**
      * 
      */
-//    @Test
+    @Test
     public void testGetSchemaWithCallbackDim() {
         Schema schema = genSchema();
         Assert.assertNotNull(schema);
@@ -386,27 +387,27 @@ public class DirectorTest {
         Cube cube = schema.getCubes()
                 .values().toArray(new Cube[0])[0];
         Assert.assertEquals(1, cube.getMeasures().size());
-        Assert.assertEquals(3, cube.getDimensions().size());
+        Assert.assertEquals(2, cube.getDimensions().size());
     }
 
     /**
      * 
      */
-//    @Test
-//    public void testGetStarModel() {
-//        Schema schema = this.genSchema();
-//        StarModel[] starModels = this.director.getStarModel(schema);
-//        Assert.assertNotNull(starModels);
-//        Assert.assertEquals(1, starModels.length);
-//        StarModel starModel = starModels[0];
-//        Assert.assertEquals(3, starModel.getDimTables().size());
-//        Assert.assertEquals("fact", starModel.getFactTable().getName());
-//    }
+    @Test
+    public void testGetStarModel() {
+        Schema schema = this.genSchema();
+        StarModel[] starModels = this.director.getStarModel(schema);
+        Assert.assertNotNull(starModels);
+        Assert.assertEquals(1, starModels.length);
+        StarModel starModel = starModels[0];
+        Assert.assertEquals(2, starModel.getDimTables().size());
+        Assert.assertEquals("fact", starModel.getFactTable().getName());
+    }
     
     /**
      * 
      */
-//    @Test
+    @Test
     public void testModifySchemaWithNewModel() {
         Schema schema = this.genSchema(); 
         StarModel starModel = genStarModel();
@@ -484,13 +485,9 @@ public class DirectorTest {
         TimeDimTableMetaDefine timeDimTable = 
                 new TimeDimTableMetaDefine(TimeDimType.STANDARD_TIME);
         ColumnMetaDefine timeId = new ColumnMetaDefine();
-        timeId.setName("time_id");
-        timeId.setCaption("time_id");
+        timeId.setName(TimeType.TimeYear.toString());
+        timeId.setCaption(TimeType.TimeYear.toString());
         timeDimTable.addColumn(timeId);
-        ColumnMetaDefine timeYear = new ColumnMetaDefine();
-        timeYear.setName("time_year");
-        timeYear.setCaption("time_year");
-        timeDimTable.addColumn(timeYear);
         ReferenceDefine timeReference = new ReferenceDefine();
         timeReference.setMajorColumn("fact_time_id");
         timeReference.setMajorTable("fact");
@@ -524,4 +521,10 @@ public class DirectorTest {
         return dimTables;
     }
     
+    /**
+     * 
+     */
+    @Test
+    public void testModifyWithNewModel() {
+    }
 }

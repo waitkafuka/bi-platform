@@ -121,9 +121,10 @@ public interface DimensionMemberService extends BeanFactoryAware {
         }
         // 如果是Time开头的，默认就是时间维度
         // TODO 不能这么判断，需要根据UniqueName中的维度名称获取到维度
-        // if(names[0].startsWith(TimeDimension.DEFAULT_TIME_DIMENSION_NAME)){
-        // return TimeDimensionUtils.processTimeMember(cube, names);
-        // }
+//        String dimName = MetaNameUtil.getDimNameFromUniqueName (uniqueName);
+//         if(cube.getDimensions ().get (dimName).getType () == DimensionType.TIME_DIMENSION){
+//             return TimeDimensionUtils.
+//         }
         Dimension targetDim = null;
         MiniCubeMember result = null;
 

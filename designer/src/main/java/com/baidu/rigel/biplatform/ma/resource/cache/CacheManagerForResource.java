@@ -15,9 +15,10 @@
  */
 package com.baidu.rigel.biplatform.ma.resource.cache;
 
+import javax.annotation.Resource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.stereotype.Service;
@@ -44,15 +45,15 @@ public class CacheManagerForResource {
     /**
      * cache manager
      */
-    @Autowired
-    private StoreManager cacheManager = null;
+    @Resource 
+    private StoreManager storeManager = null;
     
     /**
      * 
      * @return
      */
     protected Cache getCache() {
-        return cacheManager.getDataStore ("bi_platform");
+        return storeManager.getDataStore ("bi_platform");
     }
     
     /**

@@ -16,7 +16,10 @@
 package com.baidu.rigel.biplatform.cache;
 
 import java.util.EventObject;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Function;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cache.Cache;
@@ -47,6 +50,13 @@ public interface StoreManager {
      * String 当前的storeManager
      */
     String CURRENT_STORE_MANAGER = "CURRENT_STORE_MANAGER";
+    
+    public static final String SERIALIZER_KEY = "serializer";
+    
+    public static final String DESERIALIZER_KEY = "deserializer";
+    
+    final Map<String, Function<Object[], Object>> UDF_SETTING = new HashMap<String, Function<Object[], Object>>();
+    
     
     /**
      * 
@@ -123,5 +133,22 @@ public interface StoreManager {
     
     
     Lock getClusterLock(String lockName);
+    
+    /**
+     * 用户自定义序列化、反序列化器注册
+     * @param f
+     */
+    static void addUdfSerializerSetting (Function<Object[], Object> f) {
+        UDF_SETTING.put (SERIALIZER_KEY, f);
+    }
+    
+    
+    /**
+     * 用户自定义序列化、反序列化器注册
+     * @param f
+     */
+    static void addUdfDeSerializerSetting (Function<Object[],  Object> f) {
+        UDF_SETTING.put (DESERIALIZER_KEY, f);
+    }
     
 }

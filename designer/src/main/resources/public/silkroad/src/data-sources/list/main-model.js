@@ -14,11 +14,25 @@ define(['url'], function (Url) {
          */
         loadDataSourcesList: function () {
             var that = this;
-
             $.ajax({
-                url: Url.loadDataSourcesList(),
+                url: Url.loadDsgroupList(),
                 success: function (data) {
                     that.set('dataSourcesList', data.data);
+                }
+            });
+        },
+        /**
+         * 加载数据源列表
+         *
+         * @public
+         */
+        loadDsGroupActive: function () {
+            var that = this;
+
+            $.ajax({
+                url: Url.loadDsGroupActive(),
+                success: function (data) {
+                    that.set('activeDataSourcesList', data.data);
                 }
             });
         },
@@ -29,11 +43,11 @@ define(['url'], function (Url) {
          * @param {string} dsId 数据源id
          * @public
          */
-        deleteDataSources: function (dsId) {
+        deleteDataSources: function (groupId, dsId) {
             var that = this;
 
             $.ajax({
-                url: Url.deleteDataSources(dsId),
+                url: Url.deleteDataSources(groupId, dsId),
                 type: 'DELETE',
                 success: function (data) {
                     that.loadDataSourcesList();
@@ -48,13 +62,76 @@ define(['url'], function (Url) {
          * @param {Function} sucess(Object) 加载成功后的回调函数
          * @public
          */
-        loadTables: function (dsId, success) {
+        loadTables: function (groupId, dsId, success) {
             var that = this;
-
             $.ajax({
-                url: Url.loadTables(dsId),
+                url: Url.loadTables(groupId, dsId),
                 success: function (data) {
                     success(data.data);
+                }
+            });
+        },
+
+        /**
+         * 新建数据源组
+         *
+         * @param {string} dsGroupName 报表样式名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
+        addDsGroup: function (dsGroupName, success) {
+            $.ajax({
+                url: Url.addDsGroup(),
+                type: 'POST',
+                data: {
+                    name: dsGroupName
+                },
+                success: function (data) {
+                    success(data.data.id);
+                }
+            });
+        },
+        /**
+         * 编辑数据源组
+         *
+         * @param {string} dsGroupName 报表样式名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
+        editDsGroup: function (dsGroupId, dsGroupName, success) {
+            $.ajax({
+                url: Url.editDsGroup(dsGroupId),
+                type: 'POST',
+                data: {
+                    groupName: dsGroupName
+                },
+                success: function () {
+                    success();
+                }
+            });
+        },
+        /**
+         * 删除数据源组
+         *
+         * @param {string} dsGroupName 报表样式名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
+        delDsGroup: function (dsGroupId, success) {
+            $.ajax({
+                url:  Url.editDsGroup(dsGroupId),
+                type: 'DELETE',
+                success: function () {
+                    success();
+                }
+            });
+        },
+        changeDataSourceActive: function (dsGroupId, dsId, success) {
+            $.ajax({
+                url:  Url.changeDsActive(dsGroupId, dsId),
+                type: 'POST',
+                success: function () {
+                    success();
                 }
             });
         }

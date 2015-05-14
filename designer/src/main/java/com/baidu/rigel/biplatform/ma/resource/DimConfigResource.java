@@ -49,7 +49,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
 import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
-import com.baidu.rigel.biplatform.ma.model.service.CubeBuildService;
+import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
@@ -105,10 +105,10 @@ public class DimConfigResource extends BaseResource {
     private ReportModelCacheManager reportModelCacheManager;
     
     /**
-     * cubeBuildService
+     * cubeMetaBuildService
      */
     @Resource
-    private CubeBuildService cubeBuildService;
+    private CubeMetaBuildService cubeBuildService;
     
     /**
      * starModelBuildService
@@ -237,8 +237,8 @@ public class DimConfigResource extends BaseResource {
             List<ColumnInfo> cols = null;
             try {
                 dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-                		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
-                cols = dsInfoReaderService.getColumnInfos(ds, securityKey, tableName);
+                		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
+                cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, tableName);
             } catch(Exception e) {
             	logger.error("fail to get columninfos from datasource", e);
             }
@@ -457,8 +457,8 @@ public class DimConfigResource extends BaseResource {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
-            cols = dsInfoReaderService.getColumnInfos(ds, securityKey, starModel.getFactTable().getName());
+            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
+            cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, starModel.getFactTable().getName());
         } catch (Exception e) {
             logger.error("[ERROR] --- --- --- --- fail to get columnInfos from datasource : {}", e.getMessage());
             logger.error("[ERROR] --- --- --- --- stackTrace :", e);

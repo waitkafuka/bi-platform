@@ -31,6 +31,7 @@ public class DataSourceUtilTest {
 	@Test
 	public void testGetDs() {
 		String productLine = "productLine";
+		ContextManager.cleanProductLine();
 		ContextManager.setProductLine(productLine);
 		DataSourceDefine ds = new DataSourceDefine();
 		String id = UuidGeneratorUtils.generate();
@@ -55,5 +56,21 @@ public class DataSourceUtilTest {
 	public void testDsGroup() {
 		DataSourceGroupDefine dsG = new DataSourceGroupDefine();
 		String productLine = "productLine";
+		ContextManager.cleanProductLine();
+		ContextManager.setProductLine(productLine);
+		String id = UuidGeneratorUtils.generate();
+		dsG.setId(id);
+		String name = "name";
+		dsG.setName(name);
+		
+		String expectStr = productLine + File.separator + this.dsFileBaseDir;
+		expectStr = expectStr + File.separator + id + "_" + name;
+		Assert.assertEquals(expectStr, DataSourceUtil.getDsGroupFileName(dsG));
+		String fileName = id + "_" +name;
+		Assert.assertEquals(expectStr, DataSourceUtil.getDsGroupFileName(fileName));
+		
+		String expectDir = productLine + File.separator + this.dsFileBaseDir;
+		Assert.assertEquals(expectDir, DataSourceUtil.getDsGroupFileStoreDir());
+		Assert.assertEquals(expectDir, DataSourceUtil.getDsGroupFileStoreDir(productLine));
 	}
 }

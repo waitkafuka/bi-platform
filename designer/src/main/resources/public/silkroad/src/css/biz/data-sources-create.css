@@ -87,3 +87,22 @@
     top: -1px;
 
 }
+
+.data-source-item-name {
+    padding-left: 20px;
+}
+.data-source-item-name > input {
+    display: inline-block;
+    vertical-align: middle;
+    height: 25px;
+    line-height: 25px;
+    cursor: pointer;
+}
+
+.data-source-item-name > label {
+    display: inline-block;
+    vertical-align: middle;
+    height: 25px;
+    line-height: 25px;
+    cursor: pointer;
+}

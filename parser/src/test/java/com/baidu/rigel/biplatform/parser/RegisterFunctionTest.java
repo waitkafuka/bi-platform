@@ -118,6 +118,24 @@ public class RegisterFunctionTest {
         }
     }
     
+    @Test
+    public void testGetConstructor ()  throws Exception {
+        try {
+            boolean rs = RegisterFunction.register ("test", SubFunctionNode.class);
+            Assert.assertTrue (rs);
+            Assert.assertNotNull (RegisterFunction.getConstructorByFunctionName ("test"));
+        } catch (Exception e) {
+        }
+    }
+    
+    @Test
+    public void testGetConstructorWithEmpty () {
+        try {
+            RegisterFunction.getConstructorByFunctionName ("") ;
+            Assert.fail ();
+        } catch (Exception e) {
+        }
+    }
     private static class SubFunctionNode extends FunctionNode {
 
         /**

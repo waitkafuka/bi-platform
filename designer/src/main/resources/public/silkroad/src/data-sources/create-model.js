@@ -46,7 +46,7 @@ define(['url'], function (Url) {
 
             // 如果是新建，直接触发render标识，进行渲染
             if (isAdd) {
-                that.set('dbData', {});
+                that.loadDataSourcesGroup();
             }
             // 如果是更新,就先去后端获取数据源配置信息(获取信息后，触发渲染标识，进行渲染)
             else {
@@ -61,9 +61,8 @@ define(['url'], function (Url) {
          */
         getCurrentDsInfo: function () {
             var that = this;
-
             $.ajax({
-                url: Url.getCurrentDataSourceInfo(that.get('id')),
+                url: Url.getCurrentDataSourceInfo(that.get('groupId'), that.get('id')),
                 success: function (data) {
                     that.set('dbData', data.data);
                 }
@@ -82,11 +81,11 @@ define(['url'], function (Url) {
             var isAdd = that.get('isAdd');
 
             if (!isAdd) {
-                url = Url.submitDataSourceInfoUpdate(that.id);
+                url = Url.submitDataSourceInfoUpdate(data.groupId, that.get('id'));
             } else {
-                url = Url.submitDataSourceInfoAdd();
+                url = Url.submitDataSourceInfoAdd(data.groupId);
             }
-
+            delete data.groupId;
             data.isEncrypt = this.get('isEncrypt');
             $.ajax({
                 url: url,
@@ -94,6 +93,29 @@ define(['url'], function (Url) {
                 data: data,
                 success: function () {
                     success();
+                }
+            });
+        },
+        /**
+         * 加载数据源列表
+         *
+         * @public
+         */
+        loadDataSourcesGroup: function () {
+            var that = this;
+            $.ajax({
+                url: Url.loadDsgroupList(),
+                success: function (data) {
+                    var tarData = data.data;
+                    var resData = [];
+                    for (var i = 0, iLen = tarData.length; i < iLen; i ++) {
+                        resData.push({
+                            id: tarData[i].id,
+                            name: tarData[i].name
+                        });
+                    }
+                    that.set('groupData', resData);
+                    that.set('dbData', {});
                 }
             });
         }

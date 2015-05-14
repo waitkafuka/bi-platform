@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.util;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -195,7 +196,7 @@ public class DataModelBuilder {
                     String value = tesseractResultSet.getString(prop);
                     if (rowHeadName.queryPropers.get(prop).isEmpty() 
                             || (rowHeadName.queryPropers.get(prop).contains(value) 
-                            && value.equals(record.getGroupBy()))) {
+                            && record.getGroupBy ().contains (value)) || value.equals(record.getGroupBy())) {
                         oneLine.append(prop);
                         oneLine.append(PROP_KEY_SPLIT);
                         oneLine.append(value);
@@ -211,7 +212,6 @@ public class DataModelBuilder {
             }
             
             // 构建列轴元数据的交叉key
-            Map<String, BigDecimal> colValues = Maps.newHashMap();
             StringBuilder oneColumn = new StringBuilder();
             for (MemberTreePropResult colHeadName : colHeadNames) {
                 for(String prop : colHeadName.queryPropers.keySet()) {
@@ -228,15 +228,31 @@ public class DataModelBuilder {
             }
             
             // 获取单元格值
+            Map<String, BigDecimal> colValues = Maps.newHashMap();
+            final String oneLineKey = oneLine.toString ();
             for (MiniCubeMeasure measure : queryContext.getQueryMeasures()) {
+                final BigDecimal currentVal = tesseractResultSet.getBigDecimal(measure.getDefine());
                 StringBuilder columnKey = new StringBuilder();
                 columnKey.append(oneColumn);
                 columnKey.append(measure.getName());
-                colValues.put(columnKey.toString(), tesseractResultSet.getBigDecimal(measure.getDefine()));
+                if (data.containsKey (oneLineKey) ) {
+                    final BigDecimal oldVal = data.get (oneLineKey).get (columnKey.toString ());
+                    if (oldVal != null &&  currentVal != null) {
+                        final Serializable newTmp = measure.getAggregator ().aggregate (oldVal, currentVal);
+                        BigDecimal newVal = 
+                            newTmp instanceof BigDecimal ? (BigDecimal) newTmp : new BigDecimal(newTmp.toString ());
+//                    data.put(columnKey.toString(), newVal);
+                        data.get (oneLineKey).put (columnKey.toString (), newVal);
+                    } else if (data.containsKey (oneLineKey)) {
+                        data.get (oneLineKey).put (columnKey.toString (), currentVal);
+                    } 
+                } else {
+                    colValues.put(columnKey.toString(), currentVal);
+                    data.put (oneLineKey, colValues);
+                }
             }
-            
-            // 单行数据构建完毕
-            data.put(oneLine.toString(), colValues);
+                // 单行数据构建完毕
+//            data.put(oneLineKey, colValues);
         }
 
         return data;

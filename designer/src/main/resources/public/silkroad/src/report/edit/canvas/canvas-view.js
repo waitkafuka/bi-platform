@@ -429,7 +429,7 @@ define([
                         compType === 'TEXT'
                         || compType === 'H_BUTTON'
                     ) {
-                        $($component[i]).find('.j-setting').remove();
+//                        $($component[i]).find('.j-setting').remove();
                     }
                 }
                 /**

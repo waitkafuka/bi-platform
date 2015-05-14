@@ -122,14 +122,14 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             List<TableInfo> tables = dsInfoReaderService.getAllTableInfos(ds, securityKey);
             List<RelationTableView> relationTables = Lists.newArrayList();
             for (TableInfo table : tables) {
                 RelationTableView relation = new RelationTableView();
                 relation.setId(table.getId());
                 relation.setName(table.getName());
-                List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, table.getId());
+                List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, table.getId());
                 relation.setFields(cols);
                 relationTables.add(relation);
             }
@@ -367,7 +367,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         DataSourceInfoReaderService dsInfoReaderService = null;
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
-            		getDataSourceInfoReaderServiceInstance(ds.getDataSourceType());
+                getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
             for (NormalDimDetail detail : normal.getChildren()) {
                 StandardDimTableMetaDefine stand = new StandardDimTableMetaDefine();
                 ReferenceDefine reference = new ReferenceDefine();
@@ -376,7 +376,7 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
                 stand.setReference(reference);
                 stand.setName(detail.getRelationTable());
                 
-                List<ColumnInfo> cols = dsInfoReaderService.getColumnInfos(ds, securityKey, detail.getRelationTable());
+                List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, detail.getRelationTable());
                 stand.addColumns(parseToDefine(cols));
                 standMetaDefines.add(stand);
             }

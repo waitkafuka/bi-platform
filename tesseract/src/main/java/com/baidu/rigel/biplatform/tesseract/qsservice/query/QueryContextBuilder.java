@@ -188,7 +188,8 @@ public class QueryContextBuilder {
                         queryContext.getFilterExpression().put(measureCon.getMetaName(),
                                 measureCon.getMeasureConditions());
                     }
-                    logger.info("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
+                    logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
+//                    logger.info("cost:{}ms,in build filter",System.currentTimeMillis() - current);
                     current = System.currentTimeMillis();
                 }
             }
@@ -386,7 +387,7 @@ public class QueryContextBuilder {
                         memberNode.setSummary(true);
                         children.forEach((child) -> {
                             MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                            buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
+                            childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
                             childNodes.add(childNode);
 //                        member.getQueryNodes().addAll(child.getQueryNodes());
                         });
@@ -394,7 +395,7 @@ public class QueryContextBuilder {
                 }
                 // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
                 if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                    buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
+                    memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
                     memberNode.setChildren(childNodes);
                     nodeTree.getChildren().add(memberNode);
 //                return memberNode;
@@ -416,7 +417,7 @@ public class QueryContextBuilder {
                     if (CollectionUtils.isNotEmpty (children)) { 
                         children.forEach((child) -> {
                             MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                            buildMemberNodeByMember(dataSourceInfo, cube, childNode, (MiniCubeMember) child, params);
+                            childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, (MiniCubeMember) child, params);
                             parentNode.getChildren().add(childNode);
                         });
                     }
@@ -424,7 +425,7 @@ public class QueryContextBuilder {
                 } else {
                     callbackMembers.forEach((child) -> {
                         MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                        buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
+                        childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
                         nodeTree.getChildren().add(childNode);
                     });
                 }
@@ -443,7 +444,7 @@ public class QueryContextBuilder {
      * @param node 查询节点
      * @param member 维值
      */
-    private void buildMemberNodeByMember(DataSourceInfo dataSource, 
+    private MemberNodeTree buildMemberNodeByMember(DataSourceInfo dataSource, 
             Cube cube, MemberNodeTree node, MiniCubeMember member, Map<String, String> params) {
         node.setCaption(member.getCaption());
         node.setTime(member.getLevel().getDimension().isTimeDimension());
@@ -487,7 +488,20 @@ public class QueryContextBuilder {
 //                }
 //            }
         }
-
+        final MiniCubeMember memberParent = (MiniCubeMember) member.getParent ();
+        if (memberParent != null) {
+            
+            MemberNodeTree parent = new MemberNodeTree (node.getParent ());
+            parent.setCaption (memberParent.getCaption ());
+            parent.setUniqueName (memberParent.getUniqueName ());
+            parent.setName (memberParent.getName ());
+            parent.setLeafIds (memberParent.getQueryNodes ());
+            parent.setQuerySource (memberParent.getLevel ().getFactTableColumn ());
+            node.setParent (parent);
+            parent.getChildren ().add (node);
+//            return parent;
+        }
+        return node;
     }
 
 }

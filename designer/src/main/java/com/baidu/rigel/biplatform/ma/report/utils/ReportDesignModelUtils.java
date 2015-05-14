@@ -70,7 +70,7 @@ public final class ReportDesignModelUtils {
         }
         ExtendArea[] extendAreaList = model.getExtendAreaList();
         if (extendAreaList == null || extendAreaList.length == 0) {
-            logger.error("can not get extendarea from current model : {}", model);
+//            logger.error("can not get extendarea from current model : {}", model);
             return new ArrayList<Cube>();
         }
         List<Cube> cubes = new ArrayList<Cube>();
@@ -99,24 +99,24 @@ public final class ReportDesignModelUtils {
         LogicModel logicModel = area.getLogicModel();
         Item[] items = logicModel.getItems();
         if (items == null || items.length == 0) {
-            logger.error("can not get reference items from currrent area : {}", area);
+//            logger.error("can not get reference items from currrent area : {}", area);
             return null;
         }
         Schema schema = model.getSchema();
         if (schema == null) {
-            logger.error("can not get schema define from report model : {}", model);
+//            logger.error("can not get schema define from report model : {}", model);
             return null;
         }
         
         if (schema.getCubes() == null) {
-            logger.error("can not get cubes from schema : {}", schema);
+//            logger.error("can not get cubes from schema : {}", schema);
             return null;
         }
         
         Cube tmp = schema.getCubes().get(area.getCubeId());
         if (tmp == null) {
-            logger.error("can not get cube define from schema {} with id [{}]", schema,
-                    area.getCubeId());
+//            logger.error("can not get cube define from schema {} with id [{}]", schema,
+//                    area.getCubeId());
             return null;
         }
         MiniCube cube = new MiniCube();
@@ -178,7 +178,7 @@ public final class ReportDesignModelUtils {
         
         Cube cube = schema.getCubes().get(cubeId);
         if (cube == null) {
-            logger.info("can not get cube with id [{}] from schema [{}]", cubeId, schema);
+//            logger.info("can not get cube with id [{}] from schema [{}]", cubeId, schema);
             return null;
         }
         
@@ -188,10 +188,10 @@ public final class ReportDesignModelUtils {
                     return dimOrIndId.equals(dim.getId()) || dimOrIndId.equals(dim.getName());
             }).toArray();
             if (tmp != null && tmp.length == 1) {
-                logger.info("get dimension for cube [{}] with id [{}]", cube, dimOrIndId);
+//                logger.info("get dimension for cube [{}] with id [{}]", cube, dimOrIndId);
                 return (OlapElement) tmp[0];
             }
-            logger.info("can not get dim from cube [{}] with id [{}]", cube, dimOrIndId);
+//            logger.info("can not get dim from cube [{}] with id [{}]", cube, dimOrIndId);
         }
         
         if (cube.getMeasures() != null) {
@@ -203,10 +203,10 @@ public final class ReportDesignModelUtils {
                 logger.info("get measuer for cube [{}] with id [{}]", cube, dimOrIndId);
                 return (OlapElement) tmp[0];
             }
-            logger.info("can not get measuer from cube [{}] with id [{}]", cube, dimOrIndId);
+//            logger.info("can not get measuer from cube [{}] with id [{}]", cube, dimOrIndId);
         }
         
-        logger.info("current cube [{}] 's dimensions and measurs define are empty", cube);
+//        logger.info("current cube [{}] 's dimensions and measurs define are empty", cube);
         return null;
     }
 }

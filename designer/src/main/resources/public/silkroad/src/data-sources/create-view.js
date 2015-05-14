@@ -36,6 +36,9 @@ define([
                 if (option.id !== undefined) {
                     modelData.id = option.id;
                 }
+                if (option.groupId !== undefined) {
+                    modelData.groupId = option.groupId;
+                }
                 that.model = new Model(modelData);
                 that.model.set({
                     isAdd: option.isAdd,
@@ -49,6 +52,15 @@ define([
                     function (model, data) {
                         var html = template.render(data);
                         that.$el.html(html);
+                        var $groupItem = $('.j-data-sources-info-group-name');
+                        var groupData = model.get('groupData');
+                        var selHtml = [];
+                        if (model.get('isAdd')) {
+                            for (var i = 0, iLen = groupData.length; i < iLen; i ++) {
+                                selHtml.push('<option value="' + groupData[i].id + '">' + groupData[i].name + '</option>');
+                            }
+                            $groupItem.find('select').append(selHtml.join(''));
+                        }
                     }
                 );
 
@@ -135,8 +147,12 @@ define([
                     var $validateMessage = $item.next();
                     var attrName = $item.attr('name');
                     var validateRule = validateConfig[attrName];
-
-                    data[attrName] = $item.val();
+                    if (attrName === 'groupId' && $item.is('input')) {
+                        data[attrName] = $item.attr('group-id');
+                    }
+                    else {
+                        data[attrName] = $item.val();
+                    }
                     if (validateRule && validateRule.constructor == RegExp) {
                         if (validateRule.test(data[attrName])) {
                             $validateMessage.addClass('hide');

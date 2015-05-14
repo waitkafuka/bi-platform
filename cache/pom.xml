@@ -15,6 +15,11 @@
   		<groupId>org.springframework.boot</groupId>
   		<artifactId>spring-boot-starter-redis</artifactId>
   	</dependency>
+  	
+  	<dependency>
+  	     <groupId>junit</groupId>
+  	     <artifactId>junit</artifactId>
+  	</dependency>
   	<dependency>
   		<groupId>commons-lang</groupId>
   		<artifactId>commons-lang</artifactId>
@@ -42,11 +47,6 @@
   		<artifactId>hazelcast-spring</artifactId>
   	</dependency>
   	<dependency>
-  		<groupId>junit</groupId>
-  		<artifactId>junit</artifactId>
-  		<scope>test</scope>
-  	</dependency>
-  	<dependency>
   		<groupId>org.redisson</groupId>
   		<artifactId>redisson</artifactId>
   		<version>1.2.0</version>
@@ -57,7 +57,24 @@
   	</dependency>
   	<dependency>
   		<groupId>org.springframework.data</groupId>
-  		<artifactId>spring-data-redis</artifactId>
+        <artifactId>spring-data-redis</artifactId>
   	</dependency>
+  	<dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        
+       <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-module-junit4</artifactId>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.powermock</groupId>
+            <artifactId>powermock-api-mockito</artifactId>
+            <type>jar</type>
+            <scope>test</scope>
+        </dependency>
   </dependencies>
 </project>

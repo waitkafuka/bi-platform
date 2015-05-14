@@ -23,6 +23,7 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Function;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.redisson.Redisson;
@@ -33,13 +34,16 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.cache.RedissonCache;
 import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.cache.redis.config.RedisPoolProperties;
-import com.baidu.rigel.biplatform.cache.redis.listener.RedisTopicListener;
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.cache.util.MacAddressUtil;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /** 
  *  
@@ -51,7 +55,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     
     private Logger log = LoggerFactory.getLogger(this.getClass());
     
-    private static final String REDIS_LOCK = "RedisLock";
+//    private static final String REDIS_LOCK = "RedisLock";
     
     
     @Autowired(required = false)
@@ -67,11 +71,16 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     
     private String queueKey = EVENT_QUEUE;
     
-    private String lockKey = REDIS_LOCK;
+//    private String lockKey = REDIS_LOCK;
     
     private String cachePrefix = "";
     
-    
+    /**
+     * @return the topicKey
+     */
+    public String getTopicKey() {
+        return topicKey;
+    }
 
     /*
      * (non-Javadoc) 
@@ -101,6 +110,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
         redisson.getQueue(queueKey).add(event);
     }
 
+    
     /*
      * (non-Javadoc) 
      * @see com.baidu.rigel.biplatform.cache.StoreManager#getNextEvent() 
@@ -117,8 +127,20 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
      */
     @Override
     public void postEvent(EventObject event) throws Exception {
-        
-        redisson.getTopic(topicKey).publish(event);
+//        redisson.getTopic(topicKey).publish(event);
+        StringBuilder msg = new StringBuilder();
+        msg.append (event.getClass ().getName ());
+        msg.append ("~~~");
+        if (StoreManager.UDF_SETTING.containsKey (StoreManager.SERIALIZER_KEY)) {
+            final Function<Object[], Object> function = StoreManager.UDF_SETTING.get (StoreManager.SERIALIZER_KEY);
+            msg.append (function.apply (new Object[]{event}).toString ());
+        } else {
+            Gson gson = new GsonBuilder ().create ();
+            msg.append (gson.toJson (event));
+        }
+        StringRedisTemplate template = 
+            (StringRedisTemplate) ApplicationContextHelper.getContext ().getBean ("template");
+        template.convertAndSend (topicKey, msg.toString ());
         log.info("post topic into redis key:{},event:{}", topicKey, event);
     }
 
@@ -128,8 +150,8 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
      */
     @Override
     public Lock getClusterLock() {
-        return redisson.getLock(lockKey);
-
+        return new java.util.concurrent.locks.ReentrantLock ();
+        //return redisson.getLock(lockKey);
     }
 
     @Override
@@ -151,15 +173,15 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
             log.info("this instance is run with dev mode,current mac :{}", cachePrefix);
             topicKey = cachePrefix + "_" + redisProperties.getTopicName();
             queueKey = cachePrefix + "_" + redisProperties.getEventQueueName();
-            lockKey = cachePrefix + "_" + redisProperties.getLockName();
+//            lockKey = cachePrefix + "_" + redisProperties.getLockName();
         }
-        redisson.getTopic(topicKey).addListener(new RedisTopicListener());
+//        redisson.getTopic(topicKey).addListener(new RedisTopicListener());
     }
 
     @Override
     public Lock getClusterLock(String lockName) {
         return redisson.getLock(lockName);
     }
-
+    
 }
 

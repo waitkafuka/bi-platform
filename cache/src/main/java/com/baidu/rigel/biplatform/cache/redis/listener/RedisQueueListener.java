@@ -59,7 +59,7 @@ public class RedisQueueListener implements ApplicationListener<ContextRefreshedE
                     EventObject item = storeManager.getNextEvent();
                     if(item != null) {
                         applicationContext.publishEvent((ApplicationEvent) item);
-                        log.info("publish topic event : {} success", item);
+                        log.info("publish queue event : {} success", item);
                     }
                 } catch (Exception e) {
                     log.warn("get event error:{}", e);

@@ -28,5 +28,5 @@ public interface DataSourceInfoReaderService {
 	 * @param tableId 数据表对应的id
 	 * @return 该数据表所有的数据列名称
 	 */
-	public List<ColumnInfo> getColumnInfos(DataSourceDefine ds, String securityKey,String tableId);
+	public List<ColumnInfo> getAllColumnInfos(DataSourceDefine ds, String securityKey,String tableId);
 }

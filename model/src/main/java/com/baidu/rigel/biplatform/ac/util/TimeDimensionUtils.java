@@ -15,20 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ac.util;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
-import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
-import com.baidu.rigel.biplatform.ac.model.LevelType;
-import com.baidu.rigel.biplatform.ac.model.TimeType;
 
 /**
  * 时间维度工具类
@@ -41,12 +27,12 @@ public class TimeDimensionUtils {
     /**
      * LOG
      */
-    private static Logger LOG = LoggerFactory.getLogger(TimeDimensionUtils.class);
-
-    /**
-     * DEFAULT_SIMPLE_DATEFORMAT yyyy-MM-dd
-     */
-    public static SimpleDateFormat DEFAULT_SIMPLE_DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
+//    private static Logger LOG = LoggerFactory.getLogger(TimeDimensionUtils.class);
+//
+//    /**
+//     * DEFAULT_SIMPLE_DATEFORMAT yyyy-MM-dd
+//     */
+//    public static SimpleDateFormat DEFAULT_SIMPLE_DATEFORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
      * 根据时间和对应的格式
@@ -57,56 +43,56 @@ public class TimeDimensionUtils {
      * @return timeMember 生成的时间member
      * @throws ParseException 日期字符串parse成日期对象失败
      */
-    public static MiniCubeMember createTimeMember(String timeStr, TimeType timeType, String timeFormat)
-            throws ParseException {
-        if (StringUtils.isBlank(timeStr) && timeType == null) {
-            throw new IllegalArgumentException("timeStr is blank or timeType is null, timeStr:" + timeStr
-                    + " timeType:" + timeType);
-        }
-
-        Calendar calendar = null;
-        String dateFormat = StringUtils.isBlank(timeFormat) ? timeType.getFormat() : timeFormat;
-        if (dateFormat.toUpperCase().contains("QN")) {
-            int year = Integer.parseInt(timeStr.substring(0, 4));
-            int quarter = Integer.parseInt(timeStr.substring(5));
-            // 在Calendar中，月份比实际的数字小1
-            int month = (quarter - 1) * 3;
-            calendar = new GregorianCalendar(year, month, 1);
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
-            Date date = sdf.parse(timeStr);
-            calendar = Calendar.getInstance();
-            calendar.setTime(date);
-        }
-
-        int quarter = calendar.get(Calendar.MONTH) / 3 + 1;
-        String caption = null;
-        MiniCubeLevel level = new MiniCubeLevel("level_" + timeType);
-
-        if (timeType.equals(TimeType.TimeYear)) {
-            caption = calendar.get(Calendar.YEAR) + "";
-            level.setType(LevelType.TIME_YEARS);
-        } else if (timeType.equals(TimeType.TimeQuarter)) {
-            caption = calendar.get(Calendar.YEAR) + "_Q" + quarter;
-            level.setType(LevelType.TIME_QUARTERS);
-        } else if (timeType.equals(TimeType.TimeMonth)) {
-            caption = calendar.get(Calendar.YEAR) + "_" + (calendar.get(Calendar.MONTH) + 1);
-            level.setType(LevelType.TIME_MONTHS);
-        } else if (timeType.equals(TimeType.TimeWeekly)) {
-            caption = calendar.get(Calendar.YEAR) + "_W" + calendar.get(Calendar.WEEK_OF_YEAR);
-            level.setType(LevelType.TIME_WEEKS);
-        } else if (timeType.equals(TimeType.TimeDay)) {
-            caption = DEFAULT_SIMPLE_DATEFORMAT.format(calendar.getTime());
-            level.setType(LevelType.TIME_DAYS);
-        }
-
-        MiniCubeMember member = new MiniCubeMember(timeStr);
-        member.setCaption(caption);
-        member.setVisible(true);
-        member.setLevel(level);
-        LOG.info("time member:" + member);
-        return member;
-    }
+//    public static MiniCubeMember createTimeMember(String timeStr, TimeType timeType, String timeFormat)
+//            throws ParseException {
+//        if (StringUtils.isBlank(timeStr) && timeType == null) {
+//            throw new IllegalArgumentException("timeStr is blank or timeType is null, timeStr:" + timeStr
+//                    + " timeType:" + timeType);
+//        }
+//
+//        Calendar calendar = null;
+//        String dateFormat = StringUtils.isBlank(timeFormat) ? timeType.getFormat() : timeFormat;
+//        if (dateFormat.toUpperCase().contains("QN")) {
+//            int year = Integer.parseInt(timeStr.substring(0, 4));
+//            int quarter = Integer.parseInt(timeStr.substring(5));
+//            // 在Calendar中，月份比实际的数字小1
+//            int month = (quarter - 1) * 3;
+//            calendar = new GregorianCalendar(year, month, 1);
+//        } else {
+//            SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+//            Date date = sdf.parse(timeStr);
+//            calendar = Calendar.getInstance();
+//            calendar.setTime(date);
+//        }
+//
+//        int quarter = calendar.get(Calendar.MONTH) / 3 + 1;
+//        String caption = null;
+//        MiniCubeLevel level = new MiniCubeLevel("level_" + timeType);
+//
+//        if (timeType.equals(TimeType.TimeYear)) {
+//            caption = calendar.get(Calendar.YEAR) + "";
+//            level.setType(LevelType.TIME_YEARS);
+//        } else if (timeType.equals(TimeType.TimeQuarter)) {
+//            caption = calendar.get(Calendar.YEAR) + "_Q" + quarter;
+//            level.setType(LevelType.TIME_QUARTERS);
+//        } else if (timeType.equals(TimeType.TimeMonth)) {
+//            caption = calendar.get(Calendar.YEAR) + "_" + (calendar.get(Calendar.MONTH) + 1);
+//            level.setType(LevelType.TIME_MONTHS);
+//        } else if (timeType.equals(TimeType.TimeWeekly)) {
+//            caption = calendar.get(Calendar.YEAR) + "_W" + calendar.get(Calendar.WEEK_OF_YEAR);
+//            level.setType(LevelType.TIME_WEEKS);
+//        } else if (timeType.equals(TimeType.TimeDay)) {
+//            caption = DEFAULT_SIMPLE_DATEFORMAT.format(calendar.getTime());
+//            level.setType(LevelType.TIME_DAYS);
+//        }
+//
+//        MiniCubeMember member = new MiniCubeMember(timeStr);
+//        member.setCaption(caption);
+//        member.setVisible(true);
+//        member.setLevel(level);
+//        LOG.info("time member:" + member);
+//        return member;
+//    }
 
     /**
      * 将时间对象转成指定的时间Member
@@ -116,47 +102,47 @@ public class TimeDimensionUtils {
      * @param timeFormat 时间格式
      * @return 时间Member
      */
-    public static MiniCubeMember createTimeMember(Calendar calendar, TimeType timeType, String timeFormat) {
-        // 如果没有设置时间格式，那么用时间类型默认格式
-        String resultTimeFormat = StringUtils.isBlank(timeFormat) ? timeType.getFormat() : timeFormat;
-        int quarter = calendar.get(Calendar.MONTH) / 3 + 1;
-        String name = "";
-        String caption = "";
-        if (resultTimeFormat.toUpperCase().endsWith("QN")) {
-            name = timeFormat.toUpperCase().replace(TimeType.TimeYear.getFormat(), calendar.get(Calendar.YEAR) + "");
-            name = name.toUpperCase().replace("N", quarter + "");
-        } else if (resultTimeFormat.toUpperCase().endsWith("WN")) {
-            name = timeFormat.toUpperCase().replace(TimeType.TimeYear.getFormat(), calendar.get(Calendar.YEAR) + "");
-            name = name.toUpperCase().replace("N", calendar.get(Calendar.WEEK_OF_YEAR) + "");
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat(resultTimeFormat);
-            name = sdf.format(calendar.getTime());
-        }
-        MiniCubeLevel level = new MiniCubeLevel("level_" + timeType);
-
-        if (timeType.equals(TimeType.TimeYear)) {
-            caption = calendar.get(Calendar.YEAR) + "";
-            level.setType(LevelType.TIME_YEARS);
-        } else if (timeType.equals(TimeType.TimeQuarter)) {
-            caption = calendar.get(Calendar.YEAR) + "_Q" + quarter;
-            level.setType(LevelType.TIME_QUARTERS);
-        } else if (timeType.equals(TimeType.TimeMonth)) {
-            caption = calendar.get(Calendar.YEAR) + "_" + (calendar.get(Calendar.MONTH) + 1);
-            level.setType(LevelType.TIME_MONTHS);
-        } else if (timeType.equals(TimeType.TimeWeekly)) {
-            caption = calendar.get(Calendar.YEAR) + "_W" + calendar.get(Calendar.WEEK_OF_YEAR);
-            level.setType(LevelType.TIME_WEEKS);
-        } else if (timeType.equals(TimeType.TimeDay)) {
-            caption = DEFAULT_SIMPLE_DATEFORMAT.format(calendar.getTime());
-            level.setType(LevelType.TIME_DAYS);
-        }
-
-        MiniCubeMember member = new MiniCubeMember(name);
-        member.setCaption(caption);
-        member.setVisible(true);
-        member.setLevel(level);
-        return member;
-    }
+//    public static MiniCubeMember createTimeMember(Calendar calendar, TimeType timeType, String timeFormat) {
+//        // 如果没有设置时间格式，那么用时间类型默认格式
+//        String resultTimeFormat = StringUtils.isBlank(timeFormat) ? timeType.getFormat() : timeFormat;
+//        int quarter = calendar.get(Calendar.MONTH) / 3 + 1;
+//        String name = "";
+//        String caption = "";
+//        if (resultTimeFormat.toUpperCase().endsWith("QN")) {
+//            name = timeFormat.toUpperCase().replace(TimeType.TimeYear.getFormat(), calendar.get(Calendar.YEAR) + "");
+//            name = name.toUpperCase().replace("N", quarter + "");
+//        } else if (resultTimeFormat.toUpperCase().endsWith("WN")) {
+//            name = timeFormat.toUpperCase().replace(TimeType.TimeYear.getFormat(), calendar.get(Calendar.YEAR) + "");
+//            name = name.toUpperCase().replace("N", calendar.get(Calendar.WEEK_OF_YEAR) + "");
+//        } else {
+//            SimpleDateFormat sdf = new SimpleDateFormat(resultTimeFormat);
+//            name = sdf.format(calendar.getTime());
+//        }
+//        MiniCubeLevel level = new MiniCubeLevel("level_" + timeType);
+//
+//        if (timeType.equals(TimeType.TimeYear)) {
+//            caption = calendar.get(Calendar.YEAR) + "";
+//            level.setType(LevelType.TIME_YEARS);
+//        } else if (timeType.equals(TimeType.TimeQuarter)) {
+//            caption = calendar.get(Calendar.YEAR) + "_Q" + quarter;
+//            level.setType(LevelType.TIME_QUARTERS);
+//        } else if (timeType.equals(TimeType.TimeMonth)) {
+//            caption = calendar.get(Calendar.YEAR) + "_" + (calendar.get(Calendar.MONTH) + 1);
+//            level.setType(LevelType.TIME_MONTHS);
+//        } else if (timeType.equals(TimeType.TimeWeekly)) {
+//            caption = calendar.get(Calendar.YEAR) + "_W" + calendar.get(Calendar.WEEK_OF_YEAR);
+//            level.setType(LevelType.TIME_WEEKS);
+//        } else if (timeType.equals(TimeType.TimeDay)) {
+//            caption = DEFAULT_SIMPLE_DATEFORMAT.format(calendar.getTime());
+//            level.setType(LevelType.TIME_DAYS);
+//        }
+//
+//        MiniCubeMember member = new MiniCubeMember(name);
+//        member.setCaption(caption);
+//        member.setVisible(true);
+//        member.setLevel(level);
+//        return member;
+//    }
 
     // /**
     // * 将时间的UniqueName转换成的数组转换成timeMember

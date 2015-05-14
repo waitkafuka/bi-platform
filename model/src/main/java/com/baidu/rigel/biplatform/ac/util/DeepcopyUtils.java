@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ac.util;
 
+import org.springframework.util.Assert;
 import org.springframework.util.SerializationUtils;
 
 /**
@@ -42,7 +43,7 @@ public class DeepcopyUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> T deepCopy(T source) {
-        assert source != null;
+        Assert.notNull (source);
         byte[] content = SerializationUtils.serialize(source);
         return (T) SerializationUtils.deserialize(content);
     }

@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
 import com.google.common.collect.Lists;
@@ -293,7 +294,7 @@ public final class DataModelUtils {
         // List<HeadField>
         // limitedRowHeadFields=getLimitedRowHeads(rowHeadFields,needLimit,limitSize);
         
-        rowFields = transRowHeadFields2RowFields(rowHeadFields, needLimit, limitSize);
+        rowFields = transRowHeadFields2RowFields(rowHeadFields, needLimit, limitSize, cube);
         modify(rowFields);
         pTable.setRowHeadFields(rowFields);
         pTable.setRowHeadWidth(rowWidth);
@@ -324,6 +325,32 @@ public final class DataModelUtils {
         return pTable;
     }
 
+    /**
+     * 将DataModel转为PlaneTable平面表
+     * @param cube cube
+     * @param oriDataModel 数据模型
+     * @return
+     */
+    public static PlaneTable transDataModel2PlaneTable(Cube cube, DataModel oriDataModel) {
+        PlaneTable planeTable = new PlaneTable();
+        if (oriDataModel == null) {
+            return planeTable;
+        }
+        // 记录转换时间
+        long current = System.currentTimeMillis();
+        DataModel dataModel = oriDataModel;
+        // 基于列的表信息
+        List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
+        // 基于行的表信息
+        List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
+        
+        // 列头信息
+        List<List<ColField>> colFields = new ArrayList<List<ColField>>();
+        
+        // 列的高度信息
+        int colHeight = getHeightOfHeadFieldList(colHeadFields);
+    	return null;
+    }
     private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {
         if (rowFields == null) {
             return false;
@@ -335,6 +362,9 @@ public final class DataModelUtils {
             return false;
         }
         RowHeadField firstRow = rowFields.get (0).get (0);
+        if (MetaNameUtil.isAllMemberUniqueName (firstRow.getUniqueName ())) {
+            return true;
+        }
         return firstRow.getV () != null && firstRow.getV ().contains ("合计");
     }
 
@@ -553,10 +583,11 @@ public final class DataModelUtils {
      * @param rowHeadFields
      * @param needLimit
      * @param limitSize
+     * @param cube 
      * @return
      */
     private static List<List<RowHeadField>> transRowHeadFields2RowFields(List<HeadField> rowHeadFields,
-        boolean needLimit, int limitSize) {
+        boolean needLimit, int limitSize, Cube cube) {
         List<List<RowHeadField>> rowFieldList = new ArrayList<List<RowHeadField>>();
         // int rowHeight=getHeightOfHeadFieldList(rowHeadFields);
         if (rowHeadFields == null || rowHeadFields.size() == 0) {
@@ -613,9 +644,15 @@ public final class DataModelUtils {
                     rowField.setExpand(null);
                 } else if (CollectionUtils.isEmpty (headField.getChildren ()) 
                         && headField.getParentLevelField () == null && headField.getParent () == null) {
-                    rowField.setExpand (null);
-                } 
-                else if (!CollectionUtils.isEmpty(headField.getChildren())) {
+                    Dimension dim = getDimByName(cube, MetaNameUtil.getDimNameFromUniqueName (rowField.getUniqueName ()));
+                    final int length = MetaNameUtil.parseUnique2NameArray (rowField.getUniqueName ()).length;
+                    final boolean lastLevel = dim.getLevels ().size () >= length;
+                    if (dim != null && lastLevel) {
+                        rowField.setExpand (true);
+                    } else {
+                        rowField.setExpand (null);
+                    }
+                } else if (!CollectionUtils.isEmpty(headField.getChildren())) {
                     if (headField.getLeafSize() == 0 && headField.getParent() == null
                             && headField.getParentLevelField() == null) {
                         rowField.setExpand(null);
@@ -625,6 +662,7 @@ public final class DataModelUtils {
                 } else {
                     rowField.setExpand(true);
                 }
+                
                 rowField.setDrillByLink (false);
                 rowField.setDimName((String) headField.getExtInfos().get(EXT_INFOS_MEM_DIMNAME));
                 rowField.setIndent(getIndentOfHeadField(headField, 0));
@@ -645,6 +683,16 @@ public final class DataModelUtils {
         
     }
     
+    private static Dimension getDimByName(Cube cube, String dimName) {
+        Map<String, Dimension> dims = cube.getDimensions ();
+        for (Map.Entry<String, Dimension> dim : dims.entrySet ()) {
+            if (dimName.equals (dim.getValue().getName ())) {
+                return dim.getValue ();
+            }
+        }
+        return null;
+    }
+
     private static boolean isTimeDim(String value) {
         if (MetaNameUtil.isAllMemberUniqueName(value)) {
             return false;
