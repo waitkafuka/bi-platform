@@ -43,6 +43,10 @@ public class BaseInfo implements Serializable {
     private String id;
     
     /**
+     * comment
+     */
+    private String comment;
+    /**
      * get the name
      * 
      * @return the name
@@ -80,7 +84,22 @@ public class BaseInfo implements Serializable {
         this.id = id;
     }
 
-    /* 
+    
+    /**
+	 * @return the comment
+	 */
+	public String getComment() {
+		return comment;
+	}
+
+	/**
+	 * @param comment the comment to set
+	 */
+	public void setComment(String comment) {
+		this.comment = comment;
+	}
+
+	/* 
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()
      */

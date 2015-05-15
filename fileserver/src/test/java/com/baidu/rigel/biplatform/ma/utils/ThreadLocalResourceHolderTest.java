@@ -89,6 +89,13 @@ public class ThreadLocalResourceHolderTest {
         } catch (Exception e) {
             Assert.fail ();
         }
+        
+        try {
+            ThreadLocalResourceHolder.bindProperty ("test", "test");
+            ThreadLocalResourceHolder.unbindProperty ("test1");
+        } catch (Exception e) {
+        	ThreadLocalResourceHolder.unbindProperty ("test");
+        }
     }
     
     @Test

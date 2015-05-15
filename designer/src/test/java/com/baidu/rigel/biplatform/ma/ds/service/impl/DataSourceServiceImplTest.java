@@ -12,11 +12,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
-import com.baidu.rigel.biplatform.ma.ds.service.impl.DataSourceServiceImpl;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -29,6 +30,11 @@ import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 //@RunWith(PowerMockRunner.class)
 //@PrepareForTest(DataSourceServiceImpl.class)
 public class DataSourceServiceImplTest {
+	
+	/**
+	 * 日志对象
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(DataSourceServiceImplTest.class);
 	   /**
      * dataSourceService
      */
@@ -314,10 +320,10 @@ public class DataSourceServiceImplTest {
     		Class.forName("org.h2.Driver");
     		Connection conn = DriverManager.getConnection(url,username,password); 
     		if (conn != null) {
-    			System.out.println("get H2 datasource by username:" + username);    			
+    			LOG.info("get H2 datasource by username:" + username);    			
     		}
     	} catch (Exception e) {
-    		e.printStackTrace();
+    		LOG.error(e.getMessage(), e);
     	}
     	
     	// 测试空数据源定义对象
@@ -439,10 +445,10 @@ public class DataSourceServiceImplTest {
     		Class.forName("org.h2.Driver");
     		Connection conn = DriverManager.getConnection(url,username,password); 
     		if (conn != null) {
-    			System.out.println("get H2 datasource by username:" + username);    			
+    			LOG.info("get H2 datasource by username:" + username);    			
     		}
     	} catch (Exception e) {
-    		e.printStackTrace();
+    		LOG.error(e.getMessage(), e);
     	}
     	
     	// 创建数据源定义对象

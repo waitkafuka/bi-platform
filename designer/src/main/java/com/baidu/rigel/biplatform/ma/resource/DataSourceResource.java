@@ -29,13 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
-import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
-import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
-import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
-import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceGroupService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -491,13 +485,13 @@ public class DataSourceResource extends BaseResource {
                     		}                    	
                     	}
                     	dsGroupService.saveOrUpdateDataSourceGroup(dsG, securityKey);
-                    	Map<String, String> params = Maps.newHashMap();
-                    	// modified by jiangyichao
-                    	DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-                    			getDataSourceConnectionServiceInstance(define.getDataSourceType());
-                    	DataSourceInfo info = dsConnService.parseToDataSourceInfo(define, securityKey);
-                    	params.put("dataSourceInfo", AnswerCoreConstant.GSON.toJson(info));
-                    	HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "datasource/update", params);
+//                    	Map<String, String> params = Maps.newHashMap();
+//                    	// modified by jiangyichao
+//                    	DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+//                    			getDataSourceConnectionServiceInstance(define.getDataSourceType());
+//                    	DataSourceInfo info = dsConnService.parseToDataSourceInfo(define, securityKey);
+//                    	params.put("dataSourceInfo", AnswerCoreConstant.GSON.toJson(info));
+//                    	HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "datasource/update", params);
                     	logger.info("successfully update datasource with id " + id);
                     	rs.setStatus(0);
                     	rs.setStatusInfo("successfully");
@@ -553,7 +547,7 @@ public class DataSourceResource extends BaseResource {
     			// 检验是否存在使用数据源组中活动数据源的报表
     			DataSourceDefine activeDs = dsG.getActiveDataSource();
     			if (activeDs != null) {
-	                List<String> refReport = reportDesignModelService.lsReportWithDsId(activeDs.getId());
+	                List<String> refReport = reportDesignModelService.lsReportWithDsId(dsG.getId());
 	                if (refReport != null && refReport.size() > 0) {
 	                    rs.setStatus(1);
 	                    rs.setStatusInfo("数据源组[" + dsG.getName() + "]中的活动数据源[" + activeDs.getName() + 

@@ -18,7 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.application;
 import java.util.function.Function;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.Http11NioProtocol;
+import org.apache.coyote.http11.Http11Nio2Protocol;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -93,6 +93,7 @@ public class TesseractApplication {
     @Bean
     public EmbeddedServletContainerFactory servletContainer () {
         TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory ();
+        tomcat.setProtocol ("org.apache.coyote.http11.Http11Nio2Protocol");
         tomcat.addConnectorCustomizers (customizer());
         return tomcat;
     }
@@ -103,32 +104,14 @@ public class TesseractApplication {
             
             @Override
             public void customize(Connector connector) {
-                connector.setDomain ("test");
-                connector.setProtocol ("org.apache.coyote.http11.Http11NioProtocol");
-                Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler ();
-                protocol.setCompressableMimeType ("application/json");
-                protocol.setCompression ("on");
+                connector.setAttribute ("socket.directBuffer", true);
+                Http11Nio2Protocol protocol = (Http11Nio2Protocol) connector.getProtocolHandler ();
                 protocol.setMaxThreads (1000);
                 protocol.setMinSpareThreads (100);
-                protocol.setSessionTimeout ("1000");
-                protocol.setCompressionMinSize (4096);
-                protocol.setMaxKeepAliveRequests (500);
-                protocol.setMaxConnections (1000);
+                protocol.setMaxThreads (500);
+                protocol.setMaxConnections (700);
             }
         };
     }
     
-    
-//    @Bean
-//    public Connector connector() {
-//        Connector connector = new Connector ("org.apache.coyote.http11.Http11NioProtocol");
-//        connector.setPort (Integer.valueOf (System.getProperty ("server.port")));
-//        Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler ();
-//        protocol.setCompressableMimeType ("application/json");
-//        protocol.setCompression ("on");
-//        protocol.setMaxThreads (1000);
-//        protocol.setMinSpareThreads (50);
-//        protocol.setMaxKeepAliveRequests (100);
-//        return connector;
-//    }
 }

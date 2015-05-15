@@ -36,6 +36,11 @@ public class ColumnInfo extends BaseInfo {
     private String dataType;
 
     /**
+     * 数据库名称
+     */
+    private String dbName;
+    
+    /**
      * @return the dataType
      */
     public String getDataType() {
@@ -49,6 +54,19 @@ public class ColumnInfo extends BaseInfo {
         this.dataType = dataType;
     }
 
+	/**
+	 * @return the dbName
+	 */
+	public String getDbName() {
+		return dbName;
+	}
+
+	/**
+	 * @param dbName the dbName to set
+	 */
+	public void setDbName(String dbName) {
+		this.dbName = dbName;
+	} 
     /* 
      * (non-Javadoc)
      * @see java.lang.Object#hashCode()

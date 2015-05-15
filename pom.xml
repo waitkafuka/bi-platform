@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.2.1.RELEASE</version>
+		<version>1.2.3.RELEASE</version>
 	</parent>
 
 	<groupId>com.baidu.rigel</groupId>
@@ -51,25 +51,26 @@
 		<checkstyle.skip>true</checkstyle.skip>
 		<checkstyle.failOnViolation>true</checkstyle.failOnViolation>
 		<hazelcast.version>3.2.3</hazelcast.version>
-		<lucene.version>4.10.1</lucene.version>
-		<google.gson.version>2.2.2</google.gson.version>
-		<commons.collections.version>3.2.1</commons.collections.version>
-		<commons.lang.version>2.4</commons.lang.version>
-		<org.json.version>20090211</org.json.version>
-		<java.mail.version>1.4.1</java.mail.version>
-		<servlet.api.version>2.5</servlet.api.version>
-		<google.guava.version>11.0.2</google.guava.version>
-		<fasterxml.jackson.version>2.4.3</fasterxml.jackson.version>
-		<io.netty.version>4.0.23.Final</io.netty.version>
-		<commons.compress.version>1.8.1</commons.compress.version>
-		<org.powermock.version>1.5.5</org.powermock.version>
-		<org.mockito.version>1.9.5</org.mockito.version>
-		<commons.logging.version>1.1.1</commons.logging.version>
-		<com.mchange.version>0.9.5-pre8</com.mchange.version>
-		<maven.checkstyle.plugin.version>2.11</maven.checkstyle.plugin.version>
-		<license.maven.plugin.version>2.6</license.maven.plugin.version>
-		<biplatform.version>1.4.0-SNAPSHOT</biplatform.version>
-		<junit.version>4.11</junit.version>
+        <lucene.version>4.10.1</lucene.version>
+        <google.gson.version>2.2.2</google.gson.version>
+        <commons.collections.version>3.2.1</commons.collections.version>
+        <commons.lang.version>2.4</commons.lang.version>
+        <org.json.version>20090211</org.json.version>
+        <java.mail.version>1.4.1</java.mail.version>
+        <servlet.api.version>2.5</servlet.api.version>
+        <google.guava.version>11.0.2</google.guava.version>
+        <fasterxml.jackson.version>2.4.3</fasterxml.jackson.version>
+        <io.netty.version>4.0.23.Final</io.netty.version>
+        <commons.compress.version>1.8.1</commons.compress.version>
+        <org.powermock.version>1.5.5</org.powermock.version>
+        <org.mockito.version>1.9.5</org.mockito.version>
+        <commons.logging.version>1.1.1</commons.logging.version>
+        <com.mchange.version>0.9.5-pre8</com.mchange.version>
+        <maven.checkstyle.plugin.version>2.11</maven.checkstyle.plugin.version>
+        <license.maven.plugin.version>2.6</license.maven.plugin.version>
+        <biplatform.version>1.4.0-SNAPSHOT</biplatform.version>
+        <junit.version>4.11</junit.version>
+        <mina.version>2.0.7</mina.version>
 	</properties>
 
 	<modules>
@@ -83,6 +84,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+		     <dependency>
+			    <groupId>org.apache.mina</groupId>
+			    <artifactId>mina-core</artifactId>
+			    <version>${mina.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.baidu.rigel.biplatform</groupId>
 				<artifactId>model</artifactId>

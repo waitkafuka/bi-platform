@@ -37,8 +37,6 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
-import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
@@ -60,7 +58,7 @@ import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
-import com.baidu.rigel.biplatform.ma.report.service.ReportPublishByJmsService;
+import com.baidu.rigel.biplatform.ma.report.service.ReportNoticeByJmsService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
@@ -520,12 +518,13 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 //                connection.publishCubes(cubes, dsInfo);
 //            }
 //        }.start();
-        reportPublishByJmsService.publishReports();
+        //reportPublishByJmsService.publishReports();
+        reportNoticeByJmsService.publishReports(cubes,dsInfo);
         return true;
     }
     
     @Resource
-    private ReportPublishByJmsService reportPublishByJmsService=null;
+    private ReportNoticeByJmsService reportNoticeByJmsService=null;
 
     @Deprecated
     private String getOriReleaseReportLocation(ReportDesignModel model) {

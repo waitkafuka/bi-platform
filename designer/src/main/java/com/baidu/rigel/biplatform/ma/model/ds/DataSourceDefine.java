@@ -16,8 +16,10 @@
 package com.baidu.rigel.biplatform.ma.model.ds;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -72,6 +74,8 @@ public class DataSourceDefine implements Serializable {
      * 连接字符串
      */
     private String hostAndPort;
+    
+    private Map <String, String> properties = null;
     
     /**
      * 数据来源类型
@@ -188,5 +192,24 @@ public class DataSourceDefine implements Serializable {
         if (dataSourceType != null) {
             this.dataSourceType = dataSourceType;
         }
-    }    
+    }
+
+    /**
+     * @return the properties
+     */
+    public Map<String, String> getProperties() {
+        if (this.properties == null) {
+            this.properties = Maps.newHashMap ();
+        }
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }   
+    
+    
 }

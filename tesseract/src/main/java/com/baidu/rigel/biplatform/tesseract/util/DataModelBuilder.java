@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
@@ -237,7 +238,7 @@ public class DataModelBuilder {
                 columnKey.append(measure.getName());
                 if (data.containsKey (oneLineKey) ) {
                     final BigDecimal oldVal = data.get (oneLineKey).get (columnKey.toString ());
-                    if (oldVal != null &&  currentVal != null) {
+                    if (oldVal != null &&  currentVal != null && supportedCalculated (measure)) {
                         final Serializable newTmp = measure.getAggregator ().aggregate (oldVal, currentVal);
                         BigDecimal newVal = 
                             newTmp instanceof BigDecimal ? (BigDecimal) newTmp : new BigDecimal(newTmp.toString ());
@@ -256,6 +257,17 @@ public class DataModelBuilder {
         }
 
         return data;
+    }
+
+    /**
+     * 
+     * @param measure
+     * @return boolean
+     */
+    private boolean supportedCalculated(MiniCubeMeasure measure) {
+        return measure.getAggregator () == Aggregator.COUNT 
+                || measure.getAggregator () == Aggregator.DISTINCT_COUNT
+                || measure.getAggregator () == Aggregator.SUM;
     }
 
     /**

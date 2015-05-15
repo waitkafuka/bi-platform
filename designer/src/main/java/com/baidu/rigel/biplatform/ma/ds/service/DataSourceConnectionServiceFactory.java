@@ -29,7 +29,6 @@ public class DataSourceConnectionServiceFactory {
 				return new RelationDBConnectionServiceImpl();
 			// 列式数据库
 			case COL_DATABASE:
-				break;
 			// EXCEL文件
 			case EXCEL:
 			// CSV文件
@@ -43,6 +42,5 @@ public class DataSourceConnectionServiceFactory {
 				throw new DataSourceOperationException("unknow datasource type:"
                         + sourceType);
 		}
-		return null;
 	}
 }
