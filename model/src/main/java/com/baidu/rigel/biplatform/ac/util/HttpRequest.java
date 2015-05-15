@@ -521,6 +521,7 @@ public class HttpRequest {
                     HttpHost httpHost = new HttpHost (InetAddress.getByName (host), port);
                     HttpRoute route = new HttpRoute (httpHost);
                     routee.add (route);
+                    LOGGER.info ("generate route : {}", route);
                 }
             } catch (UnknownHostException e) {
                 LOGGER.error (e.getMessage (), e);
