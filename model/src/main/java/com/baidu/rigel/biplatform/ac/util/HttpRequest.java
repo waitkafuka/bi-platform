@@ -17,7 +17,9 @@ package com.baidu.rigel.biplatform.ac.util;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
@@ -42,12 +45,14 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.client.utils.HttpClientUtils;
 import org.apache.http.config.Lookup;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.cookie.CookieSpec;
 import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.cookie.MalformedCookieException;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
@@ -55,6 +60,8 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Lists;
 
 /**
  * httpclient 4.3 的post和get实现
@@ -89,7 +96,7 @@ public class HttpRequest {
      */
     private static Logger LOGGER = LoggerFactory.getLogger(HttpRequest.class);
 
-    private static HttpClient client;
+//    private static HttpClient client;
     /**
      * 获取一个默认的HttpClient，默认的是指了默认返回结果的head为application/json
      * 
@@ -157,49 +164,7 @@ public class HttpRequest {
      * @return 默认的HttpClient
      */
     public static HttpClient getDefaultHttpClient(Map<String, String> params) {
-        
-        if (client == null) {
-            CookieSpecProvider cookieSpecProvider = new CookieSpecProvider() {
-
-                @Override
-                public CookieSpec create(HttpContext context) {
-                    return new BrowserCompatSpec() {
-                        
-                        @Override
-                        public void validate(Cookie cookie, CookieOrigin origin) throws MalformedCookieException{
-                            //no check cookie
-                        }
-                    };
-                }
-            };
-            
-            Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
-                    .register(NO_CHECK_COOKIES, cookieSpecProvider)
-                    .build();
-            String socketTimeout = "50000";
-            String connTimeout = "1000";
-            if (params != null) {
-                if (params.containsKey(SOCKET_TIME_OUT)) {
-                    socketTimeout = params.get(SOCKET_TIME_OUT);
-                }
-                if (params.containsKey(CONNECTION_TIME_OUT)) {
-                    socketTimeout = params.get(CONNECTION_TIME_OUT);
-                }
-            }
-            // 设置默认的cookie的安全策略为不校验
-            RequestConfig requestConfigBuilder = RequestConfig.custom()
-                    .setCookieSpec(NO_CHECK_COOKIES)
-                    .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
-                    .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
-                    .build();
-            client = HttpClients.custom()
-                    .setDefaultCookieSpecRegistry(cookieSpecRegistry)
-                    .setDefaultRequestConfig(requestConfigBuilder)
-                    .build();
-        }
-        
-        
-        return client;
+        return ClientInstance.getClientInstance (params);
     }
     
     /**
@@ -358,6 +323,7 @@ public class HttpRequest {
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
                 }
 //                client.
+                LOGGER.info ("[INFO] --- --- execute query with client {}", client);
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, false);
                 StringBuilder sb = new StringBuilder();
@@ -481,6 +447,89 @@ public class HttpRequest {
         return paramList;
     }
 
+    private static final class ClientInstance {
+        
+        private static HttpClient INSTANCE;
+        
+        private static final Object LOCK_OBJ = new Object();
+        
+        private static final CookieSpecProvider cookieSpecProvider = new CookieSpecProvider() {
+            
+            @Override
+            public CookieSpec create(HttpContext context) {
+                return new BrowserCompatSpec() {
+                    
+                    @Override
+                    public void validate(Cookie cookie, CookieOrigin origin) throws MalformedCookieException{
+                        //no check cookie
+                    }
+                };
+            }
+        };
+        public static HttpClient getClientInstance (Map<String, String> params) {
+            if (INSTANCE == null) {
+                synchronized (LOCK_OBJ) {
+                    if (INSTANCE == null) {
+                        Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
+                                .register(NO_CHECK_COOKIES, cookieSpecProvider)
+                                .build();
+                        String socketTimeout = "50000";
+                        String connTimeout = "1000";
+                        if (params != null) {
+                            if (params.containsKey(SOCKET_TIME_OUT)) {
+                                socketTimeout = params.get(SOCKET_TIME_OUT);
+                            }
+                            if (params.containsKey(CONNECTION_TIME_OUT)) {
+                                socketTimeout = params.get(CONNECTION_TIME_OUT);
+                            }
+                        }
+                        // 设置默认的cookie的安全策略为不校验
+                        RequestConfig requestConfigBuilder = RequestConfig.custom()
+                                .setCookieSpec(NO_CHECK_COOKIES)
+                                .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
+                                .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
+                                .build();
+                        PoolingHttpClientConnectionManager connectionManager = 
+                            new PoolingHttpClientConnectionManager ();
+                        connectionManager.setMaxTotal (1000);
+                        List<HttpRoute> routee = getRoutee ();
+                        int maxPerRoute = 1000 / routee.size ();
+                        for (HttpRoute route : routee) {
+                            connectionManager.setMaxPerRoute (route, maxPerRoute);
+                        }
+                        INSTANCE = HttpClients.custom()
+                                .setDefaultCookieSpecRegistry(cookieSpecRegistry)
+                                .setDefaultRequestConfig(requestConfigBuilder)
+                                .setConnectionManager (connectionManager)
+                                .build();
+                    }
+                }
+            }
+            
+            return INSTANCE;
+        }
+        
+        private static List<HttpRoute> getRoutee() {
+            String addresses = ConfigInfoUtils.getServerAddress ();
+            List<HttpRoute> routee = Lists.newArrayList ();
+            String addressConf = addresses.substring (addresses.indexOf ("[") + 1, addresses.lastIndexOf("]"));
+            String[] addressArray = addressConf.split (" ");
+            try {
+                for (String addr : addressArray) {
+                    int port = Integer.valueOf (addr.split (":")[1]);
+                    String host = addr.split (":")[0];
+                    HttpHost httpHost = new HttpHost (InetAddress.getByName (host), port);
+                    HttpRoute route = new HttpRoute (httpHost);
+                    routee.add (route);
+                    LOGGER.info ("generate route : {}", route);
+                }
+            } catch (UnknownHostException e) {
+                LOGGER.error (e.getMessage (), e);
+            }
+            return routee;
+        }
+        
+    }
 //     public static void main(String[] args) throws Exception {
 //         SqlDataSourceInfo sqlDataSourceInfo = new SqlDataSourceInfo("sqlDataSource_4_unique");
 //         List<String> hosts = new ArrayList<String>();
