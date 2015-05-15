@@ -17,7 +17,9 @@ package com.baidu.rigel.biplatform.ac.util;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,6 +32,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
@@ -489,11 +492,11 @@ public class HttpRequest {
                         PoolingHttpClientConnectionManager connectionManager = 
                             new PoolingHttpClientConnectionManager ();
                         connectionManager.setMaxTotal (1000);
-//                        List<HttpRoute> routee = getRoutee ();
-//                        int maxPerRoute = 1000 / routee.size ();
-//                        for (HttpRoute route : routee) {
-//                            connectionManager.setMaxPerRoute (route, maxPerRoute);
-//                        }
+                        List<HttpRoute> routee = getRoutee ();
+                        int maxPerRoute = 1000 / routee.size ();
+                        for (HttpRoute route : routee) {
+                            connectionManager.setMaxPerRoute (route, maxPerRoute);
+                        }
                         INSTANCE = HttpClients.custom()
                                 .setDefaultCookieSpecRegistry(cookieSpecRegistry)
                                 .setDefaultRequestConfig(requestConfigBuilder)
@@ -505,11 +508,25 @@ public class HttpRequest {
             
             return INSTANCE;
         }
-//        private static List<HttpRoute> getRoutee() {
-//            String addresses = ConfigInfoUtils.getServerAddress ();
-//            List<HttpRoute> routee = Lists.newArrayList ();
-//            return routee;
-//        }
+        
+        private static List<HttpRoute> getRoutee() {
+            String addresses = ConfigInfoUtils.getServerAddress ();
+            List<HttpRoute> routee = Lists.newArrayList ();
+            String addressConf = addresses.substring (addresses.indexOf ("[") + 1, addresses.lastIndexOf("]"));
+            String[] addressArray = addressConf.split (" ");
+            try {
+                for (String addr : addressArray) {
+                    int port = Integer.valueOf (addr.split (":")[1]);
+                    String host = addr.split (":")[0];
+                    HttpHost httpHost = new HttpHost (InetAddress.getByName (host), port);
+                    HttpRoute route = new HttpRoute (httpHost);
+                    routee.add (route);
+                }
+            } catch (UnknownHostException e) {
+                LOGGER.error (e.getMessage (), e);
+            }
+            return routee;
+        }
         
     }
 //     public static void main(String[] args) throws Exception {
