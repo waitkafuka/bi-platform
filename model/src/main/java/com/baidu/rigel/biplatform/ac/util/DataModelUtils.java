@@ -16,13 +16,8 @@
 package com.baidu.rigel.biplatform.ac.util;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -60,13 +55,13 @@ public class DataModelUtils {
      * @param rowHeadDefine 行头信息
      * @return 构建的DataModel
      */
-    public static DataModel buildDataModel(List<HeadField> columnBaseHeadField, List<HeadField> rowHeadDefine) {
-        DataModel dataModel = new DataModel();
-        dataModel.setRowHeadFields(rowHeadDefine);
-        dataModel.setColumnHeadFields(columnBaseHeadField);
-        fillColumnData(dataModel, FillDataType.COLUMN);
-        return dataModel;
-    }
+//    private static DataModel buildDataModel(List<HeadField> columnBaseHeadField, List<HeadField> rowHeadDefine) {
+//        DataModel dataModel = new DataModel();
+//        dataModel.setRowHeadFields(rowHeadDefine);
+//        dataModel.setColumnHeadFields(columnBaseHeadField);
+//        fillColumnData(dataModel, FillDataType.COLUMN);
+//        return dataModel;
+//    }
 
     /**
      * 在指定的头信息中查找符合指定UniqueName的第一个节点
@@ -75,7 +70,7 @@ public class DataModelUtils {
      * @param uniqueName // TODO 后续需要修改，应该传递的是一个UniqueName的集合，按照顺序查找下去
      * @return
      */
-    public static int foundIndexByLeafeValue(List<HeadField> fileds, String uniqueName) {
+    private static int foundIndexByLeafeValue(List<HeadField> fileds, String uniqueName) {
         if (CollectionUtils.isEmpty(fileds)) {
             throw new IllegalArgumentException("root fields can not be empty!");
         }
@@ -106,24 +101,24 @@ public class DataModelUtils {
      * @param type 合并方式
      * @return 合并后的整个数据母体
      */
-    public static DataModel addData(DataModel dataModel, List<HeadField> datas, FillDataType type) {
-        if (dataModel == null) {
-            throw new IllegalArgumentException("dataModel can not be null");
-        }
-        if (CollectionUtils.isEmpty(datas)) {
-            return dataModel;
-        }
-        // 按照行或者列的类型将数据封装到表头属性中
-        fillFieldData(dataModel, type);
-        if (type.equals(FillDataType.COLUMN)) {
-            dataModel.getColumnHeadFields().addAll(datas);
-        } else {
-            dataModel.getRowHeadFields().addAll(datas);
-        }
-        // 根据不同的类型将数据重新塞到dataModel的数据区中
-        fillColumnData(dataModel, type);
-        return dataModel;
-    }
+//    public static DataModel addData(DataModel dataModel, List<HeadField> datas, FillDataType type) {
+//        if (dataModel == null) {
+//            throw new IllegalArgumentException("dataModel can not be null");
+//        }
+//        if (CollectionUtils.isEmpty(datas)) {
+//            return dataModel;
+//        }
+//        // 按照行或者列的类型将数据封装到表头属性中
+//        fillFieldData(dataModel, type);
+//        if (type.equals(FillDataType.COLUMN)) {
+//            dataModel.getColumnHeadFields().addAll(datas);
+//        } else {
+//            dataModel.getRowHeadFields().addAll(datas);
+//        }
+//        // 根据不同的类型将数据重新塞到dataModel的数据区中
+//        fillColumnData(dataModel, type);
+//        return dataModel;
+//    }
 
     /**
      * 将DataModel按照行进行排序
@@ -132,7 +127,7 @@ public class DataModelUtils {
      * @param sort 排序类型
      * @throws IllegalAccessException 排序的列非法
      */
-    public static void sortByRow(DataModel dataModel, SortType sort) throws IllegalAccessException {
+    private static void sortByRow(DataModel dataModel, SortType sort) throws IllegalAccessException {
         if (dataModel == null) {
             throw new IllegalArgumentException("can not sort empty dataModel!");
         }
@@ -168,7 +163,7 @@ public class DataModelUtils {
      * @param dataModel 整个DataModel
      * @param type 获取数据的行头类型，行还是列
      */
-    public static void fillColumnData(DataModel dataModel, FillDataType type) {
+    private static void fillColumnData(DataModel dataModel, FillDataType type) {
 
         List<HeadField> columnLeafs = getLeafNodeList(dataModel.getColumnHeadFields());
         List<HeadField> rowLeafs = getLeafNodeList(dataModel.getRowHeadFields());
@@ -319,7 +314,7 @@ public class DataModelUtils {
      * @param field 待移除节点
      * @param rowHeadFields datamodel行上节点
      */
-    public static void removeField(HeadField field, List<HeadField> rowHeadFields) {
+    private static void removeField(HeadField field, List<HeadField> rowHeadFields) {
         HeadField parentField = field.getParentLevelField();
         if (field.getParentLevelField() != null) {
             parentField.getNodeList().remove(field);
@@ -340,14 +335,14 @@ public class DataModelUtils {
      * @param rowHeadFields 行上的节点
      * @return 返回第一行的rowspan
      */
-    public static int getRowSpan(List<HeadField> rowHeadFields) {
-        if (CollectionUtils.isNotEmpty(rowHeadFields)) {
-            for (HeadField filed : rowHeadFields) {
-                return filed.getLeafSize();
-            }
-        }
-        return 0;
-    }
+//    public static int getRowSpan(List<HeadField> rowHeadFields) {
+//        if (CollectionUtils.isNotEmpty(rowHeadFields)) {
+//            for (HeadField filed : rowHeadFields) {
+//                return filed.getLeafSize();
+//            }
+//        }
+//        return 0;
+//    }
 
     /**
      * 把一个周的开始caption，换成一个完整周的caption
@@ -357,14 +352,14 @@ public class DataModelUtils {
      * @return 完整caption
      * @throws ParseException 异常
      */
-    public static String parseToEntireWeekCaption(String startDay, String pattern) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        Calendar calendar = new GregorianCalendar(2012, Calendar.JANUARY, 1);
-        calendar.setTime(sdf.parse(startDay));
-        calendar.add(Calendar.DAY_OF_MONTH, 6);
-        String endDay = sdf.format(calendar.getTime());
-        return startDay + "~" + endDay;
-    }
+//    public static String parseToEntireWeekCaption(String startDay, String pattern) throws ParseException {
+//        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+//        Calendar calendar = new GregorianCalendar(2012, Calendar.JANUARY, 1);
+//        calendar.setTime(sdf.parse(startDay));
+//        calendar.add(Calendar.DAY_OF_MONTH, 6);
+//        String endDay = sdf.format(calendar.getTime());
+//        return startDay + "~" + endDay;
+//    }
 
     /**
      * 获取List<HeadField>结构下的所有叶子节点
@@ -388,16 +383,16 @@ public class DataModelUtils {
      * @param headField 指定节点
      * @return 指定节点的从小到大的祖先链
      */
-    public static List<HeadField> getHeadFieldListOutofHeadField(HeadField headField) {
-        List<HeadField> resultList = new ArrayList<HeadField>();
-        if (headField == null) {
-            return resultList;
-        } else {
-            resultList.add(headField);
-            resultList.addAll(getHeadFieldListOutofHeadField(headField.getParentLevelField()));
-        }
-        return resultList;
-    }
+//    private static List<HeadField> getHeadFieldListOutofHeadField(HeadField headField) {
+//        List<HeadField> resultList = new ArrayList<HeadField>();
+//        if (headField == null) {
+//            return resultList;
+//        } else {
+//            resultList.add(headField);
+//            resultList.addAll(getHeadFieldListOutofHeadField(headField.getParentLevelField()));
+//        }
+//        return resultList;
+//    }
 
     // /**
     // * 根据节点的唯一名称，获取这个节点对应的祖先链
@@ -447,13 +442,13 @@ public class DataModelUtils {
      * @param indent 当前节点深度
      * @return 节点距离顶层的深度
      */
-    private static int getIndentOfHeadField(HeadField headField, int indent) {
-        if (headField != null && headField.getParent() != null) {
-            return getIndentOfHeadField(headField.getParent(), indent + 1);
-        } else {
-            return indent;
-        }
-    }
+//    private static int getIndentOfHeadField(HeadField headField, int indent) {
+//        if (headField != null && headField.getParent() != null) {
+//            return getIndentOfHeadField(headField.getParent(), indent + 1);
+//        } else {
+//            return indent;
+//        }
+//    }
 
     /**
      * 获取节点和顶层节点的深度
@@ -461,9 +456,9 @@ public class DataModelUtils {
      * @param headField 指定节点
      * @return 节点深度
      */
-    public static int getIndentOfHeadField(HeadField headField) {
-        return getIndentOfHeadField(headField, 0);
-    }
+//    public static int getIndentOfHeadField(HeadField headField) {
+//        return getIndentOfHeadField(headField, 0);
+//    }
 
     /**
      * 将基于列存储的数据转换成基于行存储的结构
@@ -471,27 +466,27 @@ public class DataModelUtils {
      * @param columnBasedData 列式存储数据
      * @return 行式存数数据
      */
-    public static List<List<BigDecimal>> transColumnBasedData2RowBasedData(List<List<BigDecimal>> columnBasedData) {
-        List<List<BigDecimal>> rowBasedData = new ArrayList<List<BigDecimal>>();
-
-        for (List<BigDecimal> currColumnData : columnBasedData) {
-            for (int i = 0; i < currColumnData.size(); i++) {
-                // 当前列的第i行
-                List<BigDecimal> currRowData = new ArrayList<BigDecimal>();
-                if (rowBasedData.size() >= i + 1) {
-                    currRowData = rowBasedData.get(i);
-                } else {
-                    rowBasedData.add(currRowData);
-                }
-
-                currRowData.add(currColumnData.get(i));
-
-            }
-        }
-
-        return rowBasedData;
-
-    }
+//    public static List<List<BigDecimal>> transColumnBasedData2RowBasedData(List<List<BigDecimal>> columnBasedData) {
+//        List<List<BigDecimal>> rowBasedData = new ArrayList<List<BigDecimal>>();
+//
+//        for (List<BigDecimal> currColumnData : columnBasedData) {
+//            for (int i = 0; i < currColumnData.size(); i++) {
+//                // 当前列的第i行
+//                List<BigDecimal> currRowData = new ArrayList<BigDecimal>();
+//                if (rowBasedData.size() >= i + 1) {
+//                    currRowData = rowBasedData.get(i);
+//                } else {
+//                    rowBasedData.add(currRowData);
+//                }
+//
+//                currRowData.add(currColumnData.get(i));
+//
+//            }
+//        }
+//
+//        return rowBasedData;
+//
+//    }
 
     /**
      * 对DataModel进行排序
@@ -676,45 +671,45 @@ public class DataModelUtils {
         
     }
 
-	public static void sortDataModelBySort(DataModel dataModel,
-			SortRecord sortRecord, Comparator<HeadField> headFieldComparator) {
-		if (sortRecord != null && StringUtils.isNotBlank(sortRecord.getSortColumnUniquename())
-                && !sortRecord.getSortType().equals(SortType.NONE)) {
-            try {
-                int index =
-                        DataModelUtils.foundIndexByLeafeValue(dataModel.getColumnHeadFields(),
-                                sortRecord.getSortColumnUniquename());
-                dataModel.setOperateIndex(index);
-                sortByRow(dataModel, sortRecord.getSortType(), headFieldComparator);
-            } catch (Exception e) {
-                logger.warn("can not sort by  columnName:" + sortRecord.getSortColumnUniquename());
-            }
-        }
-	}
+//	public static void sortDataModelBySort(DataModel dataModel,
+//			SortRecord sortRecord, Comparator<HeadField> headFieldComparator) {
+//		if (sortRecord != null && StringUtils.isNotBlank(sortRecord.getSortColumnUniquename())
+//                && !sortRecord.getSortType().equals(SortType.NONE)) {
+//            try {
+//                int index =
+//                        DataModelUtils.foundIndexByLeafeValue(dataModel.getColumnHeadFields(),
+//                                sortRecord.getSortColumnUniquename());
+//                dataModel.setOperateIndex(index);
+//                sortByRow(dataModel, sortRecord.getSortType(), headFieldComparator);
+//            } catch (Exception e) {
+//                logger.warn("can not sort by  columnName:" + sortRecord.getSortColumnUniquename());
+//            }
+//        }
+//	}
 
-	private static void sortByRow(DataModel dataModel, SortType sort,
-			Comparator<HeadField> headFieldComparator) throws IllegalAccessException {
-		if (dataModel == null) {
-            throw new IllegalArgumentException("can not sort empty dataModel!");
-        }
-        fillFieldData(dataModel, FillDataType.ROW);
-        buildSortSummary(dataModel);
-        sortListHeadFields(dataModel.getRowHeadFields(), sort, headFieldComparator);
-        fillColumnData(dataModel, FillDataType.ROW);
-	}
+//	private static void sortByRow(DataModel dataModel, SortType sort,
+//			Comparator<HeadField> headFieldComparator) throws IllegalAccessException {
+//		if (dataModel == null) {
+//            throw new IllegalArgumentException("can not sort empty dataModel!");
+//        }
+//        fillFieldData(dataModel, FillDataType.ROW);
+//        buildSortSummary(dataModel);
+//        sortListHeadFields(dataModel.getRowHeadFields(), sort, headFieldComparator);
+//        fillColumnData(dataModel, FillDataType.ROW);
+//	}
 
-	private static void sortListHeadFields(List<HeadField> headFields,
-			SortType sort, Comparator<HeadField> headFieldComparator) {
-		 if (CollectionUtils.isNotEmpty(headFields)) {
-	            for (HeadField filed : headFields) {
-	                sortListHeadFields(filed.getNodeList(), sort, headFieldComparator);
-	                sortListHeadFields(filed.getChildren(), sort, headFieldComparator);
-	                for (HeadField child : filed.getChildren()) {
-	                    sortListHeadFields(child.getNodeList(), sort, headFieldComparator);
-	                }
-	            }
-	            Collections.sort(headFields, headFieldComparator);
-	        }
-	}
+//	private static void sortListHeadFields(List<HeadField> headFields,
+//			SortType sort, Comparator<HeadField> headFieldComparator) {
+//		 if (CollectionUtils.isNotEmpty(headFields)) {
+//	            for (HeadField filed : headFields) {
+//	                sortListHeadFields(filed.getNodeList(), sort, headFieldComparator);
+//	                sortListHeadFields(filed.getChildren(), sort, headFieldComparator);
+//	                for (HeadField child : filed.getChildren()) {
+//	                    sortListHeadFields(child.getNodeList(), sort, headFieldComparator);
+//	                }
+//	            }
+//	            Collections.sort(headFields, headFieldComparator);
+//	        }
+//	}
 
 }
