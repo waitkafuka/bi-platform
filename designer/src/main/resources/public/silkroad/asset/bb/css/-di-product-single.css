@@ -4162,6 +4162,7 @@ div.di-dim-level-find-msg span{
     text-align: center;
     vertical-align: middle;
     font-family: "微软雅黑";
+    outline-style: none;
 }
 .div-write {
     display: table;
