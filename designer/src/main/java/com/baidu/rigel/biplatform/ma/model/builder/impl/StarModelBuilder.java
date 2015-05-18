@@ -28,13 +28,11 @@ import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
-import com.baidu.rigel.biplatform.ac.minicube.UserCustomLevel;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ma.model.meta.CallbackDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
-import com.baidu.rigel.biplatform.ma.model.meta.DimSourceType;
 import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ReferenceDefine;
@@ -42,7 +40,6 @@ import com.baidu.rigel.biplatform.ma.model.meta.StandardDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
-import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
 import com.google.common.collect.Maps;
 
 /**
@@ -150,9 +147,11 @@ class StarModelBuilder {
                 // TODO 目前没有处理
                 return null;
             case USER_CUSTOM: {
-                UserDefineDimTableMetaDefine dimTable = buildUserDefineTable(factTable, dimension,
-                    level);
-                return dimTable;
+            	// TODO 目前没有处理
+//                UserDefineDimTableMetaDefine dimTable = buildUserDefineTable(factTable, dimension,
+//                    level);
+//                return dimTable;
+            	return null;
             }
             default:
                 break;
@@ -212,21 +211,21 @@ class StarModelBuilder {
      *            级别定义
      * @return 用户自定义表定义
      */
-    private UserDefineDimTableMetaDefine buildUserDefineTable(String factTable,
-        Dimension dimension, Level level) {
-        UserDefineDimTableMetaDefine dimTable = new UserDefineDimTableMetaDefine();
-        dimTable.setName(dimension.getTableName());
-        ReferenceDefine reference = buildReference(factTable, dimension, level);
-        dimTable.setReference(reference);
-        UserCustomLevel tmp = (UserCustomLevel) level;
-        
-        dimTable.setParams(tmp.getCustomParams());
-        dimTable.setSourceType(DimSourceType.SQL);
-        dimTable.setValue(tmp.getValue());
-        
-        dimTable.addColumn(this.buildColumn(level));
-        return dimTable;
-    }
+//    private UserDefineDimTableMetaDefine buildUserDefineTable(String factTable,
+//        Dimension dimension, Level level) {
+//        UserDefineDimTableMetaDefine dimTable = new UserDefineDimTableMetaDefine();
+//        dimTable.setName(dimension.getTableName());
+//        ReferenceDefine reference = buildReference(factTable, dimension, level);
+//        dimTable.setReference(reference);
+//        UserCustomLevel tmp = (UserCustomLevel) level;
+//        
+//        dimTable.setParams(tmp.getCustomParams());
+//        dimTable.setSourceType(DimSourceType.SQL);
+//        dimTable.setValue(tmp.getValue());
+//        
+//        dimTable.addColumn(this.buildColumn(level));
+//        return dimTable;
+//    }
     
     /**
      * 构建回调维度表定义

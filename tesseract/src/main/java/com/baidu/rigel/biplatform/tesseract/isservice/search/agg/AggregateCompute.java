@@ -151,7 +151,8 @@ public class AggregateCompute {
      * @param query
      * @return
      */
-    public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> resultQ, QueryRequest query) {
+    public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> resultQ, 
+        QueryRequest query) {
         if (query.getGroupBy() != null && CollectionUtils.isNotEmpty(resultQ)) {
             int dimSize = query.getSelect().getQueryProperties().size();
             List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();

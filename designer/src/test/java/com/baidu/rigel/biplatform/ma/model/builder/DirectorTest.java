@@ -17,18 +17,28 @@ package com.baidu.rigel.biplatform.ma.model.builder;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
+import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ma.model.builder.impl.DirectorImpl;
 import com.baidu.rigel.biplatform.ma.model.meta.CallbackDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ColumnMetaDefine;
+import com.baidu.rigel.biplatform.ma.model.meta.DimSourceType;
 import com.baidu.rigel.biplatform.ma.model.meta.DimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.ReferenceDefine;
@@ -36,8 +46,10 @@ import com.baidu.rigel.biplatform.ma.model.meta.StandardDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
+import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -54,7 +66,7 @@ public class DirectorTest {
 	Director director = new DirectorImpl();
 
 	/**
-     * 
+     * 使用null获取schema
      */
 	@Test
 	public void testGetSchemaWithNull() {
@@ -62,7 +74,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 使用空StarModel数组获取schema
      */
 	@Test
 	public void testGetSchemaWithEmptyArray() {
@@ -70,7 +82,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 不指定数据源id获取schema
      */
 	@Test
 	public void testGetSchemaWithNullDsId() {
@@ -85,7 +97,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 使用数据源id获取schema
      */
 	@Test
 	public void testGetSchemaWithDsId() {
@@ -98,7 +110,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 事实表不含有列的情况下获取schema
      */
 	@Test
 	public void testGetSchemaWithFactableWithNullColumn() {
@@ -117,7 +129,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 事实表中含有一列的情况下，获取schema
      */
 	@Test
 	public void testGetSchemaWithFactableWithColumn() {
@@ -142,7 +154,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * starModel中不含有维表
      */
 	@Test
 	public void testGetSchemaWithNullDimTable() {
@@ -164,6 +176,7 @@ public class DirectorTest {
 		StarModel[] starModels = new StarModel[] { starModel };
 		Schema schema = director.getSchema(starModels);
 		Assert.assertNotNull(schema);
+		// 含有一个Cube，两个指标，0个维度
 		Assert.assertEquals(1, schema.getCubes().size());
 		Cube cube = schema.getCubes().values().toArray(new Cube[0])[0];
 		Assert.assertEquals(2, cube.getMeasures().size());
@@ -171,7 +184,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 维度为空
      */
 	@Test
 	public void testGetSchemaWithEmptyDimTable() {
@@ -189,6 +202,7 @@ public class DirectorTest {
 		starModel.setFactTable(factTable);
 
 		List<DimTableMetaDefine> dimTables = Lists.newArrayList();
+		// 标准维度
 		DimTableMetaDefine dimTable = new StandardDimTableMetaDefine();
 		dimTables.add(dimTable);
 		starModel.setDimTables(dimTables);
@@ -203,7 +217,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 维表未指定引用关系
      */
 	@Test
 	public void testGetSchemaWithDimTableEmptyRef() {
@@ -235,7 +249,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 维表指定的引用关系不正确
      */
 	@Test
 	public void testGetSchemaWithDimTableNotCorrectRef() {
@@ -272,7 +286,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 维表中不存在引用关系对应的列
      */
 	@Test
 	public void testGetSchemaWithDimTableCorrectRefNoneDimColumn() {
@@ -309,7 +323,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 维表中有正确的引用关系
      */
 	@Test
 	public void testGetSchemaWithDimTableCorrectRefDimColumn() {
@@ -331,6 +345,7 @@ public class DirectorTest {
 		StarModel[] starModels = new StarModel[] { starModel };
 		Schema schema = director.getSchema(starModels);
 		Assert.assertNotNull(schema);
+		// Cube中含有一个指标、一个维度
 		Assert.assertEquals(1, schema.getCubes().size());
 		Cube cube = schema.getCubes().values().toArray(new Cube[0])[0];
 		Assert.assertEquals(1, cube.getMeasures().size());
@@ -338,7 +353,7 @@ public class DirectorTest {
 	}
 
 	/**
-     * 
+     * 使用时间维度
      */
 	@Test
 	public void testGetSchemaWithTimeDimension() {
@@ -368,23 +383,74 @@ public class DirectorTest {
 		Assert.assertNotNull(schema);
 		Assert.assertEquals(1, schema.getCubes().size());
 		Cube cube = schema.getCubes().values().toArray(new Cube[0])[0];
+		Assert.assertEquals(2, cube.getMeasures().size());
+		Assert.assertEquals(1, cube.getDimensions().size());
+	}
+
+	/**
+     * 使用CallBack维度
+     */
+	@Test
+	public void testGetSchemaWithCallbackDim() {
+		StarModel starModel = new StarModel();
+		starModel.setDsId("fact");
+		FactTableMetaDefine factTable = new FactTableMetaDefine();
+		factTable.setName("test");
+		
+		ColumnMetaDefine abc = new ColumnMetaDefine();
+		abc.setName("fact_abc");
+		factTable.addColumn(abc);
+
+		ColumnMetaDefine timeCol = new ColumnMetaDefine();
+		timeCol.setName("fact_callback");
+		factTable.addColumn(timeCol);
+		starModel.setFactTable(factTable);
+
+		List<DimTableMetaDefine> dimTables = this.buildCallbackDimTable();
+
+		starModel.setDimTables(dimTables);
+		StarModel[] starModels = new StarModel[] { starModel };
+		Schema schema = this.director.getSchema(starModels);
+		
+		Assert.assertNotNull(schema);
+		Assert.assertEquals(1, schema.getCubes().size());
+		Cube cube = schema.getCubes().values().toArray(new Cube[0])[0];
 		Assert.assertEquals(1, cube.getMeasures().size());
 		Assert.assertEquals(1, cube.getDimensions().size());
 	}
 
 	/**
-     * 
-     */
+	 * 使用自定义维度获取Schema
+	 */
 	@Test
-	public void testGetSchemaWithCallbackDim() {
-		Schema schema = genSchema();
+	public void tewtGetSchemaWithUserDim() {
+		StarModel starModel = new StarModel();
+		starModel.setDsId("fact");
+		FactTableMetaDefine factTable = new FactTableMetaDefine();
+		factTable.setName("test");
+		
+		ColumnMetaDefine abc = new ColumnMetaDefine();
+		abc.setName("fact_abc");
+		factTable.addColumn(abc);
+
+		ColumnMetaDefine timeCol = new ColumnMetaDefine();
+		timeCol.setName("fact_user");
+		factTable.addColumn(timeCol);
+		starModel.setFactTable(factTable);
+
+		List<DimTableMetaDefine> dimTables = this.buildUserDefineDimTableMetaDefine();
+
+		starModel.setDimTables(dimTables);
+		StarModel[] starModels = new StarModel[] { starModel };
+		Schema schema = this.director.getSchema(starModels);
+		
 		Assert.assertNotNull(schema);
 		Assert.assertEquals(1, schema.getCubes().size());
 		Cube cube = schema.getCubes().values().toArray(new Cube[0])[0];
 		Assert.assertEquals(1, cube.getMeasures().size());
-		Assert.assertEquals(2, cube.getDimensions().size());
+		Assert.assertEquals(1, cube.getDimensions().size());
 	}
-
+	
 	/**
      * 
      */
@@ -413,8 +479,9 @@ public class DirectorTest {
 		Assert.assertNotNull(starModels);
 		Assert.assertEquals(1, starModels.length);
 		StarModel starModel = starModels[0];
-		// 有两个维度，时间维度和callback维度
-		Assert.assertEquals(2, starModel.getDimTables().size());
+		
+		// 有两个维度，普通维度和callback维度表、时间维度
+		Assert.assertEquals(3, starModel.getDimTables().size());
 		Assert.assertEquals("fact", starModel.getFactTable().getName());
 	}
 
@@ -439,6 +506,41 @@ public class DirectorTest {
 		Assert.assertEquals(schema.getName(), newSchema.getName());
 		Assert.assertEquals(schema.getCubes().size(), newSchema.getCubes()
 				.size());
+	}
+	
+	/**
+	 * 测试增加扩展指标
+	 */
+	@Test
+	public void testModifySchemaWithNewModelWithNewCube() {
+		Schema schema = this.genSchema();
+		StarModel starModel = genStarModel();
+		
+		StarModel[] starModels = new StarModel[] { starModel };
+		// 修改Cube对应的id，保证新的starModel同原来的starModel对应的Cube是同一个
+		Map<String, ? extends Cube> cubes = schema.getCubes();
+		for (Cube cube : cubes.values()) {
+			starModel.setCubeId(cube.getId());
+		}
+		// 增加一个扩展计算指标
+		this.buildNewCube(cubes);
+		Schema newSchema = this.director.modifySchemaWithNewModel(schema,
+				starModels);
+		
+		Assert.assertNotNull(newSchema);
+		Assert.assertEquals(schema.getId(), newSchema.getId());
+		Assert.assertEquals(schema.getName(), newSchema.getName());
+		Assert.assertEquals(schema.getCubes().size(), newSchema.getCubes()
+				.size());
+		
+		
+		Map<String, ? extends Cube> actualCubes = newSchema.getCubes();
+		Assert.assertEquals(1, actualCubes.size());
+		for (Cube cube : actualCubes.values()) {
+			MiniCube miniCube = (MiniCube) cube;
+			Assert.assertEquals(2, miniCube.getMeasures().size());
+			Assert.assertEquals(3, cube.getDimensions().size());
+		}
 	}
 
 	/**
@@ -515,6 +617,7 @@ public class DirectorTest {
 		ColumnMetaDefine def = new ColumnMetaDefine();
 		def.setName("fact_def");
 		factTable.addColumn(def);
+		
 		// 建立callback回调列
 		ColumnMetaDefine calback = new ColumnMetaDefine();
 		calback.setName("fact_callback");
@@ -532,12 +635,16 @@ public class DirectorTest {
 		// 设置starModel的事实表
 		starModel.setFactTable(factTable);
 
-		// 建立维度表
+		// 建立时间维度表
 		List<DimTableMetaDefine> dimTables = buildDimTablesWithTimeDim();
 		// 添加回调维度
-		dimTables.add(this.buildCallbackDim());
+		dimTables.addAll(this.buildCallbackDimTable());
+		// 添加标准维度
+		dimTables.addAll(this.buildBaseDimTables());
 //		// 添加自定义维度
 //		dimTables.add(buildUserDefineDimTableMetaDefine());
+		// 设置维度表
+		starModel.setDimTables(dimTables);
 		
 		// 设置星型模型的维度表
 		starModel.setDimTables(dimTables);
@@ -549,7 +656,8 @@ public class DirectorTest {
 	 * 
 	 * @return
 	 */
-	private CallbackDimTableMetaDefine buildCallbackDim() {
+	private List<DimTableMetaDefine> buildCallbackDimTable() {
+		List<DimTableMetaDefine> callbackDimTable = Lists.newArrayList();
 		// 建立callback回调维度
 		CallbackDimTableMetaDefine callBackDim = new CallbackDimTableMetaDefine();
 		callBackDim.setName("call_back");
@@ -564,7 +672,8 @@ public class DirectorTest {
 		callbackRef.setMajorTable("fact");
 		callbackRef.setSalveColumn("gen_call_back_id");
 		callBackDim.setReference(callbackRef);
-		return callBackDim;
+		callbackDimTable.add(callBackDim);
+		return callbackDimTable;
 	}
 
 	/**
@@ -573,19 +682,20 @@ public class DirectorTest {
 	 * @return
 	 */
 	private List<DimTableMetaDefine> buildDimTablesWithTimeDim() {
-		List<DimTableMetaDefine> dimTables = buildBaseDimTables();
+		List<DimTableMetaDefine> dimTables = Lists.newArrayList();
 		// 时间维度表
 		TimeDimTableMetaDefine timeDimTable = new TimeDimTableMetaDefine(
 				TimeDimType.STANDARD_TIME);
 		ColumnMetaDefine timeId = new ColumnMetaDefine();
-		timeId.setName(TimeType.TimeYear.toString());
-		timeId.setCaption(TimeType.TimeYear.toString());
+		timeId.setName(TimeType.TimeMonth.toString());
+		timeId.setCaption(TimeType.TimeMonth.toString());
 		timeDimTable.addColumn(timeId);
+		timeDimTable.setName("time");
 		// 构建时间维度对应的事实表引用列
 		ReferenceDefine timeReference = new ReferenceDefine();
 		timeReference.setMajorColumn("fact_time_id");
 		timeReference.setMajorTable("fact");
-		timeReference.setSalveColumn("time_id");
+		timeReference.setSalveColumn(TimeType.TimeMonth.toString());
 		timeDimTable.setReference(timeReference);
 		dimTables.add(timeDimTable);
 		return dimTables;
@@ -617,25 +727,72 @@ public class DirectorTest {
 		return dimTables;
 	}
 
-//	/**
-//	 * 构建用户自定义维度
-//	 * 
-//	 * @return
-//	 */
-//	private UserDefineDimTableMetaDefine buildUserDefineDimTableMetaDefine() {
-//		UserDefineDimTableMetaDefine ud = new UserDefineDimTableMetaDefine();
-//		ColumnMetaDefine dimColumn = new ColumnMetaDefine();
-//		dimColumn.setName("dim_user");
-//		dimColumn.setCaption("dim_user");
-//		ud.setSourceType(DimSourceType.SQL);
-//		ud.addColumn(dimColumn);
-//		ReferenceDefine reference = new ReferenceDefine();
-//		reference.setMajorColumn("fact_user");
-//		reference.setMajorTable("fact");
-//		reference.setSalveColumn("dim_user");
-//		ud.setReference(reference);
-//		ud.setParams(Maps.newHashMap());
-//		
-//		return ud;
-//	}
+	/**
+	 * 构建用户自定义维度表
+	 * 
+	 * @return
+	 */
+	private List<DimTableMetaDefine> buildUserDefineDimTableMetaDefine() {
+		List<DimTableMetaDefine> dimTable = Lists.newArrayList();
+		UserDefineDimTableMetaDefine ud = new UserDefineDimTableMetaDefine();
+		ColumnMetaDefine dimColumn = new ColumnMetaDefine();
+		dimColumn.setName("dim_user");
+		dimColumn.setCaption("dim_user");
+		ud.setSourceType(DimSourceType.SQL);
+		ud.addColumn(dimColumn);
+		ReferenceDefine reference = new ReferenceDefine();
+		reference.setMajorColumn("fact_user");
+		reference.setMajorTable("fact");
+		reference.setSalveColumn("dim_user");
+		ud.setReference(reference);
+		ud.setParams(Maps.newHashMap());
+		dimTable.add(ud);
+		return dimTable;
+	}
+
+	/**
+	 * 建立新的Cube
+	 */
+	private void buildNewCube(Map<String, ? extends Cube> cubes) {
+		for(Cube cube :cubes.values()) {
+			MiniCube miniCube = (MiniCube) cube;
+			Map<String, Measure> measures= miniCube.getMeasures();
+			for (Measure measure : measures.values()) {
+				
+				MiniCubeMeasure miniMeasure = (MiniCubeMeasure) measure;
+				miniMeasure.setAggregator(Aggregator.COUNT);
+			}
+			
+			// 增加扩展指标
+			ExtendMinicubeMeasure extendMeasure = new ExtendMinicubeMeasure("CAL");
+			extendMeasure.setAggregator(Aggregator.COUNT);
+			extendMeasure.setId("id");
+			extendMeasure.setCaption("CAL");
+			extendMeasure.setType(MeasureType.CAL);
+			extendMeasure.setVisible(true);
+			Set<String> refIndName = Sets.newHashSet();
+			refIndName.add("fact_def");
+			extendMeasure.setRefIndNames(refIndName);
+			measures.put("id", extendMeasure);
+			miniCube.setMeasures(measures);
+			
+			// 修改维度为维度组
+			Map<String, Dimension> dimensions = miniCube.getDimensions();
+			for (Dimension dimension : dimensions.values()) {
+				switch (dimension.getType()) {
+				case STANDARD_DIMENSION:
+					StandardDimension standardDimension = (StandardDimension) dimension;
+					standardDimension.setType(DimensionType.GROUP_DIMENSION);
+					break;
+				case TIME_DIMENSION:
+				case CALLBACK:
+				case GROUP_DIMENSION:
+					break;
+				default:
+					break;
+				}
+			}
+			miniCube.setDimensions(dimensions);
+		}
+	}
 }

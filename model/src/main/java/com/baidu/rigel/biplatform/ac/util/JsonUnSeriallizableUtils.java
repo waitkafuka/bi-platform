@@ -23,7 +23,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
-import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
@@ -57,7 +56,6 @@ public class JsonUnSeriallizableUtils {
         setHeadFieldParent(dataModel.getRowHeadFields(), null, null);
         setHeadFieldParent(dataModel.getColumnHeadFields(), null, null);
         return dataModel;
-
     }
 
     /**
@@ -87,19 +85,19 @@ public class JsonUnSeriallizableUtils {
      * @param cubeJson cube的json字符串
      * @return 转换好的cube对象
      */
-    public static Cube parseCubeJson(String cubeJson) {
-        if (StringUtils.isBlank(cubeJson)) {
-            throw new IllegalArgumentException("cube json is blank.");
-        }
-        MiniCube cube = AnswerCoreConstant.GSON.fromJson(cubeJson, MiniCube.class);
-        // 需要将每个Dimension的level对应的Dimension属性重新设置进去
-        cube.getDimensions().values().forEach((dim) -> {
-            dim.getLevels().forEach((k, v) -> {
-                v.setDimension(dim);
-            });
-        });
-        return cube;
-    }
+//    private static Cube parseCubeJson(String cubeJson) {
+//        if (StringUtils.isBlank(cubeJson)) {
+//            throw new IllegalArgumentException("cube json is blank.");
+//        }
+//        MiniCube cube = AnswerCoreConstant.GSON.fromJson(cubeJson, MiniCube.class);
+//        // 需要将每个Dimension的level对应的Dimension属性重新设置进去
+//        cube.getDimensions().values().forEach((dim) -> {
+//            dim.getLevels().forEach((k, v) -> {
+//                v.setDimension(dim);
+//            });
+//        });
+//        return cube;
+//    }
 
     /**
      * 回填Cube的维度中level对应的Dimension信息
@@ -133,13 +131,13 @@ public class JsonUnSeriallizableUtils {
      * @return 转换出来的member
      * @throws IllegalArgumentException 参数异常
      */
-    public static Member parseMetaJson2Member(Cube cube, String metaDataJson) {
-        if (StringUtils.isBlank(metaDataJson) || cube == null) {
-            throw new IllegalArgumentException("param is illegal. cube:" + cube + " metaDataJson:" + metaDataJson);
-        }
-        MetaJsonDataInfo metaJsonDataInfo = AnswerCoreConstant.GSON.fromJson(metaDataJson, MetaJsonDataInfo.class);
-        return parseMetaJson2Member(cube, metaJsonDataInfo);
-    }
+//    private static Member parseMetaJson2Member(Cube cube, String metaDataJson) {
+//        if (StringUtils.isBlank(metaDataJson) || cube == null) {
+//            throw new IllegalArgumentException("param is illegal. cube:" + cube + " metaDataJson:" + metaDataJson);
+//        }
+//        MetaJsonDataInfo metaJsonDataInfo = AnswerCoreConstant.GSON.fromJson(metaDataJson, MetaJsonDataInfo.class);
+//        return parseMetaJson2Member(cube, metaJsonDataInfo);
+//    }
 
     /**
      * @param cube
@@ -195,7 +193,7 @@ public class JsonUnSeriallizableUtils {
                 }
             }
         } catch (MiniCubeQueryException e) {
-            e.printStackTrace();
+            throw new RuntimeException (e);
         }
 
         return metaJsonDataInfo;

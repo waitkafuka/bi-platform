@@ -650,7 +650,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             } else {
                   if (dataRange[0] .contains("-") && dataRange[1] .contains("-")) { 
                       dataRange[0]  = dataRange[0] .replace("-", "");
-                      dataRange[0]  = dataRange[1] .replace("-", "");   
+                      dataRange[1]  = dataRange[1] .replace("-", "");   
                       TimeDimension timeDim = (TimeDimension) element;
                       Map<String, String> time = 
                               TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , timeDim.getDataTimeType());
