@@ -50,6 +50,18 @@
 .data-sources-create .data-table-set-msg-box {
     margin: 3px 0
 }
+.data-sources-create .form-common-properties {
+    display: inline-block;
+    vertical-align: top;
+}
+.form-common-properties label {
+    display: inline-block;
+}
+.form-common-properties input {
+    display: inline-block;
+    width: 130px;
+    margin: 2px 7px;
+}
 .data-table-set-msg-box .help {
     /*color: #336699;
      font-size: 16px;
