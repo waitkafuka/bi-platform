@@ -1027,6 +1027,8 @@ public class QueryDataResource extends BaseResource {
             if (table.getDataSourceColumnBased().size() == 0) {
                 ResponseResult rs = new ResponseResult();
                 rs.setStatus(0);
+                resultMap.put ("pivottable", table);
+                rs.setData (resultMap);
                 rs.setStatusInfo("未查到任何数据");
                 return rs;
             } else {
