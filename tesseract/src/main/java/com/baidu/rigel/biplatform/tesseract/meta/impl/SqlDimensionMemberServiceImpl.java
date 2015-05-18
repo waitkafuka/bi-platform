@@ -369,7 +369,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             }
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             List<MiniCubeMember> memberResultList = this.buildMembersFromCellSet (resultSet, queryLevel, parent, dataSourceInfo, cube);
-            result = CollectionUtils.isEmpty (memberResultList) ? null : memberResultList.get(0);
+            result = CollectionUtils.isEmpty (memberResultList) ? result : memberResultList.get(0);
 //            if(!resultSet.next()){
 //                    log.error("no result return by query:" + queryRequest);
 ////                    throw new MetaException("no result return by query:" + queryRequest);
