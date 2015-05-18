@@ -36,6 +36,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFacto
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
+import com.baidu.rigel.biplatform.ma.report.service.ReportNoticeByJmsService;
 import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,6 +60,10 @@ public class UpdateDataResource extends BaseResource {
      */
     @Resource
     private DataSourceService dsService;
+    
+    
+    @Resource
+    private ReportNoticeByJmsService reportNoticeByJmsService;
 
     /**
      * 
@@ -103,15 +108,17 @@ public class UpdateDataResource extends BaseResource {
         LOG.info("[INFO] --- --- factTables = {}", factTables);
         LOG.info("[INFO] --- --- conds = {}", condsStr);
         LOG.info("[INFO] --- --- --- ---- ---- end pring param list --- --- --- --- ---- ");
-        boolean result = MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray, condsStr);
-        if (result) {
-            rs.setStatus(0);
-            rs.setStatusInfo("successfully");
-        } else {
-            rs.setStatus(1);
-            rs.setStatusInfo("failed");
-        }
-        LOG.info("[INFO] -- --- update index meta result : {}", result);
+        //boolean result = MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray, condsStr);
+        reportNoticeByJmsService.refreshIndex(dsInfo, factTableArray, condsStr);
+        //
+//        if (result) {
+//            rs.setStatus(0);
+//            rs.setStatusInfo("successfully");
+//        } else {
+//            rs.setStatus(1);
+//            rs.setStatusInfo("failed");
+//        }
+//        LOG.info("[INFO] -- --- update index meta result : {}", result);
         LOG.info("[INFO] --- --- end update index meta, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
     }
