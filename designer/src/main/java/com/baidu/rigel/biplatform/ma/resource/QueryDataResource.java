@@ -448,6 +448,7 @@ public class QueryDataResource extends BaseResource {
         builder.append("<meta content='text/html' 'charset=UTF-8'>");
         final String theme = model.getTheme();
         builder.append("<link rel='stylesheet' href='/silkroad/asset/" + theme+ "/css/-di-product-min.css'/>");
+        builder.append("<script src='/silkroad/dep/jquery-1.11.1.min.js'/></script>");
         builder.append("</head>");
         builder.append("<body>");
         builder.append(vm);
@@ -1027,6 +1028,8 @@ public class QueryDataResource extends BaseResource {
             if (table.getDataSourceColumnBased().size() == 0) {
                 ResponseResult rs = new ResponseResult();
                 rs.setStatus(0);
+                resultMap.put ("pivottable", table);
+                rs.setData (resultMap);
                 rs.setStatusInfo("未查到任何数据");
                 return rs;
             } else {
