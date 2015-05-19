@@ -157,7 +157,7 @@ public class SearchIndexServiceImpl implements SearchService {
 //        LOGGER.debug (String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query",
 //                "merging final result"));
 
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
+        LOGGER.debug(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
     }
 
