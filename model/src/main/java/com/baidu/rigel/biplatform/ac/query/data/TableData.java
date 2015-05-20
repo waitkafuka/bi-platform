@@ -32,23 +32,7 @@ public class TableData implements Serializable{
      */
     private static final long serialVersionUID = -917029423791246077L;
 
-    private List<Column> columuns;
-    
     private Map<Column, List<String>> colBaseDatas;
-
-    /**
-     * @return the columuns
-     */
-    public List<Column> getColumuns() {
-        return columuns;
-    }
-
-    /**
-     * @param columuns the columuns to set
-     */
-    public void setColumuns(List<Column> columuns) {
-        this.columuns = columuns;
-    }
 
     /**
      * @return the colBaseDatas
