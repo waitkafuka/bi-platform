@@ -467,8 +467,8 @@ public class HttpRequest {
             }
         };
         public static HttpClient getClientInstance (Map<String, String> params) {
-//            if (INSTANCE == null) {
-//                synchronized (LOCK_OBJ) {
+            if (INSTANCE == null) {
+                synchronized (LOCK_OBJ) {
                     if (INSTANCE == null) {
                         Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
                                 .register(NO_CHECK_COOKIES, cookieSpecProvider)
@@ -503,8 +503,8 @@ public class HttpRequest {
                                 .setConnectionManager (connectionManager)
                                 .build();
                     }
-//                }
-//            }
+                }
+            }
             
             return INSTANCE;
         }

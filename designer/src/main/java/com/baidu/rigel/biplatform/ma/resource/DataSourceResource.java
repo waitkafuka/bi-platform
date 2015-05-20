@@ -445,7 +445,7 @@ public class DataSourceResource extends BaseResource {
      * @param define
      */
     private void assertPropertiesForDs(HttpServletRequest request, DataSourceDefine define) {
-        String properties = request.getParameter ("properties");
+        String properties = request.getParameter ("advancedProperties");
         define.getProperties ().clear ();
         if (!StringUtils.isEmpty (properties)) {
             Type type = new TypeToken<Map<String, String>>() {}.getType();

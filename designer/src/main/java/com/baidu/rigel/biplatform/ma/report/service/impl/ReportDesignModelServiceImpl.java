@@ -37,8 +37,6 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
-import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
@@ -95,6 +93,98 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 
 	@Value("${biplatform.ma.report.location}")
 	private String reportBaseDir;
+    /**
+     * {@inheritDoc}
+     * @throws DataSourceOperationException 
+     */
+    @Override
+    public boolean publishReport(ReportDesignModel model, String securityKey)
+            throws ReportModelOperationException, DataSourceOperationException {
+        
+        boolean result = false;
+        String devReportLocation = this.generateDevReportLocation(model);
+        String realeaseLocation = this.getReleaseReportLocation(model);
+        try {
+            // 删除原来已经发布的报表，如果不存在，忽略此处异常
+            ReportDesignModel tmp = this.getModelByIdOrName (model.getId (), true);
+            if (tmp != null) {
+                try {
+                    fileService.rm(getReleaseReportLocation(tmp));
+                } catch (Exception e) {
+                    fileService.rm(getOriReleaseReportLocation(tmp));
+                }
+            }
+        } catch (FileServiceException e1) {
+            logger.info (e1.getMessage (), e1);
+        }
+        try {
+            result = this.fileService.copy(devReportLocation, realeaseLocation);
+        } catch (FileServiceException e) {
+            logger.error(e.getMessage(), e);
+            throw new ReportModelOperationException("发布报表失败！");
+        }
+        if (!result) {
+            logger.error("拷贝报表失败！");
+            throw new ReportModelOperationException("发布报表失败！");
+        }
+        /**
+         * 发布
+         */
+        DataSourceDefine dsDefine;
+        DataSourceInfo dsInfo;
+        try {
+            dsDefine = dsService.getDsDefine(model.getDsId());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
+        } catch (DataSourceOperationException e) {
+            logger.error("Fail in Finding datasource define. ", e);
+            throw e;
+        } catch (DataSourceConnectionException e) {
+        	logger.error("Fail in parse datasource to datasourceInfo.", e);
+        	throw new DataSourceOperationException(e);
+        }
+        List<Cube> cubes = Lists.newArrayList();
+        for (ExtendArea area : model.getExtendAreaList()) {
+            try {
+                // 忽略此类区域
+//                if (area.getType() != ExtendAreaType.TABLE
+//                        || area.getType() != ExtendAreaType.SELECTION_AREA 
+//                        || area.getType() == ExtendAreaType.LITEOLAP_CHART
+//                        || area.getType() == ExtendAreaType.SELECT
+//                        
+//                        || area.getType() == ExtendAreaType.MULTISELECT
+//                        || area.getType() == ExtendAreaType.TEXT
+//                        || area.getType() == ExtendAreaType.H_BUTTON
+//                        || area.getType () == ExtendAreaType.SINGLE_DROP_DOWN_TREE
+//                        || QueryUtils.isFilterArea(area.getType())) {
+//                    continue;
+//                }  
+                if ((area.getType() != ExtendAreaType.TABLE
+                        && area.getType() != ExtendAreaType.CHART)
+                        || QueryUtils.isFilterArea(area.getType())) {
+                    continue;
+                }
+                Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
+                cubes.add(cube);
+            } catch (QueryModelBuildException e) {
+                logger.warn("It seems that logicmodel of area is null. Ingore this area. ");
+                continue;
+            }
+        }
+//        new Thread() {
+//            public void run() {
+//                MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
+//                connection.publishCubes(cubes, dsInfo);
+//            }
+//        }.start();
+        //reportPublishByJmsService.publishReports();
+//        reportNoticeByJmsService.publishReports(cubes,dsInfo);
+        return true;
+    }
+    
+//    @Resource
+//    private ReportNoticeByJmsService reportNoticeByJmsService=null;
 
 	/**
 	 * logger
@@ -449,98 +539,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		return builder.toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws DataSourceOperationException
-	 */
-	@Override
-	public boolean publishReport(ReportDesignModel model, String securityKey)
-			throws ReportModelOperationException, DataSourceOperationException {
-
-		boolean result = false;
-		String devReportLocation = this.generateDevReportLocation(model);
-		String realeaseLocation = this.getReleaseReportLocation(model);
-		try {
-			// 删除原来已经发布的报表，如果不存在，忽略此处异常
-			ReportDesignModel tmp = this
-					.getModelByIdOrName(model.getId(), true);
-			if (tmp != null) {
-				try {
-					fileService.rm(getReleaseReportLocation(tmp));
-				} catch (Exception e) {
-					fileService.rm(getOriReleaseReportLocation(tmp));
-				}
-			}
-		} catch (FileServiceException e1) {
-			logger.info(e1.getMessage(), e1);
-		}
-		try {
-			result = this.fileService.copy(devReportLocation, realeaseLocation);
-		} catch (FileServiceException e) {
-			logger.error(e.getMessage(), e);
-			throw new ReportModelOperationException("发布报表失败！");
-		}
-		if (!result) {
-			logger.error("拷贝报表失败！");
-			throw new ReportModelOperationException("发布报表失败！");
-		}
-		/**
-		 * 发布
-		 */
-		DataSourceDefine dsDefine;
-		DataSourceInfo dsInfo;
-		try {
-			dsDefine = dsService.getDsDefine(model.getDsId());
-			DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory
-					.getDataSourceConnectionServiceInstance(dsDefine
-							.getDataSourceType());
-			dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
-		} catch (DataSourceOperationException e) {
-			logger.error("Fail in Finding datasource define. ", e);
-			throw e;
-		} catch (DataSourceConnectionException e) {
-			logger.error("Fail in parse datasource to datasourceInfo.", e);
-			throw new DataSourceOperationException(e);
-		}
-		List<Cube> cubes = Lists.newArrayList();
-		for (ExtendArea area : model.getExtendAreaList()) {
-			try {
-				// 忽略此类区域
-				// if (area.getType() != ExtendAreaType.TABLE
-				// || area.getType() != ExtendAreaType.SELECTION_AREA
-				// || area.getType() == ExtendAreaType.LITEOLAP_CHART
-				// || area.getType() == ExtendAreaType.SELECT
-				//
-				// || area.getType() == ExtendAreaType.MULTISELECT
-				// || area.getType() == ExtendAreaType.TEXT
-				// || area.getType() == ExtendAreaType.H_BUTTON
-				// || area.getType () == ExtendAreaType.SINGLE_DROP_DOWN_TREE
-				// || QueryUtils.isFilterArea(area.getType())) {
-				// continue;
-				// }
-				if ((area.getType() != ExtendAreaType.TABLE && area.getType() != ExtendAreaType.CHART)
-						|| QueryUtils.isFilterArea(area.getType())) {
-					continue;
-				}
-				Cube cube = QueryUtils.getCubeWithExtendArea(model, area);
-				cubes.add(cube);
-			} catch (QueryModelBuildException e) {
-				logger.warn("It seems that logicmodel of area is null. Ingore this area. ");
-				continue;
-			}
-		}
-		new Thread() {
-			public void run() {
-				MiniCubeConnection connection = MiniCubeDriverManager
-						.getConnection(dsInfo);
-				connection.publishCubes(cubes, dsInfo);
-			}
-		}.start();
-		// reportPublishByJmsService.publishReports();
-		// reportNoticeByJmsService.publishReports(cubes,dsInfo);
-		return true;
-	}
+	
 
 	// @Resource
 	// private ReportNoticeByJmsService reportNoticeByJmsService=null;

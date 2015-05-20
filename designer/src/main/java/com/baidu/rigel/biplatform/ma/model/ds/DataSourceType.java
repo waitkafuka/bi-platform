@@ -45,7 +45,7 @@ public enum DataSourceType {
     /**
      * 列式数据存储介质
      */
-    COL_DATABASE("", "", ""),
+    HIVE("", "", ""),
     /**
      * MYSQL
      */

@@ -20,8 +20,12 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
+import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 
 /**
  *Description:
@@ -53,5 +57,33 @@ public class MiniCubeDriverManagerTest {
         } catch (Exception e) {
             
         }
+        
+        MiniCubeDriverManager.registryConn ("HIVE", MiniCubeConnection4Test.class);
+        SqlDataSourceInfo info1 = Mockito.mock (SqlDataSourceInfo.class);
+        Mockito.doReturn (true).when (info1).validate ();
+        Mockito.doReturn (DataSourceType.HIVE).when (info1).getDataSourceType ();
+        MiniCubeConnection conn = MiniCubeDriverManager.getConnection (info1);
+        Assert.assertNotNull (conn);
+        Assert.assertTrue (conn instanceof MiniCubeConnection4Test);
+        
+    }
+    
+    public static class MiniCubeConnection4Test implements MiniCubeConnection {
+        
+        public MiniCubeConnection4Test (DataSourceInfo datasource) {
+            
+        }
+        
+        @Override
+        public DataModel query(QuestionModel questionModel)
+                throws MiniCubeQueryException {
+            return null;
+        }
+
+        @Override
+        public void close() {
+            
+        }
+        
     }
 }
