@@ -34,7 +34,7 @@ public class TableData implements Serializable{
 
     private List<Column> columuns;
     
-    private List<Map<Column, List<String>>> colBaseDatas;
+    private Map<Column, List<String>> colBaseDatas;
 
     /**
      * @return the columuns
@@ -53,14 +53,14 @@ public class TableData implements Serializable{
     /**
      * @return the colBaseDatas
      */
-    public List<Map<Column, List<String>>> getColBaseDatas() {
+    public Map<Column, List<String>> getColBaseDatas() {
         return colBaseDatas;
     }
 
     /**
      * @param colBaseDatas the colBaseDatas to set
      */
-    public void setColBaseDatas(List<Map<Column, List<String>>> colBaseDatas) {
+    public void setColBaseDatas(Map<Column, List<String>> colBaseDatas) {
         this.colBaseDatas = colBaseDatas;
     }
     
