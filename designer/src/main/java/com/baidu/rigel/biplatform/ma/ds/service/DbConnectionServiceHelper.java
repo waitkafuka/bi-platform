@@ -65,6 +65,7 @@ public final class DbConnectionServiceHelper {
     /**
      * 依据配置注册元数据服务
      */
+    @SuppressWarnings("rawtypes")
     public static void registryDsMetaServices (String type, Class clazz) {
         try {
             REPOSITORY.put (type, (DataSourceConnectionService<?>) clazz.newInstance ());
