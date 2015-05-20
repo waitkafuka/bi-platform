@@ -52,6 +52,11 @@ public class DataModel implements Serializable {
      * 基于列存放的表格数据，外层是 列的数目，内存List是每一列包含的行上的数据
      */
     private List<List<BigDecimal>> columnBaseData = new ArrayList<List<BigDecimal>>();
+    
+    /**
+     * 二维表数据模型，透视表可以不设置
+     */
+    private TableData tableData;
 
     /**
      * operateIndex 排序的列
@@ -177,6 +182,20 @@ public class DataModel implements Serializable {
 
     public void setOthers(String others) {
         this.others = others;
+    }
+
+    /**
+     * @return the tableData
+     */
+    public TableData getTableData() {
+        return tableData;
+    }
+
+    /**
+     * @param tableData the tableData to set
+     */
+    public void setTableData(TableData tableData) {
+        this.tableData = tableData;
     }
 
     
