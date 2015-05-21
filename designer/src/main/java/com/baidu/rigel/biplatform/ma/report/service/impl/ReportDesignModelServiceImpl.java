@@ -37,6 +37,8 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
+import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
@@ -135,14 +137,14 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
         try {
             dsDefine = dsService.getDsDefine(model.getDsId());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
+                getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
             throw e;
         } catch (DataSourceConnectionException e) {
-        	logger.error("Fail in parse datasource to datasourceInfo.", e);
-        	throw new DataSourceOperationException(e);
+            logger.error("Fail in parse datasource to datasourceInfo.", e);
+            throw new DataSourceOperationException(e);
         }
         List<Cube> cubes = Lists.newArrayList();
         for (ExtendArea area : model.getExtendAreaList()) {
@@ -172,12 +174,12 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 continue;
             }
         }
-//        new Thread() {
-//            public void run() {
-//                MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
-//                connection.publishCubes(cubes, dsInfo);
-//            }
-//        }.start();
+        new Thread() {
+            public void run() {
+                MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
+                connection.publishCubes(cubes, dsInfo);
+            }
+        }.start();
         //reportPublishByJmsService.publishReports();
 //        reportNoticeByJmsService.publishReports(cubes,dsInfo);
         return true;
