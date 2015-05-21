@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.lucene.search.CachingWrapperFilter;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
@@ -124,7 +125,7 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         try {
             is = searcherManager.acquire();
             QueryWrapperFilter filter = new QueryWrapperFilter(queryAll);
-            
+            CachingWrapperFilter cachingFilter =new CachingWrapperFilter (filter);
             logger.info("cost " + (System.currentTimeMillis() - current) + " in trans QUERY --> filter:");
             
             long gcurrent = System.currentTimeMillis();
@@ -138,7 +139,7 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
 //                dimFieldList.toArray(new String[0]), measureFieldList.toArray(new String[0]), groupBy);
             
             logger.info("cost " + (System.currentTimeMillis() - gcurrent) + " in init TesseractResultRecordCollector ");
-            is.search(new MatchAllDocsQuery(), filter, collector);
+            is.search(new MatchAllDocsQuery(), cachingFilter, collector);
             searchResult = collector.buildResultSet(groupBy);
 //            for (int docId : collector.getResultDocIdList()) {
 //                Document doc = is.getIndexReader().document(docId);
