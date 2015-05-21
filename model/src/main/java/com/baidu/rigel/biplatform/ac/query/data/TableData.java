@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 /**
  * 
  *Description: DataModel数据的二维表展现形式
@@ -38,6 +40,9 @@ public class TableData implements Serializable{
      * @return the colBaseDatas
      */
     public Map<Column, List<String>> getColBaseDatas() {
+        if (this.colBaseDatas == null) {
+            this.colBaseDatas = Maps.newHashMap ();
+        }
         return colBaseDatas;
     }
 

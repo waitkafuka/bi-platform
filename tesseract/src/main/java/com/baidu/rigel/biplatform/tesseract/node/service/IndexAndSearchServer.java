@@ -62,7 +62,7 @@ public class IndexAndSearchServer {
     /**
      * BIZTHREADSIZE
      */
-    protected static final int BIZTHREADSIZE = (int)(Runtime.getRuntime().availableProcessors() * 1.5) ;
+    protected static final int BIZTHREADSIZE = (int)(Runtime.getRuntime().availableProcessors() * 30) ;
     /**
      * bossGroup
      */
