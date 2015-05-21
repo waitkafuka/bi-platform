@@ -36,6 +36,7 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
 import com.baidu.rigel.biplatform.ac.model.callback.ResponseStatus;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
 import com.google.common.collect.Maps;
@@ -73,6 +74,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
                     callbackParams.put(k, v);
                 }
             }); 
+            callbackParams.put (HttpRequest.COOKIE_PARAM_NAME, params.get (HttpRequest.COOKIE_PARAM_NAME));
 //            callbackParams.putAll(params);
         }
         
