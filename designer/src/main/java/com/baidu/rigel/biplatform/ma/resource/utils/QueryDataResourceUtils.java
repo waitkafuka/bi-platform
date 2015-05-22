@@ -134,6 +134,10 @@ public class QueryDataResourceUtils {
             if (pivotTable.getDataSourceColumnBased().size() == 0) {
                 ResponseResult rs = new ResponseResult();
                 rs.setStatus(0);
+                pivotTable.setRowDefine(Lists.newArrayList());
+                pivotTable.setRowHeadFields(Lists.newArrayList());
+                resultMap.put("pivottable", pivotTable);
+                rs.setData(resultMap);
                 rs.setStatusInfo("未查到任何数据");
                 return rs;
             } else {

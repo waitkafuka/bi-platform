@@ -453,6 +453,7 @@ public class QueryDataResource extends BaseResource {
         builder.append("<meta content='text/html' 'charset=UTF-8'>");
         final String theme = model.getTheme();
         builder.append("<link rel='stylesheet' href='/silkroad/asset/" + theme+ "/css/-di-product-min.css'/>");
+        builder.append("<script src='/silkroad/dep/jquery-1.11.1.min.js'/></script>");
         builder.append("</head>");
         builder.append("<body>");
         builder.append(vm);
@@ -1546,6 +1547,12 @@ public class QueryDataResource extends BaseResource {
             String rowAheadDimName = MetaNameUtil.getDimNameFromUniqueName(rowAheadUniqueName);
             Item rowAhead = store.get(rowAheadDimName);
             queryParams.put(rowAhead.getOlapElementId(), rowAheadUniqueName);
+            model.getParams ().values ().forEach (p -> {
+                if (p.getElementId ().equals (rowAhead.getOlapElementId())) {
+                    String[] tmp = MetaNameUtil.parseUnique2NameArray (rowAheadUniqueName);
+                    queryParams.put (p.getName (), tmp[tmp.length - 1]);
+                }
+            });
         }
         Item row = store.get(dimName);
         queryParams.put(row.getOlapElementId(), drillTargetUniqueName);
