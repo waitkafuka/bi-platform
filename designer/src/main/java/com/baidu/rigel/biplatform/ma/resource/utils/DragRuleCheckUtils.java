@@ -26,6 +26,7 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 
 /**
  * 拖拽规则检查
@@ -59,19 +60,26 @@ public final class DragRuleCheckUtils {
             logger.error("element or area can not be null!");
             return false;
         }
-        /**
-         * 指标的检查
-         */
-        if (element instanceof Measure) {
-            return position == PositionType.Y || position == PositionType.CAND_IND;
-        } 
-        if (element instanceof Dimension) {
-            return position == PositionType.X || position == PositionType.S 
+        // modify by jiangyichao at 2015-05-18, 对于平面表列轴上可以拖动指标和维度
+        if (area.getType().equals(ExtendAreaType.PLANE_TABLE)) {
+        	return position == PositionType.Y || position == PositionType.CAND_IND
+        			||position == PositionType.X || position == PositionType.S 
                     || position == PositionType.CAND_DIM;
-        } 
-        /**
-         * 维度的检查
-         */
+        } else {
+        	/**
+        	 * 指标的检查
+        	 */
+        	if (element instanceof Measure) {
+        		return position == PositionType.Y || position == PositionType.CAND_IND;
+        	} 
+        	/**
+        	 * 维度的检查
+        	 */
+        	if (element instanceof Dimension) {
+        		return position == PositionType.X || position == PositionType.S 
+        				|| position == PositionType.CAND_DIM;
+        	}         	
+        }
         return false;
     }
 }

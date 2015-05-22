@@ -20,12 +20,15 @@ import java.util.Map;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
+import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
 
 /**
  * 
@@ -54,6 +57,16 @@ public interface QueryBuildService {
     QueryAction generateTableQueryActionForDrill(ReportDesignModel model, String areaId,
             Map<String, Object> contextParams, int targetIndex);
     
+//    /**
+//     * 产生运用平面表查询的QueryAction
+//     * @param model 
+//     * @param aeraId
+//     * @param context
+//     * @return
+//     */
+//    QueryAction generateTableQueryActionForPlaneTable(ReportDesignModel model, String aeraId,
+//    		Map<String, Object> context);
+    
     /**
      * 
      * @param areaId
@@ -71,6 +84,15 @@ public interface QueryBuildService {
     PivotTable parseToPivotTable(Cube cube, DataModel dataModel) throws PivotTableParseException;
 
     /**
+     * 将DataModel模型转为平面表模型
+     * @param cube 立方体定义
+     * @param dataModel 数据模型
+     * @param formatModel 格式模型
+     * @return 平面表模型
+     * @throws PlaneTableParseException
+     */
+    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, FormatModel formatModel) throws PlaneTableParseException;
+    /**
      * @param model
      * @param areaId
      * @param context
@@ -81,4 +103,5 @@ public interface QueryBuildService {
     QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
             Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
                     throws QueryModelBuildException;
+    
 }

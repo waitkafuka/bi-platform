@@ -124,6 +124,12 @@ public class ReportDesignModel implements Serializable {
      */
     private Map<String, ReportParam> params = Maps.newHashMap();
        
+    /**
+     * 平面表对应的条件
+     */
+    private Map<String, PlaneTableCondition> planeTableConditions = Maps.newHashMap();
+    
+    
     public String getId() {
         return id;
     }
@@ -355,6 +361,25 @@ public class ReportDesignModel implements Serializable {
     public void setTheme(String theme) {
         this.theme = theme;
     }
+    
+    /**
+     * 获取平面表查询条件
+     * @return
+     */
+	public Map<String, PlaneTableCondition> getPlaneTableConditions() {
+	    if (this.planeTableConditions == null) {
+	        this.planeTableConditions = Maps.newHashMap();
+	    }
+		return planeTableConditions;
+	}
+    
+	/**
+	 * 设置平面表查询条件
+	 * @param planeTableConditions
+	 */
+	public void setPlaneTableConditions(Map<String, PlaneTableCondition> planeTableConditions) {
+		this.planeTableConditions = planeTableConditions;
+	}
     
     
 }

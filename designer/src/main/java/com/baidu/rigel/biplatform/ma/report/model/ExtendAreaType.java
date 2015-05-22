@@ -35,6 +35,11 @@ public enum ExtendAreaType {
     CHART,
     
     /**
+     * 平面表
+     */
+    PLANE_TABLE,
+    
+    /**
      * LITEOLAP中的图
      */
     LITEOLAP_CHART,

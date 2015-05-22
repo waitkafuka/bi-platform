@@ -51,6 +51,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -219,11 +220,31 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
     public ResultSet queryDatas(ReportDesignModel model, QueryAction action,
             boolean usingCache, boolean needSumary, Map<String, Object> requestParams, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
+		PageInfo pageInfo = new PageInfo();
+		pageInfo.setPageSize(100);
+		pageInfo.setTotalPage(1);
+		return this.queryDatasHelper(model, action, usingCache, needSumary, requestParams, pageInfo, securityKey);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache, Map<String, Object> requestParams,
+    		PageInfo pageInfo, String securityKey) throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
+    	return this.queryDatasHelper(model, action, usingCache, false, requestParams, pageInfo, securityKey);
+    }
+    
+    /**
+     * 查询数据的辅助类
+     */
+    private ResultSet queryDatasHelper(ReportDesignModel model, QueryAction action, boolean usingCache, 
+    		boolean needSumary, Map<String, Object> requestParams, PageInfo pageInfo, String securityKey) 
+    		throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
         ResultSet rs = new ResultSet();
-        // For Mock
-        // DataModel dataModel = MockUtils.mockDataModel();
         DataSourceDefine dsDefine;
         DataSourceInfo dsInfo;
+        // 获取数据源连接信息
         try {
             dsDefine = dataSourceService.getDsDefine(model.getDsId());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
@@ -239,18 +260,24 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
         try {
-            questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
-//            PageInfo pageInfo = new PageInfo();
-//            pageInfo.setPageNo(0);
-//            pageInfo.setPageSize(100);
-//            questionModel.setPageInfo(pageInfo);
-            if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
-                questionModel.setNeedSummary(false);
-            } else if (model.getExtendById (action.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
-                questionModel.setNeedSummary (false);
-            } else {
-                questionModel.setNeedSummary(needSummary(questionModel));
-            }
+        	ExtendArea extendArea = model.getExtendById(action.getExtendAreaId());
+        	if (extendArea.getType() != ExtendAreaType.PLANE_TABLE) {
+        		// 生成平面表对应的QuestionModel
+        		questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
+        		// 对于平面表不使用汇总方式
+        		questionModel.setNeedSummary(false);
+        		// 设置分页信息
+        		questionModel.setPageInfo(pageInfo);
+        	} else {
+        		questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
+        		if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
+        			questionModel.setNeedSummary(false);
+        		} else if (model.getExtendById (action.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
+        			questionModel.setNeedSummary (false);
+        		} else {
+        			questionModel.setNeedSummary(needSummary(questionModel));
+        		}        		
+        	}
             questionModel.setUseIndex(true);
             if (requestParams != null) {
                 for (String key : requestParams.keySet()) {
@@ -259,12 +286,12 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                         questionModel.getRequestParams().put(key, (String) value);
                     }
                 } 
-                // 设计器中
+                // 设计器中, 设置分页信息
                 if (requestParams.get(Constants.IN_EDITOR) != 
                         null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
-                    PageInfo pageInfo = new PageInfo();
-                    pageInfo.setPageSize(100);
-                    pageInfo.setTotalPage(1);
+//                    PageInfo pageInfo = new PageInfo();
+//                    pageInfo.setPageSize(100);
+//                    pageInfo.setTotalPage(1);
                     questionModel.setPageInfo(pageInfo);
                 }
             }
@@ -290,7 +317,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         rs.setDataModel(dataModel);
         return rs;
     }
-
+    
     private boolean needSummary(QuestionModel questionModel) {
         for (AxisMeta meta : questionModel.getAxisMetas().values()) {
             if (meta.getAxisType() == AxisType.ROW) {

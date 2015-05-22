@@ -49,6 +49,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.model.TimerAreaLogicModel;
@@ -62,6 +63,7 @@ import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.NameCheckCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DragRuleCheckUtils;
+import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
 import com.google.common.collect.Maps;
@@ -1288,9 +1290,49 @@ public class ReportDesignModelResource extends BaseResource {
         return publishInfoBuilder.toString();
     }
     
+    /**
+     * 预览前的处理
+     * @param reportId
+     * @param request
+     * @param response
+     * @return
+     */
+    @RequestMapping(value = "/{reportId}/prePreview", method = { RequestMethod.GET})
+    public ResponseResult prePreview(@PathVariable("reportId") String reportId, HttpServletRequest request,
+    		HttpServletResponse response) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        
+        ExtendArea[] extendAreas = model.getExtendAreaList();
+        if (extendAreas != null ) {
+        	for (ExtendArea extendArea : extendAreas) {
+        		if (extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
+        			result.setStatus(0);
+        			Map<String, Object> data = Maps.newHashMap();
+        			data.put("conditions", model.getPlaneTableConditions());
+        			result.setData(data);
+        			break;
+        		}
+        	}        	
+        }
+        return result;
+    }
+    
     @RequestMapping(value = "/{reportId}/preview", method = { RequestMethod.GET, RequestMethod.POST })
     public ResponseResult preview(@PathVariable("reportId") String reportId, HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletResponse response) {       
         long begin = System.currentTimeMillis();
         String requestUri = request.getRequestURL().toString();
         requestUri = requestUri.replace("/preview", "");
@@ -1385,6 +1427,90 @@ public class ReportDesignModelResource extends BaseResource {
         return result;
     }
     
+    /**
+     * 增加或修改平面表条件
+     * add by jiangyichao at 2015-05-18, 平面表条件设置或修改
+     * @return
+     */
+    @RequestMapping(value = "/{id}/planeTableConditions", method = {RequestMethod.POST})
+    public ResponseResult addOrUModifyPlaneTableCondition(@PathVariable("id") String reportId, 
+    		HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        // 获取平面表条件
+        String conditionStr = request.getParameter("conditions");
+        if (!StringUtils.isEmpty(conditionStr)) {
+            Map<String, PlaneTableCondition> conditions = GsonUtils.fromJson(request.getParameter("conditions"),
+                    new TypeToken<Map<String, PlaneTableCondition>>(){}.getType());
+            // 检查平面表条件值是否合理
+            for (PlaneTableCondition tmpCondition : conditions.values()) {
+            	if (!PlaneTableUtils.checkSQLCondition(tmpCondition.getSQLCondition(), tmpCondition.getDefaultValue())) {
+            		result.setStatus(1);
+            		result.setStatusInfo("条件参数设置不合理，请检查！");
+            		return result;
+            	}
+            }
+            model.setPlaneTableConditions(conditions);
+        }
+        
+        /**
+         * 配置端，在修改Item以后，需要重新初始化上下文
+         */
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        runTimeModel.init(model, true, true);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("successfully remode item from area");
+        result.setStatus(0);
+        result.setData(model);
+        result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
+        return result;
+    }
+    
+    /**
+     * 获取平面表条件信息
+     * add by jiangyichao at 2015-05-18，获取平面表条件信息
+     * @param reportId
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/{id}/planeTableConditions", method = {RequestMethod.GET})
+    public ResponseResult getPlaneTableConditions(@PathVariable("id") String reportId, 
+    		HttpServletRequest request ) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        result.setData(model.getPlaneTableConditions());
+        result.setStatusInfo(SUCCESS);
+        return result;
+    }
     /**
      * 设置报表主题
      * @param id
