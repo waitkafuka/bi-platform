@@ -586,9 +586,9 @@ public class QueryDataResource extends BaseResource {
         // add by jiangyichao， 取出DesignModel中的平面表条件
         Map<String, String> condition = Maps.newHashMap();
         if (model.getPlaneTableConditions() != null) {
-            model.getPlaneTableConditions().forEach((k, v) -> {
-                condition.put(v.getElementId(), v.getName());
-            });
+        	model.getPlaneTableConditions().forEach((k, v) -> {
+        		condition.put(v.getElementId(), v.getName());
+        	});
         }
         for (String key : contextParams.keySet()) {
             /**
@@ -598,20 +598,20 @@ public class QueryDataResource extends BaseResource {
             if (value != null && value.length > 0 && !StringUtils.isEmpty(value[0])) {
                 String realValue = modifyFilterValue(value[0]);
                 if (realValue != null) {
-                    // 移除运行态模型的Context中的已有时间维度,保证有且仅有一个时间维度
-                    if (realValue.contains("start") && realValue.contains("end") && realValue.contains("granularity")) {                    
-                        for (Entry<String, Object> tmpEntry : runTimeModel.getContext().getParams().entrySet()) {
-                            String tmpStr = String.valueOf(tmpEntry.getValue());
-                            if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
-                                runTimeModel.getContext().removeParam(tmpEntry.getKey());
-                                Map<String, QueryContext> localContext = runTimeModel.getLocalContext ();
-                                localContext.forEach ((k, v) -> {
-                                    v.reset ();
-                                }); 
-                                break;
-                            }
-                        }
-                    }
+                	// 移除运行态模型的Context中的已有时间维度,保证有且仅有一个时间维度
+                	if (realValue.contains("start") && realValue.contains("end") && realValue.contains("granularity")) {             		
+                		for (Entry<String, Object> tmpEntry : runTimeModel.getContext().getParams().entrySet()) {
+                			String tmpStr = String.valueOf(tmpEntry.getValue());
+                			if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
+                				runTimeModel.getContext().removeParam(tmpEntry.getKey());
+                				Map<String, QueryContext> localContext = runTimeModel.getLocalContext ();
+                				localContext.forEach ((k, v) -> {
+                				    v.reset ();
+                				}); 
+                				break;
+                			}
+                		}
+                	}
                     runTimeModel.getContext().put(getRealKey(model, key), realValue);
                 } else {
                     runTimeModel.getContext().removeParam(getRealKey(model, key));
@@ -668,7 +668,7 @@ public class QueryDataResource extends BaseResource {
     }
     
     private String getParamRealValue(String realValue) {
-        // modify by yichao.jiang  接收url传递过来的时间参数，并进行转换
+    	// modify by yichao.jiang  接收url传递过来的时间参数，并进行转换
         if (realValue.contains("start") && realValue.contains("end")) {
             return genNewStartAndEnd(realValue);
         }
@@ -732,20 +732,20 @@ public class QueryDataResource extends BaseResource {
      * 重新获取日期的开始和结束 ，add by jiangyichao
      */
     private String genNewStartAndEnd(String timeValue) {
-        String start;
-        String end;
-        String result = null;
-//      String yearStart;
-//      String yearEnd;
-//      String monthStart;
-//      String monthEnd;
-//      String dayStart;
-//      String dayEnd;
-//      Calendar cal;
-//      String [] startDayOfQuarter = {"0101" , "0401" , "0701", "1001"};
-//      String [] endDayOfQuarter = {"0331" , "0630" , "0930", "1231"};
-        try {
-            JSONObject json = new JSONObject(String.valueOf(timeValue));
+    	String start;
+    	String end;
+    	String result = null;
+//    	String yearStart;
+//    	String yearEnd;
+//    	String monthStart;
+//    	String monthEnd;
+//    	String dayStart;
+//    	String dayEnd;
+//    	Calendar cal;
+//    	String [] startDayOfQuarter = {"0101" , "0401" , "0701", "1001"};
+//    	String [] endDayOfQuarter = {"0331" , "0630" , "0930", "1231"};
+    	try {
+        	JSONObject json = new JSONObject(String.valueOf(timeValue));
             start = json.getString("start").replace("-", "");
             end = json.getString("end").replace("-", "");
             String granularity = json.getString("granularity");
@@ -757,61 +757,61 @@ public class QueryDataResource extends BaseResource {
             }
             Map<String, String> time = null;
             switch (granularity) {
-                // 年
-                case "Y":
-                    time = TimeUtils.getTimeCondition(start, end, TimeType.TimeYear);
-//                  start = start + "0101";
-//                  end = end + "1231";
-                    break;
-                // 季度
-                case "Q":
-                    time = TimeUtils.getTimeCondition(start, end, TimeType.TimeQuarter);
-//                  String [] tmpStart = start.split("Q");
-//                  yearStart = tmpStart[0];
-//                  String quarterStart = tmpStart[1];
-//                  String [] tmpEnd = end.split("Q");
-//                  yearEnd = tmpEnd[0];
-//                  String quarterEnd = tmpEnd[1];
-//                  
-//                  start = yearStart + startDayOfQuarter[Integer.valueOf(quarterStart)-1];
-//                  end = yearEnd + endDayOfQuarter[Integer.valueOf(quarterEnd)-1];
-                    break;
-                // 月份
-                case "M":
-                    time = TimeUtils.getTimeCondition(start, end, TimeType.TimeMonth);
-//                  yearEnd = end.substring(0, 4);
-//                  monthEnd = end.substring(4);
-//                  cal = Calendar.getInstance();
-//                  cal.set(Calendar.YEAR, Integer.valueOf(yearEnd));
-//                  cal.set(Calendar.MONTH, Integer.valueOf(monthEnd) - 1);
-//                  dayEnd = String.valueOf(cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-//                  start = start + "01";
-//                  end = yearEnd + monthEnd + dayEnd;
-                    break;
-                // 星期
-                case "W":
-                    time = TimeUtils.getTimeCondition(start, end, TimeType.TimeWeekly);
-//                  cal = Calendar.getInstance();
-//                  yearStart = start.substring(0, 4);
-//                  monthStart = start.substring(4, 6);
-//                  dayStart = start.substring(6);
-//                  cal.set(Calendar.YEAR, Integer.valueOf(yearStart));
-//                  cal.set(Calendar.MONTH, Integer.valueOf(monthStart) -1 );
-//                  cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(dayStart));
-//                  cal.add(Calendar.DAY_OF_MONTH, 6);
-//                  int month = cal.get(Calendar.MONTH) + 1;
-//                  if (month < 10 ) {
-//                      end = "" + cal.get(Calendar.YEAR) + "0" + month + cal.get(Calendar.DAY_OF_MONTH);
-//                  } else {
-//                      end = "" + cal.get(Calendar.YEAR) + month + cal.get(Calendar.DAY_OF_MONTH);
-//                  }
-                    break;
-                // 天
-                case "D":
-                    time = TimeUtils.getTimeCondition(start, end, TimeType.TimeDay);
-                    break;
-                default:
-                    break;
+            	// 年
+	            case "Y":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeYear);
+//	            	start = start + "0101";
+//	            	end = end + "1231";
+	            	break;
+	            // 季度
+	            case "Q":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeQuarter);
+//	            	String [] tmpStart = start.split("Q");
+//	            	yearStart = tmpStart[0];
+//	            	String quarterStart = tmpStart[1];
+//	            	String [] tmpEnd = end.split("Q");
+//	            	yearEnd = tmpEnd[0];
+//	            	String quarterEnd = tmpEnd[1];
+//	            	
+//	            	start = yearStart + startDayOfQuarter[Integer.valueOf(quarterStart)-1];
+//	            	end = yearEnd + endDayOfQuarter[Integer.valueOf(quarterEnd)-1];
+	            	break;
+	            // 月份
+	            case "M":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeMonth);
+//	            	yearEnd = end.substring(0, 4);
+//	            	monthEnd = end.substring(4);
+//	            	cal = Calendar.getInstance();
+//	            	cal.set(Calendar.YEAR, Integer.valueOf(yearEnd));
+//	            	cal.set(Calendar.MONTH, Integer.valueOf(monthEnd) - 1);
+//	            	dayEnd = String.valueOf(cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+//	            	start = start + "01";
+//	            	end = yearEnd + monthEnd + dayEnd;
+	            	break;
+	            // 星期
+	            case "W":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeWeekly);
+//	            	cal = Calendar.getInstance();
+//	            	yearStart = start.substring(0, 4);
+//	            	monthStart = start.substring(4, 6);
+//	            	dayStart = start.substring(6);
+//	            	cal.set(Calendar.YEAR, Integer.valueOf(yearStart));
+//	            	cal.set(Calendar.MONTH, Integer.valueOf(monthStart) -1 );
+//	            	cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(dayStart));
+//	            	cal.add(Calendar.DAY_OF_MONTH, 6);
+//	            	int month = cal.get(Calendar.MONTH) + 1;
+//	            	if (month < 10 ) {
+//	            		end = "" + cal.get(Calendar.YEAR) + "0" + month + cal.get(Calendar.DAY_OF_MONTH);
+//	            	} else {
+//	            		end = "" + cal.get(Calendar.YEAR) + month + cal.get(Calendar.DAY_OF_MONTH);
+//	            	}
+	            	break;
+	            // 天
+	            case "D":
+	            	time = TimeUtils.getTimeCondition(start, end, TimeType.TimeDay);
+	            	break;
+	            default:
+	            	break;
             }
 //            cal = Calendar.getInstance();
 //            int yearNow = cal.get(Calendar.YEAR);
@@ -819,12 +819,12 @@ public class QueryDataResource extends BaseResource {
 //            int dayNow = cal.get(Calendar.DAY_OF_MONTH);
 //            String dateNow = "" + yearNow;
 //            if (monthNow >= 10 ) {
-//              dateNow = dateNow + "0" + monthNow + dayNow;
+//            	dateNow = dateNow + "0" + monthNow + dayNow;
 //            } else {
-//              dateNow = dateNow + monthNow + dayNow;
+//            	dateNow = dateNow + monthNow + dayNow;
 //            }
 //            if (end.compareTo(dateNow) > 0) {
-//              end = dateNow;
+//            	end = dateNow;
 //            }
             start = time.get("start");
             end = time.get("end");
@@ -832,10 +832,10 @@ public class QueryDataResource extends BaseResource {
             json.put("end", end);
             logger.info("start time is [" + start + "],and end time is [" + end + "]");
             result = json.toString();
-        } catch (Exception e) {
-            logger.debug("the input time format is wrong" + timeValue, e);
-        }
-        return result;
+    	} catch (Exception e) {
+    		logger.debug("the input time format is wrong" + timeValue, e);
+    	}
+    	return result;
     }
     /**
      * 
@@ -1019,12 +1019,12 @@ public class QueryDataResource extends BaseResource {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
             if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
-                // TODO 构建分页信息
-                PageInfo pageInfo = new PageInfo();
-                result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
+            	// TODO 构建分页信息
+            	PageInfo pageInfo = new PageInfo();
+            	result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
             } else {
-                result = reportModelQueryService.queryDatas(model, action,
-                        true, true, areaContext.getParams(), securityKey);
+            	result = reportModelQueryService.queryDatas(model, action,
+            			true, true, areaContext.getParams(), securityKey);
             }
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);
@@ -1043,7 +1043,7 @@ public class QueryDataResource extends BaseResource {
          * 7. 对返回结果进行处理，用于表、图显示
          */
         ResponseResult rs = queryDataResourceUtils.parseQueryResultToResponseResult(
-                runTimeModel, targetArea, result, areaContext, action);
+    			runTimeModel, targetArea, result, areaContext, action);
         areaContext.getQueryStatus().add(result);
         
         // 清除当前request中的请求参数，保证areaContext的参数正确

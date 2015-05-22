@@ -36,6 +36,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFacto
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
+//import com.baidu.rigel.biplatform.ma.report.service.ReportNoticeByJmsService;
 import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,6 +60,10 @@ public class UpdateDataResource extends BaseResource {
      */
     @Resource
     private DataSourceService dsService;
+    
+    
+//    @Resource
+//    private ReportNoticeByJmsService reportNoticeByJmsService;
 
     /**
      * 
@@ -83,7 +88,7 @@ public class UpdateDataResource extends BaseResource {
         ResponseResult rs = new ResponseResult();
         DataSourceDefine ds = dsService.getDsDefine(dsName);
         DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-        		getDataSourceConnectionServiceInstance(ds.getDataSourceType());
+            getDataSourceConnectionServiceInstance(ds.getDataSourceType().toString ());
         DataSourceInfo dsInfo = dsConnService.parseToDataSourceInfo(ds, securityKey);
         Map<String, Map<String, String>> conds = Maps.newHashMap();
         for (String factTable : factTableArray) {
@@ -104,6 +109,7 @@ public class UpdateDataResource extends BaseResource {
         LOG.info("[INFO] --- --- conds = {}", condsStr);
         LOG.info("[INFO] --- --- --- ---- ---- end pring param list --- --- --- --- ---- ");
         boolean result = MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray, condsStr);
+//        reportNoticeByJmsService.refreshIndex(dsInfo, factTableArray, condsStr);
         if (result) {
             rs.setStatus(0);
             rs.setStatusInfo("successfully");

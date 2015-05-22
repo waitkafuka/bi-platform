@@ -163,7 +163,7 @@ public class HttpRequest {
      * 
      * @return 默认的HttpClient
      */
-    public static HttpClient getDefaultHttpClient(Map<String, String> params) {
+    private static HttpClient getDefaultHttpClient(Map<String, String> params) {
         return ClientInstance.getClientInstance (params);
     }
     
@@ -203,7 +203,7 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
-    public static String sendGet(HttpClient client, String url, Map<String, String> params) {
+    private static String sendGet(HttpClient client, String url, Map<String, String> params) {
         if(client == null || StringUtils.isBlank(url)) {
             throw new IllegalArgumentException("client is null");
         }
@@ -274,7 +274,7 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
-    public static String sendPost(HttpClient client, String url, Map<String, String> params) {
+    private static String sendPost(HttpClient client, String url, Map<String, String> params) {
         if(client == null) {
             throw new IllegalArgumentException("client is null");
         }

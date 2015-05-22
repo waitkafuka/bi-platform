@@ -140,7 +140,6 @@ public class DimensionCondition implements MetaCondition {
      * @return the memberSortType 
      */
     public SortType getMemberSortType() {
-    
         return memberSortType;
     }
 
@@ -149,7 +148,6 @@ public class DimensionCondition implements MetaCondition {
      * @param memberSortType the memberSortType to set 
      */
     public void setMemberSortType(SortType memberSortType) {
-    
         this.memberSortType = memberSortType;
     }
 

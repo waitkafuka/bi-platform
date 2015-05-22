@@ -27,10 +27,10 @@ public class DataSourceConnectionServiceFactoryTest {
     	ds.setHostAndPort("127.0.0.1:3306");
     	
     	Assert.assertNotNull(DataSourceConnectionServiceFactory.
-    			getDataSourceConnectionServiceInstance(ds.getDataSourceType()));
+    			getDataSourceConnectionServiceInstance(ds.getDataSourceType().name ()));
     	try {
-    		ds.setDataSourceType(DataSourceType.COL_DATABASE);
-    		DataSourceConnectionServiceFactory.getDataSourceConnectionServiceInstance(ds.getDataSourceType());
+    		ds.setDataSourceType(DataSourceType.HIVE);
+    		DataSourceConnectionServiceFactory.getDataSourceConnectionServiceInstance(ds.getDataSourceType().name ());
     	} catch(Exception e) {
     		Assert.assertNotNull(e);
     	}

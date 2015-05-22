@@ -101,7 +101,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         try {
             dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
@@ -182,7 +182,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         try {
             dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
@@ -248,7 +248,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         try {
             dsDefine = dataSourceService.getDsDefine(model.getDsId());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);
@@ -260,16 +260,14 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
         try {
+            questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
         	ExtendArea extendArea = model.getExtendById(action.getExtendAreaId());
-        	if (extendArea.getType() != ExtendAreaType.PLANE_TABLE) {
-        		// 生成平面表对应的QuestionModel
-        		questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
+        	if (extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
         		// 对于平面表不使用汇总方式
         		questionModel.setNeedSummary(false);
         		// 设置分页信息
         		questionModel.setPageInfo(pageInfo);
         	} else {
-        		questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
         		if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
         			questionModel.setNeedSummary(false);
         		} else if (model.getExtendById (action.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
@@ -357,7 +355,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         try {
             dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType());
+            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);

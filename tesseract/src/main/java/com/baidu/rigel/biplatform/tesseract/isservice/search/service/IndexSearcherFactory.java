@@ -62,7 +62,8 @@ public class IndexSearcherFactory {
     /**
      * 线程池
      */
-    private static ExecutorService EXECUTOR_POOL=Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()+1);
+    private static ExecutorService EXECUTOR_POOL =
+        Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 20);
     
     /**
      * getInstance

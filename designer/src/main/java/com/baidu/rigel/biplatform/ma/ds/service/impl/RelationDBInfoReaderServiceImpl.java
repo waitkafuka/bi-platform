@@ -65,7 +65,7 @@ public class RelationDBInfoReaderServiceImpl implements
 		Connection conn = null;
 		try {
 			dsConnService = (DataSourceConnectionService<Connection>) DataSourceConnectionServiceFactory.
-					getDataSourceConnectionServiceInstance(DataSourceType.MYSQL);
+					getDataSourceConnectionServiceInstance(DataSourceType.MYSQL.name ());
 			conn = dsConnService.createConnection(ds, securityKey);
 			DatabaseMetaData dbMetaData = conn.getMetaData();
 			if (StringUtils.hasText(tableId)) {

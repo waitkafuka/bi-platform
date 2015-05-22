@@ -151,7 +151,12 @@ public class SqlDataSourceInfo implements DataSourceInfo {
         /**
          * ORACLE
          */
-        ORACLE(4, DataSourceInfo.ORACLE_DRIVERMANAGER);
+        ORACLE(4, DataSourceInfo.ORACLE_DRIVERMANAGER),
+        
+        /**
+         * HIVE
+         */
+        HIVE(5, null);
 
         /**
          * id 数据库ID

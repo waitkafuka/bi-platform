@@ -110,24 +110,25 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
      * javax.sql.DataSource, long, long)
      */
     @Override
-    public IndexDataResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, DataSource dataSource, long limitStart,
+    public IndexDataResultSet queryForDocListWithSQLQuery(SqlQuery sqlQuery, 
+            DataSource dataSource, long limitStart,
             long limitEnd) throws IOException {
-    	
-    	SearchIndexResultSet data=querySqlList(sqlQuery, dataSource, limitStart, limitEnd);
-    	
-//    	long curr=System.currentTimeMillis();
-    	IndexDataResultSet result=null;
-    	if(data != null) {
-    		result=new IndexDataResultSet(data.getMeta(),data.size());        	        	
-        	
-        	for(SearchIndexResultRecord sr:data.getDataList()){
-        		IndexDataResultRecord ir=new IndexDataResultRecord(sr.getFieldArray(),sr.getGroupBy());
-        		result.addRecord(ir);
-        	}
-        	
-    	}
-//    	System.out.println("DATA TRANSFER COST : "+(System.currentTimeMillis()-curr)+" ms");
-    	return result;
+        
+        SearchIndexResultSet data = querySqlList (sqlQuery, dataSource, limitStart, limitEnd);
+        
+        // long curr=System.currentTimeMillis();
+        IndexDataResultSet result = null;
+        if (data != null) {
+            result = new IndexDataResultSet (data.getMeta (), data.size ());
+            
+            for (SearchIndexResultRecord sr : data.getDataList ()) {
+                IndexDataResultRecord ir = new IndexDataResultRecord (sr.getFieldArray (), sr.getGroupBy ());
+                result.addRecord (ir);
+            }
+            
+        }
+        // System.out.println("DATA TRANSFER COST : "+(System.currentTimeMillis()-curr)+" ms");
+        return result;
     	
     }
     
@@ -160,14 +161,14 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pstmt =
-                        con.prepareStatement(sqlQuery.toSql(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                        con.prepareStatement(sqlQuery.toSql(), 
+                        ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 if (con.getMetaData().getDriverName().toLowerCase().contains("mysql")) {
                         pstmt.setFetchSize(Integer.MIN_VALUE);
                 }
                 return pstmt;
             }
         }, new RowCallbackHandler() {
-
             @Override
             public void processRow(ResultSet rs) throws SQLException {
                 List<Object> fieldValues = new ArrayList<Object>();
@@ -179,7 +180,8 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
                     }
                 }
 
-                SearchIndexResultRecord record = new SearchIndexResultRecord(fieldValues.toArray(new Serializable[0]), groupBy);
+                SearchIndexResultRecord record = 
+                    new SearchIndexResultRecord(fieldValues.toArray(new Serializable[0]), groupBy);
                 resultSet.addRecord(record);
             }
         });
@@ -213,14 +215,16 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     }
 
     @Override
-    public SearchIndexResultSet queryForListWithSQLQueryAndGroupBy(SqlQuery sqlQuery, DataSource dataSource,
+    public SearchIndexResultSet queryForListWithSQLQueryAndGroupBy(SqlQuery sqlQuery, 
+            DataSource dataSource,
             long limitStart, long limitEnd, QueryRequest queryRequest) {
 
         long current = System.currentTimeMillis();
 
         SearchIndexResultSet resultSet = querySqlList(sqlQuery, dataSource, limitStart, limitEnd);
         
-        LOGGER.debug("query sql:" + sqlQuery.toSql() + "result size: " + resultSet.size() + " cost:" + (System.currentTimeMillis() - current));
+        LOGGER.info("query sql:" + sqlQuery.toSql() 
+            + "result size: " + resultSet.size() + " cost:" + (System.currentTimeMillis() - current));
         current = System.currentTimeMillis();
         
         if (CollectionUtils.isEmpty(resultSet.getDataList())) {
