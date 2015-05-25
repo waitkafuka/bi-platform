@@ -37,6 +37,7 @@ public class ConfigInfoUtils {
 
     private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
 
+    private static Properties properties;
     /**
      * serverAddress
      */
@@ -47,7 +48,7 @@ public class ConfigInfoUtils {
         try {
              String answerCoreConfFile = System
                     .getProperty("ac.config.location");
-            Properties properties = new Properties();
+            properties = new Properties();
             inStream = new FileInputStream(answerCoreConfFile);
             properties.load(inStream);
             // Properties properties =
@@ -76,6 +77,15 @@ public class ConfigInfoUtils {
      */
     public static void setServerAddress(String serverAddress) {
         ConfigInfoUtils.SERVERADDRESS = serverAddress;
+    }
+    
+    /**
+     * get ServerAddressByProperty
+     * 
+     * @return the sERVERADDRESS
+     */
+    public static String getServerAddressByProperty(String key) {
+        return properties.getProperty(key);
     }
 
     /**
