@@ -58,7 +58,7 @@ public class ReportRuntimeModelManageResource {
     @Resource(name = "reportModelCacheManager")
     private ReportModelCacheManager reportModelCacheManager;
     
-    @RequestMapping(value = "/{reportId}/area/{areaId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{reportId}/area/{areaId}/dimAndInds", method = RequestMethod.GET)
     public ResponseResult getAllDimAndMeasuers (@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult ();
@@ -98,7 +98,7 @@ public class ReportRuntimeModelManageResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/area/{areaId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/{reportId}/area/{areaId}/reset", method = RequestMethod.POST)
     public ResponseResult resetArea (@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult ();
