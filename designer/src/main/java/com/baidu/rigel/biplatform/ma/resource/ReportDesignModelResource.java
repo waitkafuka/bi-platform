@@ -143,7 +143,28 @@ public class ReportDesignModelResource extends BaseResource {
 //        }
         String productLine = ContextManager.getProductLine();
         if (!StringUtils.isEmpty(productLine)) {
-            ReportDesignModel[] modelList = reportDesignModelService.queryAllModels();
+            ReportDesignModel[] modelList = reportDesignModelService.queryAllModels(false);
+            ReportDesignModelBo[] reportList = genReportModelList(modelList);
+            rs = getResult(SUCCESS, "can not get model list", reportList);
+        }
+        return rs;
+    }
+    
+    /**
+     * 
+     * 查询报表模型状态
+     * @return
+     * @throws Exception 
+     */
+    @RequestMapping(value="/online", method = { RequestMethod.GET })
+    public ResponseResult listAllReleaseReport(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setData(null);
+        rs.setStatusInfo("can not get productline message, please login first!");
+        String productLine = ContextManager.getProductLine();
+        if (!StringUtils.isEmpty(productLine)) {
+            ReportDesignModel[] modelList = reportDesignModelService.queryAllModels(true);
             ReportDesignModelBo[] reportList = genReportModelList(modelList);
             rs = getResult(SUCCESS, "can not get model list", reportList);
         }

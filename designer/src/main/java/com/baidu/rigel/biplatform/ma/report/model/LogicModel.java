@@ -403,5 +403,12 @@ public class LogicModel implements Serializable {
     public void setTopSetting(MeasureTopSetting topSetting) {
         this.topSetting = topSetting;
     }
+
+    public void resetSlices(Item[] items) {
+        this.slices.clear ();
+        for (Item item : items) {
+            this.slices.put (item.getOlapElementId (), item);
+        }
+    }
     
 }

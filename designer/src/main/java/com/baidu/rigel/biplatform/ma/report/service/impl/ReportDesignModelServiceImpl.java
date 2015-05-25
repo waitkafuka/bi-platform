@@ -205,9 +205,14 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public ReportDesignModel[] queryAllModels() {
+	public ReportDesignModel[] queryAllModels(boolean released) {
 		try {
-			String[] listFile = fileService.ls(this.getDevReportDir());
+			String[] listFile = null;
+			if (released) {
+			    listFile = fileService.ls(this.getReleaseReportDir ());
+			} else {
+			    listFile = fileService.ls(this.getDevReportDir());
+			}
 			if (listFile == null || listFile.length == 0) {
 				return new ReportDesignModel[0];
 			}
