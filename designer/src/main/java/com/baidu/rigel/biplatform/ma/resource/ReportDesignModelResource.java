@@ -143,7 +143,42 @@ public class ReportDesignModelResource extends BaseResource {
 //        }
         String productLine = ContextManager.getProductLine();
         if (!StringUtils.isEmpty(productLine)) {
-            ReportDesignModel[] modelList = reportDesignModelService.queryAllModels();
+            ReportDesignModel[] modelList = reportDesignModelService.queryAllModels(false);
+            ReportDesignModelBo[] reportList = genReportModelList(modelList);
+            rs = getResult(SUCCESS, "can not get model list", reportList);
+        }
+        return rs;
+    }
+    
+    /**
+     * 
+     * 查询报表模型状态
+     * @return
+     * @throws Exception 
+     */
+    @RequestMapping(value="/online", method = { RequestMethod.GET })
+    public ResponseResult listAllReleaseReport(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        // modify by jiangyichao at 2014-10-13 
+        // 当status为0，data为null时，表示cookie中没有产品线信息，需要跳转到登录页面
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setData(null);
+        rs.setStatusInfo("can not get productline message, please login first!");
+//        Cookie[] cookies = request.getCookies();
+//        if (!(cookies == null || cookies.length == 0)) {
+//            for (Cookie cookie : cookies) {
+//                if (Constants.BIPLATFORM_PRODUCTLINE.equals(cookie.getName())) {
+//                    ReportDesignModel[] modelList = reportDesignModelService.queryAllModels();
+//                    if (modelList == null || modelList.length == 0) {
+//                        modelList = new ReportDesignModel[0];
+//                    }
+//                    rs = getResult(SUCCESS, "can not get model list", modelList);
+//                }
+//            }
+//        }
+        String productLine = ContextManager.getProductLine();
+        if (!StringUtils.isEmpty(productLine)) {
+            ReportDesignModel[] modelList = reportDesignModelService.queryAllModels(true);
             ReportDesignModelBo[] reportList = genReportModelList(modelList);
             rs = getResult(SUCCESS, "can not get model list", reportList);
         }

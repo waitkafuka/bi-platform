@@ -124,7 +124,7 @@ public class MiniCube extends OlapElementDef implements Cube {
     @Override
     public Map<String, Dimension> getDimensions() {
         if (this.dimensions == null) {
-            return new HashMap<String, Dimension>();
+            this.dimensions = new HashMap<>();
         }
         return this.dimensions;
     }
