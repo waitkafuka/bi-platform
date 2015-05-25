@@ -130,6 +130,7 @@ public class ReportRuntimeModelManageResource {
             items[i].setPositionType (PositionType.Y);
         }
         model.resetColumns (items);
+        model.resetSlices(new Item[0]);
         result.setStatus (0);
         result.setStatusInfo ("success");
         runTimeModel.getContext ().reset ();
