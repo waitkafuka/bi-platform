@@ -209,9 +209,9 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		try {
 			String[] listFile = null;
 			if (released) {
-			    fileService.ls(this.getReleaseReportDir ());
+			    listFile = fileService.ls(this.getReleaseReportDir ());
 			} else {
-			    fileService.ls(this.getDevReportDir());
+			    listFile = fileService.ls(this.getDevReportDir());
 			}
 			if (listFile == null || listFile.length == 0) {
 				return new ReportDesignModel[0];
