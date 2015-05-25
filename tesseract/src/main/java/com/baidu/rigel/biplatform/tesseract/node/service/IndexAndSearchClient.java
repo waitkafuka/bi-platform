@@ -108,6 +108,7 @@ public class IndexAndSearchClient {
         b.group(group);
         b.channel(NioSocketChannel.class).option(ChannelOption.TCP_NODELAY, true);
         b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000);
+        b.option(ChannelOption.SO_KEEPALIVE, true);
         b.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
