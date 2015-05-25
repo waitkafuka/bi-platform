@@ -18,7 +18,6 @@ package com.baidu.rigel.biplatform.tesseract.meta.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Level;
@@ -201,9 +201,10 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @return
      */
     private MiniCubeMember createMemberByPosTreeNode(CallbackDimTreeNode node, Level level, Member parentMember) {
-        MiniCubeMember result = new MiniCubeMember(node.getId());
+        CallbackMember result = new CallbackMember(node.getId());
         result.setLevel(level);
         result.setCaption(node.getName());
+        result.setHasChildren (node.isHasChildern ());
         if (CollectionUtils.isNotEmpty(node.getCsIds())) {
             result.setQueryNodes(Sets.newHashSet(node.getCsIds()));
         }
