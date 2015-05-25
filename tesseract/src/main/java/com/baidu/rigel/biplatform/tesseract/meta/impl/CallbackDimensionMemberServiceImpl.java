@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.tesseract.meta.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -209,6 +210,13 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         // 先生成一下uniqueName，避免后续生成带上了父节点的UniqueName
         result.generateUniqueName(null);
         result.setParent(parentMember);
+//        if (CollectionUtils.isNotEmpty (node.getChildren ())) {
+//            Set<String> leafIds = Sets.newHashSet ();
+//            node.getChildren ().forEach (n -> {
+//                leafIds.add (n.getId ());
+//            });
+//            result.setQueryNodes (leafIds);
+//        }
         return result;
     }
 

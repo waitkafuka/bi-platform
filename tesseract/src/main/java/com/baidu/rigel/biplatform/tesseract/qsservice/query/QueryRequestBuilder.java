@@ -134,7 +134,6 @@ public class QueryRequestBuilder {
                     }
                     // FIXED ByMe: david.wang callback维度查询数据重复计算
                     if (CollectionUtils.isEmpty (node.getChildren ())) {
-                        
                         expression.getQueryValues()
                             .add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
                         request.getWhere ().getAndList ().add (expression);
