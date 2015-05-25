@@ -166,7 +166,16 @@ define([
 
                     // 后续支持备库地址需要 改进代码
                 });
-
+                var advancedItem = this.$el.find('.j-advanced-properties').find('.j-item');
+                var advancedProperties = {};
+                advancedItem.each(function() {
+                    var $key = $(this).find('.j-item-key').val();
+                    var $value = $(this).find('.j-item-value').val();
+                    if ($.trim($key) && $.trim($value)) {
+                        advancedProperties[$key] = $value;
+                    }
+                });
+                data.advancedProperties =JSON.stringify(advancedProperties) ;
                 return validateResult ? data : validateResult;
             },
 

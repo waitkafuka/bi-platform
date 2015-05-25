@@ -77,8 +77,8 @@ public class AggregateCompute {
         int arraySize = dataList.get(0).getFieldArraySize();
         
         long current = System.currentTimeMillis();
-        Stream<SearchIndexResultRecord> stream = dataList.stream ();
-//            dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
+        Stream<SearchIndexResultRecord> stream =
+            dataList.size() > 300000 ? dataList.parallelStream() : dataList.stream();
         
         int defaultSize = (int) (dataList.size() > 100 ? dataList.size() * 0.01 : dataList.size());
         
@@ -123,7 +123,6 @@ public class AggregateCompute {
             )
         );
         
-        LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
         if(CollectionUtils.isNotEmpty(countIndex)) {
             groupResult.values().forEach(record -> {
                 for (int index : countIndex) {
@@ -142,6 +141,7 @@ public class AggregateCompute {
 //                    groupResult.get(key).setField(dimSize + index, counts.get(key).size());
 //                }
         }
+        LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
         return new ArrayList<>(groupResult.values());
     }
     
@@ -151,7 +151,8 @@ public class AggregateCompute {
      * @param query
      * @return
      */
-    public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> resultQ, QueryRequest query) {
+    public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> resultQ, 
+        QueryRequest query) {
         if (query.getGroupBy() != null && CollectionUtils.isNotEmpty(resultQ)) {
             int dimSize = query.getSelect().getQueryProperties().size();
             List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();

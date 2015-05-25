@@ -19,6 +19,7 @@ public class DataSourceInfoReaderServiceFactoryTest {
     /**
 	 * 
 	 */
+
     @Test
     public void test() throws Exception {
         DataSourceDefine ds = new DataSourceDefine ();

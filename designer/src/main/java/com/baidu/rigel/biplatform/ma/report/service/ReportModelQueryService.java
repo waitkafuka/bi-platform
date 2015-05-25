@@ -23,6 +23,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -99,6 +100,21 @@ public interface ReportModelQueryService {
             Map<String, Object> requestParams, String securityKey)
             throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException;
 
+    /**
+     * 依据查询请求查询数据，针对平面表
+     * @param model 模型
+     * @param action 查询action
+     * @param usingCache 是否使用缓存
+     * @param requestParams 请求参数
+     * @param pageInfo 分页信息
+     * @param securityKey
+     * @return
+     * @throws DataSourceOperationException
+     * @throws QueryModelBuildException
+     * @throws MiniCubeQueryException
+     */
+    public ResultSet queryDatas(ReportDesignModel model, QueryAction action, boolean usingCache, Map<String, Object> requestParams,
+    		PageInfo pageInfo, String securityKey) throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException;
     /**
      * 根据uniqueName查询叶子节点members
      * @param tmpCube

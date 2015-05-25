@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.2.1.RELEASE</version>
+		<version>1.2.3.RELEASE</version>
 	</parent>
 
 	<groupId>com.baidu.rigel</groupId>
@@ -45,6 +46,8 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<javax.jms.version>1.1</javax.jms.version>
+		<activemq.version>5.10.0</activemq.version>
 		<staticcheck.dir>staticchecks</staticcheck.dir>
 		<checkstyle.skip>true</checkstyle.skip>
 		<checkstyle.failOnViolation>true</checkstyle.failOnViolation>
@@ -68,6 +71,7 @@
         <license.maven.plugin.version>2.6</license.maven.plugin.version>
         <biplatform.version>1.4.0-SNAPSHOT</biplatform.version>
         <junit.version>4.11</junit.version>
+        <mina.version>2.0.7</mina.version>
 	</properties>
 
 	<modules>
@@ -81,6 +85,11 @@
 
 	<dependencyManagement>
 		<dependencies>
+		     <dependency>
+			    <groupId>org.apache.mina</groupId>
+			    <artifactId>mina-core</artifactId>
+			    <version>${mina.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.baidu.rigel.biplatform</groupId>
 				<artifactId>model</artifactId>
@@ -92,10 +101,10 @@
 				<version>${biplatform.version}</version>
 			</dependency>
 			<dependency>
-                <groupId>com.baidu.rigel.biplatform</groupId>
-                <artifactId>fileserver</artifactId>
-                <version>${biplatform.version}</version>
-            </dependency>
+				<groupId>com.baidu.rigel.biplatform</groupId>
+				<artifactId>fileserver</artifactId>
+				<version>${biplatform.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.google.code.gson</groupId>
 				<artifactId>gson</artifactId>
@@ -112,15 +121,15 @@
 				<version>${commons.lang.version}</version>
 			</dependency>
 			<dependency>
-			    <groupId>org.json</groupId>
-			    <artifactId>json</artifactId>
-			    <version>${org.json.version}</version>
+				<groupId>org.json</groupId>
+				<artifactId>json</artifactId>
+				<version>${org.json.version}</version>
 			</dependency>
-	        <dependency>
-	            <groupId>javax.mail</groupId>
-	            <artifactId>mail</artifactId>
-	            <version>${java.mail.version}</version>
-	        </dependency>
+			<dependency>
+				<groupId>javax.mail</groupId>
+				<artifactId>mail</artifactId>
+				<version>${java.mail.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
@@ -183,69 +192,100 @@
 				<version>${com.mchange.version}</version>
 			</dependency>
 			<dependency>
-	            <groupId>commons-logging</groupId>
-	            <artifactId>commons-logging</artifactId>
-	            <version>${commons.logging.version}</version>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.mockito</groupId>
-	            <artifactId>mockito-all</artifactId>
-	            <version>${org.mockito.version}</version>
-	        </dependency>
-	        <dependency>
-		        <groupId>junit</groupId>
-		        <artifactId>junit</artifactId>
-		        <version>${junit.version}</version>
-		    </dependency>
-	        <dependency>
-	               <groupId>org.powermock</groupId>
-		            <artifactId>powermock-module-junit4</artifactId>
-		            <version>${org.powermock.version}</version>
-		   </dependency>
-	        <dependency>
-	            <groupId>org.powermock</groupId>
-	            <artifactId>powermock-api-mockito</artifactId>
-	            <version>${org.powermock.version}</version>
-	        </dependency>
-	        <dependency>
-	            <groupId>org.powermock</groupId>
-	            <artifactId>powermock-api-mockito</artifactId>
-	            <version>${org.powermock.version}</version>
-	        </dependency>
+				<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>${commons.logging.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-all</artifactId>
+				<version>${org.mockito.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jms</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-broker</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-client</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-jms-pool</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-pool</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.jms</groupId>
+				<artifactId>jms</artifactId>
+				<version>${javax.jms.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-module-junit4</artifactId>
+				<version>${org.powermock.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-api-mockito</artifactId>
+				<version>${org.powermock.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.powermock</groupId>
+				<artifactId>powermock-api-mockito</artifactId>
+				<version>${org.powermock.version}</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-			<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
-				<groupId>org.eclipse.m2e</groupId>
-				<artifactId>lifecycle-mapping</artifactId>
-				<version>1.0.0</version>
-				<configuration>
-					<lifecycleMappingMetadata>
-						<pluginExecutions>
-							<pluginExecution>
-								<pluginExecutionFilter>
-									<groupId>
-										org.apache.maven.plugins
-									</groupId>
-									<artifactId>
-										maven-checkstyle-plugin
-									</artifactId>
-									<versionRange>[2.11,)</versionRange>
-									<goals>
-										<goal>check</goal>
-									</goals>
-								</pluginExecutionFilter>
-								<action>
-									<ignore/>
-								</action>
-							</pluginExecution>
-						</pluginExecutions>
-					</lifecycleMappingMetadata>
-				</configuration>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											org.apache.maven.plugins
+										</groupId>
+										<artifactId>
+											maven-checkstyle-plugin
+										</artifactId>
+										<versionRange>[2.11,)</versionRange>
+										<goals>
+											<goal>check</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore />
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -278,8 +318,8 @@
 				<configuration>
 					<header>${staticcheck.dir}/header.txt</header>
 					<includes>
-			            <include>**/*.java</include>
-			        </includes>
+						<include>**/*.java</include>
+					</includes>
 				</configuration>
 				<executions>
 					<execution>

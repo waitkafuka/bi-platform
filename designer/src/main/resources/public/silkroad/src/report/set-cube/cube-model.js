@@ -36,8 +36,8 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
             $.ajax({
                 url: Url.loadSelectedDataSources(that.id),
                 success: function (data) {
-                    that.selectedDsId = data.data.selected;
-                    success();
+                    that.selectedDsId = data.data.selectedDatasourceId;
+                    success(data.data.selectedGroupId);
                 }
             });
         },

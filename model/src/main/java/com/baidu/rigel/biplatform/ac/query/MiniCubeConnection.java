@@ -142,6 +142,7 @@ public interface MiniCubeConnection {
     public enum DataSourceType {
         SQL(1), // if a sql connection ,we need a datasource
         FILE(2), // not implement
+        HIVE(4),
         CUSTOM(3); // user custom datasource,support user custom data process
 
         /**

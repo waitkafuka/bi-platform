@@ -131,7 +131,7 @@ define(['url'], function (Url) {
                 url:  Url.changeDsActive(dsGroupId, dsId),
                 type: 'POST',
                 success: function () {
-                    success();
+                    success && success();
                 }
             });
         }

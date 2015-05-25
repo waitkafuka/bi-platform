@@ -16,6 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
@@ -51,7 +52,7 @@ public class CopyIndexServerHandler extends AbstractChannelInboundHandler {
     /**
      * taskExecutor
      */
-    private TaskExecutor taskExecutor;
+    private ThreadPoolTaskExecutor taskExecutor;
     
 
     /**
@@ -92,7 +93,8 @@ public class CopyIndexServerHandler extends AbstractChannelInboundHandler {
 	public CopyIndexServerHandler() {
 		super(ACTION_SUPPORT, ACTION_FEEDBACK);
 		isClient=IndexAndSearchClient.getNodeClient();
-		taskExecutor=(TaskExecutor)ApplicationContextHelper.getContext().getBean("taskExecutor");
+		taskExecutor=(ThreadPoolTaskExecutor)
+		    ApplicationContextHelper.getContext().getBean(ThreadPoolTaskExecutor.class);
 		
 	}
 

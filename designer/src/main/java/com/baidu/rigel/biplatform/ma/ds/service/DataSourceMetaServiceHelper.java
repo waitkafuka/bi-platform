@@ -73,7 +73,11 @@ public final class DataSourceMetaServiceHelper {
      /**
       * 依据配置注册元数据服务
       */
-     public static void registryDsMetaServices () {
-         
+     public static void registryDsMetaServices (String type, Class<?> clazz) {
+         try {
+            SERVICE_REPOSITORY.put (type, (DataSourceInfoReaderService) clazz.newInstance ());
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException (e);
+        }
      }
 }

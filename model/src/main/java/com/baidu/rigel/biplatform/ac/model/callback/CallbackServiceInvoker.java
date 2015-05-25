@@ -97,6 +97,7 @@ public final class CallbackServiceInvoker {
         LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
         LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
         try {
+            
             String responseStr = HttpRequest.sendPost1(url, params);
             CallbackResponse response = convertStrToResponse(responseStr, type);
             LOG.info("[INFO] --- --- resposne : {}", response);

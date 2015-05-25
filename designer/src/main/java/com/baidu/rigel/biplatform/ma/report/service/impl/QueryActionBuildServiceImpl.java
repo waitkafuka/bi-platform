@@ -50,9 +50,11 @@ import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
+import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
@@ -64,6 +66,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
 import com.baidu.rigel.biplatform.ma.report.service.AnalysisChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
 import com.baidu.rigel.biplatform.ma.report.utils.ItemUtils;
@@ -650,7 +653,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             } else {
                   if (dataRange[0] .contains("-") && dataRange[1] .contains("-")) { 
                       dataRange[0]  = dataRange[0] .replace("-", "");
-                      dataRange[0]  = dataRange[1] .replace("-", "");   
+                      dataRange[1]  = dataRange[1] .replace("-", "");   
                       TimeDimension timeDim = (TimeDimension) element;
                       Map<String, String> time = 
                               TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , timeDim.getDataTimeType());
@@ -741,5 +744,25 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         } 
         return targetArea;
     }
+
+//    /**
+//     * {@inheritDoc}
+//     */
+//	@Override
+//	public QueryAction generateTableQueryActionForPlaneTable(
+//			ReportDesignModel model, String aeraId, Map<String, Object> context) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+
+	/**
+	 * {@inheritDoc} 
+	 */
+	@Override
+	public PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel,
+			FormatModel formatModel) throws PlaneTableParseException {
+		PlaneTable planeTable = DataModelUtils.transDataModel2PlaneTable(formatModel, cube, dataModel);
+		return planeTable;
+	}
     
 }

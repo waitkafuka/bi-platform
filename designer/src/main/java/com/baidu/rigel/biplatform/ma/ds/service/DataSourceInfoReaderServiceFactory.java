@@ -6,6 +6,7 @@ import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
  * @author jiangyichao
  *
  */
+
 public final class DataSourceInfoReaderServiceFactory {
     
     private DataSourceInfoReaderServiceFactory () {

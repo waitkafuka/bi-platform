@@ -18,9 +18,14 @@
  */
 package com.baidu.rigel.biplatform.ac.query;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.google.common.collect.Maps;
 
 /**
  * 接入接口
@@ -30,6 +35,17 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
  */
 public class MiniCubeDriverManager {
 
+    /**
+     * TODO 需要调整设计为桥接模式
+     * 数据源连接对象管理仓库
+     */
+    private static final Map<String, Class<? extends MiniCubeConnection>> REPOSITORY = Maps.newConcurrentMap ();
+    
+    // 默认注入mysql connection
+    static {
+        REPOSITORY.put (DataSourceType.SQL.toString (), MiniCubeSqlConnection.class);
+    }
+    
     /**
      * 根据cube对象创建连接
      * 
@@ -44,9 +60,24 @@ public class MiniCubeDriverManager {
         if (dataSourceInfo.getDataSourceType().equals(DataSourceType.SQL)) {
             return new MiniCubeSqlConnection((SqlDataSourceInfo) dataSourceInfo);
         }
-        throw new UnsupportedOperationException("only support SQL type dataSourceinfo.");
+        Class<? extends MiniCubeConnection> clazz = REPOSITORY.get (dataSourceInfo.getDataSourceType ().toString ());
+        if (clazz == null) {
+            throw new UnsupportedOperationException("only support SQL type dataSourceinfo.");
+        }
+        try {
+            Constructor<? extends MiniCubeConnection> constructor = clazz.getConstructor (DataSourceInfo.class);
+            return constructor.newInstance (dataSourceInfo);
+        } catch (NoSuchMethodException 
+                | SecurityException 
+                | InstantiationException | IllegalAccessException 
+                | IllegalArgumentException | InvocationTargetException e) {
+            throw new RuntimeException ("initialized minicubeconnection failed !");
+        }
     }
 
+    public static void registryConn (String type, Class<? extends MiniCubeConnection> clazz) {
+        REPOSITORY.put (type, clazz);
+    }
     // /**
     // * 动态转换Schema文件，为后续预留
     // * @param schemaFile
