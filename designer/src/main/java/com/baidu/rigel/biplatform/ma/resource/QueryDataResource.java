@@ -17,9 +17,9 @@ package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1407,7 +1407,7 @@ public class QueryDataResource extends BaseResource {
             /**
              * TODO 考虑一下这样的逻辑是否应该放到resource中
              */
-            List<Map<String, String>> mainDims = Lists.newArrayList();
+            List<Map<String, String>> mainDims = areaContext.getCurBreadCrumPath ();
             DataSourceDefine define = null;
             DataSourceInfo dsInfo = null;
              try {
@@ -1418,7 +1418,20 @@ public class QueryDataResource extends BaseResource {
             } catch (DataSourceOperationException | DataSourceConnectionException e) {
                 logger.error (e.getMessage (), e);
             }
-            if (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
+            
+            if (mainDims.size () > 0 && !mainDims.get (mainDims.size () -1).values ().toArray ()[0].equals (drillTargetUniqueName)) {
+                Iterator<Map<String, String>> it = mainDims.iterator ();
+                boolean  remove = false;
+                while (it.hasNext ()) {
+                    if (remove) {
+                        it.remove ();
+                    }
+                    Map<String, String> tmpMap = it.next ();
+                    if (tmpMap.values ().toArray ()[0].equals (drillTargetUniqueName)) {
+                        remove = true;
+                    }
+                }
+            } else if (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
@@ -1429,16 +1442,16 @@ public class QueryDataResource extends BaseResource {
                 mainDims.add(dims3);
 //                drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
-            if (isRoot) {
-                mainDims.clear ();
-//                Map<String, String> root = areaContext.getCurBreadCrumPath();
-//                mainDims.add(root);
-            }
+//            if (isRoot) {
+//                mainDims.clear ();
+////                Map<String, String> root = areaContext.getCurBreadCrumPath();
+////                mainDims.add(root);
+//            }
             
-            List<Map<String, String>> root = areaContext.getCurBreadCrumPath();
-            mainDims.addAll(root);
+//            List<Map<String, String>> root = areaContext.getCurBreadCrumPath();
+//            mainDims.addAll(root);
+//            Collections.reverse(mainDims);
             areaContext.setCurBreadCrumPath (mainDims);
-            Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);
 //            runTimeModel.getContext().put("bread_key", mainDims);
