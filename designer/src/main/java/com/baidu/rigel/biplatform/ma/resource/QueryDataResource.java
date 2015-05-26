@@ -1437,7 +1437,7 @@ public class QueryDataResource extends BaseResource {
             
             List<Map<String, String>> root = areaContext.getCurBreadCrumPath();
             mainDims.addAll(root);
-          
+            areaContext.setCurBreadCrumPath (mainDims);
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);
