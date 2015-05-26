@@ -131,6 +131,50 @@ public class TableData implements Serializable{
         public void setDbName(String dbName) {
             this.dbName = dbName;
         }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#hashCode()
+         */
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((name == null) ? 0 : name.hashCode ());
+            result = prime * result + ((tableName == null) ? 0 : tableName.hashCode ());
+            return result;
+        }
+
+        /* (non-Javadoc)
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass () != obj.getClass ()) {
+                return false;
+            }
+            Column other = (Column) obj;
+            if (name == null) {
+                if (other.name != null) {
+                    return false;
+                }
+            } else if (!name.equals (other.name)) {
+                return false;
+            }
+            if (tableName == null) {
+                if (other.tableName != null) {
+                    return false;
+                }
+            } else if (!tableName.equals (other.tableName)) {
+                return false;
+            }
+            return true;
+        }
         
         
     }
