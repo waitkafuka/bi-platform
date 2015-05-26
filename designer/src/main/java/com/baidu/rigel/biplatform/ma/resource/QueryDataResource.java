@@ -1492,11 +1492,11 @@ public class QueryDataResource extends BaseResource {
         } else if (drillDim.getType () == DimensionType.CALLBACK) {
             String[] nameArray = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
             Level l = drillDim.getLevels ().values ().toArray (new Level[0])[nameArray.length - 2];
-            
             Map<String, String> tmp = Maps.newHashMap ();
             params.forEach ((k, v) -> {
                 tmp.put (k, v.toString ());
             });
+            logger.info ("in callback dim show name generate");
             return l.getMembers (QueryUtils.transformCube (cube), dsInfo, tmp).get(0).getCaption();
         }
         return showName;
