@@ -1429,10 +1429,14 @@ public class QueryDataResource extends BaseResource {
                 mainDims.add(dims3);
                 drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
-            if (!isRoot) {
-                Map<String, String> root = areaContext.getCurBreadCrumPath();
-                mainDims.add(root);
+            if (isRoot) {
+                mainDims.clear ();
+//                Map<String, String> root = areaContext.getCurBreadCrumPath();
+//                mainDims.add(root);
             }
+            Map<String, String> root = areaContext.getCurBreadCrumPath();
+            mainDims.add(root);
+          
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);
