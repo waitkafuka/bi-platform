@@ -1419,19 +1419,21 @@ public class QueryDataResource extends BaseResource {
                 logger.error (e.getMessage (), e);
             }
             
-            if (mainDims.size () > 0 && !mainDims.get (mainDims.size () -1).values ().toArray ()[0].equals (drillTargetUniqueName)) {
+             boolean  remove = false;
+            if (mainDims.size () > 0  && !isRoot
+                    && !mainDims.get (mainDims.size () -1).values ().toArray ()[0].equals (drillTargetUniqueName)) {
                 Iterator<Map<String, String>> it = mainDims.iterator ();
-                boolean  remove = false;
                 while (it.hasNext ()) {
                     if (remove) {
                         it.remove ();
                     }
                     Map<String, String> tmpMap = it.next ();
-                    if (tmpMap.values ().toArray ()[0].equals (drillTargetUniqueName)) {
+                    if (tmpMap.values ().toArray ()[1].equals (drillTargetUniqueName)) {
                         remove = true;
                     }
                 }
-            } else if (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
+            } 
+            if (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all") && !remove) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
@@ -1442,11 +1444,16 @@ public class QueryDataResource extends BaseResource {
                 mainDims.add(dims3);
 //                drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
-//            if (isRoot) {
-//                mainDims.clear ();
-////                Map<String, String> root = areaContext.getCurBreadCrumPath();
-////                mainDims.add(root);
-//            }
+            if (isRoot) {
+                Iterator<Map<String, String>> it = mainDims.iterator ();
+                it.next ();
+                while (it.hasNext ()) {
+                    it.next ();
+                    it.remove ();
+                }
+//                Map<String, String> root = areaContext.getCurBreadCrumPath();
+//                mainDims.add(root);
+            }
             
 //            List<Map<String, String>> root = areaContext.getCurBreadCrumPath();
 //            mainDims.addAll(root);
