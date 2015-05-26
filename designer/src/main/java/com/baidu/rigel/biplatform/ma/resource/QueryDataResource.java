@@ -1433,7 +1433,7 @@ public class QueryDataResource extends BaseResource {
                     }
                 }
             } 
-            if (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all") && !remove) {
+            if (!remove && drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
