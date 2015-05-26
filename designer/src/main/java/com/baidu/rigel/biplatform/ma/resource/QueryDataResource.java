@@ -1412,7 +1412,7 @@ public class QueryDataResource extends BaseResource {
             DataSourceInfo dsInfo = null;
              try {
                 define = dsService.getDsDefine (model.getDsId ());
-                 dsInfo = DataSourceConnectionServiceFactory
+                dsInfo = DataSourceConnectionServiceFactory
                         .getDataSourceConnectionServiceInstance (define.getDataSourceType ().name ())
                         .parseToDataSourceInfo (define, securityKey);
             } catch (DataSourceOperationException | DataSourceConnectionException e) {

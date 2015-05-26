@@ -79,14 +79,12 @@ public class QueryDataResourceUtils {
 		BaseTable baseTable = null;
 		ReportDesignModel designModel = runtimeModel.getModel();
 
-		Cube cube = designModel.getSchema().getCubes()
-				.get(targetArea.getCubeId());
+		Cube cube = designModel.getSchema().getCubes().get(targetArea.getCubeId());
 
 		if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
 			// 获取平面表
 			try {
-				baseTable = queryBuildService.parseToPlaneTable(cube,
-						result.getDataModel(), targetArea.getFormatModel());
+				baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getFormatModel());
 				Map<String, Object> resultMap = Maps.newHashMap();
 				resultMap.put("planeTable", (PlaneTable) baseTable);
 				return ResourceUtils.getResult("Success", "Fail", resultMap);
@@ -98,8 +96,7 @@ public class QueryDataResourceUtils {
 		} else {
 			// 获取pivotTable
 			try {
-				baseTable = queryBuildService.parseToPivotTable(cube,
-						result.getDataModel());
+				baseTable = queryBuildService.parseToPivotTable(cube, result.getDataModel());
 				// 对多维表格进行处理
 				return this.handlePivotTable((PivotTable) baseTable, runtimeModel, 
 						targetArea, areaContext, action, cube);
@@ -217,7 +214,14 @@ public class QueryDataResourceUtils {
             }
             root.put("uniqName", genRootUniqueName (uniqueName));
         } else {
-            String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
+            Dimension dimension = cube.getDimensions ().get (item.getOlapElementId ());
+            // TODO 修正错误的维度关联关系
+            if (dimension.getType () == DimensionType.GROUP_DIMENSION) {
+                dimension.getLevels ().forEach ((k, v) -> {
+                    v.setDimension (dimension);
+                });
+            }
+            String uniqueName = dimension.getAllMember ().getUniqueName ();
             root.put ("uniqName", genRootUniqueName (uniqueName));
         }
         RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);
