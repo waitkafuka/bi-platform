@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -469,8 +470,11 @@ public class QueryContextBuilder {
         if (member.isAll()) {
             node.setHasChildren(true);
         } else if (member.getLevel() instanceof CallbackLevel) {
+            CallbackMember m = (CallbackMember) member;
             if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
                 node.setHasChildren(true);
+            } else {
+                node.setHasChildren (m.isHasChildren ());
             }
         } else {
             // TODO 后续考虑维度预加载

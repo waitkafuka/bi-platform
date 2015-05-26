@@ -78,6 +78,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
@@ -1288,6 +1289,8 @@ public class QueryDataResource extends BaseResource {
         
         QueryAction action = null; //(QueryAction) runTimeModel.getContext().get(uniqueName);
         String drillTargetUniqueName = null;
+        Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, Maps.newHashMap ());
+        Item row = null;
         if (uniqueName.contains (",")) {
 //            isRoot = true;
             String[] uniqueNameArray = uniqueName.split (",");
@@ -1298,8 +1301,7 @@ public class QueryDataResource extends BaseResource {
                 logger.error(msg);
                 throw new RuntimeException(msg);
             }
-            Item row = store.get(dimName);
-            Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, Maps.newHashMap ());
+            row = store.get(dimName);
             queryParams.put(row.getOlapElementId(), uniqueNameArray);
             
             // TODO 仔细思考一下逻辑
@@ -1328,7 +1330,7 @@ public class QueryDataResource extends BaseResource {
                 logger.error(msg);
                 throw new RuntimeException(msg);
             }
-            Item row = store.get(dimName);
+            row = store.get(dimName);
             if (row == null) {
                 throw new IllegalStateException("未找到下钻节点 -" + dimName);
             }
@@ -1337,7 +1339,7 @@ public class QueryDataResource extends BaseResource {
             /**
              * update context
              */
-            Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
+            queryParams = updateLocalContextAndReturn(runTimeModel, areaId, oriQueryParams);
             queryParams.put(row.getOlapElementId(), drillName);
             
             // TODO 仔细思考一下逻辑
@@ -1355,10 +1357,22 @@ public class QueryDataResource extends BaseResource {
         }
 //        runTimeModel.getContext().put(uniqueName, action);
         runTimeModel.setLinkedQueryAction (action);
-            
+        
+        /** 
+         * TODO 针对参数映射修改，将当前下钻条件设置到对应参数上
+         */
+        final String[] tmp = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
+        final String elementId = row.getOlapElementId ();
+        for (ReportParam p : model.getParams ().values ()) {
+            if (p.getElementId ().equals (elementId)) {
+                queryParams.put (p.getName (), tmp[tmp.length - 1]);
+            }
+        };
+        
+        
         ResultSet result;
         try {
-            result = reportModelQueryService.queryDatas(model, action, true, true, securityKey);
+            result = reportModelQueryService.queryDatas(model, action, true, true, queryParams, securityKey);
         } catch (DataSourceOperationException e1) {
             logger.info("[INFO]--- ---can't get datasource！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
