@@ -1366,11 +1366,13 @@ public class QueryDataResource extends BaseResource {
          */
         final String[] tmp = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
         final String elementId = row.getOlapElementId ();
-        for (ReportParam p : model.getParams ().values ()) {
-            if (p.getElementId ().equals (elementId)) {
-                queryParams.put (p.getName (), tmp[tmp.length - 1]);
-            }
-        };
+        if (!MetaNameUtil.isAllMemberUniqueName (drillTargetUniqueName)) {
+            for (ReportParam p : model.getParams ().values ()) {
+                if (p.getElementId ().equals (elementId)) {
+                    queryParams.put (p.getName (), tmp[tmp.length - 1]);
+                }
+            };
+        }
         
         
         ResultSet result;
@@ -1490,6 +1492,7 @@ public class QueryDataResource extends BaseResource {
         } else if (drillDim.getType () == DimensionType.CALLBACK) {
             String[] nameArray = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
             Level l = drillDim.getLevels ().values ().toArray (new Level[0])[nameArray.length - 2];
+            
             Map<String, String> tmp = Maps.newHashMap ();
             params.forEach ((k, v) -> {
                 tmp.put (k, v.toString ());
