@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.ma.report.model;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -58,7 +59,7 @@ public class ExtendAreaContext implements Serializable {
     /**
      * 面包屑路径
      */
-    private Map<String, String> curBreadCrumPath;
+    private List<Map<String, String>> curBreadCrumPath;
     
     /**
      * 当前操作下钻条目
@@ -175,14 +176,14 @@ public class ExtendAreaContext implements Serializable {
     /**
      * @return the curBreadCrumPath
      */
-    public Map<String, String> getCurBreadCrumPath() {
+    public List<Map<String, String>> getCurBreadCrumPath() {
         return curBreadCrumPath;
     }
 
     /**
      * @param curBreadCrumPath the curBreadCrumPath to set
      */
-    public void setCurBreadCrumPath(Map<String, String> curBreadCrumPath) {
+    public void setCurBreadCrumPath(List<Map<String, String>> curBreadCrumPath) {
         this.curBreadCrumPath = curBreadCrumPath;
     }
 

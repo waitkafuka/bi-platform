@@ -1423,7 +1423,7 @@ public class QueryDataResource extends BaseResource {
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
                 if (isRoot) {
-                    showName = areaContext.getCurBreadCrumPath().get("showName");
+                    showName = areaContext.getCurBreadCrumPath().get (0).get("showName");
                 }
                 dims3.put("showName", showName);
                 mainDims.add(dims3);
@@ -1434,8 +1434,9 @@ public class QueryDataResource extends BaseResource {
 //                Map<String, String> root = areaContext.getCurBreadCrumPath();
 //                mainDims.add(root);
             }
-            Map<String, String> root = areaContext.getCurBreadCrumPath();
-            mainDims.add(root);
+            
+            List<Map<String, String>> root = areaContext.getCurBreadCrumPath();
+            mainDims.addAll(root);
           
             Collections.reverse(mainDims);
             resultMap.put("mainDimNodes", mainDims);
@@ -1678,7 +1679,7 @@ public class QueryDataResource extends BaseResource {
                 if (breadCrum == null) {
                     List<Map<String, String>> tmp = Lists.newArrayList();
                     if (areaContext.getCurBreadCrumPath() != null  && !areaContext.getCurBreadCrumPath().isEmpty()) {
-                        tmp.add(areaContext.getCurBreadCrumPath());
+                        tmp.addAll(areaContext.getCurBreadCrumPath());
                         breadCrum = tmp;
                     }
                 }

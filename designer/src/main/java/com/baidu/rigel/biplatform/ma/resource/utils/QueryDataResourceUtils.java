@@ -153,7 +153,9 @@ public class QueryDataResourceUtils {
             if (logicModel.getRows ().length >= 2) {
                 Map<String, String> root =  genRootDimCaption(pivotTable, logicModel, 
                         areaContext.getParams(), cube);
-                    areaContext.setCurBreadCrumPath(root);
+                List<Map<String, String>> tmp = Lists.newArrayList ();
+                tmp.add (root);
+                    areaContext.setCurBreadCrumPath(tmp);
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                     if (!root.get("uniqName").toLowerCase().contains("all")) {
@@ -163,10 +165,10 @@ public class QueryDataResourceUtils {
                     }
                     mainDims.add(root);
                     Collections.reverse(mainDims);
-                    areaContext.setCurBreadCrumPath(root);
+                    areaContext.setCurBreadCrumPath(mainDims);
                     resultMap.put("mainDimNodes", mainDims);
                 } else {
-                    areaContext.setCurBreadCrumPath (Maps.newHashMap ());
+                    areaContext.setCurBreadCrumPath (Lists.newArrayList ());
                     resultMap.remove ("mainDimNodes");
 //                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
