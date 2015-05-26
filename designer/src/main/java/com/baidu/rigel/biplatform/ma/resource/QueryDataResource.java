@@ -1418,7 +1418,7 @@ public class QueryDataResource extends BaseResource {
             } catch (DataSourceOperationException | DataSourceConnectionException e) {
                 logger.error (e.getMessage (), e);
             }
-            while (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
+            if (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
@@ -1427,7 +1427,7 @@ public class QueryDataResource extends BaseResource {
                 }
                 dims3.put("showName", showName);
                 mainDims.add(dims3);
-                drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
+//                drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
             if (isRoot) {
                 mainDims.clear ();
