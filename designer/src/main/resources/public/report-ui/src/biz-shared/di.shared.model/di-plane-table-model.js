@@ -76,7 +76,8 @@ $namespace('di.shared.model');
             DATA: URL.fn('PLANE_TABLE_DATA'),
             CHECK: URL.fn('PLANE_TABLE_CHECK'),
             SELECT: URL.fn('PLANE_TABLE_SELECT'),
-            OFFLINE_DOWNLOAD: URL.fn('PLANE_TABLE_OFFLINE_DOWNLOAD')
+            OFFLINE_DOWNLOAD: URL.fn('PLANE_TABLE_OFFLINE_DOWNLOAD'),
+            GET_FIELDSLIST: URL.fn('PLANE_TABLE_GET_FIELDSLIST')
         }
     );
 
@@ -89,7 +90,8 @@ $namespace('di.shared.model');
             DATA: 'DI_PLANE_TABLE_MODEL_DATA_' + getUID(),
             CHECK: 'DI_PLANE_TABLE_MODEL_CHECK_' + getUID(),
             SELECT: 'DI_PLANE_TABLE_MODEL_SELECT_' + getUID(),
-            OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID()
+            OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID(),
+            GET_FIELDSLIST: 'DI_PLANE_TABLE_MODEL_GET_FIELDSLIST_' + getUID()
         }
     );
 
@@ -122,6 +124,13 @@ $namespace('di.shared.model');
                     // 参数名未定
                     { mailTo: options.args.param.email }
                 );
+            },
+            GET_FIELDSLIST: function (options) {
+                return this._fCommonParamGetter(
+                    // TODO
+                    // 参数名未定
+                    { uniqueName: options.args.param.uniqueName }
+                );
             }
         }
     );
@@ -137,7 +146,8 @@ $namespace('di.shared.model');
             LINK_DRILL: doComplete,
             SELECT: doComplete,
             CHECK: doComplete,
-            OFFLINE_DOWNLOAD: doComplete
+            OFFLINE_DOWNLOAD: doComplete,
+            GET_FIELDSLIST: doComplete
         }
     );
 

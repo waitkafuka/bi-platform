@@ -2385,6 +2385,17 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     border-right: 1px dashed #CCCCCC;
 }
 
+.ui-table-hcell-field-set {
+    background-image: url(img/icon-hcell-field-filter.png);
+    background-repeat: no-repeat;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 5px;
+    width: 20px;
+    height: 16px;
+    color: #E7F9FE;
+}
+
 .ui-table-expand-background {
     /*background-color: #F6F6F5;*/
 }
@@ -3506,6 +3517,33 @@ div.di-dim-level-find-msg{
 
 div.di-dim-level-find-msg span{
      font-weight: bold
+}
+.table-fields-filter-list {
+    width: 300px;
+    height:300px;
+    border: 1px solid #D0D0D0
+}
+
+.table-fields-filter-list input {
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 3px;
+}
+
+.table-fields-filter-list label {
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.fields-filter {
+    color: #3C78A2;
+}
+
+.fields-filter .ui-button-hover {
+    background-color: white;
 }
 /**
  * Fold Panel

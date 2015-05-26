@@ -19,6 +19,7 @@
         disposeControl = core.dispose,
         $disposeControl = core.$dispose,
         createDom = dom.create,
+        hasClass = dom.hasClass,
         first = dom.first,
         last = dom.last,
         children = dom.children,
@@ -278,6 +279,7 @@
                 el.innerHTML = html.join('');
 
                 return el;
+
             },
             function(el, options) {
                 //ecui.init(el);
@@ -314,7 +316,7 @@
                     orderby = 'asc';
                 }
                 else if (this.className.indexOf('-sort-asc') >= 0) {
-                    orderby = 'desc'
+                    orderby = 'desc';
                 }
                 else {
                     orderby = this.getAttribute('data-orderby') || 'desc';
@@ -401,18 +403,36 @@
             }
             html.push('">');
 
+//            if (o.title) {
+//                 //html.push(o.title);
+//                 //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
+//                //不然文本过多的话会显示不全
+//                var useBag = dom.ieVersion < 8;
+//                var isLastColumn = i == headrow.length - 1;
+//                html.push(
+//                        useBag ? ('<div class="ui-plane-table-hcell-bag ') : '',
+//                        useBag && isLastColumn ? ('ui-plane-table-hcell-bag-lastcolumn') : '',
+//                        useBag ? ('">') : '',
+//                            o.title,
+//                        useBag ? '</div>' : ''
+//                );
+//            }
+//            if (o.title) {
+//                html.push(
+////                    '<div class="ui-table-head-th-content"><div class="ui-table-head-font">',
+//                    '<span><span class="', type, '-hcell-content">',
+//                    o.title,
+//                    '</span>',
+//                    '<span class="', type, '-hcell-field-set"></span></span>'
+////                    '</div><div class="ui-table-hcell-sort-none"></div></div>'
+//                );
+//            }
+
             if (o.title) {
-                 //html.push(o.title);
-                 //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
-                //不然文本过多的话会显示不全
-                var useBag = dom.ieVersion < 8;
-                var isLastColumn = i == headrow.length - 1;
                 html.push(
-                        useBag ? ('<div class="ui-plane-table-hcell-bag ') : '', 
-                        useBag && isLastColumn ? ('ui-plane-table-hcell-bag-lastcolumn') : '',
-                        useBag ? ('">') : '', 
-                            o.title, 
-                        useBag ? '</div>' : ''
+                    '<div class="', type, '-head-th-content"><div class="ui-table-head-font">',
+                    o.title,
+                    '</div><div class="', type, '-hcell-field-set"></div></div>'
                 );
             }
 
@@ -694,6 +714,21 @@
 
         // 行选中
         this.$initRowChecked();
+        //attachEvent(headEl, 'mouseover', headMouseOver);
+        var mainEl = this.$di('getEl');
+        var type = this.getType();
+        var headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0];
+        attachEvent(headEl, 'click', this.fieldSet);
+        function fieldSet() {
+            var me = this;
+            var type = this.getType();
+            var oEv = ev || window.event;
+            var target = oEv.target || oEv.srcElement;
+
+            if (hasClass(target, type + '-hcell-field-set')) {
+                alert();
+            }
+        }
     };
 
     /**
