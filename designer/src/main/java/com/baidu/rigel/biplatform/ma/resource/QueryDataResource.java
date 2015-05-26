@@ -46,10 +46,13 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
@@ -57,10 +60,13 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
+import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
@@ -1383,8 +1389,12 @@ public class QueryDataResource extends BaseResource {
         runTimeModel.drillDown(action, result);
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
+        Dimension drillDim = null;
+        Cube cube = null;
+        
         try {
-            Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
+            cube = model.getSchema().getCubes().get(targetArea.getCubeId());
+            drillDim = cube.getDimensions ().get (elementId);
             table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
         } catch (PivotTableParseException e) {
             logger.info(e.getMessage(), e);
@@ -1397,11 +1407,20 @@ public class QueryDataResource extends BaseResource {
              * TODO 考虑一下这样的逻辑是否应该放到resource中
              */
             List<Map<String, String>> mainDims = Lists.newArrayList();
-            while (drillTargetUniqueName != null 
-                    && !drillTargetUniqueName.toLowerCase().contains("all")) {
+            DataSourceDefine define = null;
+            DataSourceInfo dsInfo = null;
+             try {
+                define = dsService.getDsDefine (model.getDsId ());
+                 dsInfo = DataSourceConnectionServiceFactory
+                        .getDataSourceConnectionServiceInstance (define.getDataSourceType ().name ())
+                        .parseToDataSourceInfo (define, securityKey);
+            } catch (DataSourceOperationException | DataSourceConnectionException e) {
+                logger.error (e.getMessage (), e);
+            }
+            while (drillTargetUniqueName != null) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
-                String showName = genShowName(drillTargetUniqueName);
+                String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
                 if (isRoot) {
                     showName = areaContext.getCurBreadCrumPath().get("showName");
                 }
@@ -1454,15 +1473,28 @@ public class QueryDataResource extends BaseResource {
     /**
      * 
      * @param drillTargetUniqueName
+     * @param drillDim 
+     * @param queryParams 
+     * @param dsInfo 
+     * @param cube 
      * @return
      * 
      */
-    private String genShowName(String drillTargetUniqueName) {
+    private String genShowName(String drillTargetUniqueName, 
+        Dimension drillDim, Cube cube, DataSourceInfo dsInfo, Map<String, Object> params) {
         String showName = drillTargetUniqueName.substring(drillTargetUniqueName.lastIndexOf("[") + 1, 
                 drillTargetUniqueName.length() - 1);
         if (showName.contains("All_")) {
             showName = showName.replace("All_", "全部");
             showName = showName.substring(0, showName.length() - 1);
+        } else if (drillDim.getType () == DimensionType.CALLBACK) {
+            String[] nameArray = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
+            Level l = drillDim.getLevels ().values ().toArray (new Level[0])[nameArray.length - 2];
+            Map<String, String> tmp = Maps.newHashMap ();
+            params.forEach ((k, v) -> {
+                tmp.put (k, v.toString ());
+            });
+            return l.getMembers (QueryUtils.transformCube (cube), dsInfo, tmp).get(0).getCaption();
         }
         return showName;
     }
