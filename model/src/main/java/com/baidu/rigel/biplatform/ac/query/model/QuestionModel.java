@@ -95,6 +95,29 @@ public class QuestionModel implements Serializable {
     private boolean filterBlank = false;
 
     /**
+     * 查询对象
+     */
+    public String querySource;
+    
+    /**
+     * getter method for property querySource
+     * 
+     * @return querySource
+     */
+    public String getQuerySource() {
+		return querySource;
+	}
+
+	/**
+	 * setter method for property querySource
+	 * 
+	 * @param querySource
+	 */
+	public void setQuerySource(String querySource) {
+		this.querySource = querySource;
+	}
+	
+    /**
      * getter method for property axisMetas
      * 
      * @return the axisMetas

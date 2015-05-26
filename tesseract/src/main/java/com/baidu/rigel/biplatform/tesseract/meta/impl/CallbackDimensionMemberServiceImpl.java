@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Level;
@@ -36,6 +37,7 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
 import com.baidu.rigel.biplatform.ac.model.callback.ResponseStatus;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
 import com.baidu.rigel.biplatform.tesseract.meta.DimensionMemberService;
 import com.google.common.collect.Maps;
@@ -73,6 +75,7 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
                     callbackParams.put(k, v);
                 }
             }); 
+            callbackParams.put (HttpRequest.COOKIE_PARAM_NAME, params.get (HttpRequest.COOKIE_PARAM_NAME));
 //            callbackParams.putAll(params);
         }
         
@@ -198,15 +201,23 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
      * @return
      */
     private MiniCubeMember createMemberByPosTreeNode(CallbackDimTreeNode node, Level level, Member parentMember) {
-        MiniCubeMember result = new MiniCubeMember(node.getId());
+        CallbackMember result = new CallbackMember(node.getId());
         result.setLevel(level);
         result.setCaption(node.getName());
+        result.setHasChildren (node.isHasChildern ());
         if (CollectionUtils.isNotEmpty(node.getCsIds())) {
             result.setQueryNodes(Sets.newHashSet(node.getCsIds()));
         }
         // 先生成一下uniqueName，避免后续生成带上了父节点的UniqueName
         result.generateUniqueName(null);
         result.setParent(parentMember);
+//        if (CollectionUtils.isNotEmpty (node.getChildren ())) {
+//            Set<String> leafIds = Sets.newHashSet ();
+//            node.getChildren ().forEach (n -> {
+//                leafIds.add (n.getId ());
+//            });
+//            result.setQueryNodes (leafIds);
+//        }
         return result;
     }
 

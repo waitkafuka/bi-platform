@@ -48,9 +48,9 @@ public class PlaneTable extends BaseTable {
 	private int colHeadHeight;
 	
 	/**
-	 * 数据的列数
+	 * 总的数据条数
 	 */
-	private int colSize;
+	private int totalRecordSize;
 	
 	/**
 	 * @return the pageInfo
@@ -144,17 +144,17 @@ public class PlaneTable extends BaseTable {
 	}
 	
 	/**
-	 * @return the colSize
+	 * @return the totalRecordSize
 	 */
-	public int getColSize() {
-		return colSize;
+	public int getTotalRecordSize() {
+		return totalRecordSize;
 	}
 
 	/**
-	 * @param colSize the colSize to set
+	 * @param totalRecordSize the totalRecordSize to set
 	 */
-	public void setColSize(int colSize) {
-		this.colSize = colSize;
+	public void setTotalRecordSize(int totalRecordSize) {
+		this.totalRecordSize = totalRecordSize;
 	}
 		
 }

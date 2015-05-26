@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ma.report.utils;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,13 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.collections.CollectionUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
@@ -40,7 +41,6 @@ import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
@@ -53,19 +53,14 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
-import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
-import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
-import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
-import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
-import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
@@ -76,12 +71,14 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
+import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -136,7 +133,13 @@ public final class QueryUtils {
         // 设置轴信息
         questionModel.setAxisMetas(buildAxisMeta(reportModel.getSchema(), area, queryAction));
         // 构建查询信息
-        questionModel.setQueryConditions(buildQueryConditions(reportModel, area, queryAction));
+        if (area.getType() == ExtendAreaType.PLANE_TABLE) {
+        	// 针对平面表构建查询条件
+        	questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPlaneTable(reportModel, area, queryAction));
+        } else {
+        	// 针对其他情况构建查询条件
+        	questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction));       	
+        }
         questionModel.setCubeId(area.getCubeId());
         ((MiniCube) cube).setProductLine(dsDefine.getProductLine());
         // TODO 动态更新cube 针对查询过程中动态添加的属性 需要仔细考虑此处逻辑
@@ -239,155 +242,7 @@ public final class QueryUtils {
         ds.setJdbcUrls(jdbcUrls);
         return ds;
     }
-
-    /**
-     * 构建查询条件信息
-     * 
-     * @param reportModel
-     * @param area
-     * @param queryAction
-     * @return
-     * @throws QueryModelBuildException
-     */
-    private static Map<String, MetaCondition> buildQueryConditions(ReportDesignModel reportModel,
-        ExtendArea area, QueryAction queryAction) throws QueryModelBuildException {
-        Map<String, MetaCondition> rs = new HashMap<String, MetaCondition>();
-        Map<Item, Object> items = new HashMap<Item, Object>();
-        items.putAll(queryAction.getColumns());
-        items.putAll(queryAction.getRows());
-        items.putAll(queryAction.getSlices());
-        int firstIndex = 0;
-        for (Map.Entry<Item, Object> entry : items.entrySet()) {
-            Item item = entry.getKey();
-            OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
-                    area.getCubeId(), item.getOlapElementId());
-            if (olapElement == null) {
-                Cube cube = com.baidu.rigel.biplatform.ma.report.utils.QueryUtils.getCubeWithExtendArea(reportModel, area);
-                for (Dimension dim : cube.getDimensions().values()) {
-                    if (dim.getId().equals(item.getOlapElementId())) {
-                        olapElement = dim;
-                        break;
-                    }
-                }
-            }
-            if (olapElement == null) {
-                continue;
-            }
-            if (olapElement instanceof Dimension) {
-                DimensionCondition condition = new DimensionCondition(olapElement.getName());
-                Object valueObj = entry.getValue();
-                if (valueObj != null) {
-                    List<String> values = Lists.newArrayList();
-                    if (valueObj instanceof String[]) {
-                        values = Lists.newArrayList();
-                        String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
-                        CollectionUtils.addAll(values, (String[]) tmp);
-                    } else {
-                        String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
-                        values.add(tmp);
-                    }
-                   
-                    List<QueryData> datas = Lists.newArrayList();
-                    // TODO 需要排查为何多处根节点UniqueName不一致
-                    String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName();
-                    // TODO QeuryData value如何处理
-                    for (String value : values) {
-                        if (!queryAction.isChartQuery() && value.indexOf(rootUniqueName) != -1) {
-                            datas.clear();
-                            break;
-                        }
-                        QueryData data = new QueryData(value);
-                        Object drillValue = queryAction.getDrillDimValues().get(item);
-                        String tmpValue = null;
-                        if (valueObj instanceof String[]) {
-                            tmpValue = ((String[]) valueObj)[0];
-                        } else {
-                            tmpValue = valueObj.toString();
-                        }
-                        if (drillValue != null && tmpValue.equals(drillValue)) {
-                            data.setExpand(true);
-                        } else if ((item.getPositionType() == PositionType.X 
-                                || item.getPositionType() == PositionType.S)
-                                && queryAction.isChartQuery()) {
-                            // 修正图形查询方式
-                            if (MetaNameUtil.isAllMemberUniqueName (data.getUniqueName ())) {
-                                data.setExpand(true);
-                                data.setShow(false);
-                            } else {
-                                data.setExpand (false);
-                                data.setShow (true);
-                            }
-                        }
-                        // 修正展开方式
-                        if (item.getParams().get(Constants.LEVEL) != null) {
-                            if (item.getParams().get(Constants.LEVEL).equals(1)) {
-                                data.setExpand(!queryAction.isChartQuery());
-                                data.setShow(true);
-                            } else if (item.getParams().get(Constants.LEVEL).equals(2)) {
-                                data.setExpand(true);
-                                data.setShow(false);
-                            } 
-                            if (MetaNameUtil.isAllMemberUniqueName(data.getUniqueName()) 
-                                    && queryAction.isChartQuery()){
-                                data.setExpand(true);
-                                data.setShow(false);
-                            }
-                        }
-                        datas.add(data);
-                    } 
-                    if (values.isEmpty() && queryAction.isChartQuery()) {
-                        QueryData data = new QueryData(rootUniqueName + "s]");
-                        data.setExpand(true);
-                        data.setShow(false);
-                        datas.add(data);
-                    }
-                    condition.setQueryDataNodes(datas);
-                } else {
-                    List<QueryData> datas = new ArrayList<QueryData>();
-                    Dimension dim = (Dimension) olapElement;
-                    if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                            && queryAction.isChartQuery()) {
-                        QueryData data = new QueryData(dim.getAllMember().getUniqueName());
-                        data.setExpand(true);
-                        data.setShow(false);
-                        datas.add(data);
-                    } else if (dim.getType() == DimensionType.CALLBACK) {
-                        QueryData data = new QueryData(dim.getAllMember().getUniqueName());
-                        data.setExpand(firstIndex == 0);
-                        data.setShow(firstIndex != 0);
-                        datas.add(data);
-                    }
-                    condition.setQueryDataNodes(datas);
-                }
-                // 时间维度，并且在第一列位置，后续改成可配置方式
-                if (item.getPositionType() == PositionType.X 
-                    && olapElement instanceof TimeDimension && firstIndex == 0 && !queryAction.isChartQuery()) {
-                    condition.setMemberSortType(SortType.DESC);
-                    ++firstIndex;
-                }
-                rs.put(condition.getMetaName(), condition);
-            }
-        }
-        return rs;
-    }
     
-    private static String[] resetValues(String dimName, String... valueObj) {
-        if (valueObj == null) {
-            return null;
-        }
-        String[] rs = new String[valueObj.length];
-        int i = 0;
-        for (String str : valueObj) {
-            if (!MetaNameUtil.isUniqueName(str)) {
-                rs[i] = "[" + dimName + "].[" + str + "]";
-            } else {
-                rs[i] = str;
-            }
-            ++i;
-        }
-        return rs;
-    }
-
     /**
      * 通过查询
      * 
@@ -874,28 +729,57 @@ public final class QueryUtils {
     public static Map<String, Object> resetContextParam(final HttpServletRequest request, ReportDesignModel model) {
         Map<String, Object> rs = Maps.newHashMap();
         Collection<ReportParam> params = DeepcopyUtils.deepCopy(model.getParams()).values();
-        if (params.size() == 0) {
+        // modify by jiangyichao at 2015-05-19
+        Collection<PlaneTableCondition> planeTableConditions = DeepcopyUtils.deepCopy(model.getPlaneTableConditions()).values();
+        if (params.size() == 0 && planeTableConditions.size() == 0) {
             return rs;
         }
         LOG.info ("context params ============== " + ContextManager.getParams ());
+        // 当前请求参数
         Map<String, String> requestParams = collectRequestParams(params, request);
         rs.putAll(requestParams);
         LOG.info ("current request params ============== " + requestParams);
-        params.forEach(param -> {
-            LOG.info ("current param define ============== " + param.toString());
-            if (param.isNeeded() && StringUtils.isEmpty(requestParams.get(param.getName()))) {
-                if (StringUtils.isEmpty(param.getDefaultValue())) {
-                    throw new RuntimeException("必要参数未赋值");
+        
+        // TODO 先处理P功能对应的参数
+        if (params.size() != 0) {
+            params.forEach(param -> {
+                LOG.info ("current param define ============== " + param.toString());
+                if (param.isNeeded() && StringUtils.isEmpty(requestParams.get(param.getName()))) {
+                    if (StringUtils.isEmpty(param.getDefaultValue())) {
+                        throw new RuntimeException("必要参数未赋值");
+                    }
+                    rs.put(param.getElementId(), param.getDefaultValue());
+                    rs.put(param.getName(), param.getDefaultValue());
+                } else if (!StringUtils.isEmpty(requestParams.get(param.getName()))) {
+                    rs.put(param.getElementId(), requestParams.get(param.getName()));
+                } else if (!StringUtils.isEmpty(param.getDefaultValue())) {
+                    rs.put(param.getElementId(), param.getDefaultValue());
+                    rs.put(param.getName(), param.getDefaultValue());
                 }
-                rs.put(param.getElementId(), param.getDefaultValue());
-                rs.put(param.getName(), param.getDefaultValue());
-            } else if (!StringUtils.isEmpty(requestParams.get(param.getName()))) {
-                rs.put(param.getElementId(), requestParams.get(param.getName()));
-            } else if (!StringUtils.isEmpty(param.getDefaultValue())) {
-                rs.put(param.getElementId(), param.getDefaultValue());
-                rs.put(param.getName(), param.getDefaultValue());
-            }
-        });
+            });            
+        }
+        
+        // 处理平面表对应的条件
+        if (planeTableConditions.size() != 0) {
+            planeTableConditions.forEach(condition -> {
+                LOG.info ("current planeTable condition define ============== " + condition.toString());
+                // 如果请求参数中没有条件对应的参数，则使用默认值对应的参数值
+                if (StringUtils.isEmpty(requestParams.get(condition.getName()))) {                   
+                    rs.put(condition.getElementId(), condition.getDefaultValue());
+                    rs.put(condition.getName(), condition.getDefaultValue());
+                } else if (!StringUtils.isEmpty(requestParams.get(condition.getName()))) {
+                    // 如果请求参数中有条件对应的参数，则取请求参数中的参数值
+                    // TODO 对时间条件和层级条件做特殊处理
+                    String requestParam = requestParams.get(condition.getName());
+                    // 处理时间条件
+                    requestParam = PlaneTableUtils.handleTimeCondition(requestParam);
+                    // 处理层级条件
+                    requestParam = PlaneTableUtils.handleLayerCondition(requestParam);
+                    rs.put(condition.getElementId(), requestParam);
+                } 
+            }); 
+        }
+        
         LOG.info ("after reset params is : " + rs);
         return rs;
     }

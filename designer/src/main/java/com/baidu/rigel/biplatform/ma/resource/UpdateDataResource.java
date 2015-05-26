@@ -88,7 +88,7 @@ public class UpdateDataResource extends BaseResource {
         ResponseResult rs = new ResponseResult();
         DataSourceDefine ds = dsService.getDsDefine(dsName);
         DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-        		getDataSourceConnectionServiceInstance(ds.getDataSourceType());
+            getDataSourceConnectionServiceInstance(ds.getDataSourceType().toString ());
         DataSourceInfo dsInfo = dsConnService.parseToDataSourceInfo(ds, securityKey);
         Map<String, Map<String, String>> conds = Maps.newHashMap();
         for (String factTable : factTableArray) {

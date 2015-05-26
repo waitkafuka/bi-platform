@@ -25,9 +25,11 @@ import org.slf4j.LoggerFactory;
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
+import com.baidu.rigel.biplatform.ac.util.DesCoderUtil;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
@@ -60,12 +62,34 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
     public DataModel query(QuestionModel questionModel) throws MiniCubeQueryException {
         long current = System.currentTimeMillis();
         Map<String, String> params = new HashMap<String, String>();
-
-        params.put(QUESTIONMODEL_PARAM_KEY, AnswerCoreConstant.GSON.toJson(questionModel));
         long curr = System.currentTimeMillis ();
-        log.info("begin execute query with tesseract ");
-        String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params);
-        log.info("execute query with tesseract cost {} ms", (System.currentTimeMillis () - curr));
+        String response = null;
+        String questionModelJson = null;
+        if (ConfigInfoUtils.getServerAddressByProperty("server.queryrouter.address") != null) {
+            String systemCode = "designer";
+            ConfigQuestionModel configQuestionModel = (ConfigQuestionModel)questionModel;
+        	questionModel.setQuerySource("SQL");
+        	questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
+        	log.info("begin execute query with queryrouter ");
+        	System.out.println("---------------------------------------------------------------------");
+            String temp = new String(questionModelJson);
+            temp = DesCoderUtil.encrypt(questionModelJson, systemCode);
+            System.out.println(temp);
+            questionModelJson = temp;
+            System.out.println(DesCoderUtil.decrypt(temp, systemCode));
+            System.out.println("---------------------------------------------------------------------");
+            
+            params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
+            params.put("token", DesCoderUtil.decrypt(configQuestionModel.getDataSourceInfo().getProductLine(), systemCode));
+            response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddressByProperty("server.queryrouter.address") + "/queryrouter/query", params);
+        } else {
+        	questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
+        	log.info("begin execute query with tesseract ");
+        	params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
+        	response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params);
+        }
+        
+        log.info("execute query with tesseract/queryrouter cost {} ms", (System.currentTimeMillis () - curr));
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
             String dataModelJson = responseResult.getData().replace("\\", "");

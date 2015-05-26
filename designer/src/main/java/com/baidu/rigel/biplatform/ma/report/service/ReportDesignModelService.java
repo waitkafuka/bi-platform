@@ -39,17 +39,18 @@ public interface ReportDesignModelService {
     
     /**
      * 获取ReportModel列表
+     * @param released 
      * 
      * @return
      */
-    ReportDesignModel[] queryAllModels();
+    ReportDesignModel[] queryAllModels(boolean released);
     
     /**
      * 依据id获取报表模版对象
      * 
      * @param id 报表id或者名称
      * @param isRelease 是否要获取发布的对象
-     * @return
+     * @return 
      */
     ReportDesignModel getModelByIdOrName(String id, boolean isRelease);
     

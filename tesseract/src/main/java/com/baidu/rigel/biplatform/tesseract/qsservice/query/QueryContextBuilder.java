@@ -34,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -47,6 +48,7 @@ import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
+import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
@@ -184,9 +186,14 @@ public class QueryContextBuilder {
                         }
                     } else {
                         MeasureCondition measureCon = (MeasureCondition) condition;
-                        // 暂时这个还不会生效
-                        queryContext.getFilterExpression().put(measureCon.getMetaName(),
-                                measureCon.getMeasureConditions());
+                        // TODO 暂时这个还不会生效
+                        List<SQLCondition> conditions = measureCon.getMeasureConditions();
+                        List<String> expression = Lists.newArrayList();
+                        for (SQLCondition sqlCondition : conditions) {
+                        	String expressStr = sqlCondition.parseToExpression();
+                        	expression.add(expressStr);
+                        }
+                        queryContext.getFilterExpression().put(measureCon.getMetaName(), expression);
                     }
                     logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
 //                    logger.info("cost:{}ms,in build filter",System.currentTimeMillis() - current);
@@ -463,8 +470,11 @@ public class QueryContextBuilder {
         if (member.isAll()) {
             node.setHasChildren(true);
         } else if (member.getLevel() instanceof CallbackLevel) {
+            CallbackMember m = (CallbackMember) member;
             if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
                 node.setHasChildren(true);
+            } else {
+                node.setHasChildren (m.isHasChildren ());
             }
         } else {
             // TODO 后续考虑维度预加载

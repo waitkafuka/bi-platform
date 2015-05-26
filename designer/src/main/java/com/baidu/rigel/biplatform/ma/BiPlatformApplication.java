@@ -29,7 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
-import com.baidu.rigel.biplatform.ma.ds.service.DataSourceMetaServiceHelper;
 import com.baidu.rigel.biplatform.ma.resource.filter.UniversalContextSettingFilter;
 
 /**
@@ -44,10 +43,6 @@ import com.baidu.rigel.biplatform.ma.resource.filter.UniversalContextSettingFilt
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, RedisAutoConfiguration.class})
 @ImportResource({"conf/applicationContext-cache.xml","applicationContext.xml"})
 public class BiPlatformApplication extends SpringBootServletInitializer {
-    
-    static {
-        DataSourceMetaServiceHelper.registryDsMetaServices ();
-    }
     
     @Bean
     public FilterRegistrationBean contextFilterRegistrationBean() {

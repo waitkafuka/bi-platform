@@ -172,7 +172,7 @@ public class DataSourceServiceImpl implements DataSourceService {
         try {
         	// 获取数据源连接，如果不抛出异常，说明连接字符串有效，返回true；
             dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(ds.getDataSourceType());
+            		getDataSourceConnectionServiceInstance(ds.getDataSourceType().name ());
             boolean result = dsConnService.isValidateDataSource(ds, securityKey);
             if (result) {
             	return true;
