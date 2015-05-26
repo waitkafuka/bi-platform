@@ -1029,10 +1029,9 @@ public class QueryDataResource extends BaseResource {
             if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
             	// TODO 构建分页信息
             	PageInfo pageInfo = new PageInfo();
-            	result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
+                result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
             } else {
-            	result = reportModelQueryService.queryDatas(model, action,
-            			true, true, areaContext.getParams(), securityKey);
+             result = reportModelQueryService.queryDatas(model, action,true, true, areaContext.getParams(), securityKey);
             }
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);

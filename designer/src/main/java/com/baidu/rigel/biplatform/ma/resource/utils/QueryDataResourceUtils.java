@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
@@ -206,8 +209,12 @@ public class QueryDataResourceUtils {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
-            final String uniqueName = params.get (item.getOlapElementId ()).toString ();
-            
+            String uniqueName = params.get (item.getOlapElementId ()).toString ();
+            Dimension dim = cube.getDimensions ().get (item.getOlapElementId ());
+            // for callback
+            if (!MetaNameUtil.isUniqueName (uniqueName) && dim.getType () == DimensionType.CALLBACK) {
+                uniqueName = "[" + dim.getName () + "].[" + uniqueName + "]";
+            }
             root.put("uniqName", genRootUniqueName (uniqueName));
         } else {
             String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
