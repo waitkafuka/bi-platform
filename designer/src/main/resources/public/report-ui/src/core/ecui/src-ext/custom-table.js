@@ -310,7 +310,8 @@
         DEFAULT_EVENTS = {
             
             'click div.ui-table-hcell-sort-def': function (event, control) {
-                var field = this.getAttribute('data-field'),
+                // var field = this.getAttribute('data-field'),
+                var field = dom.getParent(dom.getParent(this)).getAttribute('data-field'),
                     orderby;
 
                 if (this.className.indexOf('-sort-desc') >= 0) {
@@ -323,7 +324,7 @@
                     orderby = this.getAttribute('data-orderby') || 'desc';
                 }
 
-                triggerEvent(control, 'sort', null, [field, orderby]);
+                triggerEvent(control, 'sort', null, [field, orderby.toUpperCase()]);
             },
             'click input.ui-table-checkbox-all': function (event, control) {
                 control.$refreshCheckbox(this.checked);
@@ -443,7 +444,7 @@
                     tipsStr = tipsStr + 'title="' + o.toolTip + '"';
                 }
                 if (o.orderby) {
-                    sortStr = '<div ' + ' data-orderby="' + o.orderby + '" class="'+ type + '-hcell-sort-' + o.orderby + ' ' + type + '-hcell-sort-def"></div>';
+                    sortStr = '<div class="' + type + '-hcell-sort-' + o.orderby + ' ' + type + '-hcell-sort-def"></div>';
                 }
                 tipsStr = tipsStr + '">&nbsp;</div>';
 
@@ -739,7 +740,7 @@
         var mainEl = this.$di('getEl');
         var type = this.getType();
         var headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0];
-        attachEvent(headEl, 'click', fieldSet);
+        //attachEvent(headEl, 'click', fieldSet);
         function fieldSet(ev) {
             var oEv = ev || window.event;
             var target = oEv.target || oEv.srcElement;

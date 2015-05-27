@@ -158,6 +158,12 @@ $namespace('di.shared.ui');
             ['sync.error.GET_FIELDSLIST', this.$handleDataError, this],
             ['sync.complete.GET_FIELDSLIST', this.$syncEnable, this, 'GET_FIELDSLIST']
         );
+//        model.attach(
+//            ['sync.preprocess.SORT', this.$syncDisable, this, 'SORT'],
+//            ['sync.result.SORT', this.$renderMain, this],
+//            ['sync.error.SORT', this.$handleDataError, this],
+//            ['sync.complete.SORT', this.$syncEnable, this, 'SORT']
+//        );
 
         model.init();
 
@@ -240,9 +246,10 @@ $namespace('di.shared.ui');
 
         options = assign({ DI_querySessionClear: true }, options);
         if (this._uPager) {
+            options.currentPage = this._uPager.getPage();
             options.pageSize = this._uPager.getPageSize();
         }
-
+        options.componentId = this.$di('getId').split('.')[1];
         // 请求后台
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
     };
@@ -491,11 +498,16 @@ $namespace('di.shared.ui');
      * 
      * @protected
      */
-    DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey) {
+    DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey, sortType) {
         this.$sync(
             this.getModel(),
-            'DATA',
-            { orderbyParamKey: orderbyParamKey }
+            'SORT',
+            {
+                componentId: this.$di('getId').split('.')[1],
+                orderbyParamKey: orderbyParamKey,
+                sortType: sortType
+
+            }
         );
     };
 
@@ -531,7 +543,8 @@ $namespace('di.shared.ui');
         this.$sync(
             this.getModel(),
             'DATA',
-            { 
+            {
+                componentId: this.$di('getId').split('.')[1],
                 currentPage: currentPage,
                 pageSize: this._uPager ? this._uPager.getPageSize() : void 0
             }
