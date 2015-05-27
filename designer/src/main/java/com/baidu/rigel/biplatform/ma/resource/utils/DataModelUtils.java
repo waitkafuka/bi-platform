@@ -32,6 +32,8 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
@@ -356,10 +358,7 @@ public final class DataModelUtils {
             return planeTable;
         }
         
-        // 分别获取数据模型、提示信息、文本对齐信息
-        Map<String, String> dataFormat = formatModel.getDataFormat();
-        Map<String, String> toolTips = formatModel.getToolTips ();
-        Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
+
         
         // 记录转换时间
         long current = System.currentTimeMillis();
@@ -368,64 +367,9 @@ public final class DataModelUtils {
         // 获取数据模型中的表定义
         TableData tableData = dataModel.getTableData();
         // 表的列定义
-        List<Column> column = tableData.getColumns();
-        // 表的列属性信息
-        List<PlaneTableColDefine> colDefines = Lists.newArrayList();
-        
-        
-        MiniCube miniCube = (MiniCube) cube;
-        // 获取Cube中的维度信息
-        Map<String, Dimension> dimensions = miniCube.getDimensions();
-        // 获取Cube中的指标信息
-        Map<String, Measure> measures = miniCube.getMeasures();
-        // 构建列属性信息
-        column.forEach(col -> {
-            PlaneTableColDefine colDefine = new PlaneTableColDefine();
-            // 设置表头
-            colDefine.setTitle(col.caption);
-            // 设置表域名称
-            colDefine.setField(col.name);
-            String name = col.name;
-            // 设置数据格式信息
-            if (dataFormat != null) {
-                String formatStr = dataFormat.get("defaultFormat");
-                if (!StringUtils.isEmpty(dataFormat.get(name))) {
-                    formatStr = dataFormat.get(name);
-                }
-                if (!StringUtils.isEmpty(formatStr)) {
-                    colDefine.setFormat(formatStr);
-                }
-            }
-            // 设置提示信息
-            if (toolTips != null) {
-                String tips = toolTips.get(name);
-                if (StringUtils.isEmpty(tips)) {
-                    tips = name;
-                }
-                colDefine.setTips(tips);
-            }
-            // 设置文本对齐信息
-            if (textAlignFormat != null) {
-                String align = textAlignFormat.get(name);
-                if (StringUtils.isEmpty(align)) {
-                    align = "left";
-                }
-                colDefine.setAlign(align);
-            }
-            // 该列为维度
-            if (dimensions != null && dimensions.containsKey(name)) {
-                colDefine.setIsMeasure(false);                
-            }
-            // 该列为指标
-            if (measures != null && measures.containsKey(name)) {
-                colDefine.setIsMeasure(true);
-            }
-            // TODO 设置OrderBy属性
-            // 添加到列属性信息列表中
-            colDefines.add(colDefine);
-        });
+        List<Column> columns = tableData.getColumns();
         // 设置平面表列属性信息
-        planeTable.setColDefines(colDefines);
+        planeTable.setColDefines(getColDefinesInOrder(cube, logicModel, columns, formatModel));
         
         // 表的数据定义
         Map<String, List<String>> data = tableData.getColBaseDatas();
@@ -453,6 +397,95 @@ public final class DataModelUtils {
     }
     
     /**
+     * 获取正确的列属性信息，并设置相应的属性条件
+     * @param cube
+     * @param logicModle
+     * @param columns
+     * @param formatModel
+     * @return
+     */
+    public static List<PlaneTableColDefine> getColDefinesInOrder(Cube cube, LogicModel logicModel, 
+            List<Column> columns, FormatModel formatModel) {
+        
+        List<PlaneTableColDefine> colDefines = Lists.newArrayList();
+        // 分别获取数据模型、提示信息、文本对齐信息
+        Map<String, String> dataFormat = formatModel.getDataFormat();
+        Map<String, String> toolTips = formatModel.getToolTips ();
+        Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
+        List<String> keys = getKeysInOrder(cube, logicModel);       
+        // 构建列属性
+        for (String key : keys) {
+            for (Column column : columns) {
+                if((column.tableName + "." + column.name).equals(key)) {
+                    PlaneTableColDefine colDefine = new PlaneTableColDefine();
+                    // 设置表头
+                    colDefine.setTitle(column.caption);
+                    // 设置表域名称
+                    colDefine.setField(column.name);
+                    String name = column.name;
+
+                    // 设置提示信息
+                    if (toolTips != null) {
+                        String tips = toolTips.get(name);
+                        if (StringUtils.isEmpty(tips)) {
+                            tips = name;
+                        }
+                        colDefine.setTips(tips);
+                    }
+                    // 设置文本对齐信息
+                    if (textAlignFormat != null) {
+                        String align = textAlignFormat.get(name);
+                        if (StringUtils.isEmpty(align)) {
+                            align = "left";
+                        }
+                        colDefine.setAlign(align);
+                    }
+                    boolean isMeasure = isMeasure(name, cube);
+                    colDefine.setIsMeasure(isMeasure(name, cube));
+                    // TODO 设置OrderBy属性
+                    // 添加到列属性信息列表中
+                    colDefines.add(colDefine); 
+                    break;
+                }
+            }
+        }       
+        return colDefines;
+    }
+    
+    /**
+     * 判断某个名称对应的字段是维度还是指标
+     * @param name
+     * @param cube
+     * @return
+     */
+    private static boolean isMeasure(String name, Cube cube) {
+        MiniCube miniCube = (MiniCube) cube;
+        // 获取Cube中的维度信息
+        Map<String, Dimension> dimensions = miniCube.getDimensions();
+        // 获取Cube中的指标信息
+        Map<String, Measure> measures = miniCube.getMeasures();
+        if (dimensions != null) {
+            for(Dimension dimension : dimensions.values()) {
+                if (dimension.getType() == DimensionType.TIME_DIMENSION 
+                        && dimension.getFacttableColumn().equals(name)) {
+                    return false;
+                }
+                if(dimension.getName().equals(name)) {
+                    return false;
+                }
+            }
+        } 
+        
+        if (measures != null) {
+            for (Measure measure : measures.values()) {
+                if (measure.getName().equals(name)) {
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+    /**
      * 获取平面表数据记录条数
      * @param data
      * @return
@@ -478,42 +511,70 @@ public final class DataModelUtils {
      */
     private static List<Map<String, String>> transPlaneTableDataFromColumnBasedToRowBased(
             int totalRecordSize, Map<String, List<String>> data, Cube cube, LogicModel logicModel) {
-        // 对于平面表，仅需要纵轴，控制数据展示顺序
-        // 纵轴
-        Item[] cols = logicModel.getColumns();
-        MiniCube miniCube = (MiniCube) cube;
-        // 获取Cube中的维度和指标
-        Map<String, Dimension> dimensions = miniCube.getDimensions();
-        Map<String, Measure> measures = miniCube.getMeasures();
-        // 存储列的key，key = 表明.列名
-        List<String> keys = Lists.newArrayList();
-        for (Item col : cols ) {
-            // 处理维度
-            for (Dimension dimension :dimensions.values()) {
-                if (dimension.getId().equals(col.getOlapElementId())) {
-                    keys.add(dimension.getTableName() + "." + dimension.getTableName());
-                    break;
-                }
-            }
-            // 处理指标
-            for (Measure measure : measures.values()) {
-                if (measure.getId().equals(col.getOlapElementId())) {
-                    keys.add(miniCube.getSource() + "." + measure.getName());
-                    break;
-                }
-            }
-        }
+        
         List<Map<String, String>> planeTableData = Lists.newArrayList();
+        List<String> keys = getKeysInOrder(cube, logicModel);
         for (int i = 0; i<totalRecordSize; i++ ) {
-            Map<String, String > value = Maps.newHashMap();
+            Map<String, String > value = Maps.newLinkedHashMap();
             for (String key : keys) {
-                value.put(key, data.get(key).get(i));
+                value.put(key.split ("\\.")[1], data.get(key).get(i));
             }
             planeTableData.add(value);
         }
         return planeTableData;
     }
     
+    
+    /**
+     * 获取平面表DataModel中数据的正确的key顺序
+     * @param cube
+     * @param logicModel
+     * @param columns
+     * @return
+     */
+    private static List<String> getKeysInOrder(Cube cube, LogicModel logicModel) {
+        MiniCube miniCube = (MiniCube) cube;
+        // 获取Cube中的维度信息
+        Map<String, Dimension> dimensions = miniCube.getDimensions();
+        // 获取Cube中的指标信息
+        Map<String, Measure> measures = miniCube.getMeasures();
+        // 纵轴
+        Item[] cols = logicModel.getColumns();
+        // 存储列的key，key = 表明.列名
+        List<String> keys = Lists.newArrayList();
+        for (Item col : cols ) {
+            boolean finished = false;
+            // 处理维度
+            for (Dimension dimension :dimensions.values()) {
+                if (dimension.getType() == DimensionType.TIME_DIMENSION && 
+                        dimension.getId().equals(col.getOlapElementId())) {
+                    // 如果为时间维度，转换成事实表的时间字段
+                    keys.add(dimension.getFacttableColumn());
+                    finished = true;
+                    break;
+//                    dimensionName = oneDimensionSource.getFactTableColumn();
+//                    tableFieldName = oneDimensionSource.getFactTableColumn();
+//                    tableName = miniCube.getSource();
+                }
+                if (dimension.getId().equals(col.getOlapElementId())) {
+                    Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+                    keys.add(l.getDimTable () + "." + l.getName ());
+                    finished = true;
+                    break;
+                }
+            }
+            if (!finished) {
+                // 处理指标
+                for (Measure measure : measures.values()) {
+                    if (measure.getId().equals(col.getOlapElementId())) {
+                        keys.add(((MiniCube)cube).getSource() + "." + measure.getName());
+                        break;
+                    }
+                }                
+            }
+        }
+        return keys;
+    }
     
     private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {
         if (rowFields == null) {

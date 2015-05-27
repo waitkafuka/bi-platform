@@ -943,6 +943,7 @@ public class QueryDataResource extends BaseResource {
      * @param request
      * @return
      */
+    @SuppressWarnings("unchecked")
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}", method = {RequestMethod.POST})
     public ResponseResult queryArea(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
@@ -1024,17 +1025,29 @@ public class QueryDataResource extends BaseResource {
          * 6. 完成查询
          */
         ResultSet result;
+        // 分页信息
+        PageInfo pageInfo = new PageInfo();
+        
         try {
-            if (action == null || CollectionUtils.isEmpty(action.getRows())
-                    || CollectionUtils.isEmpty(action.getColumns())) {
+            if (targetArea.getType() != ExtendAreaType.PLANE_TABLE 
+                    && (action == null || CollectionUtils.isEmpty(action.getRows())
+                    || CollectionUtils.isEmpty(action.getColumns()))) {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
             if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
-            	// TODO 构建分页信息
-            	PageInfo pageInfo = new PageInfo();
+                // TODO 构建分页信息
+                // 设置分页大小
+                if (StringUtils.hasLength(request.getParameter("pageSize"))) {
+                    pageInfo.setPageSize(Integer.valueOf(request.getParameter("pageSize")));
+                }
+                // 设置当前页
+                if (StringUtils.hasLength(request.getParameter("currentPage"))) {
+                    pageInfo.setPageNo(Integer.valueOf(request.getParameter("currentPage")));
+                }
                 result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
             } else {
-             result = reportModelQueryService.queryDatas(model, action,true, true, areaContext.getParams(), securityKey);
+                result = reportModelQueryService.queryDatas(model, action,
+                        true, true, areaContext.getParams(), securityKey);
             }
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);
@@ -1053,7 +1066,20 @@ public class QueryDataResource extends BaseResource {
          * 7. 对返回结果进行处理，用于表、图显示
          */
         ResponseResult rs = queryDataResourceUtils.parseQueryResultToResponseResult(
-    			runTimeModel, targetArea, result, areaContext, action);
+                runTimeModel, targetArea, result, areaContext, action);
+        // TODO 对于平面表，需要维护分页信息
+        if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
+            if(rs.getStatus() == 0) {
+                Map<String, Object> data = (Map<String, Object>) rs.getData();
+                if (data.containsKey("head") && data.containsKey("pageInfo") && data.containsKey("data")) {
+                    PageInfo page = (PageInfo) data.get("pageInfo");
+                    page.setPageNo(pageInfo.getPageNo());
+                    page.setPageSize(pageInfo.getPageSize());
+                    data.put("pageInfo", page);
+                    rs.setData(data);                
+                }
+            }
+        }
         areaContext.getQueryStatus().add(result);
         
         // 清除当前request中的请求参数，保证areaContext的参数正确
