@@ -34,17 +34,30 @@ public final class DataSourceUtil {
     }
     
     /**
-     * 获取数据源文件的文件名（含路径）
+     * 获取数据源文件的文件名（含路径），对数据源名称进行hash
      * 
      * @param ds
      *            数据源定义
      * @return 返回数据源定义文件文件名（绝对路径）
      */
-    public static String getDsFileName(DataSourceDefine ds) {
+    public static String getDsFileNameUsingHashCode(DataSourceDefine ds) {
         String basePath = getDsFileStoreDir ();
-        return basePath + File.separator + ds.getId () + "_" + ds.getName ();
+        String nameHashCode = null;
+        if (ds.getName() != null) {
+            nameHashCode = String.valueOf(ds.getName().hashCode());
+        }
+        return basePath + File.separator + ds.getId () + "_" + nameHashCode;
     }
     
+    /**
+     * 
+     * @param ds
+     * @return
+     */
+    public static String getDsFileName(DataSourceDefine ds) {
+        String basePath = getDsFileStoreDir ();
+        return basePath + File.separator + ds.getId () + "_" + ds.getName();
+    }
     /**
      * 根据文件名，返回文件的详细路径
      * 
@@ -58,15 +71,29 @@ public final class DataSourceUtil {
     }
     
     /**
-     * 获取数据源组文件的文件名（含路径）
+     * 获取数据源组文件的文件名（含路径），对数据源组名称进行hash
      * 
      * @param dsG
      *            数据源组定义
      * @return 返回数据源组定义文件文件名(绝对路径)
      */
+    public static String getDsGroupFileNameUsingHashCode(DataSourceGroupDefine dsG) {
+        String basePath = getDsGroupFileStoreDir ();
+        String nameHashCode = null;
+        if(dsG.getName() != null) {
+            nameHashCode = String.valueOf(dsG.getName().hashCode());
+        }
+        return basePath + File.separator + dsG.getId () + "_" + nameHashCode;
+    }
+    
+    /**
+     * 
+     * @param dsG
+     * @return
+     */
     public static String getDsGroupFileName(DataSourceGroupDefine dsG) {
         String basePath = getDsGroupFileStoreDir ();
-        return basePath + File.separator + dsG.getId () + "_" + dsG.getName ();
+        return basePath + File.separator + dsG.getId () + "_" + dsG.getName();
     }
     
     /**

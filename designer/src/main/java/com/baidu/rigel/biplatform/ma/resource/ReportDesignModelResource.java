@@ -1453,9 +1453,9 @@ public class ReportDesignModelResource extends BaseResource {
      * add by jiangyichao at 2015-05-18, 平面表条件设置或修改
      * @return
      */
-    @RequestMapping(value = "/{id}/planeTableConditions", method = {RequestMethod.POST})
-    public ResponseResult addOrUModifyPlaneTableCondition(@PathVariable("id") String reportId, 
-    		HttpServletRequest request) {
+    @RequestMapping(value = "/{id}/{elementId}/planeTableConditions", method = {RequestMethod.POST})
+    public ResponseResult addOrModifyPlaneTableCondition(@PathVariable("id") String reportId, 
+    		@PathVariable("elementId") String elementId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
@@ -1473,6 +1473,7 @@ public class ReportDesignModelResource extends BaseResource {
         }
         // 获取平面表条件
         String conditionStr = request.getParameter("conditions");
+        // TODO 是否修改
         if (!StringUtils.isEmpty(conditionStr)) {
             Map<String, PlaneTableCondition> conditions = GsonUtils.fromJson(request.getParameter("conditions"),
                     new TypeToken<Map<String, PlaneTableCondition>>(){}.getType());
@@ -1484,6 +1485,11 @@ public class ReportDesignModelResource extends BaseResource {
             		return result;
             	}
             }
+            
+            // 获取原有报表的平面表条件信息
+            Map<String, PlaneTableCondition> oldConditions = model.getPlaneTableConditions();
+            // 替换原有条件
+            oldConditions.put(elementId, conditions.get(elementId));
             model.setPlaneTableConditions(conditions);
         }
         
@@ -1509,9 +1515,9 @@ public class ReportDesignModelResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{id}/planeTableConditions", method = {RequestMethod.GET})
+    @RequestMapping(value = "/{id}/{elementId}/planeTableConditions", method = {RequestMethod.GET})
     public ResponseResult getPlaneTableConditions(@PathVariable("id") String reportId, 
-    		HttpServletRequest request ) {
+    		@PathVariable("elementId") String elementId, HttpServletRequest request ) {
         ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
             logger.debug("report id is empty");
@@ -1527,9 +1533,15 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
             return result;
         }
-        result.setStatus(0);
-        result.setData(model.getPlaneTableConditions());
-        result.setStatusInfo(SUCCESS);
+        if (model.getPlaneTableConditions() != null) {            
+            result.setStatus(0);
+            // 返回对应条目(elementId)的条件信息
+            result.setData(model.getPlaneTableConditions().get(elementId));
+            result.setStatusInfo(SUCCESS);
+        } else {
+            result.setStatus(1);
+            result.setStatusInfo("no planeTable condition in this report design model");
+        }
         return result;
     }
     /**
