@@ -69,7 +69,6 @@ public abstract class MiniCubeDimension extends OlapElementDef implements Dimens
      */
     public void addLevel(Level level) {
         this.levels.put(level.getId(), level);
-        level.setDimension (this);
     }
 
     /**
