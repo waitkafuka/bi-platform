@@ -33,6 +33,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
+import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
@@ -415,7 +416,7 @@ public final class DataModelUtils {
         // 构建列属性
         for (String key : keys) {
             for (Column column : columns) {
-                if(column.name.equals(key)) {
+                if((column.tableName + "." + column.name).equals(key)) {
                     PlaneTableColDefine colDefine = new PlaneTableColDefine();
                     // 设置表头
                     colDefine.setTitle(column.caption);
@@ -516,7 +517,7 @@ public final class DataModelUtils {
         for (int i = 0; i<totalRecordSize; i++ ) {
             Map<String, String > value = Maps.newLinkedHashMap();
             for (String key : keys) {
-                value.put(key, data.get(key).get(i));
+                value.put(key.split ("\\.")[1], data.get(key).get(i));
             }
             planeTableData.add(value);
         }
@@ -556,7 +557,8 @@ public final class DataModelUtils {
 //                    tableName = miniCube.getSource();
                 }
                 if (dimension.getId().equals(col.getOlapElementId())) {
-                    keys.add(dimension.getName());
+                    Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+                    keys.add(l.getDimTable () + "." + l.getName ());
                     finished = true;
                     break;
                 }
@@ -565,7 +567,7 @@ public final class DataModelUtils {
                 // 处理指标
                 for (Measure measure : measures.values()) {
                     if (measure.getId().equals(col.getOlapElementId())) {
-                        keys.add(measure.getName());
+                        keys.add(((MiniCube)cube).getSource() + "." + measure.getName());
                         break;
                     }
                 }                
