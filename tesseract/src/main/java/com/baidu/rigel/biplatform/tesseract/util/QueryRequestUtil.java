@@ -350,7 +350,7 @@ public class QueryRequestUtil {
     private static PullUpProperties coolectAllMem(MemberNodeTree memberNodeTree) {
         PullUpProperties result = null;
         if (StringUtils.isNotBlank(memberNodeTree.getName()) && memberNodeTree.getChildren().size() >= 1) {
-            // TODO 解决callback维度下钻返回多层，汇总数据计算错误问题
+            // Fixed by Me David.wang 解决callback维度下钻返回多层，汇总数据计算错误问题
             if(memberNodeTree.getChildren().size() == 1 
                     && memberNodeTree.getChildren().get(0).getChildren ().size () > 1) {
                 return coolectAllMem(memberNodeTree.getChildren().get(0));
