@@ -1425,7 +1425,9 @@ public class QueryDataResource extends BaseResource {
                 Iterator<Map<String, String>> it = mainDims.iterator ();
                 while (it.hasNext ()) {
                     if (remove) {
+                        it.next ();
                         it.remove ();
+                        continue;
                     }
                     Map<String, String> tmpMap = it.next ();
                     if (tmpMap.values ().toArray ()[1].equals (drillTargetUniqueName)) {
