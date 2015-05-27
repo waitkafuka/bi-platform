@@ -1622,6 +1622,7 @@ public class QueryDataResource extends BaseResource {
             String rowAheadDimName = MetaNameUtil.getDimNameFromUniqueName(rowAheadUniqueName);
             Item rowAhead = store.get(rowAheadDimName);
             queryParams.put(rowAhead.getOlapElementId(), rowAheadUniqueName);
+            // 避免出现旋转操作参数遗漏
             model.getParams ().values ().forEach (p -> {
                 if (p.getElementId ().equals (rowAhead.getOlapElementId())) {
                     String[] tmp = MetaNameUtil.parseUnique2NameArray (rowAheadUniqueName);
@@ -1629,8 +1630,15 @@ public class QueryDataResource extends BaseResource {
                 }
             });
         }
+        
         Item row = store.get(dimName);
         queryParams.put(row.getOlapElementId(), drillTargetUniqueName);
+        model.getParams ().values ().forEach (p -> {
+            if (p.getElementId ().equals (row.getOlapElementId())) {
+                String[] tmp = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
+                queryParams.put (p.getName (), tmp[tmp.length - 1]);
+            }
+        });
         QueryAction action = queryBuildService.generateTableQueryActionForDrill(model,
                 areaId, queryParams, targetIndex);
         

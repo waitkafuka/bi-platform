@@ -30,6 +30,7 @@ import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
@@ -38,6 +39,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
@@ -321,6 +323,10 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
             if (meta.getAxisType() == AxisType.ROW) {
                 for (String str : meta.getCrossjoinDims()) {
                     DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
+                    Dimension dim = ((ConfigQuestionModel) questionModel).getCube ().getDimensions ().get (condition.getMetaName ());
+                    if (dim != null && dim.getType () == DimensionType.CALLBACK) {
+                        return false;
+                    }
                     if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
                         return false;
                     } else {
