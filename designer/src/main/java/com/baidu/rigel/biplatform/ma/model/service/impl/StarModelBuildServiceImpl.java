@@ -396,8 +396,10 @@ public class StarModelBuildServiceImpl implements StarModelBuildService {
         List<ColumnMetaDefine> defines = Lists.newArrayList();
         for (ColumnInfo col : cols) {
             ColumnMetaDefine define = new ColumnMetaDefine();
-            define.setCaption(col.getName());
-            define.setName(col.getId());
+//            define.setName(StringUtils.hasText(col.getComment())? col.getName() : col.getId());
+//            define.setCaption(StringUtils.hasText(col.getComment())? col.getComment() :col.getName());
+            define.setCaption(col.getComment());
+            define.setName(col.getName());
             defines.add(define);
         }
         return defines;
