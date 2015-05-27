@@ -19,6 +19,7 @@
         disposeControl = core.dispose,
         $disposeControl = core.$dispose,
         createDom = dom.create,
+        hasClass = dom.hasClass,
         first = dom.first,
         last = dom.last,
         children = dom.children,
@@ -166,10 +167,11 @@
                             var j;
                             for (j = 0; j < this._aColumns.length; j++) {
                                 var o = this._aColumns[j];
-                                html.push('<td data-content="1" data-cell-pos="' + j + '-' + i + '" class="ui-table-ccell"');
+                                var align = o.align || 'left';
+                                html.push('<td data-content="1" data-cell-pos="' + j + '-' + i + '" class="ui-table-ccell ');
 
-                                o.align && html.push(
-                                    ' align="' + o.align + '"'
+                                html.push(
+                                    'ui-table-cell-align-' + align + '"'
                                 );
 
                                 html.push('>');
@@ -278,6 +280,7 @@
                 el.innerHTML = html.join('');
 
                 return el;
+
             },
             function(el, options) {
                 //ecui.init(el);
@@ -306,7 +309,7 @@
         // 默认处理函数
         DEFAULT_EVENTS = {
             
-            'click th.ui-table-hcell-sort': function (event, control) {
+            'click div.ui-table-hcell-sort-def': function (event, control) {
                 var field = this.getAttribute('data-field'),
                     orderby;
 
@@ -314,7 +317,7 @@
                     orderby = 'asc';
                 }
                 else if (this.className.indexOf('-sort-asc') >= 0) {
-                    orderby = 'desc'
+                    orderby = 'desc';
                 }
                 else {
                     orderby = this.getAttribute('data-orderby') || 'desc';
@@ -348,11 +351,12 @@
         var i = 0;
         for (i = 0; i < headrow.length; i++) {
             var o = headrow[i];
+
             html.push('<th ');
             html.push('data-field="');
 
             if (Object.prototype.toString.call(o.field) == '[object String]') {
-                html.push(o.field);
+                html.push(o.field, '" ');
             }
 
             if (o.width) {
@@ -381,38 +385,75 @@
                 html.push(
                     '" width="' + width
                 );
+                html.push('"');
 
                 flag += o.colspan;
             }
-            if (o.sortable) {
-                html.push(
-                    '" class="' + type + '-hcell-sort'
-                );
-                if (o.field && o.field == con._sSortby) {
-                    html.push(
-                        ' ' + type + '-hcell-sort-' + con._sOrderby
-                    );
-                }
-                if (o.order) {
-                    html.push(
-                        '" data-orderby="' + o.order
-                    );
-                }
+            var classStr = ' class="';
+            var attrStr = [];
+            var align = o.align || 'left';
+            classStr = classStr + type + '-cell-align-' + align + '" ';
+
+//            if (o.sortable) {
+//                classStr = classStr + type + '-hcell-sort ';
+//                if (o.field && o.field == con._sSortby) {
+//                    classStr = classStr + type + '-hcell-sort-' + con._sOrderby + ' "';
+//                }
+//                if (o.order) {
+//                    html.push(
+//                        ' data-orderby="' + o.order + '"'
+//                    );
+//                }
+//            }
+            if (o.orderby) {
+                attrStr.push('data-orderby="' + o.orderby + '" ');
             }
-            html.push('">');
+            html.push(attrStr.join(''), classStr);
+            html.push('>');
+
+//            if (o.title) {
+//                 //html.push(o.title);
+//                 //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
+//                //不然文本过多的话会显示不全
+//                var useBag = dom.ieVersion < 8;
+//                var isLastColumn = i == headrow.length - 1;
+//                html.push(
+//                        useBag ? ('<div class="ui-plane-table-hcell-bag ') : '',
+//                        useBag && isLastColumn ? ('ui-plane-table-hcell-bag-lastcolumn') : '',
+//                        useBag ? ('">') : '',
+//                            o.title,
+//                        useBag ? '</div>' : ''
+//                );
+//            }
+//            if (o.title) {
+//                html.push(
+////                    '<div class="ui-table-head-th-content"><div class="ui-table-head-font">',
+//                    '<span><span class="', type, '-hcell-content">',
+//                    o.title,
+//                    '</span>',
+//                    '<span class="', type, '-hcell-field-set"></span></span>'
+////                    '</div><div class="ui-table-hcell-sort-none"></div></div>'
+//                );
+//            }
 
             if (o.title) {
-                 //html.push(o.title);
-                 //如果是ie8以下版本，需要在innerCell外面套一层div，设置表头的margin属性，
-                //不然文本过多的话会显示不全
-                var useBag = dom.ieVersion < 8;
-                var isLastColumn = i == headrow.length - 1;
+                var tipsStr = '<div class="'+ type + '-head-tips"';
+                var sortStr = '';
+                if (o.toolTip) {
+                    tipsStr = tipsStr + 'title="' + o.toolTip + '"';
+                }
+                if (o.orderby) {
+                    sortStr = '<div ' + ' data-orderby="' + o.orderby + '" class="'+ type + '-hcell-sort-' + o.orderby + ' ' + type + '-hcell-sort-def"></div>';
+                }
+                tipsStr = tipsStr + '">&nbsp;</div>';
+
                 html.push(
-                        useBag ? ('<div class="ui-plane-table-hcell-bag ') : '', 
-                        useBag && isLastColumn ? ('ui-plane-table-hcell-bag-lastcolumn') : '',
-                        useBag ? ('">') : '', 
-                            o.title, 
-                        useBag ? '</div>' : ''
+                    '<div class="', type, '-head-th-content">',
+                        '<div class="ui-table-head-font">', o.title, '</div>',
+                        sortStr,
+                        tipsStr,
+                    '<div class="', type, '-hcell-field-set"></div>',
+                    '</div>'
                 );
             }
 
@@ -694,6 +735,18 @@
 
         // 行选中
         this.$initRowChecked();
+        //attachEvent(headEl, 'mouseover', headMouseOver);
+        var mainEl = this.$di('getEl');
+        var type = this.getType();
+        var headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0];
+        attachEvent(headEl, 'click', fieldSet);
+        function fieldSet(ev) {
+            var oEv = ev || window.event;
+            var target = oEv.target || oEv.srcElement;
+            if (hasClass(target, type + '-hcell-field-set')) {
+                alert();
+            }
+        }
     };
 
     /**

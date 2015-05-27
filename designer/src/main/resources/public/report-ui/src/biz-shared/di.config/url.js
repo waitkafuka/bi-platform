@@ -188,6 +188,7 @@ $namespace('di.config');
     URL_SET.PLANE_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/planeTable/downloadOffLine.action';
     URL_SET.PLANE_TABLE_LINK_BRIDGE = '/reportTemplate/planeTable/linkBridge.action';
 
+    URL_SET.PLANE_TABLE_GET_FIELDSLIST = '/reports/#{reportId}/runtime/extend_area/#{componentId}/fields'
     // 图
 //    URL_SET.OLAP_CHART_DATA = '/reportTemplate/chart/transform.action';
 //    // 根据liteOlap的表格数据和相应条件生成图形数据

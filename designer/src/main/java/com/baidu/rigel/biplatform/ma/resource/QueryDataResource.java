@@ -17,9 +17,9 @@ package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -82,6 +82,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -102,12 +103,14 @@ import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
+import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.QueryDataResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.DimensionMemberViewObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.gson.reflect.TypeToken;
 
 
 
@@ -594,7 +597,7 @@ public class QueryDataResource extends BaseResource {
         // add by jiangyichao， 取出DesignModel中的平面表条件
         Map<String, String> condition = Maps.newHashMap();
         if (model.getPlaneTableConditions() != null) {
-        	model.getPlaneTableConditions().forEach((k, v) -> {
+        	model.getPlaneTableConditions().forEach((k, v) -> {        	    
         		condition.put(v.getElementId(), v.getName());
         	});
         }
@@ -1029,10 +1032,9 @@ public class QueryDataResource extends BaseResource {
             if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
             	// TODO 构建分页信息
             	PageInfo pageInfo = new PageInfo();
-            	result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
+                result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
             } else {
-            	result = reportModelQueryService.queryDatas(model, action,
-            			true, true, areaContext.getParams(), securityKey);
+             result = reportModelQueryService.queryDatas(model, action,true, true, areaContext.getParams(), securityKey);
             }
         } catch (DataSourceOperationException e1) {
             logger.info("获取数据源失败！", e1);
@@ -1366,11 +1368,13 @@ public class QueryDataResource extends BaseResource {
          */
         final String[] tmp = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
         final String elementId = row.getOlapElementId ();
-        for (ReportParam p : model.getParams ().values ()) {
-            if (p.getElementId ().equals (elementId)) {
-                queryParams.put (p.getName (), tmp[tmp.length - 1]);
-            }
-        };
+        if (!MetaNameUtil.isAllMemberUniqueName (drillTargetUniqueName)) {
+            for (ReportParam p : model.getParams ().values ()) {
+                if (p.getElementId ().equals (elementId)) {
+                    queryParams.put (p.getName (), tmp[tmp.length - 1]);
+                }
+            };
+        }
         
         
         ResultSet result;
@@ -1406,33 +1410,60 @@ public class QueryDataResource extends BaseResource {
             /**
              * TODO 考虑一下这样的逻辑是否应该放到resource中
              */
-            List<Map<String, String>> mainDims = Lists.newArrayList();
+            List<Map<String, String>> mainDims = areaContext.getCurBreadCrumPath ();
             DataSourceDefine define = null;
             DataSourceInfo dsInfo = null;
              try {
                 define = dsService.getDsDefine (model.getDsId ());
-                 dsInfo = DataSourceConnectionServiceFactory
+                dsInfo = DataSourceConnectionServiceFactory
                         .getDataSourceConnectionServiceInstance (define.getDataSourceType ().name ())
                         .parseToDataSourceInfo (define, securityKey);
             } catch (DataSourceOperationException | DataSourceConnectionException e) {
                 logger.error (e.getMessage (), e);
             }
-            while (drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
+            
+             boolean  remove = false;
+            if (mainDims.size () > 0  && !isRoot
+                    && !mainDims.get (mainDims.size () -1).values ().toArray ()[0].equals (drillTargetUniqueName)) {
+                Iterator<Map<String, String>> it = mainDims.iterator ();
+                while (it.hasNext ()) {
+                    if (remove) {
+                        it.next ();
+                        it.remove ();
+                        continue;
+                    }
+                    Map<String, String> tmpMap = it.next ();
+                    if (tmpMap.values ().toArray ()[1].equals (drillTargetUniqueName)) {
+                        remove = true;
+                    }
+                }
+            } 
+            if (!remove && drillTargetUniqueName != null && !drillTargetUniqueName.toLowerCase().contains("all")) {
                 Map<String, String> dims3 = Maps.newHashMap();
                 dims3.put("uniqName", drillTargetUniqueName);
                 String showName = genShowName(drillTargetUniqueName, drillDim, cube, dsInfo, queryParams);
                 if (isRoot) {
-                    showName = areaContext.getCurBreadCrumPath().get("showName");
+                    showName = areaContext.getCurBreadCrumPath().get (0).get("showName");
                 }
                 dims3.put("showName", showName);
                 mainDims.add(dims3);
-                drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
+//                drillTargetUniqueName = MetaNameUtil.getParentUniqueName(drillTargetUniqueName);
             } 
-            if (!isRoot) {
-                Map<String, String> root = areaContext.getCurBreadCrumPath();
-                mainDims.add(root);
+            if (isRoot) {
+                Iterator<Map<String, String>> it = mainDims.iterator ();
+                it.next ();
+                while (it.hasNext ()) {
+                    it.next ();
+                    it.remove ();
+                }
+//                Map<String, String> root = areaContext.getCurBreadCrumPath();
+//                mainDims.add(root);
             }
-            Collections.reverse(mainDims);
+            
+//            List<Map<String, String>> root = areaContext.getCurBreadCrumPath();
+//            mainDims.addAll(root);
+//            Collections.reverse(mainDims);
+            areaContext.setCurBreadCrumPath (mainDims);
             resultMap.put("mainDimNodes", mainDims);
             areaContext.getParams ().put ("bread_key", mainDims);
 //            runTimeModel.getContext().put("bread_key", mainDims);
@@ -1494,6 +1525,7 @@ public class QueryDataResource extends BaseResource {
             params.forEach ((k, v) -> {
                 tmp.put (k, v.toString ());
             });
+            logger.info ("in callback dim show name generate");
             return l.getMembers (QueryUtils.transformCube (cube), dsInfo, tmp).get(0).getCaption();
         }
         return showName;
@@ -1593,6 +1625,7 @@ public class QueryDataResource extends BaseResource {
             String rowAheadDimName = MetaNameUtil.getDimNameFromUniqueName(rowAheadUniqueName);
             Item rowAhead = store.get(rowAheadDimName);
             queryParams.put(rowAhead.getOlapElementId(), rowAheadUniqueName);
+            // 避免出现旋转操作参数遗漏
             model.getParams ().values ().forEach (p -> {
                 if (p.getElementId ().equals (rowAhead.getOlapElementId())) {
                     String[] tmp = MetaNameUtil.parseUnique2NameArray (rowAheadUniqueName);
@@ -1600,8 +1633,15 @@ public class QueryDataResource extends BaseResource {
                 }
             });
         }
+        
         Item row = store.get(dimName);
         queryParams.put(row.getOlapElementId(), drillTargetUniqueName);
+        model.getParams ().values ().forEach (p -> {
+            if (p.getElementId ().equals (row.getOlapElementId())) {
+                String[] tmp = MetaNameUtil.parseUnique2NameArray (drillTargetUniqueName);
+                queryParams.put (p.getName (), tmp[tmp.length - 1]);
+            }
+        });
         QueryAction action = queryBuildService.generateTableQueryActionForDrill(model,
                 areaId, queryParams, targetIndex);
         
@@ -1672,7 +1712,7 @@ public class QueryDataResource extends BaseResource {
                 if (breadCrum == null) {
                     List<Map<String, String>> tmp = Lists.newArrayList();
                     if (areaContext.getCurBreadCrumPath() != null  && !areaContext.getCurBreadCrumPath().isEmpty()) {
-                        tmp.add(areaContext.getCurBreadCrumPath());
+                        tmp.addAll(areaContext.getCurBreadCrumPath());
                         breadCrum = tmp;
                     }
                 }
@@ -1972,6 +2012,23 @@ public class QueryDataResource extends BaseResource {
     }
     
     /**
+     * 离线下载请求
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    public ResponseResult downloadOffline(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId, 
+            HttpServletRequest request, HttpServletResponse response) throws Exception {
+        long begin = System.currentTimeMillis();
+        ResponseResult rs = new ResponseResult();
+        logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
+        return rs;
+    }
+    
+    /**
      * 下载请求
      * @return
      */
@@ -2261,5 +2318,110 @@ public class QueryDataResource extends BaseResource {
         rs.setStatusInfo("OK");
         logger.info("[INFO]--- --- successfully query member, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
+    }
+    
+    
+    /**
+     * 增加或修改运行时平面表条件
+     * add by jiangyichao at 2015-05-25, 平面表条件设置或修改
+     * @return
+     */
+    @RequestMapping(value = "/{id}/{elementId}/runtime/planeTableConditions", method = {RequestMethod.POST})
+    public ResponseResult addOrModifyRuntimePlaneTableCondition(@PathVariable("id") String reportId, 
+            @PathVariable("elementId") String elementId, HttpServletRequest request) {
+        logger.info("[INFO] begin query data with new measure");
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model;
+        // 获取运行时报表模型
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);        
+        try {
+            // 根据运行态取得设计模型
+            model = getRealModel(reportId, runTimeModel);
+        } catch (CacheOperationException e) {
+            logger.info("[INFO]Report model is not in cache! ", e);
+            result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
+            return result;
+        }
+        
+        // 获取平面表条件
+        String conditionStr = request.getParameter("conditions");
+        // TODO 是否修改
+        if (!StringUtils.isEmpty(conditionStr)) {
+            Map<String, PlaneTableCondition> conditions = GsonUtils.fromJson(request.getParameter("conditions"),
+                    new TypeToken<Map<String, PlaneTableCondition>>(){}.getType());
+            // 检查平面表条件值是否合理
+            for (PlaneTableCondition tmpCondition : conditions.values()) {
+                if (!PlaneTableUtils.checkSQLCondition(tmpCondition.getSQLCondition(), tmpCondition.getDefaultValue())) {
+                    result.setStatus(1);
+                    result.setStatusInfo("条件参数设置不合理，请检查！");
+                    return result;
+                }
+            }
+            
+            // 获取原有报表的平面表条件信息
+            Map<String, PlaneTableCondition> oldConditions = model.getPlaneTableConditions();
+            // 替换原有条件
+            oldConditions.put(elementId, conditions.get(elementId));
+            model.setPlaneTableConditions(conditions);
+        }
+
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("successfully add planeTable condition in runtime phase");
+        result.setStatus(0);
+        result.setData(model);
+        result.setStatusInfo("successfully add planeTable condition in runtime phase ");
+        return result;
+    }
+    
+    /**
+     * 删除平面表条件信息
+     * add by jiangyichao at 2015-05-25，删除平面表条件信息
+     * @param reportId
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/{id}/{elementId}/runtime/planeTableConditions", method = {RequestMethod.GET})
+    public ResponseResult removeRuntimePlaneTableConditions(@PathVariable("id") String reportId, 
+            @PathVariable("elementId") String elementId, HttpServletRequest request ) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+                
+        ReportDesignModel model;
+        // 获取运行时报表模型
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);        
+        try {
+            // 根据运行态取得设计模型
+            model = getRealModel(reportId, runTimeModel);
+        } catch (CacheOperationException e) {
+            logger.info("[INFO]Report model is not in cache! ", e);
+            result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
+            return result;
+        }
+        
+        // 获取该element对应的平面表条件信息
+        Map<String, PlaneTableCondition> oldConditionsMap = model.getPlaneTableConditions();
+        if (oldConditionsMap.containsKey(elementId)) {
+            oldConditionsMap.remove(elementId);
+        }
+        model.setPlaneTableConditions(oldConditionsMap);
+        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("successfully remove planeTable condition in runtime phase");
+        result.setStatus(0);
+        result.setData(model);
+        result.setStatusInfo("successfully remove planeTable condition in runtime phase ");
+        return result;
     }
 }

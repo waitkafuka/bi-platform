@@ -17,6 +17,11 @@ import org.apache.commons.lang.StringUtils;
  *
  */
 public class DesCoderUtil {
+    
+    /**
+     * keys
+     */
+    private static String defaultKey = "DesCoderUtil";
   
     /**
      * keys
@@ -170,6 +175,39 @@ public class DesCoderUtil {
 			e.printStackTrace();
 			return null;
 		}
+    } 
+    
+    /**
+     * 开放出来的base64+des加密
+     * 
+     * @param data data，需要加密的字符串
+     * @param key key
+     * @return String 加密后的字符串
+     */
+    public static String encrypt(String data) {
+        try {
+            return DesCoderUtil.encryptStr(data, DesCoderUtil.getMD5(defaultKey.getBytes("utf-8")));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
+     * 开放出来的base64+des加密
+     * 
+     * @param data data，需要加密的字符串
+     * @param key key
+     * @return String 加密后的字符串
+     */
+    public static String decrypt(String data) {
+        try {
+            byte[] keyByte =  DesCoderUtil.getMD5(defaultKey.getBytes("utf-8"));
+            return DesCoderUtil.decryptStr(data, keyByte);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     } 
   
 }

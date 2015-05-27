@@ -13,6 +13,7 @@ define([
         'report/edit/canvas/edit-comp-model',
         'report/edit/canvas/chart-setting/chart-setting-view',
         'report/edit/canvas/table-setting/table-setting-view',
+        'report/edit/canvas/plane-table-setting/plane-table-setting-view',
         // html模板区域
         'report/edit/canvas/comp-setting-default-template',
         'report/edit/canvas/comp-setting-time-template',
@@ -25,10 +26,12 @@ define([
         'report/edit/canvas/default-selected-range-time-setting-template',
         'report/edit/canvas/data-format-setting-template',
         'report/edit/canvas/comp-relation-event-setting-template',
+        'report/edit/canvas/plane-table-setting/vui-setting-plane-table-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
         'report/edit/canvas/norm-info-depict-template',
-        'report/edit/canvas/filter-blank-line-template'
+        'report/edit/canvas/filter-blank-line-template',
+        'report/edit/canvas/plane-table-setting/field-filter-setting-template'
     ],
     function (
         template,
@@ -37,6 +40,7 @@ define([
         EditCompModel,
         ChartSettingView,
         TableSettingView,
+        PlaneTableSettingView,
         // html模板区域
         compSettingDefaultTemplate,
         compSettingTimeTemplate,
@@ -49,10 +53,12 @@ define([
         defaultSelectedRangeTimeSettingTemplate,
         dataFormatSettingTemplate,
         compRelationEventSettingTemplate,
+        vuiSettingPlaneTableTemplate,
         FloatWindow,
         indMenuTemplate,
         normInfoDepictTemplate,
-        filterBlankLineTemplate
+        filterBlankLineTemplate,
+        fieldFilterSettingTemplate
     ) {
 
         return Backbone.View.extend({
@@ -600,6 +606,9 @@ define([
                     case 'CASCADE_SELECT':
                         template = compCascadeSelectTemplate;
                         break;
+                    case 'PLANE_TABLE':
+                        template = vuiSettingPlaneTableTemplate;
+                        break;
 //                    case 'MULTISELECT' :
 //                        template = vuiSettingSelectTemplate;
 //                        break;
@@ -692,6 +701,7 @@ define([
              * @public
              */
             deleteCompAxis: function (event) {
+                event.stopPropagation();
                 var that = this;
                 var $target = $(event.target);
                 // 还原默认值
@@ -828,6 +838,9 @@ define([
             afterDeleteChartCompAxis: function (option) {
 
             },
+            afterDeletePlaneTableCompAxis: function (option) {
+
+            },
             afterDeleteTableCompAxis: function (option) {
 
             },
@@ -854,6 +867,7 @@ define([
                 var compId = $root.attr('data-comp-id');
                 var compType = $root.attr('data-comp-type');
                 var $item = $draggedUi.clone().attr('style', '');
+                var itemId = $item.attr('data-id');
                 // 默认值选择
                 var $selectDefault = $('.select-default');
                 // 单选下拉框添加维度时，初始化默认值设定
@@ -868,6 +882,20 @@ define([
                     var allName = $selectValue.attr('value');
                     // 设置单选下拉框默认值
                     that.selectSetAll(checked, allName, compId);
+                }
+                if (compType === 'PLANE_TABLE' && $acceptUi.attr('data-axis-type') === 's') {
+                    var $yItems = $('.j-line-y').find('.item');
+                    var hasSameItem = false;
+                    $yItems.each(function () {
+                        if ($(this).attr('data-id') === itemId) {
+                            hasSameItem = true;
+                        }
+                    });
+                    if (!hasSameItem) {
+                        // TODO:修改提示信息
+                        alert('列轴没有此项');
+                        return;
+                    }
                 }
                 if ($.isInArray(compType, Constant.DRAG_SINGLE_DIM)) {
                     if ($('.data-axis-line .item').length >= 1) {
@@ -906,7 +934,7 @@ define([
                 cubeId = that.canvasView.parentView.model.get('currentCubeId');
                 var data = {
                     cubeId: cubeId,
-                    oLapElementId: $item.attr('data-id'),
+                    oLapElementId: itemId,
                     axisType: $acceptUi.attr('data-axis-type')
                 };
 
@@ -1235,7 +1263,8 @@ define([
              */
             afterAddTableCompAxis: function (option) {
             },
-
+            afterAddPlaneTableCompAxis: function (option) {
+            },
             /**
              * 添加完成 时间控件 数据项之后要 特别处理json（采用了拼字符串的方式调用）
              *
@@ -1292,6 +1321,9 @@ define([
                         break;
                     case 'TABLE':
                         newType = 'Table';
+                        break;
+                    case 'PLANE_TABLE':
+                        newType = 'PlaneTable';
                         break;
                     case 'SINGLE_DROP_DOWN_TREE':
                         newType = 'SingleDropDownTree';
@@ -1792,7 +1824,19 @@ define([
                     reportId: this.model.reportId,
                     canvasView: this.canvasView
                 });
+            },
+
+            _initPLANE_TABLESettingView: function (el) {
+                if(this.planeTableSettingView) {
+                    this.planeTableSettingView.destroy();
+                }
+                this.planeTableSettingView = new PlaneTableSettingView({
+                    el: el,
+                    reportId: this.model.reportId,
+                    canvasView: this.canvasView
+                });
             }
+
         });
 
         /**

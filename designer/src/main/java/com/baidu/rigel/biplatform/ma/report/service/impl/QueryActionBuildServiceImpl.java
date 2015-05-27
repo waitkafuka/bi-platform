@@ -760,8 +760,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
 	 */
 	@Override
 	public PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel,
-			FormatModel formatModel) throws PlaneTableParseException {
-		PlaneTable planeTable = DataModelUtils.transDataModel2PlaneTable(formatModel, cube, dataModel);
+	        LogicModel logicModel, FormatModel formatModel) throws PlaneTableParseException {
+		PlaneTable planeTable = DataModelUtils.transDataModel2PlaneTable(cube, dataModel,logicModel, formatModel);
 		return planeTable;
 	}
     

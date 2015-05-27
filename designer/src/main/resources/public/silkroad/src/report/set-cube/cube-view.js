@@ -169,7 +169,7 @@ define([
 
                 data.selectedTables = [];
                 $selectedTables.each(function () {
-                    data.selectedTables.push($(this).attr('data-id'));
+                    data.selectedTables.push($(this).text());
                 });
                 data.selectedTables = data.selectedTables.join(',');
                 data.regexps = [];

@@ -16,9 +16,9 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
+import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
-import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
@@ -29,7 +29,6 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.google.common.collect.Lists;
 
 /**
@@ -141,51 +140,51 @@ public class QueryConditionUtils {
 		// 获取查询条件默认值
 		String defaultValue = planeTableCondition.getDefaultValue();
 		if (valueObj != null) {
-			List<String> values = Lists.newArrayList();
-			// 获取具体的指标条件值
-			if (valueObj instanceof String[]) {
-				values = Lists.newArrayList();
-				String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
-				CollectionUtils.addAll(values, (String[]) tmp);
-			} else {
-				String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
-				values.add(tmp);
-			}
+		    List<String> values = Lists.newArrayList();
+		    // 获取具体的指标条件值
+		    if (valueObj instanceof String[]) {
+		        values = Lists.newArrayList();
+		        String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
+		        CollectionUtils.addAll(values, (String[]) tmp);
+		    } else {
+		        String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
+		        values.add(tmp);
+		    }
 		    
-			// 所有条件
-			List<SQLCondition> conditions = Lists.newArrayList();
-			// 所有数值
-			List<String> conditionValues = Lists.newArrayList();
-			// 构建SQL查询条件
-			SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);
-			// 对所有的条件值进行遍历，构建QueryData
-			for (String value :values) {
-				conditionValues.add(value);
-			}
-
-			// 设置条件值
-			sqlCondition.setConditionValues(conditionValues);
-			// 设置条件对应的指标名称
-			sqlCondition.setMetaName(olapElement.getUniqueName());
-			// 添加条件值
-			conditions.add(sqlCondition);
-			// 设置指标条件值
-			measureCondition.setMeasureConditions(conditions);
+		    // 所有条件
+		    List<SQLCondition> conditions = Lists.newArrayList();
+		    // 所有数值
+		    List<String> conditionValues = Lists.newArrayList();
+		    // 构建SQL查询条件
+		    SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);
+		    // 对所有的条件值进行遍历，构建QueryData
+		    for (String value :values) {
+		        conditionValues.add(value);
+		    }
+		    
+		    // 设置条件值
+		    sqlCondition.setConditionValues(conditionValues);
+		    // 设置条件对应的指标名称
+		    sqlCondition.setMetaName(olapElement.getUniqueName());
+		    // 添加条件值
+		    conditions.add(sqlCondition);
+		    // 设置指标条件值
+		    measureCondition.setMeasureConditions(conditions);
 		} else {
-			// 如果没有条件值，则置为空
-			Measure measure = (Measure) olapElement;
-			List<String> conditionValues = Lists.newArrayList();
-			// 如果未设置条件值，则应使用默认值
-			String[] tmpValue = defaultValue.split(",");
-			Collections.addAll(conditionValues, tmpValue);
-			
-			// 构造SQL查询条件
-			List<SQLCondition> conditions = Lists.newArrayList();
-			SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);
-			sqlCondition.setConditionValues(conditionValues);
-			sqlCondition.setMetaName(measure.getUniqueName());
-			conditions.add(sqlCondition);
-			measureCondition.setMeasureConditions(conditions);
+		    // 如果没有条件值，则置为空
+		    Measure measure = (Measure) olapElement;
+		    List<String> conditionValues = Lists.newArrayList();
+		    // 如果未设置条件值，则应使用默认值
+		    String[] tmpValue = defaultValue.split(",");
+		    Collections.addAll(conditionValues, tmpValue);
+		    
+		    // 构造SQL查询条件
+		    List<SQLCondition> conditions = Lists.newArrayList();
+		    SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);
+		    sqlCondition.setConditionValues(conditionValues);
+		    sqlCondition.setMetaName(measure.getUniqueName());
+		    conditions.add(sqlCondition);
+		    measureCondition.setMeasureConditions(conditions);
 		}
 		return measureCondition;
     }
@@ -222,9 +221,9 @@ public class QueryConditionUtils {
                         values = Lists.newArrayList();
                         String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
                         CollectionUtils.addAll(values, (String[]) tmp);
-                    } else {
+                    }  else {
                         String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
-                        values.add(tmp);
+                        values.add(tmp); 
                     }
                    
                     List<QueryData> datas = Lists.newArrayList();
@@ -296,7 +295,7 @@ public class QueryConditionUtils {
                         data.setExpand(firstIndex == 0);
                         data.setShow(firstIndex != 0);
                         datas.add(data);
-                    }
+                    } 
                     condition.setQueryDataNodes(datas);
                 }
                 // 时间维度，并且在第一列位置，后续改成可配置方式
@@ -371,4 +370,5 @@ public class QueryConditionUtils {
         }
         return rs;
     }
+
 }
