@@ -167,10 +167,11 @@
                             var j;
                             for (j = 0; j < this._aColumns.length; j++) {
                                 var o = this._aColumns[j];
-                                html.push('<td data-content="1" data-cell-pos="' + j + '-' + i + '" class="ui-table-ccell"');
+                                var align = o.align || 'left';
+                                html.push('<td data-content="1" data-cell-pos="' + j + '-' + i + '" class="ui-table-ccell ');
 
-                                o.align && html.push(
-                                    ' align="' + o.align + '"'
+                                html.push(
+                                    'ui-table-cell-align-' + align + '"'
                                 );
 
                                 html.push('>');
@@ -350,6 +351,7 @@
         var i = 0;
         for (i = 0; i < headrow.length; i++) {
             var o = headrow[i];
+
             html.push('<th ');
             html.push('data-field="');
 
@@ -386,22 +388,22 @@
 
                 flag += o.colspan;
             }
+            var classStr = '" class="';
+            var align = o.align || 'left';
+            classStr = classStr + type + '-cell-align-' + align + ' ';
             if (o.sortable) {
-                html.push(
-                    '" class="' + type + '-hcell-sort'
-                );
+                classStr = classStr + type + '-hcell-sort ';
                 if (o.field && o.field == con._sSortby) {
-                    html.push(
-                        ' ' + type + '-hcell-sort-' + con._sOrderby
-                    );
+                    classStr = classStr + type + '-hcell-sort-' + con._sOrderby + ' "';
                 }
                 if (o.order) {
                     html.push(
-                        '" data-orderby="' + o.order
+                        ' data-orderby="' + o.order + '"'
                     );
                 }
             }
-            html.push('">');
+            html.push(classStr);
+            html.push('>');
 
 //            if (o.title) {
 //                 //html.push(o.title);
@@ -429,10 +431,18 @@
 //            }
 
             if (o.title) {
+                var tipsStr = '<div class="'+ type + '-head-tips"';
+                if (o.toolTip) {
+                    tipsStr = tipsStr + 'title="' + o.toolTip + '"';
+                }
+                tipsStr = tipsStr + '">&nbsp;</div>';
+
                 html.push(
-                    '<div class="', type, '-head-th-content"><div class="ui-table-head-font">',
-                    o.title,
-                    '</div><div class="', type, '-hcell-field-set"></div></div>'
+                    '<div class="', type, '-head-th-content">',
+                        '<div class="ui-table-head-font">', o.title, '</div>',
+                        '<div class="', type, '-hcell-field-set"></div>',
+                        tipsStr,
+                    '</div>'
                 );
             }
 
