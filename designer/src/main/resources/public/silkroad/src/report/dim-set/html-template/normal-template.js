@@ -19,21 +19,21 @@ define(['template'], function (template) {
         $out+='\r\n                    <select class="normal-relation-box-select-fields mr-20">\r\n                        <option value="0">请选择</option>\r\n                        <!-- 循环每一行中的主表字段(cubes.cube1.currDims)-->\r\n                        ';
         $each(cubes[$cube.cubeId].currDims,function($dim,$index){
         $out+='\r\n                        <option value=';
-        $out+=$escape($dim.id);
+        $out+=$escape($dim.name);
         $out+='\r\n                            ';
-        if($dim.id === $line.currDim){
+        if($dim.name === $line.currDim){
         $out+='selected="selected"\r\n                            ';
         }
         $out+='>';
-        $out+=$escape($dim.name);
+        $out+=$escape($dim.comment);
         $out+='\r\n                        </option>\r\n                        ';
         });
         $out+='\r\n                    </select>\r\n                    <span class="equal">=</span>\r\n                    <select class="normal-relation-box-select-table mr-30 j-normal-relation-table-select" >\r\n                        <option value="0">请选择</option>\r\n                        <!-- 循环关联数据表(relationTables)-->\r\n                        ';
         $each(relationTables,function($relationTable,$index){
         $out+='\r\n                        <option value=';
-        $out+=$escape($relationTable.id);
+        $out+=$escape($relationTable.name);
         $out+='\r\n                        ';
-        if($relationTable.id === $line.relationTable){
+        if($relationTable.name === $line.relationTable){
         $out+='selected="selected"\r\n                        ';
         }
         $out+='>';
@@ -43,17 +43,17 @@ define(['template'], function (template) {
         $out+='\r\n                    </select>\r\n                    <select class="normal-relation-box-select-fields mr-10">\r\n                        <option value="0">请选择</option>\r\n                        <!-- 循环关联数据表(relationTables)-->\r\n                        ';
         $each(relationTables,function($relationTable,$index){
         $out+='\r\n                        <!-- 如果关联数据表等于当前行的的关联表,那么就循环此关联表中的字段-->\r\n                        ';
-        if($relationTable.id === $line.relationTable){
+        if($relationTable.name === $line.relationTable){
         $out+='\r\n                            ';
         $each($relationTable.fields,function($field,$index){
         $out+='\r\n                                <option value=';
-        $out+=$escape($field.id);
+        $out+=$escape($field.name);
         $out+='\r\n                                ';
-        if($field.id === $line.field){
+        if($field.name === $line.field){
         $out+='selected="selected"\r\n                                ';
         }
         $out+='>';
-        $out+=$escape($field.name);
+        $out+=$escape($field.comment);
         $out+='\r\n                                </option>\r\n                            ';
         });
         $out+='\r\n                        ';

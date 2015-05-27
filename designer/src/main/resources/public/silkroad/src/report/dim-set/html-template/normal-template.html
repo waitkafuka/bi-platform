@@ -22,9 +22,9 @@
                         <option value="0">请选择</option>
                         <!-- 循环每一行中的主表字段(cubes.cube1.currDims)-->
                         {{each cubes[$cube.cubeId].currDims as $dim}}
-                        <option value={{$dim.id}}
-                            {{if $dim.id === $line.currDim}}selected="selected"
-                            {{/if}}>{{$dim.name}}
+                        <option value={{$dim.name}}
+                            {{if $dim.name === $line.currDim}}selected="selected"
+                            {{/if}}>{{$dim.comment}}
                         </option>
                         {{/each}}
                     </select>
@@ -33,8 +33,8 @@
                         <option value="0">请选择</option>
                         <!-- 循环关联数据表(relationTables)-->
                         {{each relationTables as $relationTable}}
-                        <option value={{$relationTable.id}}
-                        {{if $relationTable.id === $line.relationTable}}selected="selected"
+                        <option value={{$relationTable.name}}
+                        {{if $relationTable.name === $line.relationTable}}selected="selected"
                         {{/if}}>{{$relationTable.name}}
                         </option>
                         {{/each}}
@@ -44,11 +44,11 @@
                         <!-- 循环关联数据表(relationTables)-->
                         {{each relationTables as $relationTable}}
                         <!-- 如果关联数据表等于当前行的的关联表,那么就循环此关联表中的字段-->
-                        {{if $relationTable.id === $line.relationTable}}
+                        {{if $relationTable.name === $line.relationTable}}
                             {{each $relationTable.fields as $field}}
-                                <option value={{$field.id}}
-                                {{if $field.id === $line.field}}selected="selected"
-                                {{/if}}>{{$field.name}}
+                                <option value={{$field.name}}
+                                {{if $field.name === $line.field}}selected="selected"
+                                {{/if}}>{{$field.comment}}
                                 </option>
                             {{/each}}
                         {{/if}}

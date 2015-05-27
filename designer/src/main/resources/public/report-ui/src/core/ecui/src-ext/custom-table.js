@@ -309,7 +309,7 @@
         // 默认处理函数
         DEFAULT_EVENTS = {
             
-            'click th.ui-table-hcell-sort': function (event, control) {
+            'click div.ui-table-hcell-sort-def': function (event, control) {
                 var field = this.getAttribute('data-field'),
                     orderby;
 
@@ -356,7 +356,7 @@
             html.push('data-field="');
 
             if (Object.prototype.toString.call(o.field) == '[object String]') {
-                html.push(o.field);
+                html.push(o.field, '" ');
             }
 
             if (o.width) {
@@ -385,24 +385,30 @@
                 html.push(
                     '" width="' + width
                 );
+                html.push('"');
 
                 flag += o.colspan;
             }
-            var classStr = '" class="';
+            var classStr = ' class="';
+            var attrStr = [];
             var align = o.align || 'left';
-            classStr = classStr + type + '-cell-align-' + align + ' ';
-            if (o.sortable) {
-                classStr = classStr + type + '-hcell-sort ';
-                if (o.field && o.field == con._sSortby) {
-                    classStr = classStr + type + '-hcell-sort-' + con._sOrderby + ' "';
-                }
-                if (o.order) {
-                    html.push(
-                        ' data-orderby="' + o.order + '"'
-                    );
-                }
+            classStr = classStr + type + '-cell-align-' + align + '" ';
+
+//            if (o.sortable) {
+//                classStr = classStr + type + '-hcell-sort ';
+//                if (o.field && o.field == con._sSortby) {
+//                    classStr = classStr + type + '-hcell-sort-' + con._sOrderby + ' "';
+//                }
+//                if (o.order) {
+//                    html.push(
+//                        ' data-orderby="' + o.order + '"'
+//                    );
+//                }
+//            }
+            if (o.orderby) {
+                attrStr.push('data-orderby="' + o.orderby + '" ');
             }
-            html.push(classStr);
+            html.push(attrStr.join(''), classStr);
             html.push('>');
 
 //            if (o.title) {
@@ -432,16 +438,21 @@
 
             if (o.title) {
                 var tipsStr = '<div class="'+ type + '-head-tips"';
+                var sortStr = '';
                 if (o.toolTip) {
                     tipsStr = tipsStr + 'title="' + o.toolTip + '"';
+                }
+                if (o.orderby) {
+                    sortStr = '<div ' + ' data-orderby="' + o.orderby + '" class="'+ type + '-hcell-sort-' + o.orderby + ' ' + type + '-hcell-sort-def"></div>';
                 }
                 tipsStr = tipsStr + '">&nbsp;</div>';
 
                 html.push(
                     '<div class="', type, '-head-th-content">',
                         '<div class="ui-table-head-font">', o.title, '</div>',
-                        '<div class="', type, '-hcell-field-set"></div>',
+                        sortStr,
                         tipsStr,
+                    '<div class="', type, '-hcell-field-set"></div>',
                     '</div>'
                 );
             }
@@ -728,13 +739,10 @@
         var mainEl = this.$di('getEl');
         var type = this.getType();
         var headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0];
-        attachEvent(headEl, 'click', this.fieldSet);
-        function fieldSet() {
-            var me = this;
-            var type = this.getType();
+        attachEvent(headEl, 'click', fieldSet);
+        function fieldSet(ev) {
             var oEv = ev || window.event;
             var target = oEv.target || oEv.srcElement;
-
             if (hasClass(target, type + '-hcell-field-set')) {
                 alert();
             }
