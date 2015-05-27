@@ -180,7 +180,9 @@ $namespace('di.config');
     URL_SET.OLAP_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
     URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
     // PLANE表（平面表）
-    URL_SET.PLANE_TABLE_DATA = '/reportTemplate/planeTable/transform.action';
+    // URL_SET.PLANE_TABLE_DATA = '/reportTemplate/planeTable/transform.action';
+    URL_SET.PLANE_TABLE_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
+    URL_SET.PLANE_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
     URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
     URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
     URL_SET.PLANE_TABLE_DOWNLOAD = '/reportTemplate/planeTable/download.action';

@@ -77,7 +77,8 @@ $namespace('di.shared.model');
             CHECK: URL.fn('PLANE_TABLE_CHECK'),
             SELECT: URL.fn('PLANE_TABLE_SELECT'),
             OFFLINE_DOWNLOAD: URL.fn('PLANE_TABLE_OFFLINE_DOWNLOAD'),
-            GET_FIELDSLIST: URL.fn('PLANE_TABLE_GET_FIELDSLIST')
+            GET_FIELDSLIST: URL.fn('PLANE_TABLE_GET_FIELDSLIST'),
+            SORT: URL.fn('PLANE_TABLE_SORT')
         }
     );
 
@@ -91,7 +92,8 @@ $namespace('di.shared.model');
             CHECK: 'DI_PLANE_TABLE_MODEL_CHECK_' + getUID(),
             SELECT: 'DI_PLANE_TABLE_MODEL_SELECT_' + getUID(),
             OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID(),
-            GET_FIELDSLIST: 'DI_PLANE_TABLE_MODEL_GET_FIELDSLIST_' + getUID()
+            GET_FIELDSLIST: 'DI_PLANE_TABLE_MODEL_GET_FIELDSLIST_' + getUID(),
+            SORT: 'DI_PLANE_TABLE_MODEL_SORT_' + getUID()
         }
     );
 
@@ -131,6 +133,9 @@ $namespace('di.shared.model');
                     // 参数名未定
                     { uniqueName: options.args.param.uniqueName }
                 );
+            },
+            SORT: function (options) {
+                return this._fCommonParamGetter(options.args.param);
             }
         }
     );
@@ -147,7 +152,8 @@ $namespace('di.shared.model');
             SELECT: doComplete,
             CHECK: doComplete,
             OFFLINE_DOWNLOAD: doComplete,
-            GET_FIELDSLIST: doComplete
+            GET_FIELDSLIST: doComplete,
+            SORT: doComplete
         }
     );
 
@@ -166,7 +172,8 @@ $namespace('di.shared.model');
         {
             DATA: doParse,
             CHECK: function (data) { return data; },
-            SELECT: function (data) { return data; }
+            SELECT: function (data) { return data; },
+            SORT: doParse
         }
     );
 

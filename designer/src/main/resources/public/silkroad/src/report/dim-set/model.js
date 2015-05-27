@@ -159,7 +159,7 @@ define(['url'], function (Url) {
             var relationTables = me.get('relationTables');
 
             for (var i = 0, len = relationTables.length; i < len; i++) {
-                if (relationTables[i].id === tableId) {
+                if (relationTables[i].name === tableId) {
                     return relationTables[i].fields;
                 }
             }
