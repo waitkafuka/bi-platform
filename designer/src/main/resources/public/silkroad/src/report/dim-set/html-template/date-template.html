@@ -19,7 +19,7 @@
                     {{if $cube.children[0].relationTable==="ownertable"}}
                     selected = "selected"{{/if}}>内置表</option>
                     {{each dateRelationTables as $dateRelationTable j}}
-                    <option value={{$dateRelationTable.id}}>{{$dateRelationTable.name}}</option>
+                    <option value={{$dateRelationTable.name}}>{{$dateRelationTable.comment}}</option>
                     {{/each}}
                 </select>
             </div>
