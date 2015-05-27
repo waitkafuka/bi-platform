@@ -158,6 +158,12 @@ $namespace('di.shared.ui');
             ['sync.error.GET_FIELDSLIST', this.$handleDataError, this],
             ['sync.complete.GET_FIELDSLIST', this.$syncEnable, this, 'GET_FIELDSLIST']
         );
+        model.attach(
+            ['sync.preprocess.RESET_FIELDS', this.$syncDisable, this, 'RESET_FIELDS'],
+            ['sync.result.RESET_FIELDS', this.$handleSubmitFieldsFilterSucess, this],
+            ['sync.error.RESET_FIELDS', this.$handleDataError, this],
+            ['sync.complete.RESET_FIELDS', this.$syncEnable, this, 'RESET_FIELDS']
+        );
 //        model.attach(
 //            ['sync.preprocess.SORT', this.$syncDisable, this, 'SORT'],
 //            ['sync.result.SORT', this.$renderMain, this],
@@ -552,24 +558,6 @@ $namespace('di.shared.ui');
     };
 
 
-    DI_PLANE_TABLE_CLASS.$handleGetFieldsList = function (option) {
-        option.param.componentId = this.$di('getId').split('.')[1];
-        this.$sync(
-            this.getModel(),
-            'GET_FIELDSLIST',
-            option.param,
-            null,
-            {
-                callback: option.callback,
-                fieldsFilter: option.fieldsFilter
-            }
-        );
-    };
-
-    DI_PLANE_TABLE_CLASS.$handleGetFieldsListSuccess = function(status, ejsonObj, options) {
-        options.args.callback.call(options.args.fieldsFilter, ejsonObj.data);
-    };
-
     /**
      * 页数改变
      * 
@@ -692,16 +680,38 @@ $namespace('di.shared.ui');
         DIALOG.alert(LANG.SAD_FACE + LANG.OFFLINE_DOWNLOAD_FAIL);
     };
 
+
+
+    DI_PLANE_TABLE_CLASS.$handleGetFieldsList = function (option) {
+        this.$sync(
+            this.getModel(),
+            'GET_FIELDSLIST',
+            {
+                componentId: this.$di('getId').split('.')[1]
+            },
+            null,
+            {
+                callback: option.callback,
+                fieldsFilter: option.fieldsFilter
+            }
+        );
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleGetFieldsListSuccess = function(status, ejsonObj, options) {
+        options.args.callback.call(options.args.fieldsFilter, ejsonObj.data);
+    };
+
     DI_PLANE_TABLE_CLASS.$handleSubmitFieldsFilter = function (selectedFields) {
         this.$sync(
             this.getModel(),
-            'DATA',
+            'RESET_FIELDS',
             {
-                currentPage: currentPage,
-                pageSize: this._uPager ? this._uPager.getPageSize() : void 0,
+                componentId: this.$di('getId').split('.')[1],
                 selectedFields: selectedFields
             }
         );
-    }
-
+    };
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldsFilterSuccess = function (status, ejsonObj, options) {
+        this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
+    };
 })();

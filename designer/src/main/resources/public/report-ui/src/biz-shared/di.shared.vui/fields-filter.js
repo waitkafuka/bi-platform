@@ -167,13 +167,13 @@ $namespace('di.shared.vui');
        var chkbox = document.getElementsByName(chkName);
        var selectedFields = [];
        for (var i = 0; i < chkbox.length; i ++){
-            if (chkbox[i].checked = true) {
+            if (chkbox[i].checked == true) {
                 selectedFields.push(chkbox[i].id.split('-')[0]);
             }
        }
        this._uDialog.hide();
        // TODO：发个事件，到component中去
-        this.notify('submitFieldsFilter', selectedFields);
+        this.notify('submitFieldsFilter', selectedFields.join(','));
     };
 
     FIELDS_FILTER_CLASS.$cancelHandler = function() {

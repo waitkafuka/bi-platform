@@ -183,14 +183,15 @@ $namespace('di.config');
     // URL_SET.PLANE_TABLE_DATA = '/reportTemplate/planeTable/transform.action';
     URL_SET.PLANE_TABLE_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
     URL_SET.PLANE_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
-    URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
-    URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
-    URL_SET.PLANE_TABLE_DOWNLOAD = '/reportTemplate/planeTable/download.action';
-    URL_SET.PLANE_TABLE_DOWNLOADEXCEL = '/reportTemplate/planeTable/downloadExcel.action';
-    URL_SET.PLANE_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/planeTable/downloadOffLine.action';
-    URL_SET.PLANE_TABLE_LINK_BRIDGE = '/reportTemplate/planeTable/linkBridge.action';
+    URL_SET.PLANE_TABLE_GET_FIELDSLIST = '/reports/#{reportId}/runtime/extend_area/#{componentId}/dimAndInds';
+    URL_SET.PLANE_TABLE_RESET_FIELDS = '/reports/#{reportId}/runtime/extend_area/#{componentId}/reset'
+//    URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
+//    URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
+//    URL_SET.PLANE_TABLE_DOWNLOAD = '/reportTemplate/planeTable/download.action';
+//    URL_SET.PLANE_TABLE_DOWNLOADEXCEL = '/reportTemplate/planeTable/downloadExcel.action';
+//    URL_SET.PLANE_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/planeTable/downloadOffLine.action';
+//    URL_SET.PLANE_TABLE_LINK_BRIDGE = '/reportTemplate/planeTable/linkBridge.action';
 
-    URL_SET.PLANE_TABLE_GET_FIELDSLIST = '/reports/#{reportId}/runtime/extend_area/#{componentId}/fields'
     // 图
 //    URL_SET.OLAP_CHART_DATA = '/reportTemplate/chart/transform.action';
 //    // 根据liteOlap的表格数据和相应条件生成图形数据
