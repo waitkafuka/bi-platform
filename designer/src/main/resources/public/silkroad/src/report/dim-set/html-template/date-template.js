@@ -27,13 +27,13 @@ define(['template'], function (template) {
         $out+='\r\n                </select>\r\n            </div>\r\n            <div class="date-relation-owner-two-part c-f j-date-two-part">\r\n                <span>选择时间字段：</span>\r\n                <select>\r\n                    <option value="0">请选择</option>\r\n                    ';
         $each(cubes[$cube.cubeId].currDims,function($dim,$index){
         $out+='\r\n                    <option value=';
-        $out+=$escape($dim.id);
+        $out+=$escape($dim.name);
         $out+='\r\n                    ';
         if($dim.id === $cube.children[0].currDim){
         $out+='selected="selected"\r\n                    ';
         }
         $out+='>';
-        $out+=$escape($dim.name);
+        $out+=$escape($dim.comment);
         $out+='\r\n                    </option>\r\n                    ';
         });
         $out+='\r\n                </select>\r\n                <span>粒度：</span>\r\n                <select class="j-owner-date-level-select">\r\n                    <option value="0">请选择</option>\r\n                    ';
