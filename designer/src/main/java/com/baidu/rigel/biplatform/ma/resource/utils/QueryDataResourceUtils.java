@@ -84,11 +84,15 @@ public class QueryDataResourceUtils {
 		if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
 			// 获取平面表
 			try {
-                baseTable =
-                        queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
-                        targetArea.getFormatModel());
+                baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
+                                targetArea.getFormatModel());
                 Map<String, Object> resultMap = Maps.newHashMap();
-				resultMap.put("planeTable", (PlaneTable) baseTable);
+                PlaneTable planeTable = (PlaneTable) baseTable;
+                if (planeTable != null) {
+                    resultMap.put("head", planeTable.getColDefines());
+                    resultMap.put("data", planeTable.getData());
+                    resultMap.put("pageInfo", planeTable.getPageInfo());
+                }
 				return ResourceUtils.getResult("Success", "Fail", resultMap);
 			} catch (PlaneTableParseException e) {
 				LOG.info(e.getMessage(), e);
