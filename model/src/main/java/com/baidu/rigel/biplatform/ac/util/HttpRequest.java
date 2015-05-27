@@ -16,6 +16,8 @@
 package com.baidu.rigel.biplatform.ac.util;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
@@ -51,6 +53,7 @@ import org.apache.http.cookie.CookieOrigin;
 import org.apache.http.cookie.CookieSpec;
 import org.apache.http.cookie.CookieSpecProvider;
 import org.apache.http.cookie.MalformedCookieException;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.cookie.BrowserCompatSpec;
@@ -62,6 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * httpclient 4.3 的post和get实现
@@ -285,8 +289,8 @@ public class HttpRequest {
         String requestUrl = processPlaceHolder(url, params);
         
         String cookie = params.remove(COOKIE_PARAM_NAME);
-        if (requestUrl.contains("?")) {
-            String[] urls = requestUrl.split("?");
+        if (requestUrl.contains("\\?")) {
+            String[] urls = requestUrl.split("\\?");
             requestUrl = urls[0];
             String[] urlParams = urls[1].split("&");
             for (String param : urlParams) {
@@ -548,5 +552,26 @@ public class HttpRequest {
 //         params.put("cubeXml", "cubeXML");
 //         params.put("test", "cookies");
 //     }
+
+    public static String sendPost(String url, String hql) {
+        try {
+            long current = System.currentTimeMillis ();
+            HttpClient client = getDefaultHttpClient(Collections.unmodifiableMap(Maps.newHashMap ()));
+            HttpUriRequest request = RequestBuilder.post()
+                    .setUri(url) 
+                    .setEntity (new StringEntity (hql))
+                    .build();
+            LOGGER.info ("[INFO] --- --- execute query with client {}", client);
+            HttpResponse response = client.execute(request);
+            String content = processHttpResponse(client, response, Maps.newHashMap (), false);
+            StringBuilder sb = new StringBuilder();
+            sb.append("end send post :").append(url).append(" hql:").append(hql).append(" cost:")
+                    .append(System.currentTimeMillis() - current);
+            LOGGER.info(sb.toString());
+            return content;
+        } catch (ParseException | IOException e) {
+            throw new RuntimeException (e);
+        }
+    }
 
 }
