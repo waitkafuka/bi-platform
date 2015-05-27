@@ -29,15 +29,21 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ac.query.data.TableData;
+import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
@@ -47,6 +53,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTableColDefine
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * 类DataModelUtils.java的实现描述：DataModel操作工具类
@@ -329,191 +336,185 @@ public final class DataModelUtils {
 
     /**
      * 将DataModel转为PlaneTable平面表
+     * @param logicModel 逻辑模型
      * @param formatModel 格式模型
-     * @param cube cube
+     * @param cube cube 立方体
      * @param oriDataModel 数据模型
      * @return
      */
-    public static PlaneTable transDataModel2PlaneTable(FormatModel formatModel, 
-    		Cube cube, DataModel oriDataModel) {
+    public static PlaneTable transDataModel2PlaneTable(Cube cube, DataModel oriDataModel, 
+            LogicModel logicModel, FormatModel formatModel) {
     	// 平面表对象
         PlaneTable planeTable = new PlaneTable();
-//        if (oriDataModel == null) {
-//            return planeTable;
-//        }
-//        if (formatModel == null) {
-//            return planeTable;
-//        }
-//        // 分别获取数据模型、提示信息、文本对齐信息
-//        Map<String, String> dataFormat = formatModel.getDataFormat();
-//        Map<String, String> toolTips = formatModel.getToolTips ();
-//        Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
-//        
-//        // 记录转换时间
-//        long current = System.currentTimeMillis();
-//        DataModel dataModel = oriDataModel;
-//        // 基于列的表信息
-//        List<HeadField> colHeadFields = dataModel.getColumnHeadFields();
-//        // 基于行的表信息
-//        List<HeadField> rowHeadFields = dataModel.getRowHeadFields();
-//        
-//        // 列头信息
-//        List<List<ColField>> colFields = new ArrayList<List<ColField>>();
-//        
-//        // 列的高度信息
-//        int colHeadHeight = getHeightOfHeadFieldList(colHeadFields);
-//        // 设置平面表的列高
-//        planeTable.setColHeadHight(colHeadHeight);
-//        // 将DataModel中的ColHeadFields转为PlaneTable中的ColFields列头信息
-//        colFields = transColHeadFields2ColFields(colHeadFields);
-//        // 设置平面表的列头信息colFields
-//        planeTable.setColFields(colFields);
-//        
-//        // 获取行上的维度名称
-//        String[] dimCaptions = getDimCaptions(cube, rowHeadFields);
-//        // 获取行上的维度对应的每一层第一个节点
-//        HeadField[] firstHeadFieldOfDim = getFirstHeadFieldOfEveryDimension(rowHeadFields);
-//        // 行上的属性条件
-//        List<PlaneTableColDefine> dimColDefines = Lists.newArrayList();
-//        if (rowHeadFields != null && dimCaptions.length != 0) {
-//        	// 获取colFields的第一列
-//        	List<ColField> dimColFields = colFields.get(0);
-//        	// 将行的信息填充到列头信息上
-//        	for (int i = 0; i< dimCaptions.length; i++) {
-//				// 获取当前维度的HeadField
-//				HeadField rowHeadField = firstHeadFieldOfDim[i];
-//				// 构建维度对应的ColField列头信息
-//				ColField dimColField = new ColField();
-//				// 行宽设置为列高度
-//				dimColField.setRowspan(colHeadHeight);
-//				// 列宽设置为1
-//				dimColField.setColSpan(1);
-//				// 设置名称，维度名称为[维度名称].[All_维度名称],需要将其转为[Measure].[维度名称]
-//				dimColField.setUniqName("[Measure]."
-//						+ rowHeadField.getValue().split("\\.")[0]);
-//				dimColField.setV(dimCaptions[i].replace("汇总", ""));
-//				dimColFields.add(0, dimColField);
-//
-//				// 构建维度对应ColDefine列属性信息
-//				PlaneTableColDefine dimColDefine = new PlaneTableColDefine();
-//				dimColDefine.setIsMeasure(false);
-//				dimColDefine.setUniqueName("[Measure]."
-//						+ rowHeadField.getValue().split("\\.")[0]);
-//				dimColDefine.setCaption(dimCaptions[i].replace("汇总", ""));
-//				dimColDefine.setShowUniqueName(rowHeadField.getValue().split("\\.")[0]);
-//				// membershowname,当前member的caption
-//				dimColDefine.setShowAxis(rowHeadField.getValue().split("\\.")[0]);
-//				dimColDefine.setCurrentSort(rowHeadField.getExtInfos().get(
-//						"sortType") == null ? "NONE" : rowHeadField
-//						.getExtInfos().get("sortType").toString());
-//
-//				String uniqueName = dimColDefine.getUniqueName();
-//				uniqueName = MetaNameUtil.parseUnique2NameArray(dimColDefine
-//						.getUniqueName())[1];
-//				// 设置数据格式信息
-//				if (dataFormat != null) {
-//					String formatStr = dataFormat.get("defaultFormat");
-//					if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
-//						formatStr = dataFormat.get(uniqueName);
-//					}
-//					if (!StringUtils.isEmpty(formatStr)) {
-//						dimColDefine.setFormat(formatStr);
-//					}
-//				}
-//				// 设置提示信息
-//				if (toolTips != null) {
-//					String toolTip = toolTips.get(uniqueName);
-//					if (StringUtils.isEmpty(toolTip)) {
-//						toolTip = uniqueName;
-//					}
-//					dimColDefine.setToolTip(toolTip);
-//				}
-//				// 设置文本对齐信息
-//				if (textAlignFormat != null) {
-//					String align = textAlignFormat.get(uniqueName);
-//					if (StringUtils.isEmpty(align)) {
-//						align = "left";
-//					}
-//					dimColDefine.setAlign(align);
-//				}
-//				dimColDefines.add(0, dimColDefine);
-//        	}        	
-//        }
-//        // 重新设置colFileds
-//        planeTable.setColFields(colFields);
-//        
-//        // 构建指标ColDefine列属性信息
-//        List<PlaneTableColDefine> colDefineList = Lists.newArrayList();
-//        // 获取叶子节点(对应列上的指标),NodeList为水平方向的节点
-//        List<HeadField> leafNodeList = getLeafNodeList(colHeadFields);
-//        // 遍历，以获取ColDefineList
-//        for (HeadField headField : leafNodeList) {
-//        	PlaneTableColDefine colDefine = new PlaneTableColDefine();
-//        	colDefine.setIsMeasure(true);
-//            colDefine.setUniqueName(headField.getValue());
-//            colDefine.setCaption(transStrList2Str(getAllCaptionofHeadField(headField), "-", true));
-//            colDefine.setShowUniqueName(transStrList2Str(getAllMemberDimConcatUniqname(headField),
-//                DIV_DIM, true));
-//            // membershowname,当前member的caption
-//            colDefine.setShowAxis(transStrList2Str(getAllCaptionofHeadField(headField),
-//                DIV_DIM_NODE, true));
-//            colDefine.setCurrentSort(headField.getExtInfos().get("sortType") == null 
-//                        ? "NONE" : headField.getExtInfos().get("sortType").toString());
-//            
-//            String uniqueName = colDefine.getUniqueName();
-//            uniqueName = MetaNameUtil.parseUnique2NameArray (colDefine.getUniqueName ())[1];
-//            // 设置数据格式信息
-//            if (dataFormat != null) {
-//                String formatStr = dataFormat.get("defaultFormat");
-//                if (!StringUtils.isEmpty(dataFormat.get(uniqueName))) {
-//                    formatStr = dataFormat.get(uniqueName);
-//                }
-//                if (!StringUtils.isEmpty(formatStr)) {
-//                	colDefine.setFormat(formatStr);
-//                }
-//            }
-//            // 设置提示信息
-//            if (toolTips != null) {
-//                String toolTip = toolTips.get(uniqueName);
-//                if (StringUtils.isEmpty(toolTip)) {
-//                    toolTip = uniqueName;
-//                }
-//                colDefine.setToolTip(toolTip);
-//            }
-//            // 设置文本对齐信息
-//            if (textAlignFormat != null) {
-//            	String align = textAlignFormat.get(uniqueName);
-//				if (StringUtils.isEmpty(align)){
-//					align = "left";
-//				}
-//				colDefine.setAlign(align);
-//            }
-//            colDefineList.add(colDefine);            
-//        }
-//        // 添加维度对应的列属性信息ColDefine
-//        colDefineList.addAll(0, dimColDefines);
-//        // 设置平面表的列属性信息
-//        planeTable.setColDefines(colDefineList);
-//        
-//        List<List<String>> dimDataColumnBased = transRowHeadFields2String(rowHeadFields);
-//        planeTable.setDimDataColumnBased(dimDataColumnBased);
-//        
-//        // 按展现条数截取columnBaseData
-//        List<List<BigDecimal>> source = dataModel.getColumnBaseData();
-//        List<List<CellData>> cellDataSource = parseCellDatas(source);
-//        List<List<CellData>> columnBasedData = getColumnBasedDataCut(cellDataSource,
-//            false, 0);  
-//        planeTable.setDataSourceColumnBased(columnBasedData);
-//        
-//        // 设置总的记录数
-//        int size = source.get(0).size();
-//        planeTable.setTotalRecordSize(size);
-//        
-//        LOG.info("transfer datamodel 2 planeTable cost:"
-//                + (System.currentTimeMillis() - current) + "ms!");
+        if (oriDataModel == null) {
+            return planeTable;
+        }
+        if (formatModel == null) {
+            return planeTable;
+        }
+        if (logicModel == null) {
+            return planeTable;
+        }
+        
+        // 分别获取数据模型、提示信息、文本对齐信息
+        Map<String, String> dataFormat = formatModel.getDataFormat();
+        Map<String, String> toolTips = formatModel.getToolTips ();
+        Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
+        
+        // 记录转换时间
+        long current = System.currentTimeMillis();
+        DataModel dataModel = oriDataModel;
+        
+        // 获取数据模型中的表定义
+        TableData tableData = dataModel.getTableData();
+        // 表的列定义
+        List<Column> column = tableData.getColumns();
+        // 表的列属性信息
+        List<PlaneTableColDefine> colDefines = Lists.newArrayList();
+        
+        
+        MiniCube miniCube = (MiniCube) cube;
+        // 获取Cube中的维度信息
+        Map<String, Dimension> dimensions = miniCube.getDimensions();
+        // 获取Cube中的指标信息
+        Map<String, Measure> measures = miniCube.getMeasures();
+        // 构建列属性信息
+        column.forEach(col -> {
+            PlaneTableColDefine colDefine = new PlaneTableColDefine();
+            // 设置表头
+            colDefine.setTitle(col.caption);
+            // 设置表域名称
+            colDefine.setField(col.name);
+            String name = col.name;
+            // 设置数据格式信息
+            if (dataFormat != null) {
+                String formatStr = dataFormat.get("defaultFormat");
+                if (!StringUtils.isEmpty(dataFormat.get(name))) {
+                    formatStr = dataFormat.get(name);
+                }
+                if (!StringUtils.isEmpty(formatStr)) {
+                    colDefine.setFormat(formatStr);
+                }
+            }
+            // 设置提示信息
+            if (toolTips != null) {
+                String tips = toolTips.get(name);
+                if (StringUtils.isEmpty(tips)) {
+                    tips = name;
+                }
+                colDefine.setTips(tips);
+            }
+            // 设置文本对齐信息
+            if (textAlignFormat != null) {
+                String align = textAlignFormat.get(name);
+                if (StringUtils.isEmpty(align)) {
+                    align = "left";
+                }
+                colDefine.setAlign(align);
+            }
+            // 该列为维度
+            if (dimensions != null && dimensions.containsKey(name)) {
+                colDefine.setIsMeasure(false);                
+            }
+            // 该列为指标
+            if (measures != null && measures.containsKey(name)) {
+                colDefine.setIsMeasure(true);
+            }
+            // TODO 设置OrderBy属性
+            // 添加到列属性信息列表中
+            colDefines.add(colDefine);
+        });
+        // 设置平面表列属性信息
+        planeTable.setColDefines(colDefines);
+        
+        // 表的数据定义
+        Map<String, List<String>> data = tableData.getColBaseDatas();
+        List<Map<String, String>> planeTableData = Lists.newArrayList();
+        
+        // 总的数据条数
+        int totalRecordSize = 0;
+        
+        // TODO 优化，对数据进行遍历，并转换
+        if (data != null && data.size() != 0) {
+            // 获取总的数据条数
+            totalRecordSize = getTotalRecordSizeOfPlaneTable(data);
+            // 将以列存储的数据转为以行存储
+            planeTableData = transPlaneTableDataFromColumnBasedToRowBased(totalRecordSize,
+                    data, cube, logicModel);
+        } 
+        // 设置平面表数据信息
+        planeTable.setData(planeTableData);
+        // 设置平面表总的数据条数大小
+        planeTable.getPageInfo().setTotalSize(totalRecordSize);
+        LOG.info("transfer datamodel 2 planeTable cost:"
+                + (System.currentTimeMillis() - current) + "ms!");
         LOG.info("the planeTable info is " + GsonUtils.toJson(planeTable));
     	return planeTable;
     }
+    
+    /**
+     * 获取平面表数据记录条数
+     * @param data
+     * @return
+     */
+    private static int getTotalRecordSizeOfPlaneTable(Map<String, List<String>> data) {
+        int totalRecordSize = 0;
+        // 获取数据条数的大小，所有Key对应的数据条目条数一致
+        for(String key : data.keySet()) {
+            List<String> values = data.get(key);
+            totalRecordSize = values.size();
+            break;
+        }
+        return totalRecordSize;
+    }
+    
+    /**
+     * 将平面表数据由基于列存储方式转为基于行存储方式
+     * @param totalRecordSize 总的数据条数
+     * @param data 数据
+     * @param cube 立方体
+     * @param logicModel 逻辑模型，用于控制转换后的顺序
+     * @return
+     */
+    private static List<Map<String, String>> transPlaneTableDataFromColumnBasedToRowBased(
+            int totalRecordSize, Map<String, List<String>> data, Cube cube, LogicModel logicModel) {
+        // 对于平面表，仅需要纵轴，控制数据展示顺序
+        // 纵轴
+        Item[] cols = logicModel.getColumns();
+        MiniCube miniCube = (MiniCube) cube;
+        // 获取Cube中的维度和指标
+        Map<String, Dimension> dimensions = miniCube.getDimensions();
+        Map<String, Measure> measures = miniCube.getMeasures();
+        // 存储列的key，key = 表明.列名
+        List<String> keys = Lists.newArrayList();
+        for (Item col : cols ) {
+            // 处理维度
+            for (Dimension dimension :dimensions.values()) {
+                if (dimension.getId().equals(col.getOlapElementId())) {
+                    keys.add(dimension.getTableName() + "." + dimension.getTableName());
+                    break;
+                }
+            }
+            // 处理指标
+            for (Measure measure : measures.values()) {
+                if (measure.getId().equals(col.getOlapElementId())) {
+                    keys.add(miniCube.getSource() + "." + measure.getName());
+                    break;
+                }
+            }
+        }
+        List<Map<String, String>> planeTableData = Lists.newArrayList();
+        for (int i = 0; i<totalRecordSize; i++ ) {
+            Map<String, String > value = Maps.newHashMap();
+            for (String key : keys) {
+                value.put(key, data.get(key).get(i));
+            }
+            planeTableData.add(value);
+        }
+        return planeTableData;
+    }
+    
+    
     private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {
         if (rowFields == null) {
             return false;
@@ -583,20 +584,6 @@ public final class DataModelUtils {
         return captions.toArray(new String[0]);
     }
     
-    private static HeadField[] getFirstHeadFieldOfEveryDimension(List<HeadField> rowHeadFields) {
-        List<HeadField> headFields = Lists.newArrayList();
-        if (CollectionUtils.isEmpty (rowHeadFields)) {
-            return new HeadField[]{};
-        }
-        HeadField headField = rowHeadFields.get (0);
-        //for (HeadField headField : rowHeadFields) {
-        if (!CollectionUtils.isEmpty(headField.getNodeList())) {
-            Collections.addAll(headFields, getFirstHeadFieldOfEveryDimension(headField.getNodeList()));
-        }
-        headFields.add(headField);
-        return headFields.toArray(new HeadField[0]);
-    }
-
     /**
      * 
      * @param cube
@@ -755,58 +742,6 @@ public final class DataModelUtils {
         return result;
     }
     
-    /**
-     * 将rowHeadField转为具体的字符串数值
-     * @param rowHeadFields
-     * @return
-     */
-    private static List<List<String>> transRowHeadFields2String(List<HeadField> rowHeadFields) {
-    	// 声明存储对象，外层为列索引，内层为该列对应的数据
-    	List<List<String>> dimRowList = Lists.newArrayList();
-        if (rowHeadFields == null || rowHeadFields.size() == 0) {
-            return null;
-        }
-        List<HeadField> leafFileds = DataModelUtils.getLeafNodeList(rowHeadFields);
-        // hasStoredMap用于记录已经存过的rowField
-        Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
-        SimpleDateFormat src = new SimpleDateFormat("yyyyMMdd");
-        SimpleDateFormat target = new SimpleDateFormat("yyyy-MM-dd");
-        List<HeadField> ancestorFileds = null;
-        for (int j = 0; j < leafFileds.size (); ++j) {
-            HeadField filed = leafFileds.get (j);
-            ancestorFileds = getHeadListOutofHead(filed);
-            Collections.reverse(ancestorFileds);
-            List<String> inxDimRow = Lists.newArrayList();
-            for (int i = 0; i < ancestorFileds.size(); i++) {
-                HeadField headField = ancestorFileds.get(i);
-                if (i == 0 && hasStoredMap.get(headField.getValue()) != null) {
-                  //  continue;
-                } else {
-                    hasStoredMap.put(headField.getValue(), headField);
-                }
-                String caption = headField.getCaption();
-                String value = caption;
-                /**
-                 * 把周的开始caption换成完整的caption
-                 */
-                // TODO 临时方案，需要后续调整
-                if (isTimeDim(headField.getValue())) {
-                    try {
-                        value = target.format(src.parse(caption));
-                    } catch (ParseException e) {
-                    }
-                } else {
-                    value = caption;
-                }
-                inxDimRow.add(value);
-            }
-            if (inxDimRow.isEmpty()) {
-                continue;
-            }
-            dimRowList.add(inxDimRow);
-        }        
-        return dimRowList;
-    }
     /**
      * 
      * @param rowHeadFields
@@ -1364,7 +1299,51 @@ public final class DataModelUtils {
         }
         
     }
-
+    
+    /**
+     * 将平面表DataModel转为csv文件
+     * @param cube
+     * @param dataModel
+     * @return
+     */
+    public static String convertDataModel2CsvStringForPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel) {
+        long begin = System.currentTimeMillis();
+        StringBuilder rs = new StringBuilder();
+        if (dataModel == null) {
+            return rs.toString();
+        }
+        // 获取平面表数据
+        TableData tableData = dataModel.getTableData();
+        // 获取列属性信息
+        List<Column> columns = tableData.getColumns();
+        // 获取数据信息
+        Map<String, List<String>> data = tableData.getColBaseDatas();
+        // 获取总的数据条数
+        int totalRecordSize = getTotalRecordSizeOfPlaneTable(data);
+        // 将列存储数据转为行存储数据
+        List<Map<String, String>> rowBasedDatas = transPlaneTableDataFromColumnBasedToRowBased(totalRecordSize, 
+                data, cube, logicModel);
+        // 构建表头
+        for (Column column : columns) {
+            rs.append(column.caption + ",");
+        }
+        // 替换最后一个","
+        rs.replace(rs.length()-1, rs.length(), "");
+        rs.append("\r\n");
+        //构建数据
+        for (int i = 0; i<totalRecordSize ; i++) {
+            Map<String, String> rowBasedData = rowBasedDatas.get(i);
+            for (Column column : columns) {
+                rs.append(rowBasedData.get(column.name) + ",");
+            }
+            rs.replace(rs.length()-1, rs.length(), "");
+            rs.append("\r\n");
+        }
+        LOG.info("transfer datamodel 2 csv string cost:"
+                + (System.currentTimeMillis() - begin) + "ms!");
+        return rs.toString();
+    }
+    
     /**
      * 将dataModel转化为csv文件
      * @param dataModel

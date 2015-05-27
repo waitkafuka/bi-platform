@@ -23,6 +23,7 @@ import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
@@ -87,11 +88,12 @@ public interface QueryBuildService {
      * 将DataModel模型转为平面表模型
      * @param cube 立方体定义
      * @param dataModel 数据模型
+     * @param logicModel 逻辑模型
      * @param formatModel 格式模型
      * @return 平面表模型
      * @throws PlaneTableParseException
      */
-    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, FormatModel formatModel) throws PlaneTableParseException;
+    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel, FormatModel formatModel) throws PlaneTableParseException;
     /**
      * @param model
      * @param areaId

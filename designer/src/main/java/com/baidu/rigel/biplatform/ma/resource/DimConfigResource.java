@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -470,8 +471,10 @@ public class DimConfigResource extends BaseResource {
         ColumnMetaDefine column = null;
         for (ColumnInfo col : cols) {
             column = new ColumnMetaDefine();
-            column.setName(col.getId());
-            column.setCaption(col.getName());
+//            column.setName(StringUtils.hasText(col.getComment())? col.getName() : col.getId());
+//            column.setCaption(StringUtils.hasText(col.getComment())? col.getComment() :col.getName());
+            column.setName(col.getName());
+            column.setCaption(col.getComment());
             starModel.getFactTable().addColumn(column);
         }
     }

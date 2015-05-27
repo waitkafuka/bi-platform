@@ -1,8 +1,6 @@
 package com.baidu.rigel.biplatform.ma.ds.service;
 
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
-import com.baidu.rigel.biplatform.ma.ds.service.impl.RelationDBConnectionServiceImpl;
-import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
 
 /**
  * 数据源连接服务DataSourceConnectionService的实例化工厂
