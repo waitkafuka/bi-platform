@@ -134,7 +134,8 @@ define([
                 var validateConfig = {
                     'name': /.+/,
                     // 数据库地址
-                    'hostAndPort': new RegExp(hostAndPortRule),
+                    // TODO:修改为更全更合理的校验
+//                    'hostAndPort': new RegExp(hostAndPortRule),
                     'dbInstance': /.+/,
                     'dbUser': /.+/,
                     'dbPwd': /.+/,
