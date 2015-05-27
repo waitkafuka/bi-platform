@@ -71,16 +71,16 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
         	questionModel.setQuerySource("SQL");
         	questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
         	log.info("begin execute query with queryrouter ");
-        	System.out.println("---------------------------------------------------------------------");
+        	log.debug("---------------------------------------------------------------------");
             String temp = new String(questionModelJson);
             temp = DesCoderUtil.encrypt(questionModelJson, systemCode);
-            System.out.println(temp);
+            log.debug(temp);
             questionModelJson = temp;
-            System.out.println(DesCoderUtil.decrypt(temp, systemCode));
-            System.out.println("---------------------------------------------------------------------");
+            log.debug(DesCoderUtil.decrypt(temp));
+            log.debug("---------------------------------------------------------------------");
             
             params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
-            params.put("token", DesCoderUtil.decrypt(configQuestionModel.getDataSourceInfo().getProductLine(), systemCode));
+            params.put("token", DesCoderUtil.encrypt(configQuestionModel.getDataSourceInfo().getProductLine()));
             response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddressByProperty("server.queryrouter.address") + "/queryrouter/query", params);
         } else {
         	questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);

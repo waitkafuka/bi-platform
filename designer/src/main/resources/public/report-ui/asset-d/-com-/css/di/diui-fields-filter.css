@@ -1,0 +1,27 @@
+.table-fields-filter-list {
+    width: 300px;
+    height:300px;
+    border: 1px solid #D0D0D0
+}
+
+.table-fields-filter-list input {
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: 3px;
+}
+
+.table-fields-filter-list label {
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    vertical-align: middle;
+}
+.fields-filter {
+    color: #3C78A2;
+}
+
+.fields-filter .ui-button-hover {
+    background-color: white;
+}

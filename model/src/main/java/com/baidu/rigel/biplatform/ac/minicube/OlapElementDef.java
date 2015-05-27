@@ -81,7 +81,7 @@ public abstract class OlapElementDef implements OlapElement, Serializable, Clone
      */
     public OlapElementDef(String name) {
         this.name = name;
-        // this.uniqueName = MetaNameUtil.makeUniqueName(name);
+//         this.uniqueName = MetaNameUtil.makeUniqueName(name);
     }
 
     public String getId() {

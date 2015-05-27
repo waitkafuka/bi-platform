@@ -459,6 +459,7 @@
         { "clzPath": "di.shared.vui.TabButton", "filePath": "<%= prop.dirInnerVUI %>/rptsave-tab.js" },
         { "clzPath": "di.shared.vui.RangeCalendar", "filePath": "<%= prop.dirInnerVUI %>/range-calendar.js" },
         { "clzPath": "di.shared.vui.CascadeSelect", "filePath": "<%= prop.dirInnerVUI %>/cascade-select.js" },
+        { "clzPath": "di.shared.vui.FieldsFilter", "filePath": "<%= prop.dirInnerVUI %>/fields-filter.js" },
         // xui-ui
         { "clzPath": "xui.ui.EChart", "filePath": "<%= prop.dirXUI %>/e-chart.js" },
         // ecui core
