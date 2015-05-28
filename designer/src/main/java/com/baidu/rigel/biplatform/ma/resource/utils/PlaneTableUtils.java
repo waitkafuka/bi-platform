@@ -43,10 +43,15 @@ public class PlaneTableUtils {
 		String [] tmpValue = value.split(",");
 		List<String> conditionValues = Lists.newArrayList();
 		CollectionUtils.addAll(conditionValues, tmpValue);
-		SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);		
-		sqlCondition.setConditionValues(conditionValues);
-		String expression = sqlCondition.parseToExpression();
-		return ParamValidateUtils.check("expression", expression);
+		SQLCondition[] sqlConditions = SQLCondition.values();
+		for (SQLCondition sqlCondition : sqlConditions) {
+		    if (sqlCondition.getValue().equals(sqlStr)){
+		        sqlCondition.setConditionValues(conditionValues);
+		        String expression = sqlCondition.parseToExpression();
+		        return ParamValidateUtils.check("expression", expression);		        
+		    }
+		}
+		return false;
 	}
 	
 	/**

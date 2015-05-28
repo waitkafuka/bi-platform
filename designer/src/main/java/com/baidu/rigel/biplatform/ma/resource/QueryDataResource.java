@@ -220,6 +220,7 @@ public class QueryDataResource extends BaseResource {
         runtimeModel.getContext().getParams().forEach((k, v) -> {
             params.put(k,v == null ? "" : v.toString());
         }); 
+
 //        DataSourceInfo dsInfo = null;
 //        try {
 //            dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsService.getDsDefine(model.getDsId()), 
@@ -974,6 +975,9 @@ public class QueryDataResource extends BaseResource {
             throw new IllegalStateException("can't get report define");
         }
         
+//        Map<String, Object> tmp = 
+//                QueryUtils.resetContextParam(request, model);
+//        runTimeModel.getContext().getParams().putAll(tmp);
         /**
          * 4. 更新区域本地的上下文
          */
@@ -1042,7 +1046,13 @@ public class QueryDataResource extends BaseResource {
                 }
                 // 设置当前页
                 if (StringUtils.hasLength(request.getParameter("currentPage"))) {
-                    pageInfo.setPageNo(Integer.valueOf(request.getParameter("currentPage")));
+                    pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")));
+                }
+                // 设置总的记录数
+                if (StringUtils.hasLength(request.getParameter("totalRecordCount"))) {
+                    pageInfo.setTotalRecordCount(Integer.valueOf(request.getParameter("totalRecordCount")));
+                } else {
+                    pageInfo.setTotalRecordCount(-1);
                 }
                 result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
             } else {
@@ -1073,7 +1083,7 @@ public class QueryDataResource extends BaseResource {
                 Map<String, Object> data = (Map<String, Object>) rs.getData();
                 if (data.containsKey("head") && data.containsKey("pageInfo") && data.containsKey("data")) {
                     PageInfo page = (PageInfo) data.get("pageInfo");
-                    page.setPageNo(pageInfo.getPageNo());
+                    page.setCurrentPage(pageInfo.getCurrentPage());
                     page.setPageSize(pageInfo.getPageSize());
                     data.put("pageInfo", page);
                     rs.setData(data);                

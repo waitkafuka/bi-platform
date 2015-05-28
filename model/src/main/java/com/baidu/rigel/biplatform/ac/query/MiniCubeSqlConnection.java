@@ -70,6 +70,7 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
             ConfigQuestionModel configQuestionModel = (ConfigQuestionModel)questionModel;
         	questionModel.setQuerySource("SQL");
         	questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
+//        	log.info("quesion model is " + questionModelJson);
         	log.info("begin execute query with queryrouter ");
         	log.debug("---------------------------------------------------------------------");
             String temp = new String(questionModelJson);
