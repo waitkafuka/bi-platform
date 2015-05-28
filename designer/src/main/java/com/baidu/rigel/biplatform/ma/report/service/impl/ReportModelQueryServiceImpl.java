@@ -269,7 +269,10 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         		questionModel.setNeedSummary(false);
         		// 设置分页信息
         		questionModel.setPageInfo(pageInfo);
+        		questionModel.setQuerySource("SQL");
+        		
         	} else {
+        	    questionModel.setQuerySource("TESSERACT");
         		if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
         			questionModel.setNeedSummary(false);
         		} else if (model.getExtendById (action.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
