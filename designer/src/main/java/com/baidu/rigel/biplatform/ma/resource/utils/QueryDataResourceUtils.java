@@ -69,11 +69,15 @@ public class QueryDataResourceUtils {
     @Resource
     private ChartBuildService chartBuildService;
     
-	/**
-	 * 转换结果
-	 * 
-	 * @return
-	 */
+    /**
+     * 转换查询结果
+     * @param runtimeModel 报表运行态模型
+     * @param targetArea 区域
+     * @param result 结果
+     * @param areaContext 区域上下文
+     * @param action QueryAction
+     * @return
+     */
 	public ResponseResult parseQueryResultToResponseResult(ReportRuntimeModel runtimeModel, ExtendArea targetArea,
 			ResultSet result, ExtendAreaContext areaContext, QueryAction action ) {
 		BaseTable baseTable = null;

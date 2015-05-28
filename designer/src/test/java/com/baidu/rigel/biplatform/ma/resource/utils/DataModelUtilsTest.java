@@ -15,6 +15,9 @@
  */
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,12 +28,17 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
+import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 /**
@@ -589,5 +597,61 @@ public class DataModelUtilsTest {
             Assert.assertEquals ("dim,a,0\r\n", str);
         } catch (Exception e) {
         }
+    }
+    
+    /**
+     * 测试平面表转换
+     */
+    @Test
+    public void testParseToPlaneTable() throws Exception {
+//        FormatModel formatModel = new FormatModel();
+//        BufferedReader inDataModel = null;
+//        BufferedReader inCube = null;
+//        BufferedReader inLogicModel = null;
+//        String result = null;
+//        DataModel dataModel = null;
+//        MiniCube cube = null;
+//        LogicModel logicModel = null;
+//        try {
+//            inDataModel = new BufferedReader(new InputStreamReader(new FileInputStream("D:/datamodel_json.txt"), "GBK"));
+//            result = inDataModel.readLine();
+//            if (result != null) {
+//                dataModel = GsonUtils.fromJson(result, DataModel.class);
+//            }
+//            
+//            inCube = new BufferedReader(new InputStreamReader(new FileInputStream("D:/cube_json.txt"), "GBK"));
+//            result = inCube.readLine();
+//            if (result != null) {
+//                ObjectMapper objectMapper = new ObjectMapper();
+//                cube = objectMapper.readValue(result, MiniCube.class);
+//            }
+//            
+//            inLogicModel = new BufferedReader(new InputStreamReader(new FileInputStream("D:/logicmodel_json.txt"), "GBK"));
+//            result = inLogicModel.readLine();
+//            if (result != null) {
+//                logicModel = GsonUtils.fromJson(result, LogicModel.class);
+//            }
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        } finally {
+//            if (inDataModel != null) {
+//                inDataModel.close();
+//            }
+//            if (inCube != null) {
+//                inCube.close();
+//            }
+//            if (inLogicModel != null) {
+//                inLogicModel.close();
+//            }
+//        }
+//        PlaneTable planeTable = DataModelUtils.transDataModel2PlaneTable(cube, dataModel, logicModel, formatModel);
+//        System.out.println(GsonUtils.toJson(planeTable));
+//        
+//        String csvString = DataModelUtils.convertDataModel2CsvStringForPlaneTable(cube, dataModel, logicModel);
+//        System.out.println(csvString);
+//        
+//        System.out.println("=============================");
+//        csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
+//        System.out.println(csvString);
     }
 }
