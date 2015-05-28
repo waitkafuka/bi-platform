@@ -2,6 +2,8 @@ package com.baidu.rigel.biplatform.ma.report.model;
 
 import java.io.Serializable;
 
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
+
 /**
  * 平面表条件类
  * @author yichao.jiang
@@ -27,7 +29,7 @@ public class PlaneTableCondition implements Serializable {
 	/**
 	 * 当前查询条件 
 	 */
-	private String sqlCondition = "=";
+	private SQLConditionType sqlCondition = SQLConditionType.EQ;
 	
 	/**
 	 * 条件默认值
@@ -65,14 +67,14 @@ public class PlaneTableCondition implements Serializable {
 	/**
 	 * @return the condition
 	 */
-	public String getSQLCondition() {
+	public SQLConditionType getSQLCondition() {
 		return sqlCondition;
 	}
 
 	/**
 	 * @param condition the condition to set
 	 */
-	public void setSQLCondition(String sqlCondition) {
+	public void setSQLCondition(SQLConditionType sqlCondition) {
 		this.sqlCondition = sqlCondition;
 	}
 
@@ -94,4 +96,6 @@ public class PlaneTableCondition implements Serializable {
 	public String toString() {
 	    return "[ name: " + this.getName() + ", elementId: " + this.getElementId() + ", condition: " + this.getSQLCondition() + "]";
 	}
+	
+
 }
