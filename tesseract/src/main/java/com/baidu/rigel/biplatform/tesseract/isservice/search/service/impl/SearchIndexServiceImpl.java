@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutorCompletionService;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +56,9 @@ import com.baidu.rigel.biplatform.tesseract.node.service.IndexAndSearchClient;
 import com.baidu.rigel.biplatform.tesseract.node.service.IsNodeService;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.Expression;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryMeasure;
+import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryObject;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.QueryRequest;
+import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.baidu.rigel.biplatform.tesseract.util.QueryRequestUtil;
 import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
@@ -197,22 +200,67 @@ public class SearchIndexServiceImpl implements SearchService {
         throws IndexAndSearchException {
         ExecutorCompletionService<SearchIndexResultSet> completionService = 
             new ExecutorCompletionService<>(taskExecutor);
+        int count=0;
         for (IndexShard idxShard : idxMeta.getIdxShardList()) {
-            	if(idxShard.getIdxState().equals(IndexState.INDEX_UNINIT)){
+            	if(idxShard.getIdxState().equals(IndexState.INDEX_UNINIT) || !shardFitQuery(idxShard,query)){
             	    continue;
             	}
             final Callable<SearchIndexResultSet> queryTask = genQueryTask (query, idxMeta, idxShard);
             completionService.submit(queryTask);
+            count++;
         }
-        List<SearchIndexResultSet> idxShardResultSetList = buildResultListWithTask (completionService, idxMeta);
+        List<SearchIndexResultSet> idxShardResultSetList = buildResultListWithTask (completionService, count);
+        if(CollectionUtils.isEmpty(idxShardResultSetList)){
+        	List<String> measureFieldList = new ArrayList<String>();
+            List<String> dimFieldList = new ArrayList<String>();
+            if (query.getSelect().getQueryMeasures() != null) {
+                for (QueryMeasure qm : query.getSelect().getQueryMeasures()) {
+                    measureFieldList.add(qm.getProperties());
+                }
+            }
+            
+            if (query.getSelect().getQueryProperties() != null) {
+                dimFieldList.addAll(query.getSelect().getQueryProperties());
+            }
+           
+            Meta meta = new Meta((String[]) ArrayUtils.addAll(dimFieldList.toArray(new String[0]), measureFieldList.toArray(new String[0])));
+            SearchIndexResultSet result = new SearchIndexResultSet(meta, 0);
+            idxShardResultSetList.add(result);
+        }
         return idxShardResultSetList;
     }
+    
+	private boolean shardFitQuery(IndexShard idxShard, QueryRequest query) {
+		boolean result = false;
+		if (StringUtils.isEmpty(idxShard.getShardDimBase())) {
+			result = true;
+		} else {
+			if (query != null && query.getWhere() != null
+					&& !CollectionUtils.isEmpty(query.getWhere().getAndList())) {
+				for (Expression ex : query.getWhere().getAndList()) {
+					if (ex.getProperties().equals(idxShard.getShardDimBase())
+							&& !CollectionUtils.isEmpty(ex.getQueryValues())) {
+						for (QueryObject qo : ex.getQueryValues()) {
+							if (!CollectionUtils.isEmpty(CollectionUtils
+									.intersection(
+											idxShard.getShardDimValueSet(),
+											qo.getLeafValues()))) {
+								result = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
 
     private List<SearchIndexResultSet> buildResultListWithTask(
             ExecutorCompletionService<SearchIndexResultSet> completionService,
-            IndexMeta idxMeta) throws IndexAndSearchException {
+            int count) throws IndexAndSearchException {
         List<SearchIndexResultSet> idxShardResultSetList = new ArrayList<SearchIndexResultSet>();
-        for(int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
+        for(int i = 0; i < count; i++) {
             try {
                 idxShardResultSetList.add(completionService.take().get());
             } catch (InterruptedException | ExecutionException e) {
@@ -222,6 +270,8 @@ public class SearchIndexServiceImpl implements SearchService {
                         IndexAndSearchExceptionType.NETWORK_EXCEPTION);
             }
         }
+        
+       
         return idxShardResultSetList;
     }
     
@@ -362,7 +412,7 @@ public class SearchIndexServiceImpl implements SearchService {
         if (idxMeta == null || query == null) {
             return result;
         }
-        Set<String> idxSelect = idxMeta.getSelectList(false);
+        Set<String> idxSelect = this.idxMetaService.getSelectList(idxMeta, false);
         
         if (!CollectionUtils.isEmpty(idxSelect)
                 && idxSelect.containsAll(query.getSelect().getQueryProperties())) {

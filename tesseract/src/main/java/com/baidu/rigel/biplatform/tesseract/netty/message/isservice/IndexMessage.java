@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import com.baidu.rigel.biplatform.ac.util.Md5Util;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShardState;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
 import com.baidu.rigel.biplatform.tesseract.netty.message.MessageHeader;
 import com.baidu.rigel.biplatform.tesseract.resultset.TesseractResultSet;
@@ -47,6 +48,11 @@ public class IndexMessage extends AbstractMessage {
      * 索引服务目录
      */
     private String idxServicePath;
+    
+    /**
+     * 索引分片状态
+     */
+    private IndexShardState idxShardState;
     /**
      * 数据主体
      */
@@ -281,22 +287,19 @@ public class IndexMessage extends AbstractMessage {
         this.idName = idName;
     }
 
-//    /**
-//     * getter method for property measureInfo
-//     * @return the measureInfo
-//     */
-//    public List<String> getMeasureInfo() {
-//        return measureInfo;
-//    }
-//
-//    /**
-//     * setter method for property measureInfo
-//     * @param measureInfo the measureInfo to set
-//     */
-//    public void setMeasureInfo(List<String> measureInfo) {
-//        this.measureInfo = measureInfo;
-//    }
-    
+	/**
+	 * @return the idxShardState
+	 */
+	public IndexShardState getIdxShardState() {
+		return idxShardState;
+	}
+
+	/**
+	 * @param idxShardState the idxShardState to set
+	 */
+	public void setIdxShardState(IndexShardState idxShardState) {
+		this.idxShardState = idxShardState;
+	}    
     
     
 }

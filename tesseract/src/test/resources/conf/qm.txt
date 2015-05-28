@@ -1,0 +1,148 @@
+{
+    "cube": {
+        "dimensions": {
+                "trade": {
+                    "id": "6c48b85a107a4e1174aa8160fbc7c939",
+                    "name": "trade",
+                    "caption": "行业",
+                    "description": null,
+                    "visible": true,
+                    "levels": {
+                        "trade": {"source":"id","captionColumn":"name","parent":"parent_trade_id","type":"PARENT_CHILD","nullParentValue":"0","dimTable":"dim_trade","name":"trade","caption":"行业","visible":true,"primaryKey":"id","factTableColumn":"second_trade_id"}
+                    },
+                    "factTableColumn": "second_trade_id",
+                    "tableName": "dim_trade",
+                    "primaryKey": "trade_id",
+                    "type": "STANDARD_DIMENSION",
+                    "timeDimension": false
+                },
+				"dim_group": {
+                    "id": "89cd6556a22ee7ea9a1a316aaa735ad7",
+                    "name": "dim_group",
+                    "caption": "dim_group",
+                    "visible": true,
+                    "levels": {
+                        "parent_trade_id": {
+                            "id": "3c4f1a0f16f47024044b3788009bae46",
+                            "name": "parent_trade_id",
+                            "caption": "上级行业ID",
+                            "visible": true,
+                            "primaryKey": "id",
+                            "source": "parent_trade_id",
+                            "type": "REGULAR",
+                            "dimTable": "dim_trade",
+                            "hasAllDim": true,
+                            "parentChildLevel": false,
+							"factTableColumn": "second_trade_id"
+                        },
+                        "name": {
+                            "id": "9502bb09b17331597c5e1b6ec151510a",
+                            "name": "name",
+                            "caption": "行业名称",
+                            "visible": true,
+                            "primaryKey": "id",
+                            "source": "name",
+                            "type": "REGULAR",
+                            "dimTable": "dim_trade",
+                            "hasAllDim": true,
+                            "parentChildLevel": false,
+							"factTableColumn": "second_trade_id"
+                        }
+                    },
+                    "type": "GROUP_DIMENSION",
+                    "timeDimension": false,
+					"facttableColumn": "second_trade_id"
+                },
+				"dim_pos": {
+                    "id": "abffbbaeb86b0493baa93d2e49a9d31c",
+                    "name": "dim_pos",
+                    "caption": "岗位",
+                    "visible": true,
+                    "levels": {
+                        "shw": {
+                            "name": "shw",
+                            "caption": "shw",
+                            "visible": true,
+                            "callbackUrl": "http://cq01-testing-ecom-sfcrm03.vm.baidu.com:8999/callback/pfplat/callbackmock.action",
+                            "callbackParams": {"appId":"57","parentPosIds":"36440","levelToRoot":"3","needCsPosition":"1"},
+                            "refreshInterval": 0,
+							"factTableColumn": "post_id",
+                            "type": "CALL_BACK"
+                        }
+                    },
+                    "facttableColumn": "post_id",
+                    "type": "STANDARD_DIMENSION",
+                    "timeDimension": false
+                }
+                
+            },
+        "measures": {
+            "csm": {
+                "aggregator": "SUM",
+                "type": "COMMON",
+                "define": "csm",
+                "id": "20b4d905341006afe09450cc71238ec6",
+                "name": "csm",
+                "caption": "点击消费",
+                "visible": true
+            },           
+            "cash": {
+                "aggregator": "SUM",
+                "type": "COMMON",
+                "define": "cash",
+                "id": "760df1dd7d3d63b3679fa50e6bad64fc",
+                "name": "cash",
+                "caption": "现金",
+                "visible": true
+            }
+        },
+        "enableCache": true,
+        "mutilple": false,
+        "id": "05a26a5f79adf6c8b2283e4628d577cf",
+        "name": "data_fc_bd_qs_day_detail",
+        "visible": true,
+		"source": "data_fc_bd_qs_day_detail",
+		"productLine": "zongheng"
+    },
+    "dataSourceInfo": {
+        "dataSourceKey": "test_test",
+        "hosts": [
+            "10.48.29.75:8801"
+        ],
+        "username": "crm",
+        "password": "DoxDHHOjfol/2WxpaXAXgQ==",
+        "instanceName": "zongheng_db03",
+        "isDBProxy": true,
+        "dataBase": "MYSQL",
+        "productLine": "zongheng",
+		"jdbcUrls": ["jdbc:mysql://10.48.29.75:8801/zongheng_db03?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&noAccessToProcedureBodies=true"],
+		"dataSourceType":"SQL"
+    },
+    "axisMetas": {
+        "COLUMN": {
+            "queryMeasures": [
+                "cash",
+                "csm"
+            ],
+            "crossjoinDims":[
+                
+            ],
+            "axisType": "COLUMN"
+        },
+        "ROW": {
+            "crossjoinDims":["dim_pos","dim_group"],
+            "axisType": "ROW"
+        },
+        "FILTER": {
+            "axisType": "FILTER"
+        }
+    },
+    "queryConditions": {
+		"dim_group":
+			{"queryDataNodes":[{"uniqueName":"[dim_group].[7]","show":false,"expand":true}],"metaName":"dim_group","metaType":"Dimension"}
+		
+	},
+    "cubeId": "05a26a5f79adf6c8b2283e4628d577cf",
+    "useCache": true,
+    "needSummary": false
+}

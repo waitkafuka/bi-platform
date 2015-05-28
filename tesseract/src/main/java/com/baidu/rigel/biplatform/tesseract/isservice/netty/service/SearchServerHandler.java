@@ -125,8 +125,9 @@ public class SearchServerHandler extends AbstractChannelInboundHandler {
         try {
             is = searcherManager.acquire();
             QueryWrapperFilter filter = new QueryWrapperFilter(queryAll);
-            CachingWrapperFilter cachingFilter =new CachingWrapperFilter (filter);
             logger.info("cost " + (System.currentTimeMillis() - current) + " in trans QUERY --> filter:");
+            CachingWrapperFilter cachingFilter =new CachingWrapperFilter (filter);
+            logger.info("cost " + (System.currentTimeMillis() - current) + " in trans QUERY --> cachedFilter:");
             
             long gcurrent = System.currentTimeMillis();
             Set<String> groupBy = new HashSet<>();

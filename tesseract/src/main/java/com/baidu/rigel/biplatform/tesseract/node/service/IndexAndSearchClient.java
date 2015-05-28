@@ -338,17 +338,35 @@ public class IndexAndSearchClient {
         }
         
 		NettyAction action = null;
-		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
-			action = NettyAction.NETTY_ACTION_UPDATE;
-		} else if (idxAction.equals(IndexAction.INDEX_MOD)) {
-			action = NettyAction.NETTY_ACTION_MOD;
-		} else if (idxAction.equals(IndexAction.INDEX_MERGE)
-				    || idxAction.equals(IndexAction.INDEX_INIT)
-				    || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
-			action = NettyAction.NETTY_ACTION_INITINDEX;
-		} else {
+//		if (idxAction.equals(IndexAction.INDEX_UPDATE)) {
+//			action = NettyAction.NETTY_ACTION_UPDATE;
+//		} else if (idxAction.equals(IndexAction.INDEX_MOD)) {
+//			action = NettyAction.NETTY_ACTION_MOD;
+//		} else if (idxAction.equals(IndexAction.INDEX_MERGE)
+//				    || idxAction.equals(IndexAction.INDEX_INIT)
+//				    || idxAction.equals(IndexAction.INDEX_INIT_LIMITED)) {
+//			action = NettyAction.NETTY_ACTION_INITINDEX;
+//		} else {
+//			action = NettyAction.NETTY_ACTION_INDEX;
+//		}
+//        MessageHeader messageHeader = new MessageHeader(action, data.toString());
+//        IndexMessage message = new IndexMessage(messageHeader, data);
+//        message.setIdxPath(idxShard.getAbsoluteFilePath(node.getIndexBaseDir()));
+//        message.setIdxServicePath(idxShard.getAbsoluteIdxFilePath(node.getIndexBaseDir()));
+//        message.setBlockSize(indexConfig.getIdxShardSize());
+//        message.setIdName(idName);
+//        message.setLastPiece(lastPiece);
+		
+		if(idxAction.equals(IndexAction.INDEX_INDEX) || idxAction.equals(IndexAction.INDEX_MERGE)){
 			action = NettyAction.NETTY_ACTION_INDEX;
+		}else if(idxAction.equals(IndexAction.INDEX_MOD)){
+			action = NettyAction.NETTY_ACTION_MOD;
 		}
+		
+		
+		
+		
+		
         MessageHeader messageHeader = new MessageHeader(action, data.toString());
         IndexMessage message = new IndexMessage(messageHeader, data);
         message.setIdxPath(idxShard.getAbsoluteFilePath(node.getIndexBaseDir()));
@@ -356,6 +374,10 @@ public class IndexAndSearchClient {
         message.setBlockSize(indexConfig.getIdxShardSize());
         message.setIdName(idName);
         message.setLastPiece(lastPiece);
+        /**
+         * 增加索引分片状态 Jin 20150513
+         */
+        message.setIdxShardState(idxShard.getIdxShardState());
 
         logger.info("ready to send index message:" + message.toString());
         AbstractMessage ret = null;

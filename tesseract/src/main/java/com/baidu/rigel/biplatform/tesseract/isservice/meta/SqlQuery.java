@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +52,11 @@ public class SqlQuery {
 	 * idName
 	 */
 	private String idName;
+	
+	/**
+	 * 初始化的最大id;
+	 */
+	private BigDecimal initMaxId;
 	/**
 	 * 查询的表
 	 */
@@ -213,6 +219,8 @@ public class SqlQuery {
 	public void setOrderBy(Set<String> orderBy) {
 		this.orderBy = orderBy;
 	}
+	
+	
 
 	/**
 	 * 
@@ -354,6 +362,22 @@ public class SqlQuery {
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
+
+	/**
+	 * @return the initMaxId
+	 */
+	public BigDecimal getInitMaxId() {
+		return initMaxId;
+	}
+
+	/**
+	 * @param initMaxId the initMaxId to set
+	 */
+	public void setInitMaxId(BigDecimal initMaxId) {
+		this.initMaxId = initMaxId;
+	}
+    
+    
 
     
 }

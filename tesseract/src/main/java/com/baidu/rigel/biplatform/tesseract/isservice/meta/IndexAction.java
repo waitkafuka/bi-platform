@@ -27,6 +27,10 @@ public enum IndexAction {
      */
     INDEX_INIT("INDEX_INIT",Boolean.TRUE),
     /**
+     * 建索引
+     */
+    INDEX_INDEX("INDEX_INDEX"),
+    /**
      * INDEX_NORMAL
      */
     INDEX_NORMAL("INDEX_NORMAL"),
