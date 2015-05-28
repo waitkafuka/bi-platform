@@ -91,7 +91,7 @@ public class QueryRequestBuilder {
         int start = 0;
         int size = -1;
         if (pageInfo != null) {
-            start = pageInfo.getPageNo() * pageInfo.getPageSize();
+            start = pageInfo.getPageSize() * pageInfo.getPageSize();
             size = pageInfo.getPageSize();
         }
         request.setLimit(new Limit(start, size));

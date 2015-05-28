@@ -389,7 +389,7 @@ public final class DataModelUtils {
         // 设置平面表数据信息
         planeTable.setData(planeTableData);
         // 设置平面表总的数据条数大小
-        planeTable.getPageInfo().setTotalSize(totalRecordSize);
+        planeTable.getPageInfo().setTotalPage (totalRecordSize);
         LOG.info("transfer datamodel 2 planeTable cost:"
                 + (System.currentTimeMillis() - current) + "ms!");
         LOG.info("the planeTable info is " + GsonUtils.toJson(planeTable));

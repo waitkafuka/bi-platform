@@ -1042,7 +1042,7 @@ public class QueryDataResource extends BaseResource {
                 }
                 // 设置当前页
                 if (StringUtils.hasLength(request.getParameter("currentPage"))) {
-                    pageInfo.setPageNo(Integer.valueOf(request.getParameter("currentPage")));
+                    pageInfo.setPageSize(Integer.valueOf(request.getParameter("currentPage")));
                 }
                 result = reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo, securityKey);
             } else {
@@ -1073,7 +1073,7 @@ public class QueryDataResource extends BaseResource {
                 Map<String, Object> data = (Map<String, Object>) rs.getData();
                 if (data.containsKey("head") && data.containsKey("pageInfo") && data.containsKey("data")) {
                     PageInfo page = (PageInfo) data.get("pageInfo");
-                    page.setPageNo(pageInfo.getPageNo());
+//                    page.setPageNo(pageInfo.getPageNo());
                     page.setPageSize(pageInfo.getPageSize());
                     data.put("pageInfo", page);
                     rs.setData(data);                
