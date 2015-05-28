@@ -266,14 +266,16 @@ public class DataSourceGroupServiceImpl implements DataSourceGroupService {
         DataSourceGroupDefine dsG = null;
         try {
             dsG = (DataSourceGroupDefine) SerializationUtils.deserialize(content);
-            // 获取使用hashCode作为名称的文件名
-            String fileNameUsingHashCode = DataSourceUtil.getDsGroupFileNameUsingHashCode(dsG); 
-            // 兼容已有数据源组
-            // 如果该文件已经使用HashCode，则忽略；否则，则需将源文件删除，写入使用HashCode的文件
-            if (!fullFileName.equals(fileNameUsingHashCode)) {
-                // 删除源文件
-                fileService.rm(fullFileName);
-                fileService.write(fileNameUsingHashCode, SerializationUtils.serialize(dsG));
+            if (dsG != null) {
+                // 获取使用hashCode作为名称的文件名
+                String fileNameUsingHashCode = DataSourceUtil.getDsGroupFileNameUsingHashCode(dsG); 
+                // 兼容已有数据源组
+                // 如果该文件已经使用HashCode，则忽略；否则，则需将源文件删除，写入使用HashCode的文件
+                if (!fullFileName.equals(fileNameUsingHashCode)) {
+                    // 删除源文件
+                    fileService.rm(fullFileName);
+                    fileService.write(fileNameUsingHashCode, SerializationUtils.serialize(dsG));
+                }                
             }
             // // TODO dirty solution
             // // 如果仅有一个数据源，将原有数据源组的id赋值给当前活动的数据源
