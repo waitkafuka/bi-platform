@@ -27,20 +27,13 @@ define(['url'], function (Url) {
                 sqlCondition: '='
 
             };
-            success(data);
-//            $.ajax({
-//                url: Url.getFieldFilterInfo(that.get('reportId'), that.get('compId'), itemId),
-//                type: 'get',
-//                success: function (data) {
-//                    var data = {
-//                        name: 'test',
-//                        defaultValue: '默认值',
-//                        sqlCondition: '='
-//
-//                    };
-//                    success(data.data);
-//                }
-//            });
+            $.ajax({
+                url: Url.getFieldFilterInfo(that.get('reportId'), that.get('compId'), itemId),
+                type: 'get',
+                success: function (data) {
+                    success(data.data);
+                }
+            });
         },
         saveFieldFilterInfo: function (fieldId, data, success) {
             var that = this;

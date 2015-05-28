@@ -552,7 +552,8 @@ $namespace('di.shared.ui');
             {
                 componentId: this.$di('getId').split('.')[1],
                 currentPage: currentPage,
-                pageSize: this._uPager ? this._uPager.getPageSize() : void 0
+                pageSize: this._uPager ? this._uPager.getPageSize() : void 0,
+                totalRecordCount: this._uPager.getTotal()
             }
         );
     };
