@@ -91,7 +91,7 @@ public class QueryRequestBuilder {
         int start = 0;
         int size = -1;
         if (pageInfo != null) {
-            start = pageInfo.getPageNo() * pageInfo.getPageSize();
+            start = pageInfo.getCurrentPage() * pageInfo.getPageSize();
             size = pageInfo.getPageSize();
         }
         request.setLimit(new Limit(start, size));
@@ -132,9 +132,12 @@ public class QueryRequestBuilder {
                         expression = new Expression(node.getQuerySource());
                         expressions.put(node.getQuerySource(), expression);
                     }
-                    expression.getQueryValues()
-                        .add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
-                    request.getWhere ().getAndList ().add (expression);
+                    // FIXED ByMe: david.wang callback维度查询数据重复计算
+                    if (CollectionUtils.isEmpty (node.getChildren ())) {
+                        expression.getQueryValues()
+                            .add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
+                        request.getWhere ().getAndList ().add (expression);
+                    } 
                     final MemberNodeTree parent = node.getParent ();
                     if (parent != null && StringUtils.isNotBlank (parent.getQuerySource ())
                         && !parent.getQuerySource ().equals (node.getQuerySource ())) {

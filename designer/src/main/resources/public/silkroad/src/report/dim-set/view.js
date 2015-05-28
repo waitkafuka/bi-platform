@@ -284,8 +284,8 @@ define(
                     fieldList = model.getFieldListByRelationTable(tableId);
                     for(var i = 0, len = fieldList.length; i < len; i++) {
                         html.push(
-                            '<option value="', fieldList[i].id, '">',
-                            fieldList[i].name,
+                            '<option value="', fieldList[i].name, '">',
+                            fieldList[i].comment,
                             '</option>'
                         );
                     }

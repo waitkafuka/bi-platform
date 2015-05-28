@@ -76,7 +76,10 @@ $namespace('di.shared.model');
             DATA: URL.fn('PLANE_TABLE_DATA'),
             CHECK: URL.fn('PLANE_TABLE_CHECK'),
             SELECT: URL.fn('PLANE_TABLE_SELECT'),
-            OFFLINE_DOWNLOAD: URL.fn('PLANE_TABLE_OFFLINE_DOWNLOAD')
+            OFFLINE_DOWNLOAD: URL.fn('PLANE_TABLE_OFFLINE_DOWNLOAD'),
+            GET_FIELDSLIST: URL.fn('PLANE_TABLE_GET_FIELDSLIST'),
+            RESET_FIELDS: URL.fn('PLANE_TABLE_RESET_FIELDS'),
+            SORT: URL.fn('PLANE_TABLE_SORT')
         }
     );
 
@@ -89,7 +92,10 @@ $namespace('di.shared.model');
             DATA: 'DI_PLANE_TABLE_MODEL_DATA_' + getUID(),
             CHECK: 'DI_PLANE_TABLE_MODEL_CHECK_' + getUID(),
             SELECT: 'DI_PLANE_TABLE_MODEL_SELECT_' + getUID(),
-            OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID()
+            OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID(),
+            GET_FIELDSLIST: 'DI_PLANE_TABLE_MODEL_GET_FIELDSLIST_' + getUID(),
+            RESET_FIELDS: 'DI_PLANE_TABLE_MODEL_RESET_FIELDS_' + getUID(),
+            SORT: 'DI_PLANE_TABLE_MODEL_SORT_' + getUID()
         }
     );
 
@@ -122,6 +128,15 @@ $namespace('di.shared.model');
                     // 参数名未定
                     { mailTo: options.args.param.email }
                 );
+            },
+            GET_FIELDSLIST: function (options) {
+                return this._fCommonParamGetter(options.args.param);
+            },
+            RESET_FIELDS: function (options) {
+                return this._fCommonParamGetter(options.args.param);
+            },
+            SORT: function (options) {
+                return this._fCommonParamGetter(options.args.param);
             }
         }
     );
@@ -137,7 +152,10 @@ $namespace('di.shared.model');
             LINK_DRILL: doComplete,
             SELECT: doComplete,
             CHECK: doComplete,
-            OFFLINE_DOWNLOAD: doComplete
+            OFFLINE_DOWNLOAD: doComplete,
+            GET_FIELDSLIST: doComplete,
+            RESET_FIELDS: doComplete,
+            SORT: doComplete
         }
     );
 
@@ -156,7 +174,8 @@ $namespace('di.shared.model');
         {
             DATA: doParse,
             CHECK: function (data) { return data; },
-            SELECT: function (data) { return data; }
+            SELECT: function (data) { return data; },
+            SORT: doParse
         }
     );
 

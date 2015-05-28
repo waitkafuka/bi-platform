@@ -550,4 +550,49 @@ public class DataSourceGroupServiceImplTest {
     	Assert.assertNull(dsGService.getDataSourceDefine(dbID, "notexists"));
     	
     }
+    
+    /**
+     * 测试使用中文存储数据源名称
+     */
+    @Test
+    public void testDsNameWithChinese() throws Exception {
+        String securityKey = "0000000000000000";
+        // 数据库连接基本信息
+        String dsID = "数据源ID";
+        String dsName = "数据源名称";
+        
+        // 创建数据源定义对象
+        DataSourceDefine dataSourceDefine = new DataSourceDefine();
+        dataSourceDefine.setId(dsID);
+        dataSourceDefine.setName(dsName);
+        dataSourceDefine.setProductLine("productLine");
+        
+        // 定义数据源组
+        String dsGID = "数据源组ID";
+        String dsGName = "数据源组名称";
+        DataSourceGroupDefine dsG = new DataSourceGroupDefine();
+        dsG.addDataSourceDefine(dataSourceDefine);
+        dsG.setActiveDataSource(dataSourceDefine);
+        dsG.setId(dsGID);
+        dsG.setProductLine("productLine");
+        dsG.setName(dsGName);
+        
+        // 保证当前目录下没有上述数据源组
+        Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
+                new String[] {"test_abc", "newName_newName"});
+        Mockito.when(dsService.isValidateConn(Mockito.anyObject(), Mockito.anyString())).thenReturn(true);
+        dsG = dsGService.saveOrUpdateDataSourceGroup(dsG, securityKey);
+        
+        // 假定已经写入上述数据源组
+        Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
+                new String[] {"test_abc", "newName_newName", "数据源组ID_数据组名称"});
+        // 假定可以读取数据源组对象
+        Mockito.when(fileService.read(Mockito.anyString())).thenReturn(
+                SerializationUtils.serialize(dsG));
+        DataSourceGroupDefine dsGNew = dsGService.getDataSourceGroupDefine("数据源组ID");
+        
+        Assert.assertEquals(dsG.getName(), dsGNew.getName());
+        Assert.assertEquals(dsG.getId(), dsGNew.getId());
+        Assert.assertEquals(dsG.getProductLine(), dsGNew.getProductLine());
+    }
 }

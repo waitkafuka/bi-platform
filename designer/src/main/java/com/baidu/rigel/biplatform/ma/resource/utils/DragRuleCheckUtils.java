@@ -61,10 +61,10 @@ public final class DragRuleCheckUtils {
             return false;
         }
         // modify by jiangyichao at 2015-05-18, 对于平面表列轴上可以拖动指标和维度
-        if (area.getType().equals(ExtendAreaType.PLANE_TABLE)) {
-        	return position == PositionType.Y || position == PositionType.CAND_IND
-        			||position == PositionType.X || position == PositionType.S 
-                    || position == PositionType.CAND_DIM;
+        if (area.getType() != null && area.getType().equals(ExtendAreaType.PLANE_TABLE)) {
+            return position == PositionType.Y || position == PositionType.CAND_IND
+                    ||position == PositionType.X || position == PositionType.S 
+                    || position == PositionType.CAND_DIM;            
         } else {
         	/**
         	 * 指标的检查

@@ -98,6 +98,9 @@ $namespace('di.shared.ui');
 
         // 分页
         this._uPager = this.$di('vuiCreate', 'pager');
+
+        // 字段过滤
+        this._ufieldsFilterBtn = this.$di('vuiCreate', 'fieldsFilter');
     };
 
     /**
@@ -112,7 +115,8 @@ $namespace('di.shared.ui');
         var table = this._uTable;
         var downloadBtn = this._uDownloadBtn;
         var downloadExcelBtn = this._uDownloadExcelBtn;
-        var offlineDownloadBtn = this._uOfflineDownloadBtn;  
+        var offlineDownloadBtn = this._uOfflineDownloadBtn;
+        var fieldsFilterBtn = this._ufieldsFilterBtn;
         var pager = this._uPager;
 
         // 事件绑定
@@ -148,6 +152,24 @@ $namespace('di.shared.ui');
             ['sync.error.SELECT', this.$handleRowAsync, this, true],
             ['sync.complete.SELECT', this.$syncEnable, this, 'SELECT']
         );
+        model.attach(
+            ['sync.preprocess.GET_FIELDSLIST', this.$syncDisable, this, 'GET_FIELDSLIST'],
+            ['sync.result.GET_FIELDSLIST', this.$handleGetFieldsListSuccess, this],
+            ['sync.error.GET_FIELDSLIST', this.$handleDataError, this],
+            ['sync.complete.GET_FIELDSLIST', this.$syncEnable, this, 'GET_FIELDSLIST']
+        );
+        model.attach(
+            ['sync.preprocess.RESET_FIELDS', this.$syncDisable, this, 'RESET_FIELDS'],
+            ['sync.result.RESET_FIELDS', this.$handleSubmitFieldsFilterSucess, this],
+            ['sync.error.RESET_FIELDS', this.$handleDataError, this],
+            ['sync.complete.RESET_FIELDS', this.$syncEnable, this, 'RESET_FIELDS']
+        );
+//        model.attach(
+//            ['sync.preprocess.SORT', this.$syncDisable, this, 'SORT'],
+//            ['sync.result.SORT', this.$renderMain, this],
+//            ['sync.error.SORT', this.$handleDataError, this],
+//            ['sync.complete.SORT', this.$syncEnable, this, 'SORT']
+//        );
 
         model.init();
 
@@ -172,13 +194,19 @@ $namespace('di.shared.ui');
         offlineDownloadBtn && (
             offlineDownloadBtn.attach('confirm', this.$handleOfflineDownload, this)
         );
-
+        fieldsFilterBtn && (
+            fieldsFilterBtn.attach('getFieldsList', this.$handleGetFieldsList, this)
+        );
+        fieldsFilterBtn && (
+            fieldsFilterBtn.attach('submitFieldsFilter', this.$handleSubmitFieldsFilter, this)
+        );
         foreachDo(
             [
                 table,
                 downloadBtn,
                 offlineDownloadBtn,
-                pager
+                pager,
+                fieldsFilterBtn
             ],
             'init'
         );
@@ -196,7 +224,8 @@ $namespace('di.shared.ui');
                 this._uPager,
                 this._uDownloadBtn,
                 this._uDownloadExcelBtn,
-                this._uOfflineDownloadBtn
+                this._uOfflineDownloadBtn,
+                this._ufieldsFilterBtn
             ],
             'dispose'
         );
@@ -223,9 +252,10 @@ $namespace('di.shared.ui');
 
         options = assign({ DI_querySessionClear: true }, options);
         if (this._uPager) {
+            options.currentPage = this._uPager.getPage();
             options.pageSize = this._uPager.getPageSize();
         }
-
+        options.componentId = this.$di('getId').split('.')[1];
         // 请求后台
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
     };
@@ -240,7 +270,8 @@ $namespace('di.shared.ui');
         foreachDo(
             [
                 this._uTable,
-                this._uPager
+                this._uPager,
+                this._ufieldsFilterBtn
             ],
             'setData'
         );
@@ -260,7 +291,8 @@ $namespace('di.shared.ui');
                 this._uPager,
                 this._uDownloadBtn,
                 this._uDownloadExcelBtn,
-                this._uOfflineDownloadBtn               
+                this._uOfflineDownloadBtn,
+                this._ufieldsFilterBtn
             ],
             'diShow'
         );
@@ -310,7 +342,8 @@ $namespace('di.shared.ui');
                 this._uPager,
                 this._uDownloadBtn,
                 this._uDownloadExcelBtn,
-                this._uOfflineDownloadBtn
+                this._uOfflineDownloadBtn,
+                this._ufieldsFilterBtn
             ],
             'enable'
         );
@@ -329,7 +362,8 @@ $namespace('di.shared.ui');
                 this._uPager,
                 this._uDownloadBtn,
                 this._uDownloadExcelBtn,
-                this._uOfflineDownloadBtn
+                this._uOfflineDownloadBtn,
+                this._ufieldsFilterBtn
             ],
             'disable'
         );
@@ -470,11 +504,16 @@ $namespace('di.shared.ui');
      * 
      * @protected
      */
-    DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey) {
+    DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey, sortType) {
         this.$sync(
             this.getModel(),
-            'DATA',
-            { orderbyParamKey: orderbyParamKey }
+            'SORT',
+            {
+                componentId: this.$di('getId').split('.')[1],
+                orderbyParamKey: orderbyParamKey,
+                sortType: sortType
+
+            }
         );
     };
 
@@ -510,12 +549,15 @@ $namespace('di.shared.ui');
         this.$sync(
             this.getModel(),
             'DATA',
-            { 
+            {
+                componentId: this.$di('getId').split('.')[1],
                 currentPage: currentPage,
-                pageSize: this._uPager ? this._uPager.getPageSize() : void 0
+                pageSize: this._uPager ? this._uPager.getPageSize() : void 0,
+                totalRecordCount: this._uPager.getTotal()
             }
         );
     };
+
 
     /**
      * 页数改变
@@ -607,7 +649,8 @@ $namespace('di.shared.ui');
                 this._uPager,
                 this._uDownloadBtn,
                 this._uDownloadExcelBtn,
-                this._uOfflineDownloadBtn
+                this._uOfflineDownloadBtn,
+                this._ufieldsFilterBtn
             ],
             'diShow'
         ); 
@@ -638,4 +681,38 @@ $namespace('di.shared.ui');
         DIALOG.alert(LANG.SAD_FACE + LANG.OFFLINE_DOWNLOAD_FAIL);
     };
 
+
+
+    DI_PLANE_TABLE_CLASS.$handleGetFieldsList = function (option) {
+        this.$sync(
+            this.getModel(),
+            'GET_FIELDSLIST',
+            {
+                componentId: this.$di('getId').split('.')[1]
+            },
+            null,
+            {
+                callback: option.callback,
+                fieldsFilter: option.fieldsFilter
+            }
+        );
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleGetFieldsListSuccess = function(status, ejsonObj, options) {
+        options.args.callback.call(options.args.fieldsFilter, ejsonObj.data);
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldsFilter = function (selectedFields) {
+        this.$sync(
+            this.getModel(),
+            'RESET_FIELDS',
+            {
+                componentId: this.$di('getId').split('.')[1],
+                selectedFields: selectedFields
+            }
+        );
+    };
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldsFilterSuccess = function (status, ejsonObj, options) {
+        this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
+    };
 })();

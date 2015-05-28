@@ -25,9 +25,11 @@ import org.slf4j.LoggerFactory;
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
+import com.baidu.rigel.biplatform.ac.util.DesCoderUtil;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
@@ -39,49 +41,76 @@ import com.baidu.rigel.biplatform.ac.util.ResponseResult;
  *
  */
 public class MiniCubeSqlConnection implements MiniCubeConnection {
-
+    
     private Logger log = LoggerFactory.getLogger(this.getClass());
     /**
      * sqlDataSourceInfo
      */
     private SqlDataSourceInfo sqlDataSourceInfo;
-
+    
     /**
      * construct with
      * 
-     * @param cube cube对象
-     * @param dataSourceInfo 数据源信息
+     * @param cube
+     *            cube对象
+     * @param dataSourceInfo
+     *            数据源信息
      */
     protected MiniCubeSqlConnection(SqlDataSourceInfo dataSourceInfo) {
         this.sqlDataSourceInfo = dataSourceInfo;
     }
-
+    
     @Override
     public DataModel query(QuestionModel questionModel) throws MiniCubeQueryException {
         long current = System.currentTimeMillis();
         Map<String, String> params = new HashMap<String, String>();
-
-        params.put(QUESTIONMODEL_PARAM_KEY, AnswerCoreConstant.GSON.toJson(questionModel));
-        long curr = System.currentTimeMillis ();
-        log.info("begin execute query with tesseract ");
-        String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params);
-        log.info("execute query with tesseract cost {} ms", (System.currentTimeMillis () - curr));
-        ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
+        long curr = System.currentTimeMillis();
+        String response = null;
+        String questionModelJson = null;
+        if (ConfigInfoUtils.getServerAddressByProperty("server.queryrouter.address") != null) {
+            String systemCode = "designer";
+            ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+            questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
+            log.info("begin execute query with queryrouter ");
+            log.debug("---------------------------------------------------------------------");
+            String temp = new String(questionModelJson);
+            temp = DesCoderUtil.encrypt(questionModelJson, systemCode);
+            log.debug(temp);
+            questionModelJson = temp;
+            log.debug(DesCoderUtil.decrypt(temp));
+            log.debug("---------------------------------------------------------------------");
+            params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
+            params.put("token",
+                    DesCoderUtil.encrypt(configQuestionModel.getDataSourceInfo().getProductLine()));
+            response = HttpRequest.sendPost(
+                    ConfigInfoUtils.getServerAddressByProperty("server.queryrouter.address")
+                            + "/queryrouter/query", params);
+        } else {
+            questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
+            log.info("begin execute query with tesseract ");
+            params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
+            response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params);
+        }
+        
+        log.info("execute query with tesseract/queryrouter cost {} ms",
+                (System.currentTimeMillis() - curr));
+        ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response,
+                ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
             String dataModelJson = responseResult.getData().replace("\\", "");
             dataModelJson = dataModelJson.substring(1, dataModelJson.length() - 1);
             DataModel dataModel = JsonUnSeriallizableUtils.dataModelFromJson(dataModelJson);
             StringBuilder sb = new StringBuilder();
-//            sb.append("execute query questionModel:").append(questionModel).append(" cost:")
+            // sb.append("execute query questionModel:").append(questionModel).append(" cost:")
             sb.append("execute query questionModel cost:")
-                .append(System.currentTimeMillis() - current).append("ms");
+                    .append(System.currentTimeMillis() - current).append("ms");
             log.info(sb.toString());
-            dataModel.setOthers (responseResult.getStatusInfo ());
+            dataModel.setOthers(responseResult.getStatusInfo());
             return dataModel;
         }
         throw new MiniCubeQueryException("query occur error,msg:" + responseResult.getStatusInfo());
     }
-
+    
     /**
      * getter method for property sqlDataSourceInfo
      * 
@@ -90,11 +119,11 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
     public SqlDataSourceInfo getSqlDataSourceInfo() {
         return sqlDataSourceInfo;
     }
-
+    
     @Override
     public void close() {
         // 发起远程清理cube池子的请求 close的话，close当前connection的cube
         throw new UnsupportedOperationException("not implement yet.");
     }
-
+    
 }

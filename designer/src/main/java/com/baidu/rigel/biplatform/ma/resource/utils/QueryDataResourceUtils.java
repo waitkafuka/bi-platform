@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
@@ -66,26 +69,34 @@ public class QueryDataResourceUtils {
     @Resource
     private ChartBuildService chartBuildService;
     
-	/**
-	 * 转换结果
-	 * 
-	 * @return
-	 */
+    /**
+     * 转换查询结果
+     * @param runtimeModel 报表运行态模型
+     * @param targetArea 区域
+     * @param result 结果
+     * @param areaContext 区域上下文
+     * @param action QueryAction
+     * @return
+     */
 	public ResponseResult parseQueryResultToResponseResult(ReportRuntimeModel runtimeModel, ExtendArea targetArea,
 			ResultSet result, ExtendAreaContext areaContext, QueryAction action ) {
 		BaseTable baseTable = null;
 		ReportDesignModel designModel = runtimeModel.getModel();
 
-		Cube cube = designModel.getSchema().getCubes()
-				.get(targetArea.getCubeId());
+		Cube cube = designModel.getSchema().getCubes().get(targetArea.getCubeId());
 
 		if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
 			// 获取平面表
 			try {
-				baseTable = queryBuildService.parseToPlaneTable(cube,
-						result.getDataModel(), targetArea.getFormatModel());
-				Map<String, Object> resultMap = Maps.newHashMap();
-				resultMap.put("planeTable", (PlaneTable) baseTable);
+                baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
+                                targetArea.getFormatModel());
+                Map<String, Object> resultMap = Maps.newHashMap();
+                PlaneTable planeTable = (PlaneTable) baseTable;
+                if (planeTable != null) {
+                    resultMap.put("head", planeTable.getColDefines());
+                    resultMap.put("data", planeTable.getData());
+                    resultMap.put("pageInfo", planeTable.getPageInfo());
+                }
 				return ResourceUtils.getResult("Success", "Fail", resultMap);
 			} catch (PlaneTableParseException e) {
 				LOG.info(e.getMessage(), e);
@@ -95,8 +106,7 @@ public class QueryDataResourceUtils {
 		} else {
 			// 获取pivotTable
 			try {
-				baseTable = queryBuildService.parseToPivotTable(cube,
-						result.getDataModel());
+				baseTable = queryBuildService.parseToPivotTable(cube, result.getDataModel());
 				// 对多维表格进行处理
 				return this.handlePivotTable((PivotTable) baseTable, runtimeModel, 
 						targetArea, areaContext, action, cube);
@@ -153,7 +163,9 @@ public class QueryDataResourceUtils {
             if (logicModel.getRows ().length >= 2) {
                 Map<String, String> root =  genRootDimCaption(pivotTable, logicModel, 
                         areaContext.getParams(), cube);
-                    areaContext.setCurBreadCrumPath(root);
+                List<Map<String, String>> tmp = Lists.newArrayList ();
+                tmp.add (root);
+                    areaContext.setCurBreadCrumPath(tmp);
     //                    resultMap.put("mainDimNodes", dims);
                         // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                     if (!root.get("uniqName").toLowerCase().contains("all")) {
@@ -163,10 +175,10 @@ public class QueryDataResourceUtils {
                     }
                     mainDims.add(root);
                     Collections.reverse(mainDims);
-                    areaContext.setCurBreadCrumPath(root);
+                    areaContext.setCurBreadCrumPath(mainDims);
                     resultMap.put("mainDimNodes", mainDims);
                 } else {
-                    areaContext.setCurBreadCrumPath (Maps.newHashMap ());
+                    areaContext.setCurBreadCrumPath (Lists.newArrayList ());
                     resultMap.remove ("mainDimNodes");
 //                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
@@ -206,11 +218,22 @@ public class QueryDataResourceUtils {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
-            final String uniqueName = params.get (item.getOlapElementId ()).toString ();
-            
+            String uniqueName = params.get (item.getOlapElementId ()).toString ();
+            Dimension dim = cube.getDimensions ().get (item.getOlapElementId ());
+            // for callback
+            if (!MetaNameUtil.isUniqueName (uniqueName) && dim.getType () == DimensionType.CALLBACK) {
+                uniqueName = "[" + dim.getName () + "].[" + uniqueName + "]";
+            }
             root.put("uniqName", genRootUniqueName (uniqueName));
         } else {
-            String uniqueName = cube.getDimensions ().get (item.getOlapElementId ()).getAllMember ().getUniqueName ();
+            Dimension dimension = cube.getDimensions ().get (item.getOlapElementId ());
+            // TODO 修正错误的维度关联关系
+            if (dimension.getType () == DimensionType.GROUP_DIMENSION) {
+                dimension.getLevels ().forEach ((k, v) -> {
+                    v.setDimension (dimension);
+                });
+            }
+            String uniqueName = dimension.getAllMember ().getUniqueName ();
             root.put ("uniqName", genRootUniqueName (uniqueName));
         }
         RowHeadField rowHeadField = table.getRowHeadFields().get(0).get(0);

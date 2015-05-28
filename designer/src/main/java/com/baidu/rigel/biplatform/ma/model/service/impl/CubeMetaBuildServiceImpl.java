@@ -23,6 +23,7 @@ import javax.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderService;
@@ -145,8 +146,10 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
     private void addColumnToTableMeta(FactTableMetaDefine tableMeta, List<ColumnInfo> cols) {
         for (ColumnInfo col : cols) {
             ColumnMetaDefine column = new ColumnMetaDefine();
-            column.setName(col.getId());
-            column.setCaption(col.getName());
+            column.setName(col.getName());
+            column.setCaption(col.getComment());
+//            column.setName(StringUtils.hasText(col.getComment())? col.getName() : col.getId());
+//            column.setCaption(StringUtils.hasText(col.getComment())? col.getComment() :col.getName());
             tableMeta.addColumn(column);
         }
     }

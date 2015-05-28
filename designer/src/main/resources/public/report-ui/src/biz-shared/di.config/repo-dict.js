@@ -363,6 +363,15 @@
                     "caption": "离线下载按钮"
                 },
                 {
+                    "clzKey" : "FIELDS_FILTER",
+                    "clzPath" : "di.shared.vui.FieldsFilter",
+                    "clzType" : "VUI",
+                    "adapterMethod" : {
+                        "create" : "xuiCreate",
+                        "dispose" : "xuiDispose"
+                    }
+                },
+                {
                     "clzKey": "SWITCH_BUTTON",
                     "clzPath": "ecui.ui.SwitchButton",
                     "clzType": "VUI",

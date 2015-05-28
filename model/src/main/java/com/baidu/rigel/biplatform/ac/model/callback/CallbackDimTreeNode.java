@@ -50,6 +50,27 @@ public class CallbackDimTreeNode implements CallbackValue {
     private List<CallbackDimTreeNode> children;
     
     /**
+     * 是否包含孩子节点
+     */
+    private boolean hasChildren;
+    
+    
+    
+    /**
+     * @return the hasChildren
+     */
+    public boolean isHasChildren() {
+        return hasChildren;
+    }
+
+    /**
+     * @param hasChildren the hasChildren to set
+     */
+    public void setHasChildren(boolean hasChildren) {
+        this.hasChildren = hasChildren;
+    }
+
+    /**
      * @return the id
      */
     public String getId() {
@@ -109,7 +130,7 @@ public class CallbackDimTreeNode implements CallbackValue {
      * @return the hasChildern
      */
     public boolean isHasChildern() {
-        return this.children != null && this.children.size() > 0;
+        return (this.children != null && this.children.size() > 0) || this.hasChildren;
     }
 
     @Override

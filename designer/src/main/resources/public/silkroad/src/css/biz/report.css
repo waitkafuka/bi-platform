@@ -985,3 +985,44 @@
     height: 20px;
 }
 /*@end*/
+
+/**
+ * @name                      :字段设置
+ * @author                    :lizhantong
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :数据格式设置模块
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.silkroad-data-field-filter-set {
+    margin-top: 20px;
+    width: 550px;
+}
+.silkroad-data-field-filter-set .field-id {
+    float: left;
+    width: 150px;
+    height: 25px;
+    line-height: 25px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+.silkroad-data-field-filter-set .field-name {
+    display: inline-block;
+    width: 120px;
+    height: 25px;
+    line-height: 25px;
+}
+.silkroad-data-field-filter-set select {
+    display: inline-block;
+    width: 100px;
+    height: 30px;
+}
+.silkroad-data-field-filter-set .default-value {
+    display: inline-block;
+    width: 120px;
+    height: 25px;
+    line-height: 25px;
+}
+/*@end*/

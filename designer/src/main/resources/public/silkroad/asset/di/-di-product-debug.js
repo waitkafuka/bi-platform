@@ -93,6 +93,7 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/dropkick/dropkick.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/cascade-select.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/echart-topn.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/fields-filter.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/hidden-input.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/multi-checkbox.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/offline-download.js" type="text/javascript"><\/script>' );

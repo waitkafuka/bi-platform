@@ -1,0 +1,23 @@
+<!--
+数据例子：
+var demoData = {
+    type: '',
+    name: '',
+    defaultValue: '',
+    sqlContidion: ''
+};
+-->
+<div class="silkroad-data-field-filter-set">
+    <span class="field-id" data-id="{{$data.id}}" title="{{$data.text}}">{{$data.text}}</span>
+    <input class="field-name" value="{{$data.name}}" placeholder="名称"/>
+    <select class="condition">
+        <option value="=" {{if $data.sqlCondition=='='}}selected=selected {{/if}}> = </option>
+        <option value="<>" {{if $data.sqlCondition=='<>'}}selected=selected {{/if}}> <> </option>
+        <option value="<=" {{if $data.sqlCondition=='<='}}selected=selected {{/if}}> <= </option>
+        <option value="<" {{if $data.sqlCondition=='<'}}selected=selected {{/if}}> < </option>
+        <option value=">" {{if $data.sqlCondition=='>'}}selected=selected {{/if}}> > </option>
+        <option value="in" {{if $data.sqlCondition=='in'}}selected=selected {{/if}}> in </option>
+        <option value="between and" {{if $data.sqlCondition=='between and'}}selected=selected {{/if}}> between and </option>
+    </select>
+    <input type="text" class="default-value" value="{{$data.defaultValue}}" placeholder="默认值"/>
+</div>

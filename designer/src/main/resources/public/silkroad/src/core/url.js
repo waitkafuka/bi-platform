@@ -900,6 +900,11 @@ define(function () {
             + '/textAlign';
     };
 
+    Url.getFieldFilterInfo = function (reportId, compId, itemId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/item/' + itemId + '/condition';
+    };
+
     /**
      * 报表新建（编辑）-edit-setting
      * 获取双坐标轴设置信息
