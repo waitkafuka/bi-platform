@@ -38,14 +38,14 @@ public class PageInfo implements Serializable {
     public static final int DEFAULT_PAGE_SIZE = 500;
     
     /**
-     * totalSize 总记录数
+     * totalRecordCount 总记录数
      */
-    private int totalSize;
+    private int totalRecordCount;
     
     /**
-     * pageNo 当前第几页
+     * currentPage 当前第几页
      */
-    private int pageNo;
+    private int currentPage;
     
     /**
      * totalPage 总页数
@@ -58,35 +58,35 @@ public class PageInfo implements Serializable {
     private int pageSize = PageInfo.DEFAULT_PAGE_SIZE;
 
     /**
-     * getter method for property totalSize
-     * @return the totalSize
+     * getter method for property totalRecordCount
+     * @return the totalRecordCount
      */
-    public int getTotalSize() {
-        return totalSize;
+    public int getTotalRecordCount() {
+        return totalRecordCount;
     }
 
     /**
-     * setter method for property totalSize
-     * @param totalSize the totalSize to set
+     * setter method for property totalRecordCount
+     * @param totalRecordCount the totalRecordCount to set
      */
-    public void setTotalSize(int totalSize) {
-        this.totalSize = totalSize;
+    public void setTotalRecordCount(int totalRecordCount) {
+        this.totalRecordCount = totalRecordCount;
     }
 
     /**
-     * getter method for property pageNo
-     * @return the pageNo
+     * getter method for property currentPage
+     * @return the currentPage
      */
-    public int getPageNo() {
-        return pageNo;
+    public int getCurrentPage() {
+        return currentPage;
     }
 
     /**
-     * setter method for property pageNo
-     * @param pageNo the pageNo to set
+     * setter method for property currentPage
+     * @param currentPage the currentPage to set
      */
-    public void setPageNo(int pageNo) {
-        this.pageNo = pageNo;
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
     }
 
     /**
@@ -126,7 +126,7 @@ public class PageInfo implements Serializable {
      */
     @Override
     public String toString() {
-        return "PageInfo [totalSize=" + totalSize + ", pageNo=" + pageNo + ", totalPage="
+        return "PageInfo [totalRecordCount=" + totalRecordCount + ", currentPage=" + currentPage + ", totalPage="
             + totalPage + ", pageSize=" + pageSize + "]";
     }
     
