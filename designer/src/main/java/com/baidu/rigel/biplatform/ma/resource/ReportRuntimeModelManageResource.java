@@ -15,7 +15,8 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
-import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -30,11 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -77,14 +81,50 @@ public class ReportRuntimeModelManageResource {
             result.setStatusInfo ("未能获取正确的报表定义");
             return result;
         }
+        
+        // 获取扩展区域
+        ExtendArea extendArea = runTimeModel.getModel().getExtendById(areaId);
+        // 逻辑模型
+        LogicModel logicModel = extendArea.getLogicModel();
+        Item[] items = logicModel.getItems();
         String cubeId = runTimeModel.getModel ().getExtendById (areaId).getCubeId ();
         Cube cube = runTimeModel.getModel ().getSchema ().getCubes ().get (cubeId);
-        LinkedHashMap<String, String> cols = new LinkedHashMap<String, String> ();
+        List<Map<String, String>> cols = Lists.newArrayList();
+        
+        // 设置维度，如果在LogicModel中则设置为选中，否则不选中；指标处理类似
         cube.getDimensions ().forEach ((k, dim) -> {
-            cols.put (dim.getCaption (), dim.getId());
+            Map<String, String> map = Maps.newHashMap();
+            boolean isInLogicModel = false;
+            map.put("id", dim.getId());
+            map.put("name", dim.getCaption());
+            for (Item item : items) {
+                if (item.getOlapElementId().equals(dim.getId())) {
+                    map.put("selected", "true");
+                    isInLogicModel = true;
+                    break;
+                }
+            }
+            if (!isInLogicModel) {
+                map.put("selected", "false");
+            }
+            cols.add(map);
         });
         cube.getMeasures ().forEach ((k, m) -> {
-            cols.put (m.getCaption (), m.getId());
+            Map<String, String> map = Maps.newHashMap();
+            boolean isInLogicModel = false;
+            map.put("id", m.getId());
+            map.put("name", m.getCaption());
+            for (Item item : items) {
+                if (item.getOlapElementId().equals(m.getId())) {
+                    map.put("selected", "true");
+                    isInLogicModel = true;
+                    break;
+                }
+            }
+            if (!isInLogicModel) {
+                map.put("selected", "false");
+            }
+            cols.add(map);
         });
         result.setStatus (0);
         result.setData (cols);

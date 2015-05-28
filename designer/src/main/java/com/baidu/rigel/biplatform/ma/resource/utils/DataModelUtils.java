@@ -54,6 +54,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTableColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -375,7 +376,7 @@ public final class DataModelUtils {
         Map<String, List<String>> data = tableData.getColBaseDatas();
         List<Map<String, String>> planeTableData = Lists.newArrayList();
         
-        // 总的数据条数
+        // 本次查询总的数据条数
         int totalRecordSize = 0;
         
         // TODO 优化，对数据进行遍历，并转换
@@ -389,7 +390,7 @@ public final class DataModelUtils {
         // 设置平面表数据信息
         planeTable.setData(planeTableData);
         // 设置平面表总的数据条数大小
-        planeTable.getPageInfo().setTotalSize(totalRecordSize);
+        planeTable.getPageInfo().setTotalRecordCount(dataModel.getRecordSize());
         LOG.info("transfer datamodel 2 planeTable cost:"
                 + (System.currentTimeMillis() - current) + "ms!");
         LOG.info("the planeTable info is " + GsonUtils.toJson(planeTable));
@@ -440,8 +441,21 @@ public final class DataModelUtils {
                         }
                         colDefine.setAlign(align);
                     }
-                    boolean isMeasure = isMeasure(name, cube);
-                    colDefine.setIsMeasure(isMeasure(name, cube));
+                    boolean isMeasure = isMeasure(column.tableName + "." + column.name, cube);
+                    if (isMeasure) {
+                        if (dataFormat != null) {
+                            String formatStr = dataFormat.get("defaultFormat");
+                            if (!StringUtils.isEmpty(dataFormat.get(name))) {
+                                formatStr = dataFormat.get(name);
+                            }
+                            if (!StringUtils.isEmpty(formatStr)) {
+                                colDefine.setFormat(formatStr);
+                            }
+                        } 
+                    } else {
+                        colDefine.setFormat(null);
+                    }
+                    colDefine.setIsMeasure(isMeasure);
                     // TODO 设置OrderBy属性
                     // 添加到列属性信息列表中
                     colDefines.add(colDefine); 
@@ -460,30 +474,38 @@ public final class DataModelUtils {
      */
     private static boolean isMeasure(String name, Cube cube) {
         MiniCube miniCube = (MiniCube) cube;
+        String colName = name.split("\\.")[1];
+        Cube cubeNew = QueryUtils.transformCube(miniCube);
+        return cubeNew.getMeasures().get(colName) != null;
         // 获取Cube中的维度信息
-        Map<String, Dimension> dimensions = miniCube.getDimensions();
+//        Map<String, Dimension> dimensions = miniCube.getDimensions();
         // 获取Cube中的指标信息
-        Map<String, Measure> measures = miniCube.getMeasures();
-        if (dimensions != null) {
-            for(Dimension dimension : dimensions.values()) {
-                if (dimension.getType() == DimensionType.TIME_DIMENSION 
-                        && dimension.getFacttableColumn().equals(name)) {
-                    return false;
-                }
-                if(dimension.getName().equals(name)) {
-                    return false;
-                }
-            }
-        } 
-        
-        if (measures != null) {
-            for (Measure measure : measures.values()) {
-                if (measure.getName().equals(name)) {
-                    return true;
-                }
-            }
-        }
-        return true;
+//        Map<String, Measure> measures = miniCube.getMeasures();
+//        // 事实表名称
+//        String factTableName = ((MiniCube) cube).getSource();
+//        if (dimensions != null) {
+//            for(Dimension dimension : dimensions.values()) {
+//                
+//                if (dimension.isTimeDimension() 
+//                        && ((factTableName + "." + dimension.getFacttableColumn()).equals(name))) {
+//                    return false;
+//                }
+//                Level l = dimension.getLevels().values().toArray(new Level[0])[0];
+//                
+//                if((l.getDimTable() + "." + l.getName()).equals(name)) {
+//                    return false;
+//                }
+//            }
+//        } 
+//        
+//        if (measures != null) {
+//            for (Measure measure : measures.values()) {
+//                if ((factTableName +"." + measure.getName()).equals(name)) {
+//                    return true;
+//                }
+//            }
+//        }
+//        return true;
     }
     /**
      * 获取平面表数据记录条数
@@ -549,7 +571,7 @@ public final class DataModelUtils {
                 if (dimension.getType() == DimensionType.TIME_DIMENSION && 
                         dimension.getId().equals(col.getOlapElementId())) {
                     // 如果为时间维度，转换成事实表的时间字段
-                    keys.add(dimension.getFacttableColumn());
+                    keys.add(((MiniCube) cube).getSource() + "." + dimension.getFacttableColumn());
                     finished = true;
                     break;
 //                    dimensionName = oneDimensionSource.getFactTableColumn();

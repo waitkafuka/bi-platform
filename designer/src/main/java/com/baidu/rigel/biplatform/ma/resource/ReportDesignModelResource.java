@@ -1453,7 +1453,7 @@ public class ReportDesignModelResource extends BaseResource {
      * add by jiangyichao at 2015-05-18, 平面表条件设置或修改
      * @return
      */
-    @RequestMapping(value = "/{id}/{elementId}/planeTableConditions", method = {RequestMethod.POST})
+    @RequestMapping(value = "/{id}/extend_area/{area_id}/item/{elementId}/condition", method = {RequestMethod.POST})
     public ResponseResult addOrModifyPlaneTableCondition(@PathVariable("id") String reportId, 
     		@PathVariable("elementId") String elementId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
@@ -1472,27 +1472,31 @@ public class ReportDesignModelResource extends BaseResource {
             return result;
         }
         // 获取平面表条件
-        String conditionStr = request.getParameter("conditions");
-        // TODO 是否修改
-        if (!StringUtils.isEmpty(conditionStr)) {
-            Map<String, PlaneTableCondition> conditions = GsonUtils.fromJson(request.getParameter("conditions"),
-                    new TypeToken<Map<String, PlaneTableCondition>>(){}.getType());
-            // 检查平面表条件值是否合理
-            for (PlaneTableCondition tmpCondition : conditions.values()) {
-            	if (!PlaneTableUtils.checkSQLCondition(tmpCondition.getSQLCondition(), tmpCondition.getDefaultValue())) {
-            		result.setStatus(1);
-            		result.setStatusInfo("条件参数设置不合理，请检查！");
-            		return result;
-            	}
+        String name = request.getParameter("name");
+        String sqlCondition = request.getParameter("sqlCondition");
+        String defaultValue = request.getParameter("defaultValue");
+        if (!StringUtils.isEmpty(name) && !StringUtils.isEmpty(sqlCondition) && !StringUtils.isEmpty(defaultValue)) {
+            // 检查输入值是否合理
+            if (!PlaneTableUtils.checkSQLCondition(sqlCondition, defaultValue)) {
+                result.setStatus(1);
+                result.setStatusInfo("条件参数设置不合理，请检查！");
+                return result;
             }
-            
+            PlaneTableCondition condition = new PlaneTableCondition();
+            condition.setElementId(elementId);
+            condition.setName(name);
+            condition.setSQLCondition(sqlCondition);
+            condition.setDefaultValue(defaultValue);
             // 获取原有报表的平面表条件信息
-            Map<String, PlaneTableCondition> oldConditions = model.getPlaneTableConditions();
+            Map<String, PlaneTableCondition> conditions = model.getPlaneTableConditions();
             // 替换原有条件
-            oldConditions.put(elementId, conditions.get(elementId));
+            conditions.put(elementId, condition);
             model.setPlaneTableConditions(conditions);
+        } else {
+            result.setStatus(1);
+            result.setStatusInfo("部分参数为空，请补充完整");
+            return result;
         }
-        
         /**
          * 配置端，在修改Item以后，需要重新初始化上下文
          */
@@ -1515,7 +1519,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{id}/{elementId}/planeTableConditions", method = {RequestMethod.GET})
+    @RequestMapping(value = "/{id}/extend_area/{area_id}/item/{elementId}/condition", method = {RequestMethod.GET})
     public ResponseResult getPlaneTableConditions(@PathVariable("id") String reportId, 
     		@PathVariable("elementId") String elementId, HttpServletRequest request ) {
         ResponseResult result = new ResponseResult();
