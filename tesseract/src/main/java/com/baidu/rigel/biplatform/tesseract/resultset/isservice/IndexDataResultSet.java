@@ -45,6 +45,17 @@ public class IndexDataResultSet implements
      * 当前结果集
      */
     private IndexDataResultRecord currRecord;
+    
+    
+    /**
+     * 构造函数
+     * @param meta 元数据
+     */
+    public IndexDataResultSet(Meta meta){
+    	super();
+		this.meta = meta;
+		this.dataList = Collections.synchronizedList(new ArrayList<IndexDataResultRecord>());
+    }
 
     /**
      * 构造函数

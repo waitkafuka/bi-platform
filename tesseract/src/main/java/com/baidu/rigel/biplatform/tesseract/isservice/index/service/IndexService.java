@@ -22,6 +22,8 @@ import java.util.Map;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.tesseract.isservice.exception.IndexAndSearchException;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexAction;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexMeta;
 
 /**
  * 
@@ -66,4 +68,20 @@ public interface IndexService {
      * @param succList 成功的nodeKeyList
      */
     void setCopyIndexTaskResult(String shardName,List<String> succList) ;
+    
+    
+	/**
+	 * doIndexByIndexAction
+	 * 
+	 * @param indexMeta
+	 *            索引元数据
+	 * @param idxAction
+	 *            索引动作
+	 * @param dataMap
+	 *            修订数据时，提供修订的起止范围
+	 * @throws Exception
+	 *             有可能抛出异常
+	 */
+	void doIndexByIndexAction(IndexMeta indexMeta, IndexAction idxAction,
+			Map<String, BigDecimal> dataMap) throws Exception;
 }

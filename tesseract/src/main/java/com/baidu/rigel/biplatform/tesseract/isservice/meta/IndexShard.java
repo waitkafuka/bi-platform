@@ -18,12 +18,14 @@ package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
-import com.baidu.rigel.biplatform.tesseract.util.IndexFileSystemConstants;
 import com.baidu.rigel.biplatform.tesseract.util.StringTools;
 
 /**
@@ -97,10 +99,20 @@ public class IndexShard implements Serializable {
      */
     private long diskSize;
     
+    
+    private String shardDimBase;
+    
+    private Set<String> shardDimValueSet;
+    
     /**
      * 索引状态
      */
     private IndexState idxState = IndexState.INDEX_UNINIT;
+    
+    /**
+     * 索引分片状态（数据状态）
+     */
+    private IndexShardState idxShardState=IndexShardState.INDEXSHARD_UNINIT;
     
     /**
      * 构造函数
@@ -482,6 +494,53 @@ public class IndexShard implements Serializable {
 		}
 		return true;
 	}
+
+	/**
+	 * @return the idxShardState
+	 */
+	public IndexShardState getIdxShardState() {
+		return idxShardState;
+	}
+
+	/**
+	 * @param idxShardState the idxShardState to set
+	 */
+	public void setIdxShardState(IndexShardState idxShardState) {
+		this.idxShardState = idxShardState;
+	}
+
+	/**
+	 * @return the shardDimBase
+	 */
+	public String getShardDimBase() {
+		return shardDimBase;
+	}
+
+	/**
+	 * @param shardDimBase the shardDimBase to set
+	 */
+	public void setShardDimBase(String shardDimBase) {
+		this.shardDimBase = shardDimBase;
+	}
+
+	/**
+	 * @return the shardDimValueSet
+	 */
+	public Set<String> getShardDimValueSet() {
+		if(CollectionUtils.isEmpty(this.shardDimValueSet)){
+			this.shardDimValueSet=new HashSet<String>();
+		}
+		return shardDimValueSet;
+	}
+
+	/**
+	 * @param shardDimValueSet the shardDimValueSet to set
+	 */
+	public void setShardDimValueSet(Set<String> shardDimValueSet) {
+		this.shardDimValueSet = shardDimValueSet;
+	}
+	
+	
 
 	
     

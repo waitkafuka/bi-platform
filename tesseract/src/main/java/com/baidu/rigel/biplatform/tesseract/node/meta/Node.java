@@ -349,7 +349,16 @@ public class Node extends StoreMeta implements Serializable {
         return indexBaseDir;
     }
     
+    
+    
     /**
+	 * @param indexBaseDir the indexBaseDir to set
+	 */
+	public void setIndexBaseDir(String indexBaseDir) {
+		this.indexBaseDir = indexBaseDir;
+	}
+
+	/**
      * getter method for property blockCapacity
      * 
      * @return the blockCapacity

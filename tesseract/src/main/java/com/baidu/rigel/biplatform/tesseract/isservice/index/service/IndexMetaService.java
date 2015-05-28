@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.tesseract.isservice.index.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -164,5 +165,19 @@ public interface IndexMetaService {
      * @return boolean
      */
     boolean isIndexShardFull(IndexShard idxShard);
+    
+    /**
+     * 
+     * getSelectList 抽取索引元数据中的指标与维度字段，生成集合
+     * @param needMerge 是否需要合并
+     * @return Set<String> 如果指标与维度为空，则反回空集，而不是null
+     */
+    Set<String> getSelectList(IndexMeta indexMeta,boolean needMerge) ;
+    
+    /**
+     * 解锁
+     * @param idxMeta
+     */
+    void unLockIndexMeta(IndexMeta idxMeta);
     
 }

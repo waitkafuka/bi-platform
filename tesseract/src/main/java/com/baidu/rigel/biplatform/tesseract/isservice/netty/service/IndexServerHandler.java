@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexWriterFactory;
+import com.baidu.rigel.biplatform.tesseract.isservice.meta.IndexShardState;
 import com.baidu.rigel.biplatform.tesseract.isservice.search.service.IndexSearcherFactory;
 import com.baidu.rigel.biplatform.tesseract.netty.AbstractChannelInboundHandler;
 import com.baidu.rigel.biplatform.tesseract.netty.message.AbstractMessage;
@@ -51,7 +52,6 @@ import com.baidu.rigel.biplatform.tesseract.netty.message.isservice.IndexMessage
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.IndexDataResultSet;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
-
 import com.baidu.rigel.biplatform.tesseract.util.FileUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 
@@ -129,6 +129,79 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         }
     }
     
+	private IndexWriter prepareIndexEnv(IndexMessage indexMsg) throws Exception {
+		File idxFile = new File(indexMsg.getIdxPath());
+		File idxServiceFile = new File(indexMsg.getIdxServicePath());
+
+		if (indexMsg.getIdxShardState().equals(
+				IndexShardState.INDEXSHARD_UNINIT)
+				|| indexMsg.getIdxShardState().equals(
+						IndexShardState.INDEXSHARD_INDEXED)) {
+			// 1、uninit 分建分片 ; indexed 在已有数据上做更新 ;
+
+			// 清理写索引路径
+			FileUtils.deleteFile(idxFile);
+			if (!indexMsg.getIdxShardState().equals(
+					IndexShardState.INDEXSHARD_UNINIT)
+					&& idxServiceFile.exists()) {
+				// 索引更新\修订，复制索引目录
+				FileUtils.copyFolder(indexMsg.getIdxServicePath(),
+						indexMsg.getIdxPath());
+			}
+
+		}
+		IndexWriter idxWriter = IndexWriterFactory.getIndexWriter (indexMsg.getIdxPath ());
+		return idxWriter;
+
+	}
+	
+	
+	private IndexDataResultSet getDataProcess(IndexMessage indexMsg,IndexWriter idxWriter) throws Exception {
+		IndexDataResultSet data = null;
+
+		if (indexMsg.getMessageHeader().getAction()
+				.equals(NettyAction.NETTY_ACTION_MOD)) {
+			// 索引修订
+			// S1:查找索引中存在的数据
+			List<IndexDataResultRecord> dataQ = ((IndexDataResultSet) indexMsg
+					.getDataBody()).getDataList();
+			Iterator<IndexDataResultRecord> it = dataQ.iterator();
+
+			List<IndexDataResultRecord> dataProcess = new ArrayList<IndexDataResultRecord>();
+			List<Query> deleteQueryList = new ArrayList<Query>();
+			while (it.hasNext()) {
+				IndexDataResultRecord currRecord = it.next();
+				// 查询
+				Query query = existInIndex(currRecord, indexMsg.getIdxPath(),
+						indexMsg.getIdName(),
+						((IndexDataResultSet) indexMsg.getDataBody()).getMeta());
+				if (query != null) {
+					// 如果存在，则从队列中删除
+					dataProcess.add(currRecord);
+					it.remove();
+					deleteQueryList.add(query);
+				}
+			}
+			// S2:删除旧数据
+			if (!CollectionUtils.isEmpty(deleteQueryList)) {
+				idxWriter
+						.deleteDocuments(deleteQueryList.toArray(new Query[0]));
+				idxWriter.commit();
+			}
+			// S3:设置需要重建索引的数据
+			data = new IndexDataResultSet(
+					((IndexDataResultSet) indexMsg.getDataBody()).getMeta(),
+					dataProcess.size());
+			data.setDataList(dataProcess);
+		}
+
+		if (data == null) {
+			data = (IndexDataResultSet) indexMsg.getDataBody();
+		}
+		
+		return data;
+	}
+    
     /*
      * (non-Javadoc)
      * 
@@ -145,78 +218,16 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                 "IndexServerHandler"));
         IndexMessage indexMsg = (IndexMessage) msg;
         // 从消息中获取索引路径
-        File idxFile = new File (indexMsg.getIdxPath ());
-        File idxServiceFile = new File (indexMsg.getIdxServicePath ());
-        
-        if (indexMsg.getMessageHeader ().getAction ()
-                .equals (NettyAction.NETTY_ACTION_UPDATE)
-                || indexMsg.getMessageHeader ().getAction ()
-                        .equals (NettyAction.NETTY_ACTION_INITINDEX)
-                || indexMsg.getMessageHeader ().getAction ()
-                        .equals (NettyAction.NETTY_ACTION_MOD)) {
-            // 如果是索引更新、初始化、修订过程
-            // 清理写索引路径
-            FileUtils.deleteFile (idxFile);
-            if ((indexMsg.getMessageHeader ().getAction ()
-                    .equals (NettyAction.NETTY_ACTION_UPDATE) || indexMsg
-                    .getMessageHeader ().getAction ()
-                    .equals (NettyAction.NETTY_ACTION_MOD))
-                    && idxServiceFile.exists ()) {
-                // 索引更新\修订，复制索引目录
-                FileUtils.copyFolder (indexMsg.getIdxServicePath (),
-                        indexMsg.getIdxPath ());
-            }
-        }
-        
-        IndexWriter idxWriter = IndexWriterFactory.getIndexWriter (indexMsg.getIdxPath ());
-        IndexDataResultSet data = null;
-        
-        if (indexMsg.getMessageHeader ().getAction ().equals (NettyAction.NETTY_ACTION_MOD)) {
-            // 索引修订
-            // S1:查找索引中存在的数据
-            // Queue<ResultRecord>
-            // dataQ=((SearchResultSet)indexMsg.getDataBody()).getResultQ();
-            List<IndexDataResultRecord> dataQ = ((IndexDataResultSet) indexMsg
-                    .getDataBody ()).getDataList ();
-            Iterator<IndexDataResultRecord> it = dataQ.iterator ();
-            
-            List<IndexDataResultRecord> dataProcess = new ArrayList<IndexDataResultRecord> ();
-            List<Query> deleteQueryList = new ArrayList<Query> ();
-            while (it.hasNext ()) {
-            	IndexDataResultRecord currRecord = it.next ();
-                // 查询
-                Query query = existInIndex (currRecord, indexMsg.getIdxPath (), indexMsg.getIdName (),
-                        ((IndexDataResultSet) indexMsg.getDataBody ()).getMeta ());
-                if (query != null) {
-                    // 如果存在，则从队列中删除
-                    dataProcess.add (currRecord);
-                    it.remove ();
-                    deleteQueryList.add (query);
-                }
-            }
-            // S2:删除旧数据
-            if (!CollectionUtils.isEmpty (deleteQueryList)) {
-                idxWriter.deleteDocuments (deleteQueryList
-                        .toArray (new Query[0]));
-                idxWriter.commit ();
-            }
-            // S3:设置需要重建索引的数据
-            data = new IndexDataResultSet (
-                    ((IndexDataResultSet) indexMsg.getDataBody ()).getMeta (),
-                    dataProcess.size ());
-            data.setDataList(dataProcess);
-        }
-        
-        if (data == null) {
-            data = (IndexDataResultSet) indexMsg.getDataBody ();
-        }
+       
+        IndexWriter idxWriter = prepareIndexEnv(indexMsg);
+        IndexDataResultSet data = this.getDataProcess(indexMsg, idxWriter);
         
         logger.info (String.format (
                 LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
                 "IndexServerHandler", "Begin to index "
                         + (data == null ? 0 : data.size ()) + " data"));
         long currDiskSize = FileUtils.getDiskSize (indexMsg.getIdxPath ());
-        BigDecimal currMaxId = null;
+        BigDecimal currMaxId = BigDecimal.ZERO;
         // 读取数据建索引
         
         long count=0;
@@ -225,7 +236,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
                 Document doc = new Document ();
                 String[] fieldNameArr = data.getFieldNameArray ();
                 for (String select : fieldNameArr) {
-                    if (select.equals (indexMsg.getIdName ())) {
+                    if (select.equals (indexMsg.getIdName ()) && currMaxId.longValue() < data.getBigDecimal (select).longValue()) {
                         currMaxId = data.getBigDecimal (select);
                     }
                     
@@ -276,6 +287,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         indexFeedbackMsg.setIdxPath (feedBackIndexFilePath);
         indexFeedbackMsg.setIdName (indexMsg.getIdName ());
         indexFeedbackMsg.setMaxId (currMaxId);
+        indexFeedbackMsg.setIdxShardState(IndexShardState.INDEXSHARD_INDEXING);
         
         logger.info (String.format (
                 LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,

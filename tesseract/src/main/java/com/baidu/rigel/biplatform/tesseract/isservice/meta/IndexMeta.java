@@ -98,6 +98,11 @@ public class IndexMeta extends StoreMeta implements Serializable {
      */
     private Set<String> measureSet;
     
+    /**
+     * 分片维度
+     */
+    private String shardDimBase;
+    
     // /**
     // * 索引分片规则
     // */
@@ -553,6 +558,22 @@ public class IndexMeta extends StoreMeta implements Serializable {
 	public void setLocked(Boolean locked) {
 		this.locked = locked;
 	}
+	
+	
+
+	/**
+	 * @return the shardDimBase
+	 */
+	public String getShardDimBase() {
+		return shardDimBase;
+	}
+
+	/**
+	 * @param shardDimBase the shardDimBase to set
+	 */
+	public void setShardDimBase(String shardDimBase) {
+		this.shardDimBase = shardDimBase;
+	}
 
 	/*
      * (non-Javadoc)
@@ -594,43 +615,7 @@ public class IndexMeta extends StoreMeta implements Serializable {
         return true;
     }
     
-    /**
-     * 
-     * getSelectList 抽取索引元数据中的指标与维度字段，生成集合
-     * @param needMerge 是否需要合并
-     * @return Set<String> 如果指标与维度为空，则反回空集，而不是null
-     */
-    public Set<String> getSelectList(boolean needMerge) {
-        Set<String> selectList = new HashSet<String>();
-        if(this.dimSet!=null){
-            for(String dimKey:this.dimSet){
-                selectList.add(dimKey);
-            }
-        }
-        
-        if(this.measureSet!=null){
-            for(String measureKey:this.measureSet){
-                selectList.add(measureKey);
-            }
-        }
-        
-        
-        if(needMerge){
-            if(this.dimInfoMergeSet!=null && this.dimInfoMergeSet.size()>0){
-                for(String dimKey:this.dimInfoMergeSet){
-                    selectList.add(dimKey);
-                }
-            }
-            
-            if(this.measureInfoMergeSet!=null && this.measureInfoMergeSet.size()>0){
-                for(String measureKey:this.measureInfoMergeSet){
-                    selectList.add(measureKey);
-                }
-            }
-        }        
-       
-        return selectList;
-    }
+    
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
