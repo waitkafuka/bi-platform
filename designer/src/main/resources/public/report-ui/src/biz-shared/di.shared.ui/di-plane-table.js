@@ -165,10 +165,10 @@ $namespace('di.shared.ui');
             ['sync.complete.RESET_FIELDS', this.$syncEnable, this, 'RESET_FIELDS']
         );
 //        model.attach(
-//            ['sync.preprocess.SORT', this.$syncDisable, this, 'SORT'],
-//            ['sync.result.SORT', this.$renderMain, this],
-//            ['sync.error.SORT', this.$handleDataError, this],
-//            ['sync.complete.SORT', this.$syncEnable, this, 'SORT']
+//            ['sync.preprocess.GET_FIELD_SET_INFO', this.$syncDisable, this, 'GET_FIELD_SET_INFO'],
+//            ['sync.result.GET_FIELD_SET_INFO', this.$handleGetFieldSetInfoSuccess, this],
+//            ['sync.error.GET_FIELD_SET_INFO', this.$handleDataError, this],
+//            ['sync.complete.GET_FIELD_SET_INFO', this.$syncEnable, this, 'GET_FIELD_SET_INFO']
 //        );
 
         model.init();
@@ -179,6 +179,7 @@ $namespace('di.shared.ui');
         table.onrowcheck = bind(this.$handleRowCheck, this, 'rowcheck', 'CHECK');
         table.onrowuncheck = bind(this.$handleRowCheck, this, 'rowuncheck', 'CHECK');
         table.oncelllinkbridge = bind(this.$handleLinkBridge, this);
+        table.onfieldset = bind(this.$handleSetFieldInfo, this);
 
         if (pager) {
             pager.onchange = bind(this.$handlePageChange, this);
@@ -319,6 +320,8 @@ $namespace('di.shared.ui');
          * @event
          */
         this.$di('dispatchEvent', this.$diEvent('rendered', options));
+
+
     };
 
     /**
@@ -682,7 +685,7 @@ $namespace('di.shared.ui');
     };
 
 
-
+    // 字段调整
     DI_PLANE_TABLE_CLASS.$handleGetFieldsList = function (option) {
         this.$sync(
             this.getModel(),
@@ -714,5 +717,51 @@ $namespace('di.shared.ui');
     };
     DI_PLANE_TABLE_CLASS.$handleSubmitFieldsFilterSuccess = function (status, ejsonObj, options) {
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (field, isMessure) {
+//        this.$sync(
+//            this.getModel(),
+//            'GET_FIELD_SET_INFO',
+//            {
+//                componentId: this.$di('getId').split('.')[1],
+//                field: field
+//            }
+//        );
+        var options = [
+            '<option value="none">无</option>',
+            '<option value="none">大于</option>',
+            '<option value="none">小于</option>',
+            '<option value="none">等于</option>',
+            '<option value="none">大于等于</option>',
+            '<option value="none">小于等于</option>',
+            '<option value="none">不等于</option>',
+            '<option value="none">in</option>',
+            '<option value="none">between-and</option>'
+        ].join('');
+        var messureOptions = [
+            '<option value="none">无</option>',
+            '<option value="none">等于</option>',
+            '<option value="none">in</option>'
+        ].join('');
+
+        var html = [
+            '<div class="ui-table-field-set-item">',
+            '<select id="rptuiFieldSetCondition">',
+                isMessure == 'true' ? messureOptions : options,
+            '</select>',
+            '<input type="text" id="rptuiFieldSetDefaultValue" value="" placeholder="默认值" />',
+            '</div>'
+        ].join('');
+
+        DIALOG.confirm(
+            html,
+            function () {
+                alert();
+            }
+        );
+    };
+    DI_PLANE_TABLE_CLASS.$handleGetFieldSetInfoSuccess = function (status, ejsonObj, options) {
+        // TODO:弹出框
     };
 })();

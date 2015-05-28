@@ -8,6 +8,7 @@
  */
 
 (function() {
+    //
     var core = ecui;
     var dom = core.dom;
     var array = core.array;
@@ -638,7 +639,8 @@
         }
         // 如果是维度列，就不显示tooltip图标
         if (!wrap.colSpan) {
-            tooltipTag += '<div class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</div>';
+            //tooltipTag += '<div class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</div>';
+            tooltipTag += '<span class="'+ type + '-head-tips" data-message="' + string.encodeHTML(colDefItem.toolTip) + '"></span>'
             //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         else {
@@ -686,6 +688,8 @@
         var attrStr = [];
         var span = [];
         var innerStr;
+        var tooltipStr = '';
+        var tooltipTag = '';
 
         wrap = objWrap(wrap);
         var align = wrap.align || 'left';
@@ -725,6 +729,11 @@
             styleStr.push('width:' + colDefItem.width + 'px;');
             // styleStr.push('min-width:' + colDefItem.width + 'px;');
             // styleStr.push('max-width:' + colDefItem.width + 'px;');
+        }
+        if (colDefItem && colDefItem.toolTip) {
+            tooltipStr = colDefItem.toolTip;
+        } else { // 测试数据
+            tooltipStr = '测试';
         }
         attrStr.push('data-cell-pos="' + x + '-' + y + '"');
         attrStr.push('data-row-h="1"'); // 左表头的标志
@@ -830,8 +839,12 @@
         var prompt = value.prompt;
         value = value.value;
 
-        if (prompt) {
-            attrStr.push('title="' + prompt + '"');
+        if (cellType === 'ROWHCELL' || cellType === 'HCELL') {
+            if (prompt) {
+                value = '<span class="tip-layer-div" data-message="' + string.encodeHTML(prompt) + '">' + value + '</span>';
+            } else {
+                value = '<span class="tip-layer-div" data-message="' + string.encodeHTML(value) + '">' + value + '</span>';
+            }
         }
 
         if (wrap.indent) {
@@ -1249,6 +1262,15 @@
         }
     };
 
+    // UI_TABLE_HCELL_CLASS.$mouseover = function (event) {
+    //     if (event.target
+    //         && event.target.className === 'ui-table-head-tips'
+    //         ) {
+            
+    //     }
+    // };
+
+
     //--------------------------------------------------
     // UI_OLAP_TABLE_CELL 方法
     //--------------------------------------------------
@@ -1272,6 +1294,14 @@
             this.$handleCellClick();
         }
     };
+
+    // UI_OLAP_TABLE_CELL_CLASS.$mouseover = function (event) {
+    //     var el = this.getOuter();
+    //     var tableCtrl = this.getParent().getParent();
+    //     var ec;
+    //     var target;
+        
+    // }
 
     /**
      * 处理cell点击事件

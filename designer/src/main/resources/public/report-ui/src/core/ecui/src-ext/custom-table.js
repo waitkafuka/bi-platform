@@ -326,6 +326,12 @@
 
                 triggerEvent(control, 'sort', null, [field, orderby.toUpperCase()]);
             },
+            'click div.ui-table-hcell-field-set': function (event, control) {
+                var oTh = dom.getParent(dom.getParent(this));
+                var field = oTh.getAttribute('data-field');
+                var isMessure = oTh.getAttribute('data-messure');
+                triggerEvent(control, 'fieldset', null, [field, isMessure]);
+            },
             'click input.ui-table-checkbox-all': function (event, control) {
                 control.$refreshCheckbox(this.checked);
             },
@@ -408,6 +414,9 @@
 //            }
             if (o.orderby) {
                 attrStr.push('data-orderby="' + o.orderby + '" ');
+            }
+            if (o.isMessure) {
+                attrStr.push('data-messure="' + o.isMessure + '" ');
             }
             html.push(attrStr.join(''), classStr);
             html.push('>');
