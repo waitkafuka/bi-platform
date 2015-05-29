@@ -289,7 +289,7 @@ public class IndexServiceImpl implements IndexService {
 							.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
 									"initMiniCubeIndex", "[Index indexmeta : "
 											+ idxMeta.toString()));
-					this.indexMetaService.unLockIndexMeta(idxMeta);
+					
 				}
 			}
 		}
@@ -407,7 +407,7 @@ public class IndexServiceImpl implements IndexService {
 				
 				throw e;
 			}finally {
-				this.indexMetaService.unLockIndexMeta(meta);
+				
 			}
 		}
 		try {
@@ -656,9 +656,8 @@ public class IndexServiceImpl implements IndexService {
 		}
 
 		
-		saveIndexShardMetaData(idxMeta,idxAction);	
-		
-		
+		saveIndexShardMetaData(idxMeta,idxAction);			
+		this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
 		LOGGER.info("INDEX FIN,SAVING METAS");
 		
 	}
@@ -728,6 +727,7 @@ public class IndexServiceImpl implements IndexService {
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END,
 				"doIndex", "[indexMeta:" + indexMeta + "][idxAction:"
 						+ idxAction + "]"));
+		this.indexMetaService.unLockIndexMeta(idxMeta);
 		return true;
 		
 		

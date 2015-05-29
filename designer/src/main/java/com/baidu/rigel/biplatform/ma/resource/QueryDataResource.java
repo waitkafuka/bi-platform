@@ -55,11 +55,15 @@ import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
+import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
+import com.baidu.rigel.biplatform.ma.download.DownloadType;
+import com.baidu.rigel.biplatform.ma.download.service.DownloadServiceFactory;
+import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
@@ -82,7 +86,6 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
-import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -103,14 +106,12 @@ import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
-import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.QueryDataResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.DimensionMemberViewObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.gson.reflect.TypeToken;
 
 
 
@@ -2057,7 +2058,7 @@ public class QueryDataResource extends BaseResource {
     }
     
     /**
-     * 离线下载请求
+     * 平面表下载请求
      * @param reportId
      * @param areaId
      * @param request
@@ -2065,11 +2066,91 @@ public class QueryDataResource extends BaseResource {
      * @return
      * @throws Exception
      */
-    public ResponseResult downloadOffline(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId, 
+    @RequestMapping(value = "/{reportId}/downloadOnline/{areaId}", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult downloadForPlaneTable(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId, 
             HttpServletRequest request, HttpServletResponse response) throws Exception {
         long begin = System.currentTimeMillis();
         ResponseResult rs = new ResponseResult();
-        logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms" );
+        ReportDesignModel report  = this.getDesignModelFromRuntimeModel(reportId);
+        if (report == null) {
+            throw new IllegalStateException("未知报表定义，请确认下载信息");
+        }
+        ExtendArea targetArea = report.getExtendById(areaId);
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        
+        // 从runtimeModel中取出designModel
+        ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
+        
+        /**
+         * TODO 增加参数信息
+         */
+        Map<String, Object> tmp = 
+                QueryUtils.resetContextParam(request, designModel);
+        tmp.forEach((k, v) -> {
+            runtimeModel.getLocalContextByAreaId(areaId).put(k, v);            
+        });
+        
+        
+        // 获取查询条件信息
+        ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, runtimeModel);
+        // 设置查询不受限制
+        areaContext.getParams().put(Constants.NEED_LIMITED, false);
+        // 获取查询action
+        QueryAction action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
+        if (action != null) {
+            action.setChartQuery(false);
+        } else {
+            throw new RuntimeException("下载失败"); 
+        }
+        
+        // 构建平面表下载分页信息
+        PageInfo pageInfo = new PageInfo();
+        // 默认设置为100000，这样后端不会对其实施count(*)求总的记录数
+        pageInfo.setTotalRecordCount(100000);
+        pageInfo.setCurrentPage(0);
+        // 默认设置为10万条记录
+        pageInfo.setPageSize(100000);
+        // 获取数据源信息
+        DataSourceDefine dsDefine = dsService.getDsDefine(designModel.getDsId());;
+        // 获取问题模型
+        QuestionModel questionModel = QueryUtils.convert2QuestionModel(dsDefine, designModel, action, areaContext.getParams(), pageInfo, securityKey);
+        // 下载类型
+//        String downloadType = DownloadType.PLANE_TABLE_ONLINE.getName();
+        // 获取下载服务
+        DownloadType downloadType = DownloadType.PLANE_TABLE_ONLINE;
+        downloadType.setDsType(dsDefine.getDataSourceType().name());
+        DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downloadType);
+        // 获取下载字符串
+        String csvString = downloadService.downloadTableData(questionModel, designModel.getExtendById(areaId).getLogicModel());
+
+        final StringBuilder timeRange = new StringBuilder();
+        // 在上下文参数中判断是否有时间参数
+        areaContext.getParams().forEach((k, v) -> {
+            if (v instanceof String && v.toString().contains("start") 
+                && v.toString().contains("end") && v.toString().contains("granularity")) {
+                try {
+                    JSONObject json = new JSONObject(v.toString());
+                    timeRange.append(json.getString("start") + "至"  + json.getString("end"));
+                } catch (Exception e) {
+                }
+            }
+        }); 
+        response.setCharacterEncoding("utf-8");
+        response.setContentType("application/vnd.ms-excel;charset=GBK");
+        response.setContentType("application/x-msdownload;charset=GBK");
+        // 写入文件
+        final String fileName = report.getName() + timeRange.toString();
+        response.setHeader("Content-Disposition", "attachment;filename=" 
+                + URLEncoder.encode(fileName, "utf8") + ".csv"); 
+        byte[] content = csvString.getBytes("GBK");
+        response.setContentLength(content.length);
+        OutputStream os = response.getOutputStream();
+        os.write(content);
+        os.flush();
+        rs.setStatus(ResponseResult.SUCCESS);
+        rs.setStatusInfo("successfully");
+               
+        logger.info("[INFO]download data cost : " + (System.currentTimeMillis() - begin) + " ms" );
         return rs;
     }
     

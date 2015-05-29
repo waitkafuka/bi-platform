@@ -200,7 +200,7 @@ public class QueryConditionUtils {
 //                    break;
 //                }
 //            }
-//		    sqlCondition.setConditionValues(conditionValues);
+		    sqlCondition.setConditionValues(conditionValues);
 		    sqlCondition.setMetaName(measure.getUniqueName());
 		    conditions.add(sqlCondition);
 		    measureCondition.setMeasureConditions(sqlCondition);

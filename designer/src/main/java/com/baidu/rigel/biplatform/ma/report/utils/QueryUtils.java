@@ -22,15 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
@@ -41,6 +38,7 @@ import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.MeasureType;
@@ -48,20 +46,21 @@ import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
+import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
-import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -113,7 +112,7 @@ public final class QueryUtils {
      *             构建失败异常
      */
     public static QuestionModel convert2QuestionModel(DataSourceDefine dsDefine, ReportDesignModel reportModel,
-        QueryAction queryAction, String securityKey) throws QueryModelBuildException {
+        QueryAction queryAction, Map<String, Object> requestParams, PageInfo pageInfo, String securityKey) throws QueryModelBuildException {
         if (queryAction == null) {
             throw new QueryModelBuildException("query action is null");
         }
@@ -132,14 +131,7 @@ public final class QueryUtils {
         }
         // 设置轴信息
         questionModel.setAxisMetas(buildAxisMeta(reportModel.getSchema(), area, queryAction));
-        // 构建查询信息
-        if (area.getType() == ExtendAreaType.PLANE_TABLE) {
-        	// 针对平面表构建查询条件
-        	questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPlaneTable(reportModel, area, queryAction));
-        } else {
-        	// 针对其他情况构建查询条件
-        	questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction));       	
-        }
+       
         questionModel.setCubeId(area.getCubeId());
         ((MiniCube) cube).setProductLine(dsDefine.getProductLine());
         // TODO 动态更新cube 针对查询过程中动态添加的属性 需要仔细考虑此处逻辑
@@ -149,7 +141,15 @@ public final class QueryUtils {
 //        updateLogicCubeWithSlices(cube, tmp,
 //                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
-        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
+        try {
+            DataSourceInfo dataSource = DataSourceConnectionServiceFactory
+                    .getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ())
+                    .parseToDataSourceInfo (dsDefine, securityKey);
+            questionModel.setDataSourceInfo (dataSource);
+        } catch (Exception e) {
+            throw new RuntimeException (e);
+        }
+//        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
         if (orderDesc != null) {
             SortType sortType = SortType.valueOf(orderDesc.getOrderType());
@@ -163,11 +163,87 @@ public final class QueryUtils {
             // TODO 需要开发通用工具包 将常量定义到通用工具包中
             questionModel.getRequestParams().put("NEED_OTHERS", "1");
         }
+        if (area.getType() == ExtendAreaType.PLANE_TABLE) {
+            questionModel.setQuerySource("SQL");
+            // 对于平面表不使用汇总方式
+            questionModel.setNeedSummary(false);
+            // 设置分页信息
+            questionModel.setPageInfo(pageInfo);
+            // 针对平面表构建查询条件
+            questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPlaneTable(reportModel, area, queryAction));            
+        } else {
+            questionModel.setQuerySource("TESSERACT");
+            // 针对其他情况构建查询条件
+            questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction));        
+            if (queryAction.getDrillDimValues() == null || !queryAction.getDrillDimValues().isEmpty() || queryAction.isChartQuery()) {
+                questionModel.setNeedSummary(false);
+            } else if (reportModel.getExtendById (queryAction.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
+                questionModel.setNeedSummary (false);
+            } else {
+                questionModel.setNeedSummary(needSummary(questionModel));
+            }               
+        }
+        questionModel.setUseIndex(true);
+        
+        // 设置请求参数信息
+        if (requestParams != null) {
+            for (String key : requestParams.keySet()) {
+                Object value = requestParams.get(key);
+                if (value != null && value instanceof String) {
+                    questionModel.getRequestParams().put(key, (String) value);
+                }
+            } 
+            // 设计器中, 设置分页信息
+            if (requestParams.get(Constants.IN_EDITOR) != 
+                    null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
+//                PageInfo pageInfo = new PageInfo();
+//                pageInfo.setPageSize(100);
+//                pageInfo.setTotalPage(1);
+                questionModel.setPageInfo(pageInfo);
+            }
+        }
         putSliceConditionIntoParams (queryAction, questionModel);
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
     }
 
+    /**
+     * 判断是否需要汇总
+     * @param questionModel
+     * @return
+     */
+    private static boolean needSummary(QuestionModel questionModel) {
+        for (AxisMeta meta : questionModel.getAxisMetas().values()) {
+            if (meta.getAxisType() == AxisType.ROW) {
+                for (String str : meta.getCrossjoinDims()) {
+                    DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
+                    Dimension dim = ((ConfigQuestionModel) questionModel).getCube ().getDimensions ().get (condition.getMetaName ());
+                    if (dim != null && dim.getType () == DimensionType.CALLBACK) {
+                        return false;
+                    }
+                    if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
+                        return false;
+                    } else {
+                        List<QueryData> queryDatas = condition.getQueryDataNodes();
+                        for (QueryData queryData : queryDatas) {
+                            if (MetaNameUtil.isAllMemberName(queryData.getUniqueName())) {
+                                return false;
+                            } else {
+                                // TODO 这里需要修改 需要修改为可配置方式
+                                String[] tmp = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
+                                if (tmp[tmp.length - 1].contains(":")) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+        }
+        return true;
+    }
+    
     /**
      * 
      * @param queryAction
@@ -220,28 +296,28 @@ public final class QueryUtils {
      * @param dsDefine
      * @return DataSourceInfo
      */
-    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
-        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
-        ds.setDBProxy(true);
-        try {
-            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
-        } catch (Exception e) {
-        }
-        ds.setUsername(dsDefine.getDbUser());
-        ds.setProductLine(dsDefine.getProductLine());
-        ds.setInstanceName(dsDefine.getDbInstance());
-        List<String> hosts = Lists.newArrayList();
-        hosts.add(dsDefine.getHostAndPort());
-        ds.setHosts(hosts);
-        List<String> jdbcUrls = Lists.newArrayList();
-        try {
-            jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
-        } catch (Exception e) {
-        }
-        ds.setDataBase(DataBase.valueOf(dsDefine.getDataSourceType().name()));
-        ds.setJdbcUrls(jdbcUrls);
-        return ds;
-    }
+//    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
+//        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
+//        ds.setDBProxy(true);
+//        try {
+//            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
+//        } catch (Exception e) {
+//        }
+//        ds.setUsername(dsDefine.getDbUser());
+//        ds.setProductLine(dsDefine.getProductLine());
+//        ds.setInstanceName(dsDefine.getDbInstance());
+//        List<String> hosts = Lists.newArrayList();
+//        hosts.add(dsDefine.getHostAndPort());
+//        ds.setHosts(hosts);
+//        List<String> jdbcUrls = Lists.newArrayList();
+//        try {
+//            jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
+//        } catch (Exception e) {
+//        }
+//        ds.setDataBase(DataBase.valueOf(dsDefine.getDataSourceType().name()));
+//        ds.setJdbcUrls(jdbcUrls);
+//        return ds;
+//    }
     
     /**
      * 通过查询
