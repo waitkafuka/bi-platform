@@ -164,12 +164,12 @@ $namespace('di.shared.ui');
             ['sync.error.RESET_FIELDS', this.$handleDataError, this],
             ['sync.complete.RESET_FIELDS', this.$syncEnable, this, 'RESET_FIELDS']
         );
-//        model.attach(
-//            ['sync.preprocess.GET_FIELD_SET_INFO', this.$syncDisable, this, 'GET_FIELD_SET_INFO'],
-//            ['sync.result.GET_FIELD_SET_INFO', this.$handleGetFieldSetInfoSuccess, this],
-//            ['sync.error.GET_FIELD_SET_INFO', this.$handleDataError, this],
-//            ['sync.complete.GET_FIELD_SET_INFO', this.$syncEnable, this, 'GET_FIELD_SET_INFO']
-//        );
+        model.attach(
+            ['sync.preprocess.SUBMIT_FIELD_SET_INFO', this.$syncDisable, this, 'SUBMIT_FIELD_SET_INFO'],
+            ['sync.result.SUBMIT_FIELD_SET_INFO', this.$handleSubmitFieldInfoSuccess, this],
+            ['sync.error.SUBMIT_FIELD_SET_INFO', this.$handleDataError, this],
+            ['sync.complete.SUBMIT_FIELD_SET_INFO', this.$syncEnable, this, 'SUBMIT_FIELD_SET_INFO']
+        );
 
         model.init();
 
@@ -720,29 +720,32 @@ $namespace('di.shared.ui');
     };
 
     DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (field, isMessure) {
-//        this.$sync(
-//            this.getModel(),
-//            'GET_FIELD_SET_INFO',
-//            {
-//                componentId: this.$di('getId').split('.')[1],
-//                field: field
-//            }
-//        );
+        var that = this;
+        var condition,defaultValue;
+        if (!that._uTable.fieldSetList) {
+            that._uTable.fieldSetList = {};
+        }
+        else {
+            if (that._uTable.fieldSetList[field]) {
+                condition = that._uTable.fieldSetList[field].condition;
+                defaultValue = that._uTable.fieldSetList[field].defaultValue;
+            }
+        }
+
         var options = [
-            '<option value="none">无</option>',
-            '<option value="none">大于</option>',
-            '<option value="none">小于</option>',
-            '<option value="none">等于</option>',
-            '<option value="none">大于等于</option>',
-            '<option value="none">小于等于</option>',
-            '<option value="none">不等于</option>',
-            '<option value="none">in</option>',
-            '<option value="none">between-and</option>'
+            '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
+            '<option value="NOT_EQ"', condition == 'NOT_EQ' ? 'selected = "selected"' : '', '>不等于</option>',
+            '<option value="LT"', condition == 'LT' ? 'selected = "selected"' : '', '>小于</option>',
+            '<option value="GT"', condition == 'GT' ? 'selected = "selected"' : '', '>大于</option>',
+            '<option value="LT_EQ"', condition == 'LT_EQ' ? 'selected = "selected"' : '', '>小于等于</option>',
+            '<option value="GT_EQ"', condition == 'GT_EQ' ? 'selected = "selected"' : '', '>大于等于</option>',
+            '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>',
+            '<option value="BETWEEN-AND"', condition == 'BETWEEN-AND' ? 'selected = "selected"' : '', '>between-and</option>'
         ].join('');
+
         var messureOptions = [
-            '<option value="none">无</option>',
-            '<option value="none">等于</option>',
-            '<option value="none">in</option>'
+            '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
+            '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>'
         ].join('');
 
         var html = [
@@ -750,18 +753,37 @@ $namespace('di.shared.ui');
             '<select id="rptuiFieldSetCondition">',
                 isMessure == 'true' ? messureOptions : options,
             '</select>',
-            '<input type="text" id="rptuiFieldSetDefaultValue" value="" placeholder="默认值" />',
+            '<input type="text" id="rptuiFieldSetDefaultValue" value="', defaultValue, '" placeholder="默认值" />',
             '</div>'
         ].join('');
 
         DIALOG.confirm(
             html,
             function () {
-                alert();
+                condition = document.getElementById('rptuiFieldSetCondition').value;
+                defaultValue = document.getElementById('rptuiFieldSetDefaultValue').value;
+                that._uTable.fieldSetList[field] = { condition: condition, defaultValue: defaultValue };
+                that.$handleSubmitFieldInfo(field, condition, defaultValue);
             }
         );
     };
-    DI_PLANE_TABLE_CLASS.$handleGetFieldSetInfoSuccess = function (status, ejsonObj, options) {
-        // TODO:弹出框
+
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfo = function(field, condition, defaultValue) {
+        var option = {
+            componentId: this.$di('getId').split('.')[1]
+        };
+        option[field] = JSON.stringify({
+            condition: condition,
+            defaultValue: defaultValue
+        });
+        this.$sync(
+            this.getModel(),
+            'SUBMIT_FIELD_SET_INFO',
+            option
+        );
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfoSuccess = function(status, ejsonObj, options) {
+
     };
 })();

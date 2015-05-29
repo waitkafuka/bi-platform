@@ -185,7 +185,7 @@ $namespace('di.config');
     URL_SET.PLANE_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
     URL_SET.PLANE_TABLE_GET_FIELDSLIST = '/reports/#{reportId}/runtime/extend_area/#{componentId}/dimAndInds';
     URL_SET.PLANE_TABLE_RESET_FIELDS = '/reports/#{reportId}/runtime/extend_area/#{componentId}/reset';
-    URL_SET.PLANE_TABLE_GET_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/getSetInfo';
+    URL_SET.PLANE_TABLE_SUBMIT_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/submitSetInfo';
 //    URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
 //    URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
 //    URL_SET.PLANE_TABLE_DOWNLOAD = '/reportTemplate/planeTable/download.action';
