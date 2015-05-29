@@ -61,6 +61,9 @@ define(
             setFilter: function(event) {
                 var that = this;
                 var $target = $(event.target);
+                if (!$target.hasClass('item')) {
+                    return;
+                }
                 var text = $target.text();
                 var id = $target.parent().attr('data-id');
                 this.model.getFieldFilterInfo(id, function (data) {

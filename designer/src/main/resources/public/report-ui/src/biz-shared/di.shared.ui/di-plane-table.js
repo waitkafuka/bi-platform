@@ -734,16 +734,17 @@ $namespace('di.shared.ui');
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
     };
 
-    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (field, isMessure) {
+    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (id, field, isMessure) {
         var that = this;
-        var condition,defaultValue;
+        var condition,defaultValue,fieldName;
         if (!that._uTable.fieldSetList) {
             that._uTable.fieldSetList = {};
         }
         else {
-            if (that._uTable.fieldSetList[field]) {
-                condition = that._uTable.fieldSetList[field].condition;
-                defaultValue = that._uTable.fieldSetList[field].defaultValue;
+            if (that._uTable.fieldSetList[id]) {
+                condition = that._uTable.fieldSetList[id].condition;
+                defaultValue = that._uTable.fieldSetList[id].defaultValue;
+                fieldName = that._uTable.fieldSetList[id].fieldName;
             }
         }
 
@@ -777,19 +778,21 @@ $namespace('di.shared.ui');
             function () {
                 condition = document.getElementById('rptuiFieldSetCondition').value;
                 defaultValue = document.getElementById('rptuiFieldSetDefaultValue').value;
-                that._uTable.fieldSetList[field] = { condition: condition, defaultValue: defaultValue };
-                that.$handleSubmitFieldInfo(field, condition, defaultValue);
+                that._uTable.fieldSetList[id] = { condition: condition, defaultValue: defaultValue };
+                that.$handleSubmitFieldInfo(id, field, condition, defaultValue);
             }
         );
     };
 
-    DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfo = function(field, condition, defaultValue) {
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfo = function(id, field, condition, defaultValue) {
         var option = {
             componentId: this.$di('getId').split('.')[1]
         };
-        option[field] = JSON.stringify({
+        option.conditions= JSON.stringify({
             condition: condition,
-            defaultValue: defaultValue
+            defaultValue: defaultValue,
+            id: id,
+            field: field
         });
         this.$sync(
             this.getModel(),
@@ -799,6 +802,16 @@ $namespace('di.shared.ui');
     };
 
     DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfoSuccess = function(status, ejsonObj, options) {
-
+        var mainEl = this.$di('getEl');
+        var oExhibition = q('ui-table-fieldset-exhibition', mainEl)[0];
+        var html = [
+        ];
+        for (var id in this._uTable.fieldSetList) {
+            if (this._uTable.fieldSetList.hasOwnProperty(id)) {
+                var curField = this._uTable.fieldSetList[id];
+                html.push('<span>', curField.fieldName, curField.condition, curField.defaultValue, '</span>');
+            }
+        }
+        oExhibition.innerHTML = html.join('');
     };
 })();
