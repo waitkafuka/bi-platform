@@ -656,9 +656,8 @@ public class IndexServiceImpl implements IndexService {
 		}
 
 		
-		saveIndexShardMetaData(idxMeta,idxAction);	
-		
-		
+		saveIndexShardMetaData(idxMeta,idxAction);			
+		this.indexMetaService.saveOrUpdateIndexMeta(idxMeta);
 		LOGGER.info("INDEX FIN,SAVING METAS");
 		
 	}
