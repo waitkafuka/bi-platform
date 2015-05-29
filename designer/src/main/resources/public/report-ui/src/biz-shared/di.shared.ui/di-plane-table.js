@@ -22,6 +22,8 @@ $namespace('di.shared.ui');
     var assign = xutil.object.assign;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
+    var utilString = xutil.string;
+    var utilUrl = xutil.url;
     var objKey = xutil.object.objKey;
     var getByPath = xutil.object.getByPath;
     var download = UTIL.download;
@@ -140,6 +142,7 @@ $namespace('di.shared.ui');
             ['sync.error.' + key, this.$handleOfflineDownloadError, this],
             ['sync.complete.' + key, this.$syncEnable, this, key]
         );
+
         model.attach(
             ['sync.preprocess.CHECK', this.$syncDisable, this, 'CHECK'],
             ['sync.result.CHECK', this.$handleRowAsync, this, false],
@@ -400,13 +403,25 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleDownload = function (wrap) {
+//        var commonParamGetter = this.$di('getCommonParamGetter');
+//
+//        var url = URL('PLANE_TABLE_DOWNLOAD')
+//            + '?' + commonParamGetter();
+//        download(url, null, true);
+//
+//        // 对于下载，不进行reportTemplateId控制，直接打开
+//        commonParamGetter.update();
+
         var commonParamGetter = this.$di('getCommonParamGetter');
-
-        var url = URL('PLANE_TABLE_DOWNLOAD')
-            + '?' + commonParamGetter();
+        var urlParam = commonParamGetter({
+            componentId : this.$di('getId').split('.')[1]
+        });
+        // 再把url转回成对象
+        var paramObj = utilUrl.parseParam(urlParam);
+        // 再转成url字符串
+        var url = URL('PLANE_TABLE_DOWNLOAD');
+        url = utilString.template(url, paramObj);
         download(url, null, true);
-
-        // 对于下载，不进行reportTemplateId控制，直接打开
         commonParamGetter.update();
     };
 
