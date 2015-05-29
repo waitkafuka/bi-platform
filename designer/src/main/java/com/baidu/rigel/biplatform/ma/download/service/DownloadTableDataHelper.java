@@ -49,9 +49,9 @@ public class DownloadTableDataHelper {
      * @param dsType
      * @param downloadClazz
      */
-    public static void registryDownloadTableDataService(String downType, Class<? extends DownloadTableDataService> downloadClazz) {
+    public static void registryDownloadTableDataService(String downType, @SuppressWarnings("rawtypes") Class downloadClazz) {
         try {
-            SERVICE_REPOSITORY.put(downType, downloadClazz.newInstance());
+            SERVICE_REPOSITORY.put(downType, (DownloadTableDataService) downloadClazz.newInstance());
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
