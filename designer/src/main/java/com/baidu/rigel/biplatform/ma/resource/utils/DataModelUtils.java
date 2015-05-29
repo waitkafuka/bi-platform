@@ -367,6 +367,9 @@ public final class DataModelUtils {
         
         // 获取数据模型中的表定义
         TableData tableData = dataModel.getTableData();
+        if (tableData == null) {
+            return planeTable;
+        }
         // 表的列定义
         List<Column> columns = tableData.getColumns();
         // 设置平面表列属性信息
@@ -1398,27 +1401,39 @@ public final class DataModelUtils {
         }
         // 获取平面表数据
         TableData tableData = dataModel.getTableData();
+        if (tableData == null) {
+            // 如果没有数据，返回空串
+            return "";
+        }
         // 获取列属性信息
         List<Column> columns = tableData.getColumns();
-        // 获取数据信息
-        Map<String, List<String>> data = tableData.getColBaseDatas();
-        // 获取总的数据条数
-        int totalRecordSize = getTotalRecordSizeOfPlaneTable(data);
-        // 将列存储数据转为行存储数据
-        List<Map<String, String>> rowBasedDatas = transPlaneTableDataFromColumnBasedToRowBased(totalRecordSize, 
-                data, cube, logicModel);
-        // 构建表头
-        for (Column column : columns) {
-            rs.append(column.caption + ",");
+        // 获取正确的下载顺序
+        List<String> keys = getKeysInOrder(cube, logicModel);
+        for (String key : keys) {
+            for (Column column : columns) {
+                if ((column.tableName + "." + column.name).equals(key)) {
+                    rs.append(column.caption + ",");
+                    break;
+                }
+            }
         }
         // 替换最后一个","
         rs.replace(rs.length()-1, rs.length(), "");
         rs.append("\r\n");
+        
+        
+        // 获取数据信息
+        Map<String, List<String>> data = tableData.getColBaseDatas();
+        // 获取总的数据条数
+        int totalRecordSize = getTotalRecordSizeOfPlaneTable(data);
+        // 将列存储数据转为行存储数据，该数据已经有序
+        List<Map<String, String>> rowBasedDatas = transPlaneTableDataFromColumnBasedToRowBased(totalRecordSize, 
+                data, cube, logicModel);
         //构建数据
         for (int i = 0; i<totalRecordSize ; i++) {
             Map<String, String> rowBasedData = rowBasedDatas.get(i);
-            for (Column column : columns) {
-                rs.append(rowBasedData.get(column.name) + ",");
+            for (String key : keys) {
+                rs.append(rowBasedData.get(key.split("\\.")[1]) + ",");
             }
             rs.replace(rs.length()-1, rs.length(), "");
             rs.append("\r\n");

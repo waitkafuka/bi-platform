@@ -62,7 +62,6 @@ import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.ExtendAreaUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.NameCheckUtils;
-import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.NameCheckCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -1556,9 +1555,9 @@ public class ReportDesignModelResource extends BaseResource {
                 data.put("sqlCondition", condition.getSQLCondition());
                 data.put("defaultValue", condition.getDefaultValue());
                 // TODO 判断是维度还是指标
-                data.put("isMeasure", cube.getMeasures().containsKey(elementId));                
+                data.put("isMeasure", String.valueOf(cube.getMeasures().containsKey(elementId)));                
             } else {
-                data.put("isMeasure", cube.getMeasures().containsKey(elementId));
+                data.put("isMeasure", String.valueOf(cube.getMeasures().containsKey(elementId)));
             }
             result.setStatus(0);
             result.setData(data);
