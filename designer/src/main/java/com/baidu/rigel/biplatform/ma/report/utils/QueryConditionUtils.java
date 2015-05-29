@@ -16,9 +16,10 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
-import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition;
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
@@ -136,7 +137,7 @@ public class QueryConditionUtils {
     private static MeasureCondition buildMeasureConditionForPlaneTable(OlapElement olapElement, Object valueObj, PlaneTableCondition planeTableCondition) {
 		MeasureCondition measureCondition = new MeasureCondition(olapElement.getName());
 		// 获取SQL查询条件
-		String sqlStr = planeTableCondition.getSQLCondition();
+		SQLConditionType sqlType = planeTableCondition.getSQLCondition();
 		// 获取查询条件默认值
 		String defaultValue = planeTableCondition.getDefaultValue();
 		if (valueObj != null) {
@@ -144,19 +145,28 @@ public class QueryConditionUtils {
 		    // 获取具体的指标条件值
 		    if (valueObj instanceof String[]) {
 		        values = Lists.newArrayList();
-		        String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
-		        CollectionUtils.addAll(values, (String[]) tmp);
+//		        String[] tmp = resetValues(olapElement.getName(), (String[]) valueObj);
+		        CollectionUtils.addAll(values, (String[]) valueObj);
 		    } else {
-		        String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
-		        values.add(tmp);
+//		        String tmp = resetValues(olapElement.getName(), valueObj.toString())[0];
+		        values.add((String) valueObj);
 		    }
 		    
 		    // 所有条件
-		    List<SQLCondition> conditions = Lists.newArrayList();
+//		    List<SQLCondition> conditions = Lists.newArrayList();
 		    // 所有数值
 		    List<String> conditionValues = Lists.newArrayList();
 		    // 构建SQL查询条件
-		    SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);
+//            SQLCondition[] sqlConditions = SQLCondition.values();
+            SQLCondition sqlCondition = new SQLCondition();//SQLCondition.EQ;
+            sqlCondition.setCondition(sqlType);
+            // 构建指标条件
+//            for (SQLCondition sqlConditionTemp : sqlConditions) {
+//                if (sqlConditionTemp.getValue().equals(sqlStr)) {
+//                    sqlCondition = sqlConditionTemp;
+//                    break;
+//                }
+//            }
 		    // 对所有的条件值进行遍历，构建QueryData
 		    for (String value :values) {
 		        conditionValues.add(value);
@@ -167,9 +177,9 @@ public class QueryConditionUtils {
 		    // 设置条件对应的指标名称
 		    sqlCondition.setMetaName(olapElement.getUniqueName());
 		    // 添加条件值
-		    conditions.add(sqlCondition);
+//		    conditions.add(sqlCondition);
 		    // 设置指标条件值
-		    measureCondition.setMeasureConditions(conditions);
+		    measureCondition.setMeasureConditions(sqlCondition);
 		} else {
 		    // 如果没有条件值，则置为空
 		    Measure measure = (Measure) olapElement;
@@ -180,11 +190,20 @@ public class QueryConditionUtils {
 		    
 		    // 构造SQL查询条件
 		    List<SQLCondition> conditions = Lists.newArrayList();
-		    SQLCondition sqlCondition = SQLCondition.valueOf(sqlStr);
-		    sqlCondition.setConditionValues(conditionValues);
+//            SQLCondition[] sqlConditions = SQLCondition.values();
+            SQLCondition sqlCondition = new SQLCondition(); //.EQ;
+            sqlCondition.setCondition(sqlType);
+            // 构建指标条件
+//            for (SQLCondition sqlConditionTemp : sqlConditions) {
+//                if (sqlConditionTemp.getValue().equals(sqlStr)) {
+//                    sqlCondition = sqlConditionTemp;
+//                    break;
+//                }
+//            }
+//		    sqlCondition.setConditionValues(conditionValues);
 		    sqlCondition.setMetaName(measure.getUniqueName());
 		    conditions.add(sqlCondition);
-		    measureCondition.setMeasureConditions(conditions);
+		    measureCondition.setMeasureConditions(sqlCondition);
 		}
 		return measureCondition;
     }

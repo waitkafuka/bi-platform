@@ -30,9 +30,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
+import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.auth.bo.ReportDesignModelBo;
@@ -59,6 +62,7 @@ import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.ExtendAreaUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.NameCheckUtils;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.NameCheckCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -1453,7 +1457,7 @@ public class ReportDesignModelResource extends BaseResource {
      * add by jiangyichao at 2015-05-18, 平面表条件设置或修改
      * @return
      */
-    @RequestMapping(value = "/{id}/extend_area/{area_id}/item/{elementId}/condition", method = {RequestMethod.POST})
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{elementId}/condition", method = {RequestMethod.POST})
     public ResponseResult addOrModifyPlaneTableCondition(@PathVariable("id") String reportId, 
     		@PathVariable("elementId") String elementId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
@@ -1485,7 +1489,7 @@ public class ReportDesignModelResource extends BaseResource {
             PlaneTableCondition condition = new PlaneTableCondition();
             condition.setElementId(elementId);
             condition.setName(name);
-            condition.setSQLCondition(sqlCondition);
+            condition.setSQLCondition(SQLConditionType.valueOf(sqlCondition));
             condition.setDefaultValue(defaultValue);
             // 获取原有报表的平面表条件信息
             Map<String, PlaneTableCondition> conditions = model.getPlaneTableConditions();
@@ -1519,8 +1523,8 @@ public class ReportDesignModelResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{id}/extend_area/{area_id}/item/{elementId}/condition", method = {RequestMethod.GET})
-    public ResponseResult getPlaneTableConditions(@PathVariable("id") String reportId, 
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{elementId}/condition", method = {RequestMethod.GET})
+    public ResponseResult getPlaneTableConditions(@PathVariable("id") String reportId, @PathVariable("areaId") String areaId, 
     		@PathVariable("elementId") String elementId, HttpServletRequest request ) {
         ResponseResult result = new ResponseResult();
         if (StringUtils.isEmpty(reportId)) {
@@ -1537,10 +1541,27 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
             return result;
         }
+        
+        ExtendArea extendArea = model.getExtendById(areaId);
+        MiniCubeSchema schema = (MiniCubeSchema) model.getSchema();
+        Cube cube = schema.getCubes().get(extendArea.getCubeId());
+       
         if (model.getPlaneTableConditions() != null) {            
-            result.setStatus(0);
             // 返回对应条目(elementId)的条件信息
-            result.setData(model.getPlaneTableConditions().get(elementId));
+            Map<String, Object> data = Maps.newHashMap();
+            PlaneTableCondition condition = model.getPlaneTableConditions().get(elementId);
+            data.put("id", elementId);
+            if (condition != null) {
+                data.put("name", condition.getName());
+                data.put("sqlCondition", condition.getSQLCondition());
+                data.put("defaultValue", condition.getDefaultValue());
+                // TODO 判断是维度还是指标
+                data.put("isMeasure", cube.getMeasures().containsKey(elementId));                
+            } else {
+                data.put("isMeasure", cube.getMeasures().containsKey(elementId));
+            }
+            result.setStatus(0);
+            result.setData(data);
             result.setStatusInfo(SUCCESS);
         } else {
             result.setStatus(1);

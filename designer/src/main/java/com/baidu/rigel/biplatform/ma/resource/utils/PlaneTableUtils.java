@@ -1,19 +1,16 @@
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
-import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.model.TimeType;
-import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition.SQLCondition;
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
-import com.google.common.collect.Lists;
 
 /**
  * 平面表工具类
@@ -39,21 +36,28 @@ public class PlaneTableUtils {
 		if (!ParamValidateUtils.check("value", value)) {
 			return false;
 		}
-		
+		SQLConditionType sqlType = SQLConditionType.valueOf(sqlStr);
 		String [] tmpValue = value.split(",");
-		List<String> conditionValues = Lists.newArrayList();
-		CollectionUtils.addAll(conditionValues, tmpValue);
-		SQLCondition[] sqlConditions = SQLCondition.values();
-		for (SQLCondition sqlCondition : sqlConditions) {
-		    if (sqlCondition.getValue().equals(sqlStr)){
-		        sqlCondition.setConditionValues(conditionValues);
-		        String expression = sqlCondition.parseToExpression();
-		        return ParamValidateUtils.check("expression", expression);		        
-		    }
+        if (tmpValue==null || tmpValue.length==0) {
+            return false;
+        }
+		switch (sqlType) {
+            case EQ:
+            case NOT_EQ:
+            case LT:
+            case GT:
+            case LT_EQ:
+            case GT_EQ:
+                return tmpValue.length == 1;
+            case BETWEEN_AND:
+                return tmpValue.length == 2;
+            case IN:
+                return true;
+            default:
+                return true;
 		}
-		return false;
 	}
-	
+
 	/**
 	 * 平面表中对时间条件的特殊处理
 	 * @param timeJson
