@@ -24,7 +24,7 @@ define(['template'], function (template) {
         if($data.sqlCondition=='LT'){
         $out+='selected=selected ';
         }
-        $out+='>小</option>\r\n        <option value="GT" ';
+        $out+='>小于</option>\r\n        <option value="GT" ';
         if($data.sqlCondition=='GT'){
         $out+='selected=selected ';
         }

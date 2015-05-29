@@ -329,8 +329,9 @@
             'click div.ui-table-hcell-field-set': function (event, control) {
                 var oTh = dom.getParent(dom.getParent(this));
                 var field = oTh.getAttribute('data-field');
+                var id = oTh.getAttribute('data-id');
                 var isMessure = oTh.getAttribute('data-messure');
-                triggerEvent(control, 'fieldset', null, [field, isMessure]);
+                triggerEvent(control, 'fieldset', null, [id, field, isMessure]);
             },
             'click input.ui-table-checkbox-all': function (event, control) {
                 control.$refreshCheckbox(this.checked);
@@ -364,6 +365,11 @@
 
             if (Object.prototype.toString.call(o.field) == '[object String]') {
                 html.push(o.field, '" ');
+            }
+            html.push('data-id="');
+
+            if (Object.prototype.toString.call(o.id) == '[object String]') {
+                html.push(o.id, '" ');
             }
 
             if (o.width) {
