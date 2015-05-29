@@ -416,12 +416,18 @@ public final class DataModelUtils {
         Map<String, String> dataFormat = formatModel.getDataFormat();
         Map<String, String> toolTips = formatModel.getToolTips ();
         Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
-        List<String> keys = getKeysInOrder(cube, logicModel);       
+        List<String> keys = getKeysInOrder(cube, logicModel);   
+        Item[] items = logicModel.getItems();
+        
+        // Item的索引
+        int itemIndex = 0;
         // 构建列属性
         for (String key : keys) {
             for (Column column : columns) {
                 if((column.tableName + "." + column.name).equals(key)) {
                     PlaneTableColDefine colDefine = new PlaneTableColDefine();
+                    // 设置列的id
+                    colDefine.setElementId(items[itemIndex].getOlapElementId());
                     // 设置表头
                     colDefine.setTitle(column.caption);
                     // 设置表域名称
@@ -1433,7 +1439,7 @@ public final class DataModelUtils {
         for (int i = 0; i<totalRecordSize ; i++) {
             Map<String, String> rowBasedData = rowBasedDatas.get(i);
             for (String key : keys) {
-                rs.append(rowBasedData.get(key.split("\\.")[1]) + ",");
+                rs.append(rowBasedData.get(key.split(".")[1]) + ",");
             }
             rs.replace(rs.length()-1, rs.length(), "");
             rs.append("\r\n");

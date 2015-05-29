@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
@@ -42,6 +43,7 @@ import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * 
@@ -192,8 +194,8 @@ public class ReportRuntimeModelManageResource {
      * 
      * @return
      */
-    @RequestMapping(value = "/{id}/{elementId}/runtime/planeTableConditions", method = { RequestMethod.POST })
-    public ResponseResult addOrModifyRuntimePlaneTableCondition(@PathVariable("id") String reportId,
+    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/item/{elementId}/submitSetInfo", method = { RequestMethod.POST })
+    public ResponseResult addOrModifyRuntimePlaneTableCondition(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId,
             @PathVariable("elementId") String elementId, HttpServletRequest request) {
         logger.info("[INFO] begin query data with new measure");
         ResponseResult result = new ResponseResult();
@@ -216,13 +218,14 @@ public class ReportRuntimeModelManageResource {
         }
 
         // 获取平面表条件
-        String conditionStr = request.getParameter("conditions");
+        String conditions = request.getParameter("conditions");
         // TODO 是否修改
-        if (!StringUtils.isEmpty(conditionStr)) {
-//            Map<String, PlaneTableCondition> conditions =
-//                    GsonUtils.fromJson(request.getParameter("conditions"),
-//                            new TypeToken<Map<String, PlaneTableCondition>>() {
-//                            }.getType());
+        if (!StringUtils.isEmpty(conditions)) {
+            Map<String, String> conditionMap = GsonUtils.fromJson(conditions, new TypeToken<Map<String, String>>(){}.getType()); 
+            String id = conditionMap.get("id");
+            String name = conditionMap.get("field");
+            String defaultValue = conditionMap.get("defaultValue");
+            String condition = conditionMap.get("condition");
 //            // 检查平面表条件值是否合理
 //            for (PlaneTableCondition tmpCondition : conditions.values()) {
 //                if (!PlaneTableUtils.checkSQLCondition(tmpCondition.getSQLCondition(), tmpCondition.getDefaultValue())) {

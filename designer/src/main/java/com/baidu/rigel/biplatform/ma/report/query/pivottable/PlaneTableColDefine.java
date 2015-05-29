@@ -48,7 +48,12 @@ public class PlaneTableColDefine implements Serializable{
 	 */
 	private Boolean isMeasure = true;
 
-	
+
+    /**
+     * elementId
+     */
+    private String elementId;
+    
 	/**
      * default generate get field
      * @return the field
@@ -158,4 +163,22 @@ public class PlaneTableColDefine implements Serializable{
 	public void setIsMeasure(Boolean isMeasure) {
 		this.isMeasure = isMeasure;
 	}
+
+    /**
+     * default generate get elementId
+     * @return the elementId
+     */
+    public String getElementId() {
+        return elementId;
+    }
+
+    /**
+     * default generate set elementId
+     * @param elementId the elementId to set
+     */
+    public void setElementId(String elementId) {
+        this.elementId = elementId;
+    }
+	
+	
 }
