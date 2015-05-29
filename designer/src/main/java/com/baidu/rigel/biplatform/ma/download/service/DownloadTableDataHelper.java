@@ -49,9 +49,9 @@ public class DownloadTableDataHelper {
      * @param dsType
      * @param downloadClazz
      */
-    public static void registryDownloadTableDataService(String downType, Class<?> downloadClazz) {
+    public static void registryDownloadTableDataService(String downType, Class<? extends DownloadTableDataService> downloadClazz) {
         try {
-            SERVICE_REPOSITORY.put(downType, (DownloadTableDataService) downloadClazz.newInstance());
+            SERVICE_REPOSITORY.put(downType, downloadClazz.newInstance());
         } catch (InstantiationException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -69,7 +69,7 @@ public class DownloadTableDataHelper {
     /**
      * 依据配置注册下载类型
      */
-    public static void registryDsMetaServices(String type, Class<?> clazz) {
+    public static void registryDsMetaServices(String type, @SuppressWarnings("rawtypes") Class clazz) {
         try {
             SERVICE_REPOSITORY.put(type, (DownloadTableDataService) clazz.newInstance());
         } catch (InstantiationException | IllegalAccessException e) {
