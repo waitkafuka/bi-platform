@@ -30,21 +30,14 @@ import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
-import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
-import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
-import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
@@ -53,8 +46,6 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
-import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
-import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
@@ -262,42 +253,9 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
         try {
-            questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, securityKey);
-        	ExtendArea extendArea = model.getExtendById(action.getExtendAreaId());
-        	if (extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
-        		// 对于平面表不使用汇总方式
-        		questionModel.setNeedSummary(false);
-        		// 设置分页信息
-        		questionModel.setPageInfo(pageInfo);
-        		questionModel.setQuerySource("SQL");
-        		
-        	} else {
-        	    questionModel.setQuerySource("TESSERACT");
-        		if (action.getDrillDimValues() == null || !action.getDrillDimValues().isEmpty() || action.isChartQuery()) {
-        			questionModel.setNeedSummary(false);
-        		} else if (model.getExtendById (action.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
-        			questionModel.setNeedSummary (false);
-        		} else {
-        			questionModel.setNeedSummary(needSummary(questionModel));
-        		}        		
-        	}
-            questionModel.setUseIndex(true);
-            if (requestParams != null) {
-                for (String key : requestParams.keySet()) {
-                    Object value = requestParams.get(key);
-                    if (value != null && value instanceof String) {
-                        questionModel.getRequestParams().put(key, (String) value);
-                    }
-                } 
-                // 设计器中, 设置分页信息
-                if (requestParams.get(Constants.IN_EDITOR) != 
-                        null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
-//                    PageInfo pageInfo = new PageInfo();
-//                    pageInfo.setPageSize(100);
-//                    pageInfo.setTotalPage(1);
-                    questionModel.setPageInfo(pageInfo);
-                }
-            }
+            // 获取问题模型
+            questionModel = QueryUtils.convert2QuestionModel(dsDefine, model, action, requestParams, 
+                    pageInfo, securityKey);
         } catch (QueryModelBuildException e) {
             if (model.getExtendById(action.getExtendAreaId()).getLogicModel() != null) {
                 logger.debug("Fail in building question model ! ", e);
@@ -320,39 +278,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         rs.setDataModel(dataModel);
         return rs;
     }
-    
-    private boolean needSummary(QuestionModel questionModel) {
-        for (AxisMeta meta : questionModel.getAxisMetas().values()) {
-            if (meta.getAxisType() == AxisType.ROW) {
-                for (String str : meta.getCrossjoinDims()) {
-                    DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
-                    Dimension dim = ((ConfigQuestionModel) questionModel).getCube ().getDimensions ().get (condition.getMetaName ());
-                    if (dim != null && dim.getType () == DimensionType.CALLBACK) {
-                        return false;
-                    }
-                    if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
-                        return false;
-                    } else {
-                        List<QueryData> queryDatas = condition.getQueryDataNodes();
-                        for (QueryData queryData : queryDatas) {
-                            if (MetaNameUtil.isAllMemberName(queryData.getUniqueName())) {
-                                return false;
-                            } else {
-                                // TODO 这里需要修改 需要修改为可配置方式
-                                String[] tmp = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
-                                if (tmp[tmp.length - 1].contains(":")) {
-                                    return false;
-                                }
-                            }
-                        }
-                    }
-                }
-                break;
-            }
-        }
-        return true;
-    }
-
+   
     /**
      * {@inheritDoc}
      */
@@ -379,4 +305,6 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         }
         return Lists.newArrayList ();
     }  
+    
+    
 }
