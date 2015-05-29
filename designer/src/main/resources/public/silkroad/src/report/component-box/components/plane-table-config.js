@@ -119,7 +119,7 @@ define([
         }
         return {
             type: 'PLANE_TABLE',
-            caption: '表格',
+            caption: '平面表',
             renderClass: '', // 渲染时需要的外层class
             iconClass: 'plane-table', // 工具箱中 与 拖拽过程中 的class，样式表中通过外层来复用
             defaultWidth: 600,

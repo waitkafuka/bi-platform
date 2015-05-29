@@ -48,10 +48,10 @@ import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
-import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
@@ -187,13 +187,14 @@ public class QueryContextBuilder {
                     } else {
                         MeasureCondition measureCon = (MeasureCondition) condition;
                         // TODO 暂时这个还不会生效
-                        List<SQLCondition> conditions = measureCon.getMeasureConditions();
+//                        SQLCondition sqlCondition = measureCon.getMeasureConditions();
+                        // TODO
                         List<String> expression = Lists.newArrayList();
-                        for (SQLCondition sqlCondition : conditions) {
-                        	String expressStr = sqlCondition.parseToExpression();
-                        	expression.add(expressStr);
-                        }
-                        queryContext.getFilterExpression().put(measureCon.getMetaName(), expression);
+//                        for (SQLCondition sqlCondition : conditions) {
+//                        	String expressStr = sqlCondition.parseToExpression();
+//                        	expression.add(expressStr);
+//                        }
+//                        queryContext.getFilterExpression().put(measureCon.getMetaName(), expression);
                     }
                     logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
 //                    logger.info("cost:{}ms,in build filter",System.currentTimeMillis() - current);

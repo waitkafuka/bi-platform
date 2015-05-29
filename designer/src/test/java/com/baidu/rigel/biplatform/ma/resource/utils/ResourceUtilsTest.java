@@ -22,7 +22,11 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.ExtendAreaViewObject;
@@ -82,66 +86,86 @@ public class ResourceUtilsTest {
     }
     
     @Test
-    public void testBuildValueObjeWithNullArea () {
+    public void testBuildValueObjeWithNullArea() {
         try {
-            ExtendAreaViewObject rs = ResourceUtils.buildValueObject (null, null);
-            Assert.assertNull (rs.getxAxis ());
+            ExtendAreaViewObject rs = ResourceUtils.buildValueObject(null, null);
+            Assert.assertNull(rs.getxAxis());
         } catch (Exception e) {
         }
     }
     
     @Test
-    public void testBuildValueObjeWithNullModel () {
-        try {
-            ExtendArea area = new ExtendArea();
-            area.setCubeId ("test");
-            ResourceUtils.buildValueObject (null, area);
-            Assert.fail ();
-        } catch (Exception e) {
-        }
-    }
-    
-    @Test
-    public void testBuildValueObjeWithNullCubeId () {
+    public void testBuildValueObjeWithNullModel() {
         try {
             ExtendArea area = new ExtendArea();
-            area.setCubeId (null);
-            ExtendAreaViewObject rs = ResourceUtils.buildValueObject (null, area);
-            Assert.assertNull (rs.getxAxis ());
+            area.setCubeId("test");
+            ResourceUtils.buildValueObject(null, area);
+            Assert.fail();
         } catch (Exception e) {
-            Assert.fail ();
         }
     }
     
     @Test
-    public void testBuildValueObjeWithNullLogicModel () {
+    public void testBuildValueObjeWithNullCubeId() {
         try {
             ExtendArea area = new ExtendArea();
-            area.setCubeId ("test");
-            area.setLogicModel (null);
-            ResourceUtils.buildValueObject (null, area);
-            Assert.fail ();
+            area.setCubeId(null);
+            ExtendAreaViewObject rs = ResourceUtils.buildValueObject(null, area);
+            Assert.assertNull(rs.getxAxis());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+    
+    @Test
+    public void testBuildValueObjeWithLiteOlap() {
+        LiteOlapExtendArea liteOlapExtendArea = AnswerCoreConstant.GSON.fromJson(
+                LiteOlapViewUtilsTest.testLiteOlapExtendJson, LiteOlapExtendArea.class);
+        Schema schema = AnswerCoreConstant.GSON.fromJson(LiteOlapViewUtilsTest.schemaJson,
+                Schema.class);
+        ReportDesignModel reportDesignModel = new ReportDesignModel();
+        reportDesignModel.setSchema(schema);
+        
+        try {
+            liteOlapExtendArea.setType(ExtendAreaType.LITEOLAP);
+            ExtendAreaViewObject rs = ResourceUtils.buildValueObject(reportDesignModel,
+                    liteOlapExtendArea);
+            Assert.assertNotNull(rs.getxAxis());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+    
+    @Test
+    public void testBuildValueObjeWithNullLogicModel() {
+        try {
+            ExtendArea area = new ExtendArea();
+            area.setCubeId("test");
+            area.setLogicModel(null);
+            ResourceUtils.buildValueObject(null, area);
+            Assert.fail();
         } catch (Exception e) {
         }
     }
     
     @Test
-    public void testBuildValueObje () {
+    public void testBuildValueObje() {
         InputStream is = null;
         ObjectInputStream ois = null;
         try {
-            is = ResourceUtils.class.getClassLoader ().getResourceAsStream ("report_model");
-             ois = new ObjectInputStream(is);
-             ReportDesignModel model = (ReportDesignModel) ois.readObject ();
-             ExtendAreaViewObject rs = ResourceUtils.buildValueObject (model, model.getExtendAreaList ()[0]);
-             Assert.assertEquals (1, rs.getxAxis ().size());
-             Assert.assertEquals (1, rs.getyAxis ().size());
+            is = ResourceUtils.class.getClassLoader().getResourceAsStream("report_model");
+            ois = new ObjectInputStream(is);
+            ReportDesignModel model = (ReportDesignModel) ois.readObject();
+            ExtendAreaViewObject rs = ResourceUtils.buildValueObject(model,
+                    model.getExtendAreaList()[0]);
+            Assert.assertEquals(1, rs.getxAxis().size());
+            Assert.assertEquals(1, rs.getyAxis().size());
         } catch (Exception e) {
-            e.printStackTrace ();
-            Assert.fail ();
+            e.printStackTrace();
+            Assert.fail();
         } finally {
-            IOUtils.closeQuietly (is);
-            IOUtils.closeQuietly (ois);
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(ois);
         }
     }
 }

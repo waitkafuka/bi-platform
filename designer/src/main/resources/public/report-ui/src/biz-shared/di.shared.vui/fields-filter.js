@@ -204,9 +204,10 @@ $namespace('di.shared.vui');
         // 拼字段列表
         for (var i = 0, iLen = data.length; i < iLen; i ++) {
             var id = data[i].id + '-' + timeStamp;
+            var checked = data[i].selected ? ' checked="checked" ' : '';
             html.push(
                 '<li>',
-                    '<input type="checkbox" name="', chkName, '" id="', id, '">',
+                    '<input type="checkbox" name="', chkName, '" id="', id, '"', checked, '>',
                     '<label for="', id, '">', data[i].name, '</label>',
                 '</li>'
             );

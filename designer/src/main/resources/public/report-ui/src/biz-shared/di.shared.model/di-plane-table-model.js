@@ -78,6 +78,7 @@ $namespace('di.shared.model');
             SELECT: URL.fn('PLANE_TABLE_SELECT'),
             OFFLINE_DOWNLOAD: URL.fn('PLANE_TABLE_OFFLINE_DOWNLOAD'),
             GET_FIELDSLIST: URL.fn('PLANE_TABLE_GET_FIELDSLIST'),
+            SUBMIT_FIELD_SET_INFO: URL.fn('PLANE_TABLE_SUBMIT_FIELD_SET_INFO'),
             RESET_FIELDS: URL.fn('PLANE_TABLE_RESET_FIELDS'),
             SORT: URL.fn('PLANE_TABLE_SORT')
         }
@@ -94,6 +95,7 @@ $namespace('di.shared.model');
             SELECT: 'DI_PLANE_TABLE_MODEL_SELECT_' + getUID(),
             OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID(),
             GET_FIELDSLIST: 'DI_PLANE_TABLE_MODEL_GET_FIELDSLIST_' + getUID(),
+            SUBMIT_FIELD_SET_INFO: 'DI_PLANE_TABLE_MODEL_SUBMIT_FIELD_SET_INFO_' + getUID(),
             RESET_FIELDS: 'DI_PLANE_TABLE_MODEL_RESET_FIELDS_' + getUID(),
             SORT: 'DI_PLANE_TABLE_MODEL_SORT_' + getUID()
         }
@@ -132,6 +134,9 @@ $namespace('di.shared.model');
             GET_FIELDSLIST: function (options) {
                 return this._fCommonParamGetter(options.args.param);
             },
+            SUBMIT_FIELD_SET_INFO: function (options) {
+                return this._fCommonParamGetter(options.args.param);
+            },
             RESET_FIELDS: function (options) {
                 return this._fCommonParamGetter(options.args.param);
             },
@@ -155,7 +160,8 @@ $namespace('di.shared.model');
             OFFLINE_DOWNLOAD: doComplete,
             GET_FIELDSLIST: doComplete,
             RESET_FIELDS: doComplete,
-            SORT: doComplete
+            SORT: doComplete,
+            SUBMIT_FIELD_SET_INFO: doComplete
         }
     );
 

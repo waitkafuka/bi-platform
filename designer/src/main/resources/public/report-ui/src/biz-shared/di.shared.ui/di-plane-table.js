@@ -22,6 +22,8 @@ $namespace('di.shared.ui');
     var assign = xutil.object.assign;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
+    var utilString = xutil.string;
+    var utilUrl = xutil.url;
     var objKey = xutil.object.objKey;
     var getByPath = xutil.object.getByPath;
     var download = UTIL.download;
@@ -140,6 +142,7 @@ $namespace('di.shared.ui');
             ['sync.error.' + key, this.$handleOfflineDownloadError, this],
             ['sync.complete.' + key, this.$syncEnable, this, key]
         );
+
         model.attach(
             ['sync.preprocess.CHECK', this.$syncDisable, this, 'CHECK'],
             ['sync.result.CHECK', this.$handleRowAsync, this, false],
@@ -164,12 +167,12 @@ $namespace('di.shared.ui');
             ['sync.error.RESET_FIELDS', this.$handleDataError, this],
             ['sync.complete.RESET_FIELDS', this.$syncEnable, this, 'RESET_FIELDS']
         );
-//        model.attach(
-//            ['sync.preprocess.SORT', this.$syncDisable, this, 'SORT'],
-//            ['sync.result.SORT', this.$renderMain, this],
-//            ['sync.error.SORT', this.$handleDataError, this],
-//            ['sync.complete.SORT', this.$syncEnable, this, 'SORT']
-//        );
+        model.attach(
+            ['sync.preprocess.SUBMIT_FIELD_SET_INFO', this.$syncDisable, this, 'SUBMIT_FIELD_SET_INFO'],
+            ['sync.result.SUBMIT_FIELD_SET_INFO', this.$handleSubmitFieldInfoSuccess, this],
+            ['sync.error.SUBMIT_FIELD_SET_INFO', this.$handleDataError, this],
+            ['sync.complete.SUBMIT_FIELD_SET_INFO', this.$syncEnable, this, 'SUBMIT_FIELD_SET_INFO']
+        );
 
         model.init();
 
@@ -179,6 +182,7 @@ $namespace('di.shared.ui');
         table.onrowcheck = bind(this.$handleRowCheck, this, 'rowcheck', 'CHECK');
         table.onrowuncheck = bind(this.$handleRowCheck, this, 'rowuncheck', 'CHECK');
         table.oncelllinkbridge = bind(this.$handleLinkBridge, this);
+        table.onfieldset = bind(this.$handleSetFieldInfo, this);
 
         if (pager) {
             pager.onchange = bind(this.$handlePageChange, this);
@@ -319,6 +323,8 @@ $namespace('di.shared.ui');
          * @event
          */
         this.$di('dispatchEvent', this.$diEvent('rendered', options));
+
+
     };
 
     /**
@@ -397,13 +403,25 @@ $namespace('di.shared.ui');
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleDownload = function (wrap) {
+//        var commonParamGetter = this.$di('getCommonParamGetter');
+//
+//        var url = URL('PLANE_TABLE_DOWNLOAD')
+//            + '?' + commonParamGetter();
+//        download(url, null, true);
+//
+//        // 对于下载，不进行reportTemplateId控制，直接打开
+//        commonParamGetter.update();
+
         var commonParamGetter = this.$di('getCommonParamGetter');
-
-        var url = URL('PLANE_TABLE_DOWNLOAD')
-            + '?' + commonParamGetter();
+        var urlParam = commonParamGetter({
+            componentId : this.$di('getId').split('.')[1]
+        });
+        // 再把url转回成对象
+        var paramObj = utilUrl.parseParam(urlParam);
+        // 再转成url字符串
+        var url = URL('PLANE_TABLE_DOWNLOAD');
+        url = utilString.template(url, paramObj);
         download(url, null, true);
-
-        // 对于下载，不进行reportTemplateId控制，直接打开
         commonParamGetter.update();
     };
 
@@ -682,7 +700,7 @@ $namespace('di.shared.ui');
     };
 
 
-
+    // 字段调整
     DI_PLANE_TABLE_CLASS.$handleGetFieldsList = function (option) {
         this.$sync(
             this.getModel(),
@@ -714,5 +732,73 @@ $namespace('di.shared.ui');
     };
     DI_PLANE_TABLE_CLASS.$handleSubmitFieldsFilterSuccess = function (status, ejsonObj, options) {
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (field, isMessure) {
+        var that = this;
+        var condition,defaultValue;
+        if (!that._uTable.fieldSetList) {
+            that._uTable.fieldSetList = {};
+        }
+        else {
+            if (that._uTable.fieldSetList[field]) {
+                condition = that._uTable.fieldSetList[field].condition;
+                defaultValue = that._uTable.fieldSetList[field].defaultValue;
+            }
+        }
+
+        var options = [
+            '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
+            '<option value="NOT_EQ"', condition == 'NOT_EQ' ? 'selected = "selected"' : '', '>不等于</option>',
+            '<option value="LT"', condition == 'LT' ? 'selected = "selected"' : '', '>小于</option>',
+            '<option value="GT"', condition == 'GT' ? 'selected = "selected"' : '', '>大于</option>',
+            '<option value="LT_EQ"', condition == 'LT_EQ' ? 'selected = "selected"' : '', '>小于等于</option>',
+            '<option value="GT_EQ"', condition == 'GT_EQ' ? 'selected = "selected"' : '', '>大于等于</option>',
+            '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>',
+            '<option value="BETWEEN-AND"', condition == 'BETWEEN-AND' ? 'selected = "selected"' : '', '>between-and</option>'
+        ].join('');
+
+        var messureOptions = [
+            '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
+            '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>'
+        ].join('');
+
+        var html = [
+            '<div class="ui-table-field-set-item">',
+            '<select id="rptuiFieldSetCondition">',
+                isMessure == 'true' ? messureOptions : options,
+            '</select>',
+            '<input type="text" id="rptuiFieldSetDefaultValue" value="', defaultValue, '" placeholder="默认值" />',
+            '</div>'
+        ].join('');
+
+        DIALOG.confirm(
+            html,
+            function () {
+                condition = document.getElementById('rptuiFieldSetCondition').value;
+                defaultValue = document.getElementById('rptuiFieldSetDefaultValue').value;
+                that._uTable.fieldSetList[field] = { condition: condition, defaultValue: defaultValue };
+                that.$handleSubmitFieldInfo(field, condition, defaultValue);
+            }
+        );
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfo = function(field, condition, defaultValue) {
+        var option = {
+            componentId: this.$di('getId').split('.')[1]
+        };
+        option[field] = JSON.stringify({
+            condition: condition,
+            defaultValue: defaultValue
+        });
+        this.$sync(
+            this.getModel(),
+            'SUBMIT_FIELD_SET_INFO',
+            option
+        );
+    };
+
+    DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfoSuccess = function(status, ejsonObj, options) {
+
     };
 })();
