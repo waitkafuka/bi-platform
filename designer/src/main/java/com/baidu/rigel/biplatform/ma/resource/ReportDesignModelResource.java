@@ -1555,9 +1555,9 @@ public class ReportDesignModelResource extends BaseResource {
                 data.put("sqlCondition", condition.getSQLCondition());
                 data.put("defaultValue", condition.getDefaultValue());
                 // TODO 判断是维度还是指标
-                data.put("isMeasure", String.valueOf(cube.getMeasures().containsKey(elementId)));                
+                data.put("isMeasure", cube.getMeasures().containsKey(elementId));                
             } else {
-                data.put("isMeasure", String.valueOf(cube.getMeasures().containsKey(elementId)));
+                data.put("isMeasure", cube.getMeasures().containsKey(elementId));
             }
             result.setStatus(0);
             result.setData(data);
@@ -1568,6 +1568,50 @@ public class ReportDesignModelResource extends BaseResource {
         }
         return result;
     }
+    
+    
+    /**
+     * 删除平面表条件信息
+     * add by jiangyichao at 2015-05-18，获取平面表条件信息
+     * @param reportId
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{elementId}/condition", method = {RequestMethod.DELETE})
+    public ResponseResult deletePlaneTableConditions(@PathVariable("id") String reportId, @PathVariable("areaId") String areaId, 
+            @PathVariable("elementId") String elementId, HttpServletRequest request ) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+               
+        if (model.getPlaneTableConditions() != null) {            
+            // 返回对应条目(elementId)的条件信息
+            Map<String, PlaneTableCondition> conditions = model.getPlaneTableConditions();
+            if (conditions.containsKey(elementId)) {
+                conditions.remove(elementId);
+            }
+            result.setStatus(0);
+            result.setStatusInfo(SUCCESS);
+        } else {
+            result.setStatus(1);
+            result.setStatusInfo("no planeTable condition in this report design model");
+        }
+        return result;
+    }
+    
+    
     /**
      * 设置报表主题
      * @param id

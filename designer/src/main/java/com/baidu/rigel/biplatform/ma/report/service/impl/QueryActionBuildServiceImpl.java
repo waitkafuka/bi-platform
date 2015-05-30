@@ -368,7 +368,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         
         fillFilterBlankDesc (areaId, reportModel, action);
         
-        QueryAction.MeasureOrderDesc orderDesc = genOrderDesc (targetLogicModel, context, action, cube);
+        QueryAction.MeasureOrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+        if (orderDesc == null) {
+            orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
+        }
         logger.info ("[INFO] -------- order desc = " + orderDesc);
         action.setMeasureOrderDesc(orderDesc);
         // remove dumplated conditions
@@ -430,7 +433,36 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         return oriCube4QuestionModel;
     }
 
-    private MeasureOrderDesc genOrderDesc(LogicModel targetLogicModel,
+    /**
+     * 产生维度排序，对于平面表排序，默认使用第一个指标，如果指标为空，则使用第一个维度
+     * 注:此处维度和指标使用同一个指标排序信息，后续考虑修改
+     * @param targetLogicModel
+     * @param cube
+     * @return
+     */
+    private MeasureOrderDesc genDimensionOrderDesc(LogicModel targetLogicModel, QueryAction action ,
+            final Cube cube) {
+        if(!action.getColumns().isEmpty()) {
+            Dimension[] tmp = action.getColumns().keySet().stream().filter(item -> {
+                return cube.getDimensions().get(item.getOlapElementId()) != null;
+            }).map(item -> {
+                return cube.getDimensions().get(item.getOlapElementId());
+            }).toArray(Dimension[] :: new);
+            if (tmp != null && tmp.length >0) {
+                return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
+            }
+        }
+        return null;
+    }
+    /**
+     * 产生指标排序
+     * @param targetLogicModel
+     * @param context
+     * @param action
+     * @param cube
+     * @return
+     */
+    private MeasureOrderDesc genMeasureOrderDesc(LogicModel targetLogicModel,
             Map<String, Object> context, QueryAction action, final Cube cube) {
         Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
@@ -455,7 +487,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     if (isTimeDimOnFirstCol) {
                         return new MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
                     }
-                    return new MeasureOrderDesc(tmp[0].getName(), "DESC", Integer.MAX_VALUE);
+                    if (tmp != null && tmp.length != 0) {
+                        return new MeasureOrderDesc(tmp[0].getName(), "DESC", Integer.MAX_VALUE);                        
+                    }
                 }
             } else {
                 	if (context.get("time_line") != null) { //时间序列图

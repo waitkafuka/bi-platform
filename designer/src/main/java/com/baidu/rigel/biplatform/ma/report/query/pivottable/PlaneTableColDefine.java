@@ -27,7 +27,7 @@ public class PlaneTableColDefine implements Serializable{
 	/**
 	 * 排序字段
 	 */
-	private String orderby;
+	private String orderby = "none";
 	
 	/**
 	 * 样式
@@ -42,13 +42,18 @@ public class PlaneTableColDefine implements Serializable{
 	/**
 	 * 列头提示信息
 	 */
-	private String tips;
+	private String toolTip;
 	/**
 	 * 设置该列属性是否为指标,默认为指标
 	 */
 	private Boolean isMeasure = true;
 
-	
+
+    /**
+     * id
+     */
+    private String id;
+    
 	/**
      * default generate get field
      * @return the field
@@ -130,19 +135,19 @@ public class PlaneTableColDefine implements Serializable{
     }
 
     /**
-     * default generate get tips
-     * @return the tips
+     * default generate get toolTip
+     * @return the toolTip
      */
-    public String getTips() {
-        return tips;
+    public String getToolTip() {
+        return toolTip;
     }
 
     /**
-     * default generate set tips
-     * @param tips the tips to set
+     * default generate set toolTip
+     * @param toolTip the toolTip to set
      */
-    public void setTips(String tips) {
-        this.tips = tips;
+    public void setToolTip(String toolTip) {
+        this.toolTip = toolTip;
     }
 
     /**
@@ -158,4 +163,22 @@ public class PlaneTableColDefine implements Serializable{
 	public void setIsMeasure(Boolean isMeasure) {
 		this.isMeasure = isMeasure;
 	}
+
+    /**
+     * default generate get elementId
+     * @return the elementId
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * default generate set elementId
+     * @param elementId the elementId to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+	
+	
 }
