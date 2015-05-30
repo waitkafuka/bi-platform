@@ -2425,6 +2425,53 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
 
 }
 
+.ui-table-fieldset-exhibition {
+    width: 100%;
+    height: 30px;
+    overflow-y: hidden;
+}
+.ui-table-fieldset-exhibition > div {
+    position: relative;
+    display: inline-block;
+    background: white;
+    margin-right: 5px;
+}
+.ui-table-fieldset-exhibition span {
+    width: 100px;
+    display: inline-block;
+    border: solid 1px #E6E6E6;
+    padding-right: 15px;
+    height: 28px;
+    line-height: 28px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ui-table-fieldset-exhibition .delete {
+    position: absolute;
+    text-decoration: none;
+    height: 18px;
+    width: 18px;
+    line-height: 18px;
+    top: 0px;
+    right: 0px;
+    color: #333;
+    font-size: 18px;
+    font-family: arial, "宋体";
+    text-align: center;
+}
+.ui-table-fieldset-exhibition .delete:hover {
+    color: white;
+    font-weight:bold;
+    /* font-size:22px; */
+    border: 1px solid rgb(252, 244, 244);
+    height: 18px;
+    width: 18px;
+    line-height: 18px;
+    border-radius: 50%;
+    background: rgb(223, 149, 134);
+}
 
 .ui-tip {
     width: 14px;

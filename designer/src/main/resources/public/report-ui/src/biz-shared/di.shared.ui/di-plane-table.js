@@ -19,6 +19,8 @@ $namespace('di.shared.ui');
     var URL = di.config.URL;
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
+    var getParent = xutil.dom.getParent;
+    var getPreviousSibling = xutil.dom.getPreviousSibling;
     var assign = xutil.object.assign;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
@@ -33,6 +35,10 @@ $namespace('di.shared.ui');
     var LANG = di.config.Lang;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
     var ARG_HANDLER_FACTORY;
+    var hasClass = xutil.dom.hasClass;
+    var attachEvent = ecui.util.attachEvent;
+    var detachEvent = ecui.util.detachEvent;
+    var remove = xutil.dom.remove;
 
     $link(function () {
         ARG_HANDLER_FACTORY = di.shared.arg.ArgHandlerFactory;
@@ -172,6 +178,12 @@ $namespace('di.shared.ui');
             ['sync.result.SUBMIT_FIELD_SET_INFO', this.$handleSubmitFieldInfoSuccess, this],
             ['sync.error.SUBMIT_FIELD_SET_INFO', this.$handleDataError, this],
             ['sync.complete.SUBMIT_FIELD_SET_INFO', this.$syncEnable, this, 'SUBMIT_FIELD_SET_INFO']
+        );
+        model.attach(
+            ['sync.preprocess.DELETE_FIELD_SET_INFO', this.$syncDisable, this, 'DELETE_FIELD_SET_INFO'],
+            ['sync.result.DELETE_FIELD_SET_INFO', this.$handleDeleteFieldExhibitionSuccess, this],
+            ['sync.error.DELETE_FIELD_SET_INFO', this.$handleDataError, this],
+            ['sync.complete.DELETE_FIELD_SET_INFO', this.$syncEnable, this, 'DELETE_FIELD_SET_INFO']
         );
 
         model.init();
@@ -522,15 +534,15 @@ $namespace('di.shared.ui');
      * 
      * @protected
      */
-    DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey, sortType) {
+    DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey, sortType, id) {
         this.$sync(
             this.getModel(),
             'SORT',
             {
                 componentId: this.$di('getId').split('.')[1],
+                elementId: id,
                 orderbyParamKey: orderbyParamKey,
                 sortType: sortType
-
             }
         );
     };
@@ -734,9 +746,9 @@ $namespace('di.shared.ui');
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
     };
 
-    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (id, field, isMessure) {
+    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (id, field, text, isMessure) {
         var that = this;
-        var condition,defaultValue,fieldName;
+        var condition,defaultValue,conditionText;
         if (!that._uTable.fieldSetList) {
             that._uTable.fieldSetList = {};
         }
@@ -744,7 +756,6 @@ $namespace('di.shared.ui');
             if (that._uTable.fieldSetList[id]) {
                 condition = that._uTable.fieldSetList[id].condition;
                 defaultValue = that._uTable.fieldSetList[id].defaultValue;
-                fieldName = that._uTable.fieldSetList[id].fieldName;
             }
         }
 
@@ -776,9 +787,17 @@ $namespace('di.shared.ui');
         DIALOG.confirm(
             html,
             function () {
-                condition = document.getElementById('rptuiFieldSetCondition').value;
+                var oSelect = document.getElementById('rptuiFieldSetCondition');
+                condition = oSelect.value;
+                conditionText = oSelect.options[oSelect.selectedIndex].text;
                 defaultValue = document.getElementById('rptuiFieldSetDefaultValue').value;
-                that._uTable.fieldSetList[id] = { condition: condition, defaultValue: defaultValue };
+                that._uTable.fieldSetList[id] = {
+                    condition: condition,
+                    conditionText: conditionText,
+                    defaultValue: defaultValue,
+                    field: field,
+                    text: text
+                };
                 that.$handleSubmitFieldInfo(id, field, condition, defaultValue);
             }
         );
@@ -802,6 +821,7 @@ $namespace('di.shared.ui');
     };
 
     DI_PLANE_TABLE_CLASS.$handleSubmitFieldInfoSuccess = function(status, ejsonObj, options) {
+        var that = this;
         var mainEl = this.$di('getEl');
         var oExhibition = q('ui-table-fieldset-exhibition', mainEl)[0];
         var html = [
@@ -809,9 +829,60 @@ $namespace('di.shared.ui');
         for (var id in this._uTable.fieldSetList) {
             if (this._uTable.fieldSetList.hasOwnProperty(id)) {
                 var curField = this._uTable.fieldSetList[id];
-                html.push('<span>', curField.fieldName, curField.condition, curField.defaultValue, '</span>');
+                var spanStr = [];
+                var valStr;
+                if (curField.condition == 'BETWEEN-AND') {
+                    valStr = curField.defaultValue.split(',');
+                    if (Object.prototype.toString.call(valStr) == '[object Array]') {
+                        valStr = 'between&nbsp;' + valStr[0] + '&nbsp;and&nbsp;' + valStr[1];
+                    }
+                }
+                else {
+                    valStr = curField.conditionText + '&nbsp;' + curField.defaultValue;
+                }
+                spanStr = [
+                    '<span class="span-', id, '" title="', valStr, '" data-id="', id, '">',
+                    curField.text, '&nbsp;', valStr,
+                    '</span>'
+                ];
+                html.push(
+                    '<div>',
+                    spanStr.join(''),
+                    '<a class="delete" href="javascript:void(0)">×</a>',
+                    '</div>'
+                );
             }
         }
         oExhibition.innerHTML = html.join('');
+        detachEvent(oExhibition, 'click', deleteFieldSetExhibition);
+        attachEvent(oExhibition, 'click', deleteFieldSetExhibition);
+        function deleteFieldSetExhibition(ev) {
+            var oEv = ev || window.event;
+            var target = oEv.target || oEv.srcElement;
+            if (hasClass(target, 'delete')) {
+                that.$handleDeleteFieldExhibition(getPreviousSibling(target).getAttribute('data-id'));
+            }
+        }
     };
+
+    DI_PLANE_TABLE_CLASS.$handleDeleteFieldExhibition = function(id) {
+        var option = {
+            componentId: this.$di('getId').split('.')[1],
+            elementId: id
+        }
+        this.$sync(
+            this.getModel(),
+            'DELETE_FIELD_SET_INFO',
+            option
+        );
+    };
+    DI_PLANE_TABLE_CLASS.$handleDeleteFieldExhibitionSuccess = function(status, ejsonObj, options) {
+        var id = options.args.param.elementId;
+        var mainEl = this.$di('getEl');
+        var oExhibition = q('ui-table-fieldset-exhibition', mainEl)[0];
+        var target = q('span-'+ id, oExhibition)[0];
+        var parent = getParent(target);
+        remove(parent);
+    };
+
 })();

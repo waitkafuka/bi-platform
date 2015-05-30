@@ -182,10 +182,11 @@ $namespace('di.config');
     // PLANE表（平面表）
     // URL_SET.PLANE_TABLE_DATA = '/reportTemplate/planeTable/transform.action';
     URL_SET.PLANE_TABLE_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
-    URL_SET.PLANE_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
+    URL_SET.PLANE_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/item/#{elementId}/sort';
     URL_SET.PLANE_TABLE_GET_FIELDSLIST = '/reports/#{reportId}/runtime/extend_area/#{componentId}/dimAndInds';
     URL_SET.PLANE_TABLE_RESET_FIELDS = '/reports/#{reportId}/runtime/extend_area/#{componentId}/reset';
     URL_SET.PLANE_TABLE_SUBMIT_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/submitSetInfo';
+    URL_SET.PLANE_TABLE_DELETE_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/item/#{elementId}/removeSetInfo';
     URL_SET.PLANE_TABLE_DOWNLOAD = '/reports/#{reportId}/downloadOnline/#{componentId}';
 //    URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
 //    URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
