@@ -61,7 +61,7 @@ define(
             setFilter: function(event) {
                 var that = this;
                 var $target = $(event.target);
-                if (!$target.hasClass('item')) {
+                if (!$target.hasClass('j-item-text')) {
                     return;
                 }
                 var text = $target.text();
