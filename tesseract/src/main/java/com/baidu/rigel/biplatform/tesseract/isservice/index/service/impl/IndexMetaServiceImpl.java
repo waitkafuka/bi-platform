@@ -104,6 +104,8 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements
 	 * DEFAULT_BLOCK_COUNT，默认每次申请索引块数
 	 */
 	private static final int DEFAULT_BLOCK_COUNT = 1;
+	
+	private static final String DEFAULT_CUBE_ID="DEFAULT_CUBE_ID";
 
 	/**
 	 * 
@@ -591,18 +593,30 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements
 			// 维度信息
 			Set<String> dimInfoSet1 = idxMeta1.getDimSet();
 			Set<String> dimInfoSet2 = idxMeta2.getDimSet();
-			Collection<String> dimInfoIntersection = getIntersectionOf2Collection(
-					dimInfoSet1, dimInfoSet2);
-			if (dimInfoIntersection != null) {
-				dimScore += dimInfoIntersection.size();
+//			Collection<String> dimInfoIntersection = getIntersectionOf2Collection(
+//					dimInfoSet1, dimInfoSet2);
+//			if (dimInfoIntersection != null) {
+//				dimScore += dimInfoIntersection.size();
+//			}
+			if(dimInfoSet2.containsAll(dimInfoSet1)){
+				dimScore+=dimInfoSet2.size();
 			}
 			// 指标信息
 			Set<String> measureSet1 = idxMeta1.getMeasureSet();
 			Set<String> measureSet2 = idxMeta2.getMeasureSet();
-			Collection<String> measureIntersection = getIntersectionOf2Collection(
-					measureSet1, measureSet2);
-			if (measureIntersection != null) {
-				measureScore += measureIntersection.size();
+//			Collection<String> measureIntersection = getIntersectionOf2Collection(
+//					measureSet1, measureSet2);
+//			if (measureIntersection != null) {
+//				measureScore += measureIntersection.size();
+//			}
+			if(measureSet2.containsAll(measureSet1)){
+				measureScore+=measureSet2.size();
+			}else {
+				Collection<String> measureIntersection = getIntersectionOf2Collection(
+						measureSet1, measureSet2);
+				if (measureIntersection != null) {
+					measureScore += measureIntersection.size();
+				}
 			}
 		}
 		return new IndexMetaSimilarityScore(dimScore, measureScore);
@@ -692,10 +706,23 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements
 		if (factTableIdxMetaMap != null
 				&& factTableIdxMetaMap.containsKey(idxMeta.getDataDescInfo()
 						.getTableName())) {
+			
+			
+			
 			// 当前idxMeta的事实表已经有对应的索引
 			// 跟据索引情况判断是否需要合并索引
 			List<IndexMeta> currFactTableIdxMetaList = factTableIdxMetaMap
 					.get(idxMeta.getDataDescInfo().getTableName());
+			
+			//当前cubeId有对应的IndexMeta
+			for(IndexMeta meta:currFactTableIdxMetaList){
+				if(meta.getCubeIdSet().containsAll(idxMeta.getCubeIdSet())){
+					meta.getCubeIdSet().removeAll(idxMeta.getCubeIdSet());					
+					this.saveOrUpdateIndexMeta(meta);
+				}
+			}
+			
+			
 			/**
 			 * 合并策略： 0.维度、指标完全相同，可以复用 1.维度相同，指标不同，可以合并
 			 */
