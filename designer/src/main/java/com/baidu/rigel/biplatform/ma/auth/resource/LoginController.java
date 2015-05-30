@@ -98,7 +98,13 @@ public class LoginController extends RandomValidateCodeController {
         Cookie productLineCookie = new Cookie(Constants.BIPLATFORM_PRODUCTLINE, productLineEncrypt);
         productLineCookie.setPath(Constants.COOKIE_PATH);
         response.addCookie(productLineCookie);
-
+        Cookie[] cookies = request.getCookies ();
+        for (Cookie cookie  : cookies) {
+            if ("prevReq".equals (cookie.getName ())) {
+                rs.setData (cookie.getValue ());
+                break;
+            }
+        }
         // 在请求中添加sessionId的cookie信息
 //        String sessionId = UuidGeneratorUtils.generate();
 //        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);

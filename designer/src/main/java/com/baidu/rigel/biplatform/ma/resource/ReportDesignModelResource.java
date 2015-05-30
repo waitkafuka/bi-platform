@@ -159,7 +159,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @return
      * @throws Exception 
      */
-    @RequestMapping(value="/online", method = { RequestMethod.GET })
+    @RequestMapping(value="/online", method = { RequestMethod.GET , RequestMethod.POST})
     public ResponseResult listAllReleaseReport(HttpServletRequest request, HttpServletResponse response) throws Exception {
         ResponseResult rs = new ResponseResult();
         rs.setStatus(0);
@@ -184,6 +184,11 @@ public class ReportDesignModelResource extends BaseResource {
             return new ReportDesignModelBo[0];
         }
         ReportDesignModelBo[] rs = new ReportDesignModelBo[modelList.length];
+        String token = null;
+        try {
+            token = AesUtil.getInstance ().encryptAndUrlEncoding (ContextManager.getProductLine (), securityKey);
+        } catch (Exception e) {
+        }
         int i = 0;
         for (ReportDesignModel model : modelList) {
             rs[i] = new ReportDesignModelBo ();
@@ -191,6 +196,7 @@ public class ReportDesignModelResource extends BaseResource {
             rs[i].setName (model.getName ());
             rs[i].setDsId (model.getDsId ());
             rs[i].setTheme (model.getTheme ());
+            rs[i].setToken (token);
             rs[i++].setRunTimeId (model.getRunTimeId ());
         }
         return rs;
