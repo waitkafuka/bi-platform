@@ -543,7 +543,8 @@ $namespace('di.shared.ui');
                 elementId: id,
                 orderbyParamKey: orderbyParamKey,
                 sortType: sortType,
-                pageSize: this._uPager ? this._uPager.getPageSize() : void 0
+                pageSize: this._uPager ? this._uPager.getPageSize() : void 0,
+                currentPage: this._uPager.getPage()
             }
         );
     };
@@ -601,7 +602,7 @@ $namespace('di.shared.ui');
             'DATA',
             {
                 componentId: this.$di('getId').split('.')[1],
-                currentPage: currentPage,
+                currentPage: this._uPager.getPage(),
                 pageSize: pageSize,
                 totalRecordCount: this._uPager.getTotal()
             }
