@@ -599,7 +599,12 @@ $namespace('di.shared.ui');
         this.$sync(
             this.getModel(),
             'DATA',
-            { pageSize: pageSize }
+            {
+                componentId: this.$di('getId').split('.')[1],
+                currentPage: currentPage,
+                pageSize: pageSize,
+                totalRecordCount: this._uPager.getTotal()
+            }
         );
     };
 

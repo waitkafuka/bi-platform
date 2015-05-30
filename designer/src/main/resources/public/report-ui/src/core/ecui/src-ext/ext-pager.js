@@ -99,7 +99,7 @@ change:     切换了分页
 
         UI_EXT_PAGER_CLASS = UI_EXT_PAGER.prototype,
 
-        DEFAULT_PAGE_SIZE = 50;
+        DEFAULT_PAGE_SIZE = 1000;
         
 
     // UI_EXT_PAGER.PAGE_SIZE = [20, 50, 80];
