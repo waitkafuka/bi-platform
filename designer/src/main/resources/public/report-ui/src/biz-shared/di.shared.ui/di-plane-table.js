@@ -759,7 +759,7 @@ $namespace('di.shared.ui');
             }
         }
 
-        var options = [
+        var measureOptions = [
             '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
             '<option value="NOT_EQ"', condition == 'NOT_EQ' ? 'selected = "selected"' : '', '>不等于</option>',
             '<option value="LT"', condition == 'LT' ? 'selected = "selected"' : '', '>小于</option>',
@@ -770,7 +770,7 @@ $namespace('di.shared.ui');
             '<option value="BETWEEN-AND"', condition == 'BETWEEN-AND' ? 'selected = "selected"' : '', '>between-and</option>'
         ].join('');
 
-        var messureOptions = [
+        var options = [
             '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
             '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>'
         ].join('');
@@ -778,7 +778,7 @@ $namespace('di.shared.ui');
         var html = [
             '<div class="ui-table-field-set-item">',
             '<select id="rptuiFieldSetCondition">',
-                isMeasure == 'true' ? messureOptions : options,
+                isMeasure == 'true' ? measureOptions : options,
             '</select>',
             '<input type="text" id="rptuiFieldSetDefaultValue" value="', defaultValue, '" placeholder="默认值" />',
             '</div>'
