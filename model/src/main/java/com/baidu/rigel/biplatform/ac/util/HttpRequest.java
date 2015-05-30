@@ -564,7 +564,7 @@ public class HttpRequest {
                     .setUri(url) 
                     .setEntity (new StringEntity (hql))
                     .build();
-            LOGGER.info ("[INFO] --- --- execute query with client {}", client);
+            LOGGER.info ("[INFO] --- --- execute query with client {}, hql: {}, url :{}", client, hql, url);
             HttpResponse response = client.execute(request);
             String content = processHttpResponse(client, response, Maps.newHashMap (), false);
             StringBuilder sb = new StringBuilder();
