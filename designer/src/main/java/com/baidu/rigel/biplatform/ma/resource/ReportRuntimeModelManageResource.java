@@ -344,7 +344,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
 //        reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remove planeTable condition in runtime phase");
         result.setStatus(0);
-        result.setData(model);
+//        result.setData(model);
         result.setStatusInfo("successfully remove planeTable condition in runtime phase ");
         return result;
     }
@@ -463,7 +463,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         // 更新本次操作结果
         runTimeModel.updateDatas(queryAction, resultSet);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("[INFO]successfully sort by " + orderDesc.getName() + 
                 " as " + orderDesc.getOrderType() + " for planeTable ");
         logger.info("[INFO]sort planeTable cost : " + (System.currentTimeMillis() - begin) + " ms" );
