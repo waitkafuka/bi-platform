@@ -500,7 +500,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
             } else {
                 Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
                 // 指定排序的名称、排序方式，最后一个暂不解析
-                return new MeasureOrderDesc(l.getName(), sort, 500);                
+                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);                
             }
         }
         return null;
