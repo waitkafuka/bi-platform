@@ -124,7 +124,7 @@
             url: '/silkroad/reports/online',
             type: 'POST',
             success: function (data) {
-            	if (data.status && data.status === 0) {
+            	if (data.status === 0) {
             		render(data);
             	}                
             }
