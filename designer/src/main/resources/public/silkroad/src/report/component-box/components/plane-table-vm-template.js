@@ -6,15 +6,15 @@ define(['template'], function (template) {
         $out+=$escape(id);
         $out+='">\r\n    <div class="di-o_o-line">\r\n        <div id="';
         $out+=$escape(id);
-        $out+='-exhibition" class="ui-table-fieldset-exhibition"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="vu-table" data-o_o-di="';
-        $out+=$escape(id);
-        $out+='-vu-table" style="height: 160px;"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="" data-o_o-di="';
-        $out+=$escape(id);
-        $out+='-vu-table-pager"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="" data-o_o-di="';
+        $out+='-exhibition" class="ui-table-fieldset-exhibition"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div data-o_o-di="';
         $out+=$escape(id);
         $out+='-vu-table-fieldsFilter"></div>\r\n        <div class="di-o_o-item" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table-download"></div>\r\n    </div>\r\n</div>';
+        $out+='-vu-table-download" style="display: inline-block;float: right;"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="vu-table" data-o_o-di="';
+        $out+=$escape(id);
+        $out+='-vu-table" style="height: 160px;"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="" data-o_o-di="';
+        $out+=$escape(id);
+        $out+='-vu-table-pager"></div>\r\n    </div>\r\n\r\n</div>';
         return $out;
     }
     return { render: anonymous };

@@ -746,7 +746,7 @@ $namespace('di.shared.ui');
         this.$sync(this.getModel(), 'DATA', options, this.$di('getEvent'));
     };
 
-    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (id, field, text, isMessure) {
+    DI_PLANE_TABLE_CLASS.$handleSetFieldInfo = function (id, field, text, isMeasure) {
         var that = this;
         var condition,defaultValue,conditionText;
         if (!that._uTable.fieldSetList) {
@@ -778,7 +778,7 @@ $namespace('di.shared.ui');
         var html = [
             '<div class="ui-table-field-set-item">',
             '<select id="rptuiFieldSetCondition">',
-                isMessure == 'true' ? messureOptions : options,
+                isMeasure == 'true' ? messureOptions : options,
             '</select>',
             '<input type="text" id="rptuiFieldSetDefaultValue" value="', defaultValue, '" placeholder="默认值" />',
             '</div>'
@@ -883,6 +883,7 @@ $namespace('di.shared.ui');
         var target = q('span-'+ id, oExhibition)[0];
         var parent = getParent(target);
         remove(parent);
+        delete this._uTable.fieldSetList[id];
     };
 
 })();

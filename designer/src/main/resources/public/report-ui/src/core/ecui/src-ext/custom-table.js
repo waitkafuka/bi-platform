@@ -333,8 +333,8 @@
                 var field = oTh.getAttribute('data-field');
                 var id = oTh.getAttribute('data-id');
                 var text = oTh.getAttribute('data-title');
-                var isMessure = oTh.getAttribute('data-messure');
-                triggerEvent(control, 'fieldset', null, [id, field, text, isMessure]);
+                var isMeasure = oTh.getAttribute('data-measure');
+                triggerEvent(control, 'fieldset', null, [id, field, text, isMeasure]);
             },
             'click input.ui-table-checkbox-all': function (event, control) {
                 control.$refreshCheckbox(this.checked);
@@ -428,8 +428,8 @@
             if (o.orderby) {
                 attrStr.push('data-orderby="' + o.orderby + '" ');
             }
-            if (o.isMessure) {
-                attrStr.push('data-messure="' + o.isMessure + '" ');
+            if (o.isMeasure) {
+                attrStr.push('data-measure="' + o.isMeasure + '" ');
             }
             html.push(attrStr.join(''), classStr);
             html.push('>');

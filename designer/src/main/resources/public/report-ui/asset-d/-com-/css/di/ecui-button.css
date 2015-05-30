@@ -265,3 +265,6 @@
 .ui-download-btn .ui-button-text {
     vertical-align: middle;
 }
+.ui-download-btn .ui-button-text {
+    display: inline-block;
+}

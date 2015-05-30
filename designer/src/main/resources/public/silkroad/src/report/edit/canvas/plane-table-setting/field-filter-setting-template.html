@@ -11,7 +11,7 @@ var demoData = {
     <span class="field-id" data-id="{{$data.id}}" title="{{$data.text}}">{{$data.text}}</span>
     <input class="field-name" value="{{$data.name}}" placeholder="名称"/>
     <select class="condition">
-        {{if !$data.isMessure}}
+        {{if !$data.isMeasure}}
         <option value="EQ" {{if $data.sqlCondition=='EQ'}}selected=selected {{/if}}>等于</option>
         <option value="NOT_EQ" {{if $data.sqlCondition=='NOT_EQ'}}selected=selected {{/if}}>不等于</option>
         <option value="LT" {{if $data.sqlCondition=='LT'}}selected=selected {{/if}}>小于</option>

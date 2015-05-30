@@ -20,6 +20,7 @@
 }
 .fields-filter {
     color: #3C78A2;
+    display: inline-block;
 }
 
 .fields-filter .ui-button-hover {
