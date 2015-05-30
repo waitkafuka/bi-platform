@@ -131,7 +131,7 @@ $namespace('di.shared.vui');
                 null,
                 {
                     text: options.cancelText || '取消',
-                    skin: ''
+                    skin: 'ui-button-g'
                 }
             );
 

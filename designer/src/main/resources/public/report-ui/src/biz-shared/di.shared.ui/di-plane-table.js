@@ -542,7 +542,8 @@ $namespace('di.shared.ui');
                 componentId: this.$di('getId').split('.')[1],
                 elementId: id,
                 orderbyParamKey: orderbyParamKey,
-                sortType: sortType
+                sortType: sortType,
+                pageSize: this._uPager ? this._uPager.getPageSize() : void 0
             }
         );
     };
@@ -840,9 +841,10 @@ $namespace('di.shared.ui');
                 else {
                     valStr = curField.conditionText + '&nbsp;' + curField.defaultValue;
                 }
+                valStr = curField.text + '&nbsp;' + valStr;
                 spanStr = [
                     '<span class="span-', id, '" title="', valStr, '" data-id="', id, '">',
-                    curField.text, '&nbsp;', valStr,
+                        valStr,
                     '</span>'
                 ];
                 html.push(

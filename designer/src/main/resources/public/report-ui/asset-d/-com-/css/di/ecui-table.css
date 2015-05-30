@@ -401,6 +401,7 @@
     width: 20px;
     height: 16px;
     color: #E7F9FE;
+    cursor: pointer;
 }
 
 .ui-table-expand-background {

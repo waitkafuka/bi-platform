@@ -1253,12 +1253,14 @@
 
         if (orderby = this.getOuter().getAttribute('data-orderby')) {
             var pos = getCellPosition(this.getOuter());
-            triggerEvent(
-                tableCtrl,
-                'sort',
-                null,
-                [tableCtrl._aColDefine[(tableCtrl._nLeftLock || 0) + pos.x]]
-            );
+            if (pos) {
+                triggerEvent(
+                    tableCtrl,
+                    'sort',
+                    null,
+                    [tableCtrl._aColDefine[(tableCtrl._nLeftLock || 0) + pos.x]]
+                );
+            }
         }
     };
 

@@ -61,7 +61,7 @@ change:     切换了分页
                 
                 html.push('<div class="'+ type +'-sum">共<em></em>条记录</div>');
                 html.push('<div class="ui-pager"></div>');
-                html.push('<div class="'+ type +'-pagesize"><span class="' + type + '-text">每页显示</span><select class="ui-select" style="width:40px">');
+                html.push('<div class="'+ type +'-pagesize"><span class="' + type + '-text">每页显示</span><select class="ui-select" style="width:55px">');
                 for (i = 0, len = UI_EXT_PAGER.PAGE_SIZE.length; i < len; i++) {
                     html.push('<option value="'+ UI_EXT_PAGER.PAGE_SIZE[i] +'">' + UI_EXT_PAGER.PAGE_SIZE[i] + '</option>');
                 }
@@ -102,7 +102,8 @@ change:     切换了分页
         DEFAULT_PAGE_SIZE = 50;
         
 
-    UI_EXT_PAGER.PAGE_SIZE = [20, 50, 80];
+    // UI_EXT_PAGER.PAGE_SIZE = [20, 50, 80];
+    UI_EXT_PAGER.PAGE_SIZE = [1000];
 
     UI_EXT_PAGER_CLASS.init = function () {
         this._uPager.init();
