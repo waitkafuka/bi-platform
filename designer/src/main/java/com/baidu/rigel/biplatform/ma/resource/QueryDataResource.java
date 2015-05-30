@@ -1056,7 +1056,7 @@ public class QueryDataResource extends BaseResource {
                 }
                 // 设置当前页
                 if (StringUtils.hasLength(request.getParameter("currentPage"))) {
-                    pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")));
+                    pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")) -1 );
                 }
                 // 设置总的记录数
                 if (StringUtils.hasLength(request.getParameter("totalRecordCount"))) {
@@ -1093,8 +1093,11 @@ public class QueryDataResource extends BaseResource {
                 Map<String, Object> data = (Map<String, Object>) rs.getData();
                 if (data.containsKey("head") && data.containsKey("pageInfo") && data.containsKey("data")) {
                     PageInfo page = (PageInfo) data.get("pageInfo");
-                    page.setCurrentPage(pageInfo.getCurrentPage());
+                    page.setCurrentPage(pageInfo.getCurrentPage() + 1);
                     page.setPageSize(pageInfo.getPageSize());
+                    if (pageInfo.getTotalRecordCount() != -1) {
+                        page.setTotalRecordCount(pageInfo.getTotalRecordCount());                        
+                    }
                     data.put("pageInfo", page);
                     rs.setData(data);                
                 }

@@ -408,7 +408,7 @@ public final class DataModelUtils {
      * @param formatModel
      * @return
      */
-    public static List<PlaneTableColDefine> getColDefinesInOrder(Cube cube, LogicModel logicModel, 
+    private static List<PlaneTableColDefine> getColDefinesInOrder(Cube cube, LogicModel logicModel, 
             List<Column> columns, FormatModel formatModel) {
         
         List<PlaneTableColDefine> colDefines = Lists.newArrayList();
@@ -427,7 +427,7 @@ public final class DataModelUtils {
                 if((column.tableName + "." + column.name).equals(key)) {
                     PlaneTableColDefine colDefine = new PlaneTableColDefine();
                     // 设置列的id
-                    colDefine.setElementId(items[itemIndex].getOlapElementId());
+                    colDefine.setId(items[itemIndex].getOlapElementId());
                     // 设置表头
                     colDefine.setTitle(column.caption);
                     // 设置表域名称
@@ -440,7 +440,7 @@ public final class DataModelUtils {
                         if (StringUtils.isEmpty(tips)) {
                             tips = name;
                         }
-                        colDefine.setTips(tips);
+                        colDefine.setToolTip(tips);
                     }
                     // 设置文本对齐信息
                     if (textAlignFormat != null) {
@@ -1439,7 +1439,7 @@ public final class DataModelUtils {
         for (int i = 0; i<totalRecordSize ; i++) {
             Map<String, String> rowBasedData = rowBasedDatas.get(i);
             for (String key : keys) {
-                rs.append(rowBasedData.get(key.split(".")[1]) + ",");
+                rs.append(rowBasedData.get(key.split("\\.")[1]) + ",");
             }
             rs.replace(rs.length()-1, rs.length(), "");
             rs.append("\r\n");

@@ -1555,9 +1555,9 @@ public class ReportDesignModelResource extends BaseResource {
                 data.put("sqlCondition", condition.getSQLCondition());
                 data.put("defaultValue", condition.getDefaultValue());
                 // TODO 判断是维度还是指标
-                data.put("isMeasure", String.valueOf(cube.getMeasures().containsKey(elementId)));                
+                data.put("isMeasure", cube.getMeasures().containsKey(elementId));                
             } else {
-                data.put("isMeasure", String.valueOf(cube.getMeasures().containsKey(elementId)));
+                data.put("isMeasure", cube.getMeasures().containsKey(elementId));
             }
             result.setStatus(0);
             result.setData(data);
