@@ -110,6 +110,9 @@ public class UniversalContextSettingFilter implements Filter {
                     && StringUtils.isEmpty(productLine)) {
                 httpResponse.addCookie (new Cookie("prevReq", httpRequest.getRequestURI ()));
                 httpResponse.sendRedirect("home.html");
+            } else if (httpRequest.getRequestURI().endsWith("home.html")) {
+                httpResponse.addCookie (new Cookie("prevReq", 
+                        httpRequest.getRequestURI ().replace ("home.html", "index.html")));
             }
             setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
         } catch(Exception e) {
