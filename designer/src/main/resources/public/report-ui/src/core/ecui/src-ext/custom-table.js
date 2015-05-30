@@ -308,7 +308,7 @@
 
         // 默认处理函数
         DEFAULT_EVENTS = {
-            
+
             'click div.ui-table-hcell-sort-def': function (event, control) {
                 // var field = this.getAttribute('data-field'),
                 var oTh = dom.getParent(dom.getParent(this));

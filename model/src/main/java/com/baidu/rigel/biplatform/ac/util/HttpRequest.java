@@ -477,8 +477,8 @@ public class HttpRequest {
                         Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
                                 .register(NO_CHECK_COOKIES, cookieSpecProvider)
                                 .build();
-                        String socketTimeout = "50000";
-                        String connTimeout = "1000";
+                        String socketTimeout = "1800000";
+                        String connTimeout = "1800000";
                         if (params != null) {
                             if (params.containsKey(SOCKET_TIME_OUT)) {
                                 socketTimeout = params.get(SOCKET_TIME_OUT);
@@ -556,7 +556,10 @@ public class HttpRequest {
     public static String sendPost(String url, String hql) {
         try {
             long current = System.currentTimeMillis ();
-            HttpClient client = getDefaultHttpClient(Collections.unmodifiableMap(Maps.newHashMap ()));
+            Map<String, String> params = Maps.newConcurrentMap ();
+            params.put(SOCKET_TIME_OUT, "1800000");
+            params.put(CONNECTION_TIME_OUT, "1800000");
+            HttpClient client = getDefaultHttpClient(params);
             HttpUriRequest request = RequestBuilder.post()
                     .setUri(url) 
                     .setEntity (new StringEntity (hql))

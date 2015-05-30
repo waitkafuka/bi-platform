@@ -330,7 +330,8 @@ $namespace('di.helper');
                     action: onconfirm 
                 },
                 { 
-                    text: '取消', 
+                    text: '取消',
+                    className: 'ui-button-g',
                     action: oncancel 
                 }
             ], 

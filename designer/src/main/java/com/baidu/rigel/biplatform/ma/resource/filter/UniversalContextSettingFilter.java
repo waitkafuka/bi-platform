@@ -105,7 +105,10 @@ public class UniversalContextSettingFilter implements Filter {
                 sessionId = generateSessionId(httpResponse);
             }
             LOG.info("productLine in token is " + productLine + " and sessionId is " + sessionId);
-            if (httpRequest.getRequestURI().endsWith("index.html") && StringUtils.isEmpty(productLine)) {
+            if ((httpRequest.getRequestURI().endsWith("index.html") 
+                    || httpRequest.getRequestURI().endsWith("report.html") )
+                    && StringUtils.isEmpty(productLine)) {
+                httpResponse.addCookie (new Cookie("prevReq", httpRequest.getRequestURI ()));
                 httpResponse.sendRedirect("home.html");
             }
             setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
