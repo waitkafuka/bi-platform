@@ -466,11 +466,14 @@ public final class DataModelUtils {
                     }
                     colDefine.setIsMeasure(isMeasure);
                     // TODO 设置OrderBy属性
+                    colDefine.setOrderby("desc");
                     // 添加到列属性信息列表中
                     colDefines.add(colDefine); 
                     break;
                 }
             }
+            // 更新索引
+            itemIndex++;
         }       
         return colDefines;
     }

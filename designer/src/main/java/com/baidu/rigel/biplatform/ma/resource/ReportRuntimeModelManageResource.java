@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
@@ -126,21 +127,23 @@ public class ReportRuntimeModelManageResource extends BaseResource{
 
         // 设置维度，如果在LogicModel中则设置为选中，否则不选中；指标处理类似
         cube.getDimensions().forEach((k, dim) -> {
-            Map<String, Object> map = Maps.newHashMap();
-            boolean isInLogicModel = false;
-            map.put("id", dim.getId());
-            map.put("name", dim.getCaption());
-            for (Item item : items) {
-                if (item.getOlapElementId().equals(dim.getId())) {
-                    map.put("selected", true);
-                    isInLogicModel = true;
-                    break;
+            if (dim.getType() != DimensionType.TIME_DIMENSION) {
+                Map<String, Object> map = Maps.newHashMap();
+                boolean isInLogicModel = false;
+                map.put("id", dim.getId());
+                map.put("name", dim.getCaption());
+                for (Item item : items) {
+                    if (item.getOlapElementId().equals(dim.getId())) {
+                        map.put("selected", true);
+                        isInLogicModel = true;
+                        break;
+                    }
                 }
+                if (!isInLogicModel) {
+                    map.put("selected", false);
+                }
+                cols.add(map);                
             }
-            if (!isInLogicModel) {
-                map.put("selected", false);
-            }
-            cols.add(map);
         });
         cube.getMeasures().forEach((k, m) -> {
             Map<String, Object> map = Maps.newHashMap();
@@ -266,7 +269,8 @@ public class ReportRuntimeModelManageResource extends BaseResource{
                 // 替换原有条件
                 oldConditions.put(id, planeTableCondition);
                 model.setPlaneTableConditions(oldConditions);
-
+                
+                runTimeModel.setModel(model);
                 // 更新报表模型
                 reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
 //                reportModelCacheManager.updateReportModelToCache(reportId, model);
@@ -322,13 +326,22 @@ public class ReportRuntimeModelManageResource extends BaseResource{
 
         // 获取该element对应的平面表条件信息
         Map<String, PlaneTableCondition> oldConditionsMap = model.getPlaneTableConditions();
+        // 参数名称
+        String conditionName = null;
         // 删除对应条件
         if (oldConditionsMap.containsKey(elementId)) {
+            conditionName = oldConditionsMap.get(elementId).getName();
             oldConditionsMap.remove(elementId);
         }
         model.setPlaneTableConditions(oldConditionsMap);
+        runTimeModel.setModel(model);
+        // TODO 仔细考虑
+        runTimeModel.getContext().getParams().remove(elementId);
+        runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(elementId);
+        runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(conditionName);
+//        runTimeModel.getQueryActions().clear();
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        reportModelCacheManager.updateReportModelToCache(reportId, model);
+//        reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remove planeTable condition in runtime phase");
         result.setStatus(0);
         result.setData(model);
@@ -357,14 +370,14 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         String sort = request.getParameter("sortType");
         // 获取排序方式
         ResponseResult result = new ResponseResult();
-        if (StringUtils.isEmpty(sort)) {
-            sort = "NONE";
-        }
-        if (sort.equalsIgnoreCase("NONE") || sort.equalsIgnoreCase("ASC")) {
-            sort = "DESC";
-        } else if (sort.equalsIgnoreCase("DESC")) {
-            sort = "ASC";
-        }
+//        if (StringUtils.isEmpty(sort)) {
+//            sort = "NONE";
+//        }
+//        if (sort.equalsIgnoreCase("NONE") || sort.equalsIgnoreCase("ASC")) {
+//            sort = "DESC";
+//        } else if (sort.equalsIgnoreCase("DESC")) {
+//            sort = "ASC";
+//        }
 
         // 获取运行态模型
         ReportRuntimeModel runTimeModel = null;
@@ -434,17 +447,17 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         }
         
         // 对返回结果进行处理，用于表、图显示
-        ResponseResult rs = queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, area, 
+        result = queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, area, 
                 resultSet, areaContext, queryAction);
         // 维护平面表分页信息
-        if (rs.getStatus() == 0) {
-            Map<String, Object> data = (Map<String, Object>) rs.getData();
+        if (result.getStatus() == 0) {
+            Map<String, Object> data = (Map<String, Object>) result.getData();
             if (data.containsKey("head") && data.containsKey("pageInfo") && data.containsKey("data")) {
                 PageInfo page = (PageInfo) data.get("pageInfo");
                 page.setCurrentPage(pageInfo.getCurrentPage() + 1);
                 page.setPageSize(pageInfo.getPageSize());
                 data.put("pageInfo", page);
-                rs.setData(data);
+                result.setData(data);
             }
         }
         // 更新本次操作结果
@@ -455,8 +468,8 @@ public class ReportRuntimeModelManageResource extends BaseResource{
                 " as " + orderDesc.getOrderType() + " for planeTable ");
         logger.info("[INFO]sort planeTable cost : " + (System.currentTimeMillis() - begin) + " ms" );
         result.setStatus(0);
-        result.setData(model);
-        result.setStatusInfo("successfully remove planeTable condition in runtime phase ");
+//        result.setData(model);
+        result.setStatusInfo("successfully sort plane table in runtime phase ");
         return result;
     }
 
@@ -480,9 +493,15 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         } else if (dimensions.containsKey(elementId)) {
             // 如果待排序列为维度
             Dimension dimension = dimensions.get(elementId);
-            Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
-            // 指定排序的名称、排序方式，最后一个暂不解析
-            return new MeasureOrderDesc(l.getName(), sort, 500);
+            if (dimension.getType() == DimensionType.TIME_DIMENSION) {
+                Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+                // 指定排序的名称、排序方式，最后一个暂不解析
+                return new MeasureOrderDesc(l.getFactTableColumn(), sort, 500);   
+            } else {
+                Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+                // 指定排序的名称、排序方式，最后一个暂不解析
+                return new MeasureOrderDesc(l.getName(), sort, 500);                
+            }
         }
         return null;
     }
