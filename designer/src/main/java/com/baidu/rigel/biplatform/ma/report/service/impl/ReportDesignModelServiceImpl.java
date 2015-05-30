@@ -166,6 +166,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                         && area.getType () != ExtendAreaType.LITEOLAP_TABLE
                         && area.getType() != ExtendAreaType.CHART
                         && area.getType () != ExtendAreaType.LITEOLAP_CHART)
+                        || area.getType () == ExtendAreaType.PLANE_TABLE
                         || QueryUtils.isFilterArea(area.getType())) {
                     continue;
                 }
@@ -218,7 +219,7 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 			if (listFile == null || listFile.length == 0) {
 				return new ReportDesignModel[0];
 			}
-			ReportDesignModel[] modelList = buildResult(listFile);
+			ReportDesignModel[] modelList = buildResult(listFile, released);
 			List<ReportDesignModel> reportList = Arrays.asList(modelList);
 			Collections.sort(reportList, new Comparator<ReportDesignModel>() {
 
@@ -245,11 +246,17 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 	 * 通过文件内容构建报表模型
 	 * 
 	 * @param listFile
+	 * @param released 
 	 * @return
 	 */
-	private ReportDesignModel[] buildResult(String[] listFile) {
+	private ReportDesignModel[] buildResult(String[] listFile, boolean released) {
 		final List<ReportDesignModel> rs = new ArrayList<ReportDesignModel>();
-		final String reportDir = getDevReportDir();
+		String reportDir = null; 
+		if (released) {
+		    reportDir = this.getReleaseReportDir ();
+		} else {
+		    reportDir = getDevReportDir();
+		}
 		for (final String f : listFile) {
 			if (f.contains(".")) {
 				continue;

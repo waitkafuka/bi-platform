@@ -308,11 +308,13 @@
 
         // 默认处理函数
         DEFAULT_EVENTS = {
-            
+
             'click div.ui-table-hcell-sort-def': function (event, control) {
                 // var field = this.getAttribute('data-field'),
-                var field = dom.getParent(dom.getParent(this)).getAttribute('data-field'),
-                    orderby;
+                var oTh = dom.getParent(dom.getParent(this));
+                var field = oTh.getAttribute('data-field');
+                var id = oTh.getAttribute('data-id');
+                var orderby;
 
                 if (this.className.indexOf('-sort-desc') >= 0) {
                     orderby = 'asc';
@@ -324,13 +326,15 @@
                     orderby = this.getAttribute('data-orderby') || 'desc';
                 }
 
-                triggerEvent(control, 'sort', null, [field, orderby.toUpperCase()]);
+                triggerEvent(control, 'sort', null, [field, orderby.toUpperCase(), id]);
             },
             'click div.ui-table-hcell-field-set': function (event, control) {
                 var oTh = dom.getParent(dom.getParent(this));
                 var field = oTh.getAttribute('data-field');
-                var isMessure = oTh.getAttribute('data-messure');
-                triggerEvent(control, 'fieldset', null, [field, isMessure]);
+                var id = oTh.getAttribute('data-id');
+                var text = oTh.getAttribute('data-title');
+                var isMeasure = oTh.getAttribute('data-measure');
+                triggerEvent(control, 'fieldset', null, [id, field, text, isMeasure]);
             },
             'click input.ui-table-checkbox-all': function (event, control) {
                 control.$refreshCheckbox(this.checked);
@@ -364,6 +368,15 @@
 
             if (Object.prototype.toString.call(o.field) == '[object String]') {
                 html.push(o.field, '" ');
+            }
+
+            if (Object.prototype.toString.call(o.id) == '[object String]') {
+                html.push('data-id="');
+                html.push(o.id, '" ');
+            }
+            if (o.title) {
+                html.push('data-title="');
+                html.push(o.title, '" ');
             }
 
             if (o.width) {
@@ -415,8 +428,8 @@
             if (o.orderby) {
                 attrStr.push('data-orderby="' + o.orderby + '" ');
             }
-            if (o.isMessure) {
-                attrStr.push('data-messure="' + o.isMessure + '" ');
+            if (o.isMeasure) {
+                attrStr.push('data-measure="' + o.isMeasure + '" ');
             }
             html.push(attrStr.join(''), classStr);
             html.push('>');
@@ -745,18 +758,6 @@
 
         // 行选中
         this.$initRowChecked();
-        //attachEvent(headEl, 'mouseover', headMouseOver);
-        var mainEl = this.$di('getEl');
-        var type = this.getType();
-        var headEl = dom.getElementsByClass(mainEl, 'div', type + '-head')[0];
-        //attachEvent(headEl, 'click', fieldSet);
-        function fieldSet(ev) {
-            var oEv = ev || window.event;
-            var target = oEv.target || oEv.srcElement;
-            if (hasClass(target, type + '-hcell-field-set')) {
-                alert();
-            }
-        }
     };
 
     /**

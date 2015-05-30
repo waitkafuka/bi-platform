@@ -46,8 +46,6 @@ import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
@@ -57,13 +55,12 @@ import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
-import com.baidu.rigel.biplatform.ma.model.utils.DBUrlGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -144,7 +141,15 @@ public final class QueryUtils {
 //        updateLogicCubeWithSlices(cube, tmp,
 //                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
-        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
+        try {
+            DataSourceInfo dataSource = DataSourceConnectionServiceFactory
+                    .getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ())
+                    .parseToDataSourceInfo (dsDefine, securityKey);
+            questionModel.setDataSourceInfo (dataSource);
+        } catch (Exception e) {
+            throw new RuntimeException (e);
+        }
+//        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
         if (orderDesc != null) {
             SortType sortType = SortType.valueOf(orderDesc.getOrderType());
@@ -291,28 +296,28 @@ public final class QueryUtils {
      * @param dsDefine
      * @return DataSourceInfo
      */
-    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
-        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
-        ds.setDBProxy(true);
-        try {
-            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
-        } catch (Exception e) {
-        }
-        ds.setUsername(dsDefine.getDbUser());
-        ds.setProductLine(dsDefine.getProductLine());
-        ds.setInstanceName(dsDefine.getDbInstance());
-        List<String> hosts = Lists.newArrayList();
-        hosts.add(dsDefine.getHostAndPort());
-        ds.setHosts(hosts);
-        List<String> jdbcUrls = Lists.newArrayList();
-        try {
-            jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
-        } catch (Exception e) {
-        }
-        ds.setDataBase(DataBase.valueOf(dsDefine.getDataSourceType().name()));
-        ds.setJdbcUrls(jdbcUrls);
-        return ds;
-    }
+//    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
+//        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
+//        ds.setDBProxy(true);
+//        try {
+//            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
+//        } catch (Exception e) {
+//        }
+//        ds.setUsername(dsDefine.getDbUser());
+//        ds.setProductLine(dsDefine.getProductLine());
+//        ds.setInstanceName(dsDefine.getDbInstance());
+//        List<String> hosts = Lists.newArrayList();
+//        hosts.add(dsDefine.getHostAndPort());
+//        ds.setHosts(hosts);
+//        List<String> jdbcUrls = Lists.newArrayList();
+//        try {
+//            jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
+//        } catch (Exception e) {
+//        }
+//        ds.setDataBase(DataBase.valueOf(dsDefine.getDataSourceType().name()));
+//        ds.setJdbcUrls(jdbcUrls);
+//        return ds;
+//    }
     
     /**
      * 通过查询

@@ -11,7 +11,7 @@ define(['template'], function (template) {
         $out+='</span>\r\n    <input class="field-name" value="';
         $out+=$escape($data.name);
         $out+='" placeholder="名称"/>\r\n    <select class="condition">\r\n        ';
-        if(!$data.isMessure){
+        if(!$data.isMeasure){
         $out+='\r\n        <option value="EQ" ';
         if($data.sqlCondition=='EQ'){
         $out+='selected=selected ';
@@ -24,7 +24,7 @@ define(['template'], function (template) {
         if($data.sqlCondition=='LT'){
         $out+='selected=selected ';
         }
-        $out+='>小</option>\r\n        <option value="GT" ';
+        $out+='>小于</option>\r\n        <option value="GT" ';
         if($data.sqlCondition=='GT'){
         $out+='selected=selected ';
         }

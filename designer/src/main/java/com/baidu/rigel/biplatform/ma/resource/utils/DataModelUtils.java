@@ -408,7 +408,7 @@ public final class DataModelUtils {
      * @param formatModel
      * @return
      */
-    public static List<PlaneTableColDefine> getColDefinesInOrder(Cube cube, LogicModel logicModel, 
+    private static List<PlaneTableColDefine> getColDefinesInOrder(Cube cube, LogicModel logicModel, 
             List<Column> columns, FormatModel formatModel) {
         
         List<PlaneTableColDefine> colDefines = Lists.newArrayList();
@@ -416,12 +416,18 @@ public final class DataModelUtils {
         Map<String, String> dataFormat = formatModel.getDataFormat();
         Map<String, String> toolTips = formatModel.getToolTips ();
         Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
-        List<String> keys = getKeysInOrder(cube, logicModel);       
+        List<String> keys = getKeysInOrder(cube, logicModel);   
+        Item[] items = logicModel.getColumns();
+        
+        // Item的索引
+        int itemIndex = 0;
         // 构建列属性
         for (String key : keys) {
             for (Column column : columns) {
                 if((column.tableName + "." + column.name).equals(key)) {
                     PlaneTableColDefine colDefine = new PlaneTableColDefine();
+                    // 设置列的id
+                    colDefine.setId(items[itemIndex].getOlapElementId());
                     // 设置表头
                     colDefine.setTitle(column.caption);
                     // 设置表域名称
@@ -434,7 +440,7 @@ public final class DataModelUtils {
                         if (StringUtils.isEmpty(tips)) {
                             tips = name;
                         }
-                        colDefine.setTips(tips);
+                        colDefine.setToolTip(tips);
                     }
                     // 设置文本对齐信息
                     if (textAlignFormat != null) {
@@ -460,11 +466,14 @@ public final class DataModelUtils {
                     }
                     colDefine.setIsMeasure(isMeasure);
                     // TODO 设置OrderBy属性
+                    colDefine.setOrderby("desc");
                     // 添加到列属性信息列表中
                     colDefines.add(colDefine); 
                     break;
                 }
             }
+            // 更新索引
+            itemIndex++;
         }       
         return colDefines;
     }

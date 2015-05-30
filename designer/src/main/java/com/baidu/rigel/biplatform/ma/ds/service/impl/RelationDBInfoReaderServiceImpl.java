@@ -76,7 +76,7 @@ public class RelationDBInfoReaderServiceImpl implements
 					ColumnInfo info = new ColumnInfo();
 					info.setId(colName);
 	                info.setName(colName);
-	                info.setComment(comment);
+	                info.setComment(StringUtils.hasText(comment)? comment : colName);
 					lists.add((T) info);
 				}				
 			} else {

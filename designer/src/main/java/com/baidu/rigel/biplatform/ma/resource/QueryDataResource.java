@@ -1056,7 +1056,7 @@ public class QueryDataResource extends BaseResource {
                 }
                 // 设置当前页
                 if (StringUtils.hasLength(request.getParameter("currentPage"))) {
-                    pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")));
+                    pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")) -1 );
                 }
                 // 设置总的记录数
                 if (StringUtils.hasLength(request.getParameter("totalRecordCount"))) {
@@ -1093,8 +1093,11 @@ public class QueryDataResource extends BaseResource {
                 Map<String, Object> data = (Map<String, Object>) rs.getData();
                 if (data.containsKey("head") && data.containsKey("pageInfo") && data.containsKey("data")) {
                     PageInfo page = (PageInfo) data.get("pageInfo");
-                    page.setCurrentPage(pageInfo.getCurrentPage());
+                    page.setCurrentPage(pageInfo.getCurrentPage() + 1);
                     page.setPageSize(pageInfo.getPageSize());
+                    if (pageInfo.getTotalRecordCount() != -1) {
+                        page.setTotalRecordCount(pageInfo.getTotalRecordCount());                        
+                    }
                     data.put("pageInfo", page);
                     rs.setData(data);                
                 }
@@ -2446,108 +2449,4 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
     
-    
-//    /**
-//     * 增加或修改运行时平面表条件
-//     * add by jiangyichao at 2015-05-25, 平面表条件设置或修改
-//     * @return
-//     */
-//    @RequestMapping(value = "/{id}/{elementId}/runtime/planeTableConditions", method = {RequestMethod.POST})
-//    public ResponseResult addOrModifyRuntimePlaneTableCondition(@PathVariable("id") String reportId, 
-//            @PathVariable("elementId") String elementId, HttpServletRequest request) {
-//        logger.info("[INFO] begin query data with new measure");
-//        ResponseResult result = new ResponseResult();
-//        if (StringUtils.isEmpty(reportId)) {
-//            logger.debug("report id is empty");
-//            result.setStatus(1);
-//            result.setStatusInfo("report id is empty");
-//            return result;
-//        }
-//        ReportDesignModel model;
-//        // 获取运行时报表模型
-//        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);        
-//        try {
-//            // 根据运行态取得设计模型
-//            model = getRealModel(reportId, runTimeModel);
-//        } catch (CacheOperationException e) {
-//            logger.info("[INFO]Report model is not in cache! ", e);
-//            result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
-//            return result;
-//        }
-//        
-//        // 获取平面表条件
-//        String conditionStr = request.getParameter("conditions");
-//        // TODO 是否修改
-//        if (!StringUtils.isEmpty(conditionStr)) {
-//            Map<String, PlaneTableCondition> conditions = GsonUtils.fromJson(request.getParameter("conditions"),
-//                    new TypeToken<Map<String, PlaneTableCondition>>(){}.getType());
-//            // 检查平面表条件值是否合理
-//            for (PlaneTableCondition tmpCondition : conditions.values()) {
-//                if (!PlaneTableUtils.checkSQLCondition(tmpCondition.getSQLCondition(), tmpCondition.getDefaultValue())) {
-//                    result.setStatus(1);
-//                    result.setStatusInfo("条件参数设置不合理，请检查！");
-//                    return result;
-//                }
-//            }
-//            
-//            // 获取原有报表的平面表条件信息
-//            Map<String, PlaneTableCondition> oldConditions = model.getPlaneTableConditions();
-//            // 替换原有条件
-//            oldConditions.put(elementId, conditions.get(elementId));
-//            model.setPlaneTableConditions(conditions);
-//        }
-//
-//        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-//        reportModelCacheManager.updateReportModelToCache(reportId, model);
-//        logger.info("successfully add planeTable condition in runtime phase");
-//        result.setStatus(0);
-//        result.setData(model);
-//        result.setStatusInfo("successfully add planeTable condition in runtime phase ");
-//        return result;
-//    }
-//    
-//    /**
-//     * 删除平面表条件信息
-//     * add by jiangyichao at 2015-05-25，删除平面表条件信息
-//     * @param reportId
-//     * @param request
-//     * @return
-//     */
-//    @RequestMapping(value = "/{id}/{elementId}/runtime/planeTableConditions", method = {RequestMethod.GET})
-//    public ResponseResult removeRuntimePlaneTableConditions(@PathVariable("id") String reportId, 
-//            @PathVariable("elementId") String elementId, HttpServletRequest request ) {
-//        ResponseResult result = new ResponseResult();
-//        if (StringUtils.isEmpty(reportId)) {
-//            logger.debug("report id is empty");
-//            result.setStatus(1);
-//            result.setStatusInfo("report id is empty");
-//            return result;
-//        }
-//                
-//        ReportDesignModel model;
-//        // 获取运行时报表模型
-//        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);        
-//        try {
-//            // 根据运行态取得设计模型
-//            model = getRealModel(reportId, runTimeModel);
-//        } catch (CacheOperationException e) {
-//            logger.info("[INFO]Report model is not in cache! ", e);
-//            result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
-//            return result;
-//        }
-//        
-//        // 获取该element对应的平面表条件信息
-//        Map<String, PlaneTableCondition> oldConditionsMap = model.getPlaneTableConditions();
-//        if (oldConditionsMap.containsKey(elementId)) {
-//            oldConditionsMap.remove(elementId);
-//        }
-//        model.setPlaneTableConditions(oldConditionsMap);
-//        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-//        reportModelCacheManager.updateReportModelToCache(reportId, model);
-//        logger.info("successfully remove planeTable condition in runtime phase");
-//        result.setStatus(0);
-//        result.setData(model);
-//        result.setStatusInfo("successfully remove planeTable condition in runtime phase ");
-//        return result;
-//    }
 }

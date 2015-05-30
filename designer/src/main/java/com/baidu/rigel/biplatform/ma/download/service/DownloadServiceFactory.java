@@ -14,6 +14,6 @@ public class DownloadServiceFactory {
      * @return 表格下载服务
      */
     public static DownloadTableDataService getDownloadTableDataService(DownloadType downType) {
-        return DownloadTableDataHelper.getDownloadTableDataService(downType.name() + "_" +downType.getDsType());
+        return DownloadTableDataHelper.getDownloadTableDataService(downType.getName() + "_" +downType.getDsType());
     }
 }

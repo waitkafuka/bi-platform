@@ -33,6 +33,11 @@ public class ReportDesignModelBo implements Serializable {
      * 主题
      */
     private String theme;
+    
+    /**
+     * token
+     */
+    private String token;
 
     /**
      * @return the id
@@ -103,5 +108,20 @@ public class ReportDesignModelBo implements Serializable {
     public void setTheme(String theme) {
         this.theme = theme;
     }
+
+    /**
+     * @return the token
+     */
+    public String getToken() {
+        return token;
+    }
+
+    /**
+     * @param token the token to set
+     */
+    public void setToken(String token) {
+        this.token = token;
+    }
+    
     
 }

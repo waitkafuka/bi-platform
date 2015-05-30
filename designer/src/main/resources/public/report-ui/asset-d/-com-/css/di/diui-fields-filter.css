@@ -1,7 +1,8 @@
 .table-fields-filter-list {
     width: 300px;
     height:300px;
-    border: 1px solid #D0D0D0
+    border: 1px solid #D0D0D0;
+    overflow-y: scroll;
 }
 
 .table-fields-filter-list input {
@@ -20,6 +21,7 @@
 }
 .fields-filter {
     color: #3C78A2;
+    display: inline-block;
 }
 
 .fields-filter .ui-button-hover {
