@@ -417,7 +417,7 @@ public final class DataModelUtils {
         Map<String, String> toolTips = formatModel.getToolTips ();
         Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
         List<String> keys = getKeysInOrder(cube, logicModel);   
-        Item[] items = logicModel.getItems();
+        Item[] items = logicModel.getColumns();
         
         // Item的索引
         int itemIndex = 0;

@@ -32,7 +32,7 @@ public class PlaneTableColDefine implements Serializable{
 	/**
 	 * 样式
 	 */
-	private String format = "I,III.DD";
+	private String format = "";
 	
 	/**
 	 * 对齐方式
