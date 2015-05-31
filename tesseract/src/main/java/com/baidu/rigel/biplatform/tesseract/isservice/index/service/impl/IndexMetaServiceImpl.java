@@ -784,7 +784,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements
 	}
 
 	@Override
-	public IndexMeta assignIndexShard(IndexMeta idxMeta, String clusterName) {
+	public IndexMeta assignIndexShard(IndexMeta idxMeta, String clusterName ) {
 
 		LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN,
 				"assignIndexShard", "[idxMeta:" + idxMeta + "][clusterName:"
@@ -802,7 +802,7 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements
 		// 如果当前索引元数据没有索引分片或者已有的分片已满， 分配索引分片
 		if (idxMeta.getIdxShardList() == null
 				|| idxMeta.getIdxShardList().size() == 0
-				|| isIndexShardFull(idxMeta)) {
+				|| isIndexShardFull(idxMeta) || isIndexShardUpdated(idxMeta)) {
 			Map<Node, Integer> assignedNodeMap = new HashMap<Node, Integer>();
 			assignedNodeMap = this.isNodeService.assignFreeNode(
 					DEFAULT_BLOCK_COUNT, clusterName);
@@ -880,6 +880,22 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements
 				"assignIndexShard", "[idxMeta:" + idxMeta + "]"));
 		return idxMeta;
 
+	}
+	
+	public boolean isIndexShardUpdated(IndexMeta idxMeta){
+		boolean isUpdate=false;
+		if (idxMeta != null && idxMeta.getIdxShardList() != null) {
+			int i = 0;
+			for (; i < idxMeta.getIdxShardList().size(); i++) {
+				if (!idxMeta.getIdxShardList().get(i).isUpdate()) {
+					break;
+				}
+			}
+			if (i >= idxMeta.getIdxShardList().size()) {
+				isUpdate = true;
+			}
+		}
+		return isUpdate;
 	}
 
 	public boolean isIndexShardFull(IndexMeta idxMeta) {
