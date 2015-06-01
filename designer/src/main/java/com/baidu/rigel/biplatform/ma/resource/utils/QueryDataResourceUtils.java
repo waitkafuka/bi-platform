@@ -89,7 +89,7 @@ public class QueryDataResourceUtils {
 			// 获取平面表
 			try {
                 baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
-                                targetArea.getFormatModel());
+                                targetArea.getFormatModel(), action);
                 Map<String, Object> resultMap = Maps.newHashMap();
                 PlaneTable planeTable = (PlaneTable) baseTable;
                 if (planeTable != null) {

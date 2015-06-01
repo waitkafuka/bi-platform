@@ -46,6 +46,8 @@ import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
@@ -342,14 +344,14 @@ public final class DataModelUtils {
      * @param logicModel 逻辑模型
      * @param formatModel 格式模型
      * @param cube cube 立方体
-     * @param oriDataModel 数据模型
+     * @param dataModel 数据模型
      * @return
      */
-    public static PlaneTable transDataModel2PlaneTable(Cube cube, DataModel oriDataModel, 
-            LogicModel logicModel, FormatModel formatModel) {
+    public static PlaneTable transDataModel2PlaneTable(Cube cube, DataModel dataModel, 
+            LogicModel logicModel, FormatModel formatModel, QueryAction queryAction) {
     	// 平面表对象
         PlaneTable planeTable = new PlaneTable();
-        if (oriDataModel == null) {
+        if (dataModel == null) {
             return planeTable;
         }
         if (formatModel == null) {
@@ -362,9 +364,7 @@ public final class DataModelUtils {
 
         
         // 记录转换时间
-        long current = System.currentTimeMillis();
-        DataModel dataModel = oriDataModel;
-        
+        long current = System.currentTimeMillis();        
         // 获取数据模型中的表定义
         TableData tableData = dataModel.getTableData();
         if (tableData == null) {
@@ -373,7 +373,7 @@ public final class DataModelUtils {
         // 表的列定义
         List<Column> columns = tableData.getColumns();
         // 设置平面表列属性信息
-        planeTable.setColDefines(getColDefinesInOrder(cube, logicModel, columns, formatModel));
+        planeTable.setColDefines(getColDefinesInOrder(cube, logicModel, columns, formatModel, queryAction));
         
         // 表的数据定义
         Map<String, List<String>> data = tableData.getColBaseDatas();
@@ -406,10 +406,11 @@ public final class DataModelUtils {
      * @param logicModle
      * @param columns
      * @param formatModel
+     * @param queryAction
      * @return
      */
     private static List<PlaneTableColDefine> getColDefinesInOrder(Cube cube, LogicModel logicModel, 
-            List<Column> columns, FormatModel formatModel) {
+            List<Column> columns, FormatModel formatModel, QueryAction queryAction) {
         
         List<PlaneTableColDefine> colDefines = Lists.newArrayList();
         // 分别获取数据模型、提示信息、文本对齐信息
@@ -419,8 +420,16 @@ public final class DataModelUtils {
         List<String> keys = getKeysInOrder(cube, logicModel);   
         Item[] items = logicModel.getColumns();
         
+        // 获取排序维度或者指标
+        MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
+        // 排序列名称
+        String orderName = orderDesc.getName();
+        // 排序类型
+        String orderType = orderDesc.getOrderType();
         // Item的索引
         int itemIndex = 0;
+        // 是否已经设置排序列
+        boolean setOrder = false;
         // 构建列属性
         for (String key : keys) {
             for (Column column : columns) {
@@ -461,12 +470,21 @@ public final class DataModelUtils {
                                 colDefine.setFormat(formatStr);
                             }
                         } 
+                        // 设置排序信息
+                        if (column.name.equals(orderName) && !setOrder) {
+                            colDefine.setOrderby(orderType.toLowerCase());
+                            setOrder = true;
+                        }
                     } else {
+                        // TODO 之后需要修改
+                        if ((column.tableName + "_" + column.name).equals(orderName) && !setOrder) {
+                            colDefine.setOrderby(orderType.toLowerCase());
+                            setOrder = true;
+                        }
                         colDefine.setFormat(null);
                     }
+                    // 设置维度、指标信息
                     colDefine.setIsMeasure(isMeasure);
-                    // TODO 设置OrderBy属性
-                    colDefine.setOrderby("desc");
                     // 添加到列属性信息列表中
                     colDefines.add(colDefine); 
                     break;
