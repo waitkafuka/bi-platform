@@ -10,7 +10,7 @@
 $namespace('di.shared.ui');
 
 (function () {
-    
+
     //------------------------------------------
     // 引用 
     //------------------------------------------
@@ -43,22 +43,22 @@ $namespace('di.shared.ui');
     $link(function () {
         ARG_HANDLER_FACTORY = di.shared.arg.ArgHandlerFactory;
     });
-        
+
     //------------------------------------------
     // 类型声明 
     //------------------------------------------
 
     /**
      * DI 表视图组件
-     * 
+     *
      * @class
      * @extends xui.XView
      * @param {Object} options
      */
-    var DI_PLANE_TABLE = $namespace().DIPlaneTable = 
+    var DI_PLANE_TABLE = $namespace().DIPlaneTable =
         inheritsObject(INTERACT_ENTITY);
     var DI_PLANE_TABLE_CLASS = DI_PLANE_TABLE.prototype;
-    
+
     //------------------------------------------
     // 常量 
     //------------------------------------------
@@ -128,12 +128,12 @@ $namespace('di.shared.ui');
         var pager = this._uPager;
 
         // 事件绑定
-        for (key in { 
-                'DATA': 1, 
-                'DRILL': 1, 
-                'SORT': 1
-            }
-        ) {
+        for (key in {
+            'DATA': 1,
+            'DRILL': 1,
+            'SORT': 1
+        }
+            ) {
             model.attach(
                 ['sync.preprocess.' + key, this.$syncDisable, this, key],
                 ['sync.result.' + key, this.$renderMain, this],
@@ -203,19 +203,19 @@ $namespace('di.shared.ui');
 
         downloadBtn && (
             downloadBtn.onclick = bind(this.$handleDownload, this)
-        );
+            );
         downloadExcelBtn && (
             downloadExcelBtn.onclick = bind(this.$handleDownloadExcel, this)
-        );
+            );
         offlineDownloadBtn && (
             offlineDownloadBtn.attach('confirm', this.$handleOfflineDownload, this)
-        );
+            );
         fieldsFilterBtn && (
             fieldsFilterBtn.attach('getFieldsList', this.$handleGetFieldsList, this)
-        );
+            );
         fieldsFilterBtn && (
             fieldsFilterBtn.attach('submitFieldsFilter', this.$handleSubmitFieldsFilter, this)
-        );
+            );
         foreachDo(
             [
                 table,
@@ -226,8 +226,19 @@ $namespace('di.shared.ui');
             ],
             'init'
         );
-
         this.$di('getEl').style.display = 'none';
+        // TODO：优化代码
+        var that = this;
+        var mainEl = this.$di('getEl');
+        var oExhibition = q('ui-table-fieldset-exhibition', mainEl)[0];
+        attachEvent(oExhibition, 'click', deleteFieldSetExhibition);
+        function deleteFieldSetExhibition(ev) {
+            var oEv = ev || window.event;
+            var target = oEv.target || oEv.srcElement;
+            if (hasClass(target, 'delete')) {
+                that.$handleDeleteFieldExhibition(getPreviousSibling(target).getAttribute('data-id'));
+            }
+        }
     };
 
     /**
@@ -259,12 +270,12 @@ $namespace('di.shared.ui');
 
         // 视图禁用
         /*
-        var diEvent = this.$di('getEvent');
-        var vd = diEvent.viewDisable;
-        vd && this.getModel().attachOnce(
-            ['sync.preprocess.DATA', vd.disable],
-            ['sync.complete.DATA', vd.enable]
-        );*/
+         var diEvent = this.$di('getEvent');
+         var vd = diEvent.viewDisable;
+         vd && this.getModel().attachOnce(
+         ['sync.preprocess.DATA', vd.disable],
+         ['sync.complete.DATA', vd.enable]
+         );*/
 
         options = assign({ DI_querySessionClear: true }, options);
         if (this._uPager) {
@@ -295,7 +306,7 @@ $namespace('di.shared.ui');
 
     /**
      * 渲染主体
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$renderMain = function (data, ejsonObj, options) {
@@ -479,8 +490,8 @@ $namespace('di.shared.ui');
         // FIXME
         // 参数不一样了，这个是原来olap的，后面修改
         this.$di(
-            'linkBridge', 
-            colDefItem.linkBridge, 
+            'linkBridge',
+            colDefItem.linkBridge,
             URL('PLANE_TABLE_LINK_BRIDGE'),
             this.$di('getCommonParamGetter')(
                 {
@@ -490,11 +501,11 @@ $namespace('di.shared.ui');
                 }
             )
         );
-    };    
+    };
 
-    /**  
+    /**
      * 行点击
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleRowClick = function (rowDefItem) {
@@ -510,9 +521,9 @@ $namespace('di.shared.ui');
         );
     };
 
-    /**  
+    /**
      * 行选中
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleRowCheck = function (eventName, datasourceId, rowData, callback) {
@@ -529,9 +540,9 @@ $namespace('di.shared.ui');
         );
     };
 
-    /**  
+    /**
      * 排序
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleSort = function (orderbyParamKey, sortType, id) {
@@ -549,9 +560,9 @@ $namespace('di.shared.ui');
         );
     };
 
-    /**  
+    /**
      * 行选中
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleRowAsync = function (isFailed, data, ejsonObj, options) {
@@ -574,7 +585,7 @@ $namespace('di.shared.ui');
 
     /**
      * 翻页
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handlePageChange = function (currentPage) {
@@ -593,7 +604,7 @@ $namespace('di.shared.ui');
 
     /**
      * 页数改变
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handlePageSizeChange = function (pageSize) {
@@ -611,11 +622,11 @@ $namespace('di.shared.ui');
 
     /**
      * 数据加载成功
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleDataLoaded = function (data, ejsonObj, options) {
-        var datasourceId = options.datasourceId;    
+        var datasourceId = options.datasourceId;
         var value = this.$di('getValue');
         var args;
         var param = options.args.param;
@@ -657,8 +668,8 @@ $namespace('di.shared.ui');
          * @event
          */
         this.$di(
-            'dispatchEvent', 
-            this.$diEvent('dataloaded', options), 
+            'dispatchEvent',
+            this.$diEvent('dataloaded', options),
             [value]
         );
 
@@ -666,15 +677,15 @@ $namespace('di.shared.ui');
          * 真实使用的查询sql，在此输出
          */
         this.$di(
-            'dispatchEvent', 
-            this.$diEvent('outputexecinfo', options), 
+            'dispatchEvent',
+            this.$diEvent('outputexecinfo', options),
             [{ data: data }]
         );
     };
 
     /**
      * 获取表格数据错误处理
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleDataError = function (status, ejsonObj, options) {
@@ -690,7 +701,7 @@ $namespace('di.shared.ui');
                 this._ufieldsFilterBtn
             ],
             'diShow'
-        ); 
+        );
 
         // 设置空视图
         this.clear();
@@ -711,7 +722,7 @@ $namespace('di.shared.ui');
 
     /**
      * 离线下载错误处理
-     * 
+     *
      * @protected
      */
     DI_PLANE_TABLE_CLASS.$handleOfflineDownloadError = function (status, ejsonObj, options) {
@@ -850,7 +861,7 @@ $namespace('di.shared.ui');
                 valStr = curField.text + '&nbsp;' + valStr;
                 spanStr = [
                     '<span class="span-', id, '" title="', valStr, '" data-id="', id, '">',
-                        valStr,
+                    valStr,
                     '</span>'
                 ];
                 html.push(
@@ -862,15 +873,6 @@ $namespace('di.shared.ui');
             }
         }
         oExhibition.innerHTML = html.join('');
-        detachEvent(oExhibition, 'click', deleteFieldSetExhibition);
-        attachEvent(oExhibition, 'click', deleteFieldSetExhibition);
-        function deleteFieldSetExhibition(ev) {
-            var oEv = ev || window.event;
-            var target = oEv.target || oEv.srcElement;
-            if (hasClass(target, 'delete')) {
-                that.$handleDeleteFieldExhibition(getPreviousSibling(target).getAttribute('data-id'));
-            }
-        }
     };
 
     DI_PLANE_TABLE_CLASS.$handleDeleteFieldExhibition = function(id) {
