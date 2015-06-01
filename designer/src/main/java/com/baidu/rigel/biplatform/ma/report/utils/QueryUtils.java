@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -218,8 +219,15 @@ public final class QueryUtils {
                 for (String str : meta.getCrossjoinDims()) {
                     DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
                     Dimension dim = ((ConfigQuestionModel) questionModel).getCube ().getDimensions ().get (condition.getMetaName ());
-                    if (dim != null && dim.getType () == DimensionType.CALLBACK) {
-                        return false;
+                    if (dim != null && dim.getType () == DimensionType.CALLBACK ) {
+                        if (condition.getQueryDataNodes () != null && condition.getQueryDataNodes ().size () == 1) {
+                            if (MetaNameUtil.isAllMemberUniqueName (condition.getQueryDataNodes ().get (0).getUniqueName ())) {
+                                return false;
+                            }
+                        } else if (CollectionUtils.isEmpty (condition.getQueryDataNodes ())) {
+                            return false;
+                        }
+                        return true;
                     }
                     if (condition.getQueryDataNodes() == null || condition.getQueryDataNodes().isEmpty()) {
                         return false;
