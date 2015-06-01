@@ -23,6 +23,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -253,8 +255,39 @@ public class QueryRequestUtil {
             return result;
         }
         for (String key : valueList) {
-            String sqlKey = String.format(SQL_STRING_FORMAT, key);
-            result.add(sqlKey);
+        	String sqlKey = org.apache.commons.lang.StringEscapeUtils.escapeSql(key);
+        	
+            sqlKey = String.format(SQL_STRING_FORMAT, sqlKey);
+//            Pattern p = Pattern.compile("\\s*|\t*|\r*|\n*");
+//            Matcher m = p.matcher(sqlKey);
+//            String after = m.replaceAll("");
+//            String temp = after.replaceAll("\\p{P}", "");
+//            char[] ch = temp.trim().toCharArray();
+//            float chLength = ch.length;
+//            float count = 0;
+//            
+//            for (int i = 0; i < ch.length; i++) {
+//                char c = ch[i];
+//                if (!Character.isLetterOrDigit(c)) {
+//                	Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+//                    if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+//                            || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+//                            || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+//                            || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+//                            || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+//                            || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+//                        count = count + 1;
+//                    }
+//                }
+//            }
+//            float tmp = count / chLength;
+//            if (tmp > 0.4) {
+//            	continue;
+//            }
+            if (sqlKey.contains("å") || sqlKey.contains("�")) {
+            	continue;
+            }
+            result.add(sqlKey.replace("\\", "\\\\"));
         }
         return result;
     }

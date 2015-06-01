@@ -90,7 +90,7 @@ public final class CallbackServiceInvoker {
 //        	}
 //        }
         LOG.info("[INFO] --- --- begin invoke callback service ... ...");
-        LOG.info("[INFO] --- --- params : {}", params);
+//        LOG.info("[INFO] --- --- params : {}", params);
         LOG.info("[INFO] --- --- request url : {}", url);
         LOG.info("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
         LOG.info("[INFO] --- --- callback type : {}", type.name());
@@ -100,7 +100,7 @@ public final class CallbackServiceInvoker {
             
             String responseStr = HttpRequest.sendPost1(url, params);
             CallbackResponse response = convertStrToResponse(responseStr, type);
-            LOG.info("[INFO] --- --- resposne : {}", response);
+//            LOG.info("[INFO] --- --- resposne : {}", response);
             LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
             long end = System.currentTimeMillis() - begin;
             LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
@@ -120,7 +120,7 @@ public final class CallbackServiceInvoker {
      * @return CallbackResponse
      */
     private static CallbackResponse convertStrToResponse(String responseStr, CallbackType type) {
-        LOG.info("[INFO] --- --- message received from callback server  is {}", responseStr);
+//        LOG.info("[INFO] --- --- message received from callback server  is {}", responseStr);
         CallbackResponse rs = new CallbackResponse();
         long begin = System.currentTimeMillis();
         if (StringUtils.isEmpty(responseStr)) {

@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -265,7 +266,12 @@ public class SqlQuery {
 				for (int i = 0; i < whereList.size(); i++) {
 					String where = whereList.get(i);
 					sb.append(" ");
-					sb.append(where);
+					try {
+						sb.append(new String(where.getBytes(), "utf-8"));
+					} catch (UnsupportedEncodingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} 
 					if (i < whereList.size() - 1) {
 						sb.append(" and ");
 					}
