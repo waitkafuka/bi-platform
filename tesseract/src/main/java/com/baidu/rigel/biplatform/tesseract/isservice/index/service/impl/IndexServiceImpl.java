@@ -545,7 +545,7 @@ public class IndexServiceImpl implements IndexService {
 		
 		while (dataResultSet.size() != 0) {
 			// 当前数据待处理，获取待处理的索引分片
-			if (currIdxShard == null) {
+			if (currIdxShard == null) {   
 				currIdxShardIdx = this.getIndexShardIdByIndexAction(idxMeta,idxAction);
 				currIdxShard = idxMeta.getIdxShardList().get(
 						currIdxShardIdx);
@@ -1090,7 +1090,9 @@ public class IndexServiceImpl implements IndexService {
 				}
 			}
 			if(result==-1){
-				return getFreeIndexShardIndexForIndex(idxMeta,false);
+				return getFreeIndexShardIndexForIndex(idxMeta,true);
+			}else if(idxAction.equals(IndexAction.INDEX_MERGE) && idxMeta.getIdxShardList().get(result).getIdxShardState().equals(IndexShardState.INDEXSHARD_INDEXED)){
+				idxMeta.getIdxShardList().get(result).setIdxShardState(IndexShardState.INDEXSHARD_UNINIT);
 			}
 		}
 		
@@ -1118,7 +1120,8 @@ public class IndexServiceImpl implements IndexService {
 		for (int i = 0; i < idxMeta.getIdxShardList().size(); i++) {
 			if (idxMeta.getIdxShardList().get(i) != null
 					&& (!this.indexMetaService.isIndexShardFull(idxMeta
-							.getIdxShardList().get(i)) || idxMeta
+							.getIdxShardList().get(i)) && !idxMeta
+							.getIdxShardList().get(i).isUpdate() || idxMeta
 							.getIdxShardList().get(i).getIdxState()
 							.equals(IndexState.INDEX_UNINIT)
 							&& onlyEmpty)) {

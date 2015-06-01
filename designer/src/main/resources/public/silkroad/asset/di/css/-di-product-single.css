@@ -6815,7 +6815,7 @@ button.skin-link-button:hover {
     margin: 0;
     font-size: 12px;
 }
-esui-ui .-tip-title {
+.esui-ui-tip-title {
     margin: 0 0 0.5em;
 }
 .esui-ui-tip-body {
@@ -6941,11 +6941,17 @@ esui-ui .-tip-title {
   * @author dbear
   */
 .esui-ui-tiplayer {
-    background: #fff6bd;
-    border: 1px solid #d5ca81;
-    padding: 5px;
+    background: #fff;
+    border: 1px solid #b3b9bc;
+    padding: 10px 18px 10px;
+    line-height: 1.5em;
     z-index: 1002;
     position: absolute;
+    box-shadow: 0 0 10px #b3b9bc;
+    min-width: 100px;
+    max-width: 200px;
+    word-wrap: break-word;
+    word-break: break-all;
 }
 .esui-ui-tiplayer-rt,
 .esui-ui-tiplayer-rb {
@@ -6974,7 +6980,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-tl {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: -24px -12px;
     background-color: transparent;
@@ -6985,7 +6991,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-tr {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: -36px -12px;
     background-color: transparent;
@@ -6996,7 +7002,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-bl {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: -12px -12px;
     background-color: transparent;
@@ -7007,7 +7013,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-br {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: 0px -12px;
     background-color: transparent;
@@ -7018,7 +7024,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-lt {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: -26px 0px;
     background-color: transparent;
@@ -7029,7 +7035,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-lb {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: -39px 0;
     background-color: transparent;
@@ -7040,7 +7046,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-rt {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: 0 0;
     background-color: transparent;
@@ -7051,7 +7057,7 @@ esui-ui .-tip-title {
 }
 .esui-ui-tiplayer-arrow-rb {
     display: block;
-    background-image: url(img/esesui-ui_transparent.gif);
+    background-image: none;
     background-repeat: no-repeat;
     background-position: -13px 0;
     background-color: transparent;

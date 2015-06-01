@@ -132,7 +132,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
 	private IndexWriter prepareIndexEnv(IndexMessage indexMsg) throws Exception {
 		File idxFile = new File(indexMsg.getIdxPath());
 		File idxServiceFile = new File(indexMsg.getIdxServicePath());
-
+		logger.info("Path:"+idxFile+"--IndexState:"+indexMsg.getIdxShardState());
 		if (indexMsg.getIdxShardState().equals(
 				IndexShardState.INDEXSHARD_UNINIT)
 				|| indexMsg.getIdxShardState().equals(
@@ -160,7 +160,8 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
 		IndexDataResultSet data = null;
 
 		if (indexMsg.getMessageHeader().getAction()
-				.equals(NettyAction.NETTY_ACTION_MOD)) {
+				.equals(NettyAction.NETTY_ACTION_MOD) && !indexMsg.getIdxShardState().equals(
+						IndexShardState.INDEXSHARD_UNINIT)) {
 			// 索引修订
 			// S1:查找索引中存在的数据
 			List<IndexDataResultRecord> dataQ = ((IndexDataResultSet) indexMsg
@@ -194,7 +195,6 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
 					dataProcess.size());
 			data.setDataList(dataProcess);
 		}
-
 		if (data == null) {
 			data = (IndexDataResultSet) indexMsg.getDataBody();
 		}
@@ -265,6 +265,11 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         String feedBackIndexServicePath = null;
         String feedBackIndexFilePath = null;
         // 如果当前分片写满了 or 是当前数据的最后一片，释放indexWriter\设置服务路径
+        
+        List<IndexDataResultRecord> dataQ = ((IndexDataResultSet) indexMsg.getDataBody()).getDataList();
+        if(data.size()!=0 && indexMsg.getMessageHeader ().getAction ().equals (NettyAction.NETTY_ACTION_MOD)){
+        	dataQ.addAll(data.getDataList());
+        }
         long totalDiskSize = FileUtils.getDiskSize (indexMsg.getIdxPath ());
         if (totalDiskSize > indexMsg.getBlockSize () || indexMsg.isLastPiece ()) {
             
@@ -288,6 +293,7 @@ public class IndexServerHandler extends AbstractChannelInboundHandler {
         indexFeedbackMsg.setIdName (indexMsg.getIdName ());
         indexFeedbackMsg.setMaxId (currMaxId);
         indexFeedbackMsg.setIdxShardState(IndexShardState.INDEXSHARD_INDEXING);
+        
         
         logger.info (String.format (
                 LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM,
