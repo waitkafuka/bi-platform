@@ -1043,7 +1043,7 @@ public class IndexMetaServiceTest extends IndexTestBase {
 		idxMeta.setMeasureSet(this.mockMeasure(3));
 		idxMeta.setIndexMetaId("idxMetaId_6");
 		result = this.indexMetaService.mergeIndexMeta(idxMeta);
-		Assert.assertEquals(1, result.getCubeIdSet().size());
+		Assert.assertEquals(1, result.getCubeIdMergeSet().size());
 
 	}
 
