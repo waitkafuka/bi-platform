@@ -1,3 +1,16 @@
+.esui-ui-monthview-month .esui-ui-monthview-month-main
+tbody tr td.esui-ui-monthview-month-item-virtual {
+    color: #c8c8c8;
+}
+.esui-ui-monthview-month .esui-ui-monthview-month-main
+tbody tr td.esui-ui-monthview-month-item-disabled {
+    background: #FFF;
+    color: #c8c8c8;
+}
+.esui-ui-monthview-month-main tbody tr td:nth-last-child(1),
+.esui-ui-monthview-month-main tbody tr td:nth-last-child(2) {
+    color: red;
+}
 .state-hidden {
     display: none !important;
 }
@@ -312,29 +325,28 @@ button.skin-spring-button {
 }
 /** 关闭layer按钮 */
 .skin-layerClose-button {
-    background-image: url(img/esesui-ui.png);
+    background-image: url(img/esui-rangeCalendarClose.png);
     background-repeat: repeat;
-    background-position: -37px -88px;
-    background-color: transparent;
     border: 0 none;
     height: 12px;
     overflow: hidden;
     position: absolute;
-    right: 5px;
-    top: 5px;
-    width: 12px;
+    right: 9px;
+    top: 8px;
+    width: 11px;
     padding: 0;
 }
 .skin-layerClose-button:active {
-    background-image: url(img/esesui-ui.png);
+    background-image: url(img/esui-rangeCalendarClose.png);
     background-repeat: repeat;
-    background-position: -37px -88px;
-    background-color: transparent;
-    border: 1px solid #f6f6f6;
+    border: 0 none;
     height: 12px;
-    width: 12px;
-    right: 4px;
-    top: 4px;
+    overflow: hidden;
+    position: absolute;
+    right: 9px;
+    top: 8px;
+    width: 11px;
+    padding: 0;
 }
 /** 文字按钮 */
 .skin-link-button {
@@ -794,12 +806,16 @@ button.skin-link-button:hover {
 .esui-ui-monthview-month table {
     width: 100%;
 }
+.esui-ui-monthview-month-title, .esui-ui-monthview-month-item {
+    font-size: 12px;
+    color: #000;
+    border: none;
+}
 .esui-ui-monthview-month-title {
     width: 29px;
     height: 21px;
     line-height: 21px;
     background: #f1f1f1;
-    color: #666;
     text-align: center;
 }
 .esui-ui-monthview-month-title-selected {
@@ -810,9 +826,7 @@ button.skin-link-button:hover {
     height: 21px;
     line-height: 21px;
     cursor: pointer;
-    color: #03c;
     text-align: center;
-    border-bottom: 1px solid #f1f1f1;
 }
 .esui-ui-monthview-last-row .esui-ui-monthview-month-item {
     border-bottom: none;
@@ -821,13 +835,12 @@ button.skin-link-button:hover {
     background: #e4eaf9;
 }
 .esui-ui-monthview-month-item-selected {
-    background: #fff6bd;
-    color: #333;
-    font-weight: bold;
+    background: #00aef3;
+    color: #FFF;
 }
 .esui-ui-monthview-month-item-virtual,
 .esui-ui-monthview-month-item-out {
-    color: #888;
+    color: #c8c8c8;
     cursor: default;
     background: #fff;
 }
@@ -835,12 +848,8 @@ button.skin-link-button:hover {
 .esui-ui-monthview-month-item-out:hover {
     background: #fff;
 }
-.esui-ui-monthview-month-item-disabled {
-    background: #ddd;
-    cursor: default;
-}
 .esui-ui-monthview-month-item-disabled:hover {
-    background: #ddd;
+    background: #FFF;
 }
 .esui-ui-monthview-multi-select {
     width: 220px;
@@ -1046,24 +1055,14 @@ button.skin-link-button:hover {
  * @author dbear
  */
 .esui-ui-rangecalendar {
-    border: 1px solid #a9adb6;
-    /*border:1px solid #dde0e9;*/
     width: 200px;
-    height: 23px;
-    line-height: 23px;
-    padding-left: 6px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 0;
+    border: solid 1px #d5d5d5;
+    background: #fff;
     font-size: 12px;
     cursor: pointer;
-    background-color: white;
-    background: transparent;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: -o-linear-gradient(top, #ffffff, #f6f6f6);
-    -moz-border-radius: 3px 3px 3px 3px;
-    -webkit-border-radius: 3px 3px 3px 3px;
-    border-radius: 3px 3px 3px 3px;
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
@@ -1071,7 +1070,7 @@ button.skin-link-button:hover {
     user-select: none;
 }
 .esui-ui-rangecalendar-text {
-    padding-left: 3px;
+    padding-left: 12px;
     float: left;
 }
 .esui-ui-rangecalendar:hover,
@@ -1081,25 +1080,17 @@ button.skin-link-button:hover {
 .esui-ui-rangecalendar-arrow {
     float: right;
     height: 16px;
-    margin-top: 3px;
+    margin-top: 7px;
     margin-right: 5px;
     width: 16px;
-    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px #f3f3f3;
-    background: url(img/esesui-ui-combo-arrow.png), -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ffffff), to(#f6f6f6));
-    background: url(img/esesui-ui-combo-arrow.png), -webkit-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(img/esesui-ui-combo-arrow.png), -moz-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(img/esesui-ui-combo-arrow.png), -ms-linear-gradient(top, #ffffff, #f6f6f6);
-    background: url(img/esesui-ui-combo-arrow.png), -o-linear-gradient(top, #ffffff, #f6f6f6);
+    background: url(img/esesui-ui-combo-arrow.png) no-repeat scroll left -9px;
     background-repeat: no-repeat, no-repeat;
     background-position: left -9px, 0 0;
 }
 .esui-ui-rangecalendar-layer {
     background: none repeat scroll 0 0 #FFFFFF;
-    border-color: #394459 #A8ADB6 #A8ADB6;
     border-image: none;
-    border-right: 1px solid #A8ADB6;
-    border-style: solid;
-    border-width: 2px 1px 1px;
+    border: 1px solid #A8ADB6;
     padding: 8px;
     width: 430px;
 }
@@ -1108,6 +1099,7 @@ button.skin-link-button:hover {
     height: 20px;
     line-height: 20px;
     padding-right: 10px;
+    display: none;
 }
 .esui-ui-rangecalendar-layer .esui-ui-rangecalendar-shortcut-item {
     color: #3377AA;
@@ -1148,7 +1140,8 @@ button.skin-link-button:hover {
 .esui-ui-rangecalendar-layer .esui-ui-rangecalendar-label {
     font-size: 12px;
     height: 18px;
-    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 1px;
     overflow: hidden;
     zoom: 1;
 }
@@ -3066,4 +3059,41 @@ ol {
 .skin-default-wizard .esui-ui-wizard-node-active span:before {
     border-bottom: 12px solid #44ba0f;
     border-top: 12px solid #44ba0f;
+}
+
+.esui-ui-rangecalendar-layer .esui-ui-rangecalendar-foot .esui-ui-rangecalendar-okBtn,
+.esui-ui-rangecalendar-layer .esui-ui-rangecalendar-foot .esui-ui-rangecalendar-cancelBtn:hover {
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+    padding: 0 20px;
+    background: #00aef3;
+    border: 1px solid #00aef3;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.esui-ui-rangecalendar-layer .esui-ui-rangecalendar-foot .esui-ui-rangecalendar-cancelBtn {
+    height: 30px;
+    line-height: 30px;
+    color: #00aef3;
+    padding: 0 20px;
+    background: #FFF;
+    border: 1px solid #00aef3;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+.esui-ui-select-layer::-webkit-scrollbar
+{
+    width: 5px;
+    background-color: #FFF;
+}
+/*定义滑块 内阴影+圆角*/
+.esui-ui-select-layer::-webkit-scrollbar-thumb
+{
+    border-radius: 5px;
+    background-color: rgb(181, 181, 181);
 }
