@@ -848,9 +848,9 @@ public final class QueryUtils {
                     // TODO 对时间条件和层级条件做特殊处理
                     String requestParam = requestParams.get(condition.getName());
                     // 处理时间条件
-                    requestParam = PlaneTableUtils.handleTimeCondition(requestParam);
+//                    requestParam = PlaneTableUtils.handleTimeCondition(requestParam);
                     // 处理层级条件
-                    requestParam = PlaneTableUtils.handleLayerCondition(requestParam);
+//                    requestParam = PlaneTableUtils.handleLayerCondition(requestParam);
                     rs.put(condition.getElementId(), requestParam);
                 } 
             }); 
