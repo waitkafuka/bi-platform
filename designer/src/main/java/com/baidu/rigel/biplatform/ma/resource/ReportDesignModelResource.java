@@ -1583,7 +1583,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{elementId}/condition", method = {RequestMethod.DELETE})
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/item/{elementId}/type/s", method = {RequestMethod.DELETE})
     public ResponseResult deletePlaneTableConditions(@PathVariable("id") String reportId, @PathVariable("areaId") String areaId, 
             @PathVariable("elementId") String elementId, HttpServletRequest request ) {
         ResponseResult result = new ResponseResult();
@@ -1608,6 +1608,45 @@ public class ReportDesignModelResource extends BaseResource {
             if (conditions.containsKey(elementId)) {
                 conditions.remove(elementId);
             }
+            
+            ExtendArea oriArea = model.getExtendById(areaId);
+            OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(), 
+                    oriArea.getCubeId(), elementId);
+            try {
+                model = manageService.removeItem(model, areaId, elementId, PositionType.S);
+            } catch (ReportModelOperationException e) {
+                logger.error("Fail in remove item(" + elementId + ") from area(" + areaId + ")", e);
+                return ResourceUtils.getErrorResult(e.getMessage(), 1);
+            }
+            if (model == null) {
+                result.setStatus(1);
+                result.setStatusInfo("不能将该列删除");
+                return result;
+            }
+            // remove condition in context
+            
+            // remove unused format define
+            model.getExtendById(areaId).getFormatModel().removeItem(element.getName());
+//            model.getExtendById(areaId).getFormatModel().getDataFormat().remove(element.getId());
+//            model.getExtendById(areaId).getFormatModel().getToolTips().remove(element.getId());
+            if (model.getExtendById(areaId).getFormatModel().getDataFormat().size() == 0) {
+                model.getExtendById(areaId).getFormatModel().reset();
+            }        
+            /**
+             * 配置端，在修改Item以后，需要重新初始化上下文
+             */
+            ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+            runTimeModel.init(model, true, true);
+            if (model.getExtendById(areaId) instanceof LiteOlapExtendArea) {
+                LiteOlapExtendArea area = (LiteOlapExtendArea) model.getExtendById(areaId);
+                runTimeModel.getLocalContextByAreaId(area.getChartAreaId()).reset();
+                runTimeModel.getLocalContextByAreaId(area.getTableAreaId()).reset();
+            }
+            runTimeModel.getContext().removeParam(element.getId());
+            runTimeModel.getLocalContext().values().forEach(ctx -> ctx.removeParam(element.getId()));
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+            reportModelCacheManager.updateReportModelToCache(reportId, model);
+            
             result.setStatus(0);
             result.setStatusInfo(SUCCESS);
         } else {

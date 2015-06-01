@@ -197,6 +197,25 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         }
         ReportDesignModel reportModel = runTimeModel.getModel();
         LogicModel model = reportModel.getExtendById(areaId).getLogicModel();
+        // 获取旧的item
+        Item timeItem = null;
+        Item[] oldItems = model.getItems();
+        ExtendArea area = reportModel.getExtendById(areaId);
+        String cubeId = area.getCubeId();
+        Schema schema = reportModel.getSchema();
+        Cube cube = schema.getCubes().get(cubeId);
+        
+        // 寻找原有logicModel时间维度
+        for (Item oldItem : oldItems) {
+            if (cube != null && cube.getDimensions() != null) {
+                for (Dimension dimension : cube.getDimensions().values()) {
+                    if ((dimension.getId().equals(oldItem.getId()) && dimension.getType() == DimensionType.TIME_DIMENSION)) {
+                        timeItem = oldItem;
+                        break;
+                    }
+                }
+            }
+        }
         String[] ids = request.getParameter("selectedFields").split(",");
         Item[] items = new Item[ids.length];
         for (int i = 0; i < ids.length; ++i) {
@@ -208,12 +227,15 @@ public class ReportRuntimeModelManageResource extends BaseResource{
             items[i].setPositionType(PositionType.Y);
         }
         model.resetColumns(items);
+        if (timeItem != null) {
+            model.addColumn(timeItem);            
+        }
         model.resetSlices(new Item[0]);
         result.setStatus(0);
         result.setStatusInfo("success");
-        runTimeModel.getContext().reset();
-        runTimeModel.getLocalContextByAreaId(areaId).reset();
-        runTimeModel.getQueryActions().clear();
+//        runTimeModel.getContext().getParams().clear();
+//        runTimeModel.getLocalContextByAreaId(areaId).reset();
+//        runTimeModel.getQueryActions().clear();
         runTimeModel.setModel(reportModel);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         return result;
@@ -266,6 +288,13 @@ public class ReportRuntimeModelManageResource extends BaseResource{
                 planeTableCondition.setDefaultValue(defaultValue);
                 // 获取原有报表的平面表条件信息
                 Map<String, PlaneTableCondition> oldConditions = model.getPlaneTableConditions();
+                PlaneTableCondition oldCondition = oldConditions.get(id);
+                // TODO 仔细考虑
+                if (oldCondition != null) {
+                    runTimeModel.getContext().getParams().remove(id);
+                    runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(id);
+                    runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(oldCondition.getName());                    
+                }
                 // 替换原有条件
                 oldConditions.put(id, planeTableCondition);
                 model.setPlaneTableConditions(oldConditions);
