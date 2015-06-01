@@ -1091,6 +1091,8 @@ public class IndexServiceImpl implements IndexService {
 			}
 			if(result==-1){
 				return getFreeIndexShardIndexForIndex(idxMeta,true);
+			}else if(idxAction.equals(IndexAction.INDEX_MERGE) && idxMeta.getIdxShardList().get(result).getIdxShardState().equals(IndexShardState.INDEXSHARD_INDEXED)){
+				idxMeta.getIdxShardList().get(result).setIdxShardState(IndexShardState.INDEXSHARD_UNINIT);
 			}
 		}
 		

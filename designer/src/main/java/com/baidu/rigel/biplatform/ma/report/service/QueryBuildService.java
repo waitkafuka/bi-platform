@@ -90,10 +90,11 @@ public interface QueryBuildService {
      * @param dataModel 数据模型
      * @param logicModel 逻辑模型
      * @param formatModel 格式模型
+     * @Param queryAction 查询动作，主要用于排序使用
      * @return 平面表模型
      * @throws PlaneTableParseException
      */
-    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel, FormatModel formatModel) throws PlaneTableParseException;
+    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel, FormatModel formatModel, QueryAction queryAction) throws PlaneTableParseException;
     /**
      * @param model
      * @param areaId
