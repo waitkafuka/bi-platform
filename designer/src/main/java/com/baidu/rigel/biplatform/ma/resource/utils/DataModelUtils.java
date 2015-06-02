@@ -598,7 +598,7 @@ public final class DataModelUtils {
         for (Item col : cols ) {
             boolean finished = false;
             // 处理维度
-            for (Dimension dimension :dimensions.values()) {
+            for (Dimension dimension : dimensions.values()) {
                 if (dimension.getType() == DimensionType.TIME_DIMENSION && 
                         dimension.getId().equals(col.getOlapElementId())) {
                     // 如果为时间维度，转换成事实表的时间字段

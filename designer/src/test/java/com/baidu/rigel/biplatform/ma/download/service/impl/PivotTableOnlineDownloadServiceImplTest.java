@@ -57,4 +57,5 @@ public class PivotTableOnlineDownloadServiceImplTest {
         Assert.assertNotNull(csvString);
         LOG.debug(csvString);
     }
+    
 }
