@@ -6,9 +6,9 @@ define(['template'], function (template) {
         $out+='\r\n<!--内置维度-->\r\n<div class="date-relation-owner-two-part c-f j-date-two-part">\r\n    <span>选择时间字段：</span>\r\n    <select>\r\n        <option value="0">请选择</option>\r\n        ';
         $each(currDims,function($dim,$index){
         $out+='\r\n        <option value=';
-        $out+=$escape($dim.id);
-        $out+='>';
         $out+=$escape($dim.name);
+        $out+='>';
+        $out+=$escape($dim.comment);
         $out+='\r\n        </option>\r\n        ';
         });
         $out+='\r\n    </select>\r\n    <span>粒度：</span>\r\n    <select class="j-owner-date-level-select">\r\n        <option value="0">请选择</option>\r\n        ';
@@ -24,9 +24,9 @@ define(['template'], function (template) {
         $out+='\r\n<!--普通维度-->\r\n<div class="date-relation-normal-two-part c-f j-date-two-part">\r\n    <span>指定关联字段：</span>\r\n    <select>\r\n        <option value="0">请选择</option>\r\n        ';
         $each(currDims,function($dim,$index){
         $out+='\r\n        <option value=';
-        $out+=$escape($dim.id);
-        $out+='>';
         $out+=$escape($dim.name);
+        $out+='>';
+        $out+=$escape($dim.comment);
         $out+='\r\n        </option>\r\n        ';
         });
         $out+='\r\n    </select>\r\n    <span class="equal">=</span>\r\n    <select>\r\n        <option value="0">请选择</option>\r\n        ';

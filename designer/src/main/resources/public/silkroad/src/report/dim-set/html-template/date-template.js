@@ -29,7 +29,7 @@ define(['template'], function (template) {
         $out+='\r\n                    <option value=';
         $out+=$escape($dim.name);
         $out+='\r\n                    ';
-        if($dim.id === $cube.children[0].currDim){
+        if($dim.name === $cube.children[0].currDim){
         $out+='selected="selected"\r\n                    ';
         }
         $out+='>';
