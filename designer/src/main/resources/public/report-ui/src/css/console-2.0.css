@@ -1,0 +1,114 @@
+/*-------------------------------------------------*/
+/* 报表控制台(console)公用(包括edit和mgr等公用)    */
+/*-------------------------------------------------*/
+
+/** 页面整体 */
+body {
+    margin: 0px;
+    font-size: 12px;
+    padding: 0px;
+    min-width: 1200px;
+    font-family: '微软雅黑','宋体';
+}
+div, 
+p,
+ul,
+li {
+    margin: 0px;
+    padding: 0px;
+    font-size: 12px;
+}
+li {
+    list-style: none;
+}
+a {
+    text-decoration: none; 
+    color: #0066cc;
+}
+
+/** 页面头部 */
+.hide {
+    display: none;
+}
+
+/** 常用表单的样式 */
+.form-common-line {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+.form-common-label {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+}
+.form-common-text {
+    line-height: 22px;
+    padding: 5px;
+    width: 350px;
+    border: #A9A9A9 solid 1px;
+}
+.form-common-extend {
+    border: #B3B3B3 solid 1px;
+    border-radius: 3px;
+    font-size: 22px;
+    line-height: 22px;
+    margin: 0 0 0 7px;
+    color: #B3B3B3;
+    height: 25px;
+    width: 25px;
+    text-align: center;
+    overflow: hidden;
+    display: inline-block;
+    position: relative;
+    top: 9px;
+    cursor: pointer;
+}
+.form-common-extend:hover {
+    background-color: #3399FF;
+    color: #fff;
+    border: #589FE7 solid 1px;
+}
+.form-common-btn {
+    background-color: #3399FF;
+    padding: 6px 25px;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+}
+.form-common-btn:hover {
+    background-color: #0477E9;
+}
+
+/* 创建数据源 */
+.create-data-sources {
+    width: 600px;
+    margin: 0 auto;
+}
+.get-data-table {
+    margin-left: 150px;
+}
+.create-data-table {
+    width: 450px;
+    margin: 0 auto;
+    padding-left: 38px;
+}
+.create-data-table-header {
+    font-weight: normal;
+    font-size: 14px;
+    border-bottom: #E4E4E4 solid 1px;
+    margin-top: 10px;
+    padding-bottom: 5px;
+}
+.create-data-table .form-common-label {
+    width: auto;
+    text-align: left;
+}
+.create-data-table .data-table-item {
+    cursor: pointer;
+    padding: 5px;
+    margin: 3px 0;
+}
+.create-data-table .data-table-item.selected {
+    background-color: #ccc;
+}

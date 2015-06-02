@@ -1,0 +1,233 @@
+-----------------
+【设计/规约说明】
+-----------------
+
+[支持]
+    布局放在同一行
+    普通报表参数组：
+        整体独立unit
+        确定模式和即时模式
+        默认可拥有：“确定”按钮。
+        ref关联到一或多个目标unit
+            目标unit用通用param接收
+        每个velement来源于目标unit。
+        每个velement和“确定”在fragment上用标签指定位置。
+        编辑时：拖进来此unit，指定ref，则生成每个reportParam的div，可调整位置。
+        时间：
+            独立unit，定义ref
+        普通：
+            独立unit，定义ref
+    面包屑：
+        独立unit
+        定义ref（如到di-table）
+        提供双向接口：
+            从di-table触发输入bread的text和href
+            从bread点击触发di-table输入href
+    表格设置
+    下载
+    局部展开 / 浮层
+
+TODO
+请求顺序（依赖）
+subTplId
+联动隐含条件（KA的时间范围）
+关于命名空间方案
+    打包时，所有都打到一个js
+    加上首尾的(function() { … })()
+    加上var di = $namespace('di', false);
+
+[概念]
+    snippet：
+        是报表编辑结果。
+        snippet中主要有这些部件：
+            html
+            velement的anchor
+            vslot的anchor
+            vcontainer的声明
+            unit的声明
+        子报表模式：
+            SNIPPET_COPY_MODE：在自己的报表（复杂布局）中，创建一个其他报表的拷贝（从而能进行进一步更改）。
+            SNIPPET_REF_MODE：在自己的报表（复杂布局）中，创建一个其他报表的引用（从而其他报表更新了自己也更新，但是不能更改其中内容）。
+        src-snippet：里面包括其他snippet的引用。
+        prod-snippet：是最终生成的snippet，没有引用了（是否有必要？？）。
+        里面可以包括#parse('asd/fas/dfsadfa/sdf.vm')，但只是文档引用（参见SNIPPET_REF_MODE）
+        [代码]
+            <div data-o_o-di="{ is:'SNIPPET' }"> ... </div>
+
+    unit：
+        是功能单元（或叫组件）
+        引用一个或多个velement。
+        unit没有“包含”的概念，只有ref概念。
+        一个unit可以ref多个unit（为其提供功能）。一个条件区是一个unit。
+        例子：一个di-table是一个unit，一个di-form
+        form：也是一个unit，是条件区unit的命名。内部的olap-table控件是velement。
+        含有一个htmlTpl（可以不用）
+        数据获取方式：
+            Asyc
+            Html（可暂不实现）
+        [Interface]
+            sync方法
+        [代码]
+            unit声明在html中，以div定义：
+            <div data-o_o-di="{
+                unit: {
+                    id: 'unit-222',
+                    clzKey: 'DI_TABLE',
+                    mtplRef: 'datainsight_12342143'
+                }
+            }"> ... </div>
+
+    model：
+        是后台代理
+        [生命期管理]
+            默认是属于页面全局
+            如果belong属性指定了unit，则属于该unit（由其创建，销毁）
+        [Interface]
+            sync方法
+            setDataXXX方法，XXX是clzKey，通过这个判断出此model可以存储什么velement的数据（velement改变时存储）
+            getDataXXX方法，XXX是clzKey，通过这个判断出此model可以为什么velement提供render方法的数据源
+            getParamXXX方法，XXX是clzKey，通过这个判断出此model可以为什么model提供sync.param的参数
+            （为model代码书写方便和易扩展，这两个方法集会在model类型初始化时根据DATA_GETTER_MAP和PARAM_GETTER_MAP生成）
+        [代码]
+            model声明在snippet中：
+            <div data-o_o-di="{
+                snippet: { id: 'snippet-id-111' },
+                ...,
+                modelDef: [
+                    {
+                        id: 'model-1234',
+                        clzKey: 'DI_TABLE_MODEL',
+                        belong: 'unit-222'
+                    },
+                    ...
+                ]
+                unitDef: [
+                    {
+                        id: 'unit-222',
+                        clzKey: 'DI_TABLE',
+                        modelRef: ['model-1234', 'model-3245']
+                    }
+                ]
+            }"> ... </div>
+
+    关于behavior：
+        用于描述unit之间的行为。
+        一个unit能定义多个behavior。
+        每个behavior用下面几个部分来描述：
+            （一个）事件(event)：可能为：
+                (1) 初始化事件'init'
+                (2) velement的用户事件（如：'click'）
+                (3) unit的sync返回事件（如：'sync.parse', 'sync.result', 'sync.error', 'sync.finalize'等）
+            （多个）动作(action)：可能为：
+                (1) unit的sync
+                (2) velement的render（须指定model，默认从model的getDataXXX中取，其中XXX为velement的clzKey）
+                (3) 自定义处理函数（自动从unit的$behaviorHandlers集合中取）
+        [代码]
+            behavior声明在unit声明中。
+            unitDef: [
+                {
+                    id: 'unit-id-222', 
+                    clzKey: 'DI_TABLE',
+                    behaviorDef: [
+                        {
+                            event: { rid: 'velement-1234', event: 'click' },
+                            actions: [
+                                { rid: 'unit-4321', action: 'sync' },
+                                { rid: 'velement-4322', action: 'render' },
+                                ...
+                            ]
+                        },
+                        {
+                            event: { rid: 'unit-5678', event: 'sync.result' },
+                            actions: [
+                                { rid: 'unit-212', action: 'sync' }
+                            ]
+                        },
+                        {
+                            event: { event: 'init' },
+                            actions: [
+                                { rid: 'unit-212', action: 'sync' }
+                            ]
+                        },
+                        ...
+                    ]
+                }
+            ]
+        [应用]
+            条件联动、初始化加载的依赖顺序等，用behavior描述。
+
+    关于mtpl：
+        mtpl就是后台的tpl引用。
+        mtpl引用声明在unit里。
+        [代码]
+            mtpl声明在snippet中：
+            <div data-o_o-di="{
+                snippet: { id: 'snippet-id-111' },
+                ...,
+                mtplDef: [
+                    {
+                        id: 'datainsight_12342143',
+                        subMTpl: ['datainsight_54334', 'datainsight_988444']
+                    }
+                ],
+            }"> ... </div>            
+            在unit中
+            <div data-o_o-di="{
+                unit: {
+                    id: 'unit-id-222', 
+                    clzKey: 'DI_TABLE',
+                    mtplRef: 'datainsight_12342143'
+                }
+            }"> ... </div>
+
+    velement：
+        是视图单元。
+        可以在snippet上定位。
+        一般velement用控件来实现，或者是简单的dom元素。
+        [代码]
+            <div data-o_o-di="{
+                velement: { 
+                    id: 'velement-id-123',
+                    unitRef: 'unit-id-222'
+                }
+            "> ... </div>        
+
+    vslot：
+        vslot是只在编辑时有用的东西，是组件可以插入的槽。
+
+    vcontainer：
+        是snippet中的结构，作为组织velement的方式。
+        含有控制视图的逻辑（参见layer和expansion）。
+        整个页面可以认为是一个大vcontainer。
+        vcontainer可以嵌套。
+        含有htmlTpl（一个vcontainer可以引用不同的htmlTpl，这个就在编辑时有意义，编辑后就混合到html里了）。
+        velement的anchor在vcontainer中出现。
+        vpart
+            vcontainer含有诸个vpart。
+            vpart是需要由velement提供事件的东西。
+            vcontainer也会改变vpart的视图（最简单的如是否显示），这都由接口确定。
+        已知组件：
+            basicVContainer：
+                基本的vcontainer
+            layerVContainer：
+                含有几个vpart：trigger、head、body
+            expansionVContainer：
+                含有两个vpart：trigger、body
+        [代码]
+            vcontainer声明在snippet中：
+            <div data-o_o-di="{
+                snippet: { id: 'snippet-id-111' },
+                ...,
+                vcontainerDef: [
+                    { id: 'vcontainer-id-222', clzKey: 'BASIC_VCONTAINER' },
+                    { id: 'vcontainer-id-333', clzKey: 'EXPANSION_VCONTAINER' }
+                ]
+            }"> ... </div>
+            vpart声明在html中：
+            <div data-o_o-di="{
+                vpart: { 
+                    id: 'vpart-id-2323', 
+                    vpartType: 'TRIGGER', 
+                    vcontainerRef: 'vcontainer-id-222' 
+                }
+            }"></div>

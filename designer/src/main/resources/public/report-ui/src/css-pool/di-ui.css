@@ -1,0 +1,91 @@
+/**
+ * di-ui.css
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ *
+ * @file:    data insight 公用（包括console和product等公用）
+ *           data insight UI
+ * @author:  xxx(xxx)
+ */
+
+/**
+ * Dim Select Panel
+ */
+.di-dim-select-tree {
+    overflow: auto;
+    max-width: 600px;
+    min-width: 500px;
+    max-height: 560px;
+    min-height: 360px;
+    display: inline-block;
+    border: 1px solid #D0D0D0;
+    *display: inline;
+    *zoom: 1;
+    vertical-align: top;
+}
+.di-dim-select-cal {
+    margin: 50px 0 0 40px;
+    display: inline-block;
+    *display: inline;
+    *zoom: 1;
+    vertical-align: top;
+}
+.di-dim-select-panel 
+.ui-form-body {
+    padding: 10px 25px 10px 25px;
+    width: 800px;
+}
+.di-dim-select-btn {
+    margin: 10px 0 0 0;
+    float: right;
+}
+
+/**
+ * Meta Condition
+ */
+.meta-condition {
+}
+.meta-condition-head-text {
+    width: 73px;
+    text-align: right;
+    color: #666;
+    margin: 6px 0;
+    float: left;
+}
+.meta-condition-sel
+.meta-condition-head-text {
+    margin: 7px 0;
+}
+.meta-condition-src {
+    margin-top: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #E3E3E3;
+}
+.meta-condition-tar {
+    padding: 20px 0 10px 0;
+    border-top: 1px solid #FFF;
+}
+.meta-condition-ind-line, 
+.meta-condition-dim-line,
+.meta-condition-sel-line {
+    margin: 0 0 6px 76px;
+    vertical-align: middle;
+    -webkit-border-radius: 3px;
+    -o-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;    
+    border-radius: 3px;    
+}
+.meta-condition-sel-line {
+    padding: 0;
+    margin-left: 79px;
+    margin-right: 300px;
+    background-color: #F0F0F0;
+    border: 1px solid #D8D8D8;
+}
+
+/**
+ * di table
+ */
+.di-table-area {
+    width: 965px;
+}
