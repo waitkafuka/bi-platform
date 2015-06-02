@@ -160,6 +160,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
 
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
+//                LOGGER.info ("[INFO] --- --- query sql : " + sqlQuery.toSql ());
                 PreparedStatement pstmt =
                         con.prepareStatement(sqlQuery.toSql(), 
                         ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);

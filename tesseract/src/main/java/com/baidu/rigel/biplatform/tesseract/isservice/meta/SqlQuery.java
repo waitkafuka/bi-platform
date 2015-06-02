@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.tesseract.isservice.meta;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -140,8 +140,11 @@ public class QueryServiceImpl implements QueryService {
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query context.");
         // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
         int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
-        logger.info("query condition descarte:" + conditionDescartes);
-        logger.debug("question model:{}", questionModel);
+        if (logger.isDebugEnabled ()) {
+            logger.debug("query condition descarte:" + conditionDescartes);
+            logger.debug("question model:{}", questionModel);
+        }
+        
         if (questionModel.getQueryConditionLimit().isWarningAtOverFlow()
                 && conditionDescartes > questionModel.getQueryConditionLimit().getWarnningConditionSize()) {
             StringBuilder sb = new StringBuilder();

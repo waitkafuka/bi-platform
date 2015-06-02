@@ -307,9 +307,10 @@ public class QueryRequest implements Serializable {
      */
     @Override
     public String toString() {
-        return "QueryRequest [dataSourceInfo=" + dataSourceInfo + ", cubeName=" + cubeName + ", cubeId=" + cubeId
-                + ", select=" + select + ", from=" + from + ", where=" + where + ", groupBy=" + groupBy + ", order="
-                + order + ", limit=" + limit + ", useIndex=" + useIndex + "]";
+        return "";
+//        return "QueryRequest [dataSourceInfo=" + dataSourceInfo + ", cubeName=" + cubeName + ", cubeId=" + cubeId
+//                + ", select=" + select + ", from=" + from + ", where=" + where + ", groupBy=" + groupBy + ", order="
+//                + order + ", limit=" + limit + ", useIndex=" + useIndex + "]";
     }
 
     /*

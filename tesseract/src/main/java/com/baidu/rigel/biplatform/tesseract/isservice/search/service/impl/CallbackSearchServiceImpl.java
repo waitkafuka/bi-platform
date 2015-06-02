@@ -51,6 +51,7 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackMeasureVaue;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackResponse;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackValue;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ThreadLocalPlaceholder;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.condition.QueryContextAdapter;
@@ -177,7 +178,7 @@ public class CallbackSearchServiceImpl {
      * @throws IndexAndSearchException exception occurred when 
      */
     public SearchIndexResultSet query(QueryContext context, QueryRequest query) throws IndexAndSearchException {
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "callbackquery", "[callbackquery:" + query + "]"));
+//        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "callbackquery", "[callbackquery:" + query + "]"));
         if (query == null || context == null || StringUtils.isEmpty(query.getCubeId())) {
             LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "callbackquery", "[callbackquery:" + query
                     + "]"));
@@ -211,7 +212,7 @@ public class CallbackSearchServiceImpl {
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION);
         }
-        LOGGER.info("Find callback targets " + callbackMeasures);
+//        LOGGER.info("Find callback targets " + callbackMeasures);
         
         // Keep group-by sequence.
         List<String> groupby = new ArrayList<String>(query.getGroupBy().getGroups());
@@ -285,7 +286,7 @@ public class CallbackSearchServiceImpl {
             result = new SearchIndexResultSet(new Meta(query.getGroupBy().getGroups().toArray(new String[0])), 0);
         }
 
-        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
+//        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
     }
     
@@ -303,7 +304,8 @@ public class CallbackSearchServiceImpl {
         SearchIndexResultSet result = new SearchIndexResultSet(meta, 500);
         // Use first response as base SEQ. Weak implementation. FIXME: WANGYUXUE.
         List<String> fieldValues = null;
-        for (int index = 0; index < fieldValuesHolderList.get(0).getValue().getData().size(); index++) {
+        List<? extends CallbackValue> data = fieldValuesHolderList.get(0).getValue().getData();
+        for (int index = 0; data != null && index < data.size(); index++) {
             fieldValues = new ArrayList<String>(groupby.size());
             CallbackMeasureVaue mv = (CallbackMeasureVaue) fieldValuesHolderList.get(0).getValue().getData().get(index);
             String key = mv.keySet().iterator().next();

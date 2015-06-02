@@ -235,7 +235,7 @@ public class HttpRequest {
             prefix = urlNameString.substring(0, urlNameString.indexOf("["));
             suffix = urlNameString.substring(urlNameString.indexOf("]") + 1);
         }
-        LOGGER.info("start to send get:" + urlNameString);
+//        LOGGER.info("start to send get:" + urlNameString);
         long current = System.currentTimeMillis();
         Exception ex = null;
         for (String address : addresses) {
@@ -249,7 +249,7 @@ public class HttpRequest {
                 }
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, true);
-                LOGGER.info("end send get :" + urlNameString + " cost:" + (System.currentTimeMillis() - current));
+//                LOGGER.info("end send get :" + urlNameString + " cost:" + (System.currentTimeMillis() - current));
                 return content;
             } catch (Exception e) {
                 ex = e;
@@ -330,10 +330,10 @@ public class HttpRequest {
                 LOGGER.info ("[INFO] --- --- execute query with client {}", client);
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, false);
-                StringBuilder sb = new StringBuilder();
-                sb.append("end send post :").append(postUrl).append(" params:").append(nameValues).append(" cost:")
-                        .append(System.currentTimeMillis() - current);
-                LOGGER.info(sb.toString());
+//                StringBuilder sb = new StringBuilder();
+//                sb.append("end send post :").append(postUrl).append(" params:").append(nameValues).append(" cost:")
+//                        .append(System.currentTimeMillis() - current);
+//                LOGGER.info(sb.toString());
                 return content;
             } catch (Exception e) {
                 LOGGER.warn("send post error " + requestUrl + ",retry next one", e);
@@ -495,9 +495,9 @@ public class HttpRequest {
                                 .build();
                         PoolingHttpClientConnectionManager connectionManager = 
                             new PoolingHttpClientConnectionManager ();
-                        connectionManager.setMaxTotal (1000);
+                        connectionManager.setMaxTotal (100);
                         List<HttpRoute> routee = getRoutee ();
-                        int maxPerRoute = 1000 / routee.size ();
+                        int maxPerRoute = 100 / routee.size ();
                         for (HttpRoute route : routee) {
                             connectionManager.setMaxPerRoute (route, maxPerRoute);
                         }
