@@ -89,19 +89,23 @@ public final class CallbackServiceInvoker {
 //        		params.put(tmp[0], tmp[1]);
 //        	}
 //        }
-        LOG.info("[INFO] --- --- begin invoke callback service ... ...");
-//        LOG.info("[INFO] --- --- params : {}", params);
-        LOG.info("[INFO] --- --- request url : {}", url);
-        LOG.info("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
-        LOG.info("[INFO] --- --- callback type : {}", type.name());
-        LOG.info("[INFO] --- --- end invoke callback service. result is : \r\n");
-        LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+        if (LOG.isDebugEnabled ()) {
+            LOG.debug("[INFO] --- --- begin invoke callback service ... ...");
+            LOG.debug("[INFO] --- --- params : {}", params);
+            LOG.debug("[INFO] --- --- request url : {}", url);
+            LOG.debug("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
+            LOG.debug("[INFO] --- --- callback type : {}", type.name());
+            LOG.debug("[INFO] --- --- end invoke callback service. result is : \r\n");
+            LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
+        }
         try {
             
             String responseStr = HttpRequest.sendPost1(url, params);
             CallbackResponse response = convertStrToResponse(responseStr, type);
-//            LOG.info("[INFO] --- --- resposne : {}", response);
-            LOG.info("[INFO] -------------------------------------------------------------------------\r\n" );
+            if (LOG.isDebugEnabled ()) {
+                LOG.debug("[INFO] --- --- resposne : {}", response);
+                LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
+            }
             long end = System.currentTimeMillis() - begin;
             LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
                     + " cost on data transfer : " + (end - response.getCost()) + "ms,"
@@ -136,13 +140,16 @@ public final class CallbackServiceInvoker {
                 "" :json.get("cost").getAsString();
         String version = json.get("version") == null || json.get("version") == JsonNull.INSTANCE ?
                 "unknown" :json.get("version").getAsString();
-        LOG.info("[INFO] ------------------------------callback response desc -----------------------------------");
-        LOG.info("[INFO] --- --- status : {}", status);
-        LOG.info("[INFO] --- --- message : {}", message);
-        LOG.info("[INFO] --- --- provider : {}", provider);
-        LOG.info("[INFO] --- --- cost : {}", cost);
-        LOG.info("[INFO] --- --- callback version : {}", version);
-        LOG.info("[INFO] -----------------------------end print response desc -----------------------------------");
+        if (LOG.isDebugEnabled ()) {
+            LOG.debug("[INFO] ------------------------------callback response desc -----------------------------------");
+            LOG.debug("[INFO] --- --- status : {}", status);
+            LOG.debug("[INFO] --- --- message : {}", message);
+            LOG.debug("[INFO] --- --- provider : {}", provider);
+            LOG.debug("[INFO] --- --- cost : {}", cost);
+            LOG.debug("[INFO] --- --- callback version : {}", version);
+            LOG.debug("[INFO] -----------------------------end print response desc -----------------------------------");
+        }
+        
         LOG.info("[INFO] --- --- package result to CallbackResponse cost {} ms",
                 (System.currentTimeMillis() - begin));
         rs.setCost(Integer.valueOf(StringUtils.isEmpty(cost) ? "0" : cost));
