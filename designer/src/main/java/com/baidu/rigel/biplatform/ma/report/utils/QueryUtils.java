@@ -34,6 +34,7 @@ import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
@@ -214,15 +215,29 @@ public final class QueryUtils {
      * @return
      */
     private static boolean needSummary(QuestionModel questionModel) {
+        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         for (AxisMeta meta : questionModel.getAxisMetas().values()) {
             if (meta.getAxisType() == AxisType.ROW) {
                 for (String str : meta.getCrossjoinDims()) {
                     DimensionCondition condition = (DimensionCondition) questionModel.getQueryConditions().get(str);
-                    Dimension dim = ((ConfigQuestionModel) questionModel).getCube ().getDimensions ().get (condition.getMetaName ());
+                    Dimension dim = configQuestionModel.getCube ().getDimensions ().get (condition.getMetaName ());
+                    
                     if (dim != null && dim.getType () == DimensionType.CALLBACK ) {
                         if (condition.getQueryDataNodes () != null && condition.getQueryDataNodes ().size () == 1) {
+                            List<Member> members = dim.getLevels ().values ().toArray (new Level[0])[0]
+                                    .getMembers (
+                                            configQuestionModel.getCube (), 
+                                            configQuestionModel.getDataSourceInfo (), 
+                                            configQuestionModel.getRequestParams ());
                             if (MetaNameUtil.isAllMemberUniqueName (condition.getQueryDataNodes ().get (0).getUniqueName ())) {
                                 return false;
+                            } else if (meta.getCrossjoinDims ().size () > 1) {
+                                return false;
+                            } else if (members.size () == 1) {
+                                MiniCubeMember m = (MiniCubeMember) members.get (0);
+                                if (m.getChildren () != null && m.getChildren ().size () > 0) {
+                                    return false;
+                                }
                             }
                         } else if (CollectionUtils.isEmpty (condition.getQueryDataNodes ())) {
                             return false;

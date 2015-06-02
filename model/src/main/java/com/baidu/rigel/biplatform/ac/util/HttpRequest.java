@@ -495,9 +495,9 @@ public class HttpRequest {
                                 .build();
                         PoolingHttpClientConnectionManager connectionManager = 
                             new PoolingHttpClientConnectionManager ();
-                        connectionManager.setMaxTotal (1000);
+                        connectionManager.setMaxTotal (100);
                         List<HttpRoute> routee = getRoutee ();
-                        int maxPerRoute = 1000 / routee.size ();
+                        int maxPerRoute = 100 / routee.size ();
                         for (HttpRoute route : routee) {
                             connectionManager.setMaxPerRoute (route, maxPerRoute);
                         }

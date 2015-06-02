@@ -228,6 +228,9 @@ public class QueryRequestUtil {
             if(key.equals(betweenStr)) {
                 continue;
             }
+            if (andCondition.get (key) == null || andCondition.get (key).size () == 0) {
+                continue;
+            }
             selectList.add(key);
             StringBuilder sb = new StringBuilder();
             sb.append(key);
