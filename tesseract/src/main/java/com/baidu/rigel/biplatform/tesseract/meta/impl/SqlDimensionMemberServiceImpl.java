@@ -455,8 +455,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             if (StringUtils.isBlank (filterValue)) {
                 continue;
             }
-            if (dimTable.equals (dim.getTableName ()) 
-                    && !dim.getId ().equals (level.getDimension ().getId ())) {
+            if ((dimTable.equals (dim.getTableName ()) 
+                    && !dim.getId ().equals (level.getDimension ().getId ()))) {
                 MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
                 Expression expression = new Expression(dimLevel.getSource ());
                 // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
@@ -470,23 +470,37 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 expressionList.add (expression);
             } else if (dim instanceof TimeDimension && dimTable.equals (((MiniCube) cube).getSource())) {
                 // 此处只考虑了时间维度表和事实表同一张表情况，其他情况暂时不考虑
-                if (!filterValue.contains ("start") && !filterValue.contains ("end")) {
-                    continue;
-                }
-                Map<String, String> filterMap = AnswerCoreConstant.GSON.fromJson (filterValue, 
-                        new TypeToken<Map<String, String>>(){
-                        }.getType());
-                TimeRangeDetail detail = new TimeRangeDetail(filterMap.get ("start"), filterMap.get ("end"));
-                String[] days = detail.getDays ();
                 MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
                 Expression expression = new Expression(dimLevel.getFactTableColumn ());
-                for (String day :days) {
-                    Set<String> leafNodes = Sets.newHashSet ();
-                    leafNodes.add (day);
-                    QueryObject queryObject = new QueryObject(day, leafNodes);
-                    expression.getQueryValues ().add (queryObject);
+                if (!filterValue.contains ("start") && !filterValue.contains ("end")) {
+                    String[] tmp = filterValue.split (",");
+                    for (String data : tmp) {
+                        if (StringUtils.isNotEmpty (data) && MetaNameUtil.isUniqueName (data)) {
+                            String[] valueArray = MetaNameUtil.parseUnique2NameArray (data);
+                            Set<String> leafNodes = Sets.newHashSet ();
+                            leafNodes.add (valueArray[valueArray.length - 1]);
+                            QueryObject queryObject = new QueryObject(valueArray[valueArray.length - 1], leafNodes);
+                            expression.getQueryValues ().add (queryObject);
+                        }
+                    }
+                } else {
+                    Map<String, String> filterMap = AnswerCoreConstant.GSON.fromJson (filterValue, 
+                            new TypeToken<Map<String, String>>(){
+                            }.getType());
+                    TimeRangeDetail detail = new TimeRangeDetail(filterMap.get ("start"), filterMap.get ("end"));
+                    String[] days = detail.getDays ();
+                    
+                    for (String day :days) {
+                        Set<String> leafNodes = Sets.newHashSet ();
+                        leafNodes.add (day);
+                        QueryObject queryObject = new QueryObject(day, leafNodes);
+                        expression.getQueryValues ().add (queryObject);
+                    }
                 }
-                expressionList.add (expression);
+                
+                if (expression.getQueryValues ().size () > 0) {
+                    expressionList.add (expression);
+                }
             }
         }
         return expressionList;
