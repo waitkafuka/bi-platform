@@ -235,7 +235,7 @@ public final class QueryUtils {
                                 return false;
                             } else if (members.size () == 1) {
                                 MiniCubeMember m = (MiniCubeMember) members.get (0);
-                                if (m.getChildren () != null && m.getChildren ().size () > 0) {
+                                if (m.getChildren () != null && m.getChildren ().size () > 1) {
                                     return false;
                                 }
                             }
