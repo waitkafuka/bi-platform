@@ -27,8 +27,8 @@
         <!-- 循环每一行中的主表字段(cubes.cube1.currDims)-->
         <option value="0">请选择</option>
         {{each currDims as $dim}}
-        <option value={{$dim.id}}>
-           {{$dim.name}}
+        <option value={{$dim.name}}>
+           {{$dim.comment}}
         </option>
         {{/each}}
     </select>

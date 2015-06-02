@@ -59,11 +59,14 @@ define([
 
                 if (option.edit === true) {
                     that.model.loadSelectedDataSources(function (groupId) {
-                        that.model.dataSourcesModel.loadDsGroupActive();
+                        that.model.dataSourcesModel.loadDsGroupActive(
+                            function() {
+                                // 由于只有在编辑状态下 且 刚进来时需要还原
+                                // 所以在这里用参数的方式来还原数据
+                                that.model.loadFactTableList(groupId, true);
+                            }
+                        );
 
-                        // 由于只有在编辑状态下 且 刚进来时需要还原
-                        // 所以在这里用参数的方式来还原数据
-                        that.model.loadFactTableList(groupId, true);
                     });
                 }
                 else {

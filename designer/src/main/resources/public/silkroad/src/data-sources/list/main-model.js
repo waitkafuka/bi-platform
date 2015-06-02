@@ -26,13 +26,14 @@ define(['url'], function (Url) {
          *
          * @public
          */
-        loadDsGroupActive: function () {
+        loadDsGroupActive: function (success) {
             var that = this;
 
             $.ajax({
                 url: Url.loadDsGroupActive(),
                 success: function (data) {
                     that.set('activeDataSourcesList', data.data);
+                    success && success();
                 }
             });
         },

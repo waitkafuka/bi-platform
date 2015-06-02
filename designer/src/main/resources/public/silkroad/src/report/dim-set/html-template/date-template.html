@@ -29,7 +29,7 @@
                     <option value="0">请选择</option>
                     {{each cubes[$cube.cubeId].currDims as $dim}}
                     <option value={{$dim.name}}
-                    {{if $dim.id === $cube.children[0].currDim}}selected="selected"
+                    {{if $dim.name === $cube.children[0].currDim}}selected="selected"
                     {{/if}}>{{$dim.comment}}
                     </option>
                     {{/each}}
