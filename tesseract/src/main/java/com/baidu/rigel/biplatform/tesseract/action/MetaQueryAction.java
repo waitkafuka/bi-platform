@@ -343,7 +343,7 @@ public class MetaQueryAction {
             String listCubeJson = requestParams.get(MiniCubeConnection.CUBE_PARAM_KEY);
             String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
             List<Cube> cubes = AnswerCoreConstant.GSON.fromJson(listCubeJson, new TypeToken<List<Cube>>() {
-            }.getType());
+                }.getType());
             DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
             metaDataService.publish(cubes, dataSourceInfo);
             return ResponseResultUtils.getCorrectResult("success", "public cubes success.");
