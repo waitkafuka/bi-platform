@@ -27,18 +27,47 @@ public class DownloadTableDataHelper {
          * 提供默认表格数据下载支持(在线支持、离线支持)
          */
         try {
-            String mysqlDataDownload = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.MYSQL;
-            SERVICE_REPOSITORY.put(mysqlDataDownload ,
+            // TODO 修改
+            String mysqlDataDownloadForPlaneTableOnline = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.MYSQL;
+            SERVICE_REPOSITORY.put(mysqlDataDownloadForPlaneTableOnline ,
                     new PlaneTableOnlineDownloadServiceImpl());
-            String oracleDataDownload = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.ORACLE;
-            SERVICE_REPOSITORY.put(oracleDataDownload ,
+            String oracleDataDownloadForPlaneTableOnline = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.ORACLE;
+            SERVICE_REPOSITORY.put(oracleDataDownloadForPlaneTableOnline ,
                     new PlaneTableOnlineDownloadServiceImpl());
-            String h2DataDownload = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.H2;
-            SERVICE_REPOSITORY.put(h2DataDownload ,
+            String h2DataDownloadForPlaneTableOnline = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.H2;
+            SERVICE_REPOSITORY.put(h2DataDownloadForPlaneTableOnline ,
                     new PlaneTableOnlineDownloadServiceImpl());
-            SERVICE_REPOSITORY.put(DownloadType.PLANE_TABLE_OFFLINE.getName(), new PlaneTableOfflineDownloadServiceImpl());
-            SERVICE_REPOSITORY.put(DownloadType.PIVOT_TABLE_ONLINE.getName(), new PivotTableOnlineDownloadServiceImpl());
-            SERVICE_REPOSITORY.put(DownloadType.PIVOT_TABLE_OFFLINE.getName(), new PivotTableOfflineDownloadServiceImpl());
+            String mysqlDataDownloadForPlaneTableOffline = DownloadType.PLANE_TABLE_OFFLINE.getName() + "_" + DataSourceType.MYSQL;
+            SERVICE_REPOSITORY.put(mysqlDataDownloadForPlaneTableOffline ,
+                    new PlaneTableOfflineDownloadServiceImpl());
+            String oracleDataDownloadForPlaneTableOffline = DownloadType.PLANE_TABLE_OFFLINE.getName() + "_" + DataSourceType.ORACLE;
+            SERVICE_REPOSITORY.put(oracleDataDownloadForPlaneTableOffline ,
+                    new PlaneTableOfflineDownloadServiceImpl());
+            String h2DataDownloadForPlaneTableOffline = DownloadType.PLANE_TABLE_OFFLINE.getName() + "_" + DataSourceType.H2;
+            SERVICE_REPOSITORY.put(h2DataDownloadForPlaneTableOffline ,
+                    new PlaneTableOfflineDownloadServiceImpl());
+            
+            String mysqlDataDownloadForPivotTableOnline = DownloadType.PIVOT_TABLE_ONLINE.getName() + "_" + DataSourceType.MYSQL;
+            SERVICE_REPOSITORY.put(mysqlDataDownloadForPivotTableOnline ,
+                    new PivotTableOnlineDownloadServiceImpl());
+            String oracleDataDownloadForPivotTableOnline = DownloadType.PIVOT_TABLE_ONLINE.getName() + "_" + DataSourceType.ORACLE;
+            SERVICE_REPOSITORY.put(oracleDataDownloadForPivotTableOnline ,
+                    new PivotTableOnlineDownloadServiceImpl());
+            String h2DataDownloadForPivotTableOnline = DownloadType.PIVOT_TABLE_ONLINE.getName() + "_" + DataSourceType.H2;
+            SERVICE_REPOSITORY.put(h2DataDownloadForPivotTableOnline ,
+                    new PivotTableOnlineDownloadServiceImpl());
+            String mysqlDataDownloadForPivotTableOffline = DownloadType.PIVOT_TABLE_OFFLINE.getName() + "_" + DataSourceType.MYSQL;
+            SERVICE_REPOSITORY.put(mysqlDataDownloadForPivotTableOffline ,
+                    new PivotTableOfflineDownloadServiceImpl());
+            String oracleDataDownloadForPivotTableOffline = DownloadType.PIVOT_TABLE_OFFLINE.getName() + "_" + DataSourceType.ORACLE;
+            SERVICE_REPOSITORY.put(oracleDataDownloadForPivotTableOffline ,
+                    new PivotTableOfflineDownloadServiceImpl());
+            String h2DataDownloadForPivotTableOffline = DownloadType.PIVOT_TABLE_OFFLINE.getName() + "_" + DataSourceType.H2;
+            SERVICE_REPOSITORY.put(h2DataDownloadForPivotTableOffline ,
+                    new PivotTableOfflineDownloadServiceImpl());
+//            SERVICE_REPOSITORY.put(DownloadType.PLANE_TABLE_OFFLINE.getName(), new PlaneTableOfflineDownloadServiceImpl());
+//            SERVICE_REPOSITORY.put(DownloadType.PIVOT_TABLE_ONLINE.getName(), new PivotTableOnlineDownloadServiceImpl());
+//            SERVICE_REPOSITORY.put(DownloadType.PIVOT_TABLE_OFFLINE.getName(), new PivotTableOfflineDownloadServiceImpl());
         } catch (Exception e) {
         }
     }
