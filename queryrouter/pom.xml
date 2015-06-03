@@ -60,12 +60,6 @@
             <artifactId>commons-collections</artifactId>
         </dependency>
 
-        <dependency>
-		  <groupId>com.baidu.rigel.tmp.uc</groupId>
-		  <artifactId>casclient</artifactId>
-		  <version>1.0</version>
-		</dependency>
-		
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-all</artifactId>
