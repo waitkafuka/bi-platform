@@ -16,7 +16,9 @@
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,39 +47,42 @@ import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
  *
  */
 public class SqlExpression implements Serializable {
-    
-    @SuppressWarnings("unused")
-    private SqlExpression() {
-    }
-    
-    /**
-     * @param driver
-     *            jdbc driver
-     */
-    public SqlExpression(String driver) {
-        this.driver = driver;
-    }
-    
-    /**
-     * select sql
-     */
-    private String sql;
-    
-    /**
-     * countSql
-     */
-    private String countSql;
-    
-    /**
-     * jdbc driver
-     */
-    private String driver;
-    
+
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 3151301875582323398L;
-    
+
+    /**
+     * sql comma
+     */
+    private static final String COMMA = ",";
+
+    /**
+     * sql dot
+     */
+    private static final String DOT = ".";
+
+    /**
+     * sql space
+     */
+    private static final String SPACE = " ";
+
+    /**
+     * select sql
+     */
+    private String sql;
+
+    /**
+     * countSql
+     */
+    private String countSql;
+
+    /**
+     * jdbc driver
+     */
+    private String driver;
+
     /**
      * 生成组织sql string
      * 
@@ -89,24 +94,27 @@ public class SqlExpression implements Serializable {
      *            needColums
      * @return String sql
      */
-    public void generateSql(QuestionModel questionModel, HashMap<String, SqlColumn> allColums,
-            List<SqlColumn> needColums) {
+    public void generateSql(QuestionModel questionModel,
+            HashMap<String, SqlColumn> allColums, List<SqlColumn> needColums) {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         MiniCube cube = (MiniCube) configQuestionModel.getCube();
         StringBuffer sqlExpression = new StringBuffer();
         sqlExpression.append(generateSelectExpression(needColums));
         sqlExpression.append(generateFromExpression(cube));
-        sqlExpression.append(generateLeftOuterJoinExpression(needColums));
-        sqlExpression.append(generateWhereExpression(configQuestionModel, allColums));
-        sqlExpression.append(generateGroupByExpression(needColums));
-        sqlExpression.append(generateOrderByExpression(configQuestionModel, allColums));
+        sqlExpression.append(generateLeftOuterJoinExpression(
+                configQuestionModel, allColums, needColums));
+        sqlExpression.append(generateWhereExpression(configQuestionModel,
+                allColums));
+        sqlExpression.append(generateOrderByExpression(configQuestionModel,
+                allColums));
         // set no paged sql
         this.setSql(sqlExpression.toString());
         // set total count sql
-        this.setCountSql(" select count(1) as count from (" + this.getSql() + ") t");
+        this.setCountSql(" select count(1) as count from (" + this.getSql()
+                + ") t");
         generateTotalExpression(configQuestionModel.getPageInfo());
     }
-    
+
     /**
      * 事实表物理表名
      * 
@@ -117,7 +125,7 @@ public class SqlExpression implements Serializable {
     public String getFactTableName(MiniCube cube) {
         return cube.getSource();
     }
-    
+
     /**
      * 生成select sql语句
      * 
@@ -130,29 +138,25 @@ public class SqlExpression implements Serializable {
     public String generateSelectExpression(List<SqlColumn> needColums) {
         StringBuffer select = new StringBuffer("select ");
         for (SqlColumn colum : needColums) {
-            String columName = colum.getTableName() + "." + colum.getTableFieldName();
+            String columName = colum.getTableName() + DOT
+                    + colum.getTableFieldName();
             String columNameSqlAlias = colum.getSqlUniqueColumn();
             if (AxisType.COLUMN == colum.getType()) {
-                // TODO
-                // if (StringUtils.isEmpty(colum.getMeasure().getAggregator()))
-                // {
-                if (false) {
-                    String aggregator = colum.getMeasure().getAggregator().toString();
-                    columName = aggregator + "(" + columName + ")";
-                }
-                select.append(columName + " as " + columNameSqlAlias + ",");
+                select.append(columName + " as " + columNameSqlAlias + COMMA);
             } else if (AxisType.ROW == colum.getType()) {
                 if (colum.getDimension().getType() == DimensionType.TIME_DIMENSION) {
                     // 如果为时间维度
-                    columName = colum.getFactTableName() + "."
+                    columName = colum.getFactTableName() + DOT
                             + colum.getDimension().getFacttableColumn();
                 }
-                select.append(columName + " as " + columNameSqlAlias + ",");
+                select.append(columName + " as " + columNameSqlAlias + COMMA);
             }
         }
-        return select.toString().substring(0, select.toString().lastIndexOf(",")) + " ";
+        return select.toString().substring(0,
+                select.toString().lastIndexOf(COMMA))
+                + SPACE;
     }
-    
+
     /**
      * 生成from sql语句
      * 
@@ -162,9 +166,9 @@ public class SqlExpression implements Serializable {
      */
     public String generateFromExpression(MiniCube cube) {
         String tableName = this.getFactTableName(cube);
-        return " from " + tableName + " " + tableName + " ";
+        return " from " + tableName + SPACE + tableName + SPACE;
     }
-    
+
     /**
      * 生成leftouterjoin sql语句
      * 
@@ -175,28 +179,76 @@ public class SqlExpression implements Serializable {
      * 
      * @return String sql
      */
-    public String generateLeftOuterJoinExpression(List<SqlColumn> needColums) {
+    public String generateLeftOuterJoinExpression(
+            ConfigQuestionModel configQuestionModel,
+            HashMap<String, SqlColumn> allColums, List<SqlColumn> needColums) {
+        List<SqlColumn> needJoinColumns = new ArrayList<SqlColumn>();
+        needJoinColumns.addAll(needColums);
         StringBuffer leftOuterJoinExpressions = new StringBuffer();
-        for (SqlColumn colum : needColums) {
+        HashSet<String> joinTables = new HashSet<String>();
+        Set<Map.Entry<String, MetaCondition>> metaConditionSet = configQuestionModel
+                .getQueryConditions().entrySet();
+        MiniCube cube = (MiniCube) configQuestionModel.getCube();
+        String factTableName = cube.getSource();
+        for (Entry<String, MetaCondition> entry : metaConditionSet) {
+            MetaCondition metaCondition = entry.getValue();
+            if (entry.getValue() instanceof DimensionCondition) {
+                // 判断是维度查询
+                DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
+                Dimension dimension = cube.getDimensions().get(
+                        dimensionCondition.getMetaName());
+                String demensionName = dimensionCondition.getMetaName();
+                if (dimensionCondition.getQueryDataNodes() == null
+                        || dimensionCondition.getQueryDataNodes().isEmpty()) {
+                    // 如果节点为空，不需要组织条件
+                    continue;
+                }
+                if (MetaNameUtil.isAllMemberUniqueName(dimensionCondition
+                        .getQueryDataNodes().get(0).getUniqueName())) {
+                    // 如果节点为所有条件，不需要组织条件
+                    continue;
+                }
+                if (dimension.getType() == DimensionType.TIME_DIMENSION) {
+                    // 如果为TIME_DIMENSION，name为指标字段
+                    continue;
+                }
+                // 判断是或否有添加查询
+                SqlColumn sqlColumn = allColums.get(demensionName);
+                if (sqlColumn.getTableName().equals(factTableName)) {
+                    // 如果为事实表不添加到jointable中
+                    continue;
+                }
+                needJoinColumns.add(sqlColumn);
+            }
+        }
+        for (SqlColumn colum : needJoinColumns) {
             if (AxisType.ROW == colum.getType()) {
+                String dimTableName = colum.getTableName();
                 if (colum.getDimension().getType() == DimensionType.TIME_DIMENSION) {
                     // 如果为时间维度，不需要leftouterjoin
                     continue;
                 }
-                StringBuffer oneLeftOuterJoinExpression = new StringBuffer(" left outer join ");
-                String dimTableName = colum.getTableName();
-                oneLeftOuterJoinExpression.append(dimTableName + " " + dimTableName + " ");
-                String dimTableFiled = dimTableName + "." + colum.getLevel().getPrimaryKey();
-                String measureTableFiled = colum.getFactTableName() + "."
+                if (joinTables.contains(dimTableName)) {
+                    // 如果join的dimTableName已在sql中存在，
+                    continue;
+                }
+                joinTables.add(dimTableName);
+                StringBuffer oneLeftOuterJoinExpression = new StringBuffer(
+                        " left outer join ");
+                oneLeftOuterJoinExpression.append(dimTableName + SPACE
+                        + dimTableName + SPACE);
+                String dimTableFiled = dimTableName + DOT
+                        + colum.getLevel().getPrimaryKey();
+                String measureTableFiled = colum.getFactTableName() + DOT
                         + colum.getLevel().getFactTableColumn();
-                oneLeftOuterJoinExpression.append(" on " + dimTableFiled + " = " + measureTableFiled
-                        + " ");
+                oneLeftOuterJoinExpression.append(" on " + dimTableFiled
+                        + " = " + measureTableFiled + SPACE);
                 leftOuterJoinExpressions.append(oneLeftOuterJoinExpression);
             }
         }
         return leftOuterJoinExpressions.toString();
     }
-    
+
     /**
      * 生成where sql语句
      * 
@@ -204,9 +256,10 @@ public class SqlExpression implements Serializable {
      *            configQuestionModel
      * @return String sql
      */
-    public String generateWhereExpression(ConfigQuestionModel configQuestionModel,
+    public String generateWhereExpression(
+            ConfigQuestionModel configQuestionModel,
             HashMap<String, SqlColumn> allColums) {
-        
+
         Set<Map.Entry<String, MetaCondition>> metaConditionSet = configQuestionModel
                 .getQueryConditions().entrySet();
         MiniCube cube = (MiniCube) configQuestionModel.getCube();
@@ -216,15 +269,16 @@ public class SqlExpression implements Serializable {
             if (entry.getValue() instanceof DimensionCondition) {
                 // 判断是维度查询
                 DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
-                Dimension dimension = cube.getDimensions().get(dimensionCondition.getMetaName());
+                Dimension dimension = cube.getDimensions().get(
+                        dimensionCondition.getMetaName());
                 String demensionName = dimensionCondition.getMetaName();
                 if (dimensionCondition.getQueryDataNodes() == null
                         || dimensionCondition.getQueryDataNodes().isEmpty()) {
                     // 如果节点为空，不需要组织条件
                     continue;
                 }
-                if (MetaNameUtil.isAllMemberUniqueName(dimensionCondition.getQueryDataNodes()
-                        .get(0).getUniqueName())) {
+                if (MetaNameUtil.isAllMemberUniqueName(dimensionCondition
+                        .getQueryDataNodes().get(0).getUniqueName())) {
                     // 如果节点为所有条件，不需要组织条件
                     continue;
                 }
@@ -236,38 +290,47 @@ public class SqlExpression implements Serializable {
                 SqlColumn sqlColumn = allColums.get(demensionName);
                 String equals = "";
                 String inExpression = "";
-                for (QueryData queryData : dimensionCondition.getQueryDataNodes()) {
+                for (QueryData queryData : dimensionCondition
+                        .getQueryDataNodes()) {
                     inExpression = inExpression
                             + "\'"
-                            + queryData.getUniqueName().substring(
-                                    queryData.getUniqueName().lastIndexOf("[") + 1,
-                                    queryData.getUniqueName().lastIndexOf("]")) + "\',";
+                            + queryData.getUniqueName()
+                                    .substring(
+                                            queryData.getUniqueName()
+                                                    .lastIndexOf("[") + 1,
+                                            queryData.getUniqueName()
+                                                    .lastIndexOf("]")) + "\',";
                 }
                 if (!inExpression.isEmpty()) {
                     // 如果inExpression没有值，证明没有此条件
-                    String columnSqName = sqlColumn.getTableName() + "."
+                    String columnSqName = sqlColumn.getTableName() + DOT
                             + sqlColumn.getTableFieldName();
-                    equals = " in (" + inExpression.substring(0, inExpression.lastIndexOf(",")) + ")";
-                    whereExpressions.append(" and " + columnSqName + equals + " ");
+                    equals = " in ("
+                            + inExpression.substring(0,
+                                    inExpression.lastIndexOf(COMMA)) + ")";
+                    whereExpressions.append(" and " + columnSqName + equals
+                            + SPACE);
                 }
-                
+
             } else if (entry.getValue() instanceof MeasureCondition) {
                 // 判断是指标查询
                 MeasureCondition measureCondition = (MeasureCondition) metaCondition;
                 if (measureCondition.getMeasureConditions() != null) {
                     // 判断是或否有添加查询
-                    SqlColumn sqlColumn = allColums.get(measureCondition.getMetaName());
-                    SQLCondition sqlCondition = measureCondition.getMeasureConditions();
-                    String columnSqName = sqlColumn.getTableName() + "."
+                    SqlColumn sqlColumn = allColums.get(measureCondition
+                            .getMetaName());
+                    SQLCondition sqlCondition = measureCondition
+                            .getMeasureConditions();
+                    String columnSqName = sqlColumn.getTableName() + DOT
                             + sqlColumn.getTableFieldName();
                     whereExpressions.append(" and " + columnSqName
-                            + this.generateWhereEquals(sqlCondition) + " ");
+                            + this.generateWhereEquals(sqlCondition) + SPACE);
                 }
             }
         }
         return whereExpressions.toString();
     }
-    
+
     /**
      * 获取where equals等式
      * 
@@ -277,50 +340,60 @@ public class SqlExpression implements Serializable {
      */
     private String generateWhereEquals(SQLCondition sqlCondition) {
         SQLConditionType conditionType = sqlCondition.getCondition();
-        switch (conditionType) {
-        // 等于
-        case EQ: {
-            return " = " + sqlCondition.getConditionValues().get(0);
-        }
-        // 不等于
-        case NOT_EQ: {
-            return " <> " + sqlCondition.getConditionValues().get(0);
-        }
-        // 小于
-        case LT: {
-            return " < " + sqlCondition.getConditionValues().get(0);
-        }
-        // 小于等于
-        case LT_EQ: {
-            return " <= " + sqlCondition.getConditionValues().get(0);
-        }
-        // 大于
-        case GT: {
-            return " > " + sqlCondition.getConditionValues().get(0);
-        }
-        // 大于等于
-        case GT_EQ: {
-            return " >= " + sqlCondition.getConditionValues().get(0);
-        }
-        // between and
-        case BETWEEN_AND: {
-            return " between " + sqlCondition.getConditionValues().get(0) + " and "
-                    + sqlCondition.getConditionValues().get(1);
-        }
-        // in
-        case IN: {
-            StringBuffer inExpression = new StringBuffer(" in (");
-            for (String value : sqlCondition.getConditionValues()) {
-                inExpression.append(value + ",");
-            }
-            return inExpression.toString().substring(0, inExpression.toString().lastIndexOf(",")) + ")";
-        }
-        default: {
+        if (sqlCondition == null || sqlCondition.getConditionValues() == null
+                || sqlCondition.getConditionValues().size() < 0) {
             return "";
         }
+        switch (conditionType) {
+            // 等于
+            case EQ: {
+                return " = " + sqlCondition.getConditionValues().get(0);
+            }
+            // 不等于
+            case NOT_EQ: {
+                return " <> " + sqlCondition.getConditionValues().get(0);
+            }
+            // 小于
+            case LT: {
+                return " < " + sqlCondition.getConditionValues().get(0);
+            }
+            // 小于等于
+            case LT_EQ: {
+                return " <= " + sqlCondition.getConditionValues().get(0);
+            }
+            // 大于
+            case GT: {
+                return " > " + sqlCondition.getConditionValues().get(0);
+            }
+            // 大于等于
+            case GT_EQ: {
+                return " >= " + sqlCondition.getConditionValues().get(0);
+            }
+            // between and
+            case BETWEEN_AND: {
+                return " between " + sqlCondition.getConditionValues().get(0)
+                        + " and " + sqlCondition.getConditionValues().get(1);
+            }
+            // in
+            case IN: {
+                StringBuffer inExpression = new StringBuffer(" in (");
+                for (String value : sqlCondition.getConditionValues()) {
+                    inExpression.append(value + COMMA);
+                }
+                return inExpression.toString().substring(0,
+                        inExpression.toString().lastIndexOf(COMMA))
+                        + ")";
+            }
+            // like
+            case LIKE: {
+                return " like \"" + sqlCondition.getConditionValues().get(0) + "\"";
+            }
+            default: {
+                return "";
+            }
         }
     }
-    
+
     /**
      * 生成groupby sql语句
      * 
@@ -337,31 +410,28 @@ public class SqlExpression implements Serializable {
                 String columName = "";
                 if (colum.getDimension().getType() == DimensionType.TIME_DIMENSION) {
                     // 如果为时间维度
-                    columName = colum.getFactTableName() + "."
+                    columName = colum.getFactTableName() + DOT
                             + colum.getDimension().getFacttableColumn();
-                    groupbyExpression.append(columName + ",");
+                    groupbyExpression.append(columName + COMMA);
                 } else {
                     // 如果为其他维度
                     String dimTableName = colum.getTableName();
-                    groupbyExpression.append(dimTableName + "." + colum.getTableFieldName() + ",");
+                    groupbyExpression.append(dimTableName + DOT
+                            + colum.getTableFieldName() + COMMA);
                 }
             } else if (AxisType.COLUMN == colum.getType()) {
-                // TODO
-                // if (StringUtils.isEmpty(colum.getMeasure().getAggregator()))
-                // {
-                if (true) {
-                    return "";
-                }
+                return "";
             }
         }
         if (" group by ".equals(groupbyExpression.toString())) {
             return "";
         } else {
-            return groupbyExpression.toString().substring(0, groupbyExpression.toString().lastIndexOf(","));
+            return groupbyExpression.toString().substring(0,
+                    groupbyExpression.toString().lastIndexOf(COMMA));
         }
-        
+
     }
-    
+
     /**
      * 生成orderby sql语句
      * 
@@ -371,16 +441,19 @@ public class SqlExpression implements Serializable {
      *            allColums
      * @return String orderby sql
      */
-    public String generateOrderByExpression(ConfigQuestionModel configQuestionModel,
+    public String generateOrderByExpression(
+            ConfigQuestionModel configQuestionModel,
             HashMap<String, SqlColumn> allColums) {
-        String orderColumnNameTmp = configQuestionModel.getSortRecord().getSortColumnUniquename();
-        String orderColumnName = orderColumnNameTmp.substring(
-                orderColumnNameTmp.lastIndexOf("[") + 1, orderColumnNameTmp.lastIndexOf("]"));
+        String orderColumnNameTmp = configQuestionModel.getSortRecord()
+                .getSortColumnUniquename();
+        String[] str = MetaNameUtil.parseUnique2NameArray(orderColumnNameTmp);
+        String orderColumnName = str[str.length - 1];
         SqlColumn sqlColumn = allColums.get(orderColumnName);
-        return " order by " + sqlColumn.getTableName() + "." + sqlColumn.getTableFieldName() + " "
-                + configQuestionModel.getSortRecord().getSortType() + " ";
+        return " order by " + sqlColumn.getTableName() + DOT
+                + sqlColumn.getTableFieldName() + SPACE
+                + configQuestionModel.getSortRecord().getSortType() + SPACE;
     }
-    
+
     /**
      * 生成mysql sql语句
      * 
@@ -410,7 +483,7 @@ public class SqlExpression implements Serializable {
                 if (start >= 0 && size >= 0) {
                     limitStringBuffer.append(" limit ");
                     limitStringBuffer.append(start);
-                    limitStringBuffer.append(",");
+                    limitStringBuffer.append(COMMA);
                     limitStringBuffer.append(size);
                     this.setSql(this.getSql() + limitStringBuffer.toString());
                 }
@@ -424,7 +497,8 @@ public class SqlExpression implements Serializable {
                     StringBuffer pageString = new StringBuffer();
                     pageString.append("SELECT * FROM (");
                     pageString.append("SELECT A.*, ROWNUM RN");
-                    pageString.append("FROM (SELECT * FROM ( " + this.getSql() + " )) A ");
+                    pageString.append("FROM (SELECT * FROM ( " + this.getSql()
+                            + " )) A ");
                     pageString.append(" WHERE ROWNUM <= " + end);
                     pageString.append(") WHERE RN >=  " + start);
                     this.setSql(pageString.toString());
@@ -435,9 +509,9 @@ public class SqlExpression implements Serializable {
                 return;
             }
         }
-        
+
     }
-    
+
     /**
      * getSql
      * 
@@ -446,7 +520,7 @@ public class SqlExpression implements Serializable {
     public String getSql() {
         return sql;
     }
-    
+
     /**
      * setSql
      * 
@@ -456,7 +530,7 @@ public class SqlExpression implements Serializable {
     public void setSql(String sql) {
         this.sql = sql;
     }
-    
+
     /**
      * getCountSql
      * 
@@ -465,7 +539,7 @@ public class SqlExpression implements Serializable {
     public String getCountSql() {
         return countSql;
     }
-    
+
     /**
      * countSql
      * 
@@ -475,7 +549,7 @@ public class SqlExpression implements Serializable {
     public void setCountSql(String countSql) {
         this.countSql = countSql;
     }
-    
+
     /**
      * getDriver
      * 
@@ -484,7 +558,7 @@ public class SqlExpression implements Serializable {
     public String getDriver() {
         return driver;
     }
-    
+
     /**
      * setDriver
      * 
@@ -492,6 +566,14 @@ public class SqlExpression implements Serializable {
      *            driver
      */
     public void setDriver(String driver) {
+        this.driver = driver;
+    }
+
+    /**
+     * @param driver
+     *            jdbc driver
+     */
+    public SqlExpression(String driver) {
         this.driver = driver;
     }
 }

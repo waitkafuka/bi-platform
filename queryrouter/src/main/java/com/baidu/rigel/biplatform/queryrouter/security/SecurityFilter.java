@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.queryrouter.security;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -32,9 +31,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.baidu.rigel.biplatform.ac.util.DesCoderUtil;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * 安全过滤器
@@ -53,6 +51,16 @@ public class SecurityFilter implements Filter {
      * 存储配置策略的内置map
      */
     public static final Map<String, JSONObject> REPOSITORY = Maps.newConcurrentMap();
+    
+    /**
+     * request parameter “token”
+     */
+    public static final String TOKEN = "token";
+    
+    /**
+     * key string in REPOSITORY
+     */
+    public static final String KEY = "key";
     
     public SecurityFilter() {
     }
@@ -86,37 +94,9 @@ public class SecurityFilter implements Filter {
         HttpServletRequest httpRequest = null;
         httpRequest = (HttpServletRequest) request;
         
-        // 不需要鉴权的请求
-        String requestURI = httpRequest.getRequestURI();
-        if (isExcludeUrl(requestURI)) {
-            logger.info("[INFO]  ==================== request uri info : " + requestURI);
-            chain.doFilter(request, response);
-            return;
-        }
-        
         if (doAuth(httpRequest, (HttpServletResponse) response)) {
             chain.doFilter(httpRequest, response);
         }
-    }
-    
-    /**
-     * 
-     * @param requestURI
-     *            custom URL
-     * @return boolean if the provide requestURI in exclude list return true
-     *         else false
-     */
-    private boolean isExcludeUrl(String requestURI) {
-        Set<String> excludeUrl = Sets.newHashSet();
-        // excludeUrl.add("/silkroad/reports/dataupdate");
-        // excludeUrl.add ("/silkroad/reports/mobile");
-        for (String url : excludeUrl) {
-            if (requestURI.indexOf(url) == 0) {
-                // 如果匹配成功返回ture
-                return true;
-            }
-        }
-        return false;
     }
     
     /**
@@ -136,19 +116,22 @@ public class SecurityFilter implements Filter {
     private boolean doAuth(HttpServletRequest request, HttpServletResponse response) {
         // 进行认证
         try {
-            if (request.getParameter("token") == null) {
+            if (request.getParameter(TOKEN) == null) {
                 return false;
             }
-            String productLine = request.getParameter("token").toString();
+            String systemCodeEncrypt = request.getParameter(TOKEN).toString();
             ApiDesAuthService service = new ApiDesAuthService();
-            final String productLineStr = DesCoderUtil.decrypt(productLine);
-            JSONObject desKey = REPOSITORY.get(productLineStr);
+            String systemCode = AesUtil.getInstance().decodeAnddecrypt(systemCodeEncrypt);
+            JSONObject systemKey = REPOSITORY.get(systemCode);
+            if (systemKey == null) {
+                throw new IllegalStateException("token:\"" + systemKey
+                        + "\" is uncorrect, access to services prohibited.");
+            }
             // 认证请求成功
-            return service.auth(request, response, desKey.getString("key"));
+            return service.auth(request, response, systemKey.getString(KEY));
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error(e.getMessage());
-            throw new IllegalStateException("未能提供任何认证策略，拒绝提供服务");
+            throw new IllegalStateException("token is uncorrect, authentication failure.");
         }
     }
     

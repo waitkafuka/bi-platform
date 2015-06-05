@@ -44,62 +44,78 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColum
  */
 @Service("jdbcDataModelUtil")
 public class JdbcDataModelUtil {
-    
+
+    /**
+     * 参数需要计算page的totalsize
+     */
+    private static final int PARMA_NEED_CONTAIN_TOTALSIZE = -1;
+
+    /**
+     * dot
+     */
+    private static final String DOT = ".";
+
     /**
      * JdbcConnectionPool
      */
     @Resource(name = "jdbcHandler")
     private JdbcHandler jdbcHandler;
-    
+
     /**
      * executeSql
      * 
      * @param questionModel
-     *        questionModel
+     *            questionModel
      * @param SqlExpression
-     *        sqlExpression
+     *            sqlExpression
      * @return DataModel DataModel
      */
-    public DataModel executeSql(QuestionModel questionModel, SqlExpression sqlExpression) {
+    public DataModel executeSql(QuestionModel questionModel,
+            SqlExpression sqlExpression) {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         DataSourceInfo dataSourceInfo = configQuestionModel.getDataSourceInfo();
         questionModel.setUseIndex(false);
-        
-        List<Map<String, Object>> rowBasedList = jdbcHandler.queryForList(sqlExpression.getSql(),
-            dataSourceInfo);
+
+        List<Map<String, Object>> rowBasedList = jdbcHandler.queryForList(
+                sqlExpression.getSql(), dataSourceInfo);
         // getAll columns from Cube
         HashMap<String, SqlColumn> allColums = QuestionModel4TableDataUtils
-            .getAllCubeColumns(configQuestionModel.getCube());
-        
+                .getAllCubeColumns(configQuestionModel.getCube());
+
         // get need columns from AxisMetas
-        List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(allColums,
-            configQuestionModel.getAxisMetas(), (MiniCube) configQuestionModel.getCube());
-        
+        List<SqlColumn> needColums = QuestionModel4TableDataUtils
+                .getNeedColumns(allColums, configQuestionModel.getAxisMetas(),
+                        (MiniCube) configQuestionModel.getCube());
+
         // init DataModel
-        DataModel dataModel = this.initTableDataModel((MiniCube) configQuestionModel.getCube(),
-            needColums);
+        DataModel dataModel = this.initTableDataModel(
+                (MiniCube) configQuestionModel.getCube(), needColums);
         // 设置DataModel的ColBased Data
-        this.setModelTableData(dataModel, needColums, rowBasedList);
-        
+        this.fillModelTableData(dataModel, needColums, rowBasedList);
+
         // 如果为getRecordSize为-1，那么需要搜索dataModel.getRecordSize() from database
-        if (questionModel.getPageInfo().getTotalRecordCount() == -1) {
-            dataModel.setRecordSize(jdbcHandler.queryForInt(sqlExpression.getCountSql(), dataSourceInfo));
+        if (questionModel.getPageInfo() != null
+                && questionModel.getPageInfo().getTotalRecordCount() == PARMA_NEED_CONTAIN_TOTALSIZE) {
+            dataModel.setRecordSize(jdbcHandler.queryForInt(
+                    sqlExpression.getCountSql(), dataSourceInfo));
         }
         return dataModel;
     }
-    
+
     /**
      * setColumnHeadFields,列表头
      * 
      * @param ConfigQuestionModel
-     *        questionModel
+     *            questionModel
      * @return List<HeadField> 行表头
      */
-    public DataModel initTableDataModel(MiniCube miniCube, List<SqlColumn> needColums) {
+    public DataModel initTableDataModel(MiniCube miniCube,
+            List<SqlColumn> needColums) {
         DataModel dataModel = new DataModel();
         dataModel.setTableData(new TableData());
         dataModel.getTableData().setColumns(new ArrayList<Column>());
-        dataModel.getTableData().setColBaseDatas(new HashMap<String, List<String>>());
+        dataModel.getTableData().setColBaseDatas(
+                new HashMap<String, List<String>>());
         for (SqlColumn colDefine : needColums) {
             // String colDefineName = colDefine.getName();
             // if (colDefine.getDimension() != null
@@ -108,38 +124,46 @@ public class JdbcDataModelUtil {
             // // 时间维度
             // colDefineName = colDefine.getLevel().getFactTableColumn();
             // }
-            TableData.Column colum = new TableData.Column(colDefine.getTableFieldName(),
-                colDefine.getCaption(), colDefine.getTableName());
+            TableData.Column colum = new TableData.Column(
+                    colDefine.getTableFieldName(), colDefine.getCaption(),
+                    colDefine.getTableName());
             dataModel.getTableData().getColumns().add(colum);
             dataModel
-                .getTableData()
-                .getColBaseDatas()
-                .put(colDefine.getTableName() + "." + colDefine.getTableFieldName(),
-                    new ArrayList<String>());
+                    .getTableData()
+                    .getColBaseDatas()
+                    .put(colDefine.getTableName() + DOT
+                            + colDefine.getTableFieldName(),
+                            new ArrayList<String>());
         }
         return dataModel;
     }
-    
+
     /**
      * 将Rowbased数据集转成colbased的数据集
      * 
      * @param dataModel
-     *        dataModel
+     *            dataModel
      * @param rowBasedList
-     *        rowBasedList
+     *            rowBasedList
      */
-    public void setModelTableData(DataModel dataModel, List<SqlColumn> needColums,
-        List<Map<String, Object>> rowBasedList) {
-        Map<String, List<String>> rowBaseData = dataModel.getTableData().getColBaseDatas();
+    public void fillModelTableData(DataModel dataModel,
+            List<SqlColumn> needColums, List<Map<String, Object>> rowBasedList) {
+        if (dataModel == null || dataModel.getTableData() == null
+                || dataModel.getTableData().getColBaseDatas() == null) {
+            return ;
+        }
+        Map<String, List<String>> rowBaseData = dataModel.getTableData()
+                .getColBaseDatas();
         for (Map<String, Object> row : rowBasedList) {
             for (int colIdx = 0; colIdx < needColums.size(); colIdx++) {
                 SqlColumn column = needColums.get(colIdx);
-                String tableDataColumnKey = column.getTableName() + "."
-                    + column.getTableFieldName();
-                
+                String tableDataColumnKey = column.getTableName() + DOT
+                        + column.getTableFieldName();
+
                 if (rowBaseData.get(tableDataColumnKey) == null) {
                     // init TableData Column List
-                    rowBaseData.put(tableDataColumnKey, new ArrayList<String>());
+                    rowBaseData
+                            .put(tableDataColumnKey, new ArrayList<String>());
                 }
                 String cell = row.get(column.getSqlUniqueColumn()).toString();
                 // get Data from
@@ -148,5 +172,5 @@ public class JdbcDataModelUtil {
             }
         }
     }
-    
+
 }

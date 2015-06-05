@@ -243,7 +243,8 @@ public class QueryContextBuilder {
         
         
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
-            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())) {
+            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName()) 
+                && !dimension.isTimeDimension ()) {
                 logger.info("filter axises ignore all member filter");
                 return null;
             }
@@ -397,7 +398,7 @@ public class QueryContextBuilder {
                             MemberNodeTree childNode = new MemberNodeTree(nodeTree);
                             childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
                             childNodes.add(childNode);
-//                        member.getQueryNodes().addAll(child.getQueryNodes());
+//                        memberNode.getQueryNodes().addAll(child.getQueryNodes());
                         });
                     }
                 }

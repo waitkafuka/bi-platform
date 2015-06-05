@@ -250,7 +250,9 @@ public class QueryConditionUtils {
                     String rootUniqueName = "[" + olapElement.getName() + "].[All_" + olapElement.getName();
                     // TODO QeuryData value如何处理
                     for (String value : values) {
-                        if (!queryAction.isChartQuery() && value.indexOf(rootUniqueName) != -1) {
+                        if (!queryAction.isChartQuery() 
+                                && value.indexOf(rootUniqueName) != -1 
+                                && !(olapElement instanceof TimeDimension)) {
                             datas.clear();
                             break;
                         }

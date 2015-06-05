@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.UnsupportedDataTypeException;
 import javax.annotation.Resource;
 
 import org.json.JSONObject;
@@ -33,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
@@ -635,12 +637,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         calendar.add(Calendar.MONTH, -1);
                         range = new TimeRangeDetail(df.format(calendar.getTime()), end);
                     }
-                    String[] days = new String[range.getDays().length];
+                    String[] days = new String[range.getDays().length + 1];
                     StringBuilder message = new StringBuilder();
-                    for (int i = 0; i < days.length; i++) {
+                    for (int i = 0; i < days.length - 1; i++) {
                         days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
                         message.append(" " + days[i]);
                     }
+                    days[days.length - 1] = "[" + element.getName() + "].[All_" +element.getName () + "s]";
                     value = days;
                     itemValues.put(item, value);
                     logger.debug("[DEBUG] --- ---" + message);
@@ -674,12 +677,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     private String[] getDateRangeCond(Item item, OlapElement element, Object value) {
         String[] dataRange = new String[2];
         try {
-            JSONObject json = new JSONObject(String.valueOf(value));
-            /**
-             * TODO 考虑月/周/年等
-             */
-            dataRange[0] = json.getString("start");
-            dataRange[1] = json.getString("end");
+            if (MetaNameUtil.isUniqueName (value.toString ())) {
+                String[] tmp = MetaNameUtil.parseUnique2NameArray (value.toString ());
+                dataRange = getDataRangeWithValue((TimeDimension) element, tmp[tmp.length - 1]);
+            } else {
+                JSONObject json = new JSONObject(String.valueOf(value));
+                /**
+                 * TODO 考虑月/周/年等
+                 */
+                dataRange[0] = json.getString("start");
+                dataRange[1] = json.getString("end");
+            }
             if (item.getParams().get("range") != null && dataRange[0].equals(dataRange[1] )) {
                 TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(dataRange[0] ), 30, 0);
                 dataRange[0]  = tail.getStart();
@@ -712,6 +720,41 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             
         }
         return dataRange;
+    }
+
+    /**
+     * 
+     * @param timDim
+     * @param value
+     * @return String[]
+     */
+    private String[] getDataRangeWithValue(TimeDimension timDim, String value) {
+        Calendar cal = Calendar.getInstance ();
+        try {
+            cal.setTime (new SimpleDateFormat ("yyyyMMdd").parse (value));
+            cal.setFirstDayOfWeek (Calendar.MONDAY);
+        } catch (ParseException e) {
+            throw new RuntimeException (e.getMessage (), e);
+        }
+        TimeRangeDetail days = null;       
+        switch (timDim.getLevels ().values ().toArray (new Level[0])[0].getType ()) {
+            case TIME_YEARS:
+                days = TimeUtils.getYearDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_QUARTERS:
+                days = TimeUtils.getQuarterDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_MONTHS:
+                days = TimeUtils.getMonthDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_WEEKS:
+                days = TimeUtils.getWeekDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_DAYS:
+                return new String[] {value, value};
+            default:
+        }
+        throw new RuntimeException ("Unsupported time dim type");
     }
 
 //    private TimeRangeDetail getMonthRangDetailWithNow(final Date now) {

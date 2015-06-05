@@ -90,7 +90,8 @@ public class DataModelBuilder {
      * 
      * @param tesseractResultSet
      */
-    public DataModelBuilder(TesseractResultSet<SearchIndexResultRecord> tesseractResultSet, QueryContext queryContext) {
+    public DataModelBuilder(
+        TesseractResultSet<SearchIndexResultRecord> tesseractResultSet, QueryContext queryContext) {
         if (tesseractResultSet == null) {
             log.warn("tesseractResultSet is null,return table head");
 //            throw new IllegalArgumentException("tesseractResultSet is null");

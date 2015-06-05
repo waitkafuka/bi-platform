@@ -21,8 +21,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.baidu.rigel.biplatform.ac.util.DesCoderUtil;
-
 /**
  * Api server to server 的认证
  * 
@@ -30,6 +28,16 @@ import com.baidu.rigel.biplatform.ac.util.DesCoderUtil;
  *
  */
 public class ApiDesAuthService {
+    
+    /**
+     * 参数request question
+     */
+    private static final String PARAM_QUESTION = "question";
+    
+    /**
+     * 参数request signature
+     */
+    private static final String PARAM_SIGNATURE = "signature";
     
     /**
      * logger
@@ -41,16 +49,28 @@ public class ApiDesAuthService {
      */
     public boolean auth(HttpServletRequest request, HttpServletResponse response, String key)
             throws Exception {
+        if (request.getParameterMap().get(PARAM_QUESTION) == null
+                || request.getParameterMap().get(PARAM_SIGNATURE) == null) {
+            return true;
+        }
+        String question = request.getParameterMap().get(PARAM_QUESTION)[0].toString();
+        String signature = request.getParameterMap().get(PARAM_SIGNATURE)[0].toString();
         // 参数验证
         try {
-            String value = request.getParameterMap().get("question")[0].toString();
-            value = DesCoderUtil.decrypt(value, key);
-            request.setAttribute("question", value);
+//            if (Md5Util.encode(question, key).equals(signature)) {
+//                request.setAttribute(PARAM_QUESTION, question);
+//                return true;
+//            } else {
+//                return false;
+//            }
+            request.setAttribute(PARAM_QUESTION, question);
+            return true;
         } catch (Exception e) {
-            logger.error("查询参数传递错误:{}", e.getCause().getMessage());
+            logger.error(
+                    "occur error, request param can not distinguish:{},question:{},signature:{}", e
+                            .getCause().getMessage(), question, signature);
             return false;
         }
-        return true;
     }
     
 }
