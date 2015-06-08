@@ -3,8 +3,6 @@
  */
 package com.baidu.rigel.biplatform.ma.download.service.impl;
 
-
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.powermock.api.mockito.PowerMockito;
@@ -24,13 +22,16 @@ public class PlaneTableOfflineDownloadServiceImplTest {
      * 
      */
     @Test
-    public void test() {
+    public void testDownloadPlaneTableOffline() {
         LogicModel logicModel = PowerMockito.mock(LogicModel.class);
         QuestionModel questionModel = PowerMockito.mock(QuestionModel.class);
         DownloadType downType = DownloadType.PLANE_TABLE_OFFLINE;
         DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downType);
-        
-        //TODO 暂时没有实现，所以返回null
-        Assert.assertNull(downloadService.downloadTableData(questionModel, logicModel));
+
+        try {
+            downloadService.downloadTableData(questionModel, logicModel);
+        } catch (Exception e) {
+            Assert.fail();
+        }
     }
 }

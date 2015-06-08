@@ -32,8 +32,8 @@ import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 /**
  * 
@@ -88,8 +88,7 @@ public class JdbcDataModelUtil {
                         (MiniCube) configQuestionModel.getCube());
 
         // init DataModel
-        DataModel dataModel = this.initTableDataModel(
-                (MiniCube) configQuestionModel.getCube(), needColums);
+        DataModel dataModel = this.initTableDataModel(needColums);
         // 设置DataModel的ColBased Data
         this.fillModelTableData(dataModel, needColums, rowBasedList);
 
@@ -103,14 +102,12 @@ public class JdbcDataModelUtil {
     }
 
     /**
-     * setColumnHeadFields,列表头
+     * initTableDataModel,初始化dataModel
      * 
-     * @param ConfigQuestionModel
-     *            questionModel
-     * @return List<HeadField> 行表头
+     * @param List<SqlColumn> needColums
+     * @return DataModel DataModel
      */
-    public DataModel initTableDataModel(MiniCube miniCube,
-            List<SqlColumn> needColums) {
+    public DataModel initTableDataModel(List<SqlColumn> needColums) {
         DataModel dataModel = new DataModel();
         dataModel.setTableData(new TableData());
         dataModel.getTableData().setColumns(new ArrayList<Column>());
@@ -165,7 +162,10 @@ public class JdbcDataModelUtil {
                     rowBaseData
                             .put(tableDataColumnKey, new ArrayList<String>());
                 }
-                String cell = row.get(column.getSqlUniqueColumn()).toString();
+                String cell = "";
+                if (column.getSqlUniqueColumn() != null && row.get(column.getSqlUniqueColumn()) != null) {
+                    cell = row.get(column.getSqlUniqueColumn()).toString();
+                }
                 // get Data from
                 List<String> oneColData = rowBaseData.get(tableDataColumnKey);
                 oneColData.add(cell);

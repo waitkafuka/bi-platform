@@ -24,7 +24,7 @@ public class PivotTableOfflineDownloadServiceImpl implements DownloadTableDataSe
     @Override
     public String downloadTableData(QuestionModel questionModel, LogicModel logicModel ) {
         // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("当前暂不支持");
     }
 
 }

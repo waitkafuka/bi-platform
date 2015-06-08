@@ -451,6 +451,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 return cube.getDimensions().get(item.getOlapElementId());
             }).toArray(Dimension[] :: new);
             if (tmp != null && tmp.length >0) {
+                if (tmp[0] instanceof TimeDimension) {
+                    Level l = tmp[0].getLevels().values().toArray(new Level[0])[0];
+                    return new MeasureOrderDesc(l.getFactTableColumn(), "DESC", 500);
+                }
                 return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
             }
         }

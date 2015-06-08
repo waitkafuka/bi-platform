@@ -1484,6 +1484,16 @@ public class ReportDesignModelResource extends BaseResource {
         String name = request.getParameter("name");
         String sqlCondition = request.getParameter("sqlCondition");
         String defaultValue = request.getParameter("defaultValue");
+        // 对LIKE条件进行特殊处理
+        if ("LIKE".equals(sqlCondition)) {
+            if (!defaultValue.startsWith("%") && defaultValue.indexOf("%") != 0) {
+                defaultValue = "%" +defaultValue;
+            }
+            
+            if (!defaultValue.endsWith("%") && defaultValue.indexOf("%") != (defaultValue.length()-1)) {
+                defaultValue = defaultValue + "%";
+            }
+        }
         if (!StringUtils.isEmpty(name) && !StringUtils.isEmpty(sqlCondition) && !StringUtils.isEmpty(defaultValue)) {
             // 检查输入值是否合理
             if (!PlaneTableUtils.checkSQLCondition(sqlCondition, defaultValue)) {

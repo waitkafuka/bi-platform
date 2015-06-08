@@ -16,6 +16,10 @@ define(['template'], function (template) {
         if($item.type=="TIME_DIMENSION"){
         $out+=' j-time-dim';
         }
+        $out+=' ';
+        if($item.type=="CALLBACK"){
+        $out+=' j-callback-dim';
+        }
         $out+='" data-id="';
         $out+=$escape($item.id);
         $out+='" data-name="';

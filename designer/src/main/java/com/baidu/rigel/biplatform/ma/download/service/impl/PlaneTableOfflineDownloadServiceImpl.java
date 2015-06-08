@@ -21,7 +21,7 @@ public class PlaneTableOfflineDownloadServiceImpl implements DownloadTableDataSe
     @Override
     public String downloadTableData(QuestionModel questionModel, LogicModel logicModel) {
         // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("暂时不支持");
     }
 
 }

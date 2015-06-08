@@ -11,34 +11,34 @@ define(
     function (
         Constant,
         CalendarVmTemplate
-        ) {
+    ) {
         // 日历id后缀
         var calendarIdSuffix = Constant.COMPONENT_ID_SUFFIX.CALENDAR;
 
         // 日历 实例 描述信息（从report-ui里面获取）
         var entityDescription = {
-            "clzType": "VUI",
-            "dataSetOpt": {
-                "forbidEmpty": false,
-                "disableCancelBtn": false,
-                "timeTypeList": [],
-                "timeTypeOpt": {}
+            clzType: 'VUI',
+            dataSetOpt: {
+                forbidEmpty: false,
+                disableCancelBtn: false,
+                timeTypeList: [],
+                timeTypeOpt: {}
             },
-            "name": "dim_time^_^the_date", // name在report-ui里面会根据dateKey里面的内容改变
-            "dateKey": {},
-            "clzKey": "X_CALENDAR"
+            name: 'dim_time^_^the_date', // name在report-ui里面会根据dateKey里面的内容改变
+            dateKey: {},
+            clzKey: 'X_CALENDAR'
         };
         var entityDescriptionRangeCalendar = {
-            clzType: "VUI",
-            "name": "dim_time^_^the_date", // name在report-ui里面会根据dateKey里面的内容改变
-            "dateKey": {},
-            "dataSetOpt": {
-                "rangeTimeTypeOpt": {
+            clzType: 'VUI',
+            name: 'dim_time^_^the_date', // name在report-ui里面会根据dateKey里面的内容改变
+            dateKey: {},
+            dataSetOpt: {
+                rangeTimeTypeOpt: {
                     startDateOpt: 0,
                     endDateOpt: 0
                 }
             },
-            "clzKey": "RANGE_CALENDAR"
+            clzKey: 'RANGE_CALENDAR'
         };
         var rangeConfig = {
             start: 0,
@@ -47,105 +47,105 @@ define(
         // 那些个外在的配置项
         var timeTypeConfig = {
             timeTypeList: {
-                "D": {
-                    "value": "D",
-                    "text": "日"
+                D: {
+                    value: 'D',
+                    text: '日'
                 },
-                "W": {
-                    "value": "W",
-                    "text": "周"
+                W: {
+                    value: 'W',
+                    text: '周'
                 },
-                "M": {
-                    "value": "M",
-                    "text": "月"
+                M: {
+                    value: 'M',
+                    text: '月'
                 },
-                "Q": {
-                    "value": "Q",
-                    "text": "季"
+                Q: {
+                    value: 'Q',
+                    text: '季'
                 }
             },
             timeTypeOpt: {
-                "D": {
-                    "selMode": "SINGLE",
+                D: {
+                    selMode: 'SINGLE',
                     // 默认时间
-                    "date": [
-                        "-1D",
-                        "-1D"
+                    date: [
+                        '-1D',
+                        '-1D'
                     ],
                     // 事件范围
-                    "range": [
-                        "2011-01-01",
-                        "-1D"
+                    range: [
+                        '2011-01-01',
+                        '-1D'
                     ],
-                    "selModeList": [
+                    selModeList: [
                         {
-                            "text": "单选",
-                            "value": "SINGLE",
-                            "prompt": "单项选择"
+                            text: '单选',
+                            value: 'SINGLE',
+                            prompt: '单项选择'
                         }
                     ]
                 },
-                "W": {
-                    "selMode": "RANGE",
-                    "date": [
-                        "-1W",
-                        "-1D"
+                W: {
+                    selMode: 'RANGE',
+                    date: [
+                        '-1W',
+                        '-1W'
                     ],
-                    "range": [
-                        "2011-01-01",
-                        "-1D"
+                    range: [
+                        '2011-01-01',
+                        '-1W'
                     ],
-                    "selModeList": [
+                    selModeList: [
                         {
-                            "text": "单选",
-                            "value": "SINGLE",
-                            "prompt": "单项选择"
+                            text: '单选',
+                            value: 'SINGLE',
+                            prompt: '单项选择'
                         }
 //                        {
-//                            "text": "范围多选",
-//                            "value": "RANGE",
-//                            "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值"
+//                            'text': '范围多选',
+//                            'value': 'RANGE',
+//                            'prompt': '范围选择，点击一下选择开始值，再点击一下选择结束值'
 //                        }
                     ]
                 },
-                "M": {
-                    "selMode": "SINGLE",
-                    "date": [
-                        "-1M",
-                        "-2M"
+                M: {
+                    selMode: 'SINGLE',
+                    date: [
+                        '-1M',
+                        '-2M'
                     ],
-                    "range": [
-                        "2011-01-01",
-                        "-1M"
+                    range: [
+                        '2011-01-01',
+                        '-1M'
                     ],
-                    "selModeList": [
+                    selModeList: [
                         {
-                            "text": "单选",
-                            "value": "SINGLE",
-                            "prompt": "单项选择"
+                            text: '单选',
+                            value: 'SINGLE',
+                            prompt: '单项选择'
                         }
 //                        {
-//                            "text": "范围多选",
-//                            "value": "RANGE",
-//                            "prompt": "范围选择，点击一下选择开始值，再点击一下选择结束值"
+//                            'text': '范围多选',
+//                            'value': 'RANGE',
+//                            'prompt': '范围选择，点击一下选择开始值，再点击一下选择结束值'
 //                        }
                     ]
                 },
-                "Q": {
-                    "selMode": "SINGLE",
-                    "date": [
-                        "-1Q",
-                        "-2Q"
+                Q: {
+                    selMode: 'SINGLE',
+                    date: [
+                        '-1Q',
+                        '-2Q'
                     ],
-                    "range": [
-                        "2011-01-01",
-                        "-1D"
+                    range: [
+                        '2011-01-01',
+                        '-1D'
                     ],
-                    "selModeList": [
+                    selModeList: [
                         {
-                            "text": "单选",
-                            "value": "SINGLE",
-                            "prompt": "单项选择"
+                            text: '单选',
+                            value: 'SINGLE',
+                            prompt: '单项选择'
                         }
                     ]
                 }

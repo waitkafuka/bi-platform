@@ -20,6 +20,7 @@ var demoData = {
         <option value="GT_EQ" {{if $data.sqlCondition=='GT_EQ'}}selected=selected {{/if}}>大于等于</option>
         <option value="IN" {{if $data.sqlCondition=='IN'}}selected=selected {{/if}}>in</option>
         <option value="BETWEEN_AND" {{if $data.sqlCondition=='BETWEEN_AND'}}selected=selected {{/if}}>between-and</option>
+        <option value="LIKE" {{if $data.sqlCondition=='LIKE'}}selected=selected {{/if}}>like</option>
         {{else}}
         <option value="EQ" {{if $data.sqlCondition=='EQ'}}selected=selected {{/if}}>等于</option>
         <option value="IN" {{if $data.sqlCondition=='IN'}}selected=selected {{/if}}>in</option>

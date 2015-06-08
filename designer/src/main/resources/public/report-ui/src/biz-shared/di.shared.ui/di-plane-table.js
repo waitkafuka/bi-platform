@@ -778,25 +778,28 @@ $namespace('di.shared.ui');
         }
 
         var measureOptions = [
-            '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
-            '<option value="NOT_EQ"', condition == 'NOT_EQ' ? 'selected = "selected"' : '', '>不等于</option>',
-            '<option value="LT"', condition == 'LT' ? 'selected = "selected"' : '', '>小于</option>',
-            '<option value="GT"', condition == 'GT' ? 'selected = "selected"' : '', '>大于</option>',
-            '<option value="LT_EQ"', condition == 'LT_EQ' ? 'selected = "selected"' : '', '>小于等于</option>',
-            '<option value="GT_EQ"', condition == 'GT_EQ' ? 'selected = "selected"' : '', '>大于等于</option>',
-            '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>',
-            '<option value="BETWEEN-AND"', condition == 'BETWEEN-AND' ? 'selected = "selected"' : '', '>between-and</option>'
+            '<option value="EQ"', condition === 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
+            '<option value="NOT_EQ"', condition === 'NOT_EQ' ? 'selected = "selected"' : '', '>不等于</option>',
+            '<option value="LT"', condition === 'LT' ? 'selected = "selected"' : '', '>小于</option>',
+            '<option value="GT"', condition === 'GT' ? 'selected = "selected"' : '', '>大于</option>',
+            '<option value="LT_EQ"', condition === 'LT_EQ' ? 'selected = "selected"' : '', '>小于等于</option>',
+            '<option value="GT_EQ"', condition === 'GT_EQ' ? 'selected = "selected"' : '', '>大于等于</option>',
+            '<option value="IN"', condition === 'IN' ? 'selected = "selected"' : '', '>in</option>',
+            '<option value="BETWEEN_AND"',
+                condition === 'BETWEEN_AND' ? 'selected = "selected"' : '',
+            '>between-and</option>',
+            '<option value="LIKE"', condition === 'LIKE' ? 'selected = "selected"' : '', '>like</option>'
         ].join('');
 
         var options = [
-            '<option value="EQ"', condition == 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
-            '<option value="IN"', condition == 'IN' ? 'selected = "selected"' : '', '>in</option>'
+            '<option value="EQ"', condition === 'EQ' ? 'selected = "selected"' : '', '>等于</option>',
+            '<option value="IN"', condition === 'IN' ? 'selected = "selected"' : '', '>in</option>'
         ].join('');
 
         var html = [
             '<div class="ui-table-field-set-item">',
             '<select id="rptuiFieldSetCondition">',
-                isMeasure == 'true' ? measureOptions : options,
+                isMeasure === 'true' ? measureOptions : options,
             '</select>',
             '<input type="text" id="rptuiFieldSetDefaultValue" value="', defaultValue, '" placeholder="默认值" />',
             '</div>'
@@ -849,9 +852,9 @@ $namespace('di.shared.ui');
                 var curField = this._uTable.fieldSetList[id];
                 var spanStr = [];
                 var valStr;
-                if (curField.condition == 'BETWEEN-AND') {
+                if (curField.condition === 'BETWEEN-AND') {
                     valStr = curField.defaultValue.split(',');
-                    if (Object.prototype.toString.call(valStr) == '[object Array]') {
+                    if (Object.prototype.toString.call(valStr) === '[object Array]') {
                         valStr = 'between&nbsp;' + valStr[0] + '&nbsp;and&nbsp;' + valStr[1];
                     }
                 }

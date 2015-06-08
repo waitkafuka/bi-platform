@@ -40,7 +40,7 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColum
  *
  */
 public class QuestionModel4TableDataUtils {
-    
+
     /**
      * 获取questionModel中需要查询的Columns
      * 
@@ -52,36 +52,37 @@ public class QuestionModel4TableDataUtils {
     public static List<SqlColumn> getNeedColumns(HashMap<String, SqlColumn> allColums,
         Map<AxisType, AxisMeta> axisMetas, MiniCube cube) {
         Set<SqlColumn> needColumns = new HashSet<SqlColumn>();
-        
+
         // 获取指标元数据
         AxisMeta axisMetaMeasures = (AxisMeta) axisMetas.get(AxisType.COLUMN);
         for (String measureName : axisMetaMeasures.getQueryMeasures()) {
             needColumns.add(allColums.get(measureName));
         }
-        
+
         // 获取指标元数据
+        Dimension dimension = null;
         for (String dimName : axisMetaMeasures.getCrossjoinDims()) {
-            Dimension dimension = cube.getDimensions().get(dimName);
-            if (dimension.getType() == DimensionType.TIME_DIMENSION) {
+            dimension = cube.getDimensions().get(dimName);
+            if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(dimension)) {
             // 如果为时间维度，转换成事实表的时间字段
-            dimName = cube.getDimensions().get(dimName).getFacttableColumn();
+                dimName = dimension.getFacttableColumn();
             }
             needColumns.add(allColums.get(dimName));
         }
-        
+
         // 获取维度元数据
         AxisMeta axisMetaDims = (AxisMeta) axisMetas.get(AxisType.ROW);
         for (String dimName : axisMetaDims.getCrossjoinDims()) {
-            Dimension dimension = cube.getDimensions().get(dimName);
-            if (dimension.getType() == DimensionType.TIME_DIMENSION) {
+            dimension = cube.getDimensions().get(dimName);
+            if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(dimension)) {
             // 如果为时间维度，转换成事实表的时间字段
-            dimName = cube.getDimensions().get(dimName).getFacttableColumn();
+                dimName = dimension.getFacttableColumn();
             }
             needColumns.add(allColums.get(dimName));
         }
         return new ArrayList<SqlColumn>(needColumns);
     }
-    
+
     /**
      * 获取指标及维度中所有的字段信息Formcube
      * 
@@ -96,7 +97,7 @@ public class QuestionModel4TableDataUtils {
         for (Entry<String, Measure> entry : miniCube.getMeasures().entrySet()) {
             String measureName = entry.getKey();
             if (allColumns.get(measureName) == null) {
-            allColumns.put(measureName, new SqlColumn());
+                allColumns.put(measureName, new SqlColumn());
             }
             SqlColumn oneMeasure = allColumns.get(measureName);
             oneMeasure.setName(entry.getKey());
@@ -108,24 +109,31 @@ public class QuestionModel4TableDataUtils {
             oneMeasure.setMeasure(entry.getValue());
             oneMeasure.setFactTableName(miniCube.getSource());
         }
-        
+
         // 获取维度元数据
+        Level oneDimensionSource = null;
+        String dimensionName = null;
+        String tableFieldName = null;
+        String tableName = "";
+        Dimension dimension = null;
+        SqlColumn oneDimensionTarget = null;
         for (Entry<String, Dimension> entry : miniCube.getDimensions().entrySet()) {
-            Level oneDimensionSource = (Level) entry.getValue().getLevels().values().toArray()[0];
-            String dimensionName = entry.getKey();
-            String tableFieldName = oneDimensionSource.getName();
-            String tableName = oneDimensionSource.getDimTable();
-            Dimension dimension = cube.getDimensions().get(dimensionName);
-            if (dimension.getType() == DimensionType.TIME_DIMENSION) {
+            oneDimensionSource = (Level) entry.getValue().getLevels().values().toArray()[0];
+            dimensionName = entry.getKey();
+            tableFieldName = oneDimensionSource.getName();
+            dimension = cube.getDimensions().get(dimensionName);
+            if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(dimension)) {
             // 如果为时间维度，转换成事实表的时间字段
-            dimensionName = oneDimensionSource.getFactTableColumn();
-            tableFieldName = oneDimensionSource.getFactTableColumn();
-            tableName = miniCube.getSource();
+                dimensionName = oneDimensionSource.getFactTableColumn();
+                tableFieldName = oneDimensionSource.getFactTableColumn();
+                tableName = miniCube.getSource();
+            } else {
+                tableName = oneDimensionSource.getDimTable();
             }
             if (allColumns.get(dimensionName) == null) {
-            allColumns.put(dimensionName, new SqlColumn());
+                allColumns.put(dimensionName, new SqlColumn());
             }
-            SqlColumn oneDimensionTarget = allColumns.get(dimensionName);
+            oneDimensionTarget = allColumns.get(dimensionName);
             oneDimensionTarget.setName(dimensionName);
             oneDimensionTarget.setTableFieldName(tableFieldName);
             oneDimensionTarget.setCaption(oneDimensionSource.getCaption());
@@ -136,7 +144,19 @@ public class QuestionModel4TableDataUtils {
             oneDimensionTarget.setSqlUniqueColumn(tableName + tableFieldName);
             oneDimensionTarget.setFactTableName(miniCube.getSource());
         }
-        
+
         return allColumns;
+    }
+    
+
+    /**
+     * isTimeOrCallbackDimension
+     * 
+     * @param dimension dimension
+     * @return isTimeOrCallbackDimension
+     */
+    public static boolean isTimeOrCallbackDimension(Dimension dimension) {
+        return dimension.getType() == DimensionType.TIME_DIMENSION
+                || dimension.getType() == DimensionType.CALLBACK;
     }
 }
