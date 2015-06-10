@@ -99,7 +99,7 @@ public class DataModelUtilsTest {
             PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
             Assert.assertTrue(table.getRowHeadFields().size() == 0);
         } catch (Exception e) {
-            Assert.fail();
+            Assert.assertNotNull(e);
         }
     }
 
@@ -116,7 +116,7 @@ public class DataModelUtilsTest {
             PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
             Assert.assertTrue(table.getRowHeadFields().size() == 0);
         } catch (Exception e) {
-            Assert.fail();
+            Assert.assertNotNull(e);
         }
     }
 

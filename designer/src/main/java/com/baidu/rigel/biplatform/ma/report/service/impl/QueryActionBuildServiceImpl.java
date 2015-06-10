@@ -641,13 +641,14 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         calendar.add(Calendar.MONTH, -1);
                         range = new TimeRangeDetail(df.format(calendar.getTime()), end);
                     }
-                    String[] days = new String[range.getDays().length + 1];
+                    String[] days = new String[range.getDays().length];
                     StringBuilder message = new StringBuilder();
-                    for (int i = 0; i < days.length - 1; i++) {
-                        days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
+                    String[] detailDays = range.getDays();
+                    for (int i = 0; i < detailDays.length; i++) {
+                        days[i] = "[" + element.getName() + "].[" + detailDays[i] + "]";
                         message.append(" " + days[i]);
                     }
-                    days[days.length - 1] = "[" + element.getName() + "].[All_" +element.getName () + "s]";
+//                    days[days.length] = "[" + element.getName() + "].[All_" +element.getName () + "s]";
                     value = days;
                     itemValues.put(item, value);
                     logger.debug("[DEBUG] --- ---" + message);

@@ -25,6 +25,7 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcDataModelUtil;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcQuestionModelUtil;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 /**
@@ -57,7 +58,7 @@ public class QuerySqlPlugin implements QueryPlugin {
      * .baidu.rigel.biplatform.ac.query.model.QuestionModel)
      */
     @Override
-    public DataModel query(QuestionModel questionModel) {
+    public DataModel query(QuestionModel questionModel) throws QuestionModelTransformationException {
         SqlExpression sqlCause = jdbcQuestionModelUtil.convertQuestionModel2Sql(questionModel);
         DataModel dataModel = jdbcDataModelUtil.executeSql(questionModel, sqlCause);
         return dataModel;

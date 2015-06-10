@@ -25,8 +25,9 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 /**
  * 
@@ -45,7 +46,8 @@ public class JdbcQuestionModelUtil {
      *            questionModel
      * @return String sql str
      */
-    public SqlExpression convertQuestionModel2Sql(QuestionModel questionModel) {
+    public SqlExpression convertQuestionModel2Sql(QuestionModel questionModel)
+            throws QuestionModelTransformationException {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         MiniCube cube = (MiniCube) configQuestionModel.getCube();
         questionModel.setUseIndex(false);

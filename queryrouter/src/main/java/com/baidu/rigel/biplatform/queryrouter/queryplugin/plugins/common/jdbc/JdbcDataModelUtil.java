@@ -113,14 +113,7 @@ public class JdbcDataModelUtil {
         dataModel.getTableData().setColumns(new ArrayList<Column>());
         dataModel.getTableData().setColBaseDatas(
                 new HashMap<String, List<String>>());
-        for (SqlColumn colDefine : needColums) {
-            // String colDefineName = colDefine.getName();
-            // if (colDefine.getDimension() != null
-            // && colDefine.getDimension().getType() ==
-            // DimensionType.TIME_DIMENSION) {
-            // // 时间维度
-            // colDefineName = colDefine.getLevel().getFactTableColumn();
-            // }
+        needColums.forEach((colDefine) -> {
             TableData.Column colum = new TableData.Column(
                     colDefine.getTableFieldName(), colDefine.getCaption(),
                     colDefine.getTableName());
@@ -131,7 +124,7 @@ public class JdbcDataModelUtil {
                     .put(colDefine.getTableName() + DOT
                             + colDefine.getTableFieldName(),
                             new ArrayList<String>());
-        }
+        });
         return dataModel;
     }
 
@@ -151,9 +144,8 @@ public class JdbcDataModelUtil {
         }
         Map<String, List<String>> rowBaseData = dataModel.getTableData()
                 .getColBaseDatas();
-        for (Map<String, Object> row : rowBasedList) {
-            for (int colIdx = 0; colIdx < needColums.size(); colIdx++) {
-                SqlColumn column = needColums.get(colIdx);
+        rowBasedList.forEach((row) -> {
+            needColums.forEach((column) -> {
                 String tableDataColumnKey = column.getTableName() + DOT
                         + column.getTableFieldName();
 
@@ -169,8 +161,8 @@ public class JdbcDataModelUtil {
                 // get Data from
                 List<String> oneColData = rowBaseData.get(tableDataColumnKey);
                 oneColData.add(cell);
-            }
-        }
+            });
+        });
     }
 
 }

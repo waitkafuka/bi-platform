@@ -31,7 +31,7 @@ public class PlaneTableOfflineDownloadServiceImplTest {
         try {
             downloadService.downloadTableData(questionModel, logicModel);
         } catch (Exception e) {
-            Assert.fail();
+            Assert.assertNotNull(e);
         }
     }
 }

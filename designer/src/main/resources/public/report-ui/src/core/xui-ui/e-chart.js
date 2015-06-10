@@ -996,15 +996,17 @@
             me = this;
         me.$disposeChart();
         // 如果没有数据，图形显示空
-        if (!me._aSeries || me._aSeries.ledngth == 0) {
-            tpl = '<div class="#{dClass}-empty">#{html}</div>';
+        if (!me._aSeries || me._aSeries.length == 0) {
+            me._eContent.style.height = (me.el.offsetHeight - me._eHeader.offsetHeight) + 'px';
+            tpl = '<div class="#{dClass}-empty"><div class="#{dClass}-empty-img"></div></div>';
             me._eContent.innerHTML = stringTemplate(
                 tpl,
                 {
-                    dClass: me._sType,
-                    html: me._sEmptyHTML
+                    dClass: me._sType
                 }
-            )
+            );
+            var oImg = q(me._sType + '-empty-img', me._eContent)[0];
+            oImg.style.marginTop = ((me._eContent.offsetHeight - oImg.offsetHeight) / 2) + 'px';
             return;
         }
         me.$preload();

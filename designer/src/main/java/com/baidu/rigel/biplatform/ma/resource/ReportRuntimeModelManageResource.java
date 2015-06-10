@@ -315,12 +315,15 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             String condition = conditionMap.get("condition");
             // 对LIKE条件进行特殊处理
             if ("LIKE".equals(condition)) {
-                if (!defaultValue.startsWith("%") && defaultValue.indexOf("%") != 0) {
-                    defaultValue = "%" +defaultValue;
-                }
-                // 
-                if (!defaultValue.endsWith("%") && defaultValue.indexOf("%") != (defaultValue.length()-1)) {
-                    defaultValue = defaultValue + "%";
+                if (defaultValue != null) {
+                    // 如果不是以%开头，则需要在defaultValue的开头添加%
+                    if (!defaultValue.startsWith("%")) {
+                        defaultValue = "%" + defaultValue;
+                    }
+                    // 如果不是以%结尾，则需要在defaultValue的结尾添加%
+                    if (!defaultValue.endsWith("%")) {
+                        defaultValue = defaultValue + "%";
+                    }
                 }
             }
             if (PlaneTableUtils.checkSQLCondition(condition, defaultValue)) {
@@ -337,9 +340,9 @@ public class ReportRuntimeModelManageResource extends BaseResource {
                     runTimeModel.getContext().getParams().remove(id);
                     runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(id);
                     runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(oldCondition.getName());
-                } 
+                }
                 oldConditions.put(id, planeTableCondition);
-                model.setPlaneTableConditions(oldConditions);  
+                model.setPlaneTableConditions(oldConditions);
                 runTimeModel.setModel(model);
                 // 更新报表模型
                 reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -499,7 +502,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         } catch (DataSourceOperationException | QueryModelBuildException e1) {
             logger.info("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
-        } 
+        }
 
         // 对返回结果进行处理，用于表、图显示
         result =

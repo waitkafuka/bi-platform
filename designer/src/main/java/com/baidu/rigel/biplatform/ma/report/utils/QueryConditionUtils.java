@@ -151,7 +151,11 @@ public class QueryConditionUtils {
             // 设置指标条件值
             measureCondition.setMeasureConditions(buildSqlCondition((Measure) olapElement, sqlType, valueObj));
         } else {
-            measureCondition.setMeasureConditions(buildSqlCondition((Measure) olapElement, sqlType, defaultValue));
+            if (StringUtils.hasText(defaultValue)) {
+                measureCondition.setMeasureConditions(buildSqlCondition((Measure) olapElement, sqlType, defaultValue));
+            } else {
+                measureCondition.setMeasureConditions(null);
+            }
         }
         return measureCondition;
     }
@@ -356,10 +360,13 @@ public class QueryConditionUtils {
         int i = 0;
         for (String str : valueObj) {
             if (!MetaNameUtil.isUniqueName(str)) {
+//                // TODO，后续对LIKE维度条件进行处理
+//                String tmpStr = str.replace("%", "");
                 if (!StringUtils.hasText(str)) {
+                    // 该设置，默认会将该维度条件过滤掉
                     rs[i] = "[" + dimName + "].[All_]";
                 } else {
-                    rs[i] = "[" + dimName + "].[" + str + "]";                    
+                    rs[i] = "[" + dimName + "].[" + str + "]";
                 }
             } else {
                 rs[i] = str;
