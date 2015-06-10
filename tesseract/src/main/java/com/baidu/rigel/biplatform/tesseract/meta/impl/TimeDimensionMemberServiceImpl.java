@@ -234,11 +234,11 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         Calendar cal = Calendar.getInstance();
         int year = cal.get(Calendar.YEAR);
         int weekNow = cal.get(Calendar.WEEK_OF_YEAR);
-        cal.set(Calendar.MONTH, Calendar.JANUARY);
-        cal.set(Calendar.DATE, 1);
+//        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
         Date firstWeek = getFirstDayOfWeek(cal.getTime());
         cal.setTime(firstWeek);
-        int week = 1;
+        int week = cal.get (Calendar.WEEK_OF_YEAR);
         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
         while (week <= weekNow) {
             String day = sf.format(cal.getTime());
@@ -252,7 +252,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
             for (int i = 0; i <= 6; i++) {
                 day = sf.format(cal.getTime());
                 dayMember.getQueryNodes().add(day);
-                cal.add(Calendar.DATE, 1);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
             }
             members.add(dayMember);
             // cal.add(Calendar.DATE, 1);
@@ -328,11 +328,11 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
     private List<MiniCubeMember> genMembersWithMonthParentForAll(Level level, Member parentMember) {
         List<MiniCubeMember> members = Lists.newArrayList();
         Calendar cal = Calendar.getInstance();
-        int nowMonth = cal.get(Calendar.MONTH); // 当前月份-1
+//        int nowMonth = cal.get(Calendar.MONTH); // 当前月份-1
         int year = cal.get(Calendar.YEAR); // 当前年份
         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
-        for (int i = 0; i <= nowMonth; i++) {
-            cal.set(year, i, 1); // 设置每月第一天
+//        for (int i = 0; i <= nowMonth; i++) {
+            cal.set(Calendar.DAY_OF_MONTH, 1); // 设置每月第一天
             String day = sf.format(cal.getTime());
             String month = day.substring(4, 6);
             String caption = year + "年" + month + "月";
@@ -348,7 +348,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
                 cal.add(Calendar.DATE, 1);
             }
             members.add(firstDayOfMonth);
-        }
+//        }
         return members;
     }
 
@@ -412,8 +412,8 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         int nowMonth = cal.get(Calendar.MONTH) + 1; // 当前月份
         int quarterIndex = nowMonth / 3; // 季度索引
         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
-        for (int i = 0; i <= quarterIndex; i++) {
-            cal.set(Calendar.MONTH, i * 3);// 设置季度所在的首月
+//        for (int i = 0; i <= quarterIndex; i++) {
+            cal.set(Calendar.MONTH, quarterIndex * 3);// 设置季度所在的首月
             cal.set(Calendar.DATE, 1);
             Calendar calEnd = Calendar.getInstance();
             calEnd.setTime(cal.getTime());
@@ -421,7 +421,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
             calEnd.add(Calendar.DATE, calEnd.getActualMaximum(Calendar.DATE)-1); // 截止日期
             String day = sf.format(cal.getTime());
             String year = day.substring(0, 4);
-            String caption = year + "年第" + (i + 1) + "季度";
+            String caption = year + "年第" + quarterIndex + "季度";
             MiniCubeMember firstDayOfQuarter = new MiniCubeMember(day);
             firstDayOfQuarter.setCaption(caption);
             firstDayOfQuarter.setLevel(level);
@@ -433,7 +433,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
                 cal.add(Calendar.DATE, 1);
             }
             members.add(firstDayOfQuarter);
-        }
+//        }
         return members;
     }
 

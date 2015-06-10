@@ -19,7 +19,8 @@ import java.io.File;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
@@ -39,7 +40,7 @@ public class ProductLineManageServiceImpl implements ProductLineManageService {
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(ProductLineManageServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProductLineManageServiceImpl.class);
     
     /**
      * 用户信息存储目录

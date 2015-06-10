@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.activation.UnsupportedDataTypeException;
 import javax.annotation.Resource;
 
 import org.json.JSONObject;
@@ -34,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
@@ -648,7 +646,6 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         days[i] = "[" + element.getName() + "].[" + detailDays[i] + "]";
                         message.append(" " + days[i]);
                     }
-//                    days[days.length] = "[" + element.getName() + "].[All_" +element.getName () + "s]";
                     value = days;
                     itemValues.put(item, value);
                     logger.debug("[DEBUG] --- ---" + message);

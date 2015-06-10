@@ -5,9 +5,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.List;
 
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceType;
@@ -19,7 +20,7 @@ public class DBInfoReaderTest {
 	/**
 	 * 
 	 */
-	private static final Logger LOG  = Logger.getLogger(DBInfoReaderTest.class);
+	private static final Logger LOG  = LoggerFactory.getLogger(DBInfoReaderTest.class);
 	
 	/**
 	 * 

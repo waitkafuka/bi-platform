@@ -28,7 +28,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ma.file.serv.service.FileLocation;
 import com.baidu.rigel.biplatform.ma.file.serv.service.LocalFileOperationService;
@@ -46,7 +47,7 @@ public class LocalFileOperationServiceImpl implements LocalFileOperationService 
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(LocalFileOperationServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalFileOperationServiceImpl.class);
     
     /**
      * 文件存储路径

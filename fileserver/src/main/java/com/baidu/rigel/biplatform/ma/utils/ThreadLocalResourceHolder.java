@@ -18,8 +18,8 @@ package com.baidu.rigel.biplatform.ma.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Thread-local resource holder class, for pass data on the thread.
@@ -31,7 +31,7 @@ public abstract class ThreadLocalResourceHolder {
     /**
      * 日志对象
      */
-    protected static final Log LOG = LogFactory.getLog(ThreadLocalResourceHolder.class.getName());
+    protected static final Logger LOG = LoggerFactory.getLogger (ThreadLocalResourceHolder.class);
 
     /**
      * 本地线程

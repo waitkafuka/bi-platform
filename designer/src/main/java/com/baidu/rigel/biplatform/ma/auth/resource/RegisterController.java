@@ -22,7 +22,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,7 +47,7 @@ public class RegisterController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(RegisterController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterController.class);
     
     /**
      * 用户服务对象

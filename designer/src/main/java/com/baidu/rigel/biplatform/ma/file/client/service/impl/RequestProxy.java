@@ -21,7 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,7 @@ public class RequestProxy {
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(RequestProxy.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestProxy.class);
     
     /**
      * 服务器地址、端口缓存

@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 服务器端文件操作辅助类
@@ -56,7 +57,7 @@ public final class LocalFileOperationUtils {
     /**
      * 日志输出对象
      */
-    private static final Logger LOG = Logger.getLogger(LocalFileOperationUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger (LocalFileOperationUtils.class);
     
     /**
      * LocalFileOperationUtils

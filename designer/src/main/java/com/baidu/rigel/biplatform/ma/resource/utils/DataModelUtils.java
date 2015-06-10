@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -70,7 +71,7 @@ public final class DataModelUtils {
     /**
      * logger
      */
-    public static final Logger LOG = Logger.getLogger(DataModelUtils.class);
+    public static final Logger LOG = LoggerFactory.getLogger(DataModelUtils.class);
     
     /**
      * memeber的uniqname

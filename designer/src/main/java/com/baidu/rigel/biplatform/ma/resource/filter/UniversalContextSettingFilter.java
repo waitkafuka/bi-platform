@@ -30,7 +30,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -54,7 +55,7 @@ public class UniversalContextSettingFilter implements Filter {
     /**
      * LOG
      */
-    private static final Logger LOG = Logger.getLogger(UniversalContextSettingFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UniversalContextSettingFilter.class);
 
     /**
      * securityKey

@@ -20,7 +20,8 @@ import java.net.URLEncoder;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -65,7 +66,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(ProductLineRegisterServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProductLineRegisterServiceImpl.class);
            
     /**
      * 文件服务对象
