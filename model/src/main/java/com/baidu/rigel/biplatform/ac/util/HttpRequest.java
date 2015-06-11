@@ -16,8 +16,6 @@
 package com.baidu.rigel.biplatform.ac.util;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
@@ -236,7 +234,7 @@ public class HttpRequest {
             suffix = urlNameString.substring(urlNameString.indexOf("]") + 1);
         }
 //        LOGGER.info("start to send get:" + urlNameString);
-        long current = System.currentTimeMillis();
+//        long current = System.currentTimeMillis();
         Exception ex = null;
         for (String address : addresses) {
             String requestUrl = prefix + address + suffix;
@@ -313,7 +311,7 @@ public class HttpRequest {
             suffix = requestUrl.substring(requestUrl.indexOf("]") + 1);
         }
         LOGGER.info("start to send post:" + requestUrl);
-        long current = System.currentTimeMillis();
+//        long current = System.currentTimeMillis();
         for (String address : addresses) {
             String postUrl = prefix + address + suffix;
             LOGGER.info("post url is : " + postUrl);

@@ -89,15 +89,15 @@ public final class CallbackServiceInvoker {
 //        		params.put(tmp[0], tmp[1]);
 //        	}
 //        }
-        if (LOG.isDebugEnabled ()) {
-            LOG.debug("[INFO] --- --- begin invoke callback service ... ...");
-            LOG.debug("[INFO] --- --- params : {}", params);
-            LOG.debug("[INFO] --- --- request url : {}", url);
-            LOG.debug("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
-            LOG.debug("[INFO] --- --- callback type : {}", type.name());
-            LOG.debug("[INFO] --- --- end invoke callback service. result is : \r\n");
-            LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
-        }
+//        if (LOG.isDebugEnabled ()) {
+//            LOG.debug("[INFO] --- --- begin invoke callback service ... ...");
+//            LOG.debug("[INFO] --- --- params : {}", params);
+//            LOG.debug("[INFO] --- --- request url : {}", url);
+//            LOG.debug("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
+//            LOG.debug("[INFO] --- --- callback type : {}", type.name());
+//            LOG.debug("[INFO] --- --- end invoke callback service. result is : \r\n");
+//            LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
+//        }
         try {
             
             String responseStr = HttpRequest.sendPost1(url, params);
