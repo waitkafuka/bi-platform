@@ -154,6 +154,167 @@ public class TimeDimensionMemberServiceTest {
         testGetMembersWithYearParent (level, parent, parentLevel);
         
         testGetMembersWithQueaterParent (level, parent, parentLevel);
+        
+        testGetMembersWithMonthParent (level, parent, parentLevel);
+        
+        testGetMembersWithWeekParent (level, parent, parentLevel);
+        
+        testGetMembersWithDayParent (level, parent, parentLevel);
+    }
+
+    private void testGetMembersWithDayParent(Level level, MiniCubeMember parent, Level parentLevel) {
+        Mockito.doReturn (LevelType.TIME_DAYS).when (parentLevel).getType ();
+        Mockito.doReturn ("2011").when (parent).getCaption ();
+        Mockito.doReturn (true).when (parent).isAll ();
+        List<MiniCubeMember> rs = null;
+        try {
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (32, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        Mockito.doReturn (false).when (parent).isAll ();
+        Mockito.doReturn ("20110101").when (parent).getName ();
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_DAYS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (30, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+    }
+
+    private void testGetMembersWithWeekParent(Level level, MiniCubeMember parent, Level parentLevel) {
+        Mockito.doReturn (LevelType.TIME_WEEKS).when (parentLevel).getType ();
+        Mockito.doReturn ("2011").when (parent).getCaption ();
+        Mockito.doReturn (true).when (parent).isAll ();
+        List<MiniCubeMember> rs = null;
+        try {
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (2, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        Mockito.doReturn (false).when (parent).isAll ();
+        Mockito.doReturn ("20110101").when (parent).getName ();
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_MONTHS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.fail ();
+        } catch (Exception e) {
+            Assert.assertNotNull (e);
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_DAYS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (7, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        Mockito.doReturn (parentLevel).when (parent).getLevel ();
+        Mockito.doReturn ("2011").when (parent).getCaption ();
+        Dimension dim = Mockito.mock (Dimension.class);
+        Mockito.doReturn (dim).when (level).getDimension ();
+        Mockito.doReturn ("20110101").when (dim).getName ();
+        try {
+            Mockito.doReturn (LevelType.TIME_YEARS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.fail ();
+        } catch (Exception e) {
+            Assert.assertNotNull (e);
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_QUARTERS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.fail ();
+        } catch (Exception e) {
+            Assert.assertNotNull (e);
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_WEEKS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.fail ();
+        } catch (Exception e) {
+            Assert.assertNotNull (e);
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.CALL_BACK).when (level).getType ();
+            service.getMembers (null, level, null, parent, null);
+        } catch (Exception e) {
+            Assert.assertNotNull (e);
+        }
+    }
+
+    private void testGetMembersWithMonthParent(Level level, MiniCubeMember parent, Level parentLevel) {
+        Mockito.doReturn (LevelType.TIME_MONTHS).when (parentLevel).getType ();
+        Mockito.doReturn ("2011").when (parent).getCaption ();
+        Mockito.doReturn (true).when (parent).isAll ();
+        List<MiniCubeMember> rs = null;
+        try {
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (1, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        Mockito.doReturn (false).when (parent).isAll ();
+        Mockito.doReturn ("20110101").when (parent).getName ();
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_MONTHS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (6, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_DAYS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (31, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        Mockito.doReturn (parentLevel).when (parent).getLevel ();
+        Mockito.doReturn ("2011").when (parent).getCaption ();
+        Dimension dim = Mockito.mock (Dimension.class);
+        Mockito.doReturn (dim).when (level).getDimension ();
+        Mockito.doReturn ("20110101").when (dim).getName ();
+        try {
+            Mockito.doReturn (LevelType.TIME_YEARS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (6, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_QUARTERS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (6, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.TIME_WEEKS).when (level).getType ();
+            rs = service.getMembers (null, level, null, parent, null);
+            Assert.assertEquals (6, rs.size ());
+        } catch (Exception e) {
+            Assert.fail ();
+        }
+        
+        try {
+            Mockito.doReturn (LevelType.CALL_BACK).when (level).getType ();
+            service.getMembers (null, level, null, parent, null);
+        } catch (Exception e) {
+            Assert.assertNotNull (e);
+        }
     }
 
     private void testGetMembersWithQueaterParent(Level level, MiniCubeMember parent, Level parentLevel) {
