@@ -98,68 +98,6 @@ public class HttpRequest {
      */
     private static Logger LOGGER = LoggerFactory.getLogger(HttpRequest.class);
 
-//    private static HttpClient client;
-    /**
-     * 获取一个默认的HttpClient，默认的是指了默认返回结果的head为application/json
-     * 
-     * @return 默认的HttpClient
-     */
-//    public static HttpClient getDefaultHttpClient(Map<String, String> params) {
-//        if (client == null) {
-//            Header header = new BasicHeader(HttpHeaders.CONTENT_TYPE, "application/json;");
-//            List<Header> headers = new ArrayList<Header>(1);
-//            headers.add(header);
-//            
-//            CookieSpecProvider cookieSpecProvider = new CookieSpecProvider() {
-//
-//                @Override
-//                public CookieSpec create(HttpContext context) {
-//                    return new BrowserCompatSpec() {
-//                        
-//                        @Override
-//                        public void validate(Cookie cookie, CookieOrigin origin) throws MalformedCookieException{
-//                            //no check cookie
-//                        }
-//                    };
-//                }
-//            };
-//            
-//            Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
-////                    .register(CookieSpecs.BEST_MATCH, new BestMatchSpecFactory())
-////                    .register(CookieSpecs.STANDARD, new RFC2965SpecFactory())
-////                    .register(CookieSpecs.BROWSER_COMPATIBILITY, new BrowserCompatSpecFactory())
-////                    .register(CookieSpecs.NETSCAPE, new NetscapeDraftSpecFactory())
-////                    .register(CookieSpecs.IGNORE_COOKIES, new IgnoreSpecFactory())
-////                    .register("rfc2109", new RFC2109SpecFactory())
-////                    .register("rfc2965", new RFC2965SpecFactory())
-//                    .register(NO_CHECK_COOKIES, cookieSpecProvider)
-//                    .build();
-//            String socketTimeout = "50000";
-//            String connTimeout = "1000";
-//            if (params != null) {
-//                if (params.containsKey(SOCKET_TIME_OUT)) {
-//                    socketTimeout = params.get(SOCKET_TIME_OUT);
-//                }
-//                if (params.containsKey(CONNECTION_TIME_OUT)) {
-//                    socketTimeout = params.get(CONNECTION_TIME_OUT);
-//                }
-//            }
-//            // 设置默认的cookie的安全策略为不校验
-//            RequestConfig requestConfigBuilder = RequestConfig.custom()
-//                    .setCookieSpec(NO_CHECK_COOKIES)
-//                    .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
-//                    .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
-//                    .build();
-//            client = HttpClients.custom()
-//                    .setDefaultCookieSpecRegistry(cookieSpecRegistry)
-//                    .setDefaultRequestConfig(requestConfigBuilder)
-//                    .setDefaultHeaders(headers)
-//                    .build();
-//        }
-//        
-//        return client;
-//    }
-
     /**
      * 获取一个默认的HttpClient，默认的是指了默认返回结果的head为application/json
      * 
@@ -233,8 +171,6 @@ public class HttpRequest {
             prefix = urlNameString.substring(0, urlNameString.indexOf("["));
             suffix = urlNameString.substring(urlNameString.indexOf("]") + 1);
         }
-//        LOGGER.info("start to send get:" + urlNameString);
-//        long current = System.currentTimeMillis();
         Exception ex = null;
         for (String address : addresses) {
             String requestUrl = prefix + address + suffix;
@@ -247,7 +183,6 @@ public class HttpRequest {
                 }
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, true);
-//                LOGGER.info("end send get :" + urlNameString + " cost:" + (System.currentTimeMillis() - current));
                 return content;
             } catch (Exception e) {
                 ex = e;
@@ -311,27 +246,21 @@ public class HttpRequest {
             suffix = requestUrl.substring(requestUrl.indexOf("]") + 1);
         }
         LOGGER.info("start to send post:" + requestUrl);
-//        long current = System.currentTimeMillis();
         for (String address : addresses) {
             String postUrl = prefix + address + suffix;
             LOGGER.info("post url is : " + postUrl);
             try {
                 HttpUriRequest request = RequestBuilder.post()
-                            .setUri(postUrl) // .addParameters(nameValues.toArray(new NameValuePair[0]))
-                            .setEntity(new UrlEncodedFormEntity(nameValues, "utf-8"))
-                            .build();
+                        .setUri(postUrl)
+                        .setEntity(new UrlEncodedFormEntity(nameValues, "utf-8"))
+                        .build();
                 if (StringUtils.isNotBlank(cookie)) {
                     // 需要将cookie添加进去
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
                 }
-//                client.
                 LOGGER.info ("[INFO] --- --- execute query with client {}", client);
                 HttpResponse response = client.execute(request);
                 String content = processHttpResponse(client, response, params, false);
-//                StringBuilder sb = new StringBuilder();
-//                sb.append("end send post :").append(postUrl).append(" params:").append(nameValues).append(" cost:")
-//                        .append(System.currentTimeMillis() - current);
-//                LOGGER.info(sb.toString());
                 return content;
             } catch (Exception e) {
                 LOGGER.warn("send post error " + requestUrl + ",retry next one", e);
@@ -340,17 +269,6 @@ public class HttpRequest {
         throw new RuntimeException("send post failed[" + requestUrl + "]. params :" + nameValues);
 
     }
-
-//    @SuppressWarnings("deprecation")
-//    private static void closeConn(HttpClient client) {
-//        if (client != null) {
-//            try {
-//                client.getConnectionManager ().shutdown ();
-//            } catch (Exception e) {
-//                LOGGER.warn(e.getMessage (), e);
-//            }
-//        }
-//    }
 
     /**
      * 向指定URL发送POST方法的请求
@@ -532,24 +450,6 @@ public class HttpRequest {
         }
         
     }
-//     public static void main(String[] args) throws Exception {
-//         SqlDataSourceInfo sqlDataSourceInfo = new SqlDataSourceInfo("sqlDataSource_4_unique");
-//         List<String> hosts = new ArrayList<String>();
-//         hosts.add("host1:port");
-//        
-//         sqlDataSourceInfo.setHosts(hosts);
-//         sqlDataSourceInfo.setInstanceName("instance");
-//         sqlDataSourceInfo.setPassword("pass");
-//         sqlDataSourceInfo.setUsername("user");
-//         List<String> urls = new ArrayList<String>();
-//         urls.add("jdbcurl");
-//         sqlDataSourceInfo.setJdbcUrls(urls);
-//         sqlDataSourceInfo.setProductLine("productline");
-//         Map<String,String> params = new HashMap<String, String>();
-//         params.put("dataSourceInfoStr", AnswerCoreConstant.GSON.toJson(sqlDataSourceInfo));
-//         params.put("cubeXml", "cubeXML");
-//         params.put("test", "cookies");
-//     }
 
     public static String sendPost(String url, String hql) {
         try {

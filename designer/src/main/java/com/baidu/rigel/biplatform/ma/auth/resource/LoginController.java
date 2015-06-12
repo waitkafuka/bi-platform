@@ -107,11 +107,6 @@ public class LoginController extends RandomValidateCodeController {
             }
         }
         // 在请求中添加sessionId的cookie信息
-//        String sessionId = UuidGeneratorUtils.generate();
-//        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
-//        sessionIdCookie.setPath(Constants.COOKIE_PATH);
-//        response.addCookie(sessionIdCookie);
-//        response.addHeader(Constants.COOKIE_PATH, sessionId);
         LOG.info("user [" + productLine + "] login bi-platform successfully");
         rs.setStatus(0);
         rs.setStatusInfo("successfully");

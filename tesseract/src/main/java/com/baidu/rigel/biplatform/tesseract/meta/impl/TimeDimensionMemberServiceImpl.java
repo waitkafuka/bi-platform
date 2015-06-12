@@ -369,12 +369,12 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         int nowMonth = cal.get(Calendar.MONTH) + 1; // 当前月份
         int quarterIndex = nowMonth / 3; // 季度索引
         SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
-        cal.set(Calendar.MONTH, quarterIndex * 3);// 设置季度所在的首月
+        cal.set(Calendar.MONTH, quarterIndex * 3);
         cal.set(Calendar.DATE, 1);
         Calendar calEnd = Calendar.getInstance();
         calEnd.setTime(cal.getTime());
         calEnd.add(Calendar.MONTH, 2);
-        calEnd.add(Calendar.DATE, calEnd.getActualMaximum(Calendar.DATE)-1); // 截止日期
+        calEnd.add(Calendar.DATE, calEnd.getActualMaximum(Calendar.DATE) - 1); // 截止日期
         String day = sf.format(cal.getTime());
         String year = day.substring(0, 4);
         String caption = year + "年第" + quarterIndex + "季度";

@@ -79,7 +79,7 @@ public class UniversalContextSettingFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         if (StringUtils.isEmpty(securityKey)) {
             WebApplicationContext context = 
                 WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
@@ -101,7 +101,8 @@ public class UniversalContextSettingFilter implements Filter {
                 sessionId = getSessionId(cookies);
             }
             LOG.info("productLine in cookie is " + productLine + " and sessionId is " + sessionId);
-            if (StringUtils.isEmpty(productLine) && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
+            if (StringUtils.isEmpty(productLine) 
+                && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
                 productLine = decryptProductLIne(httpRequest, httpResponse);
                 sessionId = generateSessionId(httpResponse);
             }
@@ -112,14 +113,9 @@ public class UniversalContextSettingFilter implements Filter {
                 httpResponse.addCookie (new Cookie("prevReq", httpRequest.getRequestURI ()));
                 httpResponse.sendRedirect("home.html");
             }
-//            else if (httpRequest.getRequestURI().endsWith("home.html")) {
-//                httpResponse.addCookie (new Cookie("prevReq", 
-//                        httpRequest.getRequestURI ().replace ("home.html", "index.html")));
-//            }
             setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
         } catch(Exception e) {
-            throw new RuntimeException("productline encrypt happened exception," 
-                + "message:" + e);
+            throw new RuntimeException("productline encrypt happened exception, message:" + e);
         }
     }
     
@@ -145,8 +141,7 @@ public class UniversalContextSettingFilter implements Filter {
      * @throws Exception
      * 
      */
-    private String decryptProductLIne(HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    private String decryptProductLIne(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String productLine = null;
         productLine = request.getParameter(Constants.TOKEN);
         if (StringUtils.hasText(productLine)) {

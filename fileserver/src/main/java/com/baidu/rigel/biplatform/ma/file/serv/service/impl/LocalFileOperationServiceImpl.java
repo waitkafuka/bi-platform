@@ -322,7 +322,6 @@ public class LocalFileOperationServiceImpl implements LocalFileOperationService 
                 try {
                     fi.close();
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     LOG.info(e.getMessage(), e);
                 }
             }

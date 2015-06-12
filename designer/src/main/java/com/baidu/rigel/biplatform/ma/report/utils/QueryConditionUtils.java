@@ -51,7 +51,7 @@ public class QueryConditionUtils {
      * @throws QueryModelBuildException
      */
     public static Map<String, MetaCondition> buildQueryConditionsForPlaneTable(ReportDesignModel reportModel,
-            ExtendArea area, QueryAction queryAction) throws QueryModelBuildException {
+        ExtendArea area, QueryAction queryAction) throws QueryModelBuildException {
         // 查询条件的map，key为对应的item的elementId，value值为DimCondition或者是MeasureCondition
         Map<String, MetaCondition> rs = new HashMap<String, MetaCondition>();
         // 将QueryAction中的横轴、纵轴、过滤轴的信息先进行添加
@@ -77,9 +77,9 @@ public class QueryConditionUtils {
             } else if (olapElement instanceof Measure) {
                 // 如果该指标被选为条件
                 if (planeTableConditions.containsKey(olapElement.getId())) {
+                    PlaneTableCondition planeTableCondition = planeTableConditions.get(olapElement.getId());
                     MeasureCondition measureCondition =
-                            buildMeasureConditionForPlaneTable(olapElement, entry.getValue(),
-                                    planeTableConditions.get(olapElement.getId()));
+                            buildMeasureConditionForPlaneTable(olapElement, entry.getValue(), planeTableCondition);
                     rs.put(olapElement.getName(), measureCondition);
                 }
             }
@@ -141,7 +141,7 @@ public class QueryConditionUtils {
      * @return
      */
     private static MeasureCondition buildMeasureConditionForPlaneTable(OlapElement olapElement, Object valueObj,
-            PlaneTableCondition planeTableCondition) {
+        PlaneTableCondition planeTableCondition) {
         MeasureCondition measureCondition = new MeasureCondition(olapElement.getName());
         // 获取SQL查询条件
         SQLConditionType sqlType = planeTableCondition.getSQLCondition();
@@ -192,7 +192,7 @@ public class QueryConditionUtils {
      * @throws QueryModelBuildException
      */
     public static Map<String, MetaCondition> buildQueryConditionsForPivotTable(ReportDesignModel reportModel,
-            ExtendArea area, QueryAction queryAction) throws QueryModelBuildException {
+        ExtendArea area, QueryAction queryAction) throws QueryModelBuildException {
         Map<String, MetaCondition> rs = new HashMap<String, MetaCondition>();
         Map<Item, Object> items = new HashMap<Item, Object>();
         items.putAll(queryAction.getColumns());
@@ -262,8 +262,8 @@ public class QueryConditionUtils {
                                 data.setExpand(true);
                                 data.setShow(false);
                             }
-                            if (MetaNameUtil.isAllMemberUniqueName(data.getUniqueName())
-                                    && queryAction.isChartQuery()) {
+                            boolean allMemberUniqueName = MetaNameUtil.isAllMemberUniqueName(data.getUniqueName());
+                            if (allMemberUniqueName && queryAction.isChartQuery()) {
                                 data.setExpand(true);
                                 data.setShow(false);
                             }
@@ -281,7 +281,7 @@ public class QueryConditionUtils {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
                     if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                            && queryAction.isChartQuery()) {
+                        && queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);
@@ -295,7 +295,9 @@ public class QueryConditionUtils {
                     condition.setQueryDataNodes(datas);
                 }
                 // 时间维度，并且在第一列位置，后续改成可配置方式
-                if (item.getPositionType() == PositionType.X && olapElement instanceof TimeDimension && firstIndex == 0
+                if (item.getPositionType() == PositionType.X 
+                        && olapElement instanceof TimeDimension 
+                        && firstIndex == 0
                         && !queryAction.isChartQuery()) {
                     condition.setMemberSortType(SortType.DESC);
                     ++firstIndex;
@@ -316,11 +318,11 @@ public class QueryConditionUtils {
      * @throws QueryModelBuildException
      */
     private static OlapElement getOlapElement(ReportDesignModel reportModel, ExtendArea area, Item item,
-            boolean includeMeasure) throws QueryModelBuildException {
+        boolean includeMeasure) throws QueryModelBuildException {
         // 获取该OlapElement
-        OlapElement olapElement =
-                ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(), area.getCubeId(),
-                        item.getOlapElementId());
+        OlapElement olapElement = ReportDesignModelUtils
+                .getDimOrIndDefineWithId(reportModel.getSchema(), area.getCubeId(),
+                item.getOlapElementId());
         if (olapElement == null) {
             // 判断其是否为维度
             Cube cube = com.baidu.rigel.biplatform.ma.report.utils.QueryUtils.getCubeWithExtendArea(reportModel, area);

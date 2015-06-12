@@ -76,28 +76,14 @@ public final class CallbackServiceInvoker {
             timeOutMillSecond = 1000;
         }
         params.put(HttpRequest.SOCKET_TIME_OUT, String.valueOf(timeOutMillSecond));
-        // TODO 这里先做容错处理，待小明来来了以后排查具体原因
-//        if (url.contains("\\?")) {
-//        	String[] tmp = url.split("\\?");
-//        	url = tmp[0];
-//        	String[] paramsMap = tmp[1].split("&");
-//        	for (String str : paramsMap) {
-//        		tmp = str.split("=");
-//        		if (params.containsKey(tmp[0])) {
-//        			continue;
-//        		}
-//        		params.put(tmp[0], tmp[1]);
-//        	}
-//        }
-//        if (LOG.isDebugEnabled ()) {
-//            LOG.debug("[INFO] --- --- begin invoke callback service ... ...");
-//            LOG.debug("[INFO] --- --- params : {}", params);
-//            LOG.debug("[INFO] --- --- request url : {}", url);
-//            LOG.debug("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
-//            LOG.debug("[INFO] --- --- callback type : {}", type.name());
-//            LOG.debug("[INFO] --- --- end invoke callback service. result is : \r\n");
-//            LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
-//        }
+        if (LOG.isDebugEnabled ()) {
+            LOG.debug("[INFO] --- --- begin invoke callback service ... ...");
+            LOG.debug("[INFO] --- --- request url : {}", url);
+            LOG.debug("[INFO] --- --- timeout time : {} ms", timeOutMillSecond);
+            LOG.debug("[INFO] --- --- callback type : {}", type.name());
+            LOG.debug("[INFO] --- --- end invoke callback service. result is : \r\n");
+            LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
+        }
         try {
             
             String responseStr = HttpRequest.sendPost1(url, params);

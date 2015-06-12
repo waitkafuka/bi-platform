@@ -61,12 +61,6 @@ public class RequestProxy {
     private String host;
     
     /**
-     * 文件服务器端口号
-     */
-//    @Value("${biplatform.ma.fileserver.port}")
-//    private int port;
-
-    /**
      * 文件服务器操作请求
      * 
      * @param request
