@@ -15,12 +15,14 @@
  */
 package com.baidu.rigel.biplatform.ac.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 /**
  * 服务器配置信息，暂时只有Tesseract服务器地址配置
@@ -36,6 +38,8 @@ public class ConfigInfoUtils {
     private static Logger LOG = LoggerFactory.getLogger(ConfigInfoUtils.class);
 
     private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
+    
+    private static final String DEFAULT_AC_CONFIG_FILENAME="ac.properties";
 
     private static Properties properties;
     /**
@@ -46,15 +50,14 @@ public class ConfigInfoUtils {
     static {
         FileInputStream inStream = null;
         try {
-             String answerCoreConfFile = System
-                    .getProperty("ac.config.location");
+             String answerCoreConfFile = System.getProperty("ac.config.location");
+             if (StringUtils.isEmpty (answerCoreConfFile)) {
+                 answerCoreConfFile = System.getProperty("user.dir") + File.separator + DEFAULT_AC_CONFIG_FILENAME;
+             }
             properties = new Properties();
             inStream = new FileInputStream(answerCoreConfFile);
             properties.load(inStream);
-            // Properties properties =
-            // PropertiesLoaderUtils.loadAllProperties(answerCoreConfFile);
-            SERVERADDRESS = properties.getProperty("server.tesseract.address",
-                    DEFAULT_SERVER_ADDRESS);
+            SERVERADDRESS = properties.getProperty("server.tesseract.address", DEFAULT_SERVER_ADDRESS);
             LOG.info("load serveraddress from properties:{}", SERVERADDRESS);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
