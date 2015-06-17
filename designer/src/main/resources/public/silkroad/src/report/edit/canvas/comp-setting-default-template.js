@@ -73,7 +73,7 @@ define(['template'], function (template) {
         }
         $out+='\r\n            </span>\r\n            <span class="icon-letter j-delete" title="删除">×</span>\r\n        </div>\r\n        ';
         });
-        $out+='\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line" style="margin: 5px 0 2px 35px;">\r\n        <span class="letter">设置:</span>\r\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\r\n        <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>\r\n        <span class="icon-letter icon-letter-btn j-set-relation">关联</span>\r\n        <span class="icon-letter icon-letter-btn j-set-text-align">文本对齐</span>\r\n        <span class="icon-letter icon-letter-btn j-others-operate">其他操作</span>\r\n    </div>\r\n</div>';
+        $out+='\r\n    </div>\r\n    <div class="data-axis-line data-axis-line-48 data-btn-line" style="margin: 5px 0 2px 35px;">\r\n        <span class="letter">设置:</span>\r\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\r\n        <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>\r\n        <span class="icon-letter icon-letter-btn j-set-relation">关联</span>\r\n        <span class="icon-letter icon-letter-btn j-set-text-align">文本对齐</span>\r\n        <!--<span class="icon-letter icon-letter-btn j-set-link">跳转</span>-->\r\n        <span class="icon-letter icon-letter-btn j-others-operate">其他操作</span>\r\n    </div>\r\n</div>';
         return $out;
     }
     return { render: anonymous };

@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -102,7 +103,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         if (StringUtils.isNotEmpty(filterDimKey)) {
             nameQuery.setWhere(genWhere(nameQuery.getWhere(), filterDimKey, params));
         }
-        List<Expression> whereCondition = genWhereCondition(cube, level, params);
+        List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty ()) {
             for (Expression exp : whereCondition) {
                 nameQuery.getWhere ().getAndList ().add (exp);
@@ -354,7 +355,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeMember result = new MiniCubeMember(name);
         result.setLevel(queryLevel);
         // 根据请求参数生产查询维度的约束条件
-        List<Expression> whereCondition = genWhereCondition(cube, level, params);
+        List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty ()) {
             for (Expression exp : whereCondition) {
                 queryRequest.getWhere ().getAndList ().add (exp);
@@ -445,7 +446,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         return result;
     }
 
-    private List<Expression> genWhereCondition(Cube cube, Level level, Map<String, String> params) {
+    private List<Expression> genWhereCondition(Cube cube, Level level, Map<String, String> params, DataSourceInfo ds) {
         List<Expression> expressionList = Lists.newArrayList ();
         String dimTable = level.getDimTable ();
         Collection<Dimension> dims = cube.getDimensions ().values ();
@@ -455,22 +456,49 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             if (StringUtils.isBlank (filterValue)) {
                 continue;
             }
-            if ((dimTable.equals (dim.getTableName ()) 
-                    && !dim.getId ().equals (level.getDimension ().getId ()))) {
-                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
-                Expression expression = new Expression(dimLevel.getSource ());
+            Level dimLevel = dim.getLevels ().values ().toArray (new Level[0])[0];
+            boolean fromFactable = dimTable.equals (((MiniCube) cube).getSource());
+            if ((fromFactable && !(dim instanceof TimeDimension)
+                    && !dim.getId ().equals (level.getDimension ().getId ())) 
+                    && (dimLevel.getType () != LevelType.CALL_BACK)) {
+                Expression expression = new Expression(dimLevel.getFactTableColumn ());
                 // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
-                String[] filterValueArray = genFilterValue(filterValue);
-                for (String tmp :filterValueArray) {
-                    Set<String> leafNodes = Sets.newHashSet ();
-                    leafNodes.add (tmp);
-                    QueryObject queryObject = new QueryObject(tmp, leafNodes);
-                    expression.getQueryValues ().add (queryObject);
+                try {
+                    String[] filterValueArray = genFilterValue(filterValue);
+                    for (String tmp :filterValueArray) {
+                        MiniCubeMember member = 
+                            getMemberFromLevelByName (ds, cube, dimLevel, tmp, null, params);
+                        Set<String> leafNodes = member.getQueryNodes ();
+                        QueryObject queryObject = new QueryObject(null, leafNodes);
+                        expression.getQueryValues ().add (queryObject);
+                    }
+                } catch (Exception e) {
+                    log.error (e.getMessage (), e);
+                    String[] filterValueArray = genFilterValue(filterValue);
+                    for (String tmp :filterValueArray) {
+                        Set<String> leafNodes = Sets.newHashSet ();
+                        leafNodes.add (tmp);
+                        QueryObject queryObject = new QueryObject(tmp, leafNodes);
+                        expression.getQueryValues ().add (queryObject);
+                    }
                 }
                 expressionList.add (expression);
+            } else if (fromFactable && dimLevel.getType () == LevelType.CALL_BACK) {
+                List<Member> members = dimLevel.getMembers (cube, ds, params);
+                if (CollectionUtils.isNotEmpty (members)) {
+                    Set<String> leafNodes = ((MiniCubeMember) members.get (0)).getQueryNodes ();
+                    Expression expression = new Expression(((CallbackLevel) dimLevel).getFactTableColumn ());
+                    if (CollectionUtils.isEmpty (leafNodes)) {
+                        leafNodes = Sets.newHashSet ();
+                        leafNodes.add (members.get (0).getName ());
+                    }
+                    QueryObject queryObject = new QueryObject(members.get (0).getName (), leafNodes);
+                    expression.getQueryValues ().add (queryObject);
+                    expressionList.add (expression);
+                }
             } else if (dim instanceof TimeDimension && dimTable.equals (((MiniCube) cube).getSource())) {
                 // 此处只考虑了时间维度表和事实表同一张表情况，其他情况暂时不考虑
-                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
+//                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
                 Expression expression = new Expression(dimLevel.getFactTableColumn ());
                 if (!filterValue.contains ("start") && !filterValue.contains ("end")) {
                     String[] tmp = filterValue.split (",");
@@ -638,7 +666,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
         queryRequest.getWhere().getAndList().add(expression);
         log.info("query members,queryRequest:" + queryRequest);
-        List<Expression> whereCondition = genWhereCondition(cube, level, params);
+        List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty ()) {
             for (Expression exp : whereCondition) {
                 queryRequest.getWhere ().getAndList ().add (exp);

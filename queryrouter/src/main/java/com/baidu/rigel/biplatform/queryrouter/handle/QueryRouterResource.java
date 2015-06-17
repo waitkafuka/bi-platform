@@ -86,7 +86,18 @@ public class QueryRouterResource {
         logger.info("request questionmodel json:" + questionStr);
         return this.dispatch(questionStr);
     }
-    
+
+    /**
+     * 判断服务是否存活
+     * 
+     * @param request
+     * @return ResponseResult status string
+     */
+    @RequestMapping(value = "/alive", method = { RequestMethod.GET })
+    public ResponseResult checkAlive(HttpServletRequest request) {
+        return ResponseResultUtils.getCorrectResult("OK", "OK");
+    }
+
     /**
      * 将传入的request中的questionStr通过dispatch后分发到相应的Plugin，然后转换成DataModel的json字符串
      * 
@@ -112,7 +123,12 @@ public class QueryRouterResource {
             logger.info("queryPlugin finished cost:" + (System.currentTimeMillis() - queryPluginBegin)
                     + " ms");
             String dataModelJson = AnswerCoreConstant.GSON.toJson(dataModel);
-            logger.info("response modeldata json:" + dataModelJson);
+            // 限制日志输出
+            if (dataModelJson.length() > 150) {
+                logger.info("response modeldata json:" + dataModelJson.substring(0, 150) + "...");
+            } else {
+                logger.info("response modeldata json:" + dataModelJson);
+            }
             logger.info("response query toal cost:" + (System.currentTimeMillis() - begin) + " ms");
             return ResponseResultUtils.getCorrectResult(SUCCESS, dataModelJson);
         } catch (JsonSyntaxException e) {

@@ -231,7 +231,10 @@ $namespace('di.shared.ui');
         var that = this;
         var mainEl = this.$di('getEl');
         var oExhibition = q('ui-table-fieldset-exhibition', mainEl)[0];
-        attachEvent(oExhibition, 'click', deleteFieldSetExhibition);
+        if (oExhibition) {
+            attachEvent(oExhibition, 'click', deleteFieldSetExhibition);
+        }
+
         function deleteFieldSetExhibition(ev) {
             var oEv = ev || window.event;
             var target = oEv.target || oEv.srcElement;

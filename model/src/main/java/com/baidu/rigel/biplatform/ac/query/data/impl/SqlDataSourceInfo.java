@@ -252,8 +252,7 @@ public class SqlDataSourceInfo implements DataSourceInfo {
      * @throws Exception exception when decrypt password error
      */
     public String getPassword() throws Exception {
-
-        return AesUtil.getInstance().decrypt(this.password);
+        return AesUtil.getInstance().decodeAnddecrypt(this.password);
     }
 
     /**
@@ -263,7 +262,7 @@ public class SqlDataSourceInfo implements DataSourceInfo {
      * @throws Exception throw exception when encrypt password error
      */
     public void setPassword(String password) throws Exception {
-        this.password = AesUtil.getInstance().encrypt(password);
+        this.password = AesUtil.getInstance().encryptAndUrlEncoding(password);
     }
 
     /**

@@ -520,22 +520,21 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_TABLE_CLASS.$handleLinkBridge = function (colDefItem, rowDefItem) {
-        this.$di(
-            'linkBridge', 
-            colDefItem.linkBridge, 
-            URL('OLAP_TABLE_LINK_BRIDGE'),
-            this.$di('getCommonParamGetter')(
-                {
-                    colUniqName: colDefItem.uniqueName,
-                    rowUniqName: rowDefItem.uniqueName,
-                    colDefineId: colDefItem.colDefineId
-                },
-                {
-                    excludes: ['diAgent']
-                }
-            )
-        );
-    };    
+        var oForm = document.createElement('form');
+        document.body.appendChild(oForm);
+        oForm.type = "hidden";
+        oForm.method = "post";
+        oForm.target = "_blank";
+        oForm.action = colDefItem.linkBridge;
+
+        var param = document.createElement("input");
+        param.value = this.$di('getId').split('.')[1];
+        param.name = "reportId";
+        oForm.appendChild(param);
+        oForm.submit();
+
+        document.body.removeChild(oForm);
+    };
 
     /**
      * 展开（下钻）

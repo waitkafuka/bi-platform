@@ -103,7 +103,7 @@ public class UniversalContextSettingFilter implements Filter {
             LOG.info("productLine in cookie is " + productLine + " and sessionId is " + sessionId);
             if (StringUtils.isEmpty(productLine) 
                 && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
-                productLine = decryptProductLIne(httpRequest, httpResponse);
+                productLine = decryptProductLine(httpRequest, httpResponse);
                 sessionId = generateSessionId(httpResponse);
             }
             LOG.info("productLine in token is " + productLine + " and sessionId is " + sessionId);
@@ -141,7 +141,7 @@ public class UniversalContextSettingFilter implements Filter {
      * @throws Exception
      * 
      */
-    private String decryptProductLIne(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    private String decryptProductLine(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String productLine = null;
         productLine = request.getParameter(Constants.TOKEN);
         if (StringUtils.hasText(productLine)) {
@@ -149,7 +149,7 @@ public class UniversalContextSettingFilter implements Filter {
             productLineCookie.setPath(Constants.COOKIE_PATH);
             ((HttpServletResponse) response).addCookie(productLineCookie);
             // 对productLine进行重新解密，以便放到ContextManager中
-            productLine = AesUtil.getInstance().decrypt(productLine, securityKey);
+            productLine = AesUtil.getInstance().decodeAnddecrypt (productLine, securityKey);
         }
         return productLine;
     }
@@ -231,7 +231,7 @@ public class UniversalContextSettingFilter implements Filter {
         if (StringUtils.hasText(innerProductLine)) {
             // 调用解密算法，对productLine进行解密
             try {
-                innerProductLine = AesUtil.getInstance().decrypt(innerProductLine, securityKey);
+                innerProductLine = AesUtil.getInstance().decodeAnddecrypt(innerProductLine, securityKey);
             } catch (Exception e) {
                 LOG.error(innerProductLine);
                 LOG.error(e.getMessage(),e);

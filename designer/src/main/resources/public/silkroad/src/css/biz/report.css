@@ -1026,3 +1026,58 @@
     line-height: 25px;
 }
 /*@end*/
+
+/**
+ * @name                      :表格跳转设置
+ * @author                    :lizhantong
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.table-link-set {
+    float: left;
+    width: 410px;
+    height: 350px;
+}
+.table-link-set .table-link-set-area {
+    float: left;
+    margin-top: 10px;
+    width: 100%;
+}
+.table-link-set-area > label {
+    float: left;
+    width: 100%;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+.table-link-set-area .table-link-set-area-items {
+    float: left;
+    width: 100%;
+    height: 280px;
+    overflow-y: auto;
+}
+.table-link-set-area .table-link-set-item {
+    float: left;
+    width: 100%;
+    margin-top: 20px;
+}
+.table-link-set-item .left {
+    float: left;
+    width: 30%;
+    text-align: right;
+    line-height: 25px;
+    height: 25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.table-link-set-item .right {
+    float: left;
+    width: 70%;
+    line-height: 25px;
+    height: 25px;
+}
+
+/*@end*/

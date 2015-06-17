@@ -379,6 +379,9 @@ public class SqlExpression implements Serializable {
     public String generateOrderByExpression(
             ConfigQuestionModel configQuestionModel,
             Map<String, SqlColumn> allColums) throws QuestionModelTransformationException {
+        if (configQuestionModel.getSortRecord() == null) {
+            return "";
+        }
         String orderColumnNameTmp = configQuestionModel.getSortRecord()
                 .getSortColumnUniquename();
         if (StringUtils.isEmpty(orderColumnNameTmp) && MetaNameUtil.isUniqueName(orderColumnNameTmp)) {

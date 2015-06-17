@@ -42,6 +42,7 @@ import com.baidu.rigel.biplatform.ac.query.data.TableData;
 import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ac.util.UnicodeUtils;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
@@ -389,10 +390,6 @@ public final class DataModelUtils {
         
         // 获取排序维度或者指标
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
-        // 排序列名称
-        String orderName = orderDesc.getName();
-        // 排序类型
-        String orderType = orderDesc.getOrderType();
         // Item的索引
         int itemIndex = 0;
         // 是否已经设置排序列
@@ -438,14 +435,14 @@ public final class DataModelUtils {
                             }
                         } 
                         // 设置排序信息
-                        if (column.name.equals(orderName) && !setOrder) {
-                            colDefine.setOrderby(orderType.toLowerCase());
+                        if (orderDesc != null && column.name.equals(orderDesc.getName()) && !setOrder) {
+                            colDefine.setOrderby(orderDesc.getOrderType().toLowerCase());
                             setOrder = true;
                         }
                     } else {
                         // TODO 之后需要修改
-                        if ((column.tableName + "_" + column.name).equals(orderName) && !setOrder) {
-                            colDefine.setOrderby(orderType.toLowerCase());
+                        if (orderDesc != null && (column.tableName + "_" + column.name).equals(orderDesc.getName()) && !setOrder) {
+                            colDefine.setOrderby(orderDesc.getOrderType().toLowerCase());
                             setOrder = true;
                         }
                         colDefine.setFormat(null);
@@ -507,7 +504,7 @@ public final class DataModelUtils {
         for (int i = 0; i<totalRecordSize; i++ ) {
             Map<String, String > value = Maps.newLinkedHashMap();
             for (String key : keys) {
-                value.put(key.split ("\\.")[1], data.get(key).get(i));
+                value.put(key.split ("\\.")[1], UnicodeUtils.unicode2String(data.get(key).get(i)));
             }
             planeTableData.add(value);
         }

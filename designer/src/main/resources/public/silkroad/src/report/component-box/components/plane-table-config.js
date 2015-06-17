@@ -10,80 +10,80 @@ define([
 
         var entityDescription = [
             {
-                "configType": "DI_PLANE_TABLE", // 用于标示form处理方式
-                "clzType": "COMPONENT",
-                "clzKey": "DI_PLANE_TABLE",
-                "sync": { "viewDisable": "ALL" },
-                "vuiRef": {
+                configType: 'DI_PLANE_TABLE', // 用于标示form处理方式
+                clzType: 'COMPONENT',
+                clzKey: 'DI_PLANE_TABLE',
+                sync: {viewDisable: 'ALL'},
+                vuiRef: {
                 },
                 interactions: [
                     {
                         events: [
                             {
-                                "rid": "snpt.form",
-                                "name": "dataloaded"
+                                rid: 'snpt.form',
+                                name: 'dataloaded'
                             },
                             {
-                                rid: "snpt.form",
-                                name: "submit"
+                                rid: 'snpt.form',
+                                name: 'submit'
                             }
                         ],
                         action: {
-                            name: "sync"
+                            name: 'sync'
                         },
                         argHandlers: [
-                            ["clear"],
-                            ["getValue", "snpt.cnpt-form"]
+                            ['clear'],
+                            ['getValue', 'snpt.cnpt-form']
                         ]
                     }
                 ]
             },
             {
-                "clzType": "VUI",
-                "clzKey": "ECUI_SLOW_PLANE_TABLE",
-                "name": "table",
-                "dataOpt": {
-                    "rowHCellCut": 30,
-                    "hCellCut": 30,
-                    "cCellCut": 30,
-                    "vScroll": true
+                clzType: 'VUI',
+                clzKey: 'ECUI_SLOW_PLANE_TABLE',
+                name: 'table',
+                dataOpt: {
+                    rowHCellCut: 30,
+                    hCellCut: 30,
+                    cCellCut: 30,
+                    vScroll: true
                 }
             },
             {
-                "clzType": "VUI",
-                "clzKey": "H_BUTTON",
-                "dataOpt": {
-                    "skin": "ui-download-btn",
-                    "text": "导出当前所有数据"
+                clzType: 'VUI',
+                clzKey: 'H_BUTTON',
+                dataOpt: {
+                    skin: 'ui-download-btn',
+                    text: '导出当前所有数据'
                 }
             },
             {
-                "clzType": "VUI",
-                "clzKey": "ECUI_PAGER"
-            },
-            {
-                "clzType": "VUI",
-                "clzKey": "FIELDS_FILTER"
+                clzType: 'VUI',
+                clzKey: 'ECUI_PAGER'
             }
+//            {
+//                clzType: 'VUI',
+//                clzKey: 'FIELDS_FILTER'
+//            }
         ];
         var processRenderData = function (dynamicData) {
             var id = dynamicData.rootId + dynamicData.serverData.id;
             var data = $.extend(true, [], entityDescription);
             data[0].id = id;
             data[0].vuiRef = {
-                "mainTable": id + "-vu-table",
-                "download": id + "-vu-table-download",
-                "pager": id + "-vu-table-pager",
-                "fieldsFilter": id + "-vu-table-fieldsFilter"
+                mainTable: id + '-vu-table',
+                download: id + '-vu-table-download',
+                pager: id + '-vu-table-pager'
+//                fieldsFilter: id + '-vu-table-fieldsFilter'
             };
 
             // 如果有拖拽区域
             if (dynamicData.hasTableMeta) {
                 data[0].interactions.push(
                     addTableMetaEvent(
-                        dynamicData.rootId
-                        + dynamicData.serverData.selectionAreaId
-                        + '.cnpt-table-meta'
+                            dynamicData.rootId
+                            + dynamicData.serverData.selectionAreaId
+                            + '.cnpt-table-meta'
                     )
                 );
             }
@@ -91,32 +91,33 @@ define([
             data[1].id = id + '-vu-table';
             data[2].id = id + '-vu-table-download';
             data[3].id = id + '-vu-table-pager';
-            data[4].id = id + '-vu-table-fieldsFilter';
+//            data[4].id = id + '-vu-table-fieldsFilter';
 
             return data;
         };
 
         // 添加表格对拖拽区域的事件关联
         function addTableMetaEvent(id) {
-           return {
-                "event": {
-                    "rid": id,
-                    "name": "submit"
+            return {
+                event: {
+                    rid: id,
+                    name: 'submit'
                 },
-                "action": {
-                    "name": "sync"
+                action: {
+                    name: 'sync'
                 },
-                "argHandlers": [
+                argHandlers: [
                     [
-                        "clear"
+                        'clear'
                     ],
                     [
-                        "getValue",
-                        "snpt.cnpt-form"
+                        'getValue',
+                        'snpt.cnpt-form'
                     ]
                 ]
             };
         }
+
         return {
             type: 'PLANE_TABLE',
             caption: '平面表',

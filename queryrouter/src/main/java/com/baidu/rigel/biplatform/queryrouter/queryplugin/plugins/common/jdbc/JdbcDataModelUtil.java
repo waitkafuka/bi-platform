@@ -22,6 +22,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -31,9 +32,11 @@ import com.baidu.rigel.biplatform.ac.query.data.TableData;
 import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.util.UnicodeUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
+
 
 /**
  * 
@@ -43,6 +46,7 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpre
  *
  */
 @Service("jdbcDataModelUtil")
+@Scope("prototype")
 public class JdbcDataModelUtil {
 
     /**
@@ -160,7 +164,7 @@ public class JdbcDataModelUtil {
                 }
                 // get Data from
                 List<String> oneColData = rowBaseData.get(tableDataColumnKey);
-                oneColData.add(cell);
+                oneColData.add(UnicodeUtils.string2Unicode(cell));
             });
         });
     }

@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.queryrouter.security;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * 安全过滤器
@@ -77,6 +79,19 @@ public class SecurityFilter implements Filter {
     }
     
     /**
+     * 
+     * @param requestURI
+     *            custom URL
+     * @return boolean if the provide requestURI in exclude list return true
+     *         else false
+     */
+    private boolean isExcludeUrl(String requestURI) {
+        Set<String> excludeUrl = Sets.newHashSet ();
+        excludeUrl.add ("/alive");
+        return excludeUrl.contains (requestURI);
+    }
+    
+    /**
      * do filter
      * 
      * @param request
@@ -93,7 +108,14 @@ public class SecurityFilter implements Filter {
             throws IOException, ServletException {
         HttpServletRequest httpRequest = null;
         httpRequest = (HttpServletRequest) request;
-        
+        // 不需要鉴权的请求
+        String realRequestUri = httpRequest.getRequestURI().substring(1);
+        String requestURI = realRequestUri.substring(realRequestUri.indexOf("/"), realRequestUri.length());
+        if (isExcludeUrl (requestURI)) {
+            logger.info ("[INFO]  ==================== request uri info : " + requestURI);
+            chain.doFilter (request, response);
+            return;
+        }
         if (doAuth(httpRequest, (HttpServletResponse) response)) {
             chain.doFilter(httpRequest, response);
         }

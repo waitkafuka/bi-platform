@@ -184,6 +184,26 @@
 .ui-g-btn .ui-button-text {
     vertical-align: middle;
 }
+
+/* 取消按钮 */
+.ui-button-c {
+    /*    background:  url(img/icon.png) 0px -55px repeat-x;
+        border:  1px solid #7FAFC7;
+    */
+    background-color: #e9e9e9;
+    border: 1px solid #B3B3B3;
+    color: black;
+    width: 55px;
+    margin-left: 10px;
+}
+.ui-button-c-hover {
+    background-color: #BCBCBC;
+    background-position: 0px -79px;
+}
+.ui-button-c-active {
+    background-color: #BCBCBC;
+}
+
 /* 轻按钮 */
 .ui-lite-btn {
     border: 1px solid #CCC;

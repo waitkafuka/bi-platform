@@ -94,7 +94,7 @@ $namespace('di.shared.ui');
                 '<div>',
                     '<div class="di-dim-select-btn">',
                         '<div class="ui-button-g ui-button q-di-submit">确定</div>',
-                        '<div class="ui-button-g ui-button q-di-cancel">取消</div>',
+                        '<div class="ui-button-c ui-button q-di-cancel">取消</div>',
                     '</div>',
                 '<div>',
             '</div>'

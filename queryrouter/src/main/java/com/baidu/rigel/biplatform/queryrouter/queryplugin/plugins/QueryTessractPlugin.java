@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
@@ -59,6 +60,16 @@ public class QueryTessractPlugin implements QueryPlugin {
      * TESSERACT_SERVER_PRO
      */
     private static String TESSERACT_SERVER_PRO = "server.tesseract.address";
+    
+    /**
+     * BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM
+     */
+    private static String BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM = "biplatform_queryrouter_target";
+
+    /**
+     * BIPLATFORM_PRODUCTLINE_PARAM
+     */
+    private static String BIPLATFORM_PRODUCTLINE_PARAM = "_rbk";
 
     /*
      * (non-Javadoc)
@@ -69,17 +80,19 @@ public class QueryTessractPlugin implements QueryPlugin {
      */
     @Override
     public DataModel query(QuestionModel questionModel) {
-        // TODO Auto-generated method stub
         long current = System.currentTimeMillis();
         Map<String, String> params = new HashMap<String, String>();
-
         params.put(QUESTIONMODEL_PARAM_KEY,
                 AnswerCoreConstant.GSON.toJson(questionModel));
+        Map<String, String> headerParams = new HashMap<String, String>();
+        headerParams.put(BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM, questionModel.getQuerySource());
+        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+        headerParams.put(BIPLATFORM_PRODUCTLINE_PARAM, configQuestionModel.getDataSourceInfo().getProductLine());
         long curr = System.currentTimeMillis();
         logger.info("begin execute query with tesseract ");
         String response = HttpRequest
                 .sendPost(ConfigInfoUtils.getServerAddressByProperty(TESSERACT_SERVER_PRO)
-                        + "/query", params);
+                        + "/query", params, headerParams);
         logger.info("execute query with tesseract cost {} ms",
                 (System.currentTimeMillis() - curr));
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(

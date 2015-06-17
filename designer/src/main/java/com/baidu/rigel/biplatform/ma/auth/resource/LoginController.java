@@ -77,7 +77,7 @@ public class LoginController extends RandomValidateCodeController {
         // 对产品线信息进行加密
         try {            
             // 加密产品线
-            productLineEncrypt = AesUtil.getInstance().encrypt(productLine, securityKey);
+            productLineEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(productLine, securityKey);
             // 加密密码
             pwdEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(pwd, securityKey);
         } catch (Exception e) {

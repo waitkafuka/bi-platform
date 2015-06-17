@@ -87,7 +87,7 @@ public final class CallbackServiceInvoker {
         try {
             
             String responseStr = HttpRequest.sendPost1(url, params);
-            CallbackResponse response = convertStrToResponse(responseStr, type);
+            CallbackResponse response = convertStrToResponse(responseStr, type); 
             if (LOG.isDebugEnabled ()) {
                 LOG.debug("[INFO] --- --- resposne : {}", response);
                 LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );

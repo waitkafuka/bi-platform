@@ -62,6 +62,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -123,8 +124,8 @@ public class HttpRequest {
             String newUrl = url;
             for (String placeHolder : placeHolders) {
                 String key =
-                        params.containsKey(placeHolder) ? placeHolder : PlaceHolderUtils
-                                .getKeyFromPlaceHolder(placeHolder);
+                        params.containsKey(placeHolder) ? placeHolder 
+                        : PlaceHolderUtils.getKeyFromPlaceHolder(placeHolder);
                 if (params.containsKey(key)) {
                     newUrl = PlaceHolderUtils.replacePlaceHolderWithValue(newUrl, placeHolder, params.get(key));
                 }
@@ -166,8 +167,8 @@ public class HttpRequest {
         String prefix = "", suffix = "";
         String[] addresses = new String[] { urlNameString };
         if (urlNameString.contains("[") && urlNameString.contains("]")) {
-            addresses = urlNameString.substring(urlNameString.indexOf("[") + 1, 
-                urlNameString.indexOf("]")).split(" ");
+            addresses = urlNameString
+                .substring(urlNameString.indexOf("[") + 1, urlNameString.indexOf("]")).split(" ");
             prefix = urlNameString.substring(0, urlNameString.indexOf("["));
             suffix = urlNameString.substring(urlNameString.indexOf("]") + 1);
         }
@@ -211,7 +212,7 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
-    private static String sendPost(HttpClient client, String url, Map<String, String> params) {
+    private static String sendPost(HttpClient client, String url, Map<String, String> params, Map<String, String> headerParams) {
         if(client == null) {
             throw new IllegalArgumentException("client is null");
         }
@@ -228,13 +229,33 @@ public class HttpRequest {
             String[] urlParams = urls[1].split("&");
             for (String param : urlParams) {
                 String[] paramSplit = param.split("=");
-                params.put(paramSplit[0], paramSplit[1]);
+                if (StringUtils.isNotEmpty (paramSplit[1]) && paramSplit[1].getBytes ().length > 1024 * 1024) {
+                    params.put(paramSplit[0], "");
+                } else {
+                    params.put(paramSplit[0], paramSplit[1]);
+                }
             }
         }
 
         List<NameValuePair> nameValues = new ArrayList<NameValuePair>();
         params.forEach((k, v) -> {
-            NameValuePair nameValuePair = new BasicNameValuePair(k, v);
+            NameValuePair nameValuePair = null;
+            if (!MiniCubeConnection.QUESTIONMODEL_PARAM_KEY.endsWith (k) 
+                    && StringUtils.isNotEmpty (v)) {
+                String tmp = null;
+                try {
+                    tmp = URLEncoder.encode (v == null ? "" : v, "utf-8");
+                } catch (Exception e) {
+                    throw new RuntimeException ("不支持utf字符编码");
+                }
+                if (tmp.getBytes ().length > 1024 * 1024) {
+                    nameValuePair = new BasicNameValuePair(k, "");
+                } else {
+                    nameValuePair = new BasicNameValuePair(k, v);
+                }
+            } else {
+                nameValuePair = new BasicNameValuePair(k, v);
+            }
             nameValues.add(nameValuePair);
         });
 
@@ -250,9 +271,104 @@ public class HttpRequest {
             String postUrl = prefix + address + suffix;
             LOGGER.info("post url is : " + postUrl);
             try {
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nameValues, "utf-8");
                 HttpUriRequest request = RequestBuilder.post()
                         .setUri(postUrl)
-                        .setEntity(new UrlEncodedFormEntity(nameValues, "utf-8"))
+                        .setEntity(entity)
+                        .build();
+                if (StringUtils.isNotBlank(cookie)) {
+                    // 需要将cookie添加进去
+                    request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
+                }
+                if (headerParams != null && !headerParams.isEmpty()) {
+                    for (String key : headerParams.keySet()) {
+                        String value = headerParams.get(key);
+                        request.addHeader(new BasicHeader(key, value));
+                    }
+                }
+                LOGGER.info ("[INFO] --- --- execute query with client {}", client);
+                HttpResponse response = client.execute(request);
+                String content = processHttpResponse(client, response, params, false);
+                return content;
+            } catch (Exception e) {
+                LOGGER.warn("send post error " + requestUrl + ",retry next one", e);
+            }
+        }
+        throw new RuntimeException("send post failed[" + requestUrl + "]. params :" + nameValues);
+
+    }
+    
+    /**
+     * 向指定URL发送POST方法的请求，含有url参数
+     * 
+     * @param client httpclient对象
+     * @param url 发送请求的URL
+     * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+     * @param urlRequestParams request请求参数 的形式。
+     * @return URL 所代表远程资源的响应结果
+     */
+    private static String sendPostWithRequestParam(HttpClient client, String url, Map<String, String> params, Map<String, String> urlRequestParams) {
+        if(client == null) {
+            throw new IllegalArgumentException("client is null");
+        }
+        
+        if(params == null) {
+            params = new HashMap<String, String>(1);
+        }
+        String requestUrl = processPlaceHolder(url, params);
+        
+        String cookie = params.remove(COOKIE_PARAM_NAME);
+       
+        List<NameValuePair> nameValues = new ArrayList<NameValuePair>();
+        params.forEach((k, v) -> {
+            NameValuePair nameValuePair = null;
+            if (!MiniCubeConnection.QUESTIONMODEL_PARAM_KEY.endsWith (k) 
+                    && StringUtils.isNotEmpty (v)) {
+                String tmp = null;
+                try {
+                    tmp = URLEncoder.encode (v == null ? "" : v, "utf-8");
+                } catch (Exception e) {
+                    throw new RuntimeException ("不支持utf字符编码");
+                }
+                if (tmp.getBytes ().length > 1024 * 1024) {
+                    nameValuePair = new BasicNameValuePair(k, "");
+                } else {
+                    nameValuePair = new BasicNameValuePair(k, v);
+                }
+            } else {
+                nameValuePair = new BasicNameValuePair(k, v);
+            }
+            nameValues.add(nameValuePair);
+        });
+
+        String prefix = "", suffix = "";
+        String[] addresses = new String[] { requestUrl };
+        if (requestUrl.contains("[") && requestUrl.contains("]")) {
+            addresses = requestUrl.substring(requestUrl.indexOf("[") + 1, requestUrl.indexOf("]")).split(" ");
+            prefix = requestUrl.substring(0, requestUrl.indexOf("["));
+            suffix = requestUrl.substring(requestUrl.indexOf("]") + 1);
+        }
+        LOGGER.info("start to send post:" + requestUrl);
+        for (String address : addresses) {
+            String postUrl = prefix + address + suffix;
+            LOGGER.info("post url is : " + postUrl);
+            try {
+                if (urlRequestParams != null && !urlRequestParams.isEmpty()) {
+                    for (int i = 0; i < urlRequestParams.keySet().size(); i++) {
+                        String key = urlRequestParams.keySet().toArray()[i].toString();
+                        String value = urlRequestParams.get(key);
+                        if (i == 0) {
+                            postUrl = postUrl + "?" + key + "=" + value;
+                        } else {
+                            postUrl = postUrl + "&" + key + "=" + value;
+                        }
+                    }
+                }
+                LOGGER.info("start to send post url:" + postUrl);
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nameValues, "utf-8");
+                HttpUriRequest request = RequestBuilder.post()
+                        .setUri(postUrl)
+                        .setEntity(entity)
                         .build();
                 if (StringUtils.isNotBlank(cookie)) {
                     // 需要将cookie添加进去
@@ -278,7 +394,19 @@ public class HttpRequest {
      * @return URL 所代表远程资源的响应结果
      */
     public static String sendPost(String url, Map<String, String> params) {
-        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params);
+        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, null);
+    }
+    
+    /**
+     * 向指定URL发送POST方法的请求，支持header
+     * 
+     * @param url 发送请求的URL
+     * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
+     * @param handerParams header请求参数。
+     * @return URL 所代表远程资源的响应结果
+     */
+    public static String sendPost(String url, Map<String, String> params,  Map<String, String> urlParams) {
+        return sendPostWithRequestParam(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, urlParams);
     }
     
     /**
@@ -289,7 +417,7 @@ public class HttpRequest {
      * @return URL 所代表远程资源的响应结果
      */
     public static String sendPost1(String url, Map<String, String> params) {
-        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params);
+        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, null);
     }
 
     /**
@@ -314,7 +442,7 @@ public class HttpRequest {
                 if (isGet) {
                     return sendGet(client, header.getValue(), params);
                 } else {
-                    return sendPost(client, header.getValue(), params);
+                    return sendPost(client, header.getValue(), params, null);
                 }
             }
             if (statusLine.getStatusCode() != 200) {

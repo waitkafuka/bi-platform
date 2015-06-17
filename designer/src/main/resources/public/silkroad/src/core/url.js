@@ -900,6 +900,16 @@ define(function () {
             + '/textAlign';
     };
 
+    Url.getColumnLinkPlaneList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/link';
+    };
+
+    Url.getParamSetList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/param';
+    };
+
     Url.getFieldFilterInfo = function (reportId, compId, itemId) {
         return getExtendAreaBaseUrl(reportId, compId)
             + '/item/' + itemId + '/condition';

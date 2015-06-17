@@ -628,7 +628,7 @@
                         }
                         resultStr = value;
                         var w = 10000;
-                        var y = 1000000000;
+                        var y = 100000000;
 
                         if (value >= w && value <= y) {
                             resultStr = (value / w).toFixed(0) + '万';
@@ -993,23 +993,32 @@
      */
     UI_E_CHART_CLASS.render = function () {
         var tpl,
+            noDataContainer,
             me = this;
         me.$disposeChart();
-        // 如果没有数据，图形显示空
-        if (!me._aSeries || me._aSeries.length == 0) {
+        me.$preload();
+        // 如果没有数据，图形显示 暂无数据
+        if (
+            !me._aSeries
+            || (me._aSeries && me._aSeries.length === 0)
+            || (me._chartType === 'pie'
+                && me._aSeries
+                && me._aSeries.length > 0
+                && me._aSeries[0].data.length === 0
+            )
+        ) {
             me._eContent.style.height = (me.el.offsetHeight - me._eHeader.offsetHeight) + 'px';
             tpl = '<div class="#{dClass}-empty"><div class="#{dClass}-empty-img"></div></div>';
             me._eContent.innerHTML = stringTemplate(
                 tpl,
-                {
-                    dClass: me._sType
-                }
+                { dClass: me._sType }
             );
-            var oImg = q(me._sType + '-empty-img', me._eContent)[0];
-            oImg.style.marginTop = ((me._eContent.offsetHeight - oImg.offsetHeight) / 2) + 'px';
+            noDataContainer = q(me._sType + '-empty-img', me._eContent)[0];
+            noDataContainer.style.marginTop = (
+                (me._eContent.offsetHeight - noDataContainer.offsetHeight) / 2
+            ) + 'px';
             return;
         }
-        me.$preload();
         me.$createChart(me.$initOptions());
     };
 
@@ -1110,6 +1119,7 @@
         for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
             this._chartType = ser.type;
         }
+
         if (this._allMeasures) {
             this.$renderCheckBoxs();
         }

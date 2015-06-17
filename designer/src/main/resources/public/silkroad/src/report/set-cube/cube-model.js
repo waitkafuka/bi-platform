@@ -146,7 +146,7 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
                 }
             }
             // 新建报表走的逻辑，且数据源列表不为空
-            else if (data.length > 0) {
+            else if (data.length > 0 && data[0].active) {
                 that.set('dsId', data[0].active.id);
                 data[0].active.selected = true;
                 this.selectedDsId = data[0].active.id;

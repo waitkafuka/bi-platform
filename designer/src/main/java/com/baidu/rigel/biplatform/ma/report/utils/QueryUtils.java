@@ -79,7 +79,6 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
-import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -127,7 +126,12 @@ public final class QueryUtils {
         if (area == null) {
             throw new QueryModelBuildException("can not get area with id : " + areaId);
         }
-        Cube cube = getCubeWithExtendArea(reportModel, area);
+        Cube cube = getCubeFromReportModel(reportModel, area);
+        if (area.getType() == ExtendAreaType.PLANE_TABLE) {
+            cube = transformCube(cube);
+        } else {
+            cube = getCubeWithExtendArea(reportModel, area);
+        }
         if (cube == null) {
             throw new QueryModelBuildException("can not get cube define in area : " + areaId);
         }
@@ -165,6 +169,23 @@ public final class QueryUtils {
             // TODO 需要开发通用工具包 将常量定义到通用工具包中
             questionModel.getRequestParams().put("NEED_OTHERS", "1");
         }
+     // 设置请求参数信息
+        if (requestParams != null) {
+            for (String key : requestParams.keySet()) {
+                Object value = requestParams.get(key);
+                if (value != null && value instanceof String) {
+                    questionModel.getRequestParams().put(key, (String) value);
+                }
+            } 
+            // 设计器中, 设置分页信息
+            if (requestParams.get(Constants.IN_EDITOR) != 
+                    null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
+//                PageInfo pageInfo = new PageInfo();
+//                pageInfo.setPageSize(100);
+//                pageInfo.setTotalPage(1);
+                questionModel.setPageInfo(pageInfo);
+            }
+        }
         if (area.getType() == ExtendAreaType.PLANE_TABLE) {
             questionModel.setQuerySource("SQL");
             // 对于平面表不使用汇总方式
@@ -187,23 +208,7 @@ public final class QueryUtils {
         }
         questionModel.setUseIndex(true);
         
-        // 设置请求参数信息
-        if (requestParams != null) {
-            for (String key : requestParams.keySet()) {
-                Object value = requestParams.get(key);
-                if (value != null && value instanceof String) {
-                    questionModel.getRequestParams().put(key, (String) value);
-                }
-            } 
-            // 设计器中, 设置分页信息
-            if (requestParams.get(Constants.IN_EDITOR) != 
-                    null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
-//                PageInfo pageInfo = new PageInfo();
-//                pageInfo.setPageSize(100);
-//                pageInfo.setTotalPage(1);
-                questionModel.setPageInfo(pageInfo);
-            }
-        }
+        
         putSliceConditionIntoParams (queryAction, questionModel);
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;

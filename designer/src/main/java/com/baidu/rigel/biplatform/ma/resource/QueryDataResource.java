@@ -350,7 +350,7 @@ public class QueryDataResource extends BaseResource {
      * @param response
      * @return String
      */
-    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET },
+    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.POST, RequestMethod.GET },
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
@@ -460,7 +460,7 @@ public class QueryDataResource extends BaseResource {
         return builder;
     }
 
-    @RequestMapping(value = "/{reportId}/report_json", method = { RequestMethod.GET },
+    @RequestMapping(value = "/{reportId}/report_json", method = { RequestMethod.GET, RequestMethod.POST },
             produces = "text/plain;charset=utf-8")
     public String queryJson(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {

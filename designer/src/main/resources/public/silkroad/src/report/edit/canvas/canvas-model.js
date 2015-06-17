@@ -435,7 +435,8 @@ define(
                 this.$reportVm.find('[data-comp-id=' + paramObj.compId + ']').css({
                     width: paramObj.width,
                     height: paramObj.height
-                }).find('.vu-plane-table').height(parseInt(paramObj.height) - 126);
+                }).find('.vu-plane-table').height(parseInt(paramObj.height) - 90);
+                // }).find('.vu-plane-table').height(parseInt(paramObj.height) - 126);
                 // 16 18 30 22
                 this.saveJsonVm();
             },

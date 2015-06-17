@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc;
 import java.util.HashMap;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
@@ -37,6 +38,7 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpre
  *
  */
 @Service("jdbcQuestionModelUtil")
+@Scope("prototype")
 public class JdbcQuestionModelUtil {
     
     /**

@@ -9,11 +9,13 @@
 define(
     [
         'report/edit/canvas/table-setting/table-setting-model',
-        'report/edit/canvas/table-setting/text-align/text-align-view'
+        'report/edit/canvas/table-setting/text-align/text-align-view',
+        'report/edit/canvas/table-setting/link/link-view'
     ],
     function (
         TableSettingModel,
-        textAlignView
+        TextAlignView,
+        LinkView
     ) {
         //------------------------------------------
         // 视图类的声明
@@ -44,7 +46,12 @@ define(
                 });
                 this.canvasView = option.canvasView;
                 // 挂载topn设置视图
-                this.textAlignView = new textAlignView({
+                this.textAlignView = new TextAlignView({
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
+                this.linkView = new LinkView({
                     el: this.el,
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView

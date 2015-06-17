@@ -366,13 +366,15 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         action.setSlices(slices);
         
         fillFilterBlankDesc (areaId, reportModel, action);
-        
-        QueryAction.MeasureOrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
-        if (orderDesc == null) {
-            orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
+        ExtendArea area = reportModel.getExtendById(areaId);
+        if (area.getType() != ExtendAreaType.PLANE_TABLE) {
+            QueryAction.MeasureOrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+            if (orderDesc == null) {
+                orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
+            }
+            logger.info ("[INFO] -------- order desc = " + orderDesc);
+            action.setMeasureOrderDesc(orderDesc);            
         }
-        logger.info ("[INFO] -------- order desc = " + orderDesc);
-        action.setMeasureOrderDesc(orderDesc);
         // remove dumplated conditions
         Iterator<Item> it = action.getSlices ().keySet ().iterator ();
         while (it.hasNext ()) {

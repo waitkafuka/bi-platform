@@ -219,6 +219,24 @@
 .ui-lite-btn .ui-button-text {
     vertical-align: middle;
 }
+/* 取消按钮 */
+.ui-button-c {
+    /*    background:  url(img/icon.png) 0px -55px repeat-x;
+        border:  1px solid #7FAFC7;
+    */
+    background-color: #e9e9e9;
+    border: 1px solid #B3B3B3;
+    color: black;
+    width: 55px;
+    margin-left: 10px;
+}
+.ui-button-c-hover {
+    background-color: #BCBCBC;
+    background-position: 0px -79px;
+}
+.ui-button-c-active {
+    background-color: #BCBCBC;
+}
 /* 下载按钮 */
 .ui-download-btn {
     border: 1px solid #F0F4F7;
@@ -4056,6 +4074,8 @@ div.di-dim-level-find-msg span{
     height:300px;
     border: 1px solid #D0D0D0;
     overflow-y: scroll;
+    margin-bottom: 10px;
+    padding-left: 5px;
 }
 
 .table-fields-filter-list input {
@@ -4071,6 +4091,7 @@ div.di-dim-level-find-msg span{
     line-height: 20px;
     display: inline-block;
     vertical-align: middle;
+    margin-left: 3px;
 }
 .fields-filter {
     color: #3C78A2;

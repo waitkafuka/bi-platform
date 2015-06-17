@@ -1,0 +1,52 @@
+<!--
+数据例子：
+var demoData = {
+    "columnDefine": [
+        {"text": "文本1", "value": "text1", "selectedTable": "table1"},
+        {"text": "文本2", "value": "text2", "selectedTable": "table2"},
+        {"text": "文本3", "value": "text3", "selectedTable": "table3"}
+    ],
+    "planeTableList": [
+        {
+            "text": "表1",
+            "value": "table1"
+        },
+        {
+            "text": "表2",
+            "value": "table2"
+},
+        {
+            "text": "表3",
+            "value": "table3"
+        }
+    ]
+};
+-->
+<!-- 指标颜色设置 -->
+<div class="table-link-set">
+    <div class="table-link-set-area j-table-link-set-column-table">
+        <label>请设置列与跳转表格的关系</label>
+        <div class="table-link-set-area-items">
+            {{each columnDefine as $column name}}
+            <div class="table-link-set-item">
+                <label class="left" data-value="{{$column.value}}">{{$column.text}}：</label>
+                <select class="right">
+                    {{each planeTableList as $planeTable}}
+                    <option value={{$planeTable.value}}
+                    {{if $column.selectedTable === $planeTable.value}} selected="selected"
+                    {{/if}}>{{$planeTable.text}}</option>
+                    {{/each}}
+                </select>
+            </div>
+            {{/each}}
+        </div>
+        <input type="button" class="j-next" value="下一步"/>
+    </div>
+    <div class="table-link-set-area j-table-link-set-param-table hide">
+        <label>请设置参数与跳转表格的关系</label>
+        <div class="table-link-set-area-items j-table-link-set-param-items">
+        </div>
+        <input type="button" class="j-back" value="上一步"/>
+        <input type="button" class="j-ok" value="完成"/>
+    </div>
+</div>
