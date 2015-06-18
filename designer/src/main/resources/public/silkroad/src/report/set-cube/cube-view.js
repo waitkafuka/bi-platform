@@ -26,7 +26,8 @@ define([
                 'click .j-root-set-group .j-delete': 'deleteFormLine',
                 'click .j-create-data-sources-link': 'enterCreateDataSources',
                 'click .j-submit': 'submit',
-                'click .j-cancel': 'cancel'
+                'click .j-cancel': 'cancel',
+                'change .j-select-area-date': 'changeDateArea'
             },
 
             /**
@@ -37,7 +38,6 @@ define([
              */
             initialize: function (option) {
                 var that = this;
-
                 this.model = new CubeModel({id: this.id});
                 this.listenTo(
                     this.model,
@@ -51,9 +51,38 @@ define([
                     this.model,
                     'change:factTableList',
                     function (model, data) {
+                        var separateTableRuleData = that.model.get('separateTableRuleData');
+                        data.separateTableRuleData = separateTableRuleData;
                         // 其中包括factTables、prefixs两项数据
                         var html = cubeListTemplate.render(data);
                         that.$el.find('.j-con-cube-list').html(html);
+                    }
+                );
+
+                this.listenTo(
+                    this.model,
+                    'change:selectedTable',
+                    function (model, data) {
+                        // 获取分表规则中所有表格下拉框
+                        var selector = '.j-root-set-group .j-select-table';
+                        var $selectedTablesSels = this.$el.find(selector);
+                        if (!$selectedTablesSels.length) {
+                            return;
+                        }
+                        // 获取选中表数据，在分表规则中，第一个下拉框中填充
+                        var html = [];
+                        $.each(data, function() {
+                            html.push(
+                                '<option value="', this.id, '">',
+                                    this.text,
+                                '</option>'
+                            );
+                        });
+
+                        // 重置所有选择表下拉框中的内容
+                        $selectedTablesSels.each(function () {
+                            $(this).html(html.join(''));
+                        });
                     }
                 );
 
@@ -66,7 +95,6 @@ define([
                                 that.model.loadFactTableList(groupId, true);
                             }
                         );
-
                     });
                 }
                 else {
@@ -100,13 +128,21 @@ define([
              */
             selectCubes: function (event) {
                 var $target = $(event.target);
-
                 if ($target.hasClass('selected')) {
                     $target.removeClass('selected');
                 }
                 else {
                     $target.addClass('selected');
                 }
+                $('.j-root-set-group .j-regexps-validate').text('').hide();
+                var $selectedTables = this.$el.find('.j-con-cube-list .j-item.selected');
+                var table = [];
+                $selectedTables.each(function () {
+                    var id = $(this).attr('data-id');
+                    var text = $(this).text();
+                    table.push({id: id, text: text});
+                });
+                this.model.set('selectedTable', table);
             },
 
             /**
@@ -116,10 +152,40 @@ define([
              */
             addFormLine: function (event) {
                 var $target = $(event.target);
-                var selector = '.j-root-set-group .j-template';
+                var selector = '.j-root-set-group-template';
                 var $formLine = this.$el.find(selector).clone();
-                var $dom = $formLine.removeClass('hide j-template');
-                $target.after($dom.addClass('j-item'));
+
+                // 获取选中表数据
+                selector = '.j-con-cube-list .j-item.selected';
+                var $selectedTables = this.$el.find(selector);
+
+                // 获取分表规则中所有表格下拉框
+                selector = '.j-root-set-group .j-select-table';
+                var $selectedTablesSels = this.$el.find(selector);
+
+                if (!$selectedTables.length) {
+                    $('.j-root-set-group .j-regexps-validate').text('提示：请先选择表格').show();
+                    return;
+                }
+                else if ($selectedTables.length <= $selectedTablesSels.length) {
+                    $('.j-root-set-group .j-regexps-validate').text('提示：不能再添加规则').show();
+                    return;
+                }
+
+                // 获取选中表数据，在分表规则中，第一个下拉框中填充
+                var html = [];
+                $selectedTables.each(function () {
+                    html.push(
+                        '<option value="', $(this).attr('data-id'), '">',
+                            $(this).text(),
+                        '</option>'
+                    );
+                });
+                $formLine.find('.j-select-table').html(
+                    html.join('')
+                );
+                var $dom = $formLine.removeClass('hide j-root-set-group-template');
+                $target.next('span').after($dom.addClass('j-item'));
             },
 
             /**
@@ -152,6 +218,27 @@ define([
             },
 
             /**
+             * 分表规则中，地域时间先啦狂改变事件
+             * @param {event} event 点击事件
+             * @public
+             */
+            changeDateArea: function (event) {
+                var $target = $(event.target);
+                var val = $target.val().toLowerCase();
+                var html = [];
+                var ruleData = this.model.get('separateTableRuleData');
+                var areaDateDatas = ruleData[val].children;
+                for (var i = 0, iLen = areaDateDatas.length; i < iLen; i++ ) {
+                    html.push(
+                        '<option value="', areaDateDatas[i].value, '">',
+                            areaDateDatas[i].text,
+                        '</option>'
+                    );
+                }
+                $target.next('select').html(html.join(''));
+            },
+
+            /**
              * 提交cube设置
              * @public
              */
@@ -159,7 +246,7 @@ define([
                 var that = this;
                 var selector = '.j-con-cube-list .j-item.selected';
                 var $selectedTables = this.$el.find(selector);
-                var $regexps = this.$el.find('.j-root-set-group .j-item input');
+                var $regexps = this.$el.find('.j-root-set-group .j-item');
                 var data = {};
 
                 if ($selectedTables.length == 0) {
@@ -175,15 +262,36 @@ define([
                     data.selectedTables.push($(this).text());
                 });
                 data.selectedTables = data.selectedTables.join(',');
-                data.regexps = [];
+
+                // 获取分表规则data
+                var regexps = {};
+                var noRepeat = {}; // 用来做去重容器
+                var noRepeatFlag = false;
                 $regexps.each(function () {
-                    var val = $(this).val().trim();
-                    if (val !== '') {
-                        data.regexps.push(val);
+                    var selects = $(this).find('select');
+                    var prefix = $(this).find('input').val().trim();
+                    var tableName = $(selects[0]).val();
+                    var type = $(selects[1]).val();
+                    var condition = $(selects[2]).val();
+                    // 去重校验
+                    if (noRepeat[tableName]) {
+                        noRepeatFlag = true;
+                        return;
+                    }
+                    else {
+                        noRepeat[tableName] = true;
+                    }
+                    regexps[tableName] = {
+                        type: type,
+                        prefix: prefix,
+                        condition: condition
                     }
                 });
-                data.regexps = data.regexps.join(',');
-
+                if (noRepeatFlag) {
+                    $('.j-root-set-group .j-regexps-validate').text('提示：表格不能重复').show();
+                    return;
+                }
+                data.regexps = JSON.stringify(regexps);
                 this.model.submit(data, function () {
                     // 提交成功
                     window.dataInsight.main.destroy();

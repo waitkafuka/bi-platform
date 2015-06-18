@@ -372,6 +372,15 @@
                     }
                 },
                 {
+                    "clzKey" : "RICH_SELECT",
+                    "clzPath" : "di.shared.vui.RichSelect",
+                    "clzType" : "VUI",
+                    "adapterMethod" : {
+                        "create" : "xuiCreate",
+                        "dispose" : "xuiDispose"
+                    }
+                },
+                {
                     "clzKey": "SWITCH_BUTTON",
                     "clzPath": "ecui.ui.SwitchButton",
                     "clzType": "VUI",

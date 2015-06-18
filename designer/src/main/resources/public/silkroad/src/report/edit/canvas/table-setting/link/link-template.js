@@ -8,7 +8,7 @@ define(['template'], function (template) {
         $out+=$escape($column.value);
         $out+='">';
         $out+=$escape($column.text);
-        $out+='：</label>\n                <select class="right">\n                    ';
+        $out+='：</label>\n                <select class="right w-p-40  mr-10">\n                    <option value="">请选择</option>\n                    ';
         $each(planeTableList,function($planeTable,$index){
         $out+='\n                    <option value=';
         $out+=$escape($planeTable.value);
@@ -20,9 +20,9 @@ define(['template'], function (template) {
         $out+=$escape($planeTable.text);
         $out+='</option>\n                    ';
         });
-        $out+='\n                </select>\n            </div>\n            ';
+        $out+='\n                </select>\n                <span type="button" class="form-common-input-button j-next">设置参数</span>\n            </div>\n            ';
         });
-        $out+='\n        </div>\n        <input type="button" class="j-next" value="下一步"/>\n    </div>\n    <div class="table-link-set-area j-table-link-set-param-table hide">\n        <label>请设置参数与跳转表格的关系</label>\n        <div class="table-link-set-area-items j-table-link-set-param-items">\n        </div>\n        <input type="button" class="j-back" value="上一步"/>\n        <input type="button" class="j-ok" value="完成"/>\n    </div>\n</div>\n';
+        $out+='\n        </div>\n    </div>\n    <div class="table-link-set-area j-table-link-set-param-table hide">\n        <label>请设置参数与跳转表格的关系</label>\n        <div class="table-link-set-area-items j-table-link-set-param-items">\n        </div>\n        <div class="f-r mt-5">\n            <span type="button" class="form-common-input-button mr-10 j-back">上一步</span>\n            <span type="button" class="form-common-input-button j-ok">完成</span>\n        </div>\n\n    </div>\n</div>\n';
         return $out;
     }
     return { render: anonymous };

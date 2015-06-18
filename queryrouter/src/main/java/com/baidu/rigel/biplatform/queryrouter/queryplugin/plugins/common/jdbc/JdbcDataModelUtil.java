@@ -81,7 +81,7 @@ public class JdbcDataModelUtil {
         questionModel.setUseIndex(false);
 
         List<Map<String, Object>> rowBasedList = jdbcHandler.queryForList(
-                sqlExpression.getSql(), dataSourceInfo);
+                sqlExpression, dataSourceInfo);
         // getAll columns from Cube
         HashMap<String, SqlColumn> allColums = QuestionModel4TableDataUtils
                 .getAllCubeColumns(configQuestionModel.getCube());
@@ -100,7 +100,7 @@ public class JdbcDataModelUtil {
         if (questionModel.getPageInfo() != null
                 && questionModel.getPageInfo().getTotalRecordCount() == PARMA_NEED_CONTAIN_TOTALSIZE) {
             dataModel.setRecordSize(jdbcHandler.queryForInt(
-                    sqlExpression.getCountSql(), dataSourceInfo));
+                    sqlExpression, dataSourceInfo));
         }
         return dataModel;
     }

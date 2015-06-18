@@ -1,5 +1,5 @@
 /**
- * @file: 报表新建（编辑）-- 表格组件编辑模块 -- 跳转设置view
+ * @file: 报表新建（编辑）-- 表格组件编辑模块 -- 跳转设置view lzt
  *
  * @author: lizhantong
  * @depend:
@@ -78,11 +78,14 @@ define(
                 $back.unbind();
                 $ok.unbind();
                 $next.bind('click', function () {
-                    that.saveColumnTableRelation();
+                    that.saveColumnTableRelation($(this));
                 });
                 $back.bind('click', function () {
                     $('.j-table-link-set-column-table').show();
                     $('.j-table-link-set-param-table').hide();
+                });
+                $ok.bind('click', function () {
+                    that.saveParamRelation();
                 });
             },
             /**
@@ -90,18 +93,18 @@ define(
              *
              * @public
              */
-            showParamSetting: function () {
+            showParamSetting: function (param) {
                 var that = this;
-                that.model.getParamSetList(function (data) {
+                that.model.getParamSetList(param, function (data) {
                     $('.j-table-link-set-param-items').html(
                         LinkSettingParamTemplate.render(data)
                     );
-                    $('.j-param-set-add').unbind();
-                    $('.j-param-set-add').bind('click', function () {
-                        $(this).before(
-                            LinkParamSettingAddTemplate.render(data)
-                        );
-                    });
+//                    $('.j-param-set-add').unbind();
+//                    $('.j-param-set-add').bind('click', function () {
+//                        $(this).before(
+//                            LinkParamSettingAddTemplate.render(data)
+//                        );
+//                    });
                 });
             },
             /**
@@ -109,11 +112,11 @@ define(
              *
              * @public
              */
-            saveColumnTableRelation: function () {
+            saveColumnTableRelation: function (target) {
                 var that = this;
-                var items = $('.j-table-link-set-column-table .table-link-set-item');
+                var curParam = {};
                 var data = [];
-
+                var items = $('.j-table-link-set-column-table .table-link-set-item');
                 items.each(function () {
                     var $this = $(this);
                     var id = $this.find('label').attr('data-value');
@@ -123,11 +126,15 @@ define(
                         selectedTable: value
                     });
                 });
-
-                that.model.saveColumnTableRelation(data, function () {
+                curParam.linkInfo = JSON.stringify(data);
+                var nextParam = {};
+                nextParam.planeTableId = target.prev('select').val();
+                nextParam.olapElementId = target.prev().prev().attr('data-value');
+                that.olapElementId = nextParam.olapElementId;
+                that.model.saveColumnTableRelation(curParam, function () {
                     $('.j-table-link-set-column-table').hide();
                     $('.j-table-link-set-param-table').show();
-                    that.showParamSetting();
+                    that.showParamSetting(nextParam);
                 });
             },
             /**
@@ -139,20 +146,20 @@ define(
                 var that = this;
                 var items = $('.j-table-link-set-param-table .table-link-set-item');
                 var data = [];
-
+                var param = {};
                 items.each(function () {
                     var $this = $(this);
-                    var $selects = $this.find('select');
-                    var id = $selects[0].val();
-                    var value = $selects[1].val();
+                    var paramName = $this.find('label').attr('data-value');
+                    var selectedDim = $this.find('select').val();
                     data.push({
-                        id: id,
-                        selectedTable: value
+                        paramName: paramName,
+                        selectedDim: selectedDim
                     });
                 });
-
-                that.model.saveParamRelation(data, function () {
-                    that.$dialog.close();
+                param.mappingInfo = JSON.stringify(data);
+                param.olapElementId = that.olapElementId;
+                that.model.saveParamRelation(param, function () {
+                    that.$dialog.dialog('close');
                 });
             },
             /**

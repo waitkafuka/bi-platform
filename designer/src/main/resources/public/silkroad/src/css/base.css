@@ -68,6 +68,9 @@ a {
 .m-20 {
     margin: 20px;
 }
+.mt-1 {
+    margin-top: 1px;
+}
 .mt-5 {
     margin-top: 5px;
 }
@@ -116,6 +119,9 @@ a {
 .w-30 {
     width: 30px;
 }
+.w-90 {
+    width: 100px;
+}
 .w-100 {
     width: 100px;
 }
@@ -127,4 +133,13 @@ a {
 }
 .w-200 {
     width: 200px;
+}
+.w-p-40 {
+    width: 40%;
+}
+.cor-red {
+    color: red;
+}
+.h-30 {
+    height: 30px;
 }

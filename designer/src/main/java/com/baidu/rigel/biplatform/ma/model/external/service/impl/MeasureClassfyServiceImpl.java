@@ -21,11 +21,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
@@ -43,7 +42,7 @@ import com.google.common.collect.Lists;
  * @author david.wang
  *
  */
-@Resource
+@Service("measureClassfyService")
 public class MeasureClassfyServiceImpl implements MeasureClassfyService {
     
     /**

@@ -25,9 +25,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -74,6 +74,11 @@ public class SqlExpression implements Serializable {
     private String countSql;
 
     /**
+     * whereValues
+     */
+    private List<Object> whereValues = new ArrayList<Object>();
+
+    /**
      * jdbc driver
      */
     private String driver;
@@ -103,7 +108,7 @@ public class SqlExpression implements Serializable {
             sqlExpression.append(generateLeftOuterJoinExpression(
                     configQuestionModel, allColums, needColums));
             sqlExpression.append(generateWhereExpression(configQuestionModel,
-                    allColums));
+                    allColums, whereValues));
             sqlExpression.append(generateOrderByExpression(configQuestionModel,
                     allColums));
             // set no paged sql
@@ -139,7 +144,7 @@ public class SqlExpression implements Serializable {
             } else if (AxisType.ROW == colum.getType()) {
                 if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(colum.getDimension())) {
                     // 如果为时间维度
-                    columName = colum.getFactTableName() + SqlConstants.DOT
+                    columName = SqlConstants.FACTTABLE_ALIAS_NAME + SqlConstants.DOT
                             + colum.getDimension().getFacttableColumn();
                 }
                 select.append(columName + " as " + columNameSqlAlias + SqlConstants.COMMA);
@@ -162,7 +167,23 @@ public class SqlExpression implements Serializable {
         if (StringUtils.isEmpty(tableName)) {
             throw new QuestionModelTransformationException("cube.getSource() can not be empty");
         }
-        return " from " + tableName + SqlConstants.SPACE + tableName + SqlConstants.SPACE;
+        String[] tableNames =  tableName.split(",");
+        String sqlFrom = "";
+        if (tableNames.length == 1) {
+        // 一个表
+            sqlFrom = tableName;
+        } else {
+        // 多个表union的情况
+            for (int i = 0; i < tableNames.length; i++) {
+                if (i == 0) {
+                    sqlFrom = tableNames[i];
+                } else {
+                    sqlFrom = sqlFrom + " union all " + tableNames[i];
+                }
+            }
+            sqlFrom = "(" + sqlFrom + ")";
+        }
+        return " from " + sqlFrom + SqlConstants.SPACE + SqlConstants.FACTTABLE_ALIAS_NAME + SqlConstants.SPACE;
     }
 
     /**
@@ -177,7 +198,8 @@ public class SqlExpression implements Serializable {
      */
     public String generateLeftOuterJoinExpression(
             ConfigQuestionModel configQuestionModel,
-            HashMap<String, SqlColumn> allColums, List<SqlColumn> needColums) throws QuestionModelTransformationException {
+            HashMap<String, SqlColumn> allColums, List<SqlColumn> needColums)
+                    throws QuestionModelTransformationException {
         List<SqlColumn> needJoinColumns = new ArrayList<SqlColumn>();
         needJoinColumns.addAll(needColums);
         StringBuffer leftOuterJoinExpressions = new StringBuffer();
@@ -239,7 +261,7 @@ public class SqlExpression implements Serializable {
                         + dimTableName + SqlConstants.SPACE);
                 String dimTableFiled = dimTableName + SqlConstants.DOT
                         + colum.getLevel().getPrimaryKey();
-                String measureTableFiled = colum.getFactTableName() + SqlConstants.DOT
+                String measureTableFiled = SqlConstants.FACTTABLE_ALIAS_NAME + SqlConstants.DOT
                         + colum.getLevel().getFactTableColumn();
                 oneLeftOuterJoinExpression.append(" on " + dimTableFiled
                         + " = " + measureTableFiled + SqlConstants.SPACE);
@@ -258,7 +280,7 @@ public class SqlExpression implements Serializable {
      */
     public String generateWhereExpression(
             ConfigQuestionModel configQuestionModel,
-            HashMap<String, SqlColumn> allColums) {
+            HashMap<String, SqlColumn> allColums, List<Object> whereValues) {
         MiniCube cube = (MiniCube) configQuestionModel.getCube();
         StringBuffer whereExpressions = new StringBuffer(" where 1=1 ");
         configQuestionModel.getQueryConditions().forEach((k, v) -> {
@@ -284,7 +306,9 @@ public class SqlExpression implements Serializable {
                     String inExpression = "";
                     for (QueryData queryData : dimensionCondition.getQueryDataNodes()) {
                         String[] str = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
-                        inExpression = inExpression + "\'" + str[str.length - 1]  + "\',";
+                        String value = str[str.length - 1];
+                        inExpression = inExpression + SqlConstants.PARAM + ",";
+                        this.whereValues.add(value);
                     }
                     if (!inExpression.isEmpty()) {
                         // 如果inExpression没有值，证明没有此条件
@@ -307,7 +331,7 @@ public class SqlExpression implements Serializable {
                     String columnSqName = sqlColumn.getTableName() + SqlConstants.DOT
                             + sqlColumn.getTableFieldName();
                     whereExpressions.append(" and " + columnSqName
-                            + this.generateWhereEquals(sqlCondition) + SqlConstants.SPACE);
+                            + this.generateWhereEquals(sqlCondition, whereValues) + SqlConstants.SPACE);
                 }
             }
         });
@@ -321,12 +345,12 @@ public class SqlExpression implements Serializable {
      *            sqlCondition
      * @return where equals sting
      */
-    private String generateWhereEquals(SQLCondition sqlCondition) {
+    private String generateWhereEquals(SQLCondition sqlCondition, List<Object> whereValues) {
         if (sqlCondition == null || sqlCondition.getConditionValues() == null
                 || sqlCondition.getConditionValues().size() < 0) {
             return "";
         }
-        return SqlWhereExpressionFactory.getWhereExpression(sqlCondition);
+        return SqlWhereExpressionFactory.getWhereExpression(sqlCondition, whereValues);
     }
 
     /**
@@ -345,7 +369,7 @@ public class SqlExpression implements Serializable {
                 String columName = "";
                 if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(colum.getDimension())) {
                     // 如果为时间维度
-                    columName = colum.getFactTableName() + SqlConstants.DOT
+                    columName = SqlConstants.FACTTABLE_ALIAS_NAME + SqlConstants.DOT
                             + colum.getDimension().getFacttableColumn();
                     groupbyExpression.append(columName + SqlConstants.COMMA);
                 } else {
@@ -453,6 +477,22 @@ public class SqlExpression implements Serializable {
 
     }
 
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString(){
+        String sql = this.getSql();
+        if (!StringUtils.isEmpty(this.getSql())) {
+            for(Object value : this.whereValues){
+                sql = StringUtils.replaceOnce(sql, "?", "'" + value.toString() + "'");
+            }
+            return sql;
+        } else {
+            return "";
+        }    
+    }
+
     /**
      * getSql
      * 
@@ -516,5 +556,19 @@ public class SqlExpression implements Serializable {
      */
     public SqlExpression(String driver) {
         this.driver = driver;
+    }
+
+    /**
+     * @return the whereValues
+     */
+    public List<Object> getWhereValues() {
+        return whereValues;
+    }
+
+    /**
+     * @param whereValues the whereValues to set
+     */
+    public void setWhereValues(List<Object> whereValues) {
+        this.whereValues = whereValues;
     }
 }

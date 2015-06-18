@@ -80,12 +80,7 @@ public class SqlColumn implements Serializable {
      * measure
      */
     public Measure measure;
-    
-    /**
-     * factTableName
-     */
-    public String factTableName;
-    
+
     /**
      * getSqlUniqueColumn
      * 
@@ -104,26 +99,7 @@ public class SqlColumn implements Serializable {
     public void setSqlUniqueColumn(String sqlUniqueColumn) {
         this.sqlUniqueColumn = sqlUniqueColumn;
     }
-    
-    /**
-     * getFactTableName
-     * 
-     * @return String factTableName
-     */
-    public String getFactTableName() {
-        return factTableName;
-    }
-    
-    /**
-     * setFactTableName
-     * 
-     * @param String
-     *            factTableName
-     */
-    public void setFactTableName(String factTableName) {
-        this.factTableName = factTableName;
-    }
-    
+
     /**
      * getLevel
      * 

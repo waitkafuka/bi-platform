@@ -30,23 +30,27 @@ var demoData = {
             {{each columnDefine as $column name}}
             <div class="table-link-set-item">
                 <label class="left" data-value="{{$column.value}}">{{$column.text}}：</label>
-                <select class="right">
+                <select class="right w-p-40  mr-10">
+                    <option value="">请选择</option>
                     {{each planeTableList as $planeTable}}
                     <option value={{$planeTable.value}}
                     {{if $column.selectedTable === $planeTable.value}} selected="selected"
                     {{/if}}>{{$planeTable.text}}</option>
                     {{/each}}
                 </select>
+                <span type="button" class="form-common-input-button j-next">设置参数</span>
             </div>
             {{/each}}
         </div>
-        <input type="button" class="j-next" value="下一步"/>
     </div>
     <div class="table-link-set-area j-table-link-set-param-table hide">
         <label>请设置参数与跳转表格的关系</label>
         <div class="table-link-set-area-items j-table-link-set-param-items">
         </div>
-        <input type="button" class="j-back" value="上一步"/>
-        <input type="button" class="j-ok" value="完成"/>
+        <div class="f-r mt-5">
+            <span type="button" class="form-common-input-button mr-10 j-back">上一步</span>
+            <span type="button" class="form-common-input-button j-ok">完成</span>
+        </div>
+
     </div>
 </div>

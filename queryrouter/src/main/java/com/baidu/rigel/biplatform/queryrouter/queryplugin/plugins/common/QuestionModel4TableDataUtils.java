@@ -30,6 +30,7 @@ import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlConstants;
 
 /**
  * QuestionModel to TableData的工具类
@@ -100,11 +101,10 @@ public class QuestionModel4TableDataUtils {
             oneMeasure.setName(measureName);
             oneMeasure.setTableFieldName(v.getDefine());
             oneMeasure.setCaption(v.getCaption());
-            oneMeasure.setTableName(miniCube.getSource());
+            oneMeasure.setTableName(SqlConstants.FACTTABLE_ALIAS_NAME);
             oneMeasure.setType(AxisType.COLUMN);
-            oneMeasure.setSqlUniqueColumn(miniCube.getSource() + v.getDefine());
+            oneMeasure.setSqlUniqueColumn(SqlConstants.FACTTABLE_ALIAS_NAME + v.getDefine());
             oneMeasure.setMeasure(v);
-            oneMeasure.setFactTableName(miniCube.getSource());
         });
 
         // 获取维度元数据
@@ -118,7 +118,7 @@ public class QuestionModel4TableDataUtils {
             // 如果为时间维度，转换成事实表的时间字段
                 dimensionName = oneDimensionSource.getFactTableColumn();
                 tableFieldName = oneDimensionSource.getFactTableColumn();
-                tableName = miniCube.getSource();
+                tableName = SqlConstants.FACTTABLE_ALIAS_NAME;
             } else {
                 tableName = oneDimensionSource.getDimTable();
             }
@@ -134,7 +134,6 @@ public class QuestionModel4TableDataUtils {
             oneDimensionTarget.setDimension(v);
             oneDimensionTarget.setLevel(oneDimensionSource);
             oneDimensionTarget.setSqlUniqueColumn(tableName + tableFieldName);
-            oneDimensionTarget.setFactTableName(miniCube.getSource());
         });
 
         return allColumns;

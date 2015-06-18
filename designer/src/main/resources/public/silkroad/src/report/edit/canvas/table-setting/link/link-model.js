@@ -61,34 +61,35 @@ define(['url'], function (Url) {
          * @param {Function} success 回调函数
          * @public
          */
-        getParamSetList: function (success) {
+        getParamSetList: function (param, success) {
             var that = this;
             $.ajax({
                 url: Url.getParamSetList(that.get('reportId'), that.get('compId')),
                 type: 'get',
+                data: param,
                 success: function (data) {
                     that.set('paramList', data.data);
                     success(data.data);
                 }
             });
 //            var data = {
-//                "olapTableParamList": [
-//                    {"text": "文本1", "value": "text1", "relationParam": "table1"},
-//                    {"text": "文本2", "value": "text2", "relationParam": "table2"},
-//                    {"text": "文本3", "value": "text3", "relationParam": "table3"}
+//                "olapTableDimList": [
+//                    {"text": "文本1", "value": "text1"},
+//                    {"text": "文本2", "value": "text2"},
+//                    {"text": "文本3", "value": "text3"}
 //                ],
 //                "planeTableParamList": [
 //                    {
-//                        "text": "表1",
-//                        "value": "table1"
+//                        "name": "平面表1",
+//                        "selectedDim": "text1"
 //                    },
 //                    {
-//                        "text": "表2",
-//                        "value": "table2"
+//                        "name": "平面表2",
+//                        "selectedDim": "text2"
 //                    },
 //                    {
-//                        "text": "表3",
-//                        "value": "table3"
+//                        "name": "平面表3",
+//                        "selectedDim": "text3"
 //                    }
 //                ]
 //            };
@@ -106,7 +107,7 @@ define(['url'], function (Url) {
             $.ajax({
                 url: Url.getColumnLinkPlaneList(that.get('reportId'), that.get('compId')),
                 type: 'POST',
-                data:  JSON.stringify(data),
+                data: data,
                 success: function () {
                     success();
                 }
@@ -124,7 +125,7 @@ define(['url'], function (Url) {
             $.ajax({
                 url: Url.getParamSetList(that.get('reportId'), that.get('compId')),
                 type: 'POST',
-                data:  JSON.stringify(data),
+                data: data,
                 success: function () {
                     success();
                 }

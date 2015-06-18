@@ -21,7 +21,16 @@ public final class SqlConstants {
      * sql space
      */
     public static final String SPACE = " ";
+    
+    /**
+     * 参数问号
+     */
+    public static final String PARAM = "?";
 
+    /**
+     * facttable alias name
+     */
+    public static final String FACTTABLE_ALIAS_NAME = "biplatform_facttable_name";
     
     /**
      * 禁用new此类

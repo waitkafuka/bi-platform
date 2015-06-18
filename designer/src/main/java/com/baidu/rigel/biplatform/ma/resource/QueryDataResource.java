@@ -954,6 +954,12 @@ public class QueryDataResource extends BaseResource {
                 } else {
                     pageInfo.setTotalRecordCount(-1);
                 }
+                // 获取上一次查询的QueryAction
+                QueryAction queryActionPrevious = runTimeModel.getPreviousQueryAction(areaId);
+                // 携带之前的排序信息
+                if (queryActionPrevious != null) {
+                    action.setMeasureOrderDesc(queryActionPrevious.getMeasureOrderDesc());                     
+                }
                 result =
                         reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo,
                                 securityKey);

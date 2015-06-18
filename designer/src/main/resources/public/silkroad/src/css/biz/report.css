@@ -55,7 +55,7 @@
 }
 .con-data-sources-list,
 .con-cube-list {
-    width: 50%;
+    width: 65%;
     box-sizing: border-box;
     padding-right: 20px;
     height: auto;
@@ -63,6 +63,7 @@
     padding-bottom: 10000px;
 }
 .con-data-sources-list {
+    width: 35%;
     display: inline;
 }
 .con-data-sources-list .btn-has-icon-data-sources {
@@ -1078,6 +1079,9 @@
     width: 70%;
     line-height: 25px;
     height: 25px;
+}
+.table-link-set-item .w-p-40 {
+    width: 40%;
 }
 
 /*@end*/

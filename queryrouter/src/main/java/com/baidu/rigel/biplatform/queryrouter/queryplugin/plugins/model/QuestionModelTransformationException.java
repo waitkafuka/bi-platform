@@ -23,7 +23,7 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model;
  * @author 罗文磊
  *
  */
-public class QuestionModelTransformationException extends Exception {
+public class QuestionModelTransformationException extends RuntimeException {
 
     /**
      * serialVersionUID

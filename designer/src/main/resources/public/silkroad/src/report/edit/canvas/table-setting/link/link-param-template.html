@@ -22,22 +22,15 @@ var demoData = {
     ]
 };
 -->
-{{each olapTableParamList as $oParam name}}
+{{each planeTableParamList as $planeParam}}
 <div class="table-link-set-item">
-    <select class="left">
-        {{each olapTableParamList as $oParamOption }}
-        <option value={{$oParamOption.value}}
-        {{if $oParamOption.value === $oParam.value}} selected="selected"
-        {{/if}}>{{$oParamOption.text}}</option>
-        {{/each}}
-    </select>
+    <label class="left" data-value="{{$planeParam.name}}">{{$planeParam.name}}：</label>
     <select class="right">
-        {{each planeTableParamList as $pParam}}
-        <option value={{$pParam.value}}
-        {{if $oParam.relationParam === $pParam.value}} selected="selected"
-        {{/if}}>{{$pParam.text}}</option>
+        {{each olapTableDimList as $dim}}
+        <option value={{$dim.value}}
+        {{if $dim.value===$planeParam.selectedDim}} selected="selected"
+        {{/if}}>{{$dim.text}}</option>
         {{/each}}
     </select>
 </div>
 {{/each}}
-<img class="j-param-set-add" src="src/css/img/add.png">

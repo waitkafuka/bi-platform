@@ -6,6 +6,43 @@
 define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel) {
 
     return Backbone.Model.extend({
+        defaults: {
+            separateTableRuleData: {
+                time: {
+                    value: 'TIME',
+                    text: '时间',
+                    children: [
+                        {
+                            value: 'yyyy',
+                            text: '年(yyyy)'
+                        },
+                        {
+                            value: 'yyyyMM',
+                            text: '月(yyyyMM)'
+                        },
+                        {
+                            value: 'yyyyMMdd',
+                            text: '日(yyyyMMdd)'
+                        }
+                    ]
+                },
+                dist: {
+                    value: 'DIST',
+                    text: '地域',
+                    children: [
+                        {
+                            value: 'province',
+                            text: '省'
+                        },
+                        {
+                            value: 'city',
+                            text: '城市'
+                        }
+                    ]
+                }
+            },
+            selectedTable: []
+        },
 
         /**
          * 构造函数
@@ -89,6 +126,7 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
                 url: Url.loadReportFactTableList(that.id),
                 success: function (data) {
                     factTableList.prefixs = data.data.prefixs;
+                    factTableList.regx = data.data.regx;
                     factTableList.factTables = that._mergeFactTablesList(
                         dsFactTablesList,
                         data.data.selected
@@ -139,7 +177,7 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
 
             if (opt_selectedId !== undefined) {
                 for (var i = 0, len = data.length; i < len; i++) {
-                    if (data[i].active.id == opt_selectedId) {
+                    if (data[i].active && (data[i].active.id == opt_selectedId)) {
                         data[i].active.selected = true;
                         break;
                     }

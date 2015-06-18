@@ -86,7 +86,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
     @Resource
     private QueryDataResourceUtils queryDataResourceUtils;
     
-//    @Resource
+    @Resource
     private MeasureClassfyService measureClassfyService;
     
     /**
@@ -121,7 +121,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
 
         Assert.notNull (runTimeModel);
         ReportDesignModel model = runTimeModel.getModel ();
-        ExtendArea extendArea = model.getExtendById ("areaId");
+        ExtendArea extendArea = model.getExtendById (areaId);
         if (extendArea.getType () != ExtendAreaType.TABLE) {
             throw new UnsupportedOperationException ("未支持的区域类型");
         }
@@ -187,7 +187,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
 
         Assert.notNull (runTimeModel);
         ReportDesignModel model = runTimeModel.getModel ();
-        ExtendArea extendArea = model.getExtendById ("areaId");
+        ExtendArea extendArea = model.getExtendById (areaId);
         if (extendArea.getType () != ExtendAreaType.TABLE) {
             throw new UnsupportedOperationException ("未支持的区域类型");
         }

@@ -16,8 +16,7 @@ public class UnicodeUtils {
     /**
      * string2Unicode
      * 
-     * @param string
-     *            string
+     * @param string string
      * @return string2Unicode
      */
     public static String string2Unicode(String string) {

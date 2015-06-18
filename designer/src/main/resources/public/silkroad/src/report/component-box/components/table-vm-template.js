@@ -6,6 +6,8 @@ define(['template'], function (template) {
         $out+=$escape(id);
         $out+='">\r\n    <div class="di-o_o-line">\r\n        <div class="" data-o_o-di="';
         $out+=$escape(id);
+        $out+='-vu-table-rich-select"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="" data-o_o-di="';
+        $out+=$escape(id);
         $out+='-vu-table-breadcrumb"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="vu-table" data-o_o-di="';
         $out+=$escape(id);
         $out+='-vu-table" style="height: 160px;"></div>\r\n    </div>\r\n    <div class="di-o_o-line">\r\n        <div class="di-table-prompt">\r\n            <div class="di-table-count" data-o_o-di="';
