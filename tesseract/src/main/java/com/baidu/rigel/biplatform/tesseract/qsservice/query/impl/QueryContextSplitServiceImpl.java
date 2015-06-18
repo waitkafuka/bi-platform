@@ -176,36 +176,6 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
         return result;
     }
 
-    /**
-     * @param queryContext
-     * @return
-     */
-//    private QueryContextSplitResult splitByColumnStrategy(QueryContext queryContext) {
-//        QueryContextSplitResult result = new QueryContextSplitResult(QueryContextSplitStrategy.Column, queryContext);
-//        
-//        if (CollectionUtils.isNotEmpty(queryContext.getColumnMemberTrees())) {
-//            for (int i = 0; i < queryContext.getColumnMemberTrees().size(); i++) {
-//                // TODO 按照查询的节点数进行拆分，按照拆分的节点封装QueryContext
-//            }
-//        }
-//        return result;
-//    }
-//
-//    /**
-//     * @param queryContext
-//     * @return
-//     */
-//    private QueryContextSplitResult splitByRowStrategy(QueryContext queryContext) {
-//        QueryContextSplitResult result = new QueryContextSplitResult(QueryContextSplitStrategy.Row, queryContext);
-//
-//        if (CollectionUtils.isNotEmpty(queryContext.getRowMemberTrees())) {
-//            for (int i = 0; i < queryContext.getRowMemberTrees().size(); i++) {
-//                // TODO 按照查询的节点数进行拆分，按照拆分的节点封装QueryContext
-//            }
-//        }
-//        return result;
-//    }
-
     
     /*
      * (non-Javadoc) 
@@ -348,17 +318,6 @@ public class QueryContextSplitServiceImpl implements QueryContextSplitService {
                 field.setCompareDatas(datas ==  null ? null : datas.get(field.getValue()).get(pName));
             }
         }
-//        oriColumnFields.forEach(field -> {
-//            if(constantResult.containsKey(field.getValue())) {
-//                field.setCompareDatas(constantResult.get(field.getValue()));
-//            } else {
-//                String pName = NONE;
-//                if(field.getParentLevelField() != null) {
-//                    pName = field.getParentLevelField().getNodeUniqueName();
-//                }
-//                field.setCompareDatas(datas.get(field.getValue()).get(pName));
-//            }
-//        });
         
         List<HeadField> columnLeafs = DataModelUtils.getLeafNodeList(dataModel.getColumnHeadFields());
         dataModel.getColumnBaseData().clear();

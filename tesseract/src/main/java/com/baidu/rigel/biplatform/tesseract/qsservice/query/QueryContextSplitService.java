@@ -70,8 +70,9 @@ public interface QueryContextSplitService {
      * @param preSplitStrategy 上次的拆分类型
      * @return 拆分后的结果
      */
-    QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, Cube cube, QueryContext queryContext,
-         QueryContextSplitStrategy preSplitStrategy);
+    QueryContextSplitResult split(QuestionModel question, DataSourceInfo dsInfo, 
+            Cube cube, QueryContext queryContext,
+            QueryContextSplitStrategy preSplitStrategy);
     
     
     /** 

@@ -52,6 +52,7 @@ import com.baidu.rigel.biplatform.ma.resource.ReportRuntimeModelManageResource;
 import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.QueryDataResourceUtils;
+import com.google.common.collect.Lists;
 
 /**
  *Description:
@@ -145,6 +146,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         Cube cube = model.getSchema ().getCubes ().get (extendArea.getCubeId ());
         cube = QueryUtils.transformCube (cube);
         if (!StringUtils.isBlank (selectedMeasures)) {
+            List<Item> columns = Lists.newArrayList ();
             for (String indName : selectedMeasures.split (",")) {
                 Measure m = cube.getMeasures ().get (indName);
                 Item item = new Item();
@@ -154,8 +156,9 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
                 item.setPositionType (PositionType.Y);
                 item.setReportId (model.getId ());
                 item.setSchemaId (cube.getSchema ().getId ());
-                logicModel.addRow (item);
+                columns.add (item);
             }
+            logicModel.resetColumns (columns.toArray (new Item[0]));
         }
     }
     

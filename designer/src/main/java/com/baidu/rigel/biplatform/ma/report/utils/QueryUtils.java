@@ -52,6 +52,7 @@ import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
+import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
@@ -112,8 +113,10 @@ public final class QueryUtils {
      * @throws QueryModelBuildException
      *             构建失败异常
      */
-    public static QuestionModel convert2QuestionModel(DataSourceDefine dsDefine, ReportDesignModel reportModel,
-        QueryAction queryAction, Map<String, Object> requestParams, PageInfo pageInfo, String securityKey) throws QueryModelBuildException {
+    public static QuestionModel convert2QuestionModel(DataSourceDefine dsDefine,
+            ReportDesignModel reportModel,
+            QueryAction queryAction, Map<String, Object> requestParams, 
+            PageInfo pageInfo, String securityKey) throws QueryModelBuildException {
         if (queryAction == null) {
             throw new QueryModelBuildException("query action is null");
         }
@@ -144,8 +147,6 @@ public final class QueryUtils {
         Set<Item> tmp = Sets.newHashSet();
         tmp.addAll(queryAction.getSlices().keySet());
         tmp.addAll(queryAction.getRows().keySet());
-//        updateLogicCubeWithSlices(cube, tmp,
-//                reportModel.getSchema().getCubes().get(area.getCubeId()));
         questionModel.setCube(cube);
         try {
             DataSourceInfo dataSource = DataSourceConnectionServiceFactory
@@ -155,7 +156,6 @@ public final class QueryUtils {
         } catch (Exception e) {
             throw new RuntimeException (e);
         }
-//        questionModel.setDataSourceInfo(buidDataSourceInfo(dsDefine, securityKey));
         MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
         if (orderDesc != null) {
             SortType sortType = SortType.valueOf(orderDesc.getOrderType());
@@ -180,9 +180,6 @@ public final class QueryUtils {
             // 设计器中, 设置分页信息
             if (requestParams.get(Constants.IN_EDITOR) != 
                     null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
-//                PageInfo pageInfo = new PageInfo();
-//                pageInfo.setPageSize(100);
-//                pageInfo.setTotalPage(1);
                 questionModel.setPageInfo(pageInfo);
             }
         }
@@ -193,17 +190,26 @@ public final class QueryUtils {
             // 设置分页信息
             questionModel.setPageInfo(pageInfo);
             // 针对平面表构建查询条件
-            questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPlaneTable(reportModel, area, queryAction));            
+            Map<String, MetaCondition> conditionsForPlaneTable = 
+                QueryConditionUtils.buildQueryConditionsForPlaneTable(reportModel, area, queryAction);
+            questionModel.setQueryConditions(conditionsForPlaneTable);            
         } else {
             questionModel.setQuerySource("TESSERACT");
             // 针对其他情况构建查询条件
-            questionModel.setQueryConditions(QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction));        
-            if (queryAction.getDrillDimValues() == null || !queryAction.getDrillDimValues().isEmpty() || queryAction.isChartQuery()) {
+            Map<String, MetaCondition> conditionsForPivotTable = 
+                QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction);
+            questionModel.setQueryConditions(conditionsForPivotTable);        
+            if (queryAction.getDrillDimValues() == null 
+                    || !queryAction.getDrillDimValues().isEmpty() 
+                    || queryAction.isChartQuery()) {
                 questionModel.setNeedSummary(false);
-            } else if (reportModel.getExtendById (queryAction.getExtendAreaId ()).getType () != ExtendAreaType.TABLE) {
-                questionModel.setNeedSummary (false);
             } else {
-                questionModel.setNeedSummary(needSummary(questionModel));
+                ExtendAreaType areaType = reportModel.getExtendById (queryAction.getExtendAreaId ()).getType ();
+                if (areaType != ExtendAreaType.TABLE) {
+                    questionModel.setNeedSummary (false);
+                } else {
+                    questionModel.setNeedSummary(needSummary(questionModel));
+                }
             }               
         }
         questionModel.setUseIndex(true);
@@ -234,7 +240,8 @@ public final class QueryUtils {
                                             configQuestionModel.getCube (), 
                                             configQuestionModel.getDataSourceInfo (), 
                                             configQuestionModel.getRequestParams ());
-                            if (MetaNameUtil.isAllMemberUniqueName (condition.getQueryDataNodes ().get (0).getUniqueName ())) {
+                            String uniqueName = condition.getQueryDataNodes ().get (0).getUniqueName ();
+                            if (MetaNameUtil.isAllMemberUniqueName (uniqueName)) {
                                 return false;
                             } else if (meta.getCrossjoinDims ().size () > 1) {
                                 return false;
@@ -295,58 +302,6 @@ public final class QueryUtils {
         }
     }
     
-//    /**
-//     * 
-//     * @param cube
-//     * @param keySet
-//     * @param defineCube
-//     */
-//    private static void updateLogicCubeWithSlices(final Cube cube, Set<Item> keySet, final Cube defineCube) {
-//        if (keySet == null || keySet.isEmpty()) {
-//            return;
-//        }
-//        
-//        keySet.forEach(item -> {
-//            Dimension dim = defineCube.getDimensions().get(item.getOlapElementId());
-//            if (dim != null) {
-//                Dimension tmp = DeepcopyUtils.deepCopy(dim);
-//                tmp.getLevels().clear();
-//                dim.getLevels().values().forEach(level -> {
-//                    tmp.getLevels().put(level.getName(), level);
-//                });
-//                cube.getDimensions().put(tmp.getName(), tmp);
-//            }
-//        });
-//    }
-
-    /**
-     * 
-     * @param dsDefine
-     * @return DataSourceInfo
-     */
-//    private static DataSourceInfo buidDataSourceInfo(DataSourceDefine dsDefine, String securityKey) {
-//        SqlDataSourceInfo ds = new SqlDataSourceInfo(dsDefine.getId());
-//        ds.setDBProxy(true);
-//        try {
-//            ds.setPassword(AesUtil.getInstance().decodeAnddecrypt(dsDefine.getDbPwd(), securityKey));
-//        } catch (Exception e) {
-//        }
-//        ds.setUsername(dsDefine.getDbUser());
-//        ds.setProductLine(dsDefine.getProductLine());
-//        ds.setInstanceName(dsDefine.getDbInstance());
-//        List<String> hosts = Lists.newArrayList();
-//        hosts.add(dsDefine.getHostAndPort());
-//        ds.setHosts(hosts);
-//        List<String> jdbcUrls = Lists.newArrayList();
-//        try {
-//            jdbcUrls.add(DBUrlGeneratorUtils.getConnUrl(dsDefine));
-//        } catch (Exception e) {
-//        }
-//        ds.setDataBase(DataBase.valueOf(dsDefine.getDataSourceType().name()));
-//        ds.setJdbcUrls(jdbcUrls);
-//        return ds;
-//    }
-    
     /**
      * 通过查询
      * 
@@ -366,8 +321,7 @@ public final class QueryUtils {
         AxisMeta rowMeta = buildAxisMeta(schema, area, rows, AxisType.ROW);
         rs.put(rowMeta.getAxisType(), rowMeta);
         
-        AxisMeta filterMeta = buildAxisMeta(schema, area, queryAction.getSlices(),
-                AxisType.FILTER);
+        AxisMeta filterMeta = buildAxisMeta(schema, area, queryAction.getSlices(), AxisType.FILTER);
         rs.put(filterMeta.getAxisType(), filterMeta);
         return rs;
     }
@@ -386,8 +340,8 @@ public final class QueryUtils {
         AxisMeta meta = new AxisMeta(axisType);
         for (Map.Entry<Item, Object> entry : items.entrySet()) {
             Item item = entry.getKey();
-            OlapElement olapElement = ReportDesignModelUtils.getDimOrIndDefineWithId(schema,
-                    area.getCubeId(), item.getOlapElementId());
+            OlapElement olapElement = 
+                ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
             if (olapElement == null) {
                 continue;
             }
@@ -441,6 +395,10 @@ public final class QueryUtils {
     public static Cube getCubeWithExtendArea(ReportDesignModel reportModel, ExtendArea area)
         throws QueryModelBuildException {
         Cube oriCube = getCubeFromReportModel(reportModel, area);
+        // 对于可选指标，默认将事实表包含的所有列作为查询条件
+        if ("true".equals(area.getOtherSetting ().get (Constants.CAN_CHANGED_MEASURE))) {
+            return transformCube (oriCube);
+        }
         Map<String, List<Dimension>> filterDims = collectFilterDim(reportModel);
         MiniCube cube = new MiniCube(area.getCubeId());
         String areaId = area.getId();
@@ -448,7 +406,8 @@ public final class QueryUtils {
         if (area.getType() == ExtendAreaType.SELECTION_AREA
                 || area.getType() == ExtendAreaType.LITEOLAP_CHART 
                 || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
-            LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) reportModel.getExtendById(area.getReferenceAreaId());
+            LiteOlapExtendArea liteOlapArea = 
+                (LiteOlapExtendArea) reportModel.getExtendById(area.getReferenceAreaId());
             logicModel = liteOlapArea.getLogicModel();
             areaId = area.getReferenceAreaId();
         }
@@ -482,9 +441,10 @@ public final class QueryUtils {
              * TODO 把liteOlap中候选的维度和指标加入到items里面
              */
             Map<String, Item> candDims = ((LiteOlapExtendArea) area).getCandDims();
+            Schema schema = reportModel.getSchema();
+            String cubeId = area.getCubeId();
             for (String elementId : candDims.keySet()) {
-                OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
-                        area.getCubeId(), elementId);
+                OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, elementId);
                 MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
                 dim.setLevels(Maps.newLinkedHashMap());
                 ((Dimension) element).getLevels().values().forEach(level -> {
@@ -495,20 +455,19 @@ public final class QueryUtils {
             }
             Map<String, Item> candInds = ((LiteOlapExtendArea) area).getCandInds();
             for (String elementId : candInds.keySet()) {
-                OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(reportModel.getSchema(),
-                        area.getCubeId(), elementId);
+                OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, elementId);
                 if (element instanceof CallbackMeasure) {
-                	CallbackMeasure m = DeepcopyUtils.deepCopy((CallbackMeasure) element);
-                	String url = ((CallbackMeasure) element).getCallbackUrl();
-                	m.setCallbackUrl(HttpUrlUtils.getBaseUrl(url));
-                	m.setCallbackParams(HttpUrlUtils.getParams(url));
-                	measures.put(m.getName(), m);
+                    CallbackMeasure m = DeepcopyUtils.deepCopy((CallbackMeasure) element);
+                    String url = ((CallbackMeasure) element).getCallbackUrl();
+                    m.setCallbackUrl(HttpUrlUtils.getBaseUrl(url));
+                    m.setCallbackParams(HttpUrlUtils.getParams(url));
+                    measures.put(m.getName(), m);
                 } else {
-                	measures.put(element.getName(), (Measure) element);
+                    measures.put(element.getName(), (Measure) element);
                 }
             }
         }
-        if (filterDims != null ) { // && filterDims.get(area.getCubeId()) != null) {
+        if (filterDims != null ) {
             List<Dimension> dims = filterDims.get(area.getCubeId());
             if (dims != null) {
                 for(Dimension dim : dims) {
@@ -626,9 +585,9 @@ public final class QueryUtils {
                 if (rs.get(area.getCubeId()) == null) {
                     List<Dimension> dims = Lists.newArrayList();
                     area.listAllItems().values().forEach(key -> {
-                        MiniCubeDimension dim = (MiniCubeDimension) 
-                                DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
-                        dim.setLevels(Maps.newLinkedHashMap());;
+                        MiniCubeDimension dim = 
+                            (MiniCubeDimension) DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+                        dim.setLevels(Maps.newLinkedHashMap());
                         cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
                             dim.getLevels().put(level.getName(), level);
                         });
@@ -637,8 +596,8 @@ public final class QueryUtils {
                     rs.put(area.getCubeId(), dims);
                 } else {
                     area.listAllItems().values().forEach(key -> {
-                        MiniCubeDimension dim = (MiniCubeDimension) 
-                                DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
+                        MiniCubeDimension dim = 
+                            (MiniCubeDimension) DeepcopyUtils.deepCopy(cube.getDimensions().get(key.getId()));
                         dim.setLevels(Maps.newLinkedHashMap());;
                         cube.getDimensions().get(key.getId()).getLevels().values().forEach(level ->{
                             dim.getLevels().put(level.getName(), level);
@@ -755,29 +714,20 @@ public final class QueryUtils {
             chart.setAllMeasures(allMeasures);
             
             final Item[] columns = area.getLogicModel().getColumns();
-            List<String> tmp = getOlapElementNames(
-                    columns, area.getCubeId(), schema);
+            List<String> tmp = getOlapElementNames(columns, area.getCubeId(), schema);
             if (tmp.size() > 0) {
                 chart.setDefaultMeasures(tmp.toArray(new String[0]));
             }
             for (int i = 0; i < columns.length; ++i) {
                 chart.getMeasureMap().put(columns[i].getOlapElementId(), tmp.get(i));
             }
-//            List<String>  defaultDims = getOlapElementNames(
-//                    area.getLogicModel().getRows(), area.getCubeId(), schema);
             if (index >= 0 && index < chart.getAllMeasures().length) {
-            		chart.setDefaultMeasures(new String[]{ chart.getAllMeasures()[index] });
+                chart.setDefaultMeasures(new String[]{ chart.getAllMeasures()[index] });
             } 
-//            else {
-//	            	if (defaultDims.size() > 0) {
-//	            		chart.setDefaultDims(defaultDims.toArray(new String[0]));
-//	            	}
-//            }
         } 
     }
 
-    private static void addDataFormatInfo(DIReportChart chart,
-            Map<String, String> dataFormat) {
+    private static void addDataFormatInfo(DIReportChart chart, Map<String, String> dataFormat) {
         if (chart.getSeriesData () == null || chart.getSeriesData ().isEmpty ()) {
             return;
         }
@@ -815,8 +765,7 @@ public final class QueryUtils {
      * @return String
      * 
      */
-    private static OlapElement getOlapElement(ExtendArea area, Schema schema,
-            Item item) {
+    private static OlapElement getOlapElement(ExtendArea area, Schema schema, Item item) {
         OlapElement olapElement = 
                 ReportDesignModelUtils.getDimOrIndDefineWithId(schema, area.getCubeId(), item.getOlapElementId());
         if (olapElement != null) {
@@ -834,7 +783,8 @@ public final class QueryUtils {
         Map<String, Object> rs = Maps.newHashMap();
         Collection<ReportParam> params = DeepcopyUtils.deepCopy(model.getParams()).values();
         // modify by jiangyichao at 2015-05-19
-        Collection<PlaneTableCondition> planeTableConditions = DeepcopyUtils.deepCopy(model.getPlaneTableConditions()).values();
+        Collection<PlaneTableCondition> planeTableConditions = 
+            DeepcopyUtils.deepCopy(model.getPlaneTableConditions()).values();
         if (params.size() == 0 && planeTableConditions.size() == 0) {
             return rs;
         }
@@ -894,8 +844,8 @@ public final class QueryUtils {
      * @param request
      * @return Map<String, String>
      */
-    private static Map<String, String> collectRequestParams(Collection<ReportParam> params,
-            HttpServletRequest request) {
+    private static Map<String, String> collectRequestParams(Collection<ReportParam> params, 
+        HttpServletRequest request) {
         Map<String, String> rs = Maps.newHashMap();
         request.getParameterMap().forEach((k, v) -> {
             rs.put(k, v[0]);
@@ -923,7 +873,7 @@ public final class QueryUtils {
      * @return List<Map<String, String>>
      */
     public static List<Map<String, String>> getMembersWithChildrenValue(List<Member> members,
-            Cube cube, DataSourceInfo dataSource, Map<String, String> params) {
+        Cube cube, DataSourceInfo dataSource, Map<String, String> params) {
         List<Map<String, String>> rs = Lists.newArrayList();
         if (members == null || members.isEmpty()) {
             return rs;

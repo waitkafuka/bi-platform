@@ -109,23 +109,8 @@ public class QueryRequestBuilder {
             expressions = new HashMap<String, Expression>();
         }
         if (CollectionUtils.isNotEmpty(nodeTrees)) {
-//            if(nodeTrees.get(0).isTime() && nodeTrees.size() > 1) {
-//                int size = nodeTrees.size();
-//                Collections.sort (nodeTrees);
-//                request.getWhere().setBetween(new Between());
-//                request.getWhere().getBetween().setProperties(nodeTrees.get(0).getQuerySource());
-//                request.getWhere().getBetween().setStart(nodeTrees.get(0).getName());
-//                request.getWhere().getBetween().setEnd(nodeTrees.get(size - 1).getName());
-//            }
             for (MemberNodeTree node : nodeTrees) {
                 if (StringUtils.isNotBlank(node.getQuerySource()) && !MetaNameUtil.isAllMemberName(node.getName())) {
-//                    if(node.isTime() && node.getChildren().size() > 1) {
-//                         request.getWhere().setBetween(new Between());
-//                         request.getWhere().getBetween().setProperties(node.getQuerySource());
-//                        int size = node.getChildren().size(); 
-//                        request.getWhere().getBetween().setStart(node.getChildren().get(0).getName());
-//                        request.getWhere().getBetween().setEnd(node.getChildren().get(size - 1).getName());
-//                    }
                     request.selectAndGroupBy(node.getQuerySource());
                     Expression expression = expressions.get(node.getQuerySource());
                     if (expression == null) {
@@ -164,12 +149,6 @@ public class QueryRequestBuilder {
                     }
                     
                     request.getWhere ().getAndList ().add (e);
-//                    request.getWhere().setBetween(new Between());
-//                    request.getWhere().getBetween().setProperties(node.getQuerySource());
-//                    SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
-//                    request.getWhere().getBetween().setEnd(sf.format (cal.getTime ()));
-//                    cal.add (Calendar.MONTH, -1);
-//                    request.getWhere().getBetween().setStart (sf.format (cal.getTime ()));
                 } 
                 if (CollectionUtils.isNotEmpty(node.getChildren())) {
                     buildSelectAndGroupBy(node.getChildren(), request, expressions);

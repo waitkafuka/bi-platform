@@ -75,6 +75,9 @@ public final class MeasureClassfyMetaUtils {
      * @return
      */
     public static List<MeasureClassfyObject> getLeafMeasureMeta(MeasureClassfyObject meta) {
+        if (meta == null) {
+            throw new IllegalArgumentException ("meta 为空");
+        }
         List<MeasureClassfyObject> rs = Lists.newArrayList ();
         if (CollectionUtils.isEmpty (meta.getChildren ())) {
             rs.add (meta);
