@@ -43,7 +43,8 @@ public class MeasuerClassfyServiceTest {
             + "SECOND_CLASS_TYPE varchar(20),"
             + "SECOND_CLASS_TYPE_NAME varchar(20),"
             + "THIRD_CLASS_TYPE varchar(20),"
-            + "THIRD_CLASS_TYPE_NAME varchar(20)"
+            + "THIRD_CLASS_TYPE_NAME varchar(20),"
+            + "SELECTED_OPERATION_TYPE varchar(2)"
             + ")";
     
     /**
@@ -55,11 +56,11 @@ public class MeasuerClassfyServiceTest {
      * insert sql
      */
     private final String insertSql = "insert into FACT_TAB_COL_META_CLASS"
-            + " values ('1', 'test', '11', 'test11', '111', 'test111'),"
-            + " ('1', 'test', '12', 'test12', '121', 'test121'),"
-            + " ('1', 'test', '11', 'test11', '112', 'test112'),"
-            + " ('1', 'test', '12', 'test12', '122', 'test122'),"
-            + " ('2', 'test', '21', 'test21', '211', 'test211');";
+            + " values ('1', 'test', '11', 'test11', '111', 'test111', '0'),"
+            + " ('1', 'test', '12', 'test12', '121', 'test121', '0'),"
+            + " ('1', 'test', '11', 'test11', '112', 'test112', '0'),"
+            + " ('1', 'test', '12', 'test12', '122', 'test122', '0'),"
+            + " ('2', 'test', '21', 'test21', '211', 'test211', '1');";
     
     
     @Before
