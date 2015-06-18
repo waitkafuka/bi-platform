@@ -849,12 +849,6 @@ $namespace('di.shared.ui');
             options,
             this.$di('getEvent')
         );
-        this.$sync(
-            this.getModel(),
-            'DATA',
-            options,
-            this.$di('getEvent')
-        );
     };
 
 })();
