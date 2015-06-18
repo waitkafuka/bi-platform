@@ -840,6 +840,15 @@ $namespace('di.shared.ui');
         );
     };
     DI_TABLE_CLASS.$handleRichSelectChangeSuccess = function (data, ejsonObj, options) {
+    	options = {};
+        options.componentId = this.$di('getId').split('.')[1];
+        // 请求后台
+        this.$sync(
+            this.getModel(),
+            'DATA',
+            options,
+            this.$di('getEvent')
+        );
         this.$sync(
             this.getModel(),
             'DATA',
