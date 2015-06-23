@@ -22,7 +22,7 @@ define(['template'], function (template) {
         $out+='</option>\n                    ';
         });
         $out+='\n                </select>\n                <span type="button" class="form-common-input-button j-next ';
-        if(!ß$column.selectedTable){
+        if(!$column.selectedTable){
         $out+='hide';
         }
         $out+='">设置参数</span>\n            </div>\n            ';

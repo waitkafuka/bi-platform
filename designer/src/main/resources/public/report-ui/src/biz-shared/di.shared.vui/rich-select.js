@@ -53,7 +53,7 @@ $namespace('di.shared.vui');
 
     RICH_SELECT_CLASS.init = function () {
 
-    },
+    };
 
     /**
      * 渲染控件

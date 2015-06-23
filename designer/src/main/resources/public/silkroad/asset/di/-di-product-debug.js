@@ -79,7 +79,6 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/ecui/src-ext/droppable-list.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xui-ui/xui-ui.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/echarts/echarts-plain-map.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/richselect/richselect.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xui-ui/e-chart.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/ajax.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/dict.js" type="text/javascript"><\/script>' );
@@ -95,7 +94,6 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/cascade-select.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/echart-topn.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/fields-filter.js" type="text/javascript"><\/script>' );
-    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rich-select.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/hidden-input.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/multi-checkbox.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/offline-download.js" type="text/javascript"><\/script>' );
@@ -108,6 +106,8 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/esui-range-calendar.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/kalendae.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/range-calendar.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/richselect/richselect.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rich-select.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rptsave-save.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rptsave-tab.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/simple-radio.js" type="text/javascript"><\/script>' );

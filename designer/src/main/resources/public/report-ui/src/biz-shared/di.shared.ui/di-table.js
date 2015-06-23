@@ -548,7 +548,7 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_TABLE_CLASS.$handleLinkBridge = function (colDefItem, rowDefItem) {
-        var address = 'report/' + this.reportId + '/linkBridge/extend_area/' + this.$di('getId').split('.')[1];
+        var address = 'reports/' + this.reportId + '/linkBridge/extend_area/' + this.$di('getId').split('.')[1];
         var oForm = document.createElement('form');
         document.body.appendChild(oForm);
         oForm.type = "hidden";
@@ -845,17 +845,6 @@ $namespace('di.shared.ui');
             }
         );
     };
-<<<<<<< .mine
-    DI_TABLE_CLASS.$handleRichSelectChangeSuccess = function (data, ejsonObj, options) {
-       options.componentId = this.$di('getId').split('.')[1];
-       this.$sync(
-            this.getModel(),
-            'DATA',
-            options,
-            this.$di('getEvent')
-        );
-    };
-=======
     DI_TABLE_CLASS.$handleRichSelectChangeSuccess = function (data, ejsonObj, options) {
         options = {};
         options.componentId = this.$di('getId').split('.')[1];
@@ -866,6 +855,5 @@ $namespace('di.shared.ui');
             this.$di('getEvent')
         );
     };
->>>>>>> .r344390
 
 })();

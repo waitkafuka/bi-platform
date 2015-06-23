@@ -30,28 +30,28 @@ define(['url'], function (Url) {
                     success(data.data);
                 }
             });
-//            var data = {
-//                "columnDefine": [
-//                    {"text": "文本1", "value": "text1", "selectedTable": "table1"},
-//                    {"text": "文本2", "value": "text2", "selectedTable": "table2"},
-//                    {"text": "文本3", "value": "text3", "selectedTable": "table3"}
-//                ],
-//                "planeTableList": [
-//                    {
-//                        "text": "表1",
-//                        "value": "table1"
-//                    },
-//                    {
-//                        "text": "表2",
-//                        "value": "table2"
-//                    },
-//                    {
-//                        "text": "表3",
-//                        "value": "table3"
-//                    }
-//                ]
-//            };
-//            success(data);
+            //var data = {
+            //    "columnDefine": [
+            //        {"text": "文本1", "value": "text1", "selectedTable": "table1"},
+            //        {"text": "文本2", "value": "text2", "selectedTable": "table2"},
+            //        {"text": "文本3", "value": "text3", "selectedTable": "table3"}
+            //    ],
+            //    "planeTableList": [
+            //        {
+            //            "text": "表1",
+            //            "value": "table1"
+            //        },
+            //        {
+            //            "text": "表2",
+            //            "value": "table2"
+            //        },
+            //        {
+            //            "text": "表3",
+            //            "value": "table3"
+            //        }
+            //    ]
+            //};
+            //success(data);
         },
 
         /**

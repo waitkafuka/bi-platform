@@ -343,6 +343,8 @@
         { "filePath": "<%= prop.dirInnerVUI %>/simple-radio.js", "depends": [] },
         { "filePath": "<%= prop.dirInnerVUI %>/range-calendar.js", "depends": ["<%= prop.dirSrcCore %>/rangecalendar/esui-range-calendar.js", "<%= prop.dirSrcCore %>/rangecalendar/kalendae.js"] },
         { "filePath": "<%= prop.dirInnerVUI %>/cascade-select.js", "depends": ["<%= prop.dirSrcCore %>/dropkick/dropkick.js"] },
+        { "filePath": "<%= prop.dirInnerVUI %>/rich-select.js", "depends": ["<%= prop.dirSrcCore %>/richselect/richselect.js"] },
+
         // ecui core （包含了全部）
         { "filePath": "<%= prop.dirECUICore %>/items.js", "depends": ["ecuiBaseJS"] },
         { "filePath": "<%= prop.dirECUICore %>/month-view.js", "depends": ["ecuiBaseJS"] },

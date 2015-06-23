@@ -21,7 +21,7 @@ define(['template'], function (template) {
         });
         $out+='\r\n</ul>\r\n<div class="con-set-group j-root-set-group">\r\n    <span class="btn-has-icon btn-has-icon-info c-p j-set-group">添加分表匹配规则</span>\r\n    <span class="cor-red">（注意：同一规则只需提供一张表）</span>\r\n    ';
         $each(regexps,function($itemReg,index){
-        $out+='\r\n    <div class="form-common-line j-item">\r\n        <div class="form-common-text form-common-text-big">\r\n            <select class="form-common-select-small w-100 mt-1 j-select-table">\r\n                ';
+        $out+='\r\n    <div class="form-common-line j-item">\r\n        <div class="form-common-text form-common-text-xl">\r\n            <select class="form-common-select-small w-100 mt-1 j-select-table">\r\n                ';
         $each(factTables,function($item,$index){
         $out+='\r\n                    ';
         if($item.selected){

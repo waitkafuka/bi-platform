@@ -106,6 +106,8 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/esui-range-calendar.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/rangecalendar/kalendae.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/range-calendar.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/richselect/richselect.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rich-select.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rptsave-save.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/rptsave-tab.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.shared.vui/simple-radio.js" type="text/javascript"><\/script>' );

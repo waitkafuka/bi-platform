@@ -884,18 +884,18 @@ define([
                     that.selectSetAll(checked, allName, compId);
                 }
                 if (compType === 'PLANE_TABLE' && $acceptUi.attr('data-axis-type') === 's') {
-                    var $yItems = $('.j-line-y').find('.item');
-                    var hasSameItem = false;
-                    $yItems.each(function () {
-                        if ($(this).attr('data-id') === itemId) {
-                            hasSameItem = true;
-                        }
-                    });
-                    if (!hasSameItem) {
-                        // TODO:修改提示信息
-                        alert('列轴没有此项');
-                        return;
-                    }
+                    //var $yItems = $('.j-line-y').find('.item');
+                    //var hasSameItem = false;
+                    //$yItems.each(function () {
+                    //    if ($(this).attr('data-id') === itemId) {
+                    //        hasSameItem = true;
+                    //    }
+                    //});
+                    //if (!hasSameItem) {
+                    //    // TODO:修改提示信息
+                    //    alert('列轴没有此项');
+                    //    return;
+                    //}
                 }
                 if ($.isInArray(compType, Constant.DRAG_SINGLE_DIM)) {
                     if ($('.data-axis-line .item').length >= 1) {
@@ -1749,23 +1749,30 @@ define([
 
                     that.model.saveFilterBlankLine(compId, data, function () {
                         $dialog.dialog('close');
-                        // TODO:是否显示下拉框
+
+                        var $table = $($('.active').children()[0]);
+                        var $reportVm = that.model.get('canvasModel').$reportVm;
+                        var tableBox = $reportVm.find('.j-component-item').filter('[data-comp-id=' + compId + ']');
+                        var entityDefs = that.model.get('canvasModel').reportJson.entityDefs;
+
                         // 1.移除vm  2.移除json 3.重设表格高度
                         if (data.canChangedMeasure === 'false') {
-                            var $table = $($('.active').children()[0]);
+                            // 获取到table中rich-select容器，并移除掉
                             var richSelect = $($table.children()[0]).children()[0];
                             var richSelectId = $(richSelect).attr('data-o_o-di');
-                            if (richSelectId.indexOf('rich-select') > 0) {
+
+                            if (richSelectId.indexOf('rich-select') < 0) {
                                 return;
                             }
                             $table.children()[0].remove();
-                            var $reportVm = that.model.get('canvasModel').$reportVm;
-                            var tableBox = $reportVm.find('.j-component-item').filter('[data-comp-id=' + compId + ']');
+
+                            // 移除掉$reportVm中的 rich-select容器，移除掉
                             tableBox.height(tableBox.height() - 30);
                             $table = $($(tableBox).children()[0]);
                             $table.children()[0].remove();
 
-                            var entityDefs = that.model.get('canvasModel').reportJson.entityDefs;
+                            var compEntity = $.getTargetElement(compId, entityDefs);
+                            delete compEntity.vuiRef.richSelect;
                             var index = 0;
                             for (var i = 0, iLen = entityDefs.length; i < iLen; i ++) {
                                 if (entityDefs[i].id === richSelectId) {
@@ -1773,13 +1780,38 @@ define([
                                     break;
                                 }
                             }
+
                             if (index) {
                                 that.model.get('canvasModel').reportJson.entityDefs = entityDefs.slice(0, index - 1).concat(entityDefs.slice(index));
                             }
 
                         }
                         else {
-                            var html = []
+                            var richSelect = $($table.children()[0]).children()[0];
+                            var richSelectId = $(richSelect).attr('data-o_o-di');
+
+                            if (richSelectId.indexOf('rich-select') > 0) {
+                                return;
+                            }
+                            richSelectId = 'snpt.' + compId + '-vu-table-rich-select';
+                            var html = [
+                                '<div class="di-o_o-line">',
+                                    '<div class="" data-o_o-di="', richSelectId, '"></div>',
+                                '</div>'
+                            ].join('');
+
+                            var json = {
+                                clzType: 'VUI',
+                                clzKey: 'RICH_SELECT',
+                                id: richSelectId,
+                                compId: compId
+                            };
+                            $table.prepend(html);
+                            $table = $($(tableBox).children()[0]);
+                            $table.prepend(html);
+                            that.model.get('canvasModel').reportJson.entityDefs.push(json);
+                            var compEntity = $.getTargetElement(compId, entityDefs);
+                            compEntity.vuiRef.richSelect = richSelectId;
                         }
                         that.canvasView.model.saveJsonVm(
                             function () {
@@ -1788,6 +1820,8 @@ define([
                         );
 
                     });
+
+
                 }
             },
 
