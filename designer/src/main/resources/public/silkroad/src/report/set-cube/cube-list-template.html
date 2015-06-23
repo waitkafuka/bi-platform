@@ -10,7 +10,7 @@
 <div class="con-set-group j-root-set-group">
     <span class="btn-has-icon btn-has-icon-info c-p j-set-group">添加分表匹配规则</span>
     <span class="cor-red">（注意：同一规则只需提供一张表）</span>
-    {{each regx as $itemReg index}}
+    {{each regexps as $itemReg index}}
     <div class="form-common-line j-item">
         <div class="form-common-text form-common-text-big">
             <select class="form-common-select-small w-100 mt-1 j-select-table">
@@ -21,12 +21,12 @@
                 {{/each}}
             </select>
             <select class="form-common-select-small w-100 mt-1 j-select-area-date">
-                {{each separateTableRuleData as $item}}
-                <option value="{{$item.value}}" {{if $itemReg.type===$item.value}}selected=selected{{/if}}>{{$item.text}}</option>
+                {{each separateTableRuleData as $item sepIndex}}
+                <option value="{{$item.value}}" {{if $itemReg.type===sepIndex}}selected=selected{{/if}}>{{$item.text}}</option>
                 {{/each}}
             </select>
             <select class="form-common-select-small w-100 mt-1 j-select-area-date-children">
-                {{each separateTableRuleData[$itemReg.condition].children as $item}}
+                {{each separateTableRuleData[$itemReg.type].children as $item}}
                 <option value="{{$item.value}}" {{if $itemReg.condition===$item.value}}selected="selected"{{/if}}>{{$item.text}}</option>
                 {{/each}}
             </select>

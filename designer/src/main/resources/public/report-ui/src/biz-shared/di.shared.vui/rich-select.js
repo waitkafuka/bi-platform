@@ -48,6 +48,7 @@ $namespace('di.shared.vui');
      */
     function constructor(options) {
         this._eMain = options.el;
+        this.$renderFlag = false;
     };
 
     RICH_SELECT_CLASS.init = function () {
@@ -64,9 +65,14 @@ $namespace('di.shared.vui');
     RICH_SELECT_CLASS.render = function (data) {
         var el = this._eMain;
         var that = this;
-        $(el).screenXingWeiZhiBiao({data: data, clickCallback: function(param){
-            that.notify('richSelectChange', param);
-        }});
+
+        if (!that.$renderFlag) {
+            $(el).screenXingWeiZhiBiao({data: data, clickCallback: function(param){
+                that.notify('richSelectChange', param);
+            }});
+            that.$renderFlag = true;
+        }
+
     };
 
 

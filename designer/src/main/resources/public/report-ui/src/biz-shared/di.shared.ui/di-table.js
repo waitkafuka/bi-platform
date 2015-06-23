@@ -300,7 +300,7 @@ $namespace('di.shared.ui');
             return;
         }
         this.$di('getEl').style.display = '';
-
+        this.reportId = ejsonObj.data.reportTemplateId;
         foreachDo(
             [
                 this._uTable,
@@ -548,17 +548,23 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_TABLE_CLASS.$handleLinkBridge = function (colDefItem, rowDefItem) {
+        var address = 'report/' + this.reportId + '/linkBridge/extend_area/' + this.$di('getId').split('.')[1];
         var oForm = document.createElement('form');
         document.body.appendChild(oForm);
         oForm.type = "hidden";
         oForm.method = "post";
         oForm.target = "_blank";
-        oForm.action = colDefItem.linkBridge;
+        oForm.action = address;
 
-        var param = document.createElement("input");
-        param.value = this.$di('getId').split('.')[1];
-        param.name = "reportId";
-        oForm.appendChild(param);
+        var uniqueNameParam = document.createElement("input");
+        uniqueNameParam.value = rowDefItem.uniqueName;
+        uniqueNameParam.name = "uniqueName";
+        oForm.appendChild(uniqueNameParam);
+
+        var meaureParam = document.createElement("input");
+        meaureParam.value = colDefItem.linkBridge;
+        meaureParam.name = "measureId";
+        oForm.appendChild(meaureParam);
         oForm.submit();
 
         document.body.removeChild(oForm);
@@ -840,9 +846,8 @@ $namespace('di.shared.ui');
         );
     };
     DI_TABLE_CLASS.$handleRichSelectChangeSuccess = function (data, ejsonObj, options) {
-    	options = {};
+        options = {};
         options.componentId = this.$di('getId').split('.')[1];
-        // 请求后台
         this.$sync(
             this.getModel(),
             'DATA',

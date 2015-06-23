@@ -132,7 +132,7 @@
 }
 .ui-table-cell-link {
     color: #0F7DD2;
-    text-decoration: none;
+    text-decoration: underline;
 }
 .ui-table-hcell-empty {
     width: 840px;

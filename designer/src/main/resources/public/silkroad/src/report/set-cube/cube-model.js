@@ -122,29 +122,55 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
             var that = this;
             var factTableList = {};
 
-            $.ajax({
-                url: Url.loadReportFactTableList(that.id),
-                success: function (data) {
-                    factTableList.prefixs = data.data.prefixs;
-                    factTableList.regx = data.data.regx;
-                    factTableList.factTables = that._mergeFactTablesList(
-                        dsFactTablesList,
-                        data.data.selected
-                    );
-                    // 为了始终触发数据重新渲染
-                    that.set(
-                        { 'factTableList': factTableList }
-                        //{ 'silent': true } // 阻止change事件
-                    );
+            //$.ajax({
+            //    url: Url.loadReportFactTableList(that.id),
+            //    success: function (data) {
+            //        factTableList.prefixs = data.data.prefixs;
+            //        factTableList.regx = data.data.regx;
+            //        factTableList.factTables = that._mergeFactTablesList(
+            //            dsFactTablesList,
+            //            data.data.selected
+            //        );
+            //        // 为了始终触发数据重新渲染
+            //        that.set(
+            //            { 'factTableList': factTableList }
+            //            //{ 'silent': true } // 阻止change事件
+            //        );
+            //
+            //        // 修改日期 11.7
+            //        //that.trigger(
+            //        //    'change:factTableList',
+            //        //    that,
+            //        //    factTableList
+            //        //);
+            //    }
+            //});
 
-                    // 修改日期 11.7
-                    //that.trigger(
-                    //    'change:factTableList',
-                    //    that,
-                    //    factTableList
-                    //);
-                }
-            });
+            factTableList = {
+                regexps:{
+                    FACT_TAB_COL_META_CLASS: {
+                        type: 'time',
+                        condition: 'yyyy',
+                        prefix: 'testYYYy1'
+                    },
+                    fact_tab: {
+                        type: 'dist',
+                        condition: 'city',
+                        prefix: 'testPre1'
+                    }
+                },
+                factTables:[
+                    {name:"FACT_TAB_COL_META_CLASS","id":"FACT_TAB_COL_META_CLASS","comment":"","dbName":null, "selected": true},
+                    {name:"dim_1","id":"dim_1","comment":"","dbName":null},
+                    {name:"fact_tab","id":"fact_tab","comment":"","dbName":null,"selected":true}
+                ]
+            };
+
+            // 为了始终触发数据重新渲染
+            that.set(
+                { 'factTableList': factTableList }
+                //{ 'silent': true } // 阻止change事件
+            );
         },
 
         /**

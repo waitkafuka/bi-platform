@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,componentList=$data.componentList,group=$data.group,$index=$data.$index,$escape=$utils.$escape,item=$data.item,$out='';$out+='<div class="con-component-box j-con-component-box">\r\n\r\n    <!--<select id="component-group-selector">-->\r\n        <!--';

@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,url=$data.url,type=$data.type,$out='';$out+='<div class="con-releaseBox">\r\n    <div class="con-head">\r\n        <a href="';

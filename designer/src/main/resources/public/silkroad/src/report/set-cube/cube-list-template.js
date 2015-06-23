@@ -1,8 +1,9 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,factTables=$data.factTables,$each=$utils.$each,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,regx=$data.regx,$itemReg=$data.$itemReg,index=$data.index,separateTableRuleData=$data.separateTableRuleData,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n';
+        var $utils=template.utils,$helpers=$utils.$helpers,factTables=$data.factTables,$each=$utils.$each,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,regexps=$data.regexps,$itemReg=$data.$itemReg,index=$data.index,separateTableRuleData=$data.separateTableRuleData,sepIndex=$data.sepIndex,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n';
         if(factTables.length==0){
         $out+='\r\n    <div class="empty-data ta-c">暂无数据表</div>\r\n';
         }else{
@@ -19,7 +20,7 @@ define(['template'], function (template) {
         $out+='</li>\r\n    ';
         });
         $out+='\r\n</ul>\r\n<div class="con-set-group j-root-set-group">\r\n    <span class="btn-has-icon btn-has-icon-info c-p j-set-group">添加分表匹配规则</span>\r\n    <span class="cor-red">（注意：同一规则只需提供一张表）</span>\r\n    ';
-        $each(regx,function($itemReg,index){
+        $each(regexps,function($itemReg,index){
         $out+='\r\n    <div class="form-common-line j-item">\r\n        <div class="form-common-text form-common-text-big">\r\n            <select class="form-common-select-small w-100 mt-1 j-select-table">\r\n                ';
         $each(factTables,function($item,$index){
         $out+='\r\n                    ';
@@ -37,11 +38,11 @@ define(['template'], function (template) {
         $out+='\r\n                ';
         });
         $out+='\r\n            </select>\r\n            <select class="form-common-select-small w-100 mt-1 j-select-area-date">\r\n                ';
-        $each(separateTableRuleData,function($item,$index){
+        $each(separateTableRuleData,function($item,sepIndex){
         $out+='\r\n                <option value="';
         $out+=$escape($item.value);
         $out+='" ';
-        if($itemReg.type===$item.value){
+        if($itemReg.type===sepIndex){
         $out+='selected=selected';
         }
         $out+='>';
@@ -49,7 +50,7 @@ define(['template'], function (template) {
         $out+='</option>\r\n                ';
         });
         $out+='\r\n            </select>\r\n            <select class="form-common-select-small w-100 mt-1 j-select-area-date-children">\r\n                ';
-        $each(separateTableRuleData[$itemReg.condition].children,function($item,$index){
+        $each(separateTableRuleData[$itemReg.type].children,function($item,$index){
         $out+='\r\n                <option value="';
         $out+=$escape($item.value);
         $out+='" ';

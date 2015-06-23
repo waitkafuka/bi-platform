@@ -2,13 +2,18 @@
 <div class="data-format">
     <div class="data-format-alone">
         <div class="data-format-black">
-            <span>是否过滤空白行：</span>
             <input type="checkbox"
-            {{if $data.dataFormat.value == "false" }}
+                   {{if $data.dataFormat.value == "false" }}
 
             {{else}}
-                checked="checked"
+            checked="checked"
             {{/if}} />
+            <span>是否过滤空白行</span>
+        </div>
+        <div class="data-format-black">
+            <input type="checkbox" {{if $data.canChangedMeasure && $data.canChangedMeasure.value == "true"}}
+            checked="checked" {{/if}} />
+            <span>是否显示富文本下拉框</span>
         </div>
     </div>
 </div>

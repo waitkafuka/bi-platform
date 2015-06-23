@@ -26,7 +26,8 @@ define(
         //------------------------------------------
         var View = Backbone.View.extend({
             events: {
-                'click .j-set-link': 'dialogLinkSetting'
+                'click .j-set-link': 'dialogLinkSetting',
+                'change .j-table-link-set-plane-table': 'showSetParamBtn'
             },
 
             //------------------------------------------
@@ -88,6 +89,17 @@ define(
                     that.saveParamRelation();
                 });
             },
+
+            showSetParamBtn: function (event) {
+                var $target = $(event.target);
+                if (!$target.val()) {
+                    $target.next().hide();
+                }
+                else {
+                    $target.next().show();
+                }
+            },
+
             /**
              * 显示参数设置
              *

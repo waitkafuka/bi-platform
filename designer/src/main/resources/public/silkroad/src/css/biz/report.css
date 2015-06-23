@@ -640,8 +640,9 @@
     float: left;
 }
 .data-format-black {
-    text-align: center;
-    margin: 0 auto;
+    /*text-align: center;*/
+    /*margin: 0 auto;*/
+    margin: 0 0 10px 50px;
 }
 /*@end*/
 

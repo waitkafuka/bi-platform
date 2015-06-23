@@ -1731,17 +1731,62 @@ define([
                  * 保存数据格式
                  */
                 function saveFilterBlankLine($dialog) {
-                    var $check = $('.data-format-black').find('input').eq(0);
+                    var $checks = $('.data-format-black').find('input');
                     var data = {};
-                    if ($check.is(':checked')) {
+                    if ($($checks[0]).is(':checked')) {
                         data.filterBlank = "true";
                     }
                     else {
                         data.filterBlank = "false";
                     }
+
+                    if ($($checks[1]).is(':checked')) {
+                        data.canChangedMeasure = "true";
+                    }
+                    else {
+                        data.canChangedMeasure = "false";
+                    }
+
                     that.model.saveFilterBlankLine(compId, data, function () {
                         $dialog.dialog('close');
-                        that.canvasView.showReport();
+                        // TODO:是否显示下拉框
+                        // 1.移除vm  2.移除json 3.重设表格高度
+                        if (data.canChangedMeasure === 'false') {
+                            var $table = $($('.active').children()[0]);
+                            var richSelect = $($table.children()[0]).children()[0];
+                            var richSelectId = $(richSelect).attr('data-o_o-di');
+                            if (richSelectId.indexOf('rich-select') > 0) {
+                                return;
+                            }
+                            $table.children()[0].remove();
+                            var $reportVm = that.model.get('canvasModel').$reportVm;
+                            var tableBox = $reportVm.find('.j-component-item').filter('[data-comp-id=' + compId + ']');
+                            tableBox.height(tableBox.height() - 30);
+                            $table = $($(tableBox).children()[0]);
+                            $table.children()[0].remove();
+
+                            var entityDefs = that.model.get('canvasModel').reportJson.entityDefs;
+                            var index = 0;
+                            for (var i = 0, iLen = entityDefs.length; i < iLen; i ++) {
+                                if (entityDefs[i].id === richSelectId) {
+                                    index = i + 1;
+                                    break;
+                                }
+                            }
+                            if (index) {
+                                that.model.get('canvasModel').reportJson.entityDefs = entityDefs.slice(0, index - 1).concat(entityDefs.slice(index));
+                            }
+
+                        }
+                        else {
+                            var html = []
+                        }
+                        that.canvasView.model.saveJsonVm(
+                            function () {
+                                that.canvasView.showReport();
+                            }
+                        );
+
                     });
                 }
             },

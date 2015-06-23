@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,measureId=$data.measureId,$each=$utils.$each,indList=$data.indList,$ind=$data.$ind,$index=$data.$index,$escape=$utils.$escape,topTypeList=$data.topTypeList,$option=$data.$option,key=$data.key,topType=$data.topType,recordSize=$data.recordSize,$out='';$out+='<!--\r\n数据例子：\r\nvar demoData = {\r\n    measureId: \'\',\r\n    reocrdSize: \'\',\r\n    topType: \'\',\r\n    indList: [\r\n\r\n    ],\r\n    topTypeList: {\r\n        desc: bottom,\r\n        asc: top,\r\n        none: none\r\n    }\r\n};\r\n-->\r\n<div class="topn-indlist">\r\n    <div class="topn-indlist-item">\r\n        <span>指标选择：</span>\r\n        <select name="measureId">\r\n            <option value=""\r\n            ';

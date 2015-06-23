@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,oriInd=$data.oriInd,$value=$data.$value,$index=$data.$index,$escape=$utils.$escape,oriDim=$data.oriDim,$out='';$out+='<div class="data-sources-setting data-sources-set-show-data">\r\n    <div class="j-oriInd">\r\n        <div class="title">指标</div>\r\n        ';
