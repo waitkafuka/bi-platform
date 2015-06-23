@@ -78,7 +78,7 @@ public class JdbcDataModelUtil {
         List<Map<String, Object>> rowBasedList = jdbcHandler.queryForList(
                 sqlExpression, dataSourceInfo);
         // getAll columns from Cube
-        HashMap<String, SqlColumn> allColums = QuestionModel4TableDataUtils
+        Map<String, SqlColumn> allColums = QuestionModel4TableDataUtils
                 .getAllCubeColumns(questionModel, configQuestionModel.getCube());
 
         // get need columns from AxisMetas

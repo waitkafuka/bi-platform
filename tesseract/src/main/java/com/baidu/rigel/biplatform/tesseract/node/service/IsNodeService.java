@@ -87,15 +87,7 @@ public interface IsNodeService {
      */
     boolean saveOrUpdateNodeInfo(Node node);
     
-    /**
-     * 
-     * getAvailableNodeListByClusterName 给定集群名称获得当前存活的节点列表
-     * 
-     * @param clusterName
-     *            集群名称
-     * @return List<Node> List<Node>
-     */
-    List<Node> getAvailableNodeListByClusterName(String clusterName);
+
     
     /**
      * 
@@ -108,15 +100,6 @@ public interface IsNodeService {
      */
     List<Node> getAvailableNodeListByIndexShard(IndexShard idxShard, String clusterName);
     
-    /**
-     * 
-     * getFreeSearchNodeByIndexShard 获取当前索引分片下空闲的查询节点
-     * 
-     * @param idxShard
-     * @param clusterName
-     * @return Node
-     */
-    Node getFreeSearchNodeByIndexShard(IndexShard idxShard, String clusterName);
     
     /**
      * 

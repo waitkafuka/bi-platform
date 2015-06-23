@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
@@ -61,6 +62,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
+import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportModelQueryService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -109,6 +111,11 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      */
     @Resource
     private OlapLinkService olapLinkService;
+    /**
+     * reportDesignModelService
+     */
+    @Resource
+    private ReportDesignModelService reportDesignModelService;
 
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/dimAndInds", method = RequestMethod.POST)
     public ResponseResult getAllDimAndMeasuers(@PathVariable("reportId") String reportId,
@@ -575,16 +582,29 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         Map<String, LinkParams> linkBridgeParams = this.olapLinkService.buildLinkBridgeParams(linkInfo, conditionMap);
         reportRuntimeModel.getContext().getParams().put("linkBridgeParams", linkBridgeParams);
 
-        // String reportPreviewFlag= request.getParameter("reportPreview");
-
-        // TODO reportPreview需要前端传入，以确保预览和查看发布的报表相分离
-        attr.addAttribute("reportPreview", true);
         attr.addAttribute("fromReportId", reportId);
         attr.addAttribute("toReportId", planeTableId);
-        attr.addAttribute("token", "token");
-        attr.addAttribute("_rbk", ContextManager.getProductLine());
-
         ModelAndView mav = new ModelAndView("redirect:/silkroad/reports/" + planeTableId + "/report_vm");
+        ReportDesignModel planeTableModel = null;
+        try {
+            attr.addAttribute("token",
+                    AesUtil.getInstance().encryptAndUrlEncoding(ContextManager.getProductLine(), securityKey));
+            attr.addAttribute("_rbk", ContextManager.getProductLine());
+            // 先从已发布的报表中寻找
+            planeTableModel = reportDesignModelService.getModelByIdOrName(planeTableId, true);
+            // 如果从已发布当中找不到，则直接报错
+            if (planeTableModel == null) {
+                throw new RuntimeException("no planetable exist the report id is : " + planeTableId);
+            }
+            // 将平面表的设计态模型放入cache中
+            reportModelCacheManager.updateReportModelToCache(planeTableId, planeTableModel);
+            // 将多维表的运行态模型放入cache中
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, reportRuntimeModel);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            mav = new ModelAndView("redirect:/silkroad/error");
+        }
+
         return mav;
     }
 

@@ -53,10 +53,10 @@ public class QueryPluginFactory {
      */
     public QueryPlugin getPlugin(String queryPluginEnum) {
         switch (queryPluginEnum) {
-        case "TESSERACT":
-            return queryTessractPlugin;
-        case "SQL":
-            return querySqlPlugin;
+            case "TESSERACT":
+                return queryTessractPlugin;
+            case "SQL":
+                return querySqlPlugin;
         }
         return null;
     }

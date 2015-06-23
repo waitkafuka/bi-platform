@@ -15,8 +15,8 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class JdbcQuestionModelUtil {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         MiniCube cube = (MiniCube) configQuestionModel.getCube();
         questionModel.setUseIndex(false);
-        HashMap<String, SqlColumn> allColums = QuestionModel4TableDataUtils
+        Map<String, SqlColumn> allColums = QuestionModel4TableDataUtils
                 .getAllCubeColumns(questionModel, configQuestionModel.getCube());
         List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(allColums,
                 configQuestionModel.getAxisMetas(), cube);

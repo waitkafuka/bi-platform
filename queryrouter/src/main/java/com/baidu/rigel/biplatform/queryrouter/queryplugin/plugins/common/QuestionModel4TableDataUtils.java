@@ -64,12 +64,6 @@ public class QuestionModel4TableDataUtils {
         // 获取指标元数据
         axisMetaMeasures.getCrossjoinDims().forEach(
                 (dimName) -> {
-                    Dimension dimension = cube.getDimensions().get(dimName);
-                    if (QuestionModel4TableDataUtils
-                            .isTimeOrCallbackDimension(dimension)) {
-                        // 如果为时间维度，转换成事实表的时间字段
-                        dimName = dimension.getFacttableColumn();
-                    }
                     needColumns.add(allColums.get(dimName));
                 });
 
@@ -77,12 +71,6 @@ public class QuestionModel4TableDataUtils {
         AxisMeta axisMetaDims = (AxisMeta) axisMetas.get(AxisType.ROW);
         axisMetaDims.getCrossjoinDims().forEach(
                 (dimName) -> {
-                    Dimension dimension = cube.getDimensions().get(dimName);
-                    if (QuestionModel4TableDataUtils
-                            .isTimeOrCallbackDimension(dimension)) {
-                        // 如果为时间维度，转换成事实表的时间字段
-                        dimName = dimension.getFacttableColumn();
-                    }
                     needColumns.add(allColums.get(dimName));
                 });
         return new ArrayList<SqlColumn>(needColumns);
@@ -125,17 +113,19 @@ public class QuestionModel4TableDataUtils {
                         (k, v) -> {
                             Level oneDimensionSource = (Level) v.getLevels()
                                     .values().toArray()[0];
-                            String dimensionName = k;
+                            allColumns.put(k, new SqlColumn());
+                            SqlColumn oneDimensionTarget = allColumns.get(k);
+                            String name = k;
                             String tableFieldName = oneDimensionSource
                                     .getName();
                             Dimension dimension = cube.getDimensions().get(
-                                    dimensionName);
+                                    name);
                             String tableName = null;
                             String sourceTableName = null;
                             if (QuestionModel4TableDataUtils
                                     .isTimeOrCallbackDimension(dimension)) {
                                 // 如果为时间维度，转换成事实表的时间字段
-                                dimensionName = oneDimensionSource
+                                name = oneDimensionSource
                                         .getFactTableColumn();
                                 tableFieldName = oneDimensionSource
                                         .getFactTableColumn();
@@ -146,10 +136,7 @@ public class QuestionModel4TableDataUtils {
                                 tableName = oneDimensionSource.getDimTable();
                                 sourceTableName = tableName;
                             }
-                            allColumns.put(dimensionName, new SqlColumn());
-                            SqlColumn oneDimensionTarget = allColumns
-                                    .get(dimensionName);
-                            oneDimensionTarget.setName(dimensionName);
+                            oneDimensionTarget.setName(name);
                             oneDimensionTarget
                                     .setTableFieldName(tableFieldName);
                             oneDimensionTarget.setCaption(oneDimensionSource
@@ -159,8 +146,7 @@ public class QuestionModel4TableDataUtils {
                             oneDimensionTarget.setType(AxisType.ROW);
                             oneDimensionTarget.setDimension(v);
                             oneDimensionTarget.setLevel(oneDimensionSource);
-                            oneDimensionTarget.setSqlUniqueColumn(tableName
-                                    + tableFieldName);
+                            oneDimensionTarget.setSqlUniqueColumn((tableName + k).toLowerCase());
                             oneDimensionTarget.setColumnKey(System.nanoTime()
                                     + oneDimensionTarget.getTableFieldName());
                             

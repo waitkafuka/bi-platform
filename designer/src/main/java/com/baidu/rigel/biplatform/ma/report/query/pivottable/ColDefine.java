@@ -34,27 +34,31 @@ public class ColDefine implements Serializable {
      * uniqueName
      */
     private String uniqueName;
-    
+
     /**
      * format
      */
     private String format;
-    
+
     /**
      * caption
      */
     private String caption;
-    
+
     /**
      * colDefinedId
      */
     private String colDefineId;
-    
+    /**
+     * olapElementId
+     */
+    private String olapElementId;
+
     /**
      * showAxis
      */
     private String showAxis;
-    
+
     /**
      * linkBridge
      */
@@ -64,7 +68,7 @@ public class ColDefine implements Serializable {
      * currentSort
      */
     private String currentSort = "NULL";
-    
+
     /**
      * 指标提示文本
      */
@@ -74,7 +78,7 @@ public class ColDefine implements Serializable {
      * 文本对齐
      */
     private String align;
-    
+
     /**
      * @return the uniqueName
      */
@@ -83,8 +87,7 @@ public class ColDefine implements Serializable {
     }
 
     /**
-     * @param uniqueName
-     *            the uniqueName to set
+     * @param uniqueName the uniqueName to set
      */
     public void setUniqueName(String uniqueName) {
         this.uniqueName = uniqueName;
@@ -98,8 +101,7 @@ public class ColDefine implements Serializable {
     }
 
     /**
-     * @param format
-     *            the format to set
+     * @param format the format to set
      */
     public void setFormat(String format) {
         this.format = format;
@@ -134,10 +136,8 @@ public class ColDefine implements Serializable {
      */
     @Override
     public String toString() {
-        return "ColDefine [uniqueName=" + uniqueName + ", format=" + format
-                + ", caption=" + caption + ", showUniqueName=" + colDefineId
-                + ", ShowAxis=" + showAxis + ", currentSort=" + currentSort
-                + "]";
+        return "ColDefine [uniqueName=" + uniqueName + ", format=" + format + ", caption=" + caption
+                + ", showUniqueName=" + colDefineId + ", ShowAxis=" + showAxis + ", currentSort=" + currentSort + "]";
     }
 
     public String getCurrentSort() {
@@ -175,14 +175,29 @@ public class ColDefine implements Serializable {
      * @return the align
      */
     public String getAlign() {
-    	return align;
+        return align;
     }
-    
+
     /**
      * 
      * @param align 对齐方式
      */
     public void setAlign(String align) {
-    	this.align = align;
+        this.align = align;
     }
+
+    /**
+     * @return the olapElementId
+     */
+    public String getOlapElementId() {
+        return olapElementId;
+    }
+
+    /**
+     * @param olapElementId the olapElementId to set
+     */
+    public void setOlapElementId(String olapElementId) {
+        this.olapElementId = olapElementId;
+    }
+
 }

@@ -43,6 +43,7 @@ import com.baidu.rigel.biplatform.ac.query.data.TableData;
 import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
@@ -272,9 +273,18 @@ public class DataModelUtilsTest {
         ColDefine colDefine = new ColDefine();
         colDefine.setCaption("test");
         colDefine.setUniqueName("[Measures].[a]");
+        colDefine.setOlapElementId("testOlapElementId");
         newArrayList.add(colDefine);
         table.setColDefine(newArrayList);
         formatModel.getDataFormat().put("a", "abc");
+        Map<String, LinkInfo> linkInfoMap = Maps.newHashMap();
+        LinkInfo linkInfo = new LinkInfo();
+        linkInfo.setPlaneTableId("testPlaneTableId");
+        Map<String, String> paramMapping = Maps.newHashMap();
+        paramMapping.put("aa", "bb");
+        linkInfo.setParamMapping(paramMapping);
+        linkInfoMap.put("testOlapElementId", linkInfo);
+        formatModel.setLinkInfo(linkInfoMap);
         try {
             DataModelUtils.decorateTable(formatModel, table);
             Assert.assertEquals("abc", table.getColDefine().get(0).getFormat());

@@ -125,6 +125,7 @@ public class QueryRouterResource {
             String dataModelJson = AnswerCoreConstant.GSON.toJson(dataModel);
             // 限制日志输出
             if (dataModelJson.length() > 150) {
+                logger.debug("response modeldata json:" + dataModelJson);
                 logger.info("response modeldata json:" + dataModelJson.substring(0, 150) + "...");
             } else {
                 logger.info("response modeldata json:" + dataModelJson);

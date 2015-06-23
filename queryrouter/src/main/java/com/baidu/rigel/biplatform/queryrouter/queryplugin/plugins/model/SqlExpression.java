@@ -102,7 +102,7 @@ public class SqlExpression implements Serializable {
      * @return String sql
      */
     public void generateSql(QuestionModel questionModel,
-            HashMap<String, SqlColumn> allColums, List<SqlColumn> needColums) throws QuestionModelTransformationException {
+            Map<String, SqlColumn> allColums, List<SqlColumn> needColums) throws QuestionModelTransformationException {
         if (CollectionUtils.isEmpty(needColums)) {
             throw new QuestionModelTransformationException("List needColums is empty, there is no SqlColum object available to generate.");
         }
@@ -183,9 +183,9 @@ public class SqlExpression implements Serializable {
         // 多个表union的情况
             for (int i = 0; i < tableNames.length; i++) {
                 if (i == 0) {
-                    sqlFrom = tableNames[i];
+                    sqlFrom = " select * from " + tableNames[i];
                 } else {
-                    sqlFrom = sqlFrom + " union all " + tableNames[i];
+                    sqlFrom = sqlFrom + " union all select * from " + tableNames[i];
                 }
             }
             sqlFrom = "(" + sqlFrom + ")";
@@ -205,7 +205,7 @@ public class SqlExpression implements Serializable {
      */
     public String generateLeftOuterJoinExpression(
             ConfigQuestionModel configQuestionModel,
-            HashMap<String, SqlColumn> allColums, List<SqlColumn> needColums)
+            Map<String, SqlColumn> allColums, List<SqlColumn> needColums)
                     throws QuestionModelTransformationException {
         List<SqlColumn> needJoinColumns = new ArrayList<SqlColumn>();
         needJoinColumns.addAll(needColums);
@@ -285,28 +285,20 @@ public class SqlExpression implements Serializable {
      */
     public String generateWhereExpression(
             ConfigQuestionModel configQuestionModel,
-            HashMap<String, SqlColumn> allColums, List<Object> whereValues) {
-        MiniCube cube = (MiniCube) configQuestionModel.getCube();
+            Map<String, SqlColumn> allColums, List<Object> whereValues) {
         StringBuffer whereExpressions = new StringBuffer(" where 1=1 ");
         configQuestionModel.getQueryConditions().forEach((k, v) -> {
             MetaCondition metaCondition = v;
             if (metaCondition instanceof DimensionCondition) {
                 // 判断是维度查询
                 DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
-                Dimension dimension = cube.getDimensions().get(
-                        dimensionCondition.getMetaName());
-                String demensionName = dimensionCondition.getMetaName();
                 if (// 如果节点为空，不需要组织条件
                     !CollectionUtils.isEmpty(dimensionCondition.getQueryDataNodes())
                     // 如果节点为所有条件，不需要组织条件
                     && !MetaNameUtil.isAllMemberUniqueName(dimensionCondition.getQueryDataNodes()
                                 .get(0).getUniqueName())) {
-                    if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(dimension)) {
-                        // 如果为TIME_DIMENSION，name为指标字段
-                        demensionName = dimension.getFacttableColumn();
-                    }
                     // 判断是或否有添加查询
-                    SqlColumn sqlColumn = allColums.get(demensionName);
+                    SqlColumn sqlColumn = allColums.get(dimensionCondition.getMetaName());
                     String equals = "";
                     String inExpression = "";
                     for (QueryData queryData : dimensionCondition.getQueryDataNodes()) {
