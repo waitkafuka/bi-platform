@@ -42,7 +42,7 @@ public class MeasureClassfyObject {
     /**
      * 当前分类选中状态
      */
-    private boolean selected = false;
+    private Boolean selected = false;
     
     private List<MeasureClassfyObject> children;
 
@@ -77,14 +77,14 @@ public class MeasureClassfyObject {
     /**
      * @return the selected
      */
-    public boolean isSelected() {
+    public Boolean isSelected() {
         return selected;
     }
 
     /**
      * @param selected the selected to set
      */
-    public void setSelected(boolean selected) {
+    public void setSelected(Boolean selected) {
         this.selected = selected;
     }
 

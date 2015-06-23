@@ -26,12 +26,17 @@ public final class SqlConstants {
      * 参数问号
      */
     public static final String PARAM = "?";
+    
+    /**
+     * LIKE_ALL
+     */
+    public static final String LIKE_ALL = "%";
 
     /**
      * facttable alias name
      */
     public static final String FACTTABLE_ALIAS_NAME = "biplatform_facttable_name";
-    
+
     /**
      * 禁用new此类
      */

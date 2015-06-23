@@ -27,41 +27,46 @@ import com.google.common.collect.Maps;
  * @version 1.0.0.1
  */
 public class FormatModel implements Serializable {
-    
+
     /**
      * serialize id
      */
     private static final long serialVersionUID = 452576215631369839L;
-    
+
     /**
      * 数据格式
      */
     private Map<String, String> dataFormat = Maps.newHashMap();
-    
+
     /**
      * 条件格式
      */
     private Map<String, String> conditionFormat = Maps.newHashMap();
-    
+
     /**
      * 指标提示信息
      */
     private Map<String, String> toolTips = Maps.newHashMap();
-    
+
     /**
      * 指标颜色定义
      */
-    private Map<String, String> colorFormat = Maps.newHashMap ();
-    
+    private Map<String, String> colorFormat = Maps.newHashMap();
+
     /**
      * 指标位置定义
      */
-    private Map<String, String> positions = Maps.newHashMap ();
+    private Map<String, String> positions = Maps.newHashMap();
 
     /**
      * 表格指标对齐定义
      */
     private Map<String, String> textAlignFormat = Maps.newHashMap();
+    /**
+     * 多维表格跳转信息定义,其中key为指标id，value为要跳转到的映射对象
+     */
+    private Map<String, LinkInfo> linkInfo = Maps.newHashMap();
+
     /**
      * @return the dataFormat
      */
@@ -100,16 +105,17 @@ public class FormatModel implements Serializable {
         this.dataFormat = Maps.newHashMap();
         this.conditionFormat = Maps.newHashMap();
         this.toolTips = Maps.newHashMap();
-        this.colorFormat = Maps.newHashMap ();
+        this.colorFormat = Maps.newHashMap();
         this.textAlignFormat = Maps.newHashMap();
+        this.linkInfo = Maps.newHashMap();
     }
 
     public void removeItem(String id) {
         this.getDataFormat().remove(id);
         this.getToolTips().remove(id);
         this.getConditionFormat().remove(id);
-        this.getColorFormat ().remove (id);
-        this.getPositions ().remove (id);
+        this.getColorFormat().remove(id);
+        this.getPositions().remove(id);
         this.getTextAlignFormat().remove(id);
     }
 
@@ -117,8 +123,8 @@ public class FormatModel implements Serializable {
         this.getDataFormat().put(name, null);
         this.getToolTips().put(name, name);
         this.getConditionFormat().put(name, null);
-        this.getColorFormat ().put (name, null);
-        this.getPositions ().put (name, "0");
+        this.getColorFormat().put(name, null);
+        this.getPositions().put(name, "0");
         this.getTextAlignFormat().put(name, "left");
     }
 
@@ -127,7 +133,7 @@ public class FormatModel implements Serializable {
      */
     public Map<String, String> getColorFormat() {
         if (this.colorFormat == null) {
-            return Maps.newHashMap ();
+            return Maps.newHashMap();
         }
         return colorFormat;
     }
@@ -144,7 +150,7 @@ public class FormatModel implements Serializable {
      */
     public Map<String, String> getPositions() {
         if (this.positions == null) {
-            this.positions = Maps.newHashMap ();
+            this.positions = Maps.newHashMap();
         }
         return positions;
     }
@@ -155,24 +161,40 @@ public class FormatModel implements Serializable {
     public void setPositions(Map<String, String> positions) {
         this.positions = positions;
     }
-    
+
     /**
      * 设置文本对齐样式
+     * 
      * @param textAlignFormat
      */
     public void setTextAlignFormat(Map<String, String> textAlignFormat) {
-    	this.textAlignFormat = textAlignFormat;
+        this.textAlignFormat = textAlignFormat;
     }
-    
+
     /**
      * 获取文件对齐样式
+     * 
      * @return 文件对齐样式
      */
     public Map<String, String> getTextAlignFormat() {
-    	if (this.textAlignFormat == null) {
-    		this.textAlignFormat = Maps.newHashMap();
-    	}
-    	return textAlignFormat;
+        if (this.textAlignFormat == null) {
+            this.textAlignFormat = Maps.newHashMap();
+        }
+        return textAlignFormat;
     }
-    
+
+    /**
+     * @return the linkInfo
+     */
+    public Map<String, LinkInfo> getLinkInfo() {
+        return linkInfo;
+    }
+
+    /**
+     * @param linkInfo the linkInfo to set
+     */
+    public void setLinkInfo(Map<String, LinkInfo> linkInfo) {
+        this.linkInfo = linkInfo;
+    }
+
 }

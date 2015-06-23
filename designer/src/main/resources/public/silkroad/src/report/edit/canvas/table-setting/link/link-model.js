@@ -1,7 +1,6 @@
 /**
  * @file: 报表新建（编辑）-- 表格组件编辑模块 -- 跳转设置模块model
  * @author: lizhantong
- * @depend:
  * @date: 2015-06-10
  */
 

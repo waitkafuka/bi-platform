@@ -57,7 +57,7 @@ public final class MeasureClassfyMetaUtils {
         for (Item item : logicModel.getColumns ()) {
             m = (MiniCubeMeasure) cube.getMeasures ().get (item.getOlapElementId ());
             for (MeasureClassfyObject leaf : tmp) {
-                if (leaf.isSelected ()) {
+                if (leaf.isSelected () == null || leaf.isSelected ()) {
                     continue;
                 }
                 if (m.getName ().equals (leaf.getName ()) || (source + "." + m.getName ()).equals (leaf.getName ())) {

@@ -55,7 +55,8 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
      */
     private static final String SQL = "SELECT FIRST_CLASS_TYPE, FIRST_CLASS_TYPE_NAME, "
             + "SECOND_CLASS_TYPE, SECOND_CLASS_TYPE_NAME,"
-            + "THIRD_CLASS_TYPE, THIRD_CLASS_TYPE_NAME"
+            + "THIRD_CLASS_TYPE, THIRD_CLASS_TYPE_NAME,"
+            + "SELECTED_OPERATION_TYPE"
             + " FROM FACT_TAB_COL_META_CLASS";
     
     /* 
@@ -104,7 +105,8 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
                 str.append (rs.getString ("SECOND_CLASS_TYPE") + "\t");
                 str.append (rs.getString ("SECOND_CLASS_TYPE_NAME") + "\t");
                 str.append (rs.getString ("THIRD_CLASS_TYPE") + "\t");
-                str.append (rs.getString ("THIRD_CLASS_TYPE_NAME"));
+                str.append (rs.getString ("THIRD_CLASS_TYPE_NAME") + "\t");
+                str.append (rs.getString ("SELECTED_OPERATION_TYPE"));
                 tmp.add (str.toString ());
             }
         } finally {
@@ -142,6 +144,9 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
         MeasureClassfyObject thirdClassfy = new MeasureClassfyObject ();
         thirdClassfy.setName (resultArray[4]);
         thirdClassfy.setCaption (resultArray[5]);
+        if ("1".equals (resultArray[6])) {
+            thirdClassfy.setSelected (null);
+        }
         List<MeasureClassfyObject> secondClassChildren = secondClassObj.getChildren ();
         if (CollectionUtils.isEmpty (secondClassChildren)
                 || secondClassChildren.indexOf (thirdClassfy) == -1) {

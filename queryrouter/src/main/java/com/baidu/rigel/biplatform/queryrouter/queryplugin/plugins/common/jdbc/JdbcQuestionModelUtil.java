@@ -26,8 +26,8 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 /**
@@ -54,12 +54,13 @@ public class JdbcQuestionModelUtil {
         MiniCube cube = (MiniCube) configQuestionModel.getCube();
         questionModel.setUseIndex(false);
         HashMap<String, SqlColumn> allColums = QuestionModel4TableDataUtils
-                .getAllCubeColumns(configQuestionModel.getCube());
+                .getAllCubeColumns(questionModel, configQuestionModel.getCube());
         List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(allColums,
                 configQuestionModel.getAxisMetas(), cube);
         SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) configQuestionModel
                 .getDataSourceInfo();
-        SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver());
+        SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver(),
+                QuestionModel4TableDataUtils.getFactTableAliasName(configQuestionModel));
         sqlExpression.generateSql(configQuestionModel, allColums, needColums);
         return sqlExpression;
     }

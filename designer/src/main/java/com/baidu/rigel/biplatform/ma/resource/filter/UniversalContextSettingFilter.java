@@ -115,7 +115,7 @@ public class UniversalContextSettingFilter implements Filter {
             }
             setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
         } catch(Exception e) {
-            throw new RuntimeException("productline encrypt happened exception, message:" + e);
+            throw new RuntimeException("productline encrypt happened exception, message:" + e, e);
         }
     }
     
