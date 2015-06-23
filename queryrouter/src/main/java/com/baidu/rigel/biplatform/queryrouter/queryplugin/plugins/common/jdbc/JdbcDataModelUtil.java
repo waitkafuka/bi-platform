@@ -55,11 +55,6 @@ public class JdbcDataModelUtil {
     private static final int PARMA_NEED_CONTAIN_TOTALSIZE = -1;
 
     /**
-     * dot
-     */
-    private static final String DOT = ".";
-
-    /**
      * JdbcConnectionPool
      */
     @Resource(name = "jdbcHandler")
@@ -84,7 +79,7 @@ public class JdbcDataModelUtil {
                 sqlExpression, dataSourceInfo);
         // getAll columns from Cube
         HashMap<String, SqlColumn> allColums = QuestionModel4TableDataUtils
-                .getAllCubeColumns(configQuestionModel.getCube());
+                .getAllCubeColumns(questionModel, configQuestionModel.getCube());
 
         // get need columns from AxisMetas
         List<SqlColumn> needColums = QuestionModel4TableDataUtils
@@ -118,15 +113,15 @@ public class JdbcDataModelUtil {
         dataModel.getTableData().setColBaseDatas(
                 new HashMap<String, List<String>>());
         needColums.forEach((colDefine) -> {
-            TableData.Column colum = new TableData.Column(
+            TableData.Column colum = new TableData.Column(colDefine.getColumnKey(),
                     colDefine.getTableFieldName(), colDefine.getCaption(),
-                    colDefine.getTableName());
+                    colDefine.getSourceTableName());
             dataModel.getTableData().getColumns().add(colum);
+            String tableDataColumnKey = colDefine.getColumnKey();
             dataModel
                     .getTableData()
                     .getColBaseDatas()
-                    .put(colDefine.getTableName() + DOT
-                            + colDefine.getTableFieldName(),
+                    .put(tableDataColumnKey,
                             new ArrayList<String>());
         });
         return dataModel;
@@ -143,22 +138,20 @@ public class JdbcDataModelUtil {
     public void fillModelTableData(DataModel dataModel,
             List<SqlColumn> needColums, List<Map<String, Object>> rowBasedList) {
         if (dataModel == null || dataModel.getTableData() == null
-                || dataModel.getTableData().getColBaseDatas() == null) {
+                || dataModel.getTableData().getColBaseDatas().isEmpty()) {
             return ;
         }
         Map<String, List<String>> rowBaseData = dataModel.getTableData()
                 .getColBaseDatas();
         rowBasedList.forEach((row) -> {
             needColums.forEach((column) -> {
-                String tableDataColumnKey = column.getTableName() + DOT
-                        + column.getTableFieldName();
-
+                String tableDataColumnKey = column.getColumnKey();
+                String cell = "";
                 if (rowBaseData.get(tableDataColumnKey) == null) {
                     // init TableData Column List
                     rowBaseData
                             .put(tableDataColumnKey, new ArrayList<String>());
                 }
-                String cell = "";
                 if (column.getSqlUniqueColumn() != null && row.get(column.getSqlUniqueColumn()) != null) {
                     cell = row.get(column.getSqlUniqueColumn()).toString();
                 }
@@ -168,5 +161,4 @@ public class JdbcDataModelUtil {
             });
         });
     }
-
 }

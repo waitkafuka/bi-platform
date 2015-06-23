@@ -14,6 +14,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Measure;
@@ -85,8 +86,8 @@ public class PlaneTableOnlineDownloadServiceImplTest {
     private DataModel buildDataModel() {
         DataModel dataModelNew = new DataModel();
         TableData tableData = new TableData();
-        Column columnDim = new Column("Dim", "captionDim", "test");
-        Column columnMeasure = new Column("Measure", "captionMeasure", "test");
+        Column columnDim = new Column("test.Dim", "Dim", "captionDim", "test");
+        Column columnMeasure = new Column("test.Measure", "Measure", "captionMeasure", "test");
         List<Column> columns = Lists.newArrayList();
         columns.add(columnDim);
         columns.add(columnMeasure);
@@ -146,9 +147,17 @@ public class PlaneTableOnlineDownloadServiceImplTest {
         measure.setId("id2");
         measures.put("Measure", measure);
 
+        cube.setId("testCubeId");
         cube.setSource("test");
         cube.setMeasures(measures);
         cube.setDimensions(dimensions);
+        
+        MiniCubeSchema schema = new MiniCubeSchema();
+        Map<String, MiniCube> cubes = Maps.newHashMap();
+        cubes.put("testCubeId", cube);
+        schema.setCubes(cubes);
+        
+        cube.setSchema(schema);
         return cube;
     }
 }

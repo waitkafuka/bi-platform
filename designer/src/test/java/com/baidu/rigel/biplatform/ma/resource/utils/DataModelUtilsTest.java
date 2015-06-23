@@ -23,12 +23,16 @@ import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -45,6 +49,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -55,6 +60,7 @@ import com.google.common.collect.Maps;
  * @author david.wang
  * @version 1.0.0.1
  */
+@RunWith(PowerMockRunner.class)
 public class DataModelUtilsTest {
 
     /**
@@ -74,9 +80,13 @@ public class DataModelUtilsTest {
      * 
      */
     @Test
+    @PrepareForTest(QueryUtils.class)
     public void testTransDataModel2PivotTableWithHideWhiteRow() throws Exception {
+        PowerMockito.mockStatic(QueryUtils.class);
+
         DataModel dataModel = Mockito.mock(DataModel.class);
         Cube cube = Mockito.mock(Cube.class);
+        PowerMockito.when(QueryUtils.transformCube(cube)).thenReturn(cube);
         long begin = System.currentTimeMillis();
         DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, true);
         long end = System.currentTimeMillis() - begin;
@@ -158,7 +168,11 @@ public class DataModelUtilsTest {
      * 
      */
     @Test
+    @PrepareForTest(QueryUtils.class)
     public void testTransDataModel2PivotTable() throws Exception {
+        PowerMockito.mockStatic(QueryUtils.class);
+        Cube mockCube = Mockito.mock(Cube.class);
+        PowerMockito.when(QueryUtils.transformCube(Mockito.any())).thenReturn(mockCube);
         DataModel dataModel = new DataModel();
         List<HeadField> columnHeader = new ArrayList<HeadField>();
         // int c
@@ -657,9 +671,16 @@ public class DataModelUtilsTest {
         measure.setId("id2");
         measures.put("Measure", measure);
 
+        cube.setId("testCubeId");
         cube.setSource("test");
         cube.setMeasures(measures);
         cube.setDimensions(dimensions);
+
+        MiniCubeSchema schema = new MiniCubeSchema();
+        Map<String, MiniCube> cubes = Maps.newHashMap();
+        cubes.put("testCubeId", cube);
+        schema.setCubes(cubes);
+        cube.setSchema(schema);
 
         FormatModel formatModel = PowerMockito.mock(FormatModel.class);
         QueryAction queryAction = new QueryAction();
@@ -700,8 +721,8 @@ public class DataModelUtilsTest {
     private DataModel buildDataModel() {
         DataModel dataModel = new DataModel();
         TableData tableData = new TableData();
-        Column columnDim = new Column("Dim", "captionDim", "test");
-        Column columnMeasure = new Column("Measure", "captionMeasure", "test");
+        Column columnDim = new Column("test.Dim", "Dim", "captionDim", "test");
+        Column columnMeasure = new Column("test.Measure", "Measure", "captionMeasure", "test");
         List<Column> columns = Lists.newArrayList();
         columns.add(columnDim);
         columns.add(columnMeasure);

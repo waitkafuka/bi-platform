@@ -33,9 +33,10 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.query.data.TableData;
@@ -58,6 +59,7 @@ import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTableColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
+import com.baidu.rigel.biplatform.ma.report.utils.ItemUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -217,7 +219,7 @@ public final class DataModelUtils {
         List<ColDefine> colDefineList = new ArrayList<ColDefine>(); // 长度即列数即宽度
         // 获取叶子节点
         List<HeadField> leafNodeList = getLeafNodeList(colHeadFields);
-        
+        Cube tempCube = QueryUtils.transformCube(cube);
         for (HeadField headField : leafNodeList) {
             ColDefine colDefine = new ColDefine();
             colDefine.setUniqueName(headField.getValue());
@@ -227,6 +229,15 @@ public final class DataModelUtils {
             // membershowname,当前member的caption
             colDefine.setShowAxis(transStrList2Str(getAllCaptionofHeadField(headField),
                 DIV_DIM_NODE, true));
+            // 将形如[measure].[show]的UniqueName中取得该指标在模型定义中的olapElementId，然后返回给前端做判断跳转和传参之用
+            String measureName = MetaNameUtil.getNameFromMetaName(headField.getValue());
+            String measureNameId = "";
+            if (tempCube.getMeasures().get(measureName) != null) {
+                measureNameId = tempCube.getMeasures().get(measureName).getId();
+            }
+                   
+            colDefine.setLinkBridge(measureNameId);
+            
             Map<String, Object> extInfos = headField.getExtInfos();
             colDefine.setCurrentSort(
                 extInfos.get("sortType") == null ? "NONE" : extInfos.get("sortType").toString());
@@ -332,7 +343,6 @@ public final class DataModelUtils {
         if (logicModel == null) {
             return planeTable;
         }
-        
         // 记录转换时间
         long current = System.currentTimeMillis();        
         // 获取数据模型中的表定义
@@ -340,6 +350,7 @@ public final class DataModelUtils {
         if (tableData == null) {
             return planeTable;
         }
+        List<String> keys = getKeysInOrder(cube, logicModel,tableData.getColumns());
         // 表的列定义
         List<Column> columns = tableData.getColumns();
         // 设置平面表列属性信息
@@ -357,7 +368,7 @@ public final class DataModelUtils {
             // 获取总的数据条数
             totalRecordSize = getTotalRecordSizeOfPlaneTable(data);
             // 将以列存储的数据转为以行存储
-            planeTableData = transPlaneTableDataFromColumnBasedToRowBased(totalRecordSize, data, cube, logicModel);
+            planeTableData = transPlaneTableFromCol(totalRecordSize, data, keys, cube, logicModel);
         } 
         // 设置平面表数据信息
         planeTable.setData(planeTableData);
@@ -385,7 +396,7 @@ public final class DataModelUtils {
         Map<String, String> dataFormat = formatModel.getDataFormat();
         Map<String, String> toolTips = formatModel.getToolTips ();
         Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
-        List<String> keys = getKeysInOrder(cube, logicModel);   
+        List<String> keys = getKeysInOrder(cube, logicModel, columns);   
         Item[] items = logicModel.getColumns();
         
         // 获取排序维度或者指标
@@ -397,14 +408,14 @@ public final class DataModelUtils {
         // 构建列属性
         for (String key : keys) {
             for (Column column : columns) {
-                if((column.tableName + "." + column.name).equals(key)) {
+                if(column.key.equals(key)) {
                     PlaneTableColDefine colDefine = new PlaneTableColDefine();
                     // 设置列的id
                     colDefine.setId(items[itemIndex].getOlapElementId());
                     // 设置表头
                     colDefine.setTitle(column.caption);
                     // 设置表域名称
-                    colDefine.setField(column.name);
+                    colDefine.setField(column.key);
                     String name = column.name;
 
                     // 设置提示信息
@@ -496,15 +507,14 @@ public final class DataModelUtils {
      * @param logicModel 逻辑模型，用于控制转换后的顺序
      * @return
      */
-    private static List<Map<String, String>> transPlaneTableDataFromColumnBasedToRowBased(
-        int totalRecordSize, Map<String, List<String>> data, Cube cube, LogicModel logicModel) {
+    private static List<Map<String, String>> transPlaneTableFromCol(int totalRecordSize, Map<String, List<String>> data,
+            List<String> keys, Cube cube, LogicModel logicModel) {
         
         List<Map<String, String>> planeTableData = Lists.newArrayList();
-        List<String> keys = getKeysInOrder(cube, logicModel);
         for (int i = 0; i<totalRecordSize; i++ ) {
             Map<String, String > value = Maps.newLinkedHashMap();
             for (String key : keys) {
-                value.put(key.split ("\\.")[1], UnicodeUtils.unicode2String(data.get(key).get(i)));
+                value.put(key, UnicodeUtils.unicode2String(data.get(key).get(i)));
             }
             planeTableData.add(value);
         }
@@ -520,47 +530,92 @@ public final class DataModelUtils {
      * @param columns
      * @return
      */
-    private static List<String> getKeysInOrder(Cube cube, LogicModel logicModel) {
-        MiniCube miniCube = (MiniCube) cube;
+    private static List<String> getKeysInOrder(Cube cube, LogicModel logicModel, List<Column> columns) {
         // 获取Cube中的维度信息
-        Map<String, Dimension> dimensions = miniCube.getDimensions();
-        // 获取Cube中的指标信息
-        Map<String, Measure> measures = miniCube.getMeasures();
+//        Map<String, Dimension> dimensions = miniCube.getDimensions();
+//        // 获取Cube中的指标信息
+//        Map<String, Measure> measures = miniCube.getMeasures();
+        final Map<String, String> tmp = Maps.newHashMap();
+        columns.forEach(col -> {
+            tmp.put(col.tableName + "." + col.name, col.key);
+        });
         // 纵轴
         Item[] cols = logicModel.getColumns();
         // 存储列的key，key = 表明.列名
         List<String> keys = Lists.newArrayList();
         for (Item col : cols ) {
-            boolean finished = false;
+//            boolean finished = false;
             // 处理维度
-            for (Dimension dimension : dimensions.values()) {
-                if (dimension.getType() == DimensionType.TIME_DIMENSION 
-                    && dimension.getId().equals(col.getOlapElementId())) {
-                    // 如果为时间维度，转换成事实表的时间字段
-                    keys.add(((MiniCube) cube).getSource() + "." + dimension.getFacttableColumn());
-                    finished = true;
-                    break;
-                }
-                if (dimension.getId().equals(col.getOlapElementId())) {
-                    Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
-                    keys.add(l.getDimTable () + "." + l.getName ());
-                    finished = true;
-                    break;
-                }
+            OlapElement ele = 
+                ItemUtils.getOlapElementByItem(col, cube.getSchema(), cube.getId());
+            if (ele != null) {
+                keys.add(getRealKey(ele, cube, tmp));
+            } else {
+                LOG.debug("can't get olap element with cube id : " + cube.getId());
+                throw new RuntimeException("can't get olap element with cube id : " + cube.getId());
             }
-            if (!finished) {
-                // 处理指标
-                for (Measure measure : measures.values()) {
-                    if (measure.getId().equals(col.getOlapElementId())) {
-                        keys.add(((MiniCube)cube).getSource() + "." + measure.getName());
-                        break;
-                    }
-                }                
-            }
+//            for (Dimension dimension : dimensions.values()) {
+//                if (dimension.getType() == DimensionType.TIME_DIMENSION 
+//                    && dimension.getId().equals(col.getOlapElementId())) {
+//                    // 如果为时间维度，转换成事实表的时间字段
+//                    keys.add(((MiniCube) cube).getSource() + "." + dimension.getFacttableColumn());
+//                    finished = true;
+//                    break;
+//                }
+//                if (dimension.getId().equals(col.getOlapElementId())) {
+//                    Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+//                    keys.add(l.getDimTable () + "." + l.getName ());
+//                    finished = true;
+//                    break;
+//                }
+//            }
+//            if (!finished) {
+//                // 处理指标
+//                for (Measure measure : measures.values()) {
+//                    if (measure.getId().equals(col.getOlapElementId())) {
+//                        keys.add(((MiniCube)cube).getSource() + "." + measure.getName());
+//                        break;
+//                    }
+//                }                
+//            }
         }
         return keys;
     }
     
+    /**
+     * 获取数据存储对应的key值信息
+     * getRealKey
+     * @param ele olapElement
+     * @param cube 立方体信息
+     * @param tmp key值map
+     * @return
+     */
+    private static String getRealKey(OlapElement ele, Cube cube, Map<String, String> tmp) {
+        String tmpKey = null;
+        // 如果是维度
+        if (ele instanceof Dimension) {
+            Dimension dim = (Dimension) ele; 
+            // 如果是时间维度
+            if (dim.isTimeDimension()) {
+                tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
+            } else {
+                Level level = dim.getLevels().values().toArray(new Level[0])[0];
+                // Callback维度
+                if (level.getType() == LevelType.CALL_BACK) {
+                    tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
+                } else{
+                    // 普通维度
+                    tmpKey = level.getDimTable () + "." + level.getName ();
+                }
+            }
+        } else {
+            // 如果是指标
+            tmpKey = ((MiniCube)cube).getSource() + "." + ((Measure) ele).getName();
+        }
+        return tmp.get(tmpKey);
+        
+    }
+
     private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {
         if (rowFields == null) {
             return false;
@@ -1328,10 +1383,10 @@ public final class DataModelUtils {
         // 获取列属性信息
         List<Column> columns = tableData.getColumns();
         // 获取正确的下载顺序
-        List<String> keys = getKeysInOrder(cube, logicModel);
+        List<String> keys = getKeysInOrder(cube, logicModel, columns);
         for (String key : keys) {
             for (Column column : columns) {
-                if ((column.tableName + "." + column.name).equals(key)) {
+                if (column.key.equals(key)) {
                     rs.append(column.caption + ",");
                     break;
                 }
@@ -1348,12 +1403,12 @@ public final class DataModelUtils {
         int totalRecordSize = getTotalRecordSizeOfPlaneTable(data);
         // 将列存储数据转为行存储数据，该数据已经有序
         List<Map<String, String>> rowBasedDatas = 
-            transPlaneTableDataFromColumnBasedToRowBased(totalRecordSize, data, cube, logicModel);
+            transPlaneTableFromCol(totalRecordSize, data, keys, cube, logicModel);
         //构建数据
         for (int i = 0; i<totalRecordSize ; i++) {
             Map<String, String> rowBasedData = rowBasedDatas.get(i);
             for (String key : keys) {
-                rs.append(rowBasedData.get(key.split("\\.")[1]) + ",");
+                rs.append(rowBasedData.get(key) + ",");
             }
             rs.replace(rs.length()-1, rs.length(), "");
             rs.append("\r\n");

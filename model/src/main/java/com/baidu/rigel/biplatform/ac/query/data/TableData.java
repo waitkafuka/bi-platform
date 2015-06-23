@@ -87,22 +87,27 @@ public class TableData implements Serializable{
     public static class Column implements Serializable {
         
         /**
-         * 
+         * serialVersionUID
          */
         private static final long serialVersionUID = 3151301875582323397L;
 
         /**
-         * 
+         * name
          */
         public final String name;
         
         /**
-         * 
+         * key
+         */
+        public final String key;
+        
+        /**
+         * caption
          */
         public final String caption;
         
         /**
-         * 
+         * tableName
          */
         public final String tableName;
         
@@ -111,8 +116,9 @@ public class TableData implements Serializable{
          */
         private String dbName;
         
-        public Column(String name, String caption, String tableName) {
+        public Column(String key, String name, String caption, String tableName) {
             super ();
+            this.key = key;
             this.name = name;
             this.caption = caption;
             this.tableName = tableName;
@@ -140,6 +146,7 @@ public class TableData implements Serializable{
             final int prime = 31;
             int result = 1;
             result = prime * result + ((name == null) ? 0 : name.hashCode ());
+            result = prime * result + ((key == null) ? 0 : key.hashCode ());
             result = prime * result + ((tableName == null) ? 0 : tableName.hashCode ());
             return result;
         }
@@ -164,6 +171,13 @@ public class TableData implements Serializable{
                     return false;
                 }
             } else if (!name.equals (other.name)) {
+                return false;
+            }
+            if (key == null) {
+                if (other.key != null) {
+                    return false;
+                }
+            } else if (!key.equals (other.key)) {
                 return false;
             }
             if (tableName == null) {

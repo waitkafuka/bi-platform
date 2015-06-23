@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -29,6 +30,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -38,6 +41,8 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
+import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
@@ -46,6 +51,8 @@ import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
+import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -53,7 +60,9 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
+import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportModelQueryService;
+import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.QueryDataResourceUtils;
@@ -95,6 +104,11 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      */
     @Resource
     private QueryDataResourceUtils queryDataResourceUtils;
+    /**
+     * olapLinkResource
+     */
+    @Resource
+    private OlapLinkService olapLinkService;
 
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/dimAndInds", method = RequestMethod.POST)
     public ResponseResult getAllDimAndMeasuers(@PathVariable("reportId") String reportId,
@@ -530,6 +544,66 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         // result.setData(model);
         result.setStatusInfo("successfully sort plane table in runtime phase ");
         return result;
+    }
+
+    /**
+     * 当点击指标跳转之后，要执行的action
+     * 
+     * @param reportId 报表id
+     * @param areaId 表格所在区域id
+     * @param request request请求对象
+     * @param attr redirect之后要带的跳转参数对象
+     * @return 返回redirect的ModelAndView对象
+     */
+    @RequestMapping(value = "/{reportId}/linkBridge/extend_area/{areaId}", method = { RequestMethod.POST })
+    public ModelAndView linkBridge(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId,
+            HttpServletRequest request, RedirectAttributes attr) {
+        String uniqueName = request.getParameter("uniqueName");
+        if (StringUtils.isEmpty(uniqueName)) {
+            throw new RuntimeException("selected table's uniqueName must not be null!");
+        }
+        String measureId = request.getParameter("measureId");
+        ReportRuntimeModel reportRuntimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        ReportDesignModel olapTableDesignModel = reportRuntimeModel.getModel();
+        ExtendArea tableArea = olapTableDesignModel.getExtendAreas().get(areaId);
+        Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
+        LinkInfo linkInfo = linkInfoMap.get(measureId);
+        String planeTableId = linkInfo.getPlaneTableId();
+
+        Map<String, Map<String, String>> conditionMap =
+                this.olapLinkService.buildConditionMapFromRequestParams(uniqueName);
+        Map<String, LinkParams> linkBridgeParams = this.olapLinkService.buildLinkBridgeParams(linkInfo, conditionMap);
+        reportRuntimeModel.getContext().getParams().put("linkBridgeParams", linkBridgeParams);
+
+        // String reportPreviewFlag= request.getParameter("reportPreview");
+
+        // TODO reportPreview需要前端传入，以确保预览和查看发布的报表相分离
+        attr.addAttribute("reportPreview", true);
+        attr.addAttribute("fromReportId", reportId);
+        attr.addAttribute("toReportId", planeTableId);
+        attr.addAttribute("token", "token");
+        attr.addAttribute("_rbk", ContextManager.getProductLine());
+
+        ModelAndView mav = new ModelAndView("redirect:/silkroad/reports/" + planeTableId + "/report_vm");
+        return mav;
+    }
+
+    /**
+     * 根据reportId得到ReportModel
+     * 
+     * @param reportId 报表id
+     * @return 返回reportId对应的ReportDesignModel对象实例
+     */
+    private ReportDesignModel getReportModel(String reportId) {
+        ReportDesignModel reportModel = null;
+        try {
+            reportModel = reportModelCacheManager.getReportModel(reportId);
+            return reportModel;
+        } catch (CacheOperationException e) {
+            logger.warn("There is no such report model in cache. ", e);
+            logger.info("Add report model into cache. ");
+        }
+        return reportModelCacheManager.loadReportModelToCache(reportId);
     }
 
     /**
