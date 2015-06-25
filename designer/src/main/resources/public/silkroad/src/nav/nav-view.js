@@ -42,6 +42,11 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
         // 公共方法区域
         //------------------------------------------
 
+        /**
+         * 构造函数
+         *
+         * @constructor
+         */
         initialize: function () {
             this.listenTo(
                 this.model,
@@ -59,6 +64,7 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
         /**
          * 渲染
          * 根据模版渲染dom元素，绑定事件
+         *
          * @public
          */
         render: function () {
@@ -89,6 +95,7 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
         /**
          * 绑定导航菜单事件
          * 导航菜单的点击事件
+         *
          * @private
          */
         _bindEvents: function () {
@@ -150,6 +157,7 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
 
         /**
          * 调用报表管理模块接口，进行初始化
+         *
          * @private
          */
         _initReportManager: function () {
@@ -169,6 +177,7 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
 
         /**
          * 调用面板模块销毁方法
+         *
          * @private
          */
         _destroyPanel: function () {
@@ -178,6 +187,7 @@ define(['nav/nav-template', 'dialog'], function (template, dialog) {
 
         /**
          * 暂时隐藏其他按钮
+         *
          * @private
          */
         hideOther: function () {

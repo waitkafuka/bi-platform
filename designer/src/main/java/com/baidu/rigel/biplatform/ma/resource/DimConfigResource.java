@@ -232,7 +232,7 @@ public class DimConfigResource extends BaseResource {
             }
             DataSourceInfoReaderService dsInfoReaderService = null;
             String tableName = cubeTable.getName();
-            if (cubeTable.isMutilple() && CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
+            if (cubeTable.isMutilple() && !CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
                 tableName = cubeTable.getRegExpTables().get(0);
             }
             List<ColumnInfo> cols = null;

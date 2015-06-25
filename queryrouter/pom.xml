@@ -36,6 +36,17 @@
 			<groupId>com.baidu.rigel.biplatform</groupId>
 			<artifactId>model</artifactId>
 		</dependency>
+		 <dependency>
+            <groupId>com.baidu.rigel.biplatform</groupId>
+            <artifactId>tesseract</artifactId>
+            <version>1.5.0-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>

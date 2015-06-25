@@ -7,11 +7,9 @@
 .sxwzbContent{
     display: none;
     position: absolute;
-    left: 0px;
-    top: 32px;
     border: 1px solid #d9e6eb;
     background-color: #ffffff;
-    z-index: 999999;
+    z-index: 99;
     width: 530px;
     font-family: "Microsoft YaHei", Arial, sans-serif;
 }
@@ -40,6 +38,7 @@
 }
 
 .sxwzbButton{
+    position: relative;
     width: 170px;
     height: 30px;
     line-height: 30px;
@@ -48,10 +47,10 @@
     background: url(img/rich-select-combo-arrow.png) no-repeat scroll right -2px #ffffff;
     cursor: pointer;
 }
-.sxwzbButton span{
+.sxwzbButton div{
+    position: relative;
     text-overflow: ellipsis;
     overflow: hidden;
-    display: block;
     width: 170px;
     white-space: nowrap;
 }
@@ -147,4 +146,5 @@
     color: #00aef3;
 }
 .sxwzbText{
+    position: relative;
 }

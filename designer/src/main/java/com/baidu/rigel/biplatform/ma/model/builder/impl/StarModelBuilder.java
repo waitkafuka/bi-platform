@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.model.builder.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.StandardDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TimeDimType;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -329,6 +331,15 @@ class StarModelBuilder {
         if (factTable.isMutilple()) {
             // 分库分表导致多张表组成事实表
             factTable.setRegExp(cube.getSource());
+            if (cube.getSource() != null) {
+                List<String> regexTables = Lists.newArrayList();
+                Collections.addAll(regexTables, cube.getSource().split(","));
+                factTable.setRegExpTables(regexTables);
+                if (regexTables != null && regexTables.size() > 0 ) {
+                    factTable.setName(regexTables.get(0));                                    
+                }
+            }
+            factTable.setDivideTableStrategyVo(cube.getDivideTableStrategyVo());
         } else {
             // 事实表名称
             factTable.setName(cube.getSource());

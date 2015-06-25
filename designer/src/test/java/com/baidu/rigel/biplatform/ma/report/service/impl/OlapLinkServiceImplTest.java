@@ -29,6 +29,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 
@@ -65,6 +66,9 @@ public class OlapLinkServiceImplTest {
     private Map<String, ? extends Cube> mockCubes;
     @Mock
     private Map<String, Dimension> mockDimensions;
+    @Mock
+    private QueryContext queryContext;
+
     private static final String UNIQUE_NAME =
             "{[dim_trade_t_trade_name_l1].[食品餐饮]}.{[dim_trade_t_trade_name_l2].[All_dim_trade_t_trade_name_l2s]}";
 
@@ -118,30 +122,65 @@ public class OlapLinkServiceImplTest {
         Mockito.doReturn(mockDim).when(mockDimensions).get(Mockito.anyString());
         // Mockito.when(mockCube.getDimensions().get(Mockito.anyString())).thenReturn(mockDim);
         Mockito.when(mockExtendArea.getLogicModel()).thenReturn(logicModel);
+
         Item[] items = new Item[1];
         items[0] = mockItem;
         Mockito.when(logicModel.getRows()).thenReturn(items);
-
+        Mockito.when(logicModel.getSlices()).thenReturn(items);
         List<Dimension> dimList = olapLinkService.getOlapDims(mockReportDesignModel, mockExtendArea);
-        Assert.assertEquals(dimList.size(), 2);
+        Assert.assertEquals(dimList.size(), 1);
     }
 
     @Test
     public void testBuildConditionMapFromRequestParams() {
-
-        Map<String, Map<String, String>> conditionMap = olapLinkService.buildConditionMapFromRequestParams(UNIQUE_NAME);
+        ExtendArea[] extendAreaArray = new ExtendArea[1];
+        extendAreaArray[0] = mockExtendArea;
+        Item[] items = new Item[1];
+        items[0] = mockItem;
+        Mockito.when(mockExtendArea.getType()).thenReturn(ExtendAreaType.SELECT);
+        Mockito.when(mockReportDesignModel.getExtendAreaList()).thenReturn(extendAreaArray);
+        Mockito.doReturn(mockSchema).when(mockReportDesignModel).getSchema();
+        Mockito.when(logicModel.getRows()).thenReturn(items);
+        Mockito.when(mockItem.getOlapElementId()).thenReturn("testOlapElementId");
+        Mockito.when(queryContext.get("testOlapElementId")).thenReturn("testCondDimValue");
+        Mockito.doReturn(mockSchema).when(mockReportDesignModel).getSchema();
+        Mockito.doReturn(mockCubes).when(mockSchema).getCubes();
+        Mockito.doReturn(mockCube).when(mockCubes).get(Mockito.anyString());
+        Mockito.doReturn(mockDimensions).when(mockCube).getDimensions();
+        Mockito.doReturn(mockDim).when(mockDimensions).get(Mockito.anyString());
+        Mockito.when(mockExtendArea.getLogicModel()).thenReturn(logicModel);
+        Map<String, Map<String, String>> conditionMap =
+                olapLinkService.buildConditionMapFromRequestParams(UNIQUE_NAME, mockReportDesignModel, queryContext);
         Assert.assertEquals(conditionMap.get("dim_trade_t_trade_name_l1").get("uniqueName"),
                 "[dim_trade_t_trade_name_l1].[食品餐饮]");
     }
 
     @Test
     public void testBuildLinkBridgeParams() {
+        ExtendArea[] extendAreaArray = new ExtendArea[1];
+        extendAreaArray[0] = mockExtendArea;
+        Item[] items = new Item[1];
+        items[0] = mockItem;
+        Mockito.when(mockExtendArea.getType()).thenReturn(ExtendAreaType.SELECT);
+        Mockito.when(mockReportDesignModel.getExtendAreaList()).thenReturn(extendAreaArray);
+        Mockito.doReturn(mockSchema).when(mockReportDesignModel).getSchema();
+        Mockito.when(logicModel.getRows()).thenReturn(items);
+        Mockito.when(mockItem.getOlapElementId()).thenReturn("testOlapElementId");
+        Mockito.when(queryContext.get("testOlapElementId")).thenReturn("testCondDimValue");
+        Mockito.doReturn(mockSchema).when(mockReportDesignModel).getSchema();
+        Mockito.doReturn(mockCubes).when(mockSchema).getCubes();
+        Mockito.doReturn(mockCube).when(mockCubes).get(Mockito.anyString());
+        Mockito.doReturn(mockDimensions).when(mockCube).getDimensions();
+        Mockito.doReturn(mockDim).when(mockDimensions).get(Mockito.anyString());
+        Mockito.when(mockExtendArea.getLogicModel()).thenReturn(logicModel);
+        Mockito.when(logicModel.getSlices()).thenReturn(items);
         LinkInfo linkInfo = new LinkInfo();
         Map<String, String> paramMapping = new HashMap<String, String>();
         paramMapping.put("trade_name_l1", "dim_trade_t_trade_name_l1");
         paramMapping.put("trade_name_l2", "dim_trade_t_trade_name_l2");
         linkInfo.setParamMapping(paramMapping);
-        Map<String, Map<String, String>> conditionMap = olapLinkService.buildConditionMapFromRequestParams(UNIQUE_NAME);
+        Map<String, Map<String, String>> conditionMap =
+                olapLinkService.buildConditionMapFromRequestParams(UNIQUE_NAME, mockReportDesignModel, queryContext);
         Map<String, LinkParams> linkBridgeParams = olapLinkService.buildLinkBridgeParams(linkInfo, conditionMap);
         Assert.assertEquals(linkBridgeParams.get("trade_name_l1").getOriginalDimValue(), "食品餐饮");
     }

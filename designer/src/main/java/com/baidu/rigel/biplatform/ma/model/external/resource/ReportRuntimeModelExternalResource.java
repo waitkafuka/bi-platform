@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.external.service.MeasureClassfyService;
@@ -144,11 +146,11 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
             ReportDesignModel model, ExtendArea extendArea) {
         LogicModel logicModel = extendArea.getLogicModel ();
         Cube cube = model.getSchema ().getCubes ().get (extendArea.getCubeId ());
-        cube = QueryUtils.transformCube (cube);
+        Cube newCube = QueryUtils.transformCube (DeepcopyUtils.deepCopy (cube));
         if (!StringUtils.isBlank (selectedMeasures)) {
             List<Item> columns = Lists.newArrayList ();
             for (String indName : selectedMeasures.split (",")) {
-                Measure m = cube.getMeasures ().get (indName);
+                Measure m = newCube.getMeasures ().get (indName);
                 Item item = new Item();
                 item.setAreaId (areaId);
                 item.setCubeId (cube.getId ());
@@ -157,6 +159,13 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
                 item.setReportId (model.getId ());
                 item.setSchemaId (cube.getSchema ().getId ());
                 columns.add (item);
+            }
+            // 对于计算列，需要保留配置
+            for (Item item : logicModel.getColumns ()) {
+                Measure m = cube.getMeasures ().get (item.getOlapElementId ());
+                if (m.getType () == MeasureType.CAL || m.getType () == MeasureType.CALLBACK) {
+                    columns.add (item);
+                }
             }
             logicModel.resetColumns (columns.toArray (new Item[0]));
         }

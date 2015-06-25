@@ -6,11 +6,15 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
+import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
+import com.google.common.collect.Maps;
 
 /**
  * 平面表工具类
@@ -19,7 +23,6 @@ import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
  *
  */
 public class PlaneTableUtils {
-
     /**
      * 日志记录对象
      */
@@ -59,6 +62,118 @@ public class PlaneTableUtils {
                 return true;
             default:
                 return true;
+        }
+    }
+
+    /**
+     * 处理时间条件 handelTimeCondition
+     * 
+     * @param cube
+     * @param requestParams
+     * @return
+     */
+    public static Map<String, Object> handelTimeCondition(Cube cube, Map<String, Object> requestParams) {
+        if (!ParamValidateUtils.check("cube", cube)) {
+            return Maps.newHashMap();
+        }
+
+        if (!ParamValidateUtils.check("requestParams", requestParams)) {
+            return Maps.newHashMap();
+        }
+        Map<String, Object> params = Maps.newHashMap();
+        requestParams.forEach((key, value) -> {
+            if (value instanceof String) {
+                if (isTimeJson((String) value)) {
+                    // 对时间特殊处理
+                    String granularity = getTimeGranularity((String) value);
+                    String id = getElementIdFromCube(cube, granularity);
+                    if (id != null) {
+                        params.put(id, value);
+                    } else {
+                        params.put(key, value);
+                    }
+                } else {
+                    params.put(key, value);
+                }
+            } else {
+                params.put(key, value);
+            }
+        });
+        return params;
+    }
+
+    /**
+     * 判断输入的字符串是否为满足要求的时间字符串 isTimeJson
+     * 
+     * @param json
+     * @return
+     */
+    public static boolean isTimeJson(String json) {
+        return json.contains("start") && json.contains("end") && json.contains("granularity");
+    }
+
+    /**
+     * 获取时间字符串中的时间粒度信息 getTimeGranularity
+     * 
+     * @param timeJson
+     * @return
+     */
+    private static String getTimeGranularity(String timeJson) {
+        String granularity = "";
+        try {
+            JSONObject json = new JSONObject(timeJson);
+            granularity = json.getString("granularity");
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
+        return granularity;
+    }
+
+    /**
+     * 获取cube中对应时间粒度下的element的id信息 getElementIdFromCube
+     * 
+     * @param cube
+     * @param granularity
+     * @return
+     */
+    private static String getElementIdFromCube(Cube cube, String granularity) {
+        Map<String, Dimension> dimensions = cube.getDimensions();
+        if (dimensions.size() == 0) {
+            return null;
+        }
+        for (String key : dimensions.keySet()) {
+            Dimension dimension = dimensions.get(key);
+            // 如果是时间维度
+            if (dimension.isTimeDimension()) {
+                TimeType timeType = getTimeType4Granularity(granularity);
+                TimeDimension timeDim = (TimeDimension) dimension;
+                if (timeDim.getDataTimeType() == timeType) {
+                    return timeDim.getId();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取对应日期粒度下的日期类型 getTimeFormat4Granuarity
+     * 
+     * @return
+     */
+    private static TimeType getTimeType4Granularity(String granularity) {
+        switch (granularity) {
+            case "Y":
+                return TimeType.TimeYear;
+            case "Q":
+                return TimeType.TimeQuarter;
+            case "M":
+                return TimeType.TimeMonth;
+            case "W":
+                return TimeType.TimeWeekly;
+            case "D":
+                return TimeType.TimeDay;
+            default:
+                throw new UnsupportedOperationException("暂不支持此时间类型");
         }
     }
 
@@ -153,14 +268,5 @@ public class PlaneTableUtils {
         }
         message.append(days[days.length - 1]);
         return message.toString();
-    }
-
-    /**
-     * 平面表中的层级条件的特殊处理
-     * 
-     * @param layerJson
-     */
-    public static String handleLayerCondition(String layerJson) {
-        return layerJson;
     }
 }

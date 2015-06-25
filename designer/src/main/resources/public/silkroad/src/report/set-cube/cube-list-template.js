@@ -3,7 +3,7 @@ define(['template'], function (template) {
         /**/) {
         'use strict';
         $data=$data||{};
-        var $utils=template.utils,$helpers=$utils.$helpers,factTables=$data.factTables,$each=$utils.$each,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,regexps=$data.regexps,$itemReg=$data.$itemReg,index=$data.index,separateTableRuleData=$data.separateTableRuleData,sepIndex=$data.sepIndex,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n';
+        var $utils=template.utils,$helpers=$utils.$helpers,factTables=$data.factTables,$each=$utils.$each,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,regexps=$data.regexps,$itemReg=$data.$itemReg,index=$data.index,separateTableRuleData=$data.separateTableRuleData,sepIndex=$data.sepIndex,$itemChildren=$data.$itemChildren,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n';
         if(factTables.length==0){
         $out+='\r\n    <div class="empty-data ta-c">暂无数据表</div>\r\n';
         }else{
@@ -42,7 +42,7 @@ define(['template'], function (template) {
         $out+='\r\n                <option value="';
         $out+=$escape($item.value);
         $out+='" ';
-        if($itemReg.type===sepIndex){
+        if($itemReg.type===$item.value){
         $out+='selected=selected';
         }
         $out+='>';
@@ -50,16 +50,24 @@ define(['template'], function (template) {
         $out+='</option>\r\n                ';
         });
         $out+='\r\n            </select>\r\n            <select class="form-common-select-small w-100 mt-1 j-select-area-date-children">\r\n                ';
-        $each(separateTableRuleData[$itemReg.type].children,function($item,$index){
-        $out+='\r\n                <option value="';
-        $out+=$escape($item.value);
+        $each(separateTableRuleData,function($item,sepIndex){
+        $out+='\r\n                    ';
+        if($itemReg.type===$item.value){
+        $out+='\r\n                        ';
+        $each($item.children,function($itemChildren,$index){
+        $out+='\r\n                            <option value="';
+        $out+=$escape($itemChildren.value);
         $out+='" ';
-        if($itemReg.condition===$item.value){
+        if($itemReg.condition===$itemChildren.value){
         $out+='selected="selected"';
         }
         $out+='>';
-        $out+=$escape($item.text);
-        $out+='</option>\r\n                ';
+        $out+=$escape($itemChildren.text);
+        $out+='</option>\r\n                        ';
+        });
+        $out+='\r\n                    ';
+        }
+        $out+='\r\n                ';
         });
         $out+='\r\n            </select>\r\n            <input type="text" class="form-common-text-small j-input-table-prefix" placeholder="表前缀" value="';
         $out+=$escape($itemReg.prefix);

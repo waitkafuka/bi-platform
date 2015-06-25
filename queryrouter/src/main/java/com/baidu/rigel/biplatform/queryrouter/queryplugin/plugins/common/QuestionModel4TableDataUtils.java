@@ -97,11 +97,11 @@ public class QuestionModel4TableDataUtils {
                     oneMeasure.setTableFieldName(v.getDefine());
                     oneMeasure.setCaption(v.getCaption());
                     oneMeasure.setTableName(QuestionModel4TableDataUtils
-                            .getFactTableAliasName(questionModel));
+                            .getFactTableAliasName());
                     oneMeasure.setSourceTableName(miniCube.getSource());
                     oneMeasure.setType(AxisType.COLUMN);
                     oneMeasure.setSqlUniqueColumn(QuestionModel4TableDataUtils
-                            .getFactTableAliasName(questionModel)
+                            .getFactTableAliasName()
                             + v.getDefine());
                     oneMeasure.setMeasure(v);
                     oneMeasure.setColumnKey(System.nanoTime() + oneMeasure.getTableFieldName());
@@ -130,7 +130,7 @@ public class QuestionModel4TableDataUtils {
                                 tableFieldName = oneDimensionSource
                                         .getFactTableColumn();
                                 tableName = QuestionModel4TableDataUtils
-                                        .getFactTableAliasName(questionModel);
+                                        .getFactTableAliasName();
                                 sourceTableName = miniCube.getSource();
                             } else {
                                 tableName = oneDimensionSource.getDimTable();
@@ -160,7 +160,7 @@ public class QuestionModel4TableDataUtils {
      * 
      * @return
      */
-    public static String getFactTableAliasName(QuestionModel questionModel) {
+    public static String getFactTableAliasName() {
         return SqlConstants.FACTTABLE_ALIAS_NAME;
     }
 

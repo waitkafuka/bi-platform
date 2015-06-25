@@ -40,8 +40,9 @@ public interface MeasureClassfyService {
      * @return List<MeasureClassfyObject> 该方法返回值包含指标
      * @throws Exception 查询异常信息
      */
-    public List<MeasureClassfyObject> 
-        getChangableMeasureClassfyMeta(String factTab, DataSourceDefine ds, String securityKey) throws Exception;
+    public List<MeasureClassfyObject> getChangableMeasureClassfyMeta(String factTab, 
+            DataSourceDefine ds, String securityKey) 
+            throws Exception;
     
     /**
      * 依据事实表信息获取指标元数据列信息

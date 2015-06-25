@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceGroupService;
@@ -40,6 +41,7 @@ import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
+import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.resource.cache.CacheManagerForResource;
@@ -48,6 +50,7 @@ import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * CubeTable的页面交互
@@ -124,20 +127,27 @@ public class CubeTableResource extends BaseResource {
         nameCheckCacheManager.existsDSName(dsId);
         
         String[] selectedTables = StringUtils.split(request.getParameter("selectedTables"), ",");
-        String[] regexps = StringUtils.split(request.getParameter("regexps"), ",");
+        String regexpStr = request.getParameter("regexps");
         
+        // 获取正则表达式
+        Map<String, DivideTableStrategyVo> regexps = Maps.newHashMap();
+        if (!StringUtils.isEmpty(regexpStr)) {
+            regexps = GsonUtils.fromJson(request.getParameter("regexps"),
+                    new TypeToken<Map<String, DivideTableStrategyVo>>() {
+                    }.getType());
+        }
+        
+        // 选中的表
         List<String> selectedList = Lists.newArrayList();
         if (selectedTables != null && selectedTables.length > 0) {
             selectedList.addAll(Lists.newArrayList(selectedTables));
         }
-        List<String> regexList = Lists.newArrayList();
-        if (regexps != null && regexps.length > 0) {
-            regexList.addAll(Lists.newArrayList(regexps));
-        }
+
+              
         List<FactTableMetaDefine> cubeTables = null;
         try {
             cubeTables = cubeBuildService.initCubeTables(dsId, selectedList,
-                regexList, securityKey);
+                regexps, securityKey);
         } catch (DataSourceOperationException e1) {
             logger.error("Fail in getting table info from datasource. ", e1);
             return ResourceUtils.getErrorResult("未能从数据库中查到相关表定义信息，原因 " + e1.getLocalizedMessage(), 1);
@@ -227,19 +237,19 @@ public class CubeTableResource extends BaseResource {
         }
         StarModel[] stars = director.getStarModel(reportModel.getSchema());
         List<String> tables = Lists.newArrayList();
-        List<String> regExps = Lists.newArrayList();
+        Map<String, DivideTableStrategyVo> regExps = Maps.newHashMap();
         for (StarModel star : stars) {
-            String regExp = star.getFactTable().getRegExp();
-            if (!StringUtils.isEmpty(regExp)) {
-                regExps.add(regExp);
+            DivideTableStrategyVo strategy = star.getFactTable().getDivideTableStrategyVo();
+            if (strategy != null) {
                 tables.addAll(star.getFactTable().getRegExpTables());
+                regExps.put(star.getFactTable().getName(), strategy);
             } else {
                 tables.add(star.getFactTable().getName());
             }
         }
         Map<String, Object> data = Maps.newHashMap();
         data.put("selected", tables.toArray(new String[0]));
-        data.put("regx", regExps.toArray(new String[0]));
+        data.put("regexps", regExps);
         ResponseResult rs = ResourceUtils.getCorrectResult("success", data);
         return rs;
     }

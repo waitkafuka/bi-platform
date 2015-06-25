@@ -31,11 +31,26 @@ public final class SqlConstants {
      * LIKE_ALL
      */
     public static final String LIKE_ALL = "%";
+    
+    /**
+     * DESC
+     */
+    public static final String DESC = "DESC";
 
     /**
      * facttable alias name
      */
     public static final String FACTTABLE_ALIAS_NAME = "biplatform_facttable_name";
+
+    /**
+     * MySql Driver
+     */
+    public static final String DRIVER_MYSQL = "com.mysql.jdbc.Driver";
+
+    /**
+     * Oracle Driver
+     */
+    public static final String DRIVER_ORACLE = "Oracle.jdbc.driver.OracleDriver";
 
     /**
      * 禁用new此类

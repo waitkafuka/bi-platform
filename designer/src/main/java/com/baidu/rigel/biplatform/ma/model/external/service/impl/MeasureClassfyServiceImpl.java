@@ -140,6 +140,11 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
         return rs;
     }
 
+   /**
+    * 获取明细元数据描述信息
+    * @param resultArray
+    * @param secondClassObj
+    */
     private void genThirdClassfy(String[] resultArray, MeasureClassfyObject secondClassObj) {
         MeasureClassfyObject thirdClassfy = new MeasureClassfyObject ();
         thirdClassfy.setName (resultArray[4]);

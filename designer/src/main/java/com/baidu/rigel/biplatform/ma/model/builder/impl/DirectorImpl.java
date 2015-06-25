@@ -182,6 +182,7 @@ public class DirectorImpl implements Director {
         cube.setSource(oriCube.getSource());
         cube.setName(oriCube.getName());
         cube.setVisible(oriCube.isVisible());
+        cube.setDivideTableStrategyVo(oriCube.getDivideTableStrategyVo());
         Map<String, Measure> newMeasures = modifyMeasures(starModel, oriCube);
         cube.setMeasures(newMeasures);
         

@@ -31,10 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
@@ -61,6 +63,11 @@ import com.baidu.rigel.biplatform.ac.query.model.SortRecord.SortType;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.PlaceHolderUtils;
+import com.baidu.rigel.biplatform.ma.divide.table.service.DivideTableContext;
+import com.baidu.rigel.biplatform.ma.divide.table.service.DivideTableService;
+import com.baidu.rigel.biplatform.ma.divide.table.service.impl.DayDivideTableStrategyServiceImpl;
+import com.baidu.rigel.biplatform.ma.divide.table.service.impl.MonthDivideTableStrategyServiceImpl;
+import com.baidu.rigel.biplatform.ma.divide.table.service.impl.YearDivideTableStrategyServiceImpl;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -130,24 +137,52 @@ public final class QueryUtils {
             throw new QueryModelBuildException("can not get area with id : " + areaId);
         }
         Cube cube = getCubeFromReportModel(reportModel, area);
-        if (area.getType() == ExtendAreaType.PLANE_TABLE) {
-            cube = transformCube(cube);
-        } else {
-            cube = getCubeWithExtendArea(reportModel, area);
-        }
         if (cube == null) {
             throw new QueryModelBuildException("can not get cube define in area : " + areaId);
+        }
+        if (area.getType() == ExtendAreaType.PLANE_TABLE) {
+            cube = transformCube(cube);          
+            MiniCube miniCube = (MiniCube) cube;
+            DivideTableStrategyVo divideVo = miniCube.getDivideTableStrategyVo();
+            DivideTableContext divideContext = new DivideTableContext();
+            DivideTableService divideTableService = null;
+            if (divideVo != null) {
+                switch (divideVo.getCondition()) {
+                    case "yyyyMMdd":
+                        divideTableService = new DayDivideTableStrategyServiceImpl(); 
+                        break;
+                    case "yyyyMM":
+                        divideTableService = new MonthDivideTableStrategyServiceImpl(); 
+                        break;
+                    case "yyyy":
+                        divideTableService = new YearDivideTableStrategyServiceImpl(); 
+                        break;
+                    default:
+                        throw new UnsupportedOperationException("暂时不支持该分表策略");
+                }
+                divideContext.setDivideTableService(divideTableService);
+                if (divideContext.getAllFactTableName(divideVo, requestParams) != null) {
+                    miniCube.setSource(divideContext.getAllFactTableName(divideVo, requestParams));                    
+                }
+                MiniCubeSchema schema = (MiniCubeSchema) reportModel.getSchema();
+                schema.getCubes().put(miniCube.getId(), miniCube);
+                reportModel.setSchema(schema);
+            }
+            miniCube.setProductLine(dsDefine.getProductLine());
+            questionModel.setCube(miniCube);
+        } else {
+            cube = getCubeWithExtendArea(reportModel, area);
+            ((MiniCube) cube).setProductLine(dsDefine.getProductLine());
+            questionModel.setCube(cube);
         }
         // 设置轴信息
         questionModel.setAxisMetas(buildAxisMeta(reportModel.getSchema(), area, queryAction));
        
         questionModel.setCubeId(area.getCubeId());
-        ((MiniCube) cube).setProductLine(dsDefine.getProductLine());
         // TODO 动态更新cube 针对查询过程中动态添加的属性 需要仔细考虑此处逻辑
         Set<Item> tmp = Sets.newHashSet();
         tmp.addAll(queryAction.getSlices().keySet());
         tmp.addAll(queryAction.getRows().keySet());
-        questionModel.setCube(cube);
         try {
             DataSourceInfo dataSource = DataSourceConnectionServiceFactory
                     .getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ())
@@ -397,7 +432,9 @@ public final class QueryUtils {
         Cube oriCube = getCubeFromReportModel(reportModel, area);
         // 对于可选指标，默认将事实表包含的所有列作为查询条件
         if ("true".equals(area.getOtherSetting ().get (Constants.CAN_CHANGED_MEASURE))) {
-            return transformCube (oriCube);
+            Cube rs = transformCube (oriCube);
+            modifyMeasures(rs.getMeasures (), rs);
+            return rs;
         }
         Map<String, List<Dimension>> filterDims = collectFilterDim(reportModel);
         MiniCube cube = new MiniCube(area.getCubeId());

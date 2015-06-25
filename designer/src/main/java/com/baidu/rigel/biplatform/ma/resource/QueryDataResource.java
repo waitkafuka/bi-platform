@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -41,6 +42,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
@@ -48,6 +50,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
@@ -61,11 +64,14 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
+import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
 import com.baidu.rigel.biplatform.ma.download.DownloadType;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadServiceFactory;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
@@ -83,9 +89,11 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -106,6 +114,7 @@ import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
+import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.QueryDataResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.DimensionMemberViewObject;
@@ -230,9 +239,14 @@ public class QueryDataResource extends BaseResource {
         // }
         for (final String areaId : areaIds) {
             ExtendArea area = model.getExtendById(areaId);
+            Cube cube = null;
+            if (area != null) {
+                // 获取对应的cube
+                cube = model.getSchema().getCubes().get(area.getCubeId());                
+            }
+            // TODO 查询条件回填？
             if (area != null && isQueryComp(area.getType()) && !area.listAllItems().isEmpty()) {
                 Item item = area.listAllItems().values().toArray(new Item[0])[0];
-                Cube cube = model.getSchema().getCubes().get(area.getCubeId());
                 Cube tmpCube = QueryUtils.transformCube(cube);
                 String dimId = item.getOlapElementId();
                 Dimension dim = cube.getDimensions().get(dimId);
@@ -350,7 +364,8 @@ public class QueryDataResource extends BaseResource {
      * @param response
      * @return String
      */
-    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.POST, RequestMethod.GET },
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/{reportId}/report_vm", method = { RequestMethod.GET, RequestMethod.POST },
             produces = "text/html;charset=utf-8")
     public String queryVM(@PathVariable("reportId") String reportId, HttpServletRequest request,
             HttpServletResponse response) {
@@ -376,18 +391,80 @@ public class QueryDataResource extends BaseResource {
         // modify by jiangyichao at 2014-10-10
         // 将url参数添加到全局上下文中
         Enumeration<String> params = request.getParameterNames();
+        // 请求参数
+        Map<String, String> requestParams = Maps.newHashMap();
         while (params.hasMoreElements()) {
             String paramName = params.nextElement();
             runtimeModel.getContext().put(paramName, request.getParameter(paramName));
+            requestParams.put(paramName, request.getParameter(paramName));
         }
         // 添加cookie内容
         runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
 
-        /**
-         * 依据查询请求，根据报表参数定义，增量添加报表区域模型参数
-         */
-        Map<String, Object> tmp = QueryUtils.resetContextParam(request, model);
-        runtimeModel.getContext().getParams().putAll(tmp);
+        // 获取多维数据表的报表Id
+        String fromReportId = request.getParameter("fromReportId");
+        // 平面表id
+        String toReportId = request.getParameter("toReportId");
+        // 如果是由多维跳转到明细
+        if (!StringUtils.isEmpty(fromReportId) && !StringUtils.isEmpty(toReportId)) {
+            // 从cache中取得多维表的运行态模型
+            ReportRuntimeModel fromRuntimeModel = reportModelCacheManager.getRuntimeModel(fromReportId);
+            // 如果从cache中取不到多维表的运行态模型，则抛出异常
+            if (fromRuntimeModel == null) {
+                logger.info("[INFO]--- ---无法获取多维表运行态模型, id :", fromReportId);
+                throw new IllegalStateException("[INFO]--- ---无法获取多维表运行态模型, id :" + fromReportId);
+            }
+            ExtendArea[] extendAreas = model.getExtendAreaList();
+            Map<String, PlaneTableCondition> planeTableConditions = 
+                    model.getPlaneTableConditions();
+            Cube cube = null;
+            // TODO 该地方必须修改，因为此处仅考虑一个cube，获取方法是从多个extendArea中取平面表对应的那个
+            for (ExtendArea extendArea : extendAreas) {
+                if (extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
+                    cube = model.getSchema().getCubes().get(extendArea.getCubeId());
+                    break;
+                }
+            }
+            Map<String, Object> fromParams = fromRuntimeModel.getContext().getParams();
+//            runtimeModel.getContext().getParams().putAll(
+//                    PlaneTableUtils.handelTimeCondition(cube, fromParams));
+            // 如果包含跳转参数
+            if (fromParams != null && fromParams.containsKey("linkBridgeParams")) {
+                Map<String, LinkParams> linkParams = (Map<String, LinkParams>) fromParams.get("linkBridgeParams");
+                for (String key : linkParams.keySet()) {
+                    LinkParams linkParam = linkParams.get(key);                   
+                    
+                    String newValue = null;
+                    String planeTableConditionKey = null;
+                    try {
+                        for (String conditionKey : planeTableConditions.keySet()) {
+                            if (planeTableConditions.get(conditionKey).getName().
+                                    equals(linkParam.getParamName())) {
+                                planeTableConditionKey = conditionKey;
+                            }
+                        }
+                        if (linkParam.getOriginalDimValue() != null && PlaneTableUtils.isTimeJson(linkParam.getOriginalDimValue())) {
+                            newValue = linkParam.getOriginalDimValue();
+                        } else {
+                            newValue = this.handleReqParams4PlaneTable(cube, model, linkParam.getUniqueName(), requestParams, securityKey);                            
+                        }
+                    } catch (Exception e) {
+                        logger.error("处理平面表参数出错，请检查!");
+                        throw new RuntimeException("处理平面表参数出错，请检查!");
+                    }
+                    runtimeModel.getContext().getParams().put(key, newValue);
+                    if (planeTableConditionKey != null) {
+                        runtimeModel.getContext().getParams().put(planeTableConditionKey, newValue);
+                    }
+                }
+            } 
+        } else {
+            /**
+             * 依据查询请求，根据报表参数定义，增量添加报表区域模型参数
+             */
+            Map<String, Object> tmp = QueryUtils.resetContextParam(request, model);
+            runtimeModel.getContext().getParams().putAll(tmp);            
+        }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         StringBuilder builder = buildVMString(reportId, request, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
@@ -846,6 +923,7 @@ public class QueryDataResource extends BaseResource {
          * 1. 获取缓存DesignModel对象
          */
         ReportDesignModel model;
+        ReportDesignModel oriDesignModel;
 
         /**
          * 3. 获取运行时对象
@@ -854,6 +932,7 @@ public class QueryDataResource extends BaseResource {
 
         try {
             model = getRealModel(reportId, runTimeModel);
+            oriDesignModel = DeepcopyUtils.deepCopy(model);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             ResponseResult rs = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -865,7 +944,9 @@ public class QueryDataResource extends BaseResource {
          */
         Map<String, Object> tmp = QueryUtils.resetContextParam(request, model);
         tmp.forEach((k, v) -> {
-            runTimeModel.getLocalContextByAreaId(areaId).put(k, v);
+            if (!runTimeModel.getLocalContextByAreaId(areaId).getParams().containsKey(k)) {
+                runTimeModel.getLocalContextByAreaId(areaId).put(k, v);
+            } 
         });
         /**
          * 2. 获取区域对象
@@ -976,9 +1057,11 @@ public class QueryDataResource extends BaseResource {
         /**
          * 7. 对返回结果进行处理，用于表、图显示
          */
+        runTimeModel.setModel(model);
         ResponseResult rs =
                 queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, targetArea, result, areaContext,
                         action);
+        runTimeModel.setModel(oriDesignModel);
         // TODO 对于平面表，需要维护分页信息
         if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
             if (rs.getStatus() == 0) {
@@ -1001,6 +1084,7 @@ public class QueryDataResource extends BaseResource {
         resetAreaContext(areaContext, request);
         resetContext(runTimeModel.getLocalContext().get(areaId), request);
         reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
+        
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));
@@ -2339,5 +2423,93 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO]--- --- successfully query member, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
     }
+    
+    /**
+     * 处理平面表跳转时的参数问题 handleReqParams4PlaneTable
+     * @param cube
+     * @param uniqueName
+     * @param params
+     * @return
+     */
+    private String handleReqParams4PlaneTable(Cube cube, ReportDesignModel model, String uniqueName,
+            Map<String, String> params, String securityKey) throws DataSourceOperationException {
+        if (!ParamValidateUtils.check("cube", cube)) {
+            return null;
+        }
+        if (!ParamValidateUtils.check("model", model)) {
+            return null;
+        }
+        if (!ParamValidateUtils.check("uniqueName", uniqueName)) {
+            return null;
+        }
+        String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
+        Cube oriCube = QueryUtils.transformCube(cube);
+        Dimension dim = oriCube.getDimensions().get(dimName);
+        String[] tmp = MetaNameUtil.parseUnique2NameArray(uniqueName);
+        Level tmpLevel = null;
+        if (dim != null && dim.getLevels() != null) {
+            tmpLevel = dim.getLevels().values().toArray(new Level[0])[0];
+        }
 
+        DataSourceDefine dsDefine = null;
+        DataSourceInfo dsInfo = null;
+        DataSourceService dataSourceService =
+                (DataSourceService) ApplicationContextHelper.getContext().getBean("dsService");
+        try {
+            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
+                    getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name());
+            dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
+        } catch (DataSourceOperationException | DataSourceConnectionException e) {
+            logger.error("Fail in parse datasource to datasourceInfo.", e);
+            throw new DataSourceOperationException(e);
+        }
+        if (isCallbackLevel(tmpLevel)) {
+            // 处理callback
+            CallbackLevel callbackLevel = (CallbackLevel) tmpLevel;
+            String dimId = callbackLevel.getDimension().getId();
+            final Map<String, String> paramMap = Maps.newHashMap();
+            model.getPlaneTableConditions().forEach((n, p) ->{
+                paramMap.put(p.getElementId(), p.getName());
+            });
+            callbackLevel.getCallbackParams().put(paramMap.get(dimId), tmp[tmp.length - 1]);
+            List<Member> members = callbackLevel.getMembers(oriCube, dsInfo, params);
+            for (Member member : members) {
+                if (member.getUniqueName().equals(uniqueName)) {
+                    MiniCubeMember miniCubeMember = (MiniCubeMember) member;
+                    Set<String> queryNodes = miniCubeMember.getQueryNodes();
+                    return queryNodes.stream().collect(Collectors.joining(","));
+                }
+            }
+        } else {
+            // 如果有孩子结点，则要取到孩子结点数值
+            if ((dim.getLevels().size() > tmp.length - 1)) {
+                Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - 1];
+                List<Member> members = level.getMembers(oriCube, dsInfo, params);
+                for (Member member : members) {
+                    if (member.getUniqueName().equals(uniqueName)) {
+                        List<Member> childMembers = member.getChildMembers(oriCube, dsInfo, params);
+                        return childMembers.stream().map(child -> 
+                            child.getName()
+                        ).collect(Collectors.joining(","));
+                    }
+                }
+            } else {
+                // 如果没有孩子，则直接返回
+                return tmp[tmp.length - 1];
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 判断某个level是否为callback isCallbackLevel
+     * 
+     * @param level
+     * @return
+     */
+    private static boolean isCallbackLevel(Level level) {
+        return level != null && level.getType() == LevelType.CALL_BACK;
+    }
+    
 }

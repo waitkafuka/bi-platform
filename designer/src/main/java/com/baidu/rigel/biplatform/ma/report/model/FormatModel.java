@@ -187,6 +187,9 @@ public class FormatModel implements Serializable {
      * @return the linkInfo
      */
     public Map<String, LinkInfo> getLinkInfo() {
+        if (this.linkInfo == null) {
+            this.linkInfo = Maps.newHashMap();
+        }
         return linkInfo;
     }
 

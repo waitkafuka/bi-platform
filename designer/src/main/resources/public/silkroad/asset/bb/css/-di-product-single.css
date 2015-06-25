@@ -4503,11 +4503,9 @@ div.di-dim-level-find-msg span{
 .sxwzbContent{
     display: none;
     position: absolute;
-    left: 0px;
-    top: 32px;
     border: 1px solid #d9e6eb;
     background-color: #ffffff;
-    z-index: 999999;
+    z-index: 99;
     width: 530px;
     font-family: "Microsoft YaHei", Arial, sans-serif;
 }
@@ -4536,6 +4534,7 @@ div.di-dim-level-find-msg span{
 }
 
 .sxwzbButton{
+    position: relative;
     width: 170px;
     height: 30px;
     line-height: 30px;
@@ -4544,10 +4543,10 @@ div.di-dim-level-find-msg span{
     background: url(img/rich-select-combo-arrow.png) no-repeat scroll right -2px #ffffff;
     cursor: pointer;
 }
-.sxwzbButton span{
+.sxwzbButton div{
+    position: relative;
     text-overflow: ellipsis;
     overflow: hidden;
-    display: block;
     width: 170px;
     white-space: nowrap;
 }
@@ -4643,6 +4642,7 @@ div.di-dim-level-find-msg span{
     color: #00aef3;
 }
 .sxwzbText{
+    position: relative;
 }
 /**
  * @name                      :roport-ui针对silkroad所做的的css适配

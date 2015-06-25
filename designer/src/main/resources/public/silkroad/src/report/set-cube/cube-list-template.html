@@ -22,12 +22,16 @@
             </select>
             <select class="form-common-select-small w-100 mt-1 j-select-area-date">
                 {{each separateTableRuleData as $item sepIndex}}
-                <option value="{{$item.value}}" {{if $itemReg.type===sepIndex}}selected=selected{{/if}}>{{$item.text}}</option>
+                <option value="{{$item.value}}" {{if $itemReg.type===$item.value}}selected=selected{{/if}}>{{$item.text}}</option>
                 {{/each}}
             </select>
             <select class="form-common-select-small w-100 mt-1 j-select-area-date-children">
-                {{each separateTableRuleData[$itemReg.type].children as $item}}
-                <option value="{{$item.value}}" {{if $itemReg.condition===$item.value}}selected="selected"{{/if}}>{{$item.text}}</option>
+                {{each separateTableRuleData as $item sepIndex}}
+                    {{if $itemReg.type===$item.value}}
+                        {{each $item.children as $itemChildren}}
+                            <option value="{{$itemChildren.value}}" {{if $itemReg.condition===$itemChildren.value}}selected="selected"{{/if}}>{{$itemChildren.text}}</option>
+                        {{/each}}
+                    {{/if}}
                 {{/each}}
             </select>
             <input type="text" class="form-common-text-small j-input-table-prefix" placeholder="表前缀" value="{{$itemReg.prefix}}"/>

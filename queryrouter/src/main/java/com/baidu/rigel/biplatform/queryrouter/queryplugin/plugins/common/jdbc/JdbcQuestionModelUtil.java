@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,7 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.parsecheck.TableExistCheck;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
@@ -40,7 +43,13 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpre
 @Service("jdbcQuestionModelUtil")
 @Scope("prototype")
 public class JdbcQuestionModelUtil {
-    
+
+    /**
+     * TableExistCheck
+     */
+    @Resource(name = "tableExistCheck")
+    private TableExistCheck tableExistCheck;
+
     /**
      * convertQuestionModel2Sql
      * 
@@ -59,8 +68,10 @@ public class JdbcQuestionModelUtil {
                 configQuestionModel.getAxisMetas(), cube);
         SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) configQuestionModel
                 .getDataSourceInfo();
-        SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver(),
-                QuestionModel4TableDataUtils.getFactTableAliasName(configQuestionModel));
+        // 检验cube.getSource中的事实表是否在数据库中存在，并过滤不存在的数据表
+        String tableNames = tableExistCheck.getExistTableList(cube.getSource(), sqlDataSource);
+        cube.setSource(tableNames);
+        SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver());
         sqlExpression.generateSql(configQuestionModel, allColums, needColums);
         return sqlExpression;
     }

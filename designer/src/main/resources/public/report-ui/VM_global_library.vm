@@ -1,1 +1,0 @@
-##  作为全局的velocity宏变量定义文件，避免请求vm文件时，因找不到VM_global_library.vm而导致后台报错的问题

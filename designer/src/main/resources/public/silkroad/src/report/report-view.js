@@ -24,7 +24,6 @@ define([
              */
             initialize: function () {
                 var that = this;
-
                 that.model = new ReportModel({
                     id: that.id
                 });
@@ -33,10 +32,13 @@ define([
             /**
              * 发布报表
              *
+             * @param {string} type ajax请求类型
+             * @param {string} reportId 报表参数
              * @public
              */
             publishReport: function (type, reportId) {
                 var that = this;
+
                 // 列表调用需要动态传递id
                 reportId = reportId || this.id;
 
@@ -58,10 +60,13 @@ define([
                                 // 弹框内的dom事件绑定
                                 $this.find('.j-report-list').click(function () {
                                     $this.dialog('close');
-                                    require(['report/list/main-view'], function (ReportListView) {
-                                        window.dataInsight.main.destroy();
-                                        new ReportListView({el: $('.j-main')});
-                                    });
+                                    require(
+                                        ['report/list/main-view'],
+                                        function (ReportListView) {
+                                            window.dataInsight.main.destroy();
+                                            new ReportListView({el: $('.j-main')});
+                                        }
+                                    );
                                 });
 
                                 $this.find('.j-report-edit').click(function () {
@@ -78,7 +83,6 @@ define([
                                         }
                                     );
                                 });
-                                //window.setTimeout(that.initCopy, 2000);
                                 that.initCopy('copyUrlBtn');
                                 that.initCopy('copyTiledBtn');
                                 that.initCopy('copyEmbeddedBtn');
@@ -97,10 +101,11 @@ define([
             /**
              * 预览报表
              *
+             * @param {string} type ajax请求类型
+             * @param {string} reportId 报表参数
              * @public
              */
             previewReport: function (type, reportId) {
-                var that = this;
                 // 列表调用需要动态传递id
                 reportId = reportId || this.id;
                 this.model.previewReport(type, reportId, function (data) {
@@ -110,21 +115,20 @@ define([
 
             /**
              * 初始化复制功能
-             *
+             * @param {string} btnId 按钮的id
              * @public
              */
             initCopy: function (btnId) {
-                //var copyContent = '哈哈，复制成功！';
                 var clip = null;
                 clip = new ZeroClipboard.Client();
+
                 clip.setHandCursor(true);
-                clip.addEventListener('load', function (client) {
-                    //debugstr("Flash movie loaded and ready.");
-                });
-                clip.addEventListener('mouseDown', function (client) {
-                    // update the text on mouse down
+
+                clip.addEventListener('load', function (client) {});
+                clip.addEventListener('mouseDown', function () {
                     var contentId = btnId + 'CopyContent';
                     var copyContent = $('#' + contentId).html();
+
                     copyContent = copyContent.replace(/&lt;/g, '<');
                     copyContent = copyContent.replace(/&gt;/g, '>');
                     clip.setText(copyContent);
@@ -132,6 +136,7 @@ define([
                 clip.addEventListener('complete', function () {
                     alert('复制成功');
                 });
+
                 clip.glue(btnId, btnId + 'Container');
             }
         });

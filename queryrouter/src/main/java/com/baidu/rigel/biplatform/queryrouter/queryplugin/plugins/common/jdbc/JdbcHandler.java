@@ -28,10 +28,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.datasource.DataSourceException;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.datasource.DataSourcePoolService;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.datasource.SqlDataSourceWrap;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
+import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
+import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
+import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
 
 /**
  * 

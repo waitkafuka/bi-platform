@@ -77,6 +77,10 @@ public class MiniCube extends OlapElementDef implements Cube {
     private boolean mutilple;
 
     /**
+     * 分表策略
+     */
+    private DivideTableStrategyVo divideTableStrategyVo;
+    /**
      * productLine 产品线
      */
     private String productLine;
@@ -213,6 +217,43 @@ public class MiniCube extends OlapElementDef implements Cube {
 
     public void setMutilple(boolean mutilple) {
         this.mutilple = mutilple;
+    }
+
+    
+    /** 
+     * 获取 divideTableStrategyVo 
+     * @return the divideTableStrategyVo 
+     */
+    public DivideTableStrategyVo getDivideTableStrategyVo() {
+    
+        return divideTableStrategyVo;
+    }
+
+    /** 
+     * 设置 divideTableStrategyVo 
+     * @param divideTableStrategyVo the divideTableStrategyVo to set 
+     */
+    public void setDivideTableStrategyVo(DivideTableStrategyVo divideTableStrategyVo) {
+    
+        this.divideTableStrategyVo = divideTableStrategyVo;
+    }
+
+    /** 
+     * 获取 serialversionuid 
+     * @return the serialversionuid 
+     */
+    public static long getSerialversionuid() {
+    
+        return serialVersionUID;
+    }
+
+    /** 
+     * 获取 enableCache 
+     * @return the enableCache 
+     */
+    public boolean isEnableCache() {
+    
+        return enableCache;
     }
 
     /**

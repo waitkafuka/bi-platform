@@ -12,16 +12,14 @@ $namespace('di.shared.vui');
 (function () {
 
     //------------------------------------------
-    // 引用 
+    // 引用
     //------------------------------------------
 
     var inheritsObject = xutil.object.inheritsObject;
-    var extend = xutil.object.extend;
-    var encodeHTML = xutil.string.encodeHTML;
     var XOBJECT = xui.XObject;
 
     //------------------------------------------
-    // 类型声明 
+    // 类型声明
     //------------------------------------------
 
     /**
@@ -65,14 +63,23 @@ $namespace('di.shared.vui');
     RICH_SELECT_CLASS.render = function (data) {
         var el = this._eMain;
         var that = this;
-
         if (!that.$renderFlag) {
-            $(el).screenXingWeiZhiBiao({data: data, clickCallback: function(param){
-                that.notify('richSelectChange', param);
-            }});
+            $(el).screenXingWeiZhiBiao(
+                [
+                    {
+                        data: data,
+                        clickCallback: function (param) {
+                            that.notify('richSelectChange', param);
+                        }
+                    }
+                ]
+            );
             that.$renderFlag = true;
         }
 
+    };
+
+    RICH_SELECT_CLASS.dispose = function () {
     };
 
 

@@ -149,12 +149,12 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
             //factTableList = {
             //    regexps:{
             //        FACT_TAB_COL_META_CLASS: {
-            //            type: 'time',
+            //            type: 'TIME',
             //            condition: 'yyyy',
             //            prefix: 'testYYYy1'
             //        },
             //        fact_tab: {
-            //            type: 'dist',
+            //            type: 'DIST',
             //            condition: 'city',
             //            prefix: 'testPre1'
             //        }
@@ -165,12 +165,12 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
             //        {name:"fact_tab","id":"fact_tab","comment":"","dbName":null,"selected":true}
             //    ]
             //};
-
-            // 为了始终触发数据重新渲染
-            that.set(
-                { 'factTableList': factTableList }
-                //{ 'silent': true } // 阻止change事件
-            );
+            //
+            //// 为了始终触发数据重新渲染
+            //that.set(
+            //    { 'factTableList': factTableList }
+            //    //{ 'silent': true } // 阻止change事件
+            //);
         },
 
         /**

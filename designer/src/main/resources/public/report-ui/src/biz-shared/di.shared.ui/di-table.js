@@ -226,7 +226,8 @@ $namespace('di.shared.ui');
                 this._uBreadcrumb,
                 this._uCountInfo,
                 this._uDownloadBtn,
-                this._uOfflineDownloadBtn
+                this._uOfflineDownloadBtn,
+                this._uRichSelect
             ],
             'dispose'
         );
@@ -548,7 +549,12 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_TABLE_CLASS.$handleLinkBridge = function (colDefItem, rowDefItem) {
-        var address = 'reports/' + this.reportId + '/linkBridge/extend_area/' + this.$di('getId').split('.')[1];
+        var address = URL.getWebRoot()
+            + '/reports/'
+            + this.reportId
+            + '/linkBridge/extend_area/'
+            + this.$di('getId').split('.')[1];
+
         var oForm = document.createElement('form');
         document.body.appendChild(oForm);
         oForm.type = "hidden";

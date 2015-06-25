@@ -72,7 +72,7 @@ public class MeasuerClassfyServiceTest {
     public void testGetChangableMeasureClassfyMeta() throws Exception {
         Server server = Server.createTcpServer ("-tcpAllowOthers").start ();
         Class.forName ("org.h2.Driver");
-        Connection conn = DriverManager.getConnection ("jdbc:h2:tcp://localhost/mem:test", "sa", "sa");
+        Connection conn = DriverManager.getConnection ("jdbc:h2:tcp://127.0.0.1/mem:sample", "sa", "sa");
         PreparedStatement ps = conn.prepareStatement (tableCreateSql);
         ps.execute ();
         ps = conn.prepareStatement (insertSql);
@@ -82,8 +82,8 @@ public class MeasuerClassfyServiceTest {
         Mockito.doReturn (AesUtil.getInstance ().encryptAndUrlEncoding ("sa")).when (ds).getDbPwd ();
         DataSourceType.H2.setPrefix ("jdbc:h2:tcp://");
         Mockito.doReturn (DataSourceType.H2).when (ds).getDataSourceType ();
-        Mockito.doReturn ("localhost").when (ds).getHostAndPort ();
-        Mockito.doReturn ("mem:test").when (ds).getDbInstance ();
+        Mockito.doReturn ("127.0.0.1").when (ds).getHostAndPort ();
+        Mockito.doReturn ("mem:sample").when (ds).getDbInstance ();
         String secKey = "0000000000000000";
         List<MeasureClassfyObject> rs = 
             new MeasureClassfyServiceImpl ().getChangableMeasureClassfyMeta ("test", ds, secKey);
@@ -102,6 +102,11 @@ public class MeasuerClassfyServiceTest {
         DataSourceDefine ds = Mockito.mock (DataSourceDefine.class);
         try {
             service.getChangalbeMeasuerMeta (null, ds, null);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+        try {
+            service.getChangalbeMeasuerMeta ("", ds, null);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }

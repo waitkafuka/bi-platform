@@ -18,7 +18,6 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
-import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
@@ -42,6 +40,7 @@ import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition;
+import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterResource;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
@@ -487,9 +486,13 @@ public class SqlExpression implements Serializable {
         String[] str = MetaNameUtil.parseUnique2NameArray(orderColumnNameTmp);
         String orderColumnName = str[str.length - 1];
         SqlColumn sqlColumn = allColums.get(orderColumnName);
+        String orderByType = "";
+        if (SqlConstants.DESC.equals(configQuestionModel.getSortRecord().getSortType().name())) {
+            orderByType = SqlConstants.DESC;
+        }
         return " order by " + sqlColumn.getTableName() + SqlConstants.DOT
                 + sqlColumn.getTableFieldName() + SqlConstants.SPACE
-                + configQuestionModel.getSortRecord().getSortType() + SqlConstants.SPACE;
+                + orderByType + SqlConstants.SPACE;
     }
 
     /**
@@ -625,9 +628,9 @@ public class SqlExpression implements Serializable {
      * @param facttableAlias
      *            facttableAlias facttableAlias
      */
-    public SqlExpression(String driver, String facttableAlias) {
+    public SqlExpression(String driver) {
         this.driver = driver;
-        this.facttableAlias = facttableAlias;
+        this.facttableAlias = QuestionModel4TableDataUtils.getFactTableAliasName();
     }
 
     /**

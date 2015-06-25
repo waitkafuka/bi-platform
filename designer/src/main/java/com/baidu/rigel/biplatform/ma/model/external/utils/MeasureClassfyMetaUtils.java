@@ -39,7 +39,7 @@ public final class MeasureClassfyMetaUtils {
     }
     
     /**
-     * 
+     * 修改备选指标选择状态
      * @param source
      * @param logicModel
      * @param cube

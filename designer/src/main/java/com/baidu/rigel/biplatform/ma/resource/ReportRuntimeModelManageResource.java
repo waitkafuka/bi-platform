@@ -578,7 +578,8 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         String planeTableId = linkInfo.getPlaneTableId();
 
         Map<String, Map<String, String>> conditionMap =
-                this.olapLinkService.buildConditionMapFromRequestParams(uniqueName);
+                this.olapLinkService.buildConditionMapFromRequestParams(uniqueName, olapTableDesignModel,
+                        reportRuntimeModel.getContext());
         Map<String, LinkParams> linkBridgeParams = this.olapLinkService.buildLinkBridgeParams(linkInfo, conditionMap);
         reportRuntimeModel.getContext().getParams().put("linkBridgeParams", linkBridgeParams);
 

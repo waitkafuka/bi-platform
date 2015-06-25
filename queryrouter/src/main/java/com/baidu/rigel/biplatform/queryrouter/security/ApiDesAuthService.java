@@ -21,6 +21,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.baidu.rigel.biplatform.queryrouter.QueryRouterApplication4Enterprise;
+
 /**
  * Api server to server 的认证
  * 

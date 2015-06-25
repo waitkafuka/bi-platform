@@ -139,32 +139,32 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     }
 
     private Where genWhere(Where where, String filterDimKey, Map<String, String> params) {
-	    	List<Expression> andList = Lists.newArrayList();
-    		for (String key : filterDimKey.split(",")) {
-    			if (StringUtils.isEmpty(key)) {
-    				continue;
-    			}
-    			if (StringUtils.isEmpty(params.get(key))) {
-    				continue;
-    			}
-    			Set<QueryObject> value = Sets.newHashSet();
-    			for (String v : params.get(key).split(",")) {
-    				QueryObject queryObj = new QueryObject(v, Sets.newHashSet());
-    				value.add(queryObj);
-    			}
-    			Expression exp = new Expression(key, value);
-    			andList.add(exp);
-    		}
-    		if (!andList.isEmpty()) {
-    			if (where == null) {
-    				where = new Where();
-    			}
-    			where.setAndList(andList);
-    		}
-		return where;
-	}
+            List<Expression> andList = Lists.newArrayList();
+            for (String key : filterDimKey.split(",")) {
+                if (StringUtils.isEmpty(key)) {
+                    continue;
+                }
+                if (StringUtils.isEmpty(params.get(key))) {
+                    continue;
+                }
+                Set<QueryObject> value = Sets.newHashSet();
+                for (String v : params.get(key).split(",")) {
+                    QueryObject queryObj = new QueryObject(v, Sets.newHashSet());
+                    value.add(queryObj);
+                }
+                Expression exp = new Expression(key, value);
+                andList.add(exp);
+            }
+            if (!andList.isEmpty()) {
+                if (where == null) {
+                    where = new Where();
+                }
+                where.setAndList(andList);
+            }
+        return where;
+    }
 
-	/**
+    /**
      * 将查询的结果集封装成member
      * 
      * @param resultSet
@@ -172,7 +172,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
      * @param parentMember
      * @param dataSourceInfo
      * @param cube
-     * @return
+     * @return List<MiniCubeMember>
      * @throws MiniCubeQueryException
      */
     private List<MiniCubeMember> buildMembersFromCellSet(SearchIndexResultSet resultSet, MiniCubeLevel queryLevel,
@@ -217,30 +217,12 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
     }
 
-//    /**
-//     * @param cube
-//     * @param queryLevel
-//     * @return
-//     */
-//    private QueryRequest createQueryRequest(Cube cube, MiniCubeLevel queryLevel, DataSourceInfo dataSourceInfo) {
-//        QueryRequest queryRequest = new QueryRequest();
-//        queryRequest.setDataSourceInfo(dataSourceInfo);
-//        queryRequest.setCubeName(cube.getName());
-//        queryRequest.setCubeId(cube.getId());
-//        From from = new From(queryLevel.getDimTable());
-//        queryRequest.setFrom(from);
-//        if (StringUtils.isBlank(queryLevel.getDimTable())) {
-//            from.setFrom(((MiniCube) cube).getSource());
-//        }
-//        return queryRequest;
-//    }
-
     /**
      * @param cube
      * @param queryLevel
      * @param parentMember
      * @param dataSourceInfo
-     * @return
+     * @return QueryRequest
      */
     private QueryRequest buildQueryRequest(Cube cube, MiniCubeLevel queryLevel, Member parentMember,
             DataSourceInfo dataSourceInfo) {
@@ -338,7 +320,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     }
 
     @Override
-    public MiniCubeMember getMemberFromLevelByName(DataSourceInfo dataSourceInfo, Cube cube, Level level, String name,
+    public MiniCubeMember getMemberFromLevelByName(DataSourceInfo dataSourceInfo, 
+            Cube cube, Level level, String name,
             MiniCubeMember parent, Map<String, String> params) throws MiniCubeQueryException, MetaException {
         if (level == null || StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("level is null or name is blank");
@@ -371,74 +354,6 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             List<MiniCubeMember> memberResultList = this.buildMembersFromCellSet (resultSet, queryLevel, parent, dataSourceInfo, cube);
             result = CollectionUtils.isEmpty (memberResultList) ? result : memberResultList.get(0);
-//            if(!resultSet.next()){
-//                    log.error("no result return by query:" + queryRequest);
-////                    throw new MetaException("no result return by query:" + queryRequest);
-//            }
-//            if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
-//                result.setCaption(resultSet.getString(queryLevel.getCaptionColumn()));
-//            }
-//            result.setParent(parent);
-//            if (MetaNameUtil.isAllMemberName(name)) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())) {
-//                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//                } else {
-//                    request.selectAndGroupBy(queryLevel.getSource());
-//                }
-//
-//                request.setWhere(new Where());
-//                if (queryLevel.isParentChildLevel()) {
-//                    expression = new Expression(queryLevel.getParent());
-//                    expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-//                }
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//
-//            } else if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
-//                    && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getSource());
-//                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } else if (queryLevel.isParentChildLevel()){
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getParent());
-//                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } else {
-//                result.getQueryNodes().add(name);
-//            }
-//
         } catch (Exception e) {
             log.error("error occur when get name:" + name + " from level:" + level, e);
             throw new MiniCubeQueryException(e);
@@ -683,67 +598,6 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             members = 
                 buildMembersFromCellSet (resultSet, queryLevel, null, dataSourceInfo, cube);
-            
-//            if (MetaNameUtil.isAllMemberName(name)) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())) {
-//                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//                } else {
-//                    request.selectAndGroupBy(queryLevel.getSource());
-//                }
-//
-//                request.setWhere(new Where());
-//                if (queryLevel.isParentChildLevel()) {
-//                    expression = new Expression(queryLevel.getParent());
-//                    expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-//                }
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//
-//            } else if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
-//                    && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getSource());
-////                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } else {
-//                result.getQueryNodes().addAll (memberName);
-//            }
-//            else if (queryLevel.isParentChildLevel()){
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getParent());
-//                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } 
         } catch (Exception e) {
             log.error("error occur when get name:" + uniqueNameList + " from level:" + level, e);
             throw new MiniCubeQueryException(e);

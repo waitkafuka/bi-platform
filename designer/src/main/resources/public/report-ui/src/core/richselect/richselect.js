@@ -4,7 +4,7 @@
  * 窗体的宽度可自行设置
  **/
 (function ($) {
-    var defaults = [];
+    var defaults = {};
     var checkStatusCache = {};
     var textCache = {};
     var clickCheckbox = [];
@@ -12,8 +12,10 @@
     function createDom($ele) {
         // 累计的添加
         var length = $('.sxwzbText').length;
-        $('<div class="sxwzbText sxwzbText' + length + '" data-index=' + length + '><p class="sxwzbButton"><span></span></p></div>').appendTo($ele);
-        $('<div class="sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo(document.body);
+        $('<div class="sxwzb sxwzbText sxwzbText' + length + '" data-index=' + length + '>'
+        + '<div class="sxwzbButton"><div></div></div>'
+        + '</div><div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo($ele);
+        // $('<div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo(document.body);
         var $currentContent = $('.sxwzbContent' + length);
         return $currentContent;
     }
@@ -37,9 +39,14 @@
             }
             // 构建分类2
             for (var j = 0, le = children.length; j < le; j++) {
+                var random = Math.floor(Math.random() * 100 + 1);
+                var time = new Date().getTime() + '';
+                var timer = time.slice(time.length - 4) + random;
+                console.log(children[j].name);
+                var idStr = children[j].name + timer;
                 htmlArray.push('<div class="sxwzbType"><div class="sxwzbCategories">'
-                    + '<input type="checkbox" id=' + children[j].name + ' class="sxwzbCheckBoxP">'
-                    + '<label for='+ children[j].name + '>'
+                    + '<input type="checkbox" id=' + idStr + ' class="sxwzbCheckBoxP sxwzbCheckBox">'
+                    + '<label for='+ idStr + '>'
                     +  children[j].caption
                     + '</label>'
                     + '</div><div class="sxwzbSubdivisions">'
@@ -50,10 +57,20 @@
                 }
                 // 构建分类3
                 for (var m = 0, n = grandson.length; m < n; m++) {
-                    checkStatusCache[grandson[m].name] = checkStatusCache[grandson[m].name] || grandson[m].selected;
+                    grandson[m].selected = grandson[m].selected === null ? '' :String(grandson[m].selected);
+                    var selected = grandson[m].selected === 'false'? '': 'true';
+                    checkStatusCache[grandson[m].name] = checkStatusCache[grandson[m].name] || selected;
+                    var string = '';
+                    if (selected) {
+                        string = 'checked';
+                        if (grandson[m].selected == '') {
+                            string += ' disabled';
+                        }
+                    }
+                    var idGName = grandson[m].name + timer;
                     htmlArray.push('<div class="sxwzbSubdivision">'
-                        + '<input class="sxwzbCheckBoxC" data-name="' + grandson[m].name +'" type="checkbox" id=' + grandson[m].name + ' ' + (grandson[m].selected === "true"? "checked": "")+'>'
-                        + '<label for='+ grandson[m].name + '>'
+                        + '<input class="sxwzbCheckBoxC sxwzbCheckBox" data-name="' + grandson[m].name +'" type="checkbox" id=' + idGName + ' ' + string +'>'
+                        + '<label for='+ idGName + '>'
                         +  grandson[m].caption
                         + '</label>'
                         + '</div>'
@@ -74,8 +91,8 @@
         var i = arguments[0] === undefined? $('.sxwzbText').length - 1: i;
         $.each($('.sxwzbContent' + i).find('input[type="checkbox"]:checked'), function(j, item){
             text.push($(item).siblings('label').text());
-        })
-        $('.sxwzbText' + (i) + ' .sxwzbButton span').text(text);
+        });
+        $('.sxwzbText' + (i) + ' .sxwzbButton div').text(text);
     }
 
     // 判断是否为全选
@@ -87,16 +104,69 @@
 
             var checkStatus = ((childNode.length === checkedItem.length)
             && childNode.length > 0)? true: false;
+            if (checkStatus) {
+                var m = 0;
+                $.each(childNode, function(j, child){
+                    if ($(child).prop('disabled')) {
+                        m ++;
+                    }
+                })
+
+                if (m == childNode.length) {
+                    $(item).find('.sxwzbCheckBoxP').prop('disabled', true);
+                }
+            }
             $(item).find('.sxwzbCheckBoxP').prop('checked', checkStatus);
         })
     }
     // 窗体的显示与隐藏
     function bindEvent(ele) {
+        /**
+         * 点击非sxwzb的内容的时候 隐藏窗体
+         */
+        $('body').click(function(e){
+            var target = $(e.target);
+            if (!(target.parents('.sxwzb').length && !target.hasClass('sxwzb'))) {
+                $('.sxwzbContent').hide();
+            }
+        })
+
         ele.delegate($('.sxwzbButton'), 'click', function(e) {
             var target = e.target;
+            if (target == this) {
+                return;
+            }
             var index = $(target).parents('.sxwzbText').attr('data-index');
+            index = index || $(target).attr('data-index');
+            if (index === undefined) {
+                return;
+            }
+            var $currentContent = $('.sxwzbContent' + index);
+            var $currentText = $('.sxwzbText' + index);
+            //var offset = $currentText.offset();
+            //var top = offset.top;
+            //var left = offset.left;
+            //var bHeight = document.documentElement.clientHeight;
+            //var bWidth = document.documentElement.clientWidth;
+            //var contentWidth = $currentContent.outerWidth();
+            //var contentHeight = $currentContent.outerHeight();
+            //var spanWidth = $currentText.outerWidth();
+            //var spanHeight = $currentText.outerHeight();
+            //
+            //left  = left + contentWidth <= bWidth? left: left - contentWidth + spanWidth;
+            //
+            //if (top + contentHeight <= bHeight || top - contentHeight < 0) {
+            //    top = top + spanHeight;
+            //} else {
+            //    top = top - contentHeight;
+            //}
+            // top = top + contentHeight <= bHeight? top + spanHeight: top - contentHeight;
+            //$currentContent.css({
+            //    'left': left + 'px',
+            //    'top': top + 'px'
+            //})
             $('.sxwzbContent' + index).toggle().siblings('.sxwzbContent').hide();
-        })
+        });
     }
 
     function bindChekboxEvent($parent) {
@@ -126,7 +196,9 @@
             if ($self.hasClass('sxwzbCheckBoxP')) {
                 $.each(childNode, function(i, item) {
                     clickCheckbox[index][$(item).attr('data-name')] = $(item).prop('checked')? false: true;
-                    $(item).prop('checked', checkStatus);
+                    if (!$(item).prop('disabled')) {
+                        $(item).prop('checked', checkStatus);
+                    }
                 })
             } else {
                 // 全部选中时，选中前面的大类
@@ -159,7 +231,7 @@
             renderInitStatus(Number(index));
             // callback
             if (options[index].clickCallback) {
-                options[index].clickCallback(idArray.join(''));
+                options[index].clickCallback(idArray.join(','));
             }
             // 重置clickCheckbox
             $.extend(checkStatusCache, clickCheckbox[index]);
@@ -195,39 +267,25 @@
      *   窗体定位
      */
     function setStyle($content) {
-        var index = $content.selector.replace('.sxwzbContent', '');
-        var $currentText = $('.sxwzbText' + index);
-        var offset = $currentText.offset();
-        var top = offset.top;
-        var left = offset.left;
-        var bHeight = document.documentElement.clientHeight;
-        var bWidth = document.documentElement.clientWidth;
-        var contentWidth = $content.outerWidth();
-        var contentHeight = $content.outerHeight();
-        var spanWidth = $currentText.outerWidth();
-        var spanHeight = $currentText.outerHeight();
-
-        left  = left + contentWidth <= bWidth? left: left - contentWidth + spanWidth;
-        top = top + contentHeight <= bHeight? top + spanHeight: top - contentHeight;
-        $content.css({
-            'left': left + 'px',
-            'top': top + 'px'
-        })
         // 绑定事件
         bindChekboxEvent($content);
     }
     $.fn.screenXingWeiZhiBiao = function (options) {
-        defaults = defaults.concat(options);
-        // $.extend(defaults, options);
         var parent = this;
         bindEvent(parent);
 
         return parent.each(function(i, item){
-            var $content = createDom($(this), options);
+            var length = $('.sxwzbText').length;
+            if ($('.sxwzbContent' + length).length) {
+                $('.sxwzbContent' + length).remove();
+                delete defaults[length];
+            }
+            defaults[length] = options[i];
+            var $content = createDom($(this));
             if (options[i] && options[i].data) {
                 // render数据
                 $content.append(renderCheckbox(options[i].data));
-                setStyle($content, options);
+                setStyle($content);
                 judgeCheckbox();
                 renderInitStatus();
             } else {

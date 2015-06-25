@@ -6,13 +6,19 @@
 define(['url'], function (Url) {
 
     return Backbone.Model.extend({
-        initialize: function () {
 
-        },
+        /**
+         * 构造函数
+         *
+         * @constructor
+         */
+        initialize: function () {},
 
         /**
          * 发布报表
          *
+         * @param {string} type ajax请求类型
+         * @param {string} reportId 报表参数
          * @param {Function} success 回调函数
          * @public
          */
@@ -26,10 +32,11 @@ define(['url'], function (Url) {
             });
         },
 
-
         /**
          * 预览报表
          *
+         * @param {string} type ajax请求类型
+         * @param {string} reportId 报表参数
          * @param {Function} success 回调函数
          * @public
          */

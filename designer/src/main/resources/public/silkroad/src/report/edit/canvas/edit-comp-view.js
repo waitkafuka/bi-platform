@@ -1706,8 +1706,8 @@ define([
                         title: '其他操作',
                         content: html,
                         dialog: {
-                            width: 320,
-                            height: 170,
+                            width: 350,
+                            height: 200,
                             resizable: false,
                             buttons: [
                                 {

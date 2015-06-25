@@ -71,11 +71,11 @@ define([
                 "clzKey": "TEXT_LABEL",
                 "tpl": "符合条件的数据只显示#{currRecordCount}条",
                 "dataInitOpt": { "hide": true }
-            },
-            {
-                "clzType": "VUI",
-                "clzKey": "RICH_SELECT"
             }
+            //{
+            //    "clzType": "VUI",
+            //    "clzKey": "RICH_SELECT"
+            //}
         ];
         var processRenderData = function (dynamicData) {
             var id = dynamicData.rootId + dynamicData.serverData.id;
@@ -85,8 +85,8 @@ define([
                 "mainTable": id + "-vu-table",
                 "breadcrumb": id + "-vu-table-breadcrumb",
                 "download": id + "-vu-table-download",
-                "countInfo": id + "-vu-table-count",
-                richSelect: id + '-vu-table-rich-select'
+                "countInfo": id + "-vu-table-count"
+                //richSelect: id + '-vu-table-rich-select'
             };
 
             // 如果有拖拽区域
@@ -104,7 +104,7 @@ define([
             data[2].id = id + '-vu-table-breadcrumb';
             data[3].id = id + '-vu-table-download';
             data[4].id = id + '-vu-table-count';
-            data[5].id = id + '-vu-table-rich-select';
+            //data[5].id = id + '-vu-table-rich-select';
             return data;
         };
 

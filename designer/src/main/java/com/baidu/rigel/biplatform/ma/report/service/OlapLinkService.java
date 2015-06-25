@@ -8,6 +8,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 
 /**
  * 多维报表跳转操作相关service
@@ -41,12 +42,15 @@ public interface OlapLinkService {
     public List<Dimension> getOlapDims(ReportDesignModel olapTableDesignModel, ExtendArea olapTableArea);
 
     /**
-     * 根据传入的uniqueName，解析并构造跳转所需的条件对象
+     * 根据传入的uniqueName和公共条件，解析并构造跳转所需的条件对象
      * 
      * @param uniqueName uniqueName
+     * @param olapTableDesignModel olapTableDesignModel
+     * @param queryContext queryContext
      * @return 构造完毕的条件对象
      */
-    public Map<String, Map<String, String>> buildConditionMapFromRequestParams(String uniqueName);
+    public Map<String, Map<String, String>> buildConditionMapFromRequestParams(String uniqueName,
+            ReportDesignModel olapTableDesignModel, QueryContext queryContext);
 
     /**
      * 根据跳转对象和前端传入的条件对象，构建LinkBridgeParams对象

@@ -26,8 +26,7 @@ define(
         //------------------------------------------
         var View = Backbone.View.extend({
             events: {
-                'click .j-set-link': 'dialogLinkSetting',
-                'change .j-table-link-set-plane-table': 'showSetParamBtn'
+                'click .j-set-link': 'dialogLinkSetting'
             },
 
             //------------------------------------------
@@ -87,6 +86,10 @@ define(
                 });
                 $ok.bind('click', function () {
                     that.saveParamRelation();
+                });
+                $('.j-table-link-set-plane-table').unbind();
+                $('.j-table-link-set-plane-table').change(function (event) {
+                    that.showSetParamBtn(event);
                 });
             },
 

@@ -223,8 +223,8 @@ $namespace('di.shared.model');
                  },
             CHECK: function (data) { return data; },
             SELECT: function (data) { return data; },
-            RICH_SELECT_DATA: doParse,
-            RICH_SELECT_CHANGE: doParse
+            RICH_SELECT_DATA: function (data) { return data; },
+            RICH_SELECT_CHANGE: function (data) { return data; }
         }
     );
 
