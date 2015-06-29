@@ -20,6 +20,10 @@ define([
             //------------------------------------------
             // 公共方法区域
             //------------------------------------------
+
+            /**
+             * 事件绑定
+             */
             events: {
                 'click .j-extend-line-link': 'extendLine',
                 'click .j-add-address': '_addReserveAddress',
@@ -29,6 +33,12 @@ define([
                 'focus .j-input-password': '_clearPassword',
                 'blur .j-input-password': '_revertPassword'
             },
+
+            /**
+             * 构造函数
+             *
+             * @constructor
+             */
             initialize: function (option) {
                 var that = this;
                 var modelData = {};
@@ -39,6 +49,7 @@ define([
                 if (option.groupId !== undefined) {
                     modelData.groupId = option.groupId;
                 }
+
                 that.model = new Model(modelData);
                 that.model.set({
                     isAdd: option.isAdd,
@@ -55,9 +66,16 @@ define([
                         var $groupItem = $('.j-data-sources-info-group-name');
                         var groupData = model.get('groupData');
                         var selHtml = [];
+
                         if (model.get('isAdd')) {
-                            for (var i = 0, iLen = groupData.length; i < iLen; i ++) {
-                                selHtml.push('<option value="' + groupData[i].id + '">' + groupData[i].name + '</option>');
+                            for (var i = 0, iLen = groupData.length; i < iLen; i ++ ) {
+                                selHtml.push(
+                                    '<option value="'
+                                    + groupData[i].id
+                                    + '">'
+                                    + groupData[i].name
+                                    + '</option>'
+                                );
                             }
                             $groupItem.find('select').append(selHtml.join(''));
                         }
@@ -92,7 +110,7 @@ define([
              * （通过name来做）（如果验证失败返回false）
              *
              * @public
-             * @return {Object}
+             * @return {bool|Object} data|validateResult
              */
             getFormData: function () {
                 // 有name的表单项
@@ -102,7 +120,6 @@ define([
                 var num255 = '25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]';
                 var hostAndPortRule = ''
                     + '('
-
                     // ip:端口 模式
                     + '^'
                     // 开头是http，https 加 "://" 或者没有
@@ -115,9 +132,7 @@ define([
                     + '\\.'
                     + '(' + num255 + ')'
                     + '(:\\d{0,5})?$'
-
                     + ')|('
-
                     // 域名模式
                     + '^('
                           // 开头是http，https 加 "://" 或者没有
@@ -127,14 +142,13 @@ define([
                     + ')'
                     // [a-z]{2} 一种偷懒的写法，包括cn（中国），jp（日本）等，实在太多写不过来
                     + '([a-z]{2}|aero|arpa|biz|com|coop|edu|gov|info|int|jobs|mil|museum|name|nato|net|org|pro|travel)$'
-
                     + ')';
 
                 // 验证规则
                 var validateConfig = {
                     'name': /.+/,
-                    // 数据库地址
-                    // TODO:修改为更全更合理的校验
+//                    数据库地址
+//                    TODO:修改为更全更合理的校验
 //                    'hostAndPort': new RegExp(hostAndPortRule),
                     'dbInstance': /.+/,
                     'dbUser': /.+/,
@@ -148,12 +162,14 @@ define([
                     var $validateMessage = $item.next();
                     var attrName = $item.attr('name');
                     var validateRule = validateConfig[attrName];
+
                     if (attrName === 'groupId' && $item.is('input')) {
                         data[attrName] = $item.attr('group-id');
                     }
                     else {
                         data[attrName] = $item.val();
                     }
+
                     if (validateRule && validateRule.constructor == RegExp) {
                         if (validateRule.test(data[attrName])) {
                             $validateMessage.addClass('hide');
@@ -167,6 +183,7 @@ define([
 
                     // 后续支持备库地址需要 改进代码
                 });
+
                 var advancedItem = this.$el.find('.j-advanced-properties').find('.j-item');
                 var advancedProperties = {};
                 advancedItem.each(function() {
@@ -220,25 +237,24 @@ define([
             _revertPassword: function () {
                 var model = this.model;
                 var isAdd = this.model.get('isAdd');
-                var $el = this.$el;
 
                 if (!isAdd) {
                     var $el = $('.' + CLASS.J_INPUT_PASSWORD);
                     var val = $.trim($el.val());
                     if (val == '') {
                         $el.val(this.model.get('dbData').dbPwd);
-                        this.model.set({
+                        model.set({
                             isEncrypt: true
                         });
                     }
                     else {
-                        this.model.set({
+                        model.set({
                             isEncrypt: false
                         });
                     }
                 }
                 else {
-                    this.model.set({
+                    model.set({
                         isEncrypt: false
                     });
                 }

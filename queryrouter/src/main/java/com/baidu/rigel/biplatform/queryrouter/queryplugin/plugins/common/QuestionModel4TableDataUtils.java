@@ -22,14 +22,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.util.CollectionUtils;
+
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
-import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlConstants;
@@ -50,11 +52,13 @@ public class QuestionModel4TableDataUtils {
      * 
      * @return List needcolumns hashmap
      */
-    public static List<SqlColumn> getNeedColumns(
+    private static List<SqlColumn> getNeedColumns(
             Map<String, SqlColumn> allColums,
-            Map<AxisType, AxisMeta> axisMetas, Cube cube) {
+            Map<AxisType, AxisMeta> axisMetas) {
         Set<SqlColumn> needColumns = new HashSet<SqlColumn>();
-
+        if (CollectionUtils.isEmpty(allColums)) {
+            return new ArrayList<SqlColumn>(needColumns);
+        }
         // 获取指标元数据
         AxisMeta axisMetaMeasures = (AxisMeta) axisMetas.get(AxisType.COLUMN);
         axisMetaMeasures.getQueryMeasures().forEach((measureName) -> {
@@ -77,6 +81,20 @@ public class QuestionModel4TableDataUtils {
     }
 
     /**
+     * 获取questionModel中需要查询的Columns
+     * 
+     * @param QuestionModel
+     *            questionModel
+     * 
+     * @return List needcolumns hashmap
+     */
+    public static List<SqlColumn> getNeedColumns(QuestionModel questionModel) {
+        Map<String, SqlColumn> allColums = QuestionModel4TableDataUtils.getAllCubeColumns(questionModel);
+        Map<AxisType, AxisMeta> axisMetas = questionModel.getAxisMetas();
+        return QuestionModel4TableDataUtils.getNeedColumns(allColums, axisMetas);
+    }
+
+    /**
      * 获取指标及维度中所有的字段信息Formcube
      * 
      * @param cube
@@ -84,8 +102,9 @@ public class QuestionModel4TableDataUtils {
      * @return HashMap allcolumns hashmap
      */
     public static HashMap<String, SqlColumn> getAllCubeColumns(
-            QuestionModel questionModel, Cube cube) {
-        MiniCube miniCube = (MiniCube) cube;
+            QuestionModel questionModel) {
+        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+        MiniCube miniCube = (MiniCube) configQuestionModel.getCube();
         HashMap<String, SqlColumn> allColumns = new HashMap<String, SqlColumn>();
         // 获取指标元数据
         miniCube.getMeasures().forEach(
@@ -118,7 +137,7 @@ public class QuestionModel4TableDataUtils {
                             String name = k;
                             String tableFieldName = oneDimensionSource
                                     .getName();
-                            Dimension dimension = cube.getDimensions().get(
+                            Dimension dimension = miniCube.getDimensions().get(
                                     name);
                             String tableName = null;
                             String sourceTableName = null;

@@ -61,7 +61,7 @@ public class ConfigInfoUtils {
             LOG.info("load serveraddress from properties:{}", SERVERADDRESS);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            throw new IllegalStateException("不能获取ac配置文件");
+            // throw new IllegalStateException("不能获取ac配置文件");
         } finally {
             if (inStream != null) {
                 try {
@@ -75,13 +75,12 @@ public class ConfigInfoUtils {
     /**
      * 设置服务器地址
      * 
-     * @param serverAddress
-     *            Tesseract服务器地址
+     * @param serverAddress Tesseract服务器地址
      */
     public static void setServerAddress(String serverAddress) {
         ConfigInfoUtils.SERVERADDRESS = serverAddress;
     }
-    
+
     /**
      * get ServerAddressByProperty
      * 

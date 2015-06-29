@@ -160,13 +160,20 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
                 item.setSchemaId (cube.getSchema ().getId ());
                 columns.add (item);
             }
+            List<Item> tmp = Lists.newArrayList ();
             // 对于计算列，需要保留配置
             for (Item item : logicModel.getColumns ()) {
-                Measure m = cube.getMeasures ().get (item.getOlapElementId ());
-                if (m.getType () == MeasureType.CAL || m.getType () == MeasureType.CALLBACK) {
-                    columns.add (item);
+                if (columns.contains (item)) {
+                    columns.remove (item);
+                    tmp.add (item);
+                } else {
+                    Measure m = cube.getMeasures ().get (item.getOlapElementId ());
+                    if (m.getType () == MeasureType.CAL || m.getType () == MeasureType.CALLBACK) {
+                        columns.add (item);
+                    }
                 }
             }
+            columns.addAll (0, tmp);
             logicModel.resetColumns (columns.toArray (new Item[0]));
         }
     }

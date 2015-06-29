@@ -67,8 +67,8 @@ public class SearchIndexResultSet implements TesseractResultSet<SearchIndexResul
     public boolean next() throws IOException {
         boolean result = false;
         
-        if (CollectionUtils.isNotEmpty(dataList)) {
-            this.currRecord=this.dataList.remove(0);
+        if (CollectionUtils.isNotEmpty(getDataList ())) {
+            this.currRecord=getDataList ().remove(0);
             if (this.currRecord == null) {
                 result = false;
             } else {

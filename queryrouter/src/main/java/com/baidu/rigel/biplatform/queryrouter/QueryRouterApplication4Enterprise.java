@@ -128,15 +128,18 @@ public class QueryRouterApplication4Enterprise extends SpringBootServletInitiali
     private static void initAuthStrategyRepositry() {
         InputStream input = null;
         try {
-            String configFile = System.getProperty("biplatform.auth.server");
-            if (StringUtils.isEmpty(configFile)) {
-                logger.error("please set -Dbiplatform.auth.server=XXX for jvm params");
-                logger.error("can not provider auth server file, application will exit");
-                System.exit(-1);
-            }
-            input = new FileInputStream(configFile);
             Properties properties = new Properties();
-            properties.load(input);
+            String authConfigFile = System.getProperty("biplatform.auth.server");
+            if (StringUtils.isEmpty(authConfigFile)) {
+                authConfigFile = "default={key: \"default\"}";
+                logger.warn("please set -Dbiplatform.auth.server=XXX for jvm params");
+                logger.warn("can not provider auth server file, application will started by default:"
+                        + authConfigFile);
+                properties.put("default", "{key: \"default\"}");
+            } else {
+                input = new FileInputStream(authConfigFile);
+                properties.load(input);
+            }
             properties.stringPropertyNames().forEach(key -> {
                 String strategy = properties.getProperty(key);
                 try {

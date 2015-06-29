@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -42,8 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
-import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
-import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
@@ -484,9 +482,11 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         }
 
         ReportDesignModel model;
+        ReportDesignModel oriModel;
         try {
             // 根据运行态取得设计模型
             model = getRealModel(reportId, runTimeModel);
+            oriModel = DeepcopyUtils.deepCopy(model);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -503,6 +503,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         Schema schema = model.getSchema();
         Map<String, ? extends Cube> cubes = schema.getCubes();
         Cube cube = cubes.get(area.getCubeId());
+                   
         // 获取上一次查询的QueryAction
         QueryAction queryAction = runTimeModel.getPreviousQueryAction(areaId);
         // 获取排序条件
@@ -525,10 +526,12 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
         }
 
+        runTimeModel.setModel(model);
         // 对返回结果进行处理，用于表、图显示
         result =
                 queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, area, resultSet, areaContext,
                         queryAction);
+        runTimeModel.setModel(oriModel);
         // 维护平面表分页信息
         if (result.getStatus() == 0) {
             Map<String, Object> data = (Map<String, Object>) result.getData();

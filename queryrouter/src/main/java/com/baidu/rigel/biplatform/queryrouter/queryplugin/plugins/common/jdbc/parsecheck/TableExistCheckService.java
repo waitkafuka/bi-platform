@@ -42,9 +42,9 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpre
  * @author 罗文磊
  *
  */
-@Service("tableExistCheck")
+@Service("tableExistCheckService")
 @Scope("prototype")
-public class TableExistCheck {
+public class TableExistCheckService {
 
     /**
      * mysql中tablename的字段标示
@@ -67,10 +67,6 @@ public class TableExistCheck {
      */
     public String getExistTableList(String cubeSource,
             SqlDataSourceInfo dataSourceInfo) {
-        if (cubeSource.indexOf(SqlConstants.COMMA) < 0) {
-            // 无多事实表的情况
-            return cubeSource;
-        }
         // 多事实表的情况
         List<String> result = new ArrayList<String>();
         Set<String> set = new HashSet<String>(Arrays.asList(cubeSource

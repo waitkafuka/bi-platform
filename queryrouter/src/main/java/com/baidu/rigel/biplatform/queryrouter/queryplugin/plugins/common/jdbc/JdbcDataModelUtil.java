@@ -25,7 +25,6 @@ import javax.annotation.Resource;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.TableData;
@@ -77,17 +76,12 @@ public class JdbcDataModelUtil {
 
         List<Map<String, Object>> rowBasedList = jdbcHandler.queryForList(
                 sqlExpression, dataSourceInfo);
-        // getAll columns from Cube
-        Map<String, SqlColumn> allColums = QuestionModel4TableDataUtils
-                .getAllCubeColumns(questionModel, configQuestionModel.getCube());
 
         // get need columns from AxisMetas
-        List<SqlColumn> needColums = QuestionModel4TableDataUtils
-                .getNeedColumns(allColums, configQuestionModel.getAxisMetas(),
-                        (MiniCube) configQuestionModel.getCube());
+        List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(questionModel);
 
         // init DataModel
-        DataModel dataModel = this.initTableDataModel(needColums);
+        DataModel dataModel = this.getEmptyDataModel(needColums);
         // 设置DataModel的ColBased Data
         this.fillModelTableData(dataModel, needColums, rowBasedList);
 
@@ -101,17 +95,20 @@ public class JdbcDataModelUtil {
     }
 
     /**
-     * initTableDataModel,初始化dataModel
+     * getEmptyDataModel,初始化dataModel
      * 
-     * @param List<SqlColumn> needColums
+     * @param List<SqlColumn> needColums 需要select的字段
      * @return DataModel DataModel
      */
-    public DataModel initTableDataModel(List<SqlColumn> needColums) {
+    public DataModel getEmptyDataModel(List<SqlColumn> needColums) {
         DataModel dataModel = new DataModel();
         dataModel.setTableData(new TableData());
         dataModel.getTableData().setColumns(new ArrayList<Column>());
         dataModel.getTableData().setColBaseDatas(
                 new HashMap<String, List<String>>());
+        if (needColums == null || needColums.isEmpty()) {
+            return dataModel;
+        }
         needColums.forEach((colDefine) -> {
             TableData.Column colum = new TableData.Column(colDefine.getColumnKey(),
                     colDefine.getTableFieldName(), colDefine.getCaption(),

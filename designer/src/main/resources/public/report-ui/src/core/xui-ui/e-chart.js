@@ -50,8 +50,16 @@
         },
         // 地图值域色阶
         dataRangeColor : [
-            '#F06112',
-            '#29B2DC'
+            '#D87256',
+            '#E5977C',
+            '#E5B483',
+            '#D6CE90',
+            '#A5C491',
+            '#9FCCC5',
+            '#B4E0EA',
+            '#D8F0F6',
+            '#EFF9FD',
+            '#F7FBFF'
         ],
         // 轴线
         lineStyle: {
@@ -1081,20 +1089,45 @@
             this.$setupYAxis(options);
         }
         else if (this._chartType === 'map') {
-            // TODO:需要后端返回最大最小值
-            if (this._mapMinValue) {
-                this._mapMinValue = 0;
+            // TODO:要考虑到负数
+            //[
+            //    {start: 1000},
+            //    {start: 900, end: 1000},
+            //    {start: 800, end: 900},
+            //    {start: 700, end: 800},
+            //    {start: 10, end: 200, label: '10 到 200（自定义label）'},
+            //    {start: 5, end: 5, label: '5（自定义特殊颜色）', color: 'black'},
+            //    {end: this._mapMinValue}
+            //]
+            var min = this._mapMinValue;
+            var max = this._mapMaxValue;
+            var split = (max - min) / 10;
+            var splitList = [
+                {
+                    start: max
+                }
+            ];
+            var i = 1;
+            while (i <= 8) {
+                var item = {
+                    start: max - split * i,
+                    end: max - split * (i - 1)
+                }
             }
+            splitList.push({
+                end: min
+            });
+
+            if (maxValue)
             options.dataRange = {
-                min: this._mapMinValue,
-                max: this._mapMaxValue,
                 x: 80,
                 y: 'bottom',
                 text:['高','低'],           // 文本，默认为数值文本
                 calculable: true,
                 // 设置地图值域字体
                 textStyle: styleConfiguration.dataRangeStyle,
-                color: styleConfiguration.dataRangeColor
+                color: styleConfiguration.dataRangeColor,
+                splitList: splitList
             };
         }
         if (this._chartType === 'pie') {

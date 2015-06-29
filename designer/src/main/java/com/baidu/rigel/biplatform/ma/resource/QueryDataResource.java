@@ -414,17 +414,28 @@ public class QueryDataResource extends BaseResource {
                 logger.info("[INFO]--- ---无法获取多维表运行态模型, id :", fromReportId);
                 throw new IllegalStateException("[INFO]--- ---无法获取多维表运行态模型, id :" + fromReportId);
             }
-            ExtendArea[] extendAreas = model.getExtendAreaList();
-            Map<String, PlaneTableCondition> planeTableConditions = 
-                    model.getPlaneTableConditions();
-            Cube cube = null;
-            // TODO 该地方必须修改，因为此处仅考虑一个cube，获取方法是从多个extendArea中取平面表对应的那个
-            for (ExtendArea extendArea : extendAreas) {
-                if (extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
-                    cube = model.getSchema().getCubes().get(extendArea.getCubeId());
-                    break;
+            
+            // 多维表cube
+            Cube multiCube = null;
+            ExtendArea[] multiExtendAreas = fromRuntimeModel.getModel().getExtendAreaList();
+            // 获取多维表对应的因为此处仅考虑一个cube
+            for (ExtendArea extendArea : multiExtendAreas) {
+                if (extendArea != null) {
+                    multiCube = fromRuntimeModel.getModel().getSchema().getCubes().get(extendArea.getCubeId());                    
                 }
             }
+            
+            // 平面表cube
+            Cube planeCube = null;
+            ExtendArea[] planeExtendAreas = model.getExtendAreaList();
+            for (ExtendArea extendArea : planeExtendAreas) {
+                if (extendArea != null && extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
+                    planeCube = model.getSchema().getCubes().get(extendArea.getCubeId());
+                }
+            }
+            
+            Map<String, PlaneTableCondition> planeTableConditions = 
+                    model.getPlaneTableConditions();
             Map<String, Object> fromParams = fromRuntimeModel.getContext().getParams();
 //            runtimeModel.getContext().getParams().putAll(
 //                    PlaneTableUtils.handelTimeCondition(cube, fromParams));
@@ -433,27 +444,46 @@ public class QueryDataResource extends BaseResource {
                 Map<String, LinkParams> linkParams = (Map<String, LinkParams>) fromParams.get("linkBridgeParams");
                 for (String key : linkParams.keySet()) {
                     LinkParams linkParam = linkParams.get(key);                   
-                    
+                    if (StringUtils.isEmpty(linkParam.getOriginalDimValue()) ||
+                            StringUtils.isEmpty(linkParam.getUniqueName())) {
+                        continue;
+                    }
                     String newValue = null;
                     String planeTableConditionKey = null;
                     try {
-                        for (String conditionKey : planeTableConditions.keySet()) {
-                            if (planeTableConditions.get(conditionKey).getName().
-                                    equals(linkParam.getParamName())) {
-                                planeTableConditionKey = conditionKey;
+                        Map<String, String> planeTableCond = Maps.newHashMap();
+                        planeTableConditions.forEach( (k, v) -> {
+                            planeTableCond.put(v.getName(), v.getElementId());
+                            planeTableCond.put(v.getElementId(), v.getName());
+                        });
+                        planeTableConditionKey = planeTableCond.get(linkParam.getParamName());
+//                        for (String conditionKey : planeTableConditions.keySet()) {
+//                            if (planeTableConditions.get(conditionKey).getName().
+//                                    equals(linkParam.getParamName())) {
+//                                planeTableConditionKey = conditionKey;
+//                            }
+//                        }
+                        if (linkParam.getOriginalDimValue() != null && PlaneTableUtils.isTimeDim(planeCube, planeTableConditionKey)) {
+                            // 如果是普通时间JSON字符串
+                            if (PlaneTableUtils.isTimeJson(linkParam.getOriginalDimValue())) {
+                                newValue = linkParam.getOriginalDimValue();
+                            } else {
+                                // 如果不是规范的时间JSON字符串，则需特殊处理
+                                newValue = PlaneTableUtils.convert2TimeJson(linkParam.getOriginalDimValue(), fromParams);
                             }
-                        }
-                        if (linkParam.getOriginalDimValue() != null && PlaneTableUtils.isTimeJson(linkParam.getOriginalDimValue())) {
-                            newValue = linkParam.getOriginalDimValue();
                         } else {
-                            newValue = this.handleReqParams4PlaneTable(cube, model, linkParam.getUniqueName(), requestParams, securityKey);                            
+                            newValue = 
+                                    this.handleReqParams4PlaneTable(multiCube, planeTableCond, 
+                                            linkParam.getUniqueName(), requestParams, securityKey);                                                        
                         }
                     } catch (Exception e) {
                         logger.error("处理平面表参数出错，请检查!");
                         throw new RuntimeException("处理平面表参数出错，请检查!");
                     }
-                    runtimeModel.getContext().getParams().put(key, newValue);
-                    if (planeTableConditionKey != null) {
+                    if (newValue != null) {
+                        runtimeModel.getContext().getParams().put(key, newValue);                        
+                    }
+                    if (planeTableConditionKey != null && newValue != null) {
                         runtimeModel.getContext().getParams().put(planeTableConditionKey, newValue);
                     }
                 }
@@ -944,9 +974,14 @@ public class QueryDataResource extends BaseResource {
          */
         Map<String, Object> tmp = QueryUtils.resetContextParam(request, model);
         tmp.forEach((k, v) -> {
-            if (!runTimeModel.getLocalContextByAreaId(areaId).getParams().containsKey(k)) {
+            if (runTimeModel.getContext().getParams().containsKey("fromReportId") 
+                    && runTimeModel.getContext().getParams().containsKey("toReportId")) {
+                if (!runTimeModel.getLocalContextByAreaId(areaId).getParams().containsKey(k)) {
+                    runTimeModel.getLocalContextByAreaId(areaId).put(k, v);
+                }                 
+            } else {
                 runTimeModel.getLocalContextByAreaId(areaId).put(k, v);
-            } 
+            }
         });
         /**
          * 2. 获取区域对象
@@ -2116,7 +2151,7 @@ public class QueryDataResource extends BaseResource {
         response.setContentType("application/vnd.ms-excel;charset=GBK");
         response.setContentType("application/x-msdownload;charset=GBK");
         // 写入文件
-        final String fileName = report.getName() + timeRange.toString();
+        final String fileName = report.getName() + "_" +  timeRange.toString();
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf8") + ".csv");
         byte[] content = csvString.getBytes("GBK");
         response.setContentLength(content.length);
@@ -2146,11 +2181,11 @@ public class QueryDataResource extends BaseResource {
         }
         ExtendArea targetArea = report.getExtendById(areaId);
         Cube cube = report.getSchema().getCubes().get(targetArea.getCubeId());
-        ReportRuntimeModel model = reportModelCacheManager.getRuntimeModel(reportId);
+        final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
 
-        ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, model);
+        ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, runtimeModel);
         areaContext.getParams().put(Constants.NEED_LIMITED, false);
-        QueryAction action = model.getLinkedQueryAction();
+        QueryAction action = runtimeModel.getLinkedQueryAction();
         if (action == null) {
             action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
         }
@@ -2176,8 +2211,12 @@ public class QueryDataResource extends BaseResource {
                 });
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
-        if (model.getDrillDownQueryHistory() != null && !model.getDrillDownQueryHistory().isEmpty()) {
-            for (DrillDownAction queryAction : model.getDrillDownQueryHistory().values()) {
+        ReportDesignModel model = runtimeModel.getModel ();
+        if (runtimeModel.getDrillDownQueryHistory() != null && !runtimeModel.getDrillDownQueryHistory().isEmpty()) {
+            for (DrillDownAction queryAction : runtimeModel.getDrillDownQueryHistory().values()) {
+                setQueryParams (areaContext, model, queryAction.action.getColumns ());
+                setQueryParams (areaContext, model, queryAction.action.getRows ());
+                setQueryParams (areaContext, model, queryAction.action.getSlices ());
                 ResultSet subData =
                         reportModelQueryService.queryDatas(report, queryAction.action, true, true,
                                 areaContext.getParams(), securityKey);
@@ -2200,6 +2239,31 @@ public class QueryDataResource extends BaseResource {
         rs.setStatus(ResponseResult.SUCCESS);
         rs.setStatusInfo("successfully");
         return rs;
+    }
+
+    /**
+     * 跟进下钻历史纪录，查询增量数据
+     * @param areaContext
+     * @param model
+     * @param items
+     */
+    private void setQueryParams(ExtendAreaContext areaContext, ReportDesignModel model, Map<Item, Object> items) {
+        for (Map.Entry<Item , Object>  entry : items.entrySet ()) {
+            if (entry.getValue () != null) {
+                String tmp = null;
+                if (entry.getValue () instanceof String[]) {
+                    tmp = ((String[]) entry.getValue ())[0];
+                } else {
+                    tmp = entry.getValue ().toString ();
+                }
+                List<ReportParam> params = model.getParams ().values ().stream ()
+                        .filter (p -> p.getElementId ().equals (entry.getKey ().getOlapElementId ()))
+                        .collect (Collectors.toList ());
+                for (ReportParam p : params) {
+                    areaContext.getParams ().put (p.getName (), MetaNameUtil.getNameFromMetaName (tmp));
+                }
+            }
+        }
     }
 
     // @RequestMapping(value = "/test", method = {RequestMethod.POST , RequestMethod.GET})
@@ -2431,12 +2495,13 @@ public class QueryDataResource extends BaseResource {
      * @param params
      * @return
      */
-    private String handleReqParams4PlaneTable(Cube cube, ReportDesignModel model, String uniqueName,
+    private String handleReqParams4PlaneTable(Cube cube, Map<String, String> planeTableCond, String uniqueName,
             Map<String, String> params, String securityKey) throws DataSourceOperationException {
+
         if (!ParamValidateUtils.check("cube", cube)) {
             return null;
         }
-        if (!ParamValidateUtils.check("model", model)) {
+        if (!ParamValidateUtils.check("planeTableCond", planeTableCond)) {
             return null;
         }
         if (!ParamValidateUtils.check("uniqueName", uniqueName)) {
@@ -2467,12 +2532,16 @@ public class QueryDataResource extends BaseResource {
         if (isCallbackLevel(tmpLevel)) {
             // 处理callback
             CallbackLevel callbackLevel = (CallbackLevel) tmpLevel;
-            String dimId = callbackLevel.getDimension().getId();
-            final Map<String, String> paramMap = Maps.newHashMap();
-            model.getPlaneTableConditions().forEach((n, p) ->{
-                paramMap.put(p.getElementId(), p.getName());
-            });
-            callbackLevel.getCallbackParams().put(paramMap.get(dimId), tmp[tmp.length - 1]);
+            Map<String, String> callbackParams = callbackLevel.getCallbackParams();
+            String callbackParam = null;
+            // TODO是否考虑多个参数问题
+            for (String key : callbackParams.keySet()) {
+                if (planeTableCond.containsKey(key)) {
+                    callbackParam = key;
+                    break;
+                }
+            }
+            callbackLevel.getCallbackParams().put(callbackParam, tmp[tmp.length - 1]);
             List<Member> members = callbackLevel.getMembers(oriCube, dsInfo, params);
             for (Member member : members) {
                 if (member.getUniqueName().equals(uniqueName)) {
@@ -2484,8 +2553,9 @@ public class QueryDataResource extends BaseResource {
         } else {
             // 如果有孩子结点，则要取到孩子结点数值
             if ((dim.getLevels().size() > tmp.length - 1)) {
-                Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - 1];
+                Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - dim.getLevels().size()];
                 List<Member> members = level.getMembers(oriCube, dsInfo, params);
+                
                 for (Member member : members) {
                     if (member.getUniqueName().equals(uniqueName)) {
                         List<Member> childMembers = member.getChildMembers(oriCube, dsInfo, params);

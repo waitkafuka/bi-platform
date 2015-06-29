@@ -185,7 +185,7 @@ define([
                     html.join('')
                 );
                 var $dom = $formLine.removeClass('hide j-root-set-group-template');
-                $target.next('span').after($dom.addClass('j-item'));
+                $('.j-regexps-validate').before($dom.addClass('j-regexps-item'));
             },
 
             /**
@@ -195,7 +195,7 @@ define([
              */
             deleteFormLine: function (event) {
                 var $target = $(event.target);
-                $target.parents('.j-item').remove();
+                $target.parents('.j-regexps-item').remove();
             },
 
             /**
@@ -246,7 +246,7 @@ define([
                 var that = this;
                 var selector = '.j-con-cube-list .j-item.selected';
                 var $selectedTables = this.$el.find(selector);
-                var $regexps = this.$el.find('.j-root-set-group .j-item');
+                var $regexps = this.$el.find('.j-root-set-group .j-regexps-item');
                 var data = {};
 
                 if ($selectedTables.length == 0) {

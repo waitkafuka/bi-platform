@@ -155,6 +155,8 @@ public class RelationDBConnectionServiceImplTest {
     	ds.setHostAndPort("127.0.0.1:3306");
     	
     	Assert.assertNotNull(dsConnService.parseToDataSourceInfo(ds, securityKey));
-    	
+        // 设置正确的数据库前缀
+        DataSourceType.H2.setPrefix("jdbc:h2:tcp://");  
+        DataSourceType.H2.setDriver("org.h2.Driver");
 	}
 }

@@ -43,15 +43,19 @@ $namespace('di.shared.vui');
      *
      * @private
      * @param {Object} options 参数
+     * @param {HTMLElement} options.el 容器
      */
     function constructor(options) {
         this._eMain = options.el;
         this.$renderFlag = false;
-    };
+    }
 
-    RICH_SELECT_CLASS.init = function () {
-
-    };
+    /**
+     * 构造函数
+     *
+     * @public
+     */
+    RICH_SELECT_CLASS.init = function () {};
 
     /**
      * 渲染控件
@@ -76,12 +80,14 @@ $namespace('di.shared.vui');
             );
             that.$renderFlag = true;
         }
-
     };
 
-    RICH_SELECT_CLASS.dispose = function () {
-    };
-
+    /**
+     * 析构
+     *
+     * @public
+     */
+    RICH_SELECT_CLASS.dispose = function () {};
 
 })();
 

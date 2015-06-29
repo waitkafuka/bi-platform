@@ -224,7 +224,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
      * @param dataSourceInfo
      * @return QueryRequest
      */
-    private QueryRequest buildQueryRequest(Cube cube, MiniCubeLevel queryLevel, Member parentMember,
+    protected QueryRequest buildQueryRequest(Cube cube, MiniCubeLevel queryLevel, Member parentMember,
             DataSourceInfo dataSourceInfo) {
         // 查询节点信息需要分2次查询，
         // 1.查询节点的ID和对应的显示名称（必须）
@@ -248,62 +248,71 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
             queryRequest.selectAndGroupBy(queryLevel.getCaptionColumn());
         }
-        // 父节点不为空，且和当前查询level查的是同一个表，那么需要添加父节点的限制
         Where where = new Where();
-        if (queryLevel.isParentChildLevel()) {
-            Expression expression = null;
-            if (parentMember == null || parentMember.isAll()) {
-                expression = new Expression(queryLevel.getParent());
-                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                // 判断2个level从同一个维度表获取
-            } else if (parentMember != null && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    throw new UnsupportedOperationException("no supported user custom group level");
-                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
-                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
-                    expression = new Expression(queryLevel.getParent());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                } else {
-                    // 先获取parentMember所属的Level
-                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                        // TODO 这里得修改下，如果是Callback的话，查询的应该是Member对应的leafID，后续sh
-                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                        expression.getQueryValues().add(qo);
-
-                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                        expression = new Expression(parentLevel.getSource());
-                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                    }
-                    Expression parentExpression = new Expression(queryLevel.getParent());
-                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                    where.getAndList().add(parentExpression);
-                }
+        // 父节点不为空，且和当前查询level查的是同一个表，那么需要添加父节点的限制
+        // 父子维度支持，暂时注释掉
+//        if (queryLevel.isParentChildLevel()) {
+//            Expression expression = null;
+//            if (parentMember == null || parentMember.isAll()) {
+//                expression = new Expression(queryLevel.getParent());
+//                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                // 判断2个level从同一个维度表获取
+//            } else if (parentMember != null && parentMember.getLevel() != null
+//                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
+//                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                    throw new UnsupportedOperationException("no supported user custom group level");
+//                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
+//                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
+//                    expression = new Expression(queryLevel.getParent());
+//                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                } else {
+//                    // 先获取parentMember所属的Level
+//                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
+//                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
+//                        // TODO 这里得修改下，如果是Callback的话，查询的应该是Member对应的leafID，后续sh
+//                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+//                        expression.getQueryValues().add(qo);
+//
+//                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+//                        expression = new Expression(parentLevel.getSource());
+//                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                    }
+//                    Expression parentExpression = new Expression(queryLevel.getParent());
+//                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                    where.getAndList().add(parentExpression);
+//                }
+//            }
+//            if (expression != null) {
+//                where.getAndList().add(expression);
+//            }
+//        } else {
+        Expression expression = null;
+        if (parentMember != null
+                && !parentMember.isAll ()
+                && parentMember.getLevel () != null
+                && StringUtils.equals (parentMember.getLevel ().getDimTable (), queryLevel.getDimTable ())) {
+            if (parentMember.getLevel ().getType ().equals (LevelType.CALL_BACK)) {
+                expression = new Expression (parentMember.getLevel ().getPrimaryKey ());
+                QueryObject qo = 
+                    new QueryObject (parentMember.getName (), ((MiniCubeMember) parentMember).getQueryNodes ());
+                expression.getQueryValues ().add (qo);
             }
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
-        } else {
-            Expression expression = null;
-            if (parentMember != null && !parentMember.isAll() && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                    expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                    QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                    expression.getQueryValues().add(qo);
-                } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                    expression = new Expression(parentLevel.getSource());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                }
-            }
-
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
+            // TODO 用户自定义维度支持
+            // else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM))
+            // {
+            // MiniCubeLevel parentLevel = (MiniCubeLevel)
+            // parentMember.getLevel();
+            // expression = new Expression(parentLevel.getSource());
+            // expression.getQueryValues().add(new
+            // QueryObject(parentMember.getName()));
+            // }
         }
+        
+        if (expression != null) {
+            where.getAndList ().add (expression);
+        }
+//        }
         queryRequest.setWhere(where);
         
         // 如果当前level 不是最后一层level，则在查询中增加下一层levle所在列 
@@ -500,60 +509,62 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
         // 父节点不为空，且和当前查询level查的是同一个表，那么需要添加父节点的限制
         Where where = new Where();
-        if (queryLevel.isParentChildLevel()) {
-            Expression expression = null;
-            if (parentMember == null || parentMember.isAll()) {
-                expression = new Expression(queryLevel.getParent());
-                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                // 判断2个level从同一个维度表获取
-            } else if (parentMember != null && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    throw new UnsupportedOperationException("no supported user custom group level");
-                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
-                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
-                    expression = new Expression(queryLevel.getParent());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                } else {
-                    // 先获取parentMember所属的Level
-                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                        expression.getQueryValues().add(qo);
-
-                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                        expression = new Expression(parentLevel.getSource());
-                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                    }
-                    Expression parentExpression = new Expression(queryLevel.getParent());
-                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                    where.getAndList().add(parentExpression);
-                }
+//        if (queryLevel.isParentChildLevel()) {
+//            Expression expression = null;
+//            if (parentMember == null || parentMember.isAll()) {
+//                expression = new Expression(queryLevel.getParent());
+//                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                // 判断2个level从同一个维度表获取
+//            } else if (parentMember != null && parentMember.getLevel() != null
+//                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
+//                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                    throw new UnsupportedOperationException("no supported user custom group level");
+//                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
+//                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
+//                    expression = new Expression(queryLevel.getParent());
+//                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                } else {
+//                    // 先获取parentMember所属的Level
+//                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
+//                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
+//                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+//                        expression.getQueryValues().add(qo);
+//
+//                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+//                        expression = new Expression(parentLevel.getSource());
+//                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                    }
+//                    Expression parentExpression = new Expression(queryLevel.getParent());
+//                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                    where.getAndList().add(parentExpression);
+//                }
+//            }
+//            if (expression != null) {
+//                where.getAndList().add(expression);
+//            }
+//        } else {
+        Expression expression = null;
+        if (parentMember != null && !parentMember.isAll() && parentMember.getLevel() != null
+                && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
+            if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
+                expression = new Expression(parentMember.getLevel().getPrimaryKey());
+                QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+                expression.getQueryValues().add(qo);
             }
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
-        } else {
-            Expression expression = null;
-            if (parentMember != null && !parentMember.isAll() && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                    expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                    QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                    expression.getQueryValues().add(qo);
-                } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                    expression = new Expression(parentLevel.getSource());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                }
-            }
-
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
-            
+// TODO 用户自定义维度支持
+//            else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+//                expression = new Expression(parentLevel.getSource());
+//                expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//            }
         }
+
+        if (expression != null) {
+            where.getAndList().add(expression);
+        }
+            
+//        }
         queryRequest.setWhere(where);
 
         return queryRequest;
@@ -603,5 +614,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             throw new MiniCubeQueryException(e);
         }
         return members;
+    }
+    
+    protected void setSearchService(SearchService service) {
+        this.searchService = service;
     }
 }

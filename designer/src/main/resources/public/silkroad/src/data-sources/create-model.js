@@ -13,6 +13,9 @@ define(['url'], function (Url) {
 
     var Model = Backbone.Model.extend({
 
+        /**
+         * 默认属性
+         */
         defaults: {
             // 标识是新增还是更新
             isAdd: true,
@@ -31,13 +34,16 @@ define(['url'], function (Url) {
         // 公共方法区域
         //------------------------------------------
 
-        initialize: function () {
-        },
+        /**
+         * 构造函数
+         *
+         * @constructor
+         */
+        initialize: function () {},
 
         /**
          * 模块初始化data的获取
          *
-         * @param {string} id 数据源下拉框当前选中项id
          * @public
          */
         getInitData: function () {
@@ -73,6 +79,8 @@ define(['url'], function (Url) {
         /**
          * 提交新建数据源信息
          *
+         * @param {Object} data 提交的数据
+         * @param {Function} success 回调函数
          * @public
          */
         submit: function (data, success) {
@@ -96,6 +104,7 @@ define(['url'], function (Url) {
                 }
             });
         },
+
         /**
          * 加载数据源列表
          *

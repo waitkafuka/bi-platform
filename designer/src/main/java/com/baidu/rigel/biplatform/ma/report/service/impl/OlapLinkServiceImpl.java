@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 
@@ -146,24 +147,49 @@ public class OlapLinkServiceImpl implements OlapLinkService {
         ExtendArea[] extendAreaArray = olapTableDesignModel.getExtendAreaList();
         for (ExtendArea extendArea : extendAreaArray) {
             if (QueryUtils.isFilterArea(extendArea.getType())) {
-                // 如果是过滤条件的话，维度必须放在row上，并且维值只能有一个
                 Item condDim = extendArea.getLogicModel().getRows()[0];
-                String olapElementId = condDim.getOlapElementId();
-                String condDimValue = String.valueOf(queryContext.get(olapElementId));
-                Cube cube = olapTableDesignModel.getSchema().getCubes().get(extendArea.getCubeId());
-                Dimension dim = cube.getDimensions().get(olapElementId);
-                String condDimName = dim.getName();
-                String condUniqueName = "";
-                // 如果发现是时间条件，则uniqueName直接等于condDimValue
-                if (extendArea.getType() == ExtendAreaType.TIME_COMP) {
-                    condUniqueName = condDimValue;
-                } else {
-                    condUniqueName = MetaNameUtil.getNameFromMetaName(condDimValue);
-                }
-                Map<String, String> uniqueMap = buildConditionUniqueMap(condDimValue, condUniqueName);
-                conditionMap.put(condDimName, uniqueMap);
+                addDimToMap(condDim, queryContext, olapTableDesignModel, extendArea, conditionMap);
+            }
+            // 此处需要新增对表格过滤轴的参数处理逻辑
+            else if (ExtendAreaType.TABLE.equals(extendArea.getType())) {
+                Stream.of(extendArea.getLogicModel().getSlices())
+                        .filter(items -> items != null)
+                        .forEach(condDim -> { 
+                            addDimToMap(condDim, queryContext, olapTableDesignModel, extendArea, conditionMap);
+                        });
             }
         }
+        return conditionMap;
+    }
+
+    /**
+     * 从queryContext取到需要的参数值，放入要传给平面表条件的conditionMap中
+     * 
+     * @param condDim condDim
+     * @param queryContext queryContext
+     * @param olapTableDesignModel olapTableDesignModel
+     * @param extendArea extendArea
+     * @param conditionMap conditionMap
+     * @return conditionMap conditionMap
+     */
+    private Map<String, Map<String, String>> addDimToMap(Item condDim, 
+            QueryContext queryContext, ReportDesignModel olapTableDesignModel,
+            ExtendArea extendArea, Map<String, Map<String, String>> conditionMap) {
+        // 如果是过滤条件的话，维度必须放在row上，并且维值只能有一个
+        String olapElementId = condDim.getOlapElementId();
+        String condDimValue = String.valueOf(queryContext.get(olapElementId));
+        Cube cube = olapTableDesignModel.getSchema().getCubes().get(extendArea.getCubeId());
+        Dimension dim = cube.getDimensions().get(olapElementId);
+        String condDimName = dim.getName();
+        String condUniqueName = "";
+        // 如果发现是时间条件，则uniqueName直接等于condDimValue
+        if (extendArea.getType() == ExtendAreaType.TIME_COMP) {
+            condUniqueName = condDimValue;
+        } else {
+            condUniqueName = MetaNameUtil.getNameFromMetaName(condDimValue);
+        }
+        Map<String, String> uniqueMap = buildConditionUniqueMap(condDimValue, condUniqueName);
+        conditionMap.put(condDimName, uniqueMap);
         return conditionMap;
     }
 

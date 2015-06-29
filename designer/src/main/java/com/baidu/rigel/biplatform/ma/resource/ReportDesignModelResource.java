@@ -840,6 +840,27 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("不能将该列删除");
             return result;
         }
+        
+        // 对于平面表，需同时删除条件轴上的信息
+        if (model.getExtendById(areaId).getType() 
+                == ExtendAreaType.PLANE_TABLE) {
+            try {
+                if (model.getPlaneTableConditions() != null &&
+                        model.getPlaneTableConditions().containsKey(olapElementId)) {
+                    model = manageService.removeItem(model, areaId, olapElementId, PositionType.S);                    
+                    if (model == null) {
+                        result.setStatus(1);
+                        result.setStatusInfo("不能将该列删除");
+                        return result;
+                    }
+                    // 删除平面表条件中的对应的item信息
+                    model.getPlaneTableConditions().remove(olapElementId);
+                }
+            } catch (ReportModelOperationException e) {
+                logger.error("Fail in remove item(" + olapElementId + ") from area(" + areaId + ")", e);
+                return ResourceUtils.getErrorResult(e.getMessage(), 1);
+            }
+        }
         // remove condition in context
 
         // remove unused format define

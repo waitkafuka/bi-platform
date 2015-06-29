@@ -15,7 +15,7 @@ define(['template'], function (template) {
         $out+=$escape(id);
         $out+='-vu-table-download" style="display:inline-block;"></div>\n    </div>\n    <div class="di-o_o-line">\n        <div class="vu-plane-table" data-o_o-di="';
         $out+=$escape(id);
-        $out+='-vu-table"></div>\n    </div>\n    <div class="di-o_o-line">\n        <div class="" data-o_o-di="';
+        $out+='-vu-table" style="height: 160px;"></div>\n    </div>\n    <div class="di-o_o-line">\n        <div class="" data-o_o-di="';
         $out+=$escape(id);
         $out+='-vu-table-pager"></div>\n    </div>\n\n</div>';
         return $out;

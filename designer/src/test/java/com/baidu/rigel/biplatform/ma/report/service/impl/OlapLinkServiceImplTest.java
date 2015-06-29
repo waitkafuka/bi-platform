@@ -154,6 +154,30 @@ public class OlapLinkServiceImplTest {
         Assert.assertEquals(conditionMap.get("dim_trade_t_trade_name_l1").get("uniqueName"),
                 "[dim_trade_t_trade_name_l1].[食品餐饮]");
     }
+    @Test
+    public void testBuildConditionMapFromRequestParamsWhitTable() {
+        ExtendArea[] extendAreaArray = new ExtendArea[1];
+        extendAreaArray[0] = mockExtendArea;
+        Item[] items = new Item[1];
+        items[0] = mockItem;
+        Mockito.when(mockExtendArea.getType()).thenReturn(ExtendAreaType.TABLE);
+        Mockito.when(mockReportDesignModel.getExtendAreaList()).thenReturn(extendAreaArray);
+        Mockito.doReturn(mockSchema).when(mockReportDesignModel).getSchema();
+        Mockito.when(logicModel.getRows()).thenReturn(items);
+        Mockito.when(logicModel.getSlices()).thenReturn(items);
+        Mockito.when(mockItem.getOlapElementId()).thenReturn("testOlapElementId");
+        Mockito.when(queryContext.get("testOlapElementId")).thenReturn("testCondDimValue");
+        Mockito.doReturn(mockSchema).when(mockReportDesignModel).getSchema();
+        Mockito.doReturn(mockCubes).when(mockSchema).getCubes();
+        Mockito.doReturn(mockCube).when(mockCubes).get(Mockito.anyString());
+        Mockito.doReturn(mockDimensions).when(mockCube).getDimensions();
+        Mockito.doReturn(mockDim).when(mockDimensions).get(Mockito.anyString());
+        Mockito.when(mockExtendArea.getLogicModel()).thenReturn(logicModel);
+        Map<String, Map<String, String>> conditionMap =
+                olapLinkService.buildConditionMapFromRequestParams(UNIQUE_NAME, mockReportDesignModel, queryContext);
+        Assert.assertEquals(conditionMap.get("dim_trade_t_trade_name_l1").get("uniqueName"),
+                "[dim_trade_t_trade_name_l1].[食品餐饮]");
+    }
 
     @Test
     public void testBuildLinkBridgeParams() {

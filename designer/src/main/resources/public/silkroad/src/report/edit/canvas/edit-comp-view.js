@@ -1761,57 +1761,57 @@ define([
                             var richSelect = $($table.children()[0]).children()[0];
                             var richSelectId = $(richSelect).attr('data-o_o-di');
 
-                            if (richSelectId.indexOf('rich-select') < 0) {
-                                return;
-                            }
-                            $table.children()[0].remove();
+                            if (richSelectId.indexOf('rich-select') > 0) {
+                                $table.children()[0].remove();
 
-                            // 移除掉$reportVm中的 rich-select容器，移除掉
-                            tableBox.height(tableBox.height() - 30);
-                            $table = $($(tableBox).children()[0]);
-                            $table.children()[0].remove();
+                                // 移除掉$reportVm中的 rich-select容器，移除掉
+                                tableBox.height(tableBox.height() - 30);
+                                $table = $($(tableBox).children()[0]);
+                                $table.children()[0].remove();
 
-                            var compEntity = $.getTargetElement(compId, entityDefs);
-                            delete compEntity.vuiRef.richSelect;
-                            var index = 0;
-                            for (var i = 0, iLen = entityDefs.length; i < iLen; i ++) {
-                                if (entityDefs[i].id === richSelectId) {
-                                    index = i + 1;
-                                    break;
+                                var compEntity = $.getTargetElement(compId, entityDefs);
+                                delete compEntity.vuiRef.richSelect;
+                                var index = 0;
+                                for (var i = 0, iLen = entityDefs.length; i < iLen; i ++) {
+                                    if (entityDefs[i].id === richSelectId) {
+                                        index = i + 1;
+                                        break;
+                                    }
+                                }
+
+                                if (index) {
+                                    that.model.get('canvasModel').reportJson.entityDefs = entityDefs.slice(0, index - 1).concat(entityDefs.slice(index));
                                 }
                             }
 
-                            if (index) {
-                                that.model.get('canvasModel').reportJson.entityDefs = entityDefs.slice(0, index - 1).concat(entityDefs.slice(index));
-                            }
 
                         }
                         else {
                             var richSelect = $($table.children()[0]).children()[0];
                             var richSelectId = $(richSelect).attr('data-o_o-di');
 
-                            if (richSelectId.indexOf('rich-select') > 0) {
-                                return;
-                            }
-                            richSelectId = 'snpt.' + compId + '-vu-table-rich-select';
-                            var html = [
-                                '<div class="di-o_o-line">',
+                            if (richSelectId.indexOf('rich-select') < 0) {
+                                richSelectId = 'snpt.' + compId + '-vu-table-rich-select';
+                                var html = [
+                                    '<div class="di-o_o-line">',
                                     '<div class="" data-o_o-di="', richSelectId, '"></div>',
-                                '</div>'
-                            ].join('');
+                                    '</div>'
+                                ].join('');
 
-                            var json = {
-                                clzType: 'VUI',
-                                clzKey: 'RICH_SELECT',
-                                id: richSelectId,
-                                compId: compId
-                            };
-                            $table.prepend(html);
-                            $table = $($(tableBox).children()[0]);
-                            $table.prepend(html);
-                            that.model.get('canvasModel').reportJson.entityDefs.push(json);
-                            var compEntity = $.getTargetElement(compId, entityDefs);
-                            compEntity.vuiRef.richSelect = richSelectId;
+                                var json = {
+                                    clzType: 'VUI',
+                                    clzKey: 'RICH_SELECT',
+                                    id: richSelectId,
+                                    compId: compId
+                                };
+                                $table.prepend(html);
+                                $table = $($(tableBox).children()[0]);
+                                $table.prepend(html);
+                                that.model.get('canvasModel').reportJson.entityDefs.push(json);
+                                var compEntity = $.getTargetElement(compId, entityDefs);
+                                compEntity.vuiRef.richSelect = richSelectId;
+                            }
+
                         }
                         that.canvasView.model.saveJsonVm(
                             function () {

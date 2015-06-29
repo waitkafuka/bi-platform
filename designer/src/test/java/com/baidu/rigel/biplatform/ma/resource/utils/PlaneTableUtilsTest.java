@@ -18,10 +18,12 @@ package com.baidu.rigel.biplatform.ma.resource.utils;
 
 import java.util.Map;
 
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.powermock.api.mockito.PowerMockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +55,21 @@ public class PlaneTableUtilsTest {
      * 日志对象
      */
     private static final Logger LOG = LoggerFactory.getLogger(PlaneTableUtilsTest.class);
+    
+    /**
+     * 时间粒度信息
+     */
+    private static final String GRANULARITY = "granularity";
+    
+    /**
+     * 时间粒度起始标志
+     */
+    private static final String START = "start";
+    
+    /**
+     * 时间粒度结束标识
+     */
+    private static final String END = "end";
     
     /**
      * 测试检查输入SQL条件是否合理
@@ -294,5 +311,172 @@ public class PlaneTableUtilsTest {
         Assert.assertEquals(requestParams, actualParams);
     }
     
+    /**
+     * 
+     * testIsTimeDim
+     */
+    @Test
+    public void testIsTimeDimNull() {
+        // 空cube
+        Assert.assertFalse(PlaneTableUtils.isTimeDim(null, "elementId"));
+        Cube cube = PowerMockito.mock(Cube.class);
+        // 空elementId
+        Assert.assertFalse(PlaneTableUtils.isTimeDim(cube, null));
+        // 获取cube对象
+        cube = PrepareModelObject4Test.getCube();
+        // 维度中没有此id
+        Assert.assertFalse(PlaneTableUtils.isTimeDim(cube, "elementId"));
+        // 设置维度条件为null
+        ((MiniCube) cube).setDimensions(null);
+        Assert.assertFalse(PlaneTableUtils.isTimeDim(cube, "elementId"));
+        // 设置维度条件size为0
+        ((MiniCube) cube).setDimensions(Maps.newHashMap());
+        Assert.assertFalse(PlaneTableUtils.isTimeDim(cube, "elementId"));
+    }
     
+    /**
+     * 测试是否为时间维度
+     * testIsTimeDim
+     */
+    public void testIsTimeDim() {
+        Cube cube = PrepareModelObject4Test.getCube();
+        String elementId = "3da5f26e1ec5244c5b0cdbf4ced9ac73";
+        Assert.assertTrue(PlaneTableUtils.isTimeDim(cube, elementId));
+    }
+    
+    /**
+     * 测试
+     * testCov2TimeJsonNull
+     */
+    @Test
+    public void testCov2TimeJsonNull() {
+        // 待处理字符串为空
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson(null, Maps.newHashMap()));
+        // 参数值为空
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson("20150627", null));
+        // 参数中没有粒度信息
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson("20150627", Maps.newHashMap()));
+    }
+    
+    /**
+     * 测试不满足要求的时间字符串<br>
+     * 日:20150627;周:20150627
+     * 月:201506;季:201504;
+     * 年:2015
+     * testC2TimJsonWithNotStandStr
+     */
+    @Test
+    public void testC2TimJsonWithNotStandStr() {
+        // 上下文请求参数
+        Map<String, Object> requestParams = Maps.newHashMap();
+        // 时间字符串
+        String value = "";
+        // 日
+        requestParams.put(GRANULARITY, "D");
+        value = "2015-06-27";
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson(value, requestParams));
+        
+        // 周
+        requestParams.put(GRANULARITY, "W");
+        value = "2015-06-22";
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson(value, requestParams));
+        
+        // 月
+        requestParams.put(GRANULARITY, "M");
+        value = "2015-06";
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson(value, requestParams));
+        
+        // 季
+        requestParams.put(GRANULARITY, "Q");
+        value = "2015-06";
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson(value, requestParams));
+        
+        // 年
+        requestParams.put(GRANULARITY, "Y");
+        value = "20-15";
+        Assert.assertNull(PlaneTableUtils.convert2TimeJson(value, requestParams));
+        
+        // 不满足条件的粒度，抛出异常
+        requestParams.put(GRANULARITY, "S");
+        value = "2015";
+        try {
+            PlaneTableUtils.convert2TimeJson(value, requestParams);            
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
+    
+    /**
+     * 
+     * testCov2TimeJson
+     */
+    @Test
+    public void testCov2TimeJson() throws Exception {
+        // 上下文请求参数
+        Map<String, Object> requestParams = Maps.newHashMap();
+        // 时间字符串
+        String value = "";
+        // 期望结果
+        String expectValue = "";
+        // 实际结果
+        String actualValue = "";
+        // 期望json
+        JSONObject expectJson;
+        // 实际json
+        JSONObject actualJson;
+        // 日
+        expectValue = "{'start':'2015-06-27','end':'2015-06-27','granularity':'D'}";
+        requestParams.put(GRANULARITY, "D");
+        value = "20150627";
+        actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
+        expectJson = new JSONObject(expectValue);
+        actualJson = new JSONObject(actualValue);
+        Assert.assertEquals(expectJson.get(START), actualJson.get(START));
+        Assert.assertEquals(expectJson.get(END), actualJson.get(END));
+        Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
+        
+        // 周
+        expectValue = "{'start':'2015-06-22','end':'2015-06-22','granularity':'W'}";
+        requestParams.put(GRANULARITY, "W");
+        value = "20150622";
+        actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
+        expectJson = new JSONObject(expectValue);
+        actualJson = new JSONObject(actualValue);
+        Assert.assertEquals(expectJson.get(START), actualJson.get(START));
+        Assert.assertEquals(expectJson.get(END), actualJson.get(END));
+        Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
+        
+        // 月
+        expectValue = "{'start':'2015-06','end':'2015-06','granularity':'M'}";
+        requestParams.put(GRANULARITY, "M");
+        value = "201506";
+        actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
+        expectJson = new JSONObject(expectValue);
+        actualJson = new JSONObject(actualValue);
+        Assert.assertEquals(expectJson.get(START), actualJson.get(START));
+        Assert.assertEquals(expectJson.get(END), actualJson.get(END));
+        Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
+        
+        // 季
+        expectValue = "{'start':'2015-01-01','end':'2015-03-31','granularity':'D'}";
+        requestParams.put(GRANULARITY, "Q");
+        value = "201501";
+        actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
+        expectJson = new JSONObject(expectValue);
+        actualJson = new JSONObject(actualValue);
+        Assert.assertEquals(expectJson.get(START), actualJson.get(START));
+        Assert.assertEquals(expectJson.get(END), actualJson.get(END));
+        Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
+                
+        // 年
+        expectValue = "{'start':'2015','end':'2015','granularity':'Y'}";
+        requestParams.put(GRANULARITY, "Y");
+        value = "2015";
+        actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
+        expectJson = new JSONObject(expectValue);
+        actualJson = new JSONObject(actualValue);
+        Assert.assertEquals(expectJson.get(START), actualJson.get(START));
+        Assert.assertEquals(expectJson.get(END), actualJson.get(END));
+        Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
+    }
 }

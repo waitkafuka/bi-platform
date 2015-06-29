@@ -47,6 +47,9 @@ public class DataSourceGroupServiceImplTest {
     @Mock
     private FileService fileService;
     
+    /**
+     * 
+     */
     @Mock
 	private DataSourceService dsService;
     /**
@@ -511,6 +514,9 @@ public class DataSourceGroupServiceImplTest {
     	} catch(Exception e) {
     		Assert.assertNotNull(e);
     	}
+        // 设置正确的数据库前缀
+        DataSourceType.H2.setPrefix("jdbc:h2:tcp://");  
+        DataSourceType.H2.setDriver("org.h2.Driver");
     }
     
     
