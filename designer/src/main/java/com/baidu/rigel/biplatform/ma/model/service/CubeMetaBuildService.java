@@ -16,7 +16,9 @@
 package com.baidu.rigel.biplatform.ma.model.service;
 
 import java.util.List;
+import java.util.Map;
 
+import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.meta.FactTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.meta.TableInfo;
@@ -53,4 +55,18 @@ public interface CubeMetaBuildService {
      */
     List<FactTableMetaDefine> initCubeTables(String dsId,
             List<String> tableIds, List<String> regxs, String securityKey) throws DataSourceOperationException;
+    
+    /**
+     * 
+     * initCubeTables
+     * @param dsId
+     * @param tableIds
+     * @param divideTableStrategyVo
+     * @param securityKey
+     * @return
+     * @throws DataSourceOperationException
+     */
+    List<FactTableMetaDefine> initCubeTables(String dsId, List<String> tableIds, 
+            Map<String, DivideTableStrategyVo> divideTableStrategys,
+            String securityKey) throws DataSourceOperationException;
 }

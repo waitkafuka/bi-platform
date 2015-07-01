@@ -38,6 +38,7 @@ import com.baidu.rigel.biplatform.tesseract.store.service.MetaSerivce;
  */
 /**
  * TODO
+ * 
  * @author lijin
  *
  */
@@ -56,7 +57,8 @@ public class AbstractMetaService implements MetaSerivce {
     @Override
     public boolean saveOrUpdateMetaStore(StoreMeta storeMeta, String dataStoreName) {
         
-        if (storeMeta == null || storeMeta.getStoreKey() == null || ("").equals(storeMeta.getStoreKey())) {
+        if (storeMeta == null || storeMeta.getStoreKey() == null
+                || ("").equals(storeMeta.getStoreKey())) {
             LOGGER.warn("can not save StoreMeta with no accurate key:[" + storeMeta + "]");
             return false;
         }
@@ -70,18 +72,23 @@ public class AbstractMetaService implements MetaSerivce {
         if (storeMetaList == null) {
             storeMetaList = new ArrayList<StoreMeta>();
         }
-        int idx = 0;
-        boolean update = false;
-        for (; idx < storeMetaList.size(); idx++) {
-            if (storeMetaList.get(idx).equals(storeMeta)) {
-                update = true;
-                break;
-            }
+//        int idx = 0;
+//        boolean update = false;
+//        for (; idx < storeMetaList.size(); idx++) {
+//            if (storeMetaList.get(idx).equals(storeMeta)) {
+//                update = true;
+//                break;
+//            }
+//        }
+//        
+//        if (update) {
+//            storeMetaList.remove(idx);
+//        }
+        
+        if (storeMetaList.contains(storeMeta)) {
+            storeMetaList.remove(storeMeta);
         }
         
-        if (update) {
-            storeMetaList.remove(idx);
-        }
         storeMetaList.add(storeMeta);
         // 元数据存储时，以: 集群名_产品线_数据源 为KEY存储元数据
         metaDataStore.put(storeMeta.getStoreKey(), storeMetaList);
@@ -89,12 +96,12 @@ public class AbstractMetaService implements MetaSerivce {
         
         return true;
         
-    }    
-    
+    }
     
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends StoreMeta> List<T> getStoreMetaListByStoreKey(String dataStoreName, String storeKey) {
+    public <T extends StoreMeta> List<T> getStoreMetaListByStoreKey(String dataStoreName,
+            String storeKey) {
         Cache metaDataStore = this.storeManager.getDataStore(dataStoreName);
         ValueWrapper metaDataValue = null;
         if (storeKey != null) {
@@ -107,7 +114,5 @@ public class AbstractMetaService implements MetaSerivce {
         }
         return result;
     }
-    
-    
     
 }

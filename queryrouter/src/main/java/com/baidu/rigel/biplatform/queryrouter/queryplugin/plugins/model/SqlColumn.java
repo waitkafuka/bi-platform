@@ -37,6 +37,11 @@ public class SqlColumn implements Serializable {
     private static final long serialVersionUID = 3151301875582323397L;
     
     /**
+     * columnKey
+     */
+    public String columnKey;
+    
+    /**
      * name
      */
     public String name;
@@ -62,6 +67,11 @@ public class SqlColumn implements Serializable {
     public String tableName;
     
     /**
+     * tableNames
+     */
+    public String sourceTableName;
+    
+    /**
      * AxisType
      */
     public AxisType type;
@@ -75,17 +85,40 @@ public class SqlColumn implements Serializable {
      * Level
      */
     public Level level;
-    
+
+    /**
+     * @return the sourceTableName
+     */
+    public String getSourceTableName() {
+        return sourceTableName;
+    }
+
+    /**
+     * @param sourceTableName the sourceTableName to set
+     */
+    public void setSourceTableName(String sourceTableName) {
+        this.sourceTableName = sourceTableName;
+    }
+
     /**
      * measure
      */
     public Measure measure;
-    
+
     /**
-     * factTableName
+     * @return the columnKey
      */
-    public String factTableName;
-    
+    public String getColumnKey() {
+        return columnKey;
+    }
+
+    /**
+     * @param columnKey the columnKey to set
+     */
+    public void setColumnKey(String columnKey) {
+        this.columnKey = columnKey;
+    }
+
     /**
      * getSqlUniqueColumn
      * 
@@ -104,26 +137,7 @@ public class SqlColumn implements Serializable {
     public void setSqlUniqueColumn(String sqlUniqueColumn) {
         this.sqlUniqueColumn = sqlUniqueColumn;
     }
-    
-    /**
-     * getFactTableName
-     * 
-     * @return String factTableName
-     */
-    public String getFactTableName() {
-        return factTableName;
-    }
-    
-    /**
-     * setFactTableName
-     * 
-     * @param String
-     *            factTableName
-     */
-    public void setFactTableName(String factTableName) {
-        this.factTableName = factTableName;
-    }
-    
+
     /**
      * getLevel
      * 

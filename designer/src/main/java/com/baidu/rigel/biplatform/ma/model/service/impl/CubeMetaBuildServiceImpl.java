@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceInfoReaderServiceFactory;
@@ -92,10 +93,17 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
     @Override
     public List<FactTableMetaDefine> initCubeTables(String dsId, List<String> tableIds,
             List<String> regxs, String securityKey) throws DataSourceOperationException {
-        
-        List<FactTableMetaDefine> tableMetas = Lists.newArrayList();
-        Map<String, String[]> tableMap = RegExUtils.regExTableName(tableIds, regxs);
-        
+        return this.getAllFactTableMetaDefine(dsId, tableIds, regxs, null, securityKey);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<FactTableMetaDefine> initCubeTables(String dsId, List<String> tableIds,
+            Map<String, DivideTableStrategyVo> divideTableStrategys,
+            String securityKey) throws DataSourceOperationException {
+        List<FactTableMetaDefine> tableMetas = Lists.newArrayList(); 
         DataSourceDefine ds = null;
         try {
             ds = dsService.getDsDefine(dsId);
@@ -107,6 +115,58 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
         try {
             dsInfoReaderService = DataSourceInfoReaderServiceFactory.
                 getDataSourceInfoReaderServiceInstance(ds.getDataSourceType().name ());
+            for (String tableId : tableIds) {
+                FactTableMetaDefine tableMeta = new FactTableMetaDefine();
+                tableMeta = new FactTableMetaDefine();
+                tableMeta.setCubeId(tableId);
+                tableMeta.setName(tableId);
+                if (divideTableStrategys != null && divideTableStrategys.containsKey(tableId)) {
+                    tableMeta.setMutilple(true);
+                    tableMeta.setDivideTableStrategyVo(divideTableStrategys.get(tableId));
+                } else {
+                    tableMeta.setMutilple(false);                    
+                }
+                List<ColumnInfo> cols = dsInfoReaderService.getAllColumnInfos(ds, securityKey, tableId);
+                addColumnToTableMeta(tableMeta, cols);
+                tableMetas.add(tableMeta);                
+            }
+        } catch (Exception e) {
+            logger.error("[ERROR] --- --- --- --- Fail in read ds by id: " + dsId + ": {}", e.getMessage());
+            logger.error("[ERROR] --- --- --- --- stackTrace :", e);
+            throw new DataSourceOperationException(e);
+        }
+        return tableMetas;        
+    }
+    
+    /**
+     * 
+     * getAllFactTableMetaDefine
+     * @param dsId
+     * @param tableIds
+     * @param regxs
+     * @param divideTableStrategyVo
+     * @param securityKey
+     * @return
+     * @throws DataSourceOperationException
+     */
+    private List<FactTableMetaDefine> getAllFactTableMetaDefine(String dsId, List<String> tableIds, List<String> regxs,
+            DivideTableStrategyVo divideTableStrategyVo, String securityKey) throws DataSourceOperationException {
+        List<FactTableMetaDefine> tableMetas = Lists.newArrayList();
+        // 按照正则表达式分表
+        Map<String, String[]> tableMap = RegExUtils.regExTableName(tableIds, regxs);
+        
+        DataSourceDefine ds = null;
+        try {
+            ds = dsService.getDsDefine(dsId);
+        } catch (DataSourceOperationException e) {
+            logger.info("can not get datasource define with id : " + dsId, e);
+            throw e;
+        }
+        DataSourceInfoReaderService dsInfoReaderService = null;
+        try {
+            dsInfoReaderService =
+                    DataSourceInfoReaderServiceFactory.getDataSourceInfoReaderServiceInstance(
+                            ds.getDataSourceType().name ());
             for (String key : tableMap.keySet()) {
                 String[] tables = tableMap.get(key);
                 FactTableMetaDefine tableMeta = null;
@@ -141,7 +201,6 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
         }
         return tableMetas;
     }
-    
     private void addColumnToTableMeta(FactTableMetaDefine tableMeta, List<ColumnInfo> cols) {
         for (ColumnInfo col : cols) {
             ColumnMetaDefine column = new ColumnMetaDefine();
@@ -152,4 +211,6 @@ public class CubeMetaBuildServiceImpl implements CubeMetaBuildService {
             tableMeta.addColumn(column);
         }
     }
+
+   
 }

@@ -67,6 +67,7 @@ class CubeBuilder {
         cube.setId(id);
         cube.setVisible(true);
         cube.setMutilple(model.getFactTable().isMutilple());
+        cube.setDivideTableStrategyVo(model.getFactTable().getDivideTableStrategyVo());
         cube.setSource(factTableName);
         // cube.setSource(model.getDsId());
         // modify by jiangyichao at 2014-10-09  构建维度时，增加事实表参数

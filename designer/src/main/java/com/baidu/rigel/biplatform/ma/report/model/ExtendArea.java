@@ -77,7 +77,6 @@ public class ExtendArea implements Serializable {
      */
     private Map<String, Object> otherSetting = Maps.newHashMap();
     
-    
     public String getId() {
         return id;
     }

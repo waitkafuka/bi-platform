@@ -21,7 +21,10 @@ define([
     ) {
 
         return Backbone.View.extend({
-            // view事件绑定
+
+            /**
+             * 事件绑定
+             */
             events: {
                 'click .j-add-report': 'addReport',
                 'click .j-show-publish-info': 'showPublishInfo',
@@ -91,21 +94,21 @@ define([
                         }
                         else {
                             that.model.addReport(name, function (reportId) {
-                                    $this.dialog('close');
-                                    // 跳到下一步
-                                    require(['report/set-cube/cube-view'],
-                                        function (setCubeView) {
-                                            window.dataInsight.main.destroy();
-                                            new setCubeView({
-                                                el: $('.j-main'),
-                                                id: reportId
-                                            });
+                                $this.dialog('close');
+                                // 跳到下一步
+                                require(['report/set-cube/cube-view'],
+                                    function (SetCubeView) {
+                                        window.dataInsight.main.destroy();
+                                        new SetCubeView({
+                                            el: $('.j-main'),
+                                            id: reportId
                                         });
-                                },
-                                function (statusInfo) {
-                                    $this.find('.j-validation').html(statusInfo).show();
-                                }
-                            );
+                                    }
+                                );
+                            },
+                            function (statusInfo) {
+                                $this.find('.j-validation').html(statusInfo).show();
+                            });
                         }
                     }
                 });
@@ -142,7 +145,8 @@ define([
 //                );
                 // 更换线上link里面的路径
                 $('.link-skin').attr(
-                    'href', 'asset/'
+                    'href',
+                    'asset/'
                     + reportTheme
                     + '/css/-di-product-min.css'
                 );
@@ -207,7 +211,8 @@ define([
                                 },
                                 function (statusInfo) {
                                     $this.find('.j-validation').html(statusInfo).show();
-                                });
+                                }
+                            );
                         }
                     }
                 });
@@ -316,6 +321,7 @@ define([
                 // 解绑jq事件
                 $(this.el).unbind().empty();
             }
+
         });
     }
 );

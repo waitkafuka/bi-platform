@@ -10,12 +10,11 @@ import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Measure;
@@ -38,59 +37,83 @@ import com.google.common.collect.Maps;
  * 
  * @author yichao.jiang 2015年5月29日 上午9:34:10
  */
-@RunWith(PowerMockRunner.class)  
-@PrepareForTest({ MiniCubeDriverManager.class})
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({ MiniCubeDriverManager.class })
 public class PlaneTableOnlineDownloadServiceImplTest {
 
-    /**
-     * 日志对象
-     */
-    private static final Logger LOG = LoggerFactory.getLogger(PlaneTableOnlineDownloadServiceImplTest.class);
-    
     /**
      * 测试
      */
     @Test
-    public void test() throws Exception {
+    public void testDownloadForPlaneTableOnline() throws Exception {
         DownloadType downloadType = DownloadType.PLANE_TABLE_ONLINE;
         DownloadTableDataService downService = DownloadServiceFactory.getDownloadTableDataService(downloadType);
-        
+
         // Mock一些数据对象
-        LogicModel logicModel = PowerMockito.mock(LogicModel.class);        
-        ConfigQuestionModel questionModel = PowerMockito.mock(ConfigQuestionModel.class);       
+        LogicModel logicModel = PowerMockito.mock(LogicModel.class);
+        ConfigQuestionModel questionModel = PowerMockito.mock(ConfigQuestionModel.class);
         MiniCubeConnection connection = PowerMockito.mock(MiniCubeConnection.class);
         DataModel dataModel = PowerMockito.mock(DataModel.class);
         // 假定条件
         PowerMockito.mockStatic(MiniCubeDriverManager.class);
-        PowerMockito.when(MiniCubeDriverManager.getConnection(Mockito.anyObject())).thenReturn(connection); 
+        PowerMockito.when(MiniCubeDriverManager.getConnection(Mockito.anyObject())).thenReturn(connection);
         PowerMockito.when(connection.query(questionModel)).thenReturn(dataModel);
-        
+
         // DataModel中的TableData没有数据
         String csvString = downService.downloadTableData(questionModel, logicModel);
         Assert.assertEquals("", csvString);
-        
+
+        DataModel dataModelNew = this.buildDataModel();
+        logicModel = this.buildLogicModel();
+
+        questionModel = new ConfigQuestionModel();
+        questionModel.setCube(this.buildCube());
+        PowerMockito.when(connection.query(questionModel)).thenReturn(dataModelNew);
+
+        csvString = downService.downloadTableData(questionModel, logicModel);
+
+        String expectCsvString = "captionDim,captionMeasure\r\n";
+        expectCsvString = expectCsvString + "Dim,Measure\r\n";
+        Assert.assertEquals(expectCsvString, csvString);
+        Assert.assertNotNull(csvString);
+    }
+
+    /**
+     * 构建数据模型 buildDataModel
+     * 
+     * @return
+     */
+    private DataModel buildDataModel() {
         DataModel dataModelNew = new DataModel();
         TableData tableData = new TableData();
-        Column columnDim = new Column("Dim", "captionDim", "test");
-        Column columnMeasure = new Column("Measure", "captionMeasure", "test");
+        Column columnDim = new Column("test.Dim", "Dim", "captionDim", "test");
+        Column columnMeasure = new Column("test.Measure", "Measure", "captionMeasure", "test");
         List<Column> columns = Lists.newArrayList();
         columns.add(columnDim);
         columns.add(columnMeasure);
         tableData.setColumns(columns);
-        
+
         Map<String, List<String>> data = Maps.newHashMap();
         List<String> data1 = Lists.newArrayList();
         data1.add("Dim");
         data.put("test.Dim", data1);
-        
+
         List<String> data2 = Lists.newArrayList();
         data2.add("Measure");
         data.put("test.Measure", data2);
-              
+
         tableData.setColBaseDatas(data);
         dataModelNew.setTableData(tableData);
-        
-        logicModel = new LogicModel();
+        return dataModelNew;
+    }
+
+    /**
+     * 构建LogicModel模型 buildLogicModel
+     * 
+     * @return
+     */
+    private LogicModel buildLogicModel() {
+        LogicModel logicModel = new LogicModel();
         Item item1 = new Item();
         item1.setId("id1");
         item1.setOlapElementId("id1");
@@ -99,8 +122,15 @@ public class PlaneTableOnlineDownloadServiceImplTest {
         item2.setOlapElementId("id2");
         logicModel.addColumn(item1);
         logicModel.addColumn(item2);
-        
-        questionModel = new ConfigQuestionModel();
+        return logicModel;
+    }
+
+    /**
+     * 构建Cube buildCube
+     * 
+     * @return
+     */
+    private MiniCube buildCube() {
         MiniCube cube = new MiniCube();
         Map<String, Dimension> dimensions = Maps.newHashMap();
         StandardDimension dimension = new StandardDimension("test_Dim");
@@ -108,30 +138,27 @@ public class PlaneTableOnlineDownloadServiceImplTest {
         l.setDimTable("test");
         l.setName("Dim");
         dimension.addLevel(l);
-        
+
         dimension.setId("id1");
         dimensions.put("test_Dim", dimension);
-        
+
         Map<String, Measure> measures = Maps.newHashMap();
         MiniCubeMeasure measure = new MiniCubeMeasure("Measure");
-        measure.setId("id2");       
+        measure.setId("id2");
+        measure.setDefine("Measure");
         measures.put("Measure", measure);
-        
+
+        cube.setId("testCubeId");
         cube.setSource("test");
         cube.setMeasures(measures);
         cube.setDimensions(dimensions);
         
-        questionModel.setCube(cube);
-        PowerMockito.when(connection.query(questionModel)).thenReturn(dataModelNew);
+        MiniCubeSchema schema = new MiniCubeSchema();
+        Map<String, MiniCube> cubes = Maps.newHashMap();
+        cubes.put("testCubeId", cube);
+        schema.setCubes(cubes);
         
-        
-        
-        csvString = downService.downloadTableData(questionModel, logicModel);
-        
-        String expectCsvString = "captionDim,captionMeasure\r\n";
-        expectCsvString = expectCsvString + "Dim,Measure\r\n";
-        Assert.assertEquals(expectCsvString, csvString);
-        LOG.info("the csv string is : " + csvString);
-        Assert.assertNotNull(csvString);
+        cube.setSchema(schema);
+        return cube;
     }
 }

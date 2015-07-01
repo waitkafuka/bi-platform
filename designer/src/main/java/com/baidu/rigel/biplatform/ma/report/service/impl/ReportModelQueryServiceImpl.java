@@ -241,7 +241,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         try {
             dsDefine = dataSourceService.getDsDefine(model.getDsId());
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
+                getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error("Fail in Finding datasource define. ", e);

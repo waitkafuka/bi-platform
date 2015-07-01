@@ -1,7 +1,7 @@
 /**
  * 在config下配置项目路径如
  * projectPath = D:/silkroad/
- * 当前目录下（tool）运行node tc
+ * 当前目录下（tool）运行node t-c
  * template-compiler 模板编译工具，基于node
  */
 

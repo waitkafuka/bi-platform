@@ -30,7 +30,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -54,7 +55,7 @@ public class UniversalContextSettingFilter implements Filter {
     /**
      * LOG
      */
-    private static final Logger LOG = Logger.getLogger(UniversalContextSettingFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UniversalContextSettingFilter.class);
 
     /**
      * securityKey
@@ -78,7 +79,7 @@ public class UniversalContextSettingFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         if (StringUtils.isEmpty(securityKey)) {
             WebApplicationContext context = 
                 WebApplicationContextUtils.getWebApplicationContext(request.getServletContext());
@@ -100,8 +101,9 @@ public class UniversalContextSettingFilter implements Filter {
                 sessionId = getSessionId(cookies);
             }
             LOG.info("productLine in cookie is " + productLine + " and sessionId is " + sessionId);
-            if (StringUtils.isEmpty(productLine) && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
-                productLine = decryptProductLIne(httpRequest, httpResponse);
+            if (StringUtils.isEmpty(productLine) 
+                && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
+                productLine = decryptProductLine(httpRequest, httpResponse);
                 sessionId = generateSessionId(httpResponse);
             }
             LOG.info("productLine in token is " + productLine + " and sessionId is " + sessionId);
@@ -111,14 +113,9 @@ public class UniversalContextSettingFilter implements Filter {
                 httpResponse.addCookie (new Cookie("prevReq", httpRequest.getRequestURI ()));
                 httpResponse.sendRedirect("home.html");
             }
-//            else if (httpRequest.getRequestURI().endsWith("home.html")) {
-//                httpResponse.addCookie (new Cookie("prevReq", 
-//                        httpRequest.getRequestURI ().replace ("home.html", "index.html")));
-//            }
             setSessionInfoIntoThread(httpRequest, httpResponse, chain, productLine, sessionId);
         } catch(Exception e) {
-            throw new RuntimeException("productline encrypt happened exception," 
-                + "message:" + e);
+            throw new RuntimeException("productline encrypt happened exception, message:" + e, e);
         }
     }
     
@@ -144,8 +141,7 @@ public class UniversalContextSettingFilter implements Filter {
      * @throws Exception
      * 
      */
-    private String decryptProductLIne(HttpServletRequest request,
-            HttpServletResponse response) throws Exception {
+    private String decryptProductLine(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String productLine = null;
         productLine = request.getParameter(Constants.TOKEN);
         if (StringUtils.hasText(productLine)) {
@@ -153,7 +149,7 @@ public class UniversalContextSettingFilter implements Filter {
             productLineCookie.setPath(Constants.COOKIE_PATH);
             ((HttpServletResponse) response).addCookie(productLineCookie);
             // 对productLine进行重新解密，以便放到ContextManager中
-            productLine = AesUtil.getInstance().decrypt(productLine, securityKey);
+            productLine = AesUtil.getInstance().decodeAnddecrypt (productLine, securityKey);
         }
         return productLine;
     }
@@ -235,7 +231,7 @@ public class UniversalContextSettingFilter implements Filter {
         if (StringUtils.hasText(innerProductLine)) {
             // 调用解密算法，对productLine进行解密
             try {
-                innerProductLine = AesUtil.getInstance().decrypt(innerProductLine, securityKey);
+                innerProductLine = AesUtil.getInstance().decodeAnddecrypt(innerProductLine, securityKey);
             } catch (Exception e) {
                 LOG.error(innerProductLine);
                 LOG.error(e.getMessage(),e);

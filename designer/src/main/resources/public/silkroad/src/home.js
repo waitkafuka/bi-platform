@@ -268,7 +268,7 @@
                     var sign = msg.status;
                     if (sign != 1) {
                         // window.location = "/silkroad/index.html";
-                        window.location = msg.data;
+                        msg.data ? (window.location = msg.data) : (window.location = "/silkroad/index.html");
                     }
                     else {
 //                        $pass.next('div').html(errorsign);

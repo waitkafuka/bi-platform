@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
@@ -102,7 +103,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         if (StringUtils.isNotEmpty(filterDimKey)) {
             nameQuery.setWhere(genWhere(nameQuery.getWhere(), filterDimKey, params));
         }
-        List<Expression> whereCondition = genWhereCondition(cube, level, params);
+        List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty ()) {
             for (Expression exp : whereCondition) {
                 nameQuery.getWhere ().getAndList ().add (exp);
@@ -138,32 +139,32 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     }
 
     private Where genWhere(Where where, String filterDimKey, Map<String, String> params) {
-	    	List<Expression> andList = Lists.newArrayList();
-    		for (String key : filterDimKey.split(",")) {
-    			if (StringUtils.isEmpty(key)) {
-    				continue;
-    			}
-    			if (StringUtils.isEmpty(params.get(key))) {
-    				continue;
-    			}
-    			Set<QueryObject> value = Sets.newHashSet();
-    			for (String v : params.get(key).split(",")) {
-    				QueryObject queryObj = new QueryObject(v, Sets.newHashSet());
-    				value.add(queryObj);
-    			}
-    			Expression exp = new Expression(key, value);
-    			andList.add(exp);
-    		}
-    		if (!andList.isEmpty()) {
-    			if (where == null) {
-    				where = new Where();
-    			}
-    			where.setAndList(andList);
-    		}
-		return where;
-	}
+            List<Expression> andList = Lists.newArrayList();
+            for (String key : filterDimKey.split(",")) {
+                if (StringUtils.isEmpty(key)) {
+                    continue;
+                }
+                if (StringUtils.isEmpty(params.get(key))) {
+                    continue;
+                }
+                Set<QueryObject> value = Sets.newHashSet();
+                for (String v : params.get(key).split(",")) {
+                    QueryObject queryObj = new QueryObject(v, Sets.newHashSet());
+                    value.add(queryObj);
+                }
+                Expression exp = new Expression(key, value);
+                andList.add(exp);
+            }
+            if (!andList.isEmpty()) {
+                if (where == null) {
+                    where = new Where();
+                }
+                where.setAndList(andList);
+            }
+        return where;
+    }
 
-	/**
+    /**
      * 将查询的结果集封装成member
      * 
      * @param resultSet
@@ -171,7 +172,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
      * @param parentMember
      * @param dataSourceInfo
      * @param cube
-     * @return
+     * @return List<MiniCubeMember>
      * @throws MiniCubeQueryException
      */
     private List<MiniCubeMember> buildMembersFromCellSet(SearchIndexResultSet resultSet, MiniCubeLevel queryLevel,
@@ -216,32 +217,14 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
     }
 
-//    /**
-//     * @param cube
-//     * @param queryLevel
-//     * @return
-//     */
-//    private QueryRequest createQueryRequest(Cube cube, MiniCubeLevel queryLevel, DataSourceInfo dataSourceInfo) {
-//        QueryRequest queryRequest = new QueryRequest();
-//        queryRequest.setDataSourceInfo(dataSourceInfo);
-//        queryRequest.setCubeName(cube.getName());
-//        queryRequest.setCubeId(cube.getId());
-//        From from = new From(queryLevel.getDimTable());
-//        queryRequest.setFrom(from);
-//        if (StringUtils.isBlank(queryLevel.getDimTable())) {
-//            from.setFrom(((MiniCube) cube).getSource());
-//        }
-//        return queryRequest;
-//    }
-
     /**
      * @param cube
      * @param queryLevel
      * @param parentMember
      * @param dataSourceInfo
-     * @return
+     * @return QueryRequest
      */
-    private QueryRequest buildQueryRequest(Cube cube, MiniCubeLevel queryLevel, Member parentMember,
+    protected QueryRequest buildQueryRequest(Cube cube, MiniCubeLevel queryLevel, Member parentMember,
             DataSourceInfo dataSourceInfo) {
         // 查询节点信息需要分2次查询，
         // 1.查询节点的ID和对应的显示名称（必须）
@@ -265,62 +248,69 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
             queryRequest.selectAndGroupBy(queryLevel.getCaptionColumn());
         }
-        // 父节点不为空，且和当前查询level查的是同一个表，那么需要添加父节点的限制
         Where where = new Where();
-        if (queryLevel.isParentChildLevel()) {
-            Expression expression = null;
-            if (parentMember == null || parentMember.isAll()) {
-                expression = new Expression(queryLevel.getParent());
-                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                // 判断2个level从同一个维度表获取
-            } else if (parentMember != null && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    throw new UnsupportedOperationException("no supported user custom group level");
-                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
-                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
-                    expression = new Expression(queryLevel.getParent());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                } else {
-                    // 先获取parentMember所属的Level
-                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                        // TODO 这里得修改下，如果是Callback的话，查询的应该是Member对应的leafID，后续sh
-                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                        expression.getQueryValues().add(qo);
-
-                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                        expression = new Expression(parentLevel.getSource());
-                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                    }
-                    Expression parentExpression = new Expression(queryLevel.getParent());
-                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                    where.getAndList().add(parentExpression);
-                }
-            }
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
-        } else {
-            Expression expression = null;
-            if (parentMember != null && !parentMember.isAll() && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                    expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                    QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                    expression.getQueryValues().add(qo);
-                } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                    expression = new Expression(parentLevel.getSource());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                }
-            }
-
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
+        // 父节点不为空，且和当前查询level查的是同一个表，那么需要添加父节点的限制
+        // 父子维度支持，暂时注释掉
+//        if (queryLevel.isParentChildLevel()) {
+//            Expression expression = null;
+//            if (parentMember == null || parentMember.isAll()) {
+//                expression = new Expression(queryLevel.getParent());
+//                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                // 判断2个level从同一个维度表获取
+//            } else if (parentMember != null && parentMember.getLevel() != null
+//                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
+//                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                    throw new UnsupportedOperationException("no supported user custom group level");
+//                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
+//                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
+//                    expression = new Expression(queryLevel.getParent());
+//                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                } else {
+//                    // 先获取parentMember所属的Level
+//                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
+//                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
+//                        // TODO 这里得修改下，如果是Callback的话，查询的应该是Member对应的leafID，后续sh
+//                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+//                        expression.getQueryValues().add(qo);
+//
+//                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+//                        expression = new Expression(parentLevel.getSource());
+//                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                    }
+//                    Expression parentExpression = new Expression(queryLevel.getParent());
+//                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                    where.getAndList().add(parentExpression);
+//                }
+//            }
+//            if (expression != null) {
+//                where.getAndList().add(expression);
+//            }
+//        } else {
+        Expression expression = null;
+        if (parentMember != null
+                && !parentMember.isAll ()
+                && parentMember.getLevel () != null
+                && StringUtils.equals (parentMember.getLevel ().getDimTable (), queryLevel.getDimTable ())) {
+            if (parentMember.getLevel ().getType ().equals (LevelType.CALL_BACK)) {
+                expression = new Expression (parentMember.getLevel ().getPrimaryKey ());
+                QueryObject qo = 
+                    new QueryObject (parentMember.getName (), ((MiniCubeMember) parentMember).getQueryNodes ());
+                expression.getQueryValues ().add (qo);
+            } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM))
+             {
+             MiniCubeLevel parentLevel = (MiniCubeLevel)
+             parentMember.getLevel();
+             expression = new Expression(parentLevel.getSource());
+             expression.getQueryValues().add(new
+             QueryObject(parentMember.getName()));
+             }
         }
+        
+        if (expression != null) {
+            where.getAndList ().add (expression);
+        }
+//        }
         queryRequest.setWhere(where);
         
         // 如果当前level 不是最后一层level，则在查询中增加下一层levle所在列 
@@ -337,7 +327,8 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     }
 
     @Override
-    public MiniCubeMember getMemberFromLevelByName(DataSourceInfo dataSourceInfo, Cube cube, Level level, String name,
+    public MiniCubeMember getMemberFromLevelByName(DataSourceInfo dataSourceInfo, 
+            Cube cube, Level level, String name,
             MiniCubeMember parent, Map<String, String> params) throws MiniCubeQueryException, MetaException {
         if (level == null || StringUtils.isBlank(name)) {
             throw new IllegalArgumentException("level is null or name is blank");
@@ -354,7 +345,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         MiniCubeMember result = new MiniCubeMember(name);
         result.setLevel(queryLevel);
         // 根据请求参数生产查询维度的约束条件
-        List<Expression> whereCondition = genWhereCondition(cube, level, params);
+        List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty ()) {
             for (Expression exp : whereCondition) {
                 queryRequest.getWhere ().getAndList ().add (exp);
@@ -370,74 +361,6 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             List<MiniCubeMember> memberResultList = this.buildMembersFromCellSet (resultSet, queryLevel, parent, dataSourceInfo, cube);
             result = CollectionUtils.isEmpty (memberResultList) ? result : memberResultList.get(0);
-//            if(!resultSet.next()){
-//                    log.error("no result return by query:" + queryRequest);
-////                    throw new MetaException("no result return by query:" + queryRequest);
-//            }
-//            if (StringUtils.isNotBlank(queryLevel.getCaptionColumn())) {
-//                result.setCaption(resultSet.getString(queryLevel.getCaptionColumn()));
-//            }
-//            result.setParent(parent);
-//            if (MetaNameUtil.isAllMemberName(name)) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())) {
-//                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//                } else {
-//                    request.selectAndGroupBy(queryLevel.getSource());
-//                }
-//
-//                request.setWhere(new Where());
-//                if (queryLevel.isParentChildLevel()) {
-//                    expression = new Expression(queryLevel.getParent());
-//                    expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-//                }
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//
-//            } else if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
-//                    && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getSource());
-//                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } else if (queryLevel.isParentChildLevel()){
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getParent());
-//                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } else {
-//                result.getQueryNodes().add(name);
-//            }
-//
         } catch (Exception e) {
             log.error("error occur when get name:" + name + " from level:" + level, e);
             throw new MiniCubeQueryException(e);
@@ -445,7 +368,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         return result;
     }
 
-    private List<Expression> genWhereCondition(Cube cube, Level level, Map<String, String> params) {
+    private List<Expression> genWhereCondition(Cube cube, Level level, Map<String, String> params, DataSourceInfo ds) {
         List<Expression> expressionList = Lists.newArrayList ();
         String dimTable = level.getDimTable ();
         Collection<Dimension> dims = cube.getDimensions ().values ();
@@ -455,22 +378,58 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             if (StringUtils.isBlank (filterValue)) {
                 continue;
             }
-            if ((dimTable.equals (dim.getTableName ()) 
-                    && !dim.getId ().equals (level.getDimension ().getId ()))) {
-                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
-                Expression expression = new Expression(dimLevel.getSource ());
+            Level dimLevel = dim.getLevels ().values ().toArray (new Level[0])[0];
+            boolean fromFactable = dimTable.equals (((MiniCube) cube).getSource());
+            if ((fromFactable && !(dim instanceof TimeDimension)
+                    && !dim.getId ().equals (level.getDimension ().getId ())) 
+                    && (dimLevel.getType () != LevelType.CALL_BACK)) {
+                Expression expression = new Expression(dimLevel.getFactTableColumn ());
                 // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
-                String[] filterValueArray = genFilterValue(filterValue);
-                for (String tmp :filterValueArray) {
-                    Set<String> leafNodes = Sets.newHashSet ();
-                    leafNodes.add (tmp);
-                    QueryObject queryObject = new QueryObject(tmp, leafNodes);
-                    expression.getQueryValues ().add (queryObject);
+                try {
+                    String[] filterValueArray = genFilterValue(filterValue);
+                    if (dimLevel.getDimTable ().equals (dimTable)) {
+                        Set<String> leafNodes = Sets.newHashSet ();
+                        for (String tmp : filterValueArray) {
+                            leafNodes.add (tmp);
+                        }
+                        QueryObject queryObject = new QueryObject(null, leafNodes);
+                        expression.getQueryValues ().add (queryObject);
+                    } else {
+                        for (String tmp :filterValueArray) {
+                            MiniCubeMember member = 
+                                    getMemberFromLevelByName (ds, cube, dimLevel, tmp, null, params);
+                            Set<String> leafNodes = member.getQueryNodes ();
+                            QueryObject queryObject = new QueryObject(null, leafNodes);
+                            expression.getQueryValues ().add (queryObject);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error (e.getMessage (), e);
+                    String[] filterValueArray = genFilterValue(filterValue);
+                    for (String tmp :filterValueArray) {
+                        Set<String> leafNodes = Sets.newHashSet ();
+                        leafNodes.add (tmp);
+                        QueryObject queryObject = new QueryObject(tmp, leafNodes);
+                        expression.getQueryValues ().add (queryObject);
+                    }
                 }
                 expressionList.add (expression);
+            } else if (fromFactable && dimLevel.getType () == LevelType.CALL_BACK ) {
+                List<Member> members = dimLevel.getMembers (cube, ds, params);
+                if (CollectionUtils.isNotEmpty (members)) {
+                    Set<String> leafNodes = ((MiniCubeMember) members.get (0)).getQueryNodes ();
+                    Expression expression = new Expression(((CallbackLevel) dimLevel).getFactTableColumn ());
+                    if (CollectionUtils.isEmpty (leafNodes)) {
+                        leafNodes = Sets.newHashSet ();
+                        leafNodes.add (members.get (0).getName ());
+                    }
+                    QueryObject queryObject = new QueryObject(members.get (0).getName (), leafNodes);
+                    expression.getQueryValues ().add (queryObject);
+                    expressionList.add (expression);
+                }
             } else if (dim instanceof TimeDimension && dimTable.equals (((MiniCube) cube).getSource())) {
                 // 此处只考虑了时间维度表和事实表同一张表情况，其他情况暂时不考虑
-                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
+//                MiniCubeLevel dimLevel = (MiniCubeLevel) dim.getLevels ().values ().toArray (new Level[0])[0];
                 Expression expression = new Expression(dimLevel.getFactTableColumn ());
                 if (!filterValue.contains ("start") && !filterValue.contains ("end")) {
                     String[] tmp = filterValue.split (",");
@@ -501,6 +460,18 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 if (expression.getQueryValues ().size () > 0) {
                     expressionList.add (expression);
                 }
+            } else if ((dimTable.equals (dim.getTableName ()) 
+                && !dim.getId ().equals (level.getDimension ().getId ()))) {
+                Expression expression = new Expression(((MiniCubeLevel) dimLevel).getSource ());
+                // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
+                String[] filterValueArray = genFilterValue(filterValue);
+                for (String tmp :filterValueArray) {
+                    Set<String> leafNodes = Sets.newHashSet ();
+                    leafNodes.add (tmp);
+                    QueryObject queryObject = new QueryObject(tmp, leafNodes);
+                    expression.getQueryValues ().add (queryObject);
+                }
+                expressionList.add (expression);
             }
         }
         return expressionList;
@@ -557,60 +528,60 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
         // 父节点不为空，且和当前查询level查的是同一个表，那么需要添加父节点的限制
         Where where = new Where();
-        if (queryLevel.isParentChildLevel()) {
-            Expression expression = null;
-            if (parentMember == null || parentMember.isAll()) {
-                expression = new Expression(queryLevel.getParent());
-                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                // 判断2个level从同一个维度表获取
-            } else if (parentMember != null && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    throw new UnsupportedOperationException("no supported user custom group level");
-                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
-                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
-                    expression = new Expression(queryLevel.getParent());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                } else {
-                    // 先获取parentMember所属的Level
-                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                        expression.getQueryValues().add(qo);
-
-                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                        expression = new Expression(parentLevel.getSource());
-                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                    }
-                    Expression parentExpression = new Expression(queryLevel.getParent());
-                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-                    where.getAndList().add(parentExpression);
-                }
+//        if (queryLevel.isParentChildLevel()) {
+//            Expression expression = null;
+//            if (parentMember == null || parentMember.isAll()) {
+//                expression = new Expression(queryLevel.getParent());
+//                expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                // 判断2个level从同一个维度表获取
+//            } else if (parentMember != null && parentMember.getLevel() != null
+//                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
+//                if (parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                    throw new UnsupportedOperationException("no supported user custom group level");
+//                    // 父节点的level和当前查询的level为同一个level，说明直接用parent=父节点的名称
+//                } else if (StringUtils.equals(parentMember.getLevel().getName(), queryLevel.getName())) {
+//                    expression = new Expression(queryLevel.getParent());
+//                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                } else {
+//                    // 先获取parentMember所属的Level
+//                    if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
+//                        expression = new Expression(parentMember.getLevel().getPrimaryKey());
+//                        QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+//                        expression.getQueryValues().add(qo);
+//
+//                    } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+//                        MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+//                        expression = new Expression(parentLevel.getSource());
+//                        expression.getQueryValues().add(new QueryObject(parentMember.getName()));
+//                    }
+//                    Expression parentExpression = new Expression(queryLevel.getParent());
+//                    parentExpression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
+//                    where.getAndList().add(parentExpression);
+//                }
+//            }
+//            if (expression != null) {
+//                where.getAndList().add(expression);
+//            }
+//        } else {
+        Expression expression = null;
+        if (parentMember != null && !parentMember.isAll() && parentMember.getLevel() != null
+                && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
+            if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
+                expression = new Expression(parentMember.getLevel().getPrimaryKey());
+                QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
+                expression.getQueryValues().add(qo);
+            } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+                MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+                expression = new Expression(parentLevel.getSource());
+                expression.getQueryValues().add(new QueryObject(parentMember.getName()));
             }
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
-        } else {
-            Expression expression = null;
-            if (parentMember != null && !parentMember.isAll() && parentMember.getLevel() != null
-                    && StringUtils.equals(parentMember.getLevel().getDimTable(), queryLevel.getDimTable())) {
-                if (parentMember.getLevel().getType().equals(LevelType.CALL_BACK)) {
-                    expression = new Expression(parentMember.getLevel().getPrimaryKey());
-                    QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
-                    expression.getQueryValues().add(qo);
-                } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-                    MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-                    expression = new Expression(parentLevel.getSource());
-                    expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-                }
-            }
-
-            if (expression != null) {
-                where.getAndList().add(expression);
-            }
-            
         }
+
+        if (expression != null) {
+            where.getAndList().add(expression);
+        }
+            
+//        }
         queryRequest.setWhere(where);
 
         return queryRequest;
@@ -638,7 +609,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         }
         queryRequest.getWhere().getAndList().add(expression);
         log.info("query members,queryRequest:" + queryRequest);
-        List<Expression> whereCondition = genWhereCondition(cube, level, params);
+        List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty ()) {
             for (Expression exp : whereCondition) {
                 queryRequest.getWhere ().getAndList ().add (exp);
@@ -655,71 +626,15 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
             members = 
                 buildMembersFromCellSet (resultSet, queryLevel, null, dataSourceInfo, cube);
-            
-//            if (MetaNameUtil.isAllMemberName(name)) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())) {
-//                    request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//                } else {
-//                    request.selectAndGroupBy(queryLevel.getSource());
-//                }
-//
-//                request.setWhere(new Where());
-//                if (queryLevel.isParentChildLevel()) {
-//                    expression = new Expression(queryLevel.getParent());
-//                    expression.getQueryValues().add(new QueryObject(queryLevel.getNullParentValue()));
-//                }
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//
-//            } else if (StringUtils.isNotBlank(queryLevel.getPrimaryKey())
-//                    && !StringUtils.equals(queryLevel.getSource(), queryLevel.getPrimaryKey())) {
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getSource());
-////                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                if (!whereCondition.isEmpty ()) {
-//                    for (Expression exp : whereCondition) {
-//                        request.getWhere ().getAndList ().add (exp);
-//                    }
-//                }
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } else {
-//                result.getQueryNodes().addAll (memberName);
-//            }
-//            else if (queryLevel.isParentChildLevel()){
-//                QueryRequest request = createQueryRequest(cube, queryLevel, dataSourceInfo);
-//                request.selectAndGroupBy(queryLevel.getPrimaryKey());
-//
-//                request.setWhere(new Where());
-//                expression = new Expression(queryLevel.getParent());
-//                expression.getQueryValues().add(new QueryObject(result.getName()));
-//                request.getWhere().getAndList().add(expression);
-//                log.info("query member leaf nodes,queryRequest:" + request);
-//                SearchIndexResultSet leafResultSet = searchService.query(request);
-//                while (leafResultSet.next()) {
-//                    result.getQueryNodes().add(leafResultSet.getString(queryLevel.getPrimaryKey()));
-//                }
-//            } 
         } catch (Exception e) {
             log.error("error occur when get name:" + uniqueNameList + " from level:" + level, e);
             throw new MiniCubeQueryException(e);
         }
         return members;
     }
+    
+    protected void setSearchService(SearchService service) {
+        this.searchService = service;
+    }
+    
 }

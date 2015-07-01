@@ -3,6 +3,8 @@
     height:300px;
     border: 1px solid #D0D0D0;
     overflow-y: scroll;
+    margin-bottom: 10px;
+    padding-left: 5px;
 }
 
 .table-fields-filter-list input {
@@ -18,6 +20,7 @@
     line-height: 20px;
     display: inline-block;
     vertical-align: middle;
+    margin-left: 3px;
 }
 .fields-filter {
     color: #3C78A2;

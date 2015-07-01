@@ -110,4 +110,9 @@ public interface Constants {
      */
     String ALIGN_FORMAT = "textFormat";
     
+    /**
+     * 是否能够动态切换指标
+     */
+    String CAN_CHANGED_MEASURE = "canChangedMeasure";
+    
 }

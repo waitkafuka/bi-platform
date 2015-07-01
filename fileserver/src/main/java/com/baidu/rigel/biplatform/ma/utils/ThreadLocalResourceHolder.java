@@ -18,8 +18,8 @@ package com.baidu.rigel.biplatform.ma.utils;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Thread-local resource holder class, for pass data on the thread.
@@ -31,7 +31,7 @@ public abstract class ThreadLocalResourceHolder {
     /**
      * 日志对象
      */
-    protected static final Log LOG = LogFactory.getLog(ThreadLocalResourceHolder.class.getName());
+    protected static final Logger LOG = LoggerFactory.getLogger (ThreadLocalResourceHolder.class);
 
     /**
      * 本地线程
@@ -73,7 +73,7 @@ public abstract class ThreadLocalResourceHolder {
         Map<Object, Object> queryMap = getThreadMap();
 
         LOG.debug("Retrieve Object [" + queryMap.get(key) + "] from thread [" + Thread.currentThread().getName()
-                + "] using key[" + key + "].");
+            + "] using key[" + key + "].");
 
         return queryMap.get(key);
     }
@@ -94,9 +94,9 @@ public abstract class ThreadLocalResourceHolder {
 
         if (getProperty(key) != null) {
             LOG.debug("Already bind [" + key + "] to thread [" + Thread.currentThread().getName() + "], old value:{"
-                    + getProperty(key) + "}, new value:{" + target == null ? "null" : target + "}");
+                + getProperty(key) + "}, new value:{" + target == null ? "null" : target + "}");
             throw new RuntimeException("Already bind [" + key + "] to thread [" + Thread.currentThread().getName()
-                    + "], old value:{" + getProperty(key) + "}, new value:{" + target == null ? "null" : target + "}");
+                + "], old value:{" + getProperty(key) + "}, new value:{" + target == null ? "null" : target + "}");
         }
 
         Map<Object, Object> propertiesMap = getThreadMap();

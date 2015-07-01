@@ -32,11 +32,12 @@ import com.baidu.rigel.biplatform.ac.util.ResponseResult;
 import com.baidu.rigel.biplatform.ac.util.ResponseResultUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPluginFactory;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.google.gson.JsonSyntaxException;
 
 /**
  * 移动端对外接口
- * 
+ *  
  * @author luowenlei
  * 
  *         2015-05-07
@@ -85,7 +86,18 @@ public class QueryRouterResource {
         logger.info("request questionmodel json:" + questionStr);
         return this.dispatch(questionStr);
     }
-    
+
+    /**
+     * 判断服务是否存活
+     * 
+     * @param request
+     * @return ResponseResult status string
+     */
+    @RequestMapping(value = "/alive", method = { RequestMethod.GET })
+    public ResponseResult checkAlive(HttpServletRequest request) {
+        return ResponseResultUtils.getCorrectResult("OK", "OK");
+    }
+
     /**
      * 将传入的request中的questionStr通过dispatch后分发到相应的Plugin，然后转换成DataModel的json字符串
      * 
@@ -100,35 +112,36 @@ public class QueryRouterResource {
             // convert json to QuestionModel
             questionModel = AnswerCoreConstant.GSON
                     .fromJson(questionStr, ConfigQuestionModel.class);
+            // convert 请求中的请求的questionmodel
+            QueryPlugin queryPlugin = queryPluginFactory.getPlugin(questionModel.getQuerySource());
+            logger.debug("dispatch cost:" + (System.currentTimeMillis() - begin) + " ms");
+            
+            // dispatch
+            long queryPluginBegin = System.currentTimeMillis();
+            
+            DataModel dataModel = queryPlugin.query(questionModel);
+            logger.info("queryPlugin finished cost:" + (System.currentTimeMillis() - queryPluginBegin)
+                    + " ms");
+            String dataModelJson = AnswerCoreConstant.GSON.toJson(dataModel);
+            // 限制日志输出
+            if (dataModelJson.length() > 150) {
+                logger.debug("response modeldata json:" + dataModelJson);
+                logger.info("response modeldata json:" + dataModelJson.substring(0, 150) + "...");
+            } else {
+                logger.info("response modeldata json:" + dataModelJson);
+            }
+            logger.info("response query toal cost:" + (System.currentTimeMillis() - begin) + " ms");
+            return ResponseResultUtils.getCorrectResult(SUCCESS, dataModelJson);
         } catch (JsonSyntaxException e) {
-            logger.error(e.getCause().getMessage());
-            e.printStackTrace();
+            logger.error(e.getMessage());
             // 说明模型参数传入有问题
-            return ResponseResultUtils.getErrorResult("json syntax exception:" + e.getMessage(),
+            return ResponseResultUtils.getErrorResult("json syntax exception,json is not well formed.",
+                    100);
+        } catch (QuestionModelTransformationException e) {
+            logger.error(e.getMessage());
+            // 说明模型参数传入有问题
+            return ResponseResultUtils.getErrorResult("question model exception, questionmodel is incorrect.",
                     100);
         }
-        
-        // convert 请求中的请求的questionmodel
-        QueryPlugin queryPlugin = queryPluginFactory.getPlugin(questionModel.getQuerySource());
-        logger.debug("dispatch cost:" + (System.currentTimeMillis() - begin) + " ms");
-        
-        // dispatch
-        long queryPluginBegin = System.currentTimeMillis();
-        DataModel dataModel = queryPlugin.query(questionModel);
-        logger.info("queryPlugin finished cost:" + (System.currentTimeMillis() - queryPluginBegin)
-                + " ms");
-        String dataModelJson = AnswerCoreConstant.GSON.toJson(dataModel);
-        logger.info("response modeldata json:" + dataModelJson);
-        logger.info("response query toal cost:" + (System.currentTimeMillis() - begin) + " ms");
-        return ResponseResultUtils.getCorrectResult(SUCCESS, dataModelJson);
     }
-    
-//    /**
-//     * 程序入口
-//     * 
-//     * @param args
-//     *            外部参数
-//     */
-//    public static void main(String[] args) {
-//    }
 }

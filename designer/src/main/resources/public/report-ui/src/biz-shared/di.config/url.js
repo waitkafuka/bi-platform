@@ -179,6 +179,9 @@ $namespace('di.config');
     URL_SET.OLAP_TABLE_SELECT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/selected_row';
     URL_SET.OLAP_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
     URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
+    URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
+    URL_SET.OLAP_TABLE_RICH_SELECT_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}/changablemeasures';
+    URL_SET.OLAP_TABLE_RICH_SELECT_CHANGE = '/reports/#{reportId}/runtime/extend_area/#{componentId}/changedMeasures';
     // PLANE表（平面表）
     // URL_SET.PLANE_TABLE_DATA = '/reportTemplate/planeTable/transform.action';
     URL_SET.PLANE_TABLE_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';

@@ -20,7 +20,8 @@ import java.net.URLEncoder;
 
 import javax.annotation.Resource;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -65,7 +66,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(ProductLineRegisterServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ProductLineRegisterServiceImpl.class);
            
     /**
      * 文件服务对象
@@ -167,10 +168,9 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
      */
     private String makeUpRegisterMailContent(ProductlineInfo user, String hostAddress, String magicStr) {
         StringBuilder stringBuilder = new StringBuilder();
-        // TODO 修改为加载模板文件
         // 构建邮件html形式内容
         stringBuilder.append("<html><head><meta http-equiv=\"Content-Type\" "
-                 + "content=\"text/html; charset=utf-8\">");
+             + "content=\"text/html; charset=utf-8\">");
         stringBuilder.append("<title>[productLine-register]</title></head><body>");
         // 添加表头信息
         stringBuilder.append("<table border=\"1\"");
@@ -196,8 +196,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         try {
             pwd = AesUtil.getInstance().decodeAnddecrypt(pwd, securityKey);
         } catch (Exception e) {
-            throw new IllegalArgumentException("decrypt password happened exception "
-                     + "when send email to administrator");
+            throw new IllegalArgumentException("decrypt password happened exception when send email to administrator");
         }
         stringBuilder.append("<td align=center rowspan = 2>" + pwd + "</td>");
         stringBuilder.append("<td align=center rowspan = 2>" + user.getDepartment() + "</td>");
@@ -205,13 +204,13 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         
         // 添加开通线上服务url
         stringBuilder.append("<td align=center><a href=" 
-                    + makeUpOpenServiceUrl(user, 1, hostAddress, magicStr) + ">线上服务</a></td>");
+            + makeUpOpenServiceUrl(user, 1, hostAddress, magicStr) + ">线上服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("<tr>");     
         // 添加开通线下服务url
         stringBuilder.append("<td align=center><a href="
-                + makeUpOpenServiceUrl(user, 0, hostAddress, magicStr) + ">线下服务</a></td>");
+            + makeUpOpenServiceUrl(user, 0, hostAddress, magicStr) + ">线下服务</a></td>");
         stringBuilder.append("</tr>");
         
         stringBuilder.append("</table>");
@@ -248,7 +247,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             stringBuilder.append(URLEncoder.encode(user.getDepartment(), DEFAULT_CODE));
             stringBuilder.append(URL_PARAM_SEPERATOR);
             stringBuilder.append("serviceType=" 
-                     + URLEncoder.encode(String.valueOf(user.getServiceType()), DEFAULT_CODE));   
+                 + URLEncoder.encode(String.valueOf(user.getServiceType()), DEFAULT_CODE));   
             stringBuilder.append(URL_PARAM_SEPERATOR);
             stringBuilder.append("magicStr=" + magicStr);
         } catch (Exception e) {
@@ -312,8 +311,7 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
             }
             stringBuilder.append("   服务类型:" + serviceTypeStr);
         } catch (Exception e) {
-            throw new IllegalArgumentException("decrypt password happened exception "
-                    + "when send email to administrator");
+            throw new IllegalArgumentException("decrypt password happened exception when send email to administrator");
         }
         stringBuilder.append("</body></html>");
         return stringBuilder.toString();
@@ -353,8 +351,6 @@ public class ProductLineRegisterServiceImpl extends BaseResource implements Prod
         String userRootDir = name;
         if (serviceType == 0) {
             userRootDir = name;
-            // TODO 线下产品线
-            // userRootDir = OFFLINE_PATH + File.separator + name;
         }
         // 所有所需目录
         String reportDir = userRootDir + File.separator + report;

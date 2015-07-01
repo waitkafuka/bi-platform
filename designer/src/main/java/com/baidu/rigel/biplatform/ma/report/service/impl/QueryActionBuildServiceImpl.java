@@ -107,13 +107,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      */
     @Override
     public QueryAction generateTableQueryAction(ReportDesignModel model, String areaId,
-            Map<String, Object> context) {
+        Map<String, Object> context) {
         
         ExtendArea targetArea = getRealExtendArea(model, areaId, context);
         LogicModel targetLogicModel = targetArea.getLogicModel();
         String cubeId = targetArea.getCubeId();
         return generateQueryAction(model.getSchema(),
-                cubeId, targetLogicModel, context, areaId, false, model);
+            cubeId, targetLogicModel, context, areaId, false, model);
     }
 
     /* 
@@ -124,7 +124,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      */
     @Override
     public QueryAction generateTableQueryActionForDrill(ReportDesignModel model, String areaId,
-            Map<String, Object> contextParams, int targetIndex) {
+        Map<String, Object> contextParams, int targetIndex) {
         
         ReportDesignModel drillModel = DeepcopyUtils.deepCopy(model);
         ExtendArea targetArea = getRealExtendArea(drillModel, areaId, contextParams);
@@ -142,14 +142,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             target--;
         }
         QueryAction action = generateQueryAction(drillModel.getSchema(),
-                cubeId, targetLogicModel, contextParams, areaId, false, model);
+            cubeId, targetLogicModel, contextParams, areaId, false, model);
         /**
          * 把下钻的值存下来
          */
         Item item = targetLogicModel.getRows()[target];
         if (item != null && contextParams.containsKey(item.getOlapElementId())) {
-            action.getDrillDimValues().put(item,
-                    contextParams.get(item.getOlapElementId()));
+            action.getDrillDimValues().put(item, contextParams.get(item.getOlapElementId()));
         }
         return action;
     }
@@ -159,8 +158,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      */
     @Override
     public QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
-                Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
-                throws QueryModelBuildException {
+            Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
+            throws QueryModelBuildException {
         ExtendArea targetArea = DeepcopyUtils.deepCopy(model).getExtendById(areaId);
         LogicModel targetLogicModel = null;
         String cubeId = targetArea.getCubeId();
@@ -202,8 +201,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
              */
             QueryContext queryContextForTable = runTimeModel.getLocalContextByAreaId(
                 liteOlapArea.getTableAreaId());
-            QueryAction actionForTable = generateTableQueryAction(model, liteOlapArea.getTableAreaId(),
-                queryContextForTable.getParams());
+            QueryAction actionForTable = generateTableQueryAction(model, 
+                    liteOlapArea.getTableAreaId(),
+                    queryContextForTable.getParams());
             /**
              * 3.
              */
@@ -215,8 +215,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             /**
              * 按照选中行ID得到行上的维度值
              */
-            String[] uniqNames = com.baidu.rigel.biplatform.ac.util
-                .DataModelUtils.parseNodeUniqueNameToNodeValueArray(selectedRowIds[0]);
+            String[] uniqNames = com.baidu.rigel.biplatform.ac.util.DataModelUtils
+                .parseNodeUniqueNameToNodeValueArray(selectedRowIds[0]);
             /**
              * 从logicmodel里面找到时间维度
              */
@@ -233,8 +233,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
              */
             if (timeDimItem == null) {
                 for (String key : context.keySet()) {
-                    OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
-                        cubeId, key);
+                    OlapElement element = ReportDesignModelUtils
+                        .getDimOrIndDefineWithId(model.getSchema(), cubeId, key);
                     if (element != null && element instanceof TimeDimension) {
                         timeDimItem = new Item();
                         timeDimItem.setAreaId(areaId);
@@ -257,7 +257,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 Item row = store.get(dimName);
                 if (row == null) {
                     String msg = String.format("Dimension(%s) Not found in the store of Area(%s)!",
-                            dimName, liteOlapArea.getId());
+                        dimName, liteOlapArea.getId());
                     logger.error(msg);
                     throw new RuntimeException(msg);
                 }
@@ -295,9 +295,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             // 修正查询条件，重新设置查询指标
             Object index = context.get(Constants.CHART_SELECTED_MEASURE);
             if (index != null) {
-            	modifyModel(cpModel, Integer.valueOf(index.toString()));
+                modifyModel(cpModel, Integer.valueOf(index.toString()));
             }
-//            targetLogicModel = DeepcopyUtils.deepCopy(targetLogicModel);
            return generateQueryAction(model.getSchema(),
                cubeId, cpModel, context, logicModelAreaId, false, model);
         }
@@ -310,16 +309,16 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * @param index
      */
     private void modifyModel(LogicModel model, Integer index) {
-    	Item[] items = new Item[1];
-    	Item[] selMeasures = model.getSelectionMeasures().values().toArray(new Item[0]);
-    	if (index >= selMeasures.length) {
-    		throw new IndexOutOfBoundsException("索引越界");
-    	}
-    	items = new Item[]{ selMeasures[index] };
-		model.resetColumns(items);
-	}
+        Item[] items = new Item[1];
+        Item[] selMeasures = model.getSelectionMeasures().values().toArray(new Item[0]);
+        if (index >= selMeasures.length) {
+            throw new IndexOutOfBoundsException("索引越界");
+        }
+        items = new Item[]{ selMeasures[index] };
+        model.resetColumns(items);
+    }
 
-	/**
+    /**
      * 生成QueryAction
      * 
      * @param targetLogicModel
@@ -352,10 +351,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         action.setQueryPath(queryPath);
         
         Cube oriCube4QuestionModel = genCube4QuestionModel (schema, cubeId,
-                targetLogicModel, context, areaId, reportModel);
+            targetLogicModel, context, areaId, reportModel);
         
         Map<Item, Object> columns = genereateItemValues(schema,
-                cubeId, targetLogicModel.getColumns(), context, needTimeRange, oriCube4QuestionModel);
+            cubeId, targetLogicModel.getColumns(), context, needTimeRange, oriCube4QuestionModel);
         action.setColumns(columns);
         
         Map<Item, Object> rows = genereateItemValues(schema,
@@ -363,17 +362,19 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         action.setRows(rows);
         
         Map<Item, Object> slices = genereateItemValues(schema,
-                cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube4QuestionModel);
+            cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube4QuestionModel);
         action.setSlices(slices);
         
         fillFilterBlankDesc (areaId, reportModel, action);
-        
-        QueryAction.MeasureOrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
-        if (orderDesc == null) {
-            orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
+        ExtendArea area = reportModel.getExtendById(areaId);
+        if (area.getType() != ExtendAreaType.PLANE_TABLE) {
+            QueryAction.MeasureOrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+            if (orderDesc == null) {
+                orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
+            }
+            logger.info ("[INFO] -------- order desc = " + orderDesc);
+            action.setMeasureOrderDesc(orderDesc);            
         }
-        logger.info ("[INFO] -------- order desc = " + orderDesc);
-        action.setMeasureOrderDesc(orderDesc);
         // remove dumplated conditions
         Iterator<Item> it = action.getSlices ().keySet ().iterator ();
         while (it.hasNext ()) {
@@ -441,7 +442,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * @return
      */
     private MeasureOrderDesc genDimensionOrderDesc(LogicModel targetLogicModel, QueryAction action ,
-            final Cube cube) {
+        final Cube cube) {
         if(!action.getColumns().isEmpty()) {
             Dimension[] tmp = action.getColumns().keySet().stream().filter(item -> {
                 return cube.getDimensions().get(item.getOlapElementId()) != null;
@@ -449,6 +450,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 return cube.getDimensions().get(item.getOlapElementId());
             }).toArray(Dimension[] :: new);
             if (tmp != null && tmp.length >0) {
+                if (tmp[0] instanceof TimeDimension) {
+                    Level l = tmp[0].getLevels().values().toArray(new Level[0])[0];
+                    return new MeasureOrderDesc(l.getFactTableColumn(), "DESC", 500);
+                }
                 return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
             }
         }
@@ -463,7 +468,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * @return
      */
     private MeasureOrderDesc genMeasureOrderDesc(LogicModel targetLogicModel,
-            Map<String, Object> context, QueryAction action, final Cube cube) {
+        Map<String, Object> context, QueryAction action, final Cube cube) {
         Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
         if (!action.getColumns().isEmpty()) {
@@ -479,8 +484,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     }
                     return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
                 } else  if (context.get ("time_line") != null) { // 时间序列图
-                    return new MeasureOrderDesc (
-                            tmp[0].getName (), "NONE", Integer.MAX_VALUE);
+                    return new MeasureOrderDesc (tmp[0].getName (), "NONE", Integer.MAX_VALUE);
                 } else {
                     context.remove(Constants.NEED_LIMITED);
                     boolean isTimeDimOnFirstCol = isTimeDimOnFirstCol(action.getRows (), cube);
@@ -492,13 +496,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     }
                 }
             } else {
-                	if (context.get("time_line") != null) { //时间序列图
+                    if (context.get("time_line") != null) { //时间序列图
                     return  new MeasureOrderDesc(
-                            measures.get(topSet.getMeasureId()).getName(), "NONE", Integer.MAX_VALUE);
-                	}
+                        measures.get(topSet.getMeasureId()).getName(), "NONE", Integer.MAX_VALUE);
+                    }
                 String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
                 return  new MeasureOrderDesc(measures.get(olapElementId).getName(),
-                        topSet.getTopType().name(), topSet.getRecordSize());
+                    topSet.getTopType().name(), topSet.getRecordSize());
             }
         }
         return null;
@@ -519,8 +523,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * @param reportModel
      * @param action
      */
-    private void fillFilterBlankDesc(String areaId,
-            ReportDesignModel reportModel, QueryAction action) {
+    private void fillFilterBlankDesc(String areaId, ReportDesignModel reportModel, QueryAction action) {
         ExtendArea area = reportModel.getExtendById(areaId);
         if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
@@ -573,11 +576,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             // TODO 支持url传参数，需后续修改,dirty solution
             // 第一个条件判断是否包含url规定的参数
             // 第二个条件判断是否为下钻,下钻不走此流程
-            if ((values.containsKey(Constants.ORG_NAME) || values.containsKey(Constants.APP_NAME)) && 
-                    ! (values.containsKey("action") && values.get("action").equals("expand")) &&
-                    element instanceof StandardDimension
-                    && (item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                   ) {
+            if ((values.containsKey(Constants.ORG_NAME) || values.containsKey(Constants.APP_NAME)) 
+                    && ! (values.containsKey("action") && values.get("action").equals("expand")) 
+                    && element instanceof StandardDimension
+                    && (item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)) {
                 StandardDimension standardDim = (StandardDimension) element;
                 Map<String, Level> levels = standardDim.getLevels();
                 List<String> list = new ArrayList<String>();
@@ -605,8 +607,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 }
                 value = list.toArray(new String[0]);
             } else {
-                value = update && values.containsKey(elementId) ? values.get(elementId) : item
-                    .getParams().get(elementId);
+                value = update 
+                    && values.containsKey(elementId) ? values.get(elementId) : item.getParams().get(elementId);
             }
                 
             // 时间维度特殊处理
@@ -637,8 +639,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     }
                     String[] days = new String[range.getDays().length];
                     StringBuilder message = new StringBuilder();
-                    for (int i = 0; i < days.length; i++) {
-                        days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
+                    String[] detailDays = range.getDays();
+                    for (int i = 0; i < detailDays.length; i++) {
+                        days[i] = "[" + element.getName() + "].[" + detailDays[i] + "]";
                         message.append(" " + days[i]);
                     }
                     value = days;
@@ -647,20 +650,6 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 } else {
                     itemValues.put (item, value);
                 }
-//                else {
-//                    // 如果时间条件为空，默认增加时间条件为当前时间前推一个月的时间
-//                    TimeRangeDetail range = getMonthRangDetailWithNow (now);
-//                    String[] days = new String[range.getDays().length];
-//                    StringBuilder message = new StringBuilder();
-//                    for (int i = 0; i < days.length; i++) {
-//                        days[i] = "[" + element.getName() + "].[" + range.getDays()[i] + "]";
-//                        message.append(" " + days[i]);
-//                    }
-//                    value = days;
-//                    // TODO 设置展开方式
-//                    item.getParams ().put ("needSummary", 1);
-//                    itemValues.put(item, value);
-//                }
                 
             } else if (value instanceof String && !StringUtils.isEmpty(value)) {
                 itemValues.put(item, value.toString().split(","));
@@ -674,12 +663,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     private String[] getDateRangeCond(Item item, OlapElement element, Object value) {
         String[] dataRange = new String[2];
         try {
-            JSONObject json = new JSONObject(String.valueOf(value));
-            /**
-             * TODO 考虑月/周/年等
-             */
-            dataRange[0] = json.getString("start");
-            dataRange[1] = json.getString("end");
+            if (MetaNameUtil.isUniqueName (value.toString ())) {
+                String[] tmp = MetaNameUtil.parseUnique2NameArray (value.toString ());
+                dataRange = getDataRangeWithValue((TimeDimension) element, tmp[tmp.length - 1]);
+            } else {
+                JSONObject json = new JSONObject(String.valueOf(value));
+                /**
+                 * TODO 考虑月/周/年等
+                 */
+                dataRange[0] = json.getString("start");
+                dataRange[1] = json.getString("end");
+            }
             if (item.getParams().get("range") != null && dataRange[0].equals(dataRange[1] )) {
                 TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(dataRange[0] ), 30, 0);
                 dataRange[0]  = tail.getStart();
@@ -690,19 +684,16 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                       dataRange[1]  = dataRange[1] .replace("-", "");   
                       TimeDimension timeDim = (TimeDimension) element;
                       Map<String, String> time = 
-                              TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , timeDim.getDataTimeType());
+                          TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , timeDim.getDataTimeType());
                       dataRange[0] = time.get("start");
                       dataRange[1] = time.get("end");
                   }
             }
         } catch (Exception e) {
-            logger.warn("Time Condition not Correct. Maybe from row." + " Try to use it as UniqueName. Time: " + value, e);
+            logger.warn("Time Condition not Correct. Maybe from row." 
+                + " Try to use it as UniqueName. Time: " + value, e);
             if (value instanceof String[]) {
                 String[] dates = (String[]) value;
-                /**
-                 * TODO 如果有多选时间，把第一个时间和最后一个时间作为start和end，不支持间断时间
-                 * 以后要考虑重构，支持间断时间
-                 */
                 dataRange[0] = parseToDate(dates[0]);
                 dataRange[1] = parseToDate(dates[dates.length - 1]);
             } else {
@@ -714,20 +705,43 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         return dataRange;
     }
 
-//    private TimeRangeDetail getMonthRangDetailWithNow(final Date now) {
-//        Calendar calendar = Calendar.getInstance();
-//        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-//        calendar.setTime(now);
-//        calendar.add(Calendar.MONTH, -1);
-//        TimeRangeDetail range = new TimeRangeDetail(df.format(calendar.getTime()), df.format (now));
-//        return range;
-//    }
+    /**
+     * 
+     * @param timDim
+     * @param value
+     * @return String[]
+     */
+    private String[] getDataRangeWithValue(TimeDimension timDim, String value) {
+        Calendar cal = Calendar.getInstance ();
+        try {
+            cal.setTime (new SimpleDateFormat ("yyyyMMdd").parse (value));
+            cal.setFirstDayOfWeek (Calendar.MONDAY);
+        } catch (ParseException e) {
+            throw new RuntimeException (e.getMessage (), e);
+        }
+        TimeRangeDetail days = null;       
+        switch (timDim.getLevels ().values ().toArray (new Level[0])[0].getType ()) {
+            case TIME_YEARS:
+                days = TimeUtils.getYearDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_QUARTERS:
+                days = TimeUtils.getQuarterDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_MONTHS:
+                days = TimeUtils.getMonthDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_WEEKS:
+                days = TimeUtils.getWeekDays (cal.getTime ());
+                return new String[] {days.getStart (), days.getEnd ()};
+            case TIME_DAYS:
+                return new String[] {value, value};
+            default:
+        }
+        throw new RuntimeException ("Unsupported time dim type");
+    }
     
     private String parseToDate(String uniqueName) {
         String[] valueParts = StringUtils.split(uniqueName, "].[");
-        /**
-         * TODO 假定时间的uniqueName是[***].[yyyyMMdd]这种，以后要考虑兼容性
-         */
         if (valueParts.length > 1) {
             String part = valueParts[valueParts.length - 1];
             return part.replace("]", "");
@@ -760,9 +774,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      */
     @Override
     public PivotTable parseToPivotTable(Cube cube, DataModel dataModel) throws PivotTableParseException {
-        
         PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, false, 0, false);
-        // TODO Auto-generated method stub
         return table;
     }
 
@@ -779,24 +791,16 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         return targetArea;
     }
 
-//    /**
-//     * {@inheritDoc}
-//     */
-//	@Override
-//	public QueryAction generateTableQueryActionForPlaneTable(
-//			ReportDesignModel model, String aeraId, Map<String, Object> context) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-
-	/**
-	 * {@inheritDoc} 
-	 */
-	@Override
-	public PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel,
-	        LogicModel logicModel, FormatModel formatModel, QueryAction queryAction) throws PlaneTableParseException {
-		PlaneTable planeTable = DataModelUtils.transDataModel2PlaneTable(cube, dataModel,logicModel, formatModel, queryAction);
-		return planeTable;
-	}
+    /**
+     * {@inheritDoc} 
+     */
+    @Override
+    public PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel,
+            LogicModel logicModel, FormatModel formatModel, QueryAction queryAction) 
+            throws PlaneTableParseException {
+        PlaneTable planeTable = DataModelUtils
+            .transDataModel2PlaneTable(cube, dataModel,logicModel, formatModel, queryAction);
+        return planeTable;
+    }
     
 }

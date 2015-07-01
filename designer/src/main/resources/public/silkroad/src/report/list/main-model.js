@@ -11,9 +11,7 @@ define(['url'], function (Url) {
          *
          * @constructor
          */
-        initialize: function () {
-
-        },
+        initialize: function () {},
 
         /**
          * 加载报表列表
@@ -53,7 +51,7 @@ define(['url'], function (Url) {
          * 预览报表
          *
          * @param {string} reportId 报表id
-         * @param {function} success 成功回调函数
+         * @param {Function} success 成功回调函数
          * @public
          */
         showReport: function (reportId, success) {
@@ -72,7 +70,7 @@ define(['url'], function (Url) {
          * 新建报表
          *
          * @param {string} reportName 报表样式名称
-         * @param {function} success 成功回调函数
+         * @param {Function} success 成功回调函数
          * @public
          */
         addReport: function (reportName, success) {
@@ -93,7 +91,7 @@ define(['url'], function (Url) {
          *
          * @param {event} reportId 报表id
          * @param {event} reportName 报表样式名称
-         * @param {function} success 成功回调函数
+         * @param {Function} success 成功回调函数
          * @public
          */
         copyReport: function (reportId, reportName, success) {
@@ -116,7 +114,7 @@ define(['url'], function (Url) {
          * 获取被点击的行的reportId
          *
          * @param {event} reportId 报表id
-         * @param {function} success 成功回调函数
+         * @param {Function} success 成功回调函数
          * @public
          */
         getPublishInfo: function (reportId, success) {

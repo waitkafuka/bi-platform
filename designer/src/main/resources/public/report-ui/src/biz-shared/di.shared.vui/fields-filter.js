@@ -48,8 +48,10 @@ $namespace('di.shared.vui');
         '<ul class="table-fields-filter-list">',
             //'<li><input type="checkbox" name="" id="input1"><label>字段1</label></li>',
         '</ul>',
+        '<div style="float:right">',
         '<div></div>',
-        '<div></div>'
+        '<div></div>',
+        '</div>'
     ].join('');
 
     /**
@@ -110,8 +112,8 @@ $namespace('di.shared.vui');
 
             dialogElChildren = domChildren(dialogEl);
             filterEl = dialogElChildren[1];
-            confirmEl = dialogElChildren[2];
-            cancelEl = dialogElChildren[3];
+            confirmEl = domChildren(dialogElChildren[2])[0];
+            cancelEl = domChildren(dialogElChildren[2])[1];
 
             this._uDialog = ecuiCreate(UI_FORM, dialogEl, null, { hide: true });
 
@@ -131,7 +133,7 @@ $namespace('di.shared.vui');
                 null,
                 {
                     text: options.cancelText || '取消',
-                    skin: 'ui-button-g'
+                    skin: 'ui-button-c'
                 }
             );
 

@@ -21,9 +21,11 @@ define(['url'], function (Url) {
                 }
             });
         },
+
         /**
-         * 加载数据源列表
+         * 获取数据源组中活动的数组源
          *
+         * @param {Function} success 回调函数
          * @public
          */
         loadDsGroupActive: function (success) {
@@ -41,6 +43,7 @@ define(['url'], function (Url) {
         /**
          * 删除某一数据源
          *
+         * @param {string} groupId 数据源组id
          * @param {string} dsId 数据源id
          * @public
          */
@@ -59,6 +62,7 @@ define(['url'], function (Url) {
         /**
          * 加载某一数据源所含的表(在设置cube模块用到此方法)
          *
+         * @param {string} groupId 数据源组id
          * @param {string} dsId 数据源id
          * @param {Function} sucess(Object) 加载成功后的回调函数
          * @public
@@ -76,7 +80,7 @@ define(['url'], function (Url) {
         /**
          * 新建数据源组
          *
-         * @param {string} dsGroupName 报表样式名称
+         * @param {string} dsGroupName 数据源组名称
          * @param {function} success 成功回调函数
          * @public
          */
@@ -92,10 +96,12 @@ define(['url'], function (Url) {
                 }
             });
         },
+
         /**
          * 编辑数据源组
          *
-         * @param {string} dsGroupName 报表样式名称
+         * @param {string} groupId 数据源组id
+         * @param {string} dsGroupName 数据源组名称
          * @param {function} success 成功回调函数
          * @public
          */
@@ -111,10 +117,11 @@ define(['url'], function (Url) {
                 }
             });
         },
+
         /**
          * 删除数据源组
          *
-         * @param {string} dsGroupName 报表样式名称
+         * @param {string} dsGroupId 数据源组id
          * @param {function} success 成功回调函数
          * @public
          */
@@ -127,6 +134,15 @@ define(['url'], function (Url) {
                 }
             });
         },
+
+        /**
+         * 重定活动的数据源
+         *
+         * @param {string} groupId 数据源组id
+         * @param {string} dsGroupName 数据源组名称
+         * @param {function} success 成功回调函数
+         * @public
+         */
         changeDataSourceActive: function (dsGroupId, dsId, success) {
             $.ajax({
                 url:  Url.changeDsActive(dsGroupId, dsId),
@@ -136,6 +152,7 @@ define(['url'], function (Url) {
                 }
             });
         }
+
     });
 
 });

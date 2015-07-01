@@ -91,7 +91,7 @@ define([
 
                 // 维度组接收原始维度和时间维度（虽然时间维度也是原始维度）
                 $('.j-dim-group', this.el).droppable({
-                    accept: ".j-org-dim,.j-time-dim",
+                    accept: '.j-org-dim,.j-time-dim,.j-callback-dim',
                     drop: function (event, ui) {
                         var $dimGroup = $(this);
                         var groupId = $(this).attr('data-id');

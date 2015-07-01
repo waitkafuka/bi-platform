@@ -51,7 +51,6 @@ import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ac.query.model.SQLCondition;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.tesseract.exception.MetaException;
@@ -243,7 +242,8 @@ public class QueryContextBuilder {
         
         
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
-            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())) {
+            if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName()) 
+                && !dimension.isTimeDimension ()) {
                 logger.info("filter axises ignore all member filter");
                 return null;
             }
@@ -397,7 +397,7 @@ public class QueryContextBuilder {
                             MemberNodeTree childNode = new MemberNodeTree(nodeTree);
                             childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
                             childNodes.add(childNode);
-//                        member.getQueryNodes().addAll(child.getQueryNodes());
+//                        memberNode.getQueryNodes().addAll(child.getQueryNodes());
                         });
                     }
                 }

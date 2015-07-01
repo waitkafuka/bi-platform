@@ -45,7 +45,7 @@ public class AesUtilTest {
         String result = null;
 
         try {
-            result = util.encrypt(data);
+            result = util.encryptAndUrlEncoding(data);
             Assert.fail("no check blank data");
         } catch (Exception e) {
             Assert.assertTrue(e instanceof IllegalArgumentException);

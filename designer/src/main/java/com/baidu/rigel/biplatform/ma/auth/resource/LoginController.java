@@ -20,7 +20,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -45,7 +46,7 @@ public class LoginController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(LoginController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
     
     /**
      * 用户服务对象
@@ -76,7 +77,7 @@ public class LoginController extends RandomValidateCodeController {
         // 对产品线信息进行加密
         try {            
             // 加密产品线
-            productLineEncrypt = AesUtil.getInstance().encrypt(productLine, securityKey);
+            productLineEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(productLine, securityKey);
             // 加密密码
             pwdEncrypt = AesUtil.getInstance().encryptAndUrlEncoding(pwd, securityKey);
         } catch (Exception e) {
@@ -106,11 +107,6 @@ public class LoginController extends RandomValidateCodeController {
             }
         }
         // 在请求中添加sessionId的cookie信息
-//        String sessionId = UuidGeneratorUtils.generate();
-//        Cookie sessionIdCookie = new Cookie(Constants.SESSION_ID, sessionId);
-//        sessionIdCookie.setPath(Constants.COOKIE_PATH);
-//        response.addCookie(sessionIdCookie);
-//        response.addHeader(Constants.COOKIE_PATH, sessionId);
         LOG.info("user [" + productLine + "] login bi-platform successfully");
         rs.setStatus(0);
         rs.setStatusInfo("successfully");

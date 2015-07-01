@@ -6,6 +6,43 @@
 define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel) {
 
     return Backbone.Model.extend({
+        defaults: {
+            separateTableRuleData: {
+                time: {
+                    value: 'TIME',
+                    text: '时间',
+                    children: [
+                        {
+                            value: 'yyyy',
+                            text: '年(yyyy)'
+                        },
+                        {
+                            value: 'yyyyMM',
+                            text: '月(yyyyMM)'
+                        },
+                        {
+                            value: 'yyyyMMdd',
+                            text: '日(yyyyMMdd)'
+                        }
+                    ]
+                },
+                dist: {
+                    value: 'DIST',
+                    text: '地域',
+                    children: [
+                        {
+                            value: 'province',
+                            text: '省'
+                        },
+                        {
+                            value: 'city',
+                            text: '城市'
+                        }
+                    ]
+                }
+            },
+            selectedTable: []
+        },
 
         /**
          * 构造函数
@@ -88,7 +125,8 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
             $.ajax({
                 url: Url.loadReportFactTableList(that.id),
                 success: function (data) {
-                    factTableList.prefixs = data.data.prefixs;
+                    //factTableList.prefixs = data.data.prefixs;
+                    factTableList.regexps = data.data.regexps;
                     factTableList.factTables = that._mergeFactTablesList(
                         dsFactTablesList,
                         data.data.selected
@@ -107,6 +145,32 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
                     //);
                 }
             });
+
+            //factTableList = {
+            //    regexps:{
+            //        FACT_TAB_COL_META_CLASS: {
+            //            type: 'TIME',
+            //            condition: 'yyyy',
+            //            prefix: 'testYYYy1'
+            //        },
+            //        fact_tab: {
+            //            type: 'DIST',
+            //            condition: 'city',
+            //            prefix: 'testPre1'
+            //        }
+            //    },
+            //    factTables:[
+            //        {name:"FACT_TAB_COL_META_CLASS","id":"FACT_TAB_COL_META_CLASS","comment":"","dbName":null, "selected": true},
+            //        {name:"dim_1","id":"dim_1","comment":"","dbName":null},
+            //        {name:"fact_tab","id":"fact_tab","comment":"","dbName":null,"selected":true}
+            //    ]
+            //};
+            //
+            //// 为了始终触发数据重新渲染
+            //that.set(
+            //    { 'factTableList': factTableList }
+            //    //{ 'silent': true } // 阻止change事件
+            //);
         },
 
         /**
@@ -139,14 +203,14 @@ define(['url', 'data-sources/list/main-model'], function (Url, DataSourcesModel)
 
             if (opt_selectedId !== undefined) {
                 for (var i = 0, len = data.length; i < len; i++) {
-                    if (data[i].active.id == opt_selectedId) {
+                    if (data[i].active && (data[i].active.id == opt_selectedId)) {
                         data[i].active.selected = true;
                         break;
                     }
                 }
             }
             // 新建报表走的逻辑，且数据源列表不为空
-            else if (data.length > 0) {
+            else if (data.length > 0 && data[0].active) {
                 that.set('dsId', data[0].active.id);
                 data[0].active.selected = true;
                 this.selectedDsId = data[0].active.id;

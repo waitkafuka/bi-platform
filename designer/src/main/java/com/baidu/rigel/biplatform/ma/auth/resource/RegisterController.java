@@ -22,7 +22,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -46,7 +47,7 @@ public class RegisterController extends RandomValidateCodeController {
     /**
      * 日志对象
      */
-    private static final Logger LOG = Logger.getLogger(RegisterController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterController.class);
     
     /**
      * 用户服务对象
@@ -80,20 +81,17 @@ public class RegisterController extends RandomValidateCodeController {
             ProductlineInfo user = this.getUserFromUrl(request, true);
             // 校验用户名是否已经存在
             if (userManageService.existsUser(user.getName())) {
-                throw new Exception("the name " + user.getName() 
-                        + " is already exist, please change");
+                throw new Exception("the name " + user.getName() + " is already exist, please change");
             }
             String magicStr = String.valueOf(System.nanoTime());
             cacheManagerForResource.setToCache(magicStr, 1);
             // 向管理员发送注册信息，返回0代表发送成功，返回-1代表发送失败
             int status = productLineRegisterService
-                    .sendRegisterMsgToAdministrator(user, hostAddress, magicStr);
+                .sendRegisterMsgToAdministrator(user, hostAddress, magicStr);
             if (status == -1) {
-                throw new Exception("send register message to "
-                        + "Administrator happens exception");
+                throw new Exception("send register message to Administrator happens exception");
             }
-            LOG.info("send [" + user.getName() + "]'s register"
-                    + " messgage to Administrator successfully");
+            LOG.info("send [" + user.getName() + "]'s register messgage to Administrator successfully");
             // 返回处理结果
             rs.setStatus(0);
             rs.setStatusInfo("successfully");
@@ -139,7 +137,7 @@ public class RegisterController extends RandomValidateCodeController {
             // 发送开通服务信息给用户
             productLineRegisterService.sendOpenServiceMsgToUser(user, 1);           
             LOG.info("open online service for user [" 
-                    + user.getName() + "] successfully");
+                + user.getName() + "] successfully");
             // 返回成功结果
             rs.setStatus(0);
             rs.setStatusInfo("successfully");
@@ -240,8 +238,7 @@ public class RegisterController extends RandomValidateCodeController {
         try {
             user.setServiceType(Integer.valueOf(serviceType));
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("service type is wrong , "
-                    + "it's value must be 0 ro 1");
+            throw new IllegalArgumentException("service type is wrong , it's value must be 0 ro 1");
         }
         return user;
     }

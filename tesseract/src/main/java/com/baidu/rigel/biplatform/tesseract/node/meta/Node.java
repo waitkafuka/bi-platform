@@ -439,6 +439,13 @@ public class Node extends StoreMeta implements Serializable {
 		}
 		return true;
 	}
+
+    /**
+     * @param blockCapacity the blockCapacity to set
+     */
+    public void setBlockCapacity(int blockCapacity) {
+        this.blockCapacity = blockCapacity;
+    }
     
     
     

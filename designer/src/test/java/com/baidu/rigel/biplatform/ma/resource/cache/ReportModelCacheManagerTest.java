@@ -42,155 +42,145 @@ import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 @RunWith(MockitoJUnitRunner.class)
 public class ReportModelCacheManagerTest {
 
-	/**
-	 * ReportModelCacheManager
-	 */
-	@InjectMocks
-	ReportModelCacheManager cacheManager = new ReportModelCacheManager();
+    /**
+     * ReportModelCacheManager
+     */
+    @InjectMocks
+    ReportModelCacheManager cacheManager = new ReportModelCacheManager();
 
-	@Mock
-	CacheManagerForResource cacheManagerForResource;
+    @Mock
+    CacheManagerForResource cacheManagerForResource;
 
-	@Mock
-	ReportDesignModelService reportDesignModelService;
+    @Mock
+    ReportDesignModelService reportDesignModelService;
 
-	@Mock
-	StoreManager storeManager;
+    @Mock
+    StoreManager storeManager;
 
-	@Mock
-	ReportDesignModel reportDesignModel;
+    @Mock
+    ReportDesignModel reportDesignModel;
 
-	@Mock
-	ReportRuntimeModel reportRuntimeModel;
+    @Mock
+    ReportRuntimeModel reportRuntimeModel;
 
-	@Before
-	public void init() {
-		MockitoAnnotations.initMocks(this);
-		cacheManager.setCacheManagerForResource(cacheManagerForResource);
-	}
+    @Before
+    public void init() {
+        MockitoAnnotations.initMocks(this);
+        cacheManager.setCacheManagerForResource(cacheManagerForResource);
+    }
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testGetReportModelWithUnexistKey() {
-		Mockito.when(cacheManagerForResource.getFromCache("report_null_test"))
-				.thenReturn(reportDesignModel);
-		try {
-			this.cacheManager.getReportModel("test");
-			Assert.fail();
-		} catch (Exception e) {
-			Assert.assertNotNull(e);
-		}
-	}
+    @Test
+    public void testGetReportModelWithUnexistKey() {
+        Mockito.when(cacheManagerForResource.getFromCache("report_null_test")).thenReturn(reportDesignModel);
+        try {
+            this.cacheManager.getReportModel("test");
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testGetReportModel() {
-		byte[] modelBytes = SerializationUtils.serialize(reportDesignModel);
-		Mockito.when(
-				cacheManagerForResource.getFromCache("report_null_test_null"))
-				.thenReturn(modelBytes);
-		Assert.assertNotNull(this.cacheManager.getReportModel("test"));
-	}
+    @Test
+    public void testGetReportModel() {
+        byte[] modelBytes = SerializationUtils.serialize(reportDesignModel);
+        Mockito.when(cacheManagerForResource.getFromCache("report_null_test_null")).thenReturn(modelBytes);
+        try {
+            Assert.assertNotNull(this.cacheManager.getReportModel("test"));
+        } catch (CacheOperationException e) {
+            Assert.assertNotNull (e);
+        }
+    }
 
-	@Test
-	public void testLoadReportModelToCacheWithException() {
-		byte[] modelBytes = SerializationUtils.serialize(reportDesignModel);
-		ReportDesignModel serializeDesignModel = (ReportDesignModel) SerializationUtils
-				.deserialize(modelBytes);
+    @Test
+    public void testLoadReportModelToCacheWithException() {
+        byte[] modelBytes = SerializationUtils.serialize(reportDesignModel);
+        ReportDesignModel serializeDesignModel = (ReportDesignModel) SerializationUtils.deserialize(modelBytes);
 
-		Mockito.when(
-				reportDesignModelService.getModelByIdOrName("test_report",
-						false)).thenReturn(serializeDesignModel);
-		Mockito.doThrow(new CacheOperationException(""))
-				.when(cacheManagerForResource)
-				.setToCache(Mockito.anyString(), Mockito.anyString());
-		try {
-			cacheManager.loadReportModelToCache("test_report");
-		} catch (Exception e) {
-			Assert.assertNotNull(e);
-		}
-		try {
-			cacheManager.loadReleaseReportModelToCache("test_report");
-		} catch (Exception e) {
-			Assert.assertNotNull(e);
-		}
-	}
+        Mockito.when(reportDesignModelService.getModelByIdOrName("test_report", false))
+                .thenReturn(serializeDesignModel);
+        Mockito.doThrow(new CacheOperationException(""))
+                .when(cacheManagerForResource)
+                .setToCache(Mockito.anyString(), Mockito.anyString());
+        try {
+            cacheManager.loadReportModelToCache("test_report");
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+        try {
+            cacheManager.loadReleaseReportModelToCache("test_report");
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
 
-	@Test
-	public void testLoadReportModelToCache() {
-		byte[] modelBytes = SerializationUtils.serialize(reportDesignModel);
-		ReportDesignModel serializeDesignModel = (ReportDesignModel) SerializationUtils
-				.deserialize(modelBytes);
-		Mockito.when(
-				reportDesignModelService.getModelByIdOrName("test_report",
-						false)).thenReturn(serializeDesignModel);
-		Mockito.when(
-				reportDesignModelService
-						.getModelByIdOrName("test_report", true)).thenReturn(
-				serializeDesignModel);
-		// Mockito.doThrow(new CacheOperationException(""))
-		// .when(cacheManagerForResource)
-		// .setToCache(Mockito.anyString(), Mockito.anyString());
-		ReportDesignModel reportModel = cacheManager
-				.loadReportModelToCache("test_report");
-		ReportDesignModel releaseReportModel = cacheManager
-				.loadReleaseReportModelToCache("test_report");
-		Assert.assertNotNull(reportModel);
-		Assert.assertNotNull(releaseReportModel);
-	}
+    @Test
+    public void testLoadReportModelToCache() {
+        byte[] modelBytes = SerializationUtils.serialize(reportDesignModel);
+        ReportDesignModel serializeDesignModel = (ReportDesignModel) SerializationUtils.deserialize(modelBytes);
+        Mockito.when(reportDesignModelService.getModelByIdOrName("test_report", false))
+                .thenReturn(serializeDesignModel);
+        Mockito.when(
+                reportDesignModelService.getModelByIdOrName("test_report", true))
+                .thenReturn(serializeDesignModel);
+        // Mockito.doThrow(new CacheOperationException(""))
+        // .when(cacheManagerForResource)
+        // .setToCache(Mockito.anyString(), Mockito.anyString());
+        ReportDesignModel reportModel = cacheManager.loadReportModelToCache("test_report");
+        ReportDesignModel releaseReportModel = cacheManager.loadReleaseReportModelToCache("test_report");
+        Assert.assertNotNull(reportModel);
+        Assert.assertNotNull(releaseReportModel);
+    }
 
-	@Test
-	public void testDeleteReportModel() {
-		cacheManager.deleteReportModel("test_report");
-	}
+    @Test
+    public void testDeleteReportModel() {
+        cacheManager.deleteReportModel("test_report");
+    }
 
-	@Test
-	public void testGetRuntimeModel() {
-		byte[] modelBytes = SerializationUtils.serialize(reportRuntimeModel);
-		Mockito.doReturn(modelBytes).when(cacheManagerForResource)
-				.getFromCache("runtime_null_test_report_null");
-		ReportRuntimeModel reportRuntimeModelResult = cacheManager
-				.getRuntimeModel("test_report");
-		Assert.assertNotNull(reportRuntimeModelResult);
-	}
+    @Test
+    public void testGetRuntimeModel() {
+        byte[] modelBytes = SerializationUtils.serialize(reportRuntimeModel);
+        Mockito.doReturn(modelBytes).when(cacheManagerForResource).getFromCache("runtime_null_test_report_null");
+        try {
+            ReportRuntimeModel reportRuntimeModelResult = cacheManager.getRuntimeModel("test_report");
+            Assert.assertNotNull(reportRuntimeModelResult);
+        } catch (CacheOperationException e) {
+            Assert.assertNotNull (e);
+        }
+    }
 
-	@Test
-	public void testLoadRunTimeModelToCache() {
-		byte[] modelBytes = SerializationUtils
-				.serialize(new ReportDesignModel());
-		// Mockito.doReturn(modelBytes).when(cacheManagerForResource)
-		// .getFromCache("runtime_null_test_report_null");
-		Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString()))
-				.thenReturn(modelBytes);
-		ReportRuntimeModel reportRuntimeModelResult = cacheManager
-				.loadRunTimeModelToCache("test_report");
-		Assert.assertNotNull(reportRuntimeModelResult);
-	}
+    @Test
+    public void testLoadRunTimeModelToCache() {
+        byte[] modelBytes = SerializationUtils.serialize(new ReportDesignModel());
+        // Mockito.doReturn(modelBytes).when(cacheManagerForResource)
+        // .getFromCache("runtime_null_test_report_null");
+        Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString())).thenReturn(modelBytes);
+        ReportRuntimeModel reportRuntimeModelResult = cacheManager.loadRunTimeModelToCache("test_report");
+        Assert.assertNotNull(reportRuntimeModelResult);
+    }
 
-	@Test
-	public void testupdateAreaContext() {
-		cacheManager.updateAreaContext("areaId", new ExtendAreaContext());
-	}
+    @Test
+    public void testupdateAreaContext() {
+        cacheManager.updateAreaContext("areaId", new ExtendAreaContext());
+    }
 
-	@Test
-	public void testgetAreaContext() {
-		ExtendAreaContext mockContext = new ExtendAreaContext();
-		Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString()))
-				.thenReturn(mockContext);
-		ExtendAreaContext resultContext = cacheManager.getAreaContext("areaId");
-		Assert.assertNotNull(resultContext);
-	}
+    @Test
+    public void testgetAreaContext() {
+        ExtendAreaContext mockContext = new ExtendAreaContext();
+        Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString())).thenReturn(mockContext);
+        ExtendAreaContext resultContext = cacheManager.getAreaContext("areaId");
+        Assert.assertNotNull(resultContext);
+    }
 
-	@Test
-	public void testgetAreaContextWithNewContext() {
-		//ExtendAreaContext mockContext = new ExtendAreaContext();
-		Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString()))
-				.thenReturn(null);
-		ExtendAreaContext resultContext = cacheManager.getAreaContext("areaId");
-		Assert.assertNotNull(resultContext);
-	}
+    @Test
+    public void testgetAreaContextWithNewContext() {
+        Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString())).thenReturn(null);
+        ExtendAreaContext resultContext = cacheManager.getAreaContext("areaId");
+        Assert.assertNotNull(resultContext);
+    }
 }

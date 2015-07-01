@@ -4,7 +4,7 @@
 </div>
 <div class="j-con-org-dim con-org-dim">
     {{each dimList as $item}}{{if $item.type !== "GROUP_DIMENSION"}}
-    <div class="item hover-bg c-m j-root-line j-olap-element{{if $item.canToInd}} j-can-to-ind{{/if}}{{if $item.type=="STANDARD_DIMENSION"}} j-org-dim{{/if}} {{if $item.type=="TIME_DIMENSION"}} j-time-dim{{/if}}" data-id="{{$item.id}}" data-name="{{$item.name}}">
+    <div class="item hover-bg c-m j-root-line j-olap-element{{if $item.canToInd}} j-can-to-ind{{/if}}{{if $item.type=="STANDARD_DIMENSION"}} j-org-dim{{/if}} {{if $item.type=="TIME_DIMENSION"}} j-time-dim{{/if}} {{if $item.type=="CALLBACK"}} j-callback-dim{{/if}}" data-id="{{$item.id}}" data-name="{{$item.name}}">
         <span class="item-text ellipsis j-item-text">{{$item.caption}}（{{$item.name}}）</span>
         <span class="icon-letter collect j-edit-dim-name" data-id="{{$item.id}}" title="编辑名称">E</span>
     </div>

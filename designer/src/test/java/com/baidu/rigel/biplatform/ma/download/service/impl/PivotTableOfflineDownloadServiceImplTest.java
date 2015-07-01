@@ -15,6 +15,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 
 /**
  * pivotTable离线下载实现测试
+ * 
  * @author yichao.jiang 2015年6月2日 下午4:57:21
  */
 public class PivotTableOfflineDownloadServiceImplTest {
@@ -23,13 +24,16 @@ public class PivotTableOfflineDownloadServiceImplTest {
      * 
      */
     @Test
-    public void test() {
+    public void testDownloadTableForPivotTableOffline() {
         LogicModel logicModel = PowerMockito.mock(LogicModel.class);
         QuestionModel questionModel = PowerMockito.mock(QuestionModel.class);
         DownloadType downType = DownloadType.PIVOT_TABLE_OFFLINE;
         DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downType);
-        
-        //TODO 暂时没有实现，所以返回null
-        Assert.assertNull(downloadService.downloadTableData(questionModel, logicModel));
+
+        try {
+            downloadService.downloadTableData(questionModel, logicModel);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
     }
 }

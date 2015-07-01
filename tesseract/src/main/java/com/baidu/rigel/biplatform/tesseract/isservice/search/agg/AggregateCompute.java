@@ -44,8 +44,16 @@ import com.google.common.collect.Sets;
  */
 public class AggregateCompute {
     
+    /**
+     * LOGGER
+     */
     private static Logger LOGGER = LoggerFactory.getLogger(AggregateCompute.class);
     
+    /**
+     * 
+     * @param dataList
+     * @return List<SearchIndexResultRecord>
+     */
     public static List<SearchIndexResultRecord> distinct(List<SearchIndexResultRecord> dataList){
         return dataList.stream().distinct().collect(Collectors.toList());
     }
@@ -62,7 +70,7 @@ public class AggregateCompute {
     public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> dataList,
         int dimSize, List<QueryMeasure> queryMeasures) {
         
-        if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList)) { // ||dataList.size() == 1) {
+        if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList)) { 
             LOGGER.info("no need to group.");
             return dataList;
         }
@@ -111,17 +119,14 @@ public class AggregateCompute {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 throw new RuntimeException(e);
             }
             return x;
         };
-        final Collector<SearchIndexResultRecord, ?, SearchIndexResultRecord> reducing = 
+        final Collector<SearchIndexResultRecord, ?, SearchIndexResultRecord> reducing =
                 Collectors.reducing(SearchIndexResultRecord.of(arraySize), reduceOperation);
         Map<String, SearchIndexResultRecord> groupResult = stream.collect(
-                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, reducing
-            )
-        );
+                Collectors.groupingByConcurrent(SearchIndexResultRecord::getGroupBy, reducing));
         
         if(CollectionUtils.isNotEmpty(countIndex)) {
             groupResult.values().forEach(record -> {
@@ -131,15 +136,6 @@ public class AggregateCompute {
                     }
                 }
             });
-//            LOGGER.info("distinct agg(sum) cost: {}ms!", (System.currentTimeMillis() - current));
-                
-                
-//                Map<String, Set<Serializable>> counts = dataList.stream().collect(Collectors.groupingBy(SearchIndexResultRecord::getGroupBy,
-//                        Collectors.mapping(record -> record.getField(index),Collectors.toSet())));
-//                for(String key : counts.keySet()) {
-//                    groupResult.get(key).getDistinctMeasures().put(index, counts.get(key));
-//                    groupResult.get(key).setField(dimSize + index, counts.get(key).size());
-//                }
         }
         LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
         return new ArrayList<>(groupResult.values());

@@ -2,6 +2,7 @@
  * Created by v_zhaoxiaoqiang on 2014/5/22.
  */
 define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
+    var ajaxError;
 
     // 全局的log容错
     window.dataInsight = window.dataInsight || {};
@@ -10,8 +11,6 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
             console.log(str);
         }
     };
-
-    var ajaxError;
 
     // 全局ajax设置
     $.ajaxSetup({
@@ -23,11 +22,9 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
 
         },
         dataFilter: function (response, dataType) {
-
             var result;
             if (dataType == 'json' && window.JSON && window.JSON.parse) {
                 result = window.JSON.parse(response);
-
                 // 后台返回数据失败
                 if (result.status && result.status !== 0) {
                     // 异常情况，不返回response，jquery会捕获异常，进入error
@@ -44,7 +41,6 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
                     // 正常情况下，返回response
                     return response;
                 }
-
             }
         },
         // 如果具体调用时配置了 error，会覆盖此error
@@ -63,6 +59,11 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
 
     // 异步加载某模块，可在此处做一些路由处理
     var enter = function (option) {
+        var windowHeight;
+        var navHeight;
+        var footHeight;
+        var mainMinHeight;
+
         // 设置全局url基本路径
         Url.setWebRoot(option.webRoot);
         require(['nav/nav-view', 'nav/nav-model'], function (View, Model) {
@@ -70,10 +71,10 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
         });
 
         // 设置主区域的最小高度
-        var windowHeight = $(window).height();
-        var navHeight = $('.j-nav').height();
-        var footHeight = $('.j-foot').height();
-        var mainMinHeight = windowHeight - navHeight - footHeight;
+        windowHeight = $(window).height();
+        navHeight = $('.j-nav').height();
+        footHeight = $('.j-foot').height();
+        mainMinHeight = windowHeight - navHeight - footHeight;
         $('.j-main').css({
             'min-height': mainMinHeight + 'px'
         });

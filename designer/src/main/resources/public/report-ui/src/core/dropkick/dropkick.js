@@ -15,8 +15,10 @@
 var
 
   // Browser testing stuff
-  isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test( navigator.userAgent ),
-  isIframe = (window.parent != window.self && location.host === parent.location.host),
+  // isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test( navigator.userAgent ),
+    isMobile = false,
+  // isIframe = (window.parent != window.self && location.host === parent.location.host),
+    isIframe = false,
   isIE = navigator.appVersion.indexOf("MSIE")!=-1,
 
   // The Dropkick Object

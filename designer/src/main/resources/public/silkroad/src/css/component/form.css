@@ -32,6 +32,9 @@
 .form-common-text-big {
     width: 350px;
 }
+.form-common-text-xl {
+    width: 490px;
+}
 .form-common-text-validation {
     position: absolute;
     top: 21px;
@@ -76,4 +79,22 @@
 }
 .form-common-select {
     height: 22px;
+}
+.form-common-select-small {
+    height: 20px;
+}
+.form-common-text .form-common-text-small {
+    width: 176px;
+    height: 18px;
+    border: #a9a9a9 solid 1px;
+    margin-top: 1px;
+}
+.form-common-input-button {
+    background-color: #00a1cb;
+    color: white;
+    height: 20px;
+    line-height: 20px;
+    display: inline-block;
+    padding: 2px 16px;
+    cursor: pointer;
 }

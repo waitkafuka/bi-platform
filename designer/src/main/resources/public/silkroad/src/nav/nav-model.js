@@ -27,11 +27,19 @@ define(function () {
             ],
             currentMenu: "reportManager"
         },
+
+        /**
+         * 构造函数
+         *
+         * @constructor
+         */
         initialize: function () {},
 
         /**
          * 获取导航数据
+         *
          * @public
+         * @return {Object}  data 导航数据
          */
         getNavData: function () {
             var data = {};
@@ -51,7 +59,9 @@ define(function () {
 
         /**
          * 获取当前选中菜单Id
+         *
          * @public
+         * @return {string}  currentMenu 当前选中导航
          */
         getCurrentMenuId: function () {
             return this.get('currentMenu');

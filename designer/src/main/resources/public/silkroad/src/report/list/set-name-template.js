@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,text=$data.text,name=$data.name,$out='';$out+='<div class="set-report-name t-c j-set-report-name">\r\n    <div class="text">\r\n        ';

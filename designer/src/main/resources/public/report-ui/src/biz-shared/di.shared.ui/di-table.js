@@ -104,6 +104,8 @@ $namespace('di.shared.ui');
         // 条目数值等信息
         // 模板配置接口：totalRecordCount, currRecordCount
         this._uCountInfo = this.$di('vuiCreate', 'countInfo');
+
+        this._uRichSelect = this.$di('vuiCreate', 'richSelect');
     };
 
     /**
@@ -120,7 +122,7 @@ $namespace('di.shared.ui');
         var countInfo = this._uCountInfo;
         var downloadBtn = this._uDownloadBtn;
         var offlineDownloadBtn = this._uOfflineDownloadBtn;                
-
+        var richSelect = this._uRichSelect;
         // 事件绑定
         for (key in { 
                 'DATA': 1, 
@@ -155,6 +157,18 @@ $namespace('di.shared.ui');
             ['sync.error.SELECT', this.$handleRowAsync, this, true],
             ['sync.complete.SELECT', this.$syncEnable, this, 'SELECT']
         );
+        model.attach(
+            ['sync.preprocess.RICH_SELECT_DATA', this.$syncDisable, this, 'RICH_SELECT_DATA'],
+            ['sync.result.RICH_SELECT_DATA', this.$handleRenderRichSelect, this, false],
+            ['sync.error.RICH_SELECT_DATA', this.$handleRenderRichSelect, this, true],
+            ['sync.complete.RICH_SELECT_DATA', this.$syncEnable, this, 'RICH_SELECT_DATA']
+        );
+        model.attach(
+            ['sync.preprocess.RICH_SELECT_CHANGE', this.$syncDisable, this, 'RICH_SELECT_CHANGE'],
+            ['sync.result.RICH_SELECT_CHANGE', this.$handleRichSelectChangeSuccess, this, false],
+            ['sync.error.RICH_SELECT_CHANGE', this.$handleRichSelectChangeSuccess, this, true],
+            ['sync.complete.RICH_SELECT_CHANGE', this.$syncEnable, this, 'RICH_SELECT_CHANGE']
+        );
 
         if(this._needMeasureDes && this._needMeasureDes == true){
            model.attach(
@@ -182,17 +196,21 @@ $namespace('di.shared.ui');
         offlineDownloadBtn && (
             offlineDownloadBtn.attach('confirm', this.$handleOfflineDownload, this)
         );
-
+        richSelect && (
+            richSelect.attach('richSelectChange', this.$handleRichSelectChange, this)
+        );
         foreachDo(
             [
                 table,
                 breadcrumb,
                 countInfo,
                 downloadBtn,
-                offlineDownloadBtn
+                offlineDownloadBtn,
+                richSelect
             ],
             'init'
         );
+
         breadcrumb && breadcrumb.hide();
 
         this.$di('getEl').style.display = 'none';
@@ -208,7 +226,8 @@ $namespace('di.shared.ui');
                 this._uBreadcrumb,
                 this._uCountInfo,
                 this._uDownloadBtn,
-                this._uOfflineDownloadBtn
+                this._uOfflineDownloadBtn,
+                this._uRichSelect
             ],
             'dispose'
         );
@@ -241,6 +260,16 @@ $namespace('di.shared.ui');
             options,
             this.$di('getEvent')
         );
+        // TODO:
+        if (this._uRichSelect) {
+            this.$sync(
+                this.getModel(),
+                'RICH_SELECT_DATA',
+                {
+                    componentId : this.$di('getId').split('.')[1]
+                }
+            );
+        }
     };
 
     /**
@@ -272,7 +301,7 @@ $namespace('di.shared.ui');
             return;
         }
         this.$di('getEl').style.display = '';
-
+        this.reportId = ejsonObj.data.reportTemplateId;
         foreachDo(
             [
                 this._uTable,
@@ -520,22 +549,32 @@ $namespace('di.shared.ui');
      * @param {Object} options 参数
      */
     DI_TABLE_CLASS.$handleLinkBridge = function (colDefItem, rowDefItem) {
-        this.$di(
-            'linkBridge', 
-            colDefItem.linkBridge, 
-            URL('OLAP_TABLE_LINK_BRIDGE'),
-            this.$di('getCommonParamGetter')(
-                {
-                    colUniqName: colDefItem.uniqueName,
-                    rowUniqName: rowDefItem.uniqueName,
-                    colDefineId: colDefItem.colDefineId
-                },
-                {
-                    excludes: ['diAgent']
-                }
-            )
-        );
-    };    
+        var address = URL.getWebRoot()
+            + '/reports/'
+            + this.reportId
+            + '/linkBridge/extend_area/'
+            + this.$di('getId').split('.')[1];
+
+        var oForm = document.createElement('form');
+        document.body.appendChild(oForm);
+        oForm.type = "hidden";
+        oForm.method = "post";
+        oForm.target = "_blank";
+        oForm.action = address;
+
+        var uniqueNameParam = document.createElement("input");
+        uniqueNameParam.value = rowDefItem.uniqueName;
+        uniqueNameParam.name = "uniqueName";
+        oForm.appendChild(uniqueNameParam);
+
+        var meaureParam = document.createElement("input");
+        meaureParam.value = colDefItem.linkBridge;
+        meaureParam.name = "measureId";
+        oForm.appendChild(meaureParam);
+        oForm.submit();
+
+        document.body.removeChild(oForm);
+    };
 
     /**
      * 展开（下钻）
@@ -796,6 +835,31 @@ $namespace('di.shared.ui');
      */
     DI_TABLE_CLASS.$handleOfflineDownloadError = function (status, ejsonObj, options) {
         DIALOG.alert(LANG.SAD_FACE + LANG.OFFLINE_DOWNLOAD_FAIL);
+    };
+
+    DI_TABLE_CLASS.$handleRenderRichSelect = function (data, ejsonObj, options) {
+        this._uRichSelect.render(options.data);
+    };
+
+    DI_TABLE_CLASS.$handleRichSelectChange = function (selectedIds) {
+        this.$sync(
+            this.getModel(),
+            'RICH_SELECT_CHANGE',
+            {
+                selectedMeasures: selectedIds,
+                componentId : this.$di('getId').split('.')[1]
+            }
+        );
+    };
+    DI_TABLE_CLASS.$handleRichSelectChangeSuccess = function (data, ejsonObj, options) {
+        options = {};
+        options.componentId = this.$di('getId').split('.')[1];
+        this.$sync(
+            this.getModel(),
+            'DATA',
+            options,
+            this.$di('getEvent')
+        );
     };
 
 })();

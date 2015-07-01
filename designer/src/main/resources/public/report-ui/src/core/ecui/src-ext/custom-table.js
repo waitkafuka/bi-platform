@@ -462,6 +462,10 @@
             if (o.title) {
                 var tipsStr = '<div class="'+ type + '-head-tips"';
                 var sortStr = '';
+                var filterStr = '';
+                if (o.showFilter) {
+                    filterStr = '<div class="' + type + '-hcell-field-set"></div>';
+                }
                 if (o.toolTip) {
                     tipsStr = tipsStr + 'title="' + o.toolTip + '"';
                 }
@@ -475,7 +479,7 @@
                         '<div class="ui-table-head-font">', o.title, '</div>',
                         sortStr,
                         tipsStr,
-                    '<div class="', type, '-hcell-field-set"></div>',
+                        filterStr,
                     '</div>'
                 );
             }

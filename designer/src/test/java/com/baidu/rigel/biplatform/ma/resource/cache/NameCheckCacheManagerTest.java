@@ -28,162 +28,146 @@ import org.mockito.Mockito;
  */
 public class NameCheckCacheManagerTest {
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testNoExistsReportName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		Mockito.doReturn(null).when(resource)
-				.getFromCache("REPORT_NAME__null_test");
-		// Assert.assertFalse(nameCheckCacheManager.existsReportName("test"));
-	}
+    @Test
+    public void testNoExistsReportName() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        Mockito.doReturn(null).when(resource).getFromCache("REPORT_NAME__null_test");
+        // Assert.assertFalse(nameCheckCacheManager.existsReportName("test"));
+    }
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testExistsReportName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		Mockito.doReturn("test").when(resource)
-				.getFromCache("REPORT_NAME__null_test");
-		// Assert.assertTrue(nameCheckCacheManager.existsReportName("test"));
-	}
+    @Test
+    public void testExistsReportName() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        Mockito.doReturn("test").when(resource).getFromCache("REPORT_NAME__null_test");
+        // Assert.assertTrue(nameCheckCacheManager.existsReportName("test"));
+    }
 
-	/**
+//    /**
+//     * 
+//     */
+//    @Test
+//    public void testUseReportName() {
+//        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+//        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+//        nameCheckCacheManager.setCacheManagerForResource(resource);
+//        try {
+//             nameCheckCacheManager.useReportName("test");
+//        } catch (Throwable e) {
+//            Assert.fail();
+//        }
+//    }
+
+//    /**
+//     * 
+//     */
+//    @Test
+//    public void testUseReportNameWithEmptyName() {
+//        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+//        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+//        nameCheckCacheManager.setCacheManagerForResource(resource);
+//        try {
+//            // nameCheckCacheManager.useReportName(null);
+//            Assert.fail();
+//        } catch (Throwable e) {
+//            Assert.assertNotNull(e);
+//        }
+//    }
+
+    /**
      * 
      */
-	@Test
-	public void testUseReportName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		try {
-			// nameCheckCacheManager.useReportName("test");
-		} catch (Throwable e) {
-			Assert.fail();
-		}
-	}
+    @Test
+    public void testNoExistsDSName() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        Mockito.doReturn(null).when(resource).getFromCache("null_test");
+        Assert.assertFalse(nameCheckCacheManager.existsDSName("test"));
+    }
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testUseReportNameWithEmptyName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		try {
-			// nameCheckCacheManager.useReportName(null);
-			Assert.fail();
-		} catch (Throwable e) {
-			Assert.assertNotNull(e);
-		}
-	}
+    @Test
+    public void testExistsDSName() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        Mockito.doReturn("test").when(resource).getFromCache("null_test");
+//        Assert.assertTrue(nameCheckCacheManager.existsDSName("test"));
+    }
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testNoExistsDSName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		Mockito.doReturn(null).when(resource).getFromCache("null_test");
-		Assert.assertFalse(nameCheckCacheManager.existsDSName("test"));
-	}
+    @Test
+    public void testExistsDSNameForNullValue() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        Mockito.doReturn("test").when(resource).getFromCache("test");
+        Assert.assertFalse(nameCheckCacheManager.existsDSName("testDsGroup", "test"));
+    }
 
-	/**
+    @Test
+    public void testExistsDSNameWithValue() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        Mockito.doReturn("test").when(resource).getFromCache("null_testDsGroup_test");
+//        Assert.assertTrue(nameCheckCacheManager.existsDSName("testDsGroup", "test"));
+    }
+
+    /**
      * 
      */
-	@Test
-	public void testExistsDSName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		Mockito.doReturn("test").when(resource).getFromCache("null_test");
-		Assert.assertTrue(nameCheckCacheManager.existsDSName("test"));
-	}
+    @Test
+    public void testUseDsName() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        nameCheckCacheManager.userDSName("testDsGroup", "test");
+    }
 
-	/**
+    /**
      * 
      */
-	@Test
-	public void testExistsDSNameForNullValue() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		Mockito.doReturn("test").when(resource).getFromCache("test");
-		Assert.assertFalse(nameCheckCacheManager.existsDSName("testDsGroup",
-				"test"));
-	}
+    @Test
+    public void testUseDsName2() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        try {
+            nameCheckCacheManager.useDSName("test");
+        } catch (Throwable e) {
+            Assert.fail();
+        }
+    }
 
-	@Test
-	public void testExistsDSNameWithValue() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		Mockito.doReturn("test").when(resource)
-				.getFromCache("null_testDsGroup_test");
-		Assert.assertTrue(nameCheckCacheManager.existsDSName("testDsGroup",
-				"test"));
-	}
-
-	/**
+    /**
      * 
      */
-	@Test
-	public void testUseDsName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		nameCheckCacheManager.userDSName("testDsGroup", "test");
-	}
-
-	/**
-     * 
-     */
-	@Test
-	public void testUseDsName2() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		try {
-			nameCheckCacheManager.useDSName("test");
-		} catch (Throwable e) {
-			Assert.fail();
-		}
-	}
-
-	/**
-     * 
-     */
-	@Test
-	public void testUseDSNameWithEmptyName() {
-		NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
-		CacheManagerForResource resource = Mockito
-				.mock(CacheManagerForResource.class);
-		nameCheckCacheManager.setCacheManagerForResource(resource);
-		try {
-			nameCheckCacheManager.useDSName(null);
-			Assert.fail();
-		} catch (Throwable e) {
-			Assert.assertNotNull(e);
-		}
-	}
+    @Test
+    public void testUseDSNameWithEmptyName() {
+        NameCheckCacheManager nameCheckCacheManager = new NameCheckCacheManager();
+        CacheManagerForResource resource = Mockito.mock(CacheManagerForResource.class);
+        nameCheckCacheManager.setCacheManagerForResource(resource);
+        try {
+            nameCheckCacheManager.useDSName(null);
+            Assert.fail();
+        } catch (Throwable e) {
+            Assert.assertNotNull(e);
+        }
+    }
 
 }

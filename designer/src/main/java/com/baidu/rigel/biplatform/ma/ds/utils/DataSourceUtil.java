@@ -33,21 +33,6 @@ public final class DataSourceUtil {
         DataSourceUtil.dsFileBaseDir = dsDir;
     }
     
-    /**
-     * 获取数据源文件的文件名（含路径），对数据源名称进行hash
-     * 
-     * @param ds
-     *            数据源定义
-     * @return 返回数据源定义文件文件名（绝对路径）
-     */
-    public static String getDsFileNameUsingHashCode(DataSourceDefine ds) {
-        String basePath = getDsFileStoreDir ();
-        String nameHashCode = null;
-        if (ds.getName() != null) {
-            nameHashCode = String.valueOf(ds.getName().hashCode());
-        }
-        return basePath + File.separator + ds.getId () + "_" + nameHashCode;
-    }
     
     /**
      * 

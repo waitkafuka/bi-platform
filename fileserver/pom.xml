@@ -5,24 +5,25 @@
     <parent>
         <groupId>com.baidu.rigel</groupId>
         <artifactId>biplatform</artifactId>
-        <version>1.4.0-RELEASE</version>
+        <version>1.5.0-RELEASE</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-   
+
     <groupId>com.baidu.rigel.biplatform</groupId>
     <artifactId>fileserver</artifactId>
     <packaging>jar</packaging>
-   
+
 
     <dependencies>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <scope>compile</scope>
         </dependency>
         <dependency>
-                <groupId>commons-lang</groupId>
-                <artifactId>commons-lang</artifactId>
-            </dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -37,13 +38,6 @@
             <artifactId>netty-all</artifactId>
             <version>5.0.0.Alpha1</version>
         </dependency>
-        <!-- 
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <scope>provided</scope>
-        </dependency>
-         -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
@@ -73,29 +67,29 @@
     <build>
         <plugins>
             <plugin>
-				    <artifactId>maven-assembly-plugin</artifactId>  
-		             <groupId>org.apache.maven.plugins</groupId>  
-				    <configuration>  
-				        <appendAssemblyId>false</appendAssemblyId>  
-				        <descriptorRefs>  
-				            <descriptorRef>jar-with-dependencies</descriptorRef>  
-				        </descriptorRefs>  
-				        <archive>  
-				            <manifest>  
-				                <mainClass>com.baidu.rigel.biplatform.ma.file.serv.FileServer</mainClass>  
-				            </manifest>  
-				        </archive>  
-				    </configuration>  
-				    <executions>  
-				        <execution>  
-				            <id>make-assembly</id>  
-				            <phase>package</phase>  
-				            <goals>  
-				                <goal>assembly</goal>  
-				            </goals>  
-				        </execution>  
-				    </executions> 
-		    </plugin>
-           </plugins>
-       </build>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <configuration>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                    <archive>
+                        <manifest>
+                            <mainClass>com.baidu.rigel.biplatform.ma.file.serv.FileServer</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assembly</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

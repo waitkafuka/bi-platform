@@ -242,7 +242,8 @@ define(['url', 'constant'], function (Url, Constant) {
                     if (sourceData) {
                         // 组合数据格式列表项
                         targetData = {
-                            dataFormat: {}
+                            dataFormat: {},
+                            canChangedMeasure: {}
                         };
                         var length = 0;
                         for (name in sourceData) {
@@ -254,6 +255,7 @@ define(['url', 'constant'], function (Url, Constant) {
                         else {
                             targetData.dataFormat['value'] = sourceData['filterBlank'];
                         }
+                        targetData.canChangedMeasure.value = sourceData.canChangedMeasure;
                     }
                     /**
                      * dataFormat = {

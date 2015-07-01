@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -72,6 +73,11 @@ public class FactTableMetaDefine implements Serializable {
     private String regExp;
     
     /**
+     * 分表策略
+     */
+    private DivideTableStrategyVo divideTableStrategyVo;
+    
+    /**
      * 是否是多表联合作为事实表
      */
     private boolean mutilple;
@@ -117,6 +123,43 @@ public class FactTableMetaDefine implements Serializable {
         this.regExp = regExp;
     }
     
+    
+    /** 
+     * 获取 divideTableStrategyVo 
+     * @return the divideTableStrategyVo 
+     */
+    public DivideTableStrategyVo getDivideTableStrategyVo() {
+    
+        return divideTableStrategyVo;
+    }
+
+    /** 
+     * 设置 divideTableStrategyVo 
+     * @param divideTableStrategyVo the divideTableStrategyVo to set 
+     */
+    public void setDivideTableStrategyVo(DivideTableStrategyVo divideTableStrategyVo) {
+    
+        this.divideTableStrategyVo = divideTableStrategyVo;
+    }
+
+    /** 
+     * 获取 serialversionuid 
+     * @return the serialversionuid 
+     */
+    public static long getSerialversionuid() {
+    
+        return serialVersionUID;
+    }
+
+    /** 
+     * 设置 columns 
+     * @param columns the columns to set 
+     */
+    public void setColumns(Set<ColumnMetaDefine> columns) {
+    
+        this.columns = columns;
+    }
+
     /**
      * 
      * @return 是否是正则匹配

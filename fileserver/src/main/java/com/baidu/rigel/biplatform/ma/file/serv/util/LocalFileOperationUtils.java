@@ -23,7 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 服务器端文件操作辅助类
@@ -56,7 +57,7 @@ public final class LocalFileOperationUtils {
     /**
      * 日志输出对象
      */
-    private static final Logger LOG = Logger.getLogger(LocalFileOperationUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger (LocalFileOperationUtils.class);
     
     /**
      * LocalFileOperationUtils
@@ -107,17 +108,10 @@ public final class LocalFileOperationUtils {
     public static boolean writeFile(File file, byte[] content) {
         FileOutputStream fileOutputStream = null;
         try {
-            if (file == null) {
+            if (file == null || content == null || content.length == 0) {
                 return false;
             }
             
-            if (content == null) {
-                return false;
-            }
-            
-            if (content.length == 0) {
-                return false;
-            }
             fileOutputStream = new FileOutputStream(file);
             // 写入本地
             fileOutputStream.write(content);
@@ -125,7 +119,6 @@ public final class LocalFileOperationUtils {
             return true;
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            return false;
         } finally {
             if (fileOutputStream != null) {
                 try {
@@ -135,6 +128,7 @@ public final class LocalFileOperationUtils {
                 }
             }
         }
+        return false;
     }
 
     /**
@@ -163,7 +157,6 @@ public final class LocalFileOperationUtils {
             return true;
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
-            return false;
         } finally {
             try {
                 if (fileInputStream != null) {
@@ -176,6 +169,7 @@ public final class LocalFileOperationUtils {
                 LOG.error(e.getMessage(), e);
             }
         }
+        return false;
     }
 
     /**

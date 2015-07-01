@@ -26,6 +26,7 @@ import org.springframework.beans.factory.ListableBeanFactory;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
@@ -138,7 +139,9 @@ public interface DimensionMemberService extends BeanFactoryAware {
         Iterator<Level> it = levels.iterator();
 
         Level level = it.next();
-        if (MetaNameUtil.isAllMemberUniqueName(uniqueName) && !level.getType().equals(LevelType.CALL_BACK)) {
+        if (MetaNameUtil.isAllMemberUniqueName(uniqueName) 
+                && ! (targetDim instanceof TimeDimension)
+                && !level.getType().equals(LevelType.CALL_BACK)) {
             return (MiniCubeMember) targetDim.getAllMember();
         }
 
@@ -204,8 +207,15 @@ public interface DimensionMemberService extends BeanFactoryAware {
             throw new MetaException("can not found dimension by uniqueName:" + uniqueNameList + " in cube:" + cube);
         }
 
+        // 如果是Time开头的，默认就是时间维度
+        // TODO 不能这么判断，需要根据UniqueName中的维度名称获取到维度
         List<Level> levels = Lists.newArrayList(targetDim.getLevels().values());
         Level level = levels.get (names.length - 2);
+         if(targetDim.isTimeDimension ()){
+             return dimensionMemberServiceMap
+                     .get(TIME_MEMBER_SERVICE)
+                     .getMemberFromLevelByNames(dataSourceInfo, cube, level, params, uniqueNameList);
+         }
         boolean hasAllMember = false;
         for (String uniqueName : uniqueNameList) {
             if (MetaNameUtil.isAllMemberUniqueName (uniqueName)) {

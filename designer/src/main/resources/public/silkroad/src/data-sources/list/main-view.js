@@ -21,7 +21,10 @@ define([
     ) {
 
         return Backbone.View.extend({
-            // 事件
+
+            /**
+             * 事件绑定
+             */
             events: {
                 'click .j-add-data-sources': 'addDataSources',
                 'click .j-delete-data-sources': 'deleteDataSources',
@@ -36,7 +39,6 @@ define([
              * 构造函数
              *
              * @param {Object} option 初始化参数
-             * @param {$HTMLElement} option.el .j-main
              * @constructor
              */
             initialize: function () {
@@ -139,8 +141,9 @@ define([
                         height: 249,
                         open: function () {
                             var $this = $(this);
-                            $this.find('.j-data-sources-group-name').focus(function () {
-                                $this.find('.j-validation').hide();
+                            $this.find('.j-data-sources-group-name')
+                                .focus(function () {
+                                    $this.find('.j-validation').hide();
                             });
                         },
                         buttons: [
@@ -150,17 +153,21 @@ define([
                                     var $this = $(this);
                                     var name = $this.find('.j-data-sources-group-name').val();
                                     if (name == '') {
-                                        $this.find('.j-validation').html('名称不能为空').show();
+                                        $this.find('.j-validation')
+                                            .html('名称不能为空')
+                                            .show();
                                         return;
                                     }
                                     that.model.addDsGroup(
                                         name,
                                         function (dsGroupId) {
                                             $this.dialog('close');
-                                            $('.j-data-sources-tbody').append(groupItemTemplate.render({
-                                                id: dsGroupId,
-                                                name: name
-                                            }));
+                                            $('.j-data-sources-tbody').append(
+                                                groupItemTemplate.render({
+                                                    id: dsGroupId,
+                                                    name: name
+                                                })
+                                            );
                                         }
                                     );
                                 }
@@ -198,9 +205,10 @@ define([
                         height: 249,
                         open: function () {
                             var $this = $(this);
-                            $this.find('.j-data-sources-group-name').focus(function () {
-                                $this.find('.j-validation').hide();
-                            });
+                            $this.find('.j-data-sources-group-name')
+                                .focus(function () {
+                                    $this.find('.j-validation').hide();
+                                });
                         },
                         buttons: [
                             {
@@ -232,6 +240,7 @@ define([
                     }
                 });
             },
+
             /**
              * 删除数据源组
              *
@@ -241,6 +250,7 @@ define([
                 var that = this;
                 var $curGroup = $(event.target).parent().parent();
                 var groupId = $curGroup.attr('data-id');
+
                 dialog.confirm('是否确定删除当前数据源组', function () {
                     that.model.delDsGroup(groupId, function() {
                         $curGroup.remove();
@@ -250,6 +260,7 @@ define([
                     });
                 });
             },
+
             /**
              * 获取当前行的数据源id
              *
@@ -259,14 +270,29 @@ define([
             getLineId: function (event) {
                 return $(event.target).parents('.j-root-line').attr('data-id');
             },
+
+            /**
+             * 获取当前行的数据源组id
+             *
+             * @param {event} event 事件
+             * @public
+             */
             getGroupId: function (event) {
                 return $(event.target).parents('.j-root-line').find('input').attr('name');
             },
+
+            /**
+             * 改变活动的数据源
+             *
+             * @param {event} event 事件
+             * @public
+             */
             changeDataSourceActive: function(event) {
                 var groupId = $(event.target).attr('name');
                 var dsId = $(event.target).attr('id').split('-')[1];
                 this.model.changeDataSourceActive(groupId, dsId);
             },
+
             /**
              * 销毁当前view与其对应的model
              *

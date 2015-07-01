@@ -79,7 +79,9 @@ $namespace('di.shared.model');
             CHECK: URL.fn('OLAP_TABLE_CHECK'),
             SELECT: URL.fn('OLAP_TABLE_SELECT'),
             MEASURE_DES: URL.fn('MEASURE_DES'),
-            OFFLINE_DOWNLOAD: URL.fn('OLAP_TABLE_OFFLINE_DOWNLOAD')
+            OFFLINE_DOWNLOAD: URL.fn('OLAP_TABLE_OFFLINE_DOWNLOAD'),
+            RICH_SELECT_DATA: URL.fn('OLAP_TABLE_RICH_SELECT_DATA'),
+            RICH_SELECT_CHANGE: URL.fn('OLAP_TABLE_RICH_SELECT_CHANGE')
         }
     );
 
@@ -96,7 +98,9 @@ $namespace('di.shared.model');
             CHECK: 'DI_TABLE_MODEL_CHECK_' + getUID(),
             SELECT: 'DI_TABLE_MODEL_SELECT_' + getUID(),
             MEASURE_DES: 'MEASURE_DES_' + getUID(),
-            OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID()
+            OFFLINE_DOWNLOAD: 'DI_TABLE_OFFLINE_DOWNLOAD_' + getUID(),
+            RICH_SELECT_DATA: 'DI_TABLE_MODEL_RICH_SELECT_DATA_' + getUID(),
+            RICH_SELECT_CHANGE: 'DI_TABLE_MODEL_RICH_SELECT_CHANGE_' + getUID()
         }
     );
 
@@ -147,6 +151,12 @@ $namespace('di.shared.model');
                 return this._fCommonParamGetter(
                     { mailTo: options.args.param.email }
                 );
+            },
+            RICH_SELECT_DATA: function (options) {
+                return this._fCommonParamGetter(options.args.param);
+            },
+            RICH_SELECT_CHANGE: function (options) {
+                return this._fCommonParamGetter(options.args.param);
             }
         }
     );
@@ -185,7 +195,9 @@ $namespace('di.shared.model');
             SELECT: doComplete,
             CHECK: doComplete,
             MEASURE_DES: doComplete,
-            OFFLINE_DOWNLOAD: doComplete
+            OFFLINE_DOWNLOAD: doComplete,
+            RICH_SELECT_DATA: doComplete,
+            RICH_SELECT_CHANGE: doComplete
         }
     );
 
@@ -210,7 +222,9 @@ $namespace('di.shared.model');
                 return data;
                  },
             CHECK: function (data) { return data; },
-            SELECT: function (data) { return data; }
+            SELECT: function (data) { return data; },
+            RICH_SELECT_DATA: function (data) { return data; },
+            RICH_SELECT_CHANGE: function (data) { return data; }
         }
     );
 

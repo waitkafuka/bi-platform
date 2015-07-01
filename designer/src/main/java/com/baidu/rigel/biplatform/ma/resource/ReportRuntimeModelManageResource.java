@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -38,6 +40,8 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
+import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
@@ -46,6 +50,8 @@ import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
+import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -53,7 +59,10 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
+import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
+import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportModelQueryService;
+import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.QueryDataResourceUtils;
@@ -71,7 +80,7 @@ import com.google.gson.reflect.TypeToken;
  */
 @RestController
 @RequestMapping("/silkroad/reports/")
-public class ReportRuntimeModelManageResource extends BaseResource{
+public class ReportRuntimeModelManageResource extends BaseResource {
 
     /**
      * logger
@@ -89,13 +98,23 @@ public class ReportRuntimeModelManageResource extends BaseResource{
      */
     @Resource
     private ReportModelQueryService reportModelQueryService;
-    
+
     /**
      * queryDataResourceUtils
      */
     @Resource
     private QueryDataResourceUtils queryDataResourceUtils;
-        
+    /**
+     * olapLinkResource
+     */
+    @Resource
+    private OlapLinkService olapLinkService;
+    /**
+     * reportDesignModelService
+     */
+    @Resource
+    private ReportDesignModelService reportDesignModelService;
+
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/dimAndInds", method = RequestMethod.POST)
     public ResponseResult getAllDimAndMeasuers(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
@@ -143,7 +162,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
                 if (!isInLogicModel) {
                     map.put("selected", false);
                 }
-                cols.add(map);                
+                cols.add(map);
             }
         });
         cube.getMeasures().forEach((k, m) -> {
@@ -206,7 +225,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         String cubeId = area.getCubeId();
         Schema schema = reportModel.getSchema();
         Cube cube = schema.getCubes().get(cubeId);
-        
+
         // 寻找原有logicModel时间维度
         for (Item oldItem : oldItems) {
             if (cube != null && cube.getDimensions() != null) {
@@ -238,17 +257,17 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         model.resetSlices(new Item[0]);
         result.setStatus(0);
         result.setStatusInfo("success");
-        
+
         Map<String, Object> contextParams = Maps.newHashMap();
         contextParams.putAll(runTimeModel.getContext().getParams());
-        
+
         Map<String, Object> localContextParams = Maps.newHashMap();
         localContextParams.putAll(runTimeModel.getLocalContextByAreaId(areaId).getParams());
-        
+
         runTimeModel.getContext().getParams().clear();
         runTimeModel.getLocalContextByAreaId(areaId).reset();
         runTimeModel.getQueryActions().clear();
-        
+
         // TODO 考虑修改参数信息
         Map<String, PlaneTableCondition> conditions = reportModel.getPlaneTableConditions();
         for (Entry<String, PlaneTableCondition> condition : conditions.entrySet()) {
@@ -256,12 +275,12 @@ public class ReportRuntimeModelManageResource extends BaseResource{
             PlaneTableCondition planeTableCondition = condition.getValue();
             String paramName = planeTableCondition.getName();
             if (contextParams.containsKey(id)) {
-                runTimeModel.getContext().getParams().put(id, contextParams.get(id));                
+                runTimeModel.getContext().getParams().put(id, contextParams.get(id));
             }
             if (contextParams.containsKey(paramName)) {
                 runTimeModel.getContext().getParams().put(paramName, contextParams.get(paramName));
             }
-            
+
             if (localContextParams.containsKey(id)) {
                 runTimeModel.getLocalContextByAreaId(areaId).put(id, localContextParams.get(id));
             }
@@ -313,6 +332,19 @@ public class ReportRuntimeModelManageResource extends BaseResource{
             String name = conditionMap.get("field");
             String defaultValue = conditionMap.get("defaultValue");
             String condition = conditionMap.get("condition");
+            // 对LIKE条件进行特殊处理
+            if ("LIKE".equals(condition)) {
+                if (defaultValue != null) {
+                    // 如果不是以%开头，则需要在defaultValue的开头添加%
+                    if (!defaultValue.startsWith("%")) {
+                        defaultValue = "%" + defaultValue;
+                    }
+                    // 如果不是以%结尾，则需要在defaultValue的结尾添加%
+                    if (!defaultValue.endsWith("%")) {
+                        defaultValue = defaultValue + "%";
+                    }
+                }
+            }
             if (PlaneTableUtils.checkSQLCondition(condition, defaultValue)) {
                 PlaneTableCondition planeTableCondition = new PlaneTableCondition();
                 planeTableCondition.setElementId(id);
@@ -326,16 +358,14 @@ public class ReportRuntimeModelManageResource extends BaseResource{
                 if (oldCondition != null) {
                     runTimeModel.getContext().getParams().remove(id);
                     runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(id);
-                    runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(oldCondition.getName());                    
+                    runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(oldCondition.getName());
                 }
-                // 替换原有条件
                 oldConditions.put(id, planeTableCondition);
                 model.setPlaneTableConditions(oldConditions);
-                
                 runTimeModel.setModel(model);
                 // 更新报表模型
                 reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-//                reportModelCacheManager.updateReportModelToCache(reportId, model);
+                // reportModelCacheManager.updateReportModelToCache(reportId, model);
                 logger.info("successfully add planeTable condition in runtime phase");
                 result.setStatus(0);
                 result.setData(model);
@@ -401,12 +431,12 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         runTimeModel.getContext().getParams().remove(elementId);
         runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(elementId);
         runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(conditionName);
-//        runTimeModel.getQueryActions().clear();
+        // runTimeModel.getQueryActions().clear();
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-//        reportModelCacheManager.updateReportModelToCache(reportId, model);
+        // reportModelCacheManager.updateReportModelToCache(reportId, model);
         logger.info("successfully remove planeTable condition in runtime phase");
         result.setStatus(0);
-//        result.setData(model);
+        // result.setData(model);
         result.setStatusInfo("successfully remove planeTable condition in runtime phase ");
         return result;
     }
@@ -428,18 +458,10 @@ public class ReportRuntimeModelManageResource extends BaseResource{
             HttpServletRequest request) {
         long begin = System.currentTimeMillis();
         logger.info("begin execuet sort for planeTable");
-//        String orderBy = request.getParameter("orderbyParamKey");
+        // String orderBy = request.getParameter("orderbyParamKey");
         String sort = request.getParameter("sortType");
         // 获取排序方式
         ResponseResult result = new ResponseResult();
-//        if (StringUtils.isEmpty(sort)) {
-//            sort = "NONE";
-//        }
-//        if (sort.equalsIgnoreCase("NONE") || sort.equalsIgnoreCase("ASC")) {
-//            sort = "DESC";
-//        } else if (sort.equalsIgnoreCase("DESC")) {
-//            sort = "ASC";
-//        }
 
         // 获取运行态模型
         ReportRuntimeModel runTimeModel = null;
@@ -460,57 +482,56 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         }
 
         ReportDesignModel model;
+        ReportDesignModel oriModel;
         try {
             // 根据运行态取得设计模型
             model = getRealModel(reportId, runTimeModel);
+            oriModel = DeepcopyUtils.deepCopy(model);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
             return result;
         }
-        
+
         // 区域上下文
         ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(areaId);
         areaContext.getParams().clear();
         areaContext.getParams().putAll(runTimeModel.getContext().getParams());
-        
+
         // 扩展区域
         ExtendArea area = model.getExtendById(areaId);
         Schema schema = model.getSchema();
         Map<String, ? extends Cube> cubes = schema.getCubes();
         Cube cube = cubes.get(area.getCubeId());
+
         // 获取上一次查询的QueryAction
         QueryAction queryAction = runTimeModel.getPreviousQueryAction(areaId);
         // 获取排序条件
         MeasureOrderDesc orderDesc = this.getNewOrderDesc(cube, elementId, sort);
         if (orderDesc != null) {
             // 重新设置QueryAction的排序方式
-            queryAction.setMeasureOrderDesc(orderDesc);           
-        }       
+            queryAction.setMeasureOrderDesc(orderDesc);
+        }
         // 构建分页信息
         PageInfo pageInfo = this.getPageInfo(request);
         // 结果集
         ResultSet resultSet = null;
         // 重新查询数据
         try {
-            resultSet = reportModelQueryService.queryDatas(model, queryAction, true, 
-                    areaContext.getParams(), pageInfo, securityKey);
-        } catch (DataSourceOperationException e1) {
+            resultSet =
+                    reportModelQueryService.queryDatas(model, queryAction, true, areaContext.getParams(), pageInfo,
+                            securityKey);
+        } catch (DataSourceOperationException | QueryModelBuildException e1) {
             logger.info("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
-        } catch (QueryModelBuildException e1) {
-            logger.info("构建问题模型失败！", e1);
-            return ResourceUtils.getErrorResult("构建问题模型失败！", 1);
-        } catch (Exception e1) {
-            logger.info("查询数据失败！", e1);
-            return ResourceUtils.getErrorResult("没有查询到相关数据", 1);
-        } catch (Throwable t) {
-            return ResourceUtils.getErrorResult("没有查询到相关数据", 1);
         }
-        
+
+        runTimeModel.setModel(model);
         // 对返回结果进行处理，用于表、图显示
-        result = queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, area, 
-                resultSet, areaContext, queryAction);
+        result =
+                queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, area, resultSet, areaContext,
+                        queryAction);
+        runTimeModel.setModel(oriModel);
         // 维护平面表分页信息
         if (result.getStatus() == 0) {
             Map<String, Object> data = (Map<String, Object>) result.getData();
@@ -525,18 +546,104 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         // 更新本次操作结果
         runTimeModel.updateDatas(queryAction, resultSet);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-//        reportModelCacheManager.updateReportModelToCache(reportId, model);
-        logger.info("[INFO]successfully sort by " + orderDesc.getName() + 
-                " as " + orderDesc.getOrderType() + " for planeTable ");
-        logger.info("[INFO]sort planeTable cost : " + (System.currentTimeMillis() - begin) + " ms" );
+        // reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("[INFO]successfully sort by " + orderDesc.getName() + " as " + orderDesc.getOrderType()
+                + " for planeTable ");
+        logger.info("[INFO]sort planeTable cost : " + (System.currentTimeMillis() - begin) + " ms");
         result.setStatus(0);
-//        result.setData(model);
+        // result.setData(model);
         result.setStatusInfo("successfully sort plane table in runtime phase ");
         return result;
     }
 
     /**
+     * 当点击指标跳转之后，要执行的action
+     * 
+     * @param reportId 报表id
+     * @param areaId 表格所在区域id
+     * @param request request请求对象
+     * @param attr redirect之后要带的跳转参数对象
+     * @return 返回redirect的ModelAndView对象
+     */
+    @RequestMapping(value = "/{reportId}/linkBridge/extend_area/{areaId}", method = { RequestMethod.POST })
+    public ModelAndView linkBridge(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId,
+            HttpServletRequest request, RedirectAttributes attr) {
+        String uniqueName = request.getParameter("uniqueName");
+        if (StringUtils.isEmpty(uniqueName)) {
+            throw new RuntimeException("selected table's uniqueName must not be null!");
+        }
+        String measureId = request.getParameter("measureId");
+        ReportRuntimeModel reportRuntimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        ReportDesignModel olapTableDesignModel = reportRuntimeModel.getModel();
+        ExtendArea tableArea = olapTableDesignModel.getExtendAreas().get(areaId);
+        Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
+        LinkInfo linkInfo = linkInfoMap.get(measureId);
+        String planeTableId = linkInfo.getPlaneTableId();
+
+        Map<String, Map<String, String>> conditionMap =
+                this.olapLinkService.buildConditionMapFromRequestParams(uniqueName, olapTableDesignModel,
+                        reportRuntimeModel.getContext());
+        Map<String, LinkParams> linkBridgeParams = this.olapLinkService.buildLinkBridgeParams(linkInfo, conditionMap);
+        reportRuntimeModel.getContext().getParams().put("linkBridgeParams", linkBridgeParams);
+
+        attr.addAttribute("fromReportId", reportId);
+        attr.addAttribute("toReportId", planeTableId);
+
+        /**
+         * 因为在redirect的时候，浏览器会将请求地址重置为designer服务器自身的host+port，使得bfe设置的反向代理失效， 故这里需要将redirect的地址拼接为全路径，以避免换域问题
+         */
+        String referer = request.getHeader("referer");
+        String realmName = "";
+        if (!StringUtils.isEmpty(referer)) {
+            int index = referer.indexOf("/silkroad");
+            realmName = referer.substring(0, index);
+        }
+        String redirectUrl = "redirect:" + realmName + "/silkroad/reports/" + planeTableId + "/report_vm";
+        ModelAndView mav = new ModelAndView(redirectUrl);
+        ReportDesignModel planeTableModel = null;
+        try {
+            attr.addAttribute("token",
+                    AesUtil.getInstance().encryptAndUrlEncoding(ContextManager.getProductLine(), securityKey));
+            attr.addAttribute("_rbk", ContextManager.getProductLine());
+            // 先从已发布的报表中寻找
+            planeTableModel = reportDesignModelService.getModelByIdOrName(planeTableId, true);
+            // 如果从已发布当中找不到，则直接报错
+            if (planeTableModel == null) {
+                throw new RuntimeException("no planetable exist the report id is : " + planeTableId);
+            }
+            // 将平面表的设计态模型放入cache中
+            reportModelCacheManager.updateReportModelToCache(planeTableId, planeTableModel);
+            // 将多维表的运行态模型放入cache中
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, reportRuntimeModel);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            mav = new ModelAndView("redirect:" + realmName + "/silkroad/error");
+        }
+
+        return mav;
+    }
+
+    /**
+     * 根据reportId得到ReportModel
+     * 
+     * @param reportId 报表id
+     * @return 返回reportId对应的ReportDesignModel对象实例
+     */
+    private ReportDesignModel getReportModel(String reportId) {
+        ReportDesignModel reportModel = null;
+        try {
+            reportModel = reportModelCacheManager.getReportModel(reportId);
+            return reportModel;
+        } catch (CacheOperationException e) {
+            logger.warn("There is no such report model in cache. ", e);
+            logger.info("Add report model into cache. ");
+        }
+        return reportModelCacheManager.loadReportModelToCache(reportId);
+    }
+
+    /**
      * 产生新的排序信息
+     * 
      * @param cube
      * @param elementId
      * @param sort
@@ -556,20 +663,21 @@ public class ReportRuntimeModelManageResource extends BaseResource{
             // 如果待排序列为维度
             Dimension dimension = dimensions.get(elementId);
             if (dimension.getType() == DimensionType.TIME_DIMENSION) {
-                Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+                Level l = dimension.getLevels().values().toArray(new Level[0])[0];
                 // 指定排序的名称、排序方式，最后一个暂不解析
-                return new MeasureOrderDesc(l.getFactTableColumn(), sort, 500);   
+                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
             } else {
-                Level l = dimension.getLevels ().values ().toArray (new Level[0])[0];
+                Level l = dimension.getLevels().values().toArray(new Level[0])[0];
                 // 指定排序的名称、排序方式，最后一个暂不解析
-                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);                
+                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
             }
         }
         return null;
     }
-    
+
     /**
      * 获取平面表分页信息
+     * 
      * @param request
      * @return
      */
@@ -581,7 +689,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         }
         // 设置当前页
         if (StringUtils.hasLength(request.getParameter("currentPage"))) {
-            pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")) -1 );
+            pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")) - 1);
         }
         // 设置总的记录数
         if (StringUtils.hasLength(request.getParameter("totalRecordCount"))) {
@@ -591,6 +699,7 @@ public class ReportRuntimeModelManageResource extends BaseResource{
         }
         return pageInfo;
     }
+
     /**
      * 
      * @param reportId

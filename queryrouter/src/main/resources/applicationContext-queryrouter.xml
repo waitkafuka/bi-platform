@@ -15,7 +15,11 @@
        default-autowire="byName">
 
     <!-- 自动扫描(自动注入)，指明@Service类所在的包路径 -->
-    <context:component-scan base-package="com.baidu.rigel.biplatform.queryrouter.*" />
+    <context:component-scan base-package="
+    com.baidu.rigel.biplatform.queryrouter.*,
+    com.baidu.rigel.biplatform.tesseract.datasource.*,
+    com.baidu.rigel.biplatform.tesseract.exception.*
+    " />
     
     <context:annotation-config/>
     <!-- <context:property-placeholder/> -->

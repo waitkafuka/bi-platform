@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,reportList=$data.reportList,$item=$data.$item,index=$data.index,$escape=$utils.$escape,$out='';$out+='<div class="j-root-report-list">\r\n    <div class="con-common-line">\r\n        <div class="con-common-max-min">\r\n            <span class="btn-has-icon btn-has-icon-new c-p j-add-report">新建报表</span>\r\n        </div>\r\n    </div>\r\n    <div class="con-report-list con-common-max-min">\r\n        <table cellspacing="0">\r\n            <thead>\r\n            <tr>\r\n                <th class="report-index">序号</th>\r\n                <th class="report-name">报表名称</th>\r\n                <th class="report-btns">操作按钮</th>\r\n            </tr>\r\n            </thead>\r\n            <tbody>\r\n            ';

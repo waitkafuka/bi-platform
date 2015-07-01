@@ -28,9 +28,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.datasource.DataSourceException;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.datasource.DataSourcePoolService;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.datasource.SqlDataSourceWrap;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
+import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
+import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
+import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
 
 /**
  * 
@@ -86,26 +87,29 @@ public class JdbcHandler {
     /**
      * 通过sql查询数据库中的数据
      * 
-     * @param sql sql
+     * @param sqlExpression sql
      * @param dataSourceInfo dataSourceInfo
      * @return List<Map<String, Object>> formd tableresult data
      */
-    public List<Map<String, Object>> queryForList(String sql, DataSourceInfo dataSourceInfo) {
+    public List<Map<String, Object>> queryForList(SqlExpression sqlExpression, DataSourceInfo dataSourceInfo) {
         initJdbcTemplate(dataSourceInfo);
         long begin = System.currentTimeMillis();
-        List<Map<String, Object>> result = this.jdbcTemplate.queryForList(sql);
-        logger.info("select sql cost:" + (System.currentTimeMillis() - begin) + " sql: " + sql);
+        List<Map<String, Object>> result = 
+                this.jdbcTemplate.queryForList(sqlExpression.getSql(), sqlExpression.getWhereValues().toArray());
+        logger.info("select sql cost:" + (System.currentTimeMillis() - begin)
+                + "ms sql: " + sqlExpression.toString());
         return result;
     }
     
-    public int queryForInt(String sql, DataSourceInfo dataSourceInfo) {
+    public int queryForInt(SqlExpression sqlExpression, DataSourceInfo dataSourceInfo) {
         initJdbcTemplate(dataSourceInfo);
         long begin = System.currentTimeMillis();
-        Map<String, Object> result = this.jdbcTemplate.queryForMap(sql);
+        Map<String, Object> result = this.jdbcTemplate.queryForMap(sqlExpression.getCountSql(),
+                sqlExpression.getWhereValues().toArray());
         int count = Integer.valueOf(result.values().toArray()[0].toString()).intValue();
         logger.info("select count sql cost:" + (System.currentTimeMillis() - begin)
                 + "ms result: " + count
-                + " count sql: " + sql);
+                + " count sql: " + sqlExpression.getCountSql());
         return count;
     }
 }

@@ -331,7 +331,7 @@ $namespace('di.helper');
                 },
                 { 
                     text: '取消',
-                    className: 'ui-button-g',
+                    className: 'ui-button-c',
                     action: oncancel 
                 }
             ], 

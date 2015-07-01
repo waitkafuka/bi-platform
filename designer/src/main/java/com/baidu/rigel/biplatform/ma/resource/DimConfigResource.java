@@ -15,8 +15,10 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -53,8 +54,10 @@ import com.baidu.rigel.biplatform.ma.model.meta.UserDefineDimTableMetaDefine;
 import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.resource.cache.CacheManagerForResource;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -74,6 +77,7 @@ import com.baidu.rigel.biplatform.ma.resource.view.dimview.DateDimBindView;
 import com.baidu.rigel.biplatform.ma.resource.view.dimview.NormalDimBindView;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -232,7 +236,7 @@ public class DimConfigResource extends BaseResource {
             }
             DataSourceInfoReaderService dsInfoReaderService = null;
             String tableName = cubeTable.getName();
-            if (cubeTable.isMutilple() && CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
+            if (cubeTable.isMutilple() && !CollectionUtils.isEmpty(cubeTable.getRegExpTables())) {
                 tableName = cubeTable.getRegExpTables().get(0);
             }
             List<ColumnInfo> cols = null;
@@ -387,6 +391,9 @@ public class DimConfigResource extends BaseResource {
                 LogicModel logicModel = area.getLogicModel ();
                 if (logicModel != null) {
                     updateLogicModelWithCube(logicModel, cube);
+                    if (area.getType() == ExtendAreaType.PLANE_TABLE) {
+                        updatePlaneTableCond(reportModel.getPlaneTableConditions(), logicModel.getSlices());
+                    }
                 }
             }
         });
@@ -435,7 +442,8 @@ public class DimConfigResource extends BaseResource {
 
     private void updateDimItem(LogicModel logicModel, Cube cube, Item[] slices, boolean isSlices) {
         for (Item item : slices) {
-            if (cube.getDimensions ().containsKey (item.getOlapElementId ())) {
+            if (cube.getDimensions ().containsKey (item.getOlapElementId ()) 
+                    || cube.getMeasures().containsKey(item.getOlapElementId())) {
                 continue;
             }
             if (isSlices) {
@@ -446,6 +454,21 @@ public class DimConfigResource extends BaseResource {
         }
     }
 
+    private void updatePlaneTableCond(Map<String, PlaneTableCondition> conditions, Item[] slices) {
+        Set<String> elementKey = Sets.newHashSet();
+        for (Item item : slices) {
+            elementKey.add(item.getOlapElementId());
+        }
+        
+        Map<String, PlaneTableCondition> newConditions = Maps.newHashMap();
+        conditions.forEach( (k, v) -> {
+            if (elementKey.contains(k)) {
+                newConditions.put(k, v);
+            }
+        });
+        conditions.clear();
+        conditions.putAll(newConditions);
+    }
     /**
      * 
      * @param starModel
