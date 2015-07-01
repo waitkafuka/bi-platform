@@ -59,7 +59,8 @@
             '#B4E0EA',
             '#D8F0F6',
             '#EFF9FD',
-            '#F7FBFF'
+            '#F7FBFF',
+            '#E5E5E5'
         ],
         // 轴线
         lineStyle: {
@@ -387,6 +388,43 @@
             '#A5D6D2', '#C1232B', '#B5C334', '#4cc6f7','#FCCE10',
             '#E87C25', '#27727B', '#FAD860', '#F3A43B','#60C0DD'
         ];
+        var defChinaMapArr = [
+            {name: '北京',value: 0},
+            {name: '天津',value: 0},
+            {name: '上海',value: 0},
+            {name: '重庆',value: 0},
+            {name: '河北',value: 0},
+            {name: '河南',value: 0},
+            {name: '云南',value: 0},
+            {name: '辽宁',value: 0},
+            {name: '黑龙江',value: 0},
+            {name: '湖南',value: 0},
+            {name: '安徽',value: 0},
+            {name: '山东',value: 0},
+            {name: '新疆',value: 0},
+            {name: '江苏',value: 0},
+            {name: '浙江',value: 0},
+            {name: '江西',value: 0},
+            {name: '湖北',value: 0},
+            {name: '广西',value: 0},
+            {name: '甘肃',value: 0},
+            {name: '山西',value: 0},
+            {name: '内蒙古',value: 0},
+            {name: '陕西',value: 0},
+            {name: '吉林',value: 0},
+            {name: '福建',value: 0},
+            {name: '贵州',value: 0},
+            {name: '广东',value: 0},
+            {name: '青海',value: 0},
+            {name: '西藏',value: 0},
+            {name: '四川',value: 0},
+            {name: '宁夏',value: 0},
+            {name: '海南',value: 0},
+            {name: '台湾',value: 0},
+            {name: '香港',value: 0},
+            {name: '澳门',value: 0}
+        ];
+        var defChinaMapKey = {};
         for (var i = 0, ser, serDef; serDef = this._aSeries[i]; i ++) {
             seryKind[serDef.type] = seryKind[serDef.type]
                 ? seryKind[serDef.type] + 1
@@ -458,17 +496,24 @@
                         normal:{ label:{ show:true } },
                         emphasis:{ label:{ show:true } }
                     };
-                    var serData = [];
-                    for (var x = 0; x < ser.data.length; x ++) {
-                        serData.push({
-                            name: xAxis.data[x],
-                            value: ser.data[x]
-                        });
-                    }
-                    ser.data = serData;
                     if (isInArray(ser.name, defaultMeasures)) {
-                        series.push(ser);
+                        var serData = [];
+                        for (var n = 0; n < defChinaMapArr.length; n ++ ) {
+                            var tData = defChinaMapArr[n];
+                            for (var x = 0; x < ser.data.length; x ++ ) {
+                                if (tData.name === xAxis.data[x]) {
+                                    tData.value = ser.data[x];
+                                    break;
+                                }
+                            }
+                            serData.push(tData);
+                        }
+                        if (isInArray(ser.name, defaultMeasures)) {
+                            ser.data = serData;
+                            series.push(ser);
+                        }
                     }
+
                 }
             }
             else {
@@ -497,11 +542,15 @@
                         emphasis:{ label:{ show:true } }
                     };
                     var serData = [];
-                    for (var x = 0; x < ser.data.length; x ++) {
-                        serData.push({
-                            name: xAxis.data[x],
-                            value: ser.data[x]
-                        });
+                    for (var n = 0; n < defChinaMapArr.length; n ++ ) {
+                        var tData = defChinaMapArr[n];
+                        for (var x = 0; x < ser.data.length; x ++ ) {
+                            if (tData.name === xAxis.data[x]) {
+                                tData.value = ser.data[x];
+                                break;
+                            }
+                        }
+                        serData.push(tData);
                     }
                     ser.data = serData;
                     series.push(ser);
@@ -1050,6 +1099,7 @@
             me.notify('chartClick', o);
         }
     };
+
     /**
      * 构建图表参数
      *
@@ -1060,6 +1110,7 @@
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
+
         if (
             this._chartType === 'column'
             || this._chartType === 'bar'
@@ -1089,6 +1140,7 @@
             this.$setupYAxis(options);
         }
         else if (this._chartType === 'map') {
+            var splitNum = 10;
             // TODO:要考虑到负数
             //[
             //    {start: 1000},
@@ -1101,53 +1153,65 @@
             //]
             var min = this._mapMinValue;
             var max = this._mapMaxValue;
-            var split = (max - min) / 10;
+            var split = (max - min) / splitNum;
             var splitList = [
                 {
                     start: max
                 }
             ];
             var i = 1;
-            while (i <= 8) {
+            var tStart = 0;
+            while (i <= (splitNum - 2)) {
+                tStart = max - split * i;
                 var item = {
-                    start: max - split * i,
+                    start: tStart,
                     end: max - split * (i - 1)
-                }
+                };
+                splitList.push(item);
+                i++;
             }
             splitList.push({
+                start: tStart,
                 end: min
             });
+            splitList.push({
+                end: 0
+            });
 
-            if (maxValue)
-            options.dataRange = {
-                x: 80,
-                y: 'bottom',
-                text:['高','低'],           // 文本，默认为数值文本
-                calculable: true,
-                // 设置地图值域字体
-                textStyle: styleConfiguration.dataRangeStyle,
-                color: styleConfiguration.dataRangeColor,
-                splitList: splitList
-            };
+            if (max) {
+                options.dataRange = {
+                    x: 'left',
+                    y: 'bottom',
+                    //                text:['高','低'],           // 文本，默认为数值文本
+                    //                calculable: true,
+                    // 设置地图值域字体
+                    textStyle: styleConfiguration.dataRangeStyle,
+                    color: styleConfiguration.dataRangeColor,
+                    splitList: splitList
+                };
+            }
         }
+
         if (this._chartType === 'pie') {
-        	// 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun 
+            // 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun
             options.calculable = false;
-            var colors =  [
-                           '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981','#D97A81',
-                           '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C','#E6D88D'
-                       ];
+            var colors = [
+                '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
+                '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
+            ];
             // 饼图每个块的颜色，按照UE给出的标准进行重设
             options.color = colors;
         }
+
         var textStyle = {
-    		fontFamily: '微软雅黑',
+            fontFamily: '微软雅黑',
             fontSize: '120px'
         };
-        
+
         this.$setupLegend(options);
         return options;
     };
+
     UI_E_CHART_CLASS.$preload = function () {
         for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
             this._chartType = ser.type;
@@ -1157,6 +1221,7 @@
             this.$renderCheckBoxs();
         }
     };
+
     /**
      * 销毁图表
      *
@@ -1171,6 +1236,7 @@
         }
         this._eContent && (this._eContent.innerHTML = '');
     };
+
     /**
      * 销毁图表
      *
@@ -1179,6 +1245,7 @@
     UI_E_CHART_CLASS.$disposeHeader = function () {
         this._eHeader && (this._eHeader.innerHTML = '');
     };
+
     /**
      * @override
      */

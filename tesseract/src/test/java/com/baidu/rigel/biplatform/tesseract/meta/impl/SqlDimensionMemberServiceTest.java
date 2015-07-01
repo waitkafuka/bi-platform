@@ -343,7 +343,8 @@ public class SqlDimensionMemberServiceTest {
         params.put ("c", "k,m");
         Mockito.doReturn (resultSet).when (search).query (Mockito.any ());
         level.setDimTable ("fact");
-        List<MiniCubeMember> rs = service.getMemberFromLevelByNames(info, cube, level, params, Lists.newArrayList ("[abc].[test]"));
+        List<MiniCubeMember> rs = 
+            service.getMemberFromLevelByNames(info, cube, level, params, Lists.newArrayList ("[abc].[test]"));
         Assert.notNull (rs);
         
     }

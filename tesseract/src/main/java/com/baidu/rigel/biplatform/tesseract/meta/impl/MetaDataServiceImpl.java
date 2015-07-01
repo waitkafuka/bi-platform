@@ -336,5 +336,8 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
         return members;
     }
     
+    public void setStoreManager(StoreManager storeManager) {
+        this.storeManager = storeManager;
+    }
 
 }

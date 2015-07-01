@@ -1,7 +1,5 @@
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,61 +26,49 @@ import com.google.common.collect.Maps;
  *
  */
 public class PlaneTableUtils {
-    
+
     /**
      * 日志记录对象
      */
     private static final Logger LOG = LoggerFactory.getLogger(PlaneTableUtils.class);
 
     /**
-     * 时间粒度参数 
+     * 时间粒度参数
      */
     private static final String GRANULARITY = "granularity";
-    
-    /**
-     * JSON字符串起始标识符
-     */
-    private static final String START = "start";
-    
-    /**
-     * JSON字符串截止标识符
-     */
-    private static final String END = "end";
-    
+
     /**
      * 时间格式分隔符
      */
     private static final String DIV = "-";
-    
+
     /**
      * 年正则表达式，匹配2015
      */
     private static final String YEAR_REGEXP = "^[0-9]{4}$";
-    
+
     /**
      * 季度正则表达式，匹配201501、201504
      */
     private static final String QUARTER_REGEXP = "^[0-9]{4}0[1|4|7]|^[0-9]{4}1[0]$";
-    
+
     /**
      * 月正则表达式，匹配201501、201505
      */
     private static final String MONTH_REGEXP = "^[0-9]{4}0[0-9]|1[0-2]$";
-    
+
     /**
      * 周正则表达式，匹配20150626
      */
     private static final String WEEK_REGEXP = "^[0-9]{4}(((0[13578]|(10|12))(0[1-9]|[1-2][0-9]|3[0-1]))|"
             + "(02(0[1-9]|[1-2][0-9]))|((0[469]|11)(0[1-9]|[1-2][0-9]|30)))$";
-    
+
     /**
      * 日正则表达式，匹配20150626
      */
     private static final String DAY_REGEXP = "^[0-9]{4}(((0[13578]|(10|12))(0[1-9]|[1-2][0-9]|3[0-1]))|"
             + "(02(0[1-9]|[1-2][0-9]))|((0[469]|11)(0[1-9]|[1-2][0-9]|30)))$";
-    
-    
-    
+
     /**
      * 校验设置的平面表条件值是否合理
      * 
@@ -140,20 +126,20 @@ public class PlaneTableUtils {
             if (value instanceof String) {
                 if (isTimeJson((String) value)) {
                     // 对时间特殊处理
-                    String granularity = getTimeGranularity((String) value);
-                    String id = getElementIdFromCube(cube, granularity);
-                    if (id != null) {
-                        params.put(id, value);
-                    } else {
-                        params.put(key, value);
-                    }
+                String granularity = getTimeGranularity((String) value);
+                String id = getElementIdFromCube(cube, granularity);
+                if (id != null) {
+                    params.put(id, value);
                 } else {
                     params.put(key, value);
                 }
             } else {
                 params.put(key, value);
             }
-        });
+        } else {
+            params.put(key, value);
+        }
+    })  ;
         return params;
     }
 
@@ -168,8 +154,8 @@ public class PlaneTableUtils {
     }
 
     /**
-     * 判断该id对应的维度是否为时间维度
-     * isTimeDim
+     * 判断该id对应的维度是否为时间维度 isTimeDim
+     * 
      * @param cube
      * @param elementId
      * @return
@@ -181,7 +167,7 @@ public class PlaneTableUtils {
         if (!ParamValidateUtils.check("elementId", elementId)) {
             return false;
         }
-        
+
         // 获取维度信息
         Map<String, Dimension> dimensions = cube.getDimensions();
         if (dimensions == null || dimensions.size() == 0) {
@@ -193,10 +179,10 @@ public class PlaneTableUtils {
         }
         return dim.isTimeDimension();
     }
-    
+
     /**
-     * 将普通数值转为规范的时间JSON字符串
-     * convert2TimeJson
+     * 将普通数值转为规范的时间JSON字符串 convert2TimeJson
+     * 
      * @param value
      * @param requestParams
      * @return
@@ -204,27 +190,27 @@ public class PlaneTableUtils {
     public static String convert2TimeJson(String value, Map<String, Object> requestParams) {
         if (!ParamValidateUtils.check("value", value)) {
             return null;
-        } 
+        }
         if (!ParamValidateUtils.check("requestParams", requestParams)) {
             return null;
         }
         if (!requestParams.containsKey(GRANULARITY)) {
             return null;
         }
-        
+
         // 获取时间粒度参数
         String granularity = (String) requestParams.get(GRANULARITY);
-        
+
         // 如果有不是标准时间维度
         if (!isStandardTime(value, granularity)) {
             return null;
         }
         return cov2StandTime(value, granularity);
     }
-    
+
     /**
-     * 判断某个粒度下的时间字符串是否满足需求
-     * isStandardTime
+     * 判断某个粒度下的时间字符串是否满足需求 isStandardTime
+     * 
      * @param time
      * @return
      */
@@ -240,14 +226,14 @@ public class PlaneTableUtils {
                 return matchRegexp(time, WEEK_REGEXP);
             case "D":
                 return matchRegexp(time, DAY_REGEXP);
-            default :
+            default:
                 throw new RuntimeException("the time granularity : " + granularity + "is wrong");
         }
     }
-    
+
     /**
-     * 测试时间是否符合正则表达式
-     * matchRegexp
+     * 测试时间是否符合正则表达式 matchRegexp
+     * 
      * @param time
      * @param regex
      * @return
@@ -257,81 +243,59 @@ public class PlaneTableUtils {
         Matcher matcher = pattern.matcher(time);
         return matcher.matches();
     }
-    
+
     /**
      * 
      * cov2StandTime
+     * 
      * @param time
      * @param granularity
      * @return
-     * @throws JSONException 
+     * @throws JSONException
      */
-    private static String cov2StandTime(String time, String granularity)  {
+    private static String cov2StandTime(String time, String granularity) {
         // TODO 目前仅支持单选
-        JSONObject json;
+        String timeStr = "{'start':'%s','end':'%s','granularity':'%s'}";
         // 年
         String year;
         // 月
         String month;
         // 日
         String day;
-        try {
-            json = new JSONObject("{'start':'2015-06-10','end':'2015-06-12','granularity':'D'}");
-            switch (granularity) {
-                case "Y":
-                    json.put(START, time);
-                    json.put(END, time);
-                    json.put(GRANULARITY, granularity);
-                    return json.toString();                    
-                case "M":
-                    year = time.substring(0, 4);
-                    month = time.substring(4, 6);
-                    json.put(START, year + DIV + month);
-                    json.put(END, year + DIV + month);
-                    json.put(GRANULARITY, granularity);
-                    return json.toString();  
-                case "W":
-                    year = time.substring(0, 4);
-                    month = time.substring(4, 6);
-                    day = time.substring(6, 8);
-                    json.put(START, year + DIV + month + DIV + day);
-                    json.put(END, year + DIV + month + DIV + day);
-                    json.put(GRANULARITY, granularity);
-                    return json.toString();  
-                case "D":
-                    year = time.substring(0, 4);
-                    month = time.substring(4, 6);
-                    day = time.substring(6, 8);
-                    json.put(START, year + DIV + month + DIV + day);
-                    json.put(END, year + DIV + month + DIV + day);
-                    json.put(GRANULARITY, granularity);
-                    return json.toString(); 
-                case "Q":
-                    // TODO 将季度转为天
-                    // 年份信息
-                    year = time.substring(0, 4);
-                    
-                    // 获取月份信息
-                    int monthInt = Integer.valueOf(time.substring(4, 6));
-                    String quarter = "Q";
-                    quarter = quarter + String.valueOf(monthInt / 3 + 1);
-                    String start = year + quarter;
-                    String end = year + quarter;
-                    Map<String, String> timeMap = TimeUtils.getTimeCondition(start, end, TimeType.TimeQuarter);
-                    SimpleDateFormat sf1 = new SimpleDateFormat("yyyyMMdd");
-                    SimpleDateFormat sf2 = new SimpleDateFormat("yyyy-MM-dd");
-                    json.put(START, sf2.format(sf1.parse(timeMap.get(START))));
-                    json.put(END, sf2.format(sf1.parse(timeMap.get(END))));
-                    json.put(GRANULARITY, "D");
-                    return json.toString();
-                default:
-                    throw new RuntimeException("the time granularity : " + granularity + "is wrong");
-            }
-        } catch (JSONException | ParseException e) {
-            LOG.error(e.getMessage(), e);
+        switch (granularity) {
+            case "Y":
+                return String.format(timeStr, time, time, granularity);
+            case "M":
+                year = time.substring(0, 4);
+                month = time.substring(4, 6);
+                return String.format(timeStr, year + DIV + month, year + DIV + month, granularity);
+            case "W":
+                year = time.substring(0, 4);
+                month = time.substring(4, 6);
+                day = time.substring(6, 8);
+                return String.format(timeStr, year + DIV + month + DIV + day,
+                        year + DIV + month + DIV + day, granularity);
+            case "D":
+                year = time.substring(0, 4);
+                month = time.substring(4, 6);
+                day = time.substring(6, 8);
+                return String.format(timeStr, year + DIV + month + DIV + day,
+                        year + DIV + month + DIV + day, granularity);
+            case "Q":
+                // 年份信息
+                year = time.substring(0, 4);
+                // 获取月份信息
+                int monthInt = Integer.valueOf(time.substring(4, 6));
+                String quarter = "Q";
+                quarter = quarter + String.valueOf(monthInt / 3 + 1);
+                String start = year + DIV + quarter;
+                String end = year + DIV + quarter;
+                return String.format(timeStr, start, end, granularity);
+            default:
+                throw new RuntimeException("the time granularity : " + granularity + "is wrong");
         }
-        return null;
     }
+
     /**
      * 获取时间字符串中的时间粒度信息 getTimeGranularity
      * 

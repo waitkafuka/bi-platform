@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Resource;
+
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.parsecheck.TableExistCheckService;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
@@ -39,6 +42,13 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpre
 @Service("jdbcQuestionModelUtil")
 @Scope("prototype")
 public class JdbcQuestionModelUtil {
+    
+    /**
+     * TableExistCheck
+     */
+    @Resource(name = "tableExistCheckService")
+    private TableExistCheckService tableExistCheckService;
+
     /**
      * convertQuestionModel2Sql
      * 
@@ -46,7 +56,7 @@ public class JdbcQuestionModelUtil {
      *            questionModel
      * @return String sql str
      */
-    public SqlExpression convertQuestionModel2Sql(QuestionModel questionModel)
+    public SqlExpression convertQuestionModel2Sql(QuestionModel questionModel, String tableName)
             throws QuestionModelTransformationException {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         questionModel.setUseIndex(false);
@@ -55,6 +65,7 @@ public class JdbcQuestionModelUtil {
         SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) configQuestionModel
                 .getDataSourceInfo();
         SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver());
+        sqlExpression.setTableName(tableName);
         sqlExpression.generateSql(configQuestionModel, allColums, needColums);
         return sqlExpression;
     }

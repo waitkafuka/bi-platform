@@ -472,10 +472,18 @@ public class QueryDataResource extends BaseResource {
                                 newValue = PlaneTableUtils.convert2TimeJson(linkParam.getOriginalDimValue(), fromParams);
                             }
                         } else {
-                            newValue = 
-                                    this.handleReqParams4PlaneTable(multiCube, planeTableCond, 
-                                            linkParam.getUniqueName(), requestParams, securityKey);                                                        
+                            if (MetaNameUtil.isUniqueName(linkParam.getUniqueName())) {
+                                requestParams.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
+                                newValue = 
+                                        this.handleReqParams4PlaneTable(multiCube, planeTableCond, 
+                                                linkParam.getUniqueName(), requestParams, securityKey);                                                                                        
+                            } else {
+                                newValue = linkParam.getOriginalDimValue();
+                            }
                         }
+                        logger.debug("the linkParam {" + linkParam.getParamName() + 
+                                "}, and it's origin value is [" + linkParam.getOriginalDimValue() +
+                                "], and it's new value are [" + newValue + "]");
                     } catch (Exception e) {
                         logger.error("处理平面表参数出错，请检查!");
                         throw new RuntimeException("处理平面表参数出错，请检查!");
@@ -2190,6 +2198,9 @@ public class QueryDataResource extends BaseResource {
             action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
         }
         if (action != null) {
+            setQueryParams (areaContext, runtimeModel.getModel (), action.getColumns ());
+            setQueryParams (areaContext, runtimeModel.getModel (), action.getRows ());
+            setQueryParams (areaContext, runtimeModel.getModel (), action.getSlices ());
             action.setChartQuery(false);
         } else {
             throw new RuntimeException("下载失败");

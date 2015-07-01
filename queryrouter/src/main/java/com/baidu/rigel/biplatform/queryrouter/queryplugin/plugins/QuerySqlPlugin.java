@@ -85,8 +85,7 @@ public class QuerySqlPlugin implements QueryPlugin {
             List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(questionModel);
             return jdbcDataModelUtil.getEmptyDataModel(needColums);
         }
-        cube.setSource(tableNames);
-        SqlExpression sqlCause = jdbcQuestionModelUtil.convertQuestionModel2Sql(questionModel);
+        SqlExpression sqlCause = jdbcQuestionModelUtil.convertQuestionModel2Sql(questionModel, tableNames);
         DataModel dataModel = jdbcDataModelUtil.executeSql(questionModel, sqlCause);
         return dataModel;
     }

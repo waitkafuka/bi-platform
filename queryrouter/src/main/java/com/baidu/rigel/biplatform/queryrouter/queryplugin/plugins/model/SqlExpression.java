@@ -90,6 +90,11 @@ public class SqlExpression implements Serializable {
     private String facttableAlias;
     
     /**
+     * 事实表名称
+     */
+    private String tableName;
+
+    /**
      * 生成组织sql string
      * 
      * @param questionModel
@@ -106,11 +111,10 @@ public class SqlExpression implements Serializable {
             throw new QuestionModelTransformationException("List needColums is empty, there is no SqlColum object available to generate.");
         }
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
-        MiniCube cube = (MiniCube) configQuestionModel.getCube();
         StringBuffer sqlExpression = new StringBuffer();
         try {
             sqlExpression.append(generateSelectExpression(needColums));
-            sqlExpression.append(generateFromExpression(cube));
+            sqlExpression.append(generateFromExpression(this.getTableName()));
             sqlExpression.append(generateLeftOuterJoinExpression(
                     configQuestionModel, allColums, needColums));
             sqlExpression.append(generateWhereExpression(configQuestionModel,
@@ -168,8 +172,7 @@ public class SqlExpression implements Serializable {
      *            cube
      * @return String sql
      */
-    public String generateFromExpression(MiniCube cube) throws QuestionModelTransformationException {
-        String tableName = cube.getSource();
+    public String generateFromExpression(String tableName) throws QuestionModelTransformationException {
         if (StringUtils.isEmpty(tableName)) {
             throw new QuestionModelTransformationException("cube.getSource() can not be empty");
         }
@@ -632,11 +635,37 @@ public class SqlExpression implements Serializable {
         this.driver = driver;
         this.facttableAlias = QuestionModel4TableDataUtils.getFactTableAliasName();
     }
+    
+    /**
+     * @param driver
+     *            jdbc driver
+     * @param tableName
+     *            tableName 事实表tableName
+     */
+    public SqlExpression(String driver, String tableName) {
+        this.driver = driver;
+        this.tableName = tableName;
+        this.facttableAlias = QuestionModel4TableDataUtils.getFactTableAliasName();
+    }
 
     /**
      * @return the whereValues
      */
     public List<Object> getWhereValues() {
         return whereValues;
+    }
+
+    /**
+     * @return the tableName
+     */
+    public String getTableName() {
+        return tableName;
+    }
+
+    /**
+     * @param tableName the tableName to set
+     */
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

@@ -18,11 +18,16 @@
 
 package com.baidu.rigel.biplatform.ma.divide.table.service.impl;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
@@ -40,6 +45,11 @@ import com.google.common.collect.Sets;
 public class DayDivideTableStrategyServiceImpl implements DivideTableService {
     
     /**
+     * 日志对象
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(DayDivideTableStrategyServiceImpl.class);
+    
+    /**
      * 按日分表策略返回所有事实表名称<br>
      * {@inheritDoc}
      */
@@ -53,10 +63,10 @@ public class DayDivideTableStrategyServiceImpl implements DivideTableService {
             return null;
         }       
         String timeJson = TimeDivideTableUtils.getTimeJsonFromContext(context);
-        if (timeJson != null) {
-            return this.getFactTableName(divideTableStrategy, timeJson);            
+        if (timeJson == null) {
+            timeJson = this.genDefaultTimeJson();
         } 
-        return null;
+        return this.getFactTableName(divideTableStrategy, timeJson);            
     }
     
     /**
@@ -82,9 +92,29 @@ public class DayDivideTableStrategyServiceImpl implements DivideTableService {
             }
             result = tableNames.stream().collect(Collectors.joining(","));
         } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
             throw new RuntimeException("exception happend when get detail time!");
         }
         return result;
+    }
+    
+    /**
+     * 获取默认情况下分表规则下的表名，对于按照日分表，默认为当前天到前一个月
+     * getDefaultFactTableNames
+     * @param strategy
+     * @return
+     */
+    private String genDefaultTimeJson() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
+        Date now = new Date();
+        String end = dateFormat.format(now);
+        Calendar calendar = Calendar.getInstance();
+        // 得到前一个月
+        calendar.add(Calendar.MONTH, -1);
+        Date oneMonthAgo = calendar.getTime();
+        String start = dateFormat.format(oneMonthAgo);
+        String timeStr = "{'start':'%s','end':'%s','granularity':'%s'}";
+        return String.format(timeStr, start, end, "D");            
     }
 }
 

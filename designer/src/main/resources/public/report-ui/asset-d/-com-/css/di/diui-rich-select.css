@@ -11,6 +11,8 @@
     background-color: #ffffff;
     z-index: 99;
     width: 530px;
+    max-height: 300px;
+    overflow-y: scroll;
     font-family: "Microsoft YaHei", Arial, sans-serif;
 }
 .sxwzbCategories{

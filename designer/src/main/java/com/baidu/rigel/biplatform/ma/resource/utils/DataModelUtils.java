@@ -35,7 +35,6 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
-import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
@@ -593,22 +592,25 @@ public final class DataModelUtils {
         // 如果是维度
         if (ele instanceof Dimension) {
             Dimension dim = (Dimension) ele;
-            // 如果是时间维度
-            if (dim.isTimeDimension()) {
-                tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
-            } else {
-                Level level = dim.getLevels().values().toArray(new Level[0])[0];
-                // Callback维度
-                if (level.getType() == LevelType.CALL_BACK) {
-                    tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
-                } else {
-                    // 普通维度
-                    tmpKey = level.getDimTable() + "." + level.getName();
-                }
-            }
+            Level level = dim.getLevels().values().toArray(new Level[0])[0];
+            // 普通维度
+            tmpKey = level.getDimTable() + "." + level.getName();
+//            // 如果是时间维度
+//            if (dim.isTimeDimension()) {
+//                tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
+//            } else {
+//                Level level = dim.getLevels().values().toArray(new Level[0])[0];
+//                // Callback维度
+//                if (level.getType() == LevelType.CALL_BACK) {
+//                    tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
+//                } else {
+//                    // 普通维度
+//                    tmpKey = level.getDimTable() + "." + level.getName();
+//                }
+//            }
         } else {
             // 如果是指标
-            tmpKey = ((MiniCube) cube).getSource() + "." + ((Measure) ele).getName();
+            tmpKey = ((MiniCube) cube).getSource() + "." + ((Measure) ele).getDefine();
         }
         return tmp.get(tmpKey);
 

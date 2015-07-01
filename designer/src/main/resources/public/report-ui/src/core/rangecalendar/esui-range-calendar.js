@@ -17576,7 +17576,7 @@ define('esui/TipLayer',['require','./Button','./Label','./Panel','./lib','./cont
                 );
 
                 // 动态计算layer的zIndex
-                this.main.style.zIndex = helper.layer.getZIndex(targetElement);
+                // this.main.style.zIndex = helper.layer.getZIndex(targetElement);
 
                 this.removeState('hidden');
 

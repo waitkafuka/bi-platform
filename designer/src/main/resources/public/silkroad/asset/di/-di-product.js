@@ -78,7 +78,7 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/ecui/src-ext/draggable-list.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/ecui/src-ext/droppable-list.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xui-ui/xui-ui.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/echarts/echarts-plain-map.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/echarts/echarts-all.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xui-ui/e-chart.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/ajax.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/biz-shared/di.config/dict.js" type="text/javascript"><\/script>' );

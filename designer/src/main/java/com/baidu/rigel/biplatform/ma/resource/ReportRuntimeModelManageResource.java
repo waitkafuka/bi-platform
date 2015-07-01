@@ -503,7 +503,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         Schema schema = model.getSchema();
         Map<String, ? extends Cube> cubes = schema.getCubes();
         Cube cube = cubes.get(area.getCubeId());
-                   
+
         // 获取上一次查询的QueryAction
         QueryAction queryAction = runTimeModel.getPreviousQueryAction(areaId);
         // 获取排序条件
@@ -588,7 +588,18 @@ public class ReportRuntimeModelManageResource extends BaseResource {
 
         attr.addAttribute("fromReportId", reportId);
         attr.addAttribute("toReportId", planeTableId);
-        ModelAndView mav = new ModelAndView("redirect:/silkroad/reports/" + planeTableId + "/report_vm");
+
+        /**
+         * 因为在redirect的时候，浏览器会将请求地址重置为designer服务器自身的host+port，使得bfe设置的反向代理失效， 故这里需要将redirect的地址拼接为全路径，以避免换域问题
+         */
+        String referer = request.getHeader("referer");
+        String realmName = "";
+        if (!StringUtils.isEmpty(referer)) {
+            int index = referer.indexOf("/silkroad");
+            realmName = referer.substring(0, index);
+        }
+        String redirectUrl = "redirect:" + realmName + "/silkroad/reports/" + planeTableId + "/report_vm";
+        ModelAndView mav = new ModelAndView(redirectUrl);
         ReportDesignModel planeTableModel = null;
         try {
             attr.addAttribute("token",
@@ -606,7 +617,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             reportModelCacheManager.updateRunTimeModelToCache(reportId, reportRuntimeModel);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            mav = new ModelAndView("redirect:/silkroad/error");
+            mav = new ModelAndView("redirect:" + realmName + "/silkroad/error");
         }
 
         return mav;
@@ -654,7 +665,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             if (dimension.getType() == DimensionType.TIME_DIMENSION) {
                 Level l = dimension.getLevels().values().toArray(new Level[0])[0];
                 // 指定排序的名称、排序方式，最后一个暂不解析
-                return new MeasureOrderDesc(l.getFactTableColumn(), sort, 500);
+                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
             } else {
                 Level l = dimension.getLevels().values().toArray(new Level[0])[0];
                 // 指定排序的名称、排序方式，最后一个暂不解析

@@ -31,6 +31,7 @@ import com.baidu.rigel.biplatform.ac.query.data.TableData;
 import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.util.UnicodeUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
@@ -110,9 +111,19 @@ public class JdbcDataModelUtil {
             return dataModel;
         }
         needColums.forEach((colDefine) -> {
+            String tableName = "";
+            String fieldName = "";
+            if (AxisType.COLUMN == colDefine.getType()) {
+            // 指标
+                tableName = colDefine.getSourceTableName();
+                fieldName = colDefine.getMeasure().getDefine();
+            } else {
+            // 维度
+                tableName = colDefine.getLevel().getDimTable();
+                fieldName = colDefine.getLevel().getName();
+            }
             TableData.Column colum = new TableData.Column(colDefine.getColumnKey(),
-                    colDefine.getTableFieldName(), colDefine.getCaption(),
-                    colDefine.getSourceTableName());
+                    fieldName, colDefine.getCaption(), tableName);
             dataModel.getTableData().getColumns().add(colum);
             String tableDataColumnKey = colDefine.getColumnKey();
             dataModel

@@ -18,6 +18,8 @@
 
 package com.baidu.rigel.biplatform.ma.divide.table.service.impl;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -38,7 +40,7 @@ import com.google.common.collect.Sets;
  * @since jdk 1.8 or after
  */
 public class MonthDivideTableStrategyServiceImpl implements DivideTableService {
-
+    
     /**
      * 按月分表策略返回所有事实表名称<br>
      * {@inheritDoc}
@@ -53,10 +55,10 @@ public class MonthDivideTableStrategyServiceImpl implements DivideTableService {
             return null;
         }   
         String timeJson = TimeDivideTableUtils.getTimeJsonFromContext(context);
-        if (timeJson != null) {
-            return this.getFactTableName(divideTableStrategy, timeJson);            
+        if (timeJson == null) {
+            timeJson = this.genDefaultTimeJson();
         } 
-        return null;
+        return this.getFactTableName(divideTableStrategy, timeJson);            
     }
     
     /**
@@ -85,6 +87,21 @@ public class MonthDivideTableStrategyServiceImpl implements DivideTableService {
             throw new RuntimeException("exception happend when get detail time!");
         }
         return result;
+    }
+    
+    /**
+     * 获取默认情况下分表规则下的表名，对于月分表，默认取当前月份
+     * getDefaultFactTableNames
+     * @param strategy
+     * @return
+     */
+    private String genDefaultTimeJson() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd"); 
+        Date now = new Date();
+        String end = dateFormat.format(now).substring(0, 7);
+        String start = end;
+        String timeStr = "{'start':'%s','end':'%s','granularity':'%s'}";
+        return String.format(timeStr, start, end, "M");             
     }
 }
 

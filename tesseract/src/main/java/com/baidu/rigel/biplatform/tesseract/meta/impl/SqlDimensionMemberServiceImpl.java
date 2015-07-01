@@ -297,16 +297,14 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 QueryObject qo = 
                     new QueryObject (parentMember.getName (), ((MiniCubeMember) parentMember).getQueryNodes ());
                 expression.getQueryValues ().add (qo);
-            }
-            // TODO 用户自定义维度支持
-            // else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM))
-            // {
-            // MiniCubeLevel parentLevel = (MiniCubeLevel)
-            // parentMember.getLevel();
-            // expression = new Expression(parentLevel.getSource());
-            // expression.getQueryValues().add(new
-            // QueryObject(parentMember.getName()));
-            // }
+            } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM))
+             {
+             MiniCubeLevel parentLevel = (MiniCubeLevel)
+             parentMember.getLevel();
+             expression = new Expression(parentLevel.getSource());
+             expression.getQueryValues().add(new
+             QueryObject(parentMember.getName()));
+             }
         }
         
         if (expression != null) {
@@ -389,12 +387,21 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
                 try {
                     String[] filterValueArray = genFilterValue(filterValue);
-                    for (String tmp :filterValueArray) {
-                        MiniCubeMember member = 
-                            getMemberFromLevelByName (ds, cube, dimLevel, tmp, null, params);
-                        Set<String> leafNodes = member.getQueryNodes ();
+                    if (dimLevel.getDimTable ().equals (dimTable)) {
+                        Set<String> leafNodes = Sets.newHashSet ();
+                        for (String tmp : filterValueArray) {
+                            leafNodes.add (tmp);
+                        }
                         QueryObject queryObject = new QueryObject(null, leafNodes);
                         expression.getQueryValues ().add (queryObject);
+                    } else {
+                        for (String tmp :filterValueArray) {
+                            MiniCubeMember member = 
+                                    getMemberFromLevelByName (ds, cube, dimLevel, tmp, null, params);
+                            Set<String> leafNodes = member.getQueryNodes ();
+                            QueryObject queryObject = new QueryObject(null, leafNodes);
+                            expression.getQueryValues ().add (queryObject);
+                        }
                     }
                 } catch (Exception e) {
                     log.error (e.getMessage (), e);
@@ -407,7 +414,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     }
                 }
                 expressionList.add (expression);
-            } else if (fromFactable && dimLevel.getType () == LevelType.CALL_BACK) {
+            } else if (fromFactable && dimLevel.getType () == LevelType.CALL_BACK ) {
                 List<Member> members = dimLevel.getMembers (cube, ds, params);
                 if (CollectionUtils.isNotEmpty (members)) {
                     Set<String> leafNodes = ((MiniCubeMember) members.get (0)).getQueryNodes ();
@@ -453,6 +460,18 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 if (expression.getQueryValues ().size () > 0) {
                     expressionList.add (expression);
                 }
+            } else if ((dimTable.equals (dim.getTableName ()) 
+                && !dim.getId ().equals (level.getDimension ().getId ()))) {
+                Expression expression = new Expression(((MiniCubeLevel) dimLevel).getSource ());
+                // filterValue 格式为{uniqueNameList } 此处需要解析filterValue生成QueryObject
+                String[] filterValueArray = genFilterValue(filterValue);
+                for (String tmp :filterValueArray) {
+                    Set<String> leafNodes = Sets.newHashSet ();
+                    leafNodes.add (tmp);
+                    QueryObject queryObject = new QueryObject(tmp, leafNodes);
+                    expression.getQueryValues ().add (queryObject);
+                }
+                expressionList.add (expression);
             }
         }
         return expressionList;
@@ -551,13 +570,11 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 expression = new Expression(parentMember.getLevel().getPrimaryKey());
                 QueryObject qo = new QueryObject(parentMember.getName(), ((MiniCubeMember)parentMember).getQueryNodes()); 
                 expression.getQueryValues().add(qo);
+            } else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
+                MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
+                expression = new Expression(parentLevel.getSource());
+                expression.getQueryValues().add(new QueryObject(parentMember.getName()));
             }
-// TODO 用户自定义维度支持
-//            else if (!parentMember.getLevel().getType().equals(LevelType.USER_CUSTOM)) {
-//                MiniCubeLevel parentLevel = (MiniCubeLevel) parentMember.getLevel();
-//                expression = new Expression(parentLevel.getSource());
-//                expression.getQueryValues().add(new QueryObject(parentMember.getName()));
-//            }
         }
 
         if (expression != null) {
@@ -619,4 +636,5 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
     protected void setSearchService(SearchService service) {
         this.searchService = service;
     }
+    
 }
