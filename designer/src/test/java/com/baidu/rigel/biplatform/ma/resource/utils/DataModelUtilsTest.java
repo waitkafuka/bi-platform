@@ -679,6 +679,7 @@ public class DataModelUtilsTest {
         Map<String, Measure> measures = Maps.newHashMap();
         MiniCubeMeasure measure = new MiniCubeMeasure("Measure");
         measure.setId("id2");
+        measure.setDefine("Measure");
         measures.put("Measure", measure);
 
         cube.setId("testCubeId");
