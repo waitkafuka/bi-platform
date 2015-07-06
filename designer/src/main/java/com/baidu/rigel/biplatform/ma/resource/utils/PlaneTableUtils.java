@@ -38,11 +38,6 @@ public class PlaneTableUtils {
     private static final String GRANULARITY = "granularity";
 
     /**
-     * 时间格式分隔符
-     */
-    private static final String DIV = "-";
-
-    /**
      * 年正则表达式，匹配2015
      */
     private static final String YEAR_REGEXP = "^[0-9]{4}$";
@@ -253,47 +248,41 @@ public class PlaneTableUtils {
      * @return
      * @throws JSONException
      */
-    private static String cov2StandTime(String time, String granularity) {
+    private static String cov2StandTime(String timeValue, String granularity) {
         // TODO 目前仅支持单选
         String timeStr = "{'start':'%s','end':'%s','granularity':'%s'}";
-        // 年
-        String year;
-        // 月
-        String month;
-        // 日
-        String day;
+        Map<String, String> time = null;
         switch (granularity) {
+        // 年
             case "Y":
-                return String.format(timeStr, time, time, granularity);
-            case "M":
-                year = time.substring(0, 4);
-                month = time.substring(4, 6);
-                return String.format(timeStr, year + DIV + month, year + DIV + month, granularity);
-            case "W":
-                year = time.substring(0, 4);
-                month = time.substring(4, 6);
-                day = time.substring(6, 8);
-                return String.format(timeStr, year + DIV + month + DIV + day,
-                        year + DIV + month + DIV + day, granularity);
-            case "D":
-                year = time.substring(0, 4);
-                month = time.substring(4, 6);
-                day = time.substring(6, 8);
-                return String.format(timeStr, year + DIV + month + DIV + day,
-                        year + DIV + month + DIV + day, granularity);
+                time = TimeUtils.getTimeCondition(timeValue, timeValue, TimeType.TimeYear);
+                break;
+            // 季度
             case "Q":
-                // 年份信息
-                year = time.substring(0, 4);
-                // 获取月份信息
-                int monthInt = Integer.valueOf(time.substring(4, 6));
-                String quarter = "Q";
-                quarter = quarter + String.valueOf(monthInt / 3 + 1);
-                String start = year + DIV + quarter;
-                String end = year + DIV + quarter;
-                return String.format(timeStr, start, end, granularity);
+                String year = timeValue.substring(0, 4);
+                String month = timeValue.substring(4, 6);
+                int monthInt = Integer.valueOf(month);
+                String quarter = year + "Q" + (monthInt/3 + 1); 
+                time = TimeUtils.getTimeCondition(quarter, quarter, TimeType.TimeQuarter);
+                break;
+            // 月份
+            case "M":
+                time = TimeUtils.getTimeCondition(timeValue, timeValue, TimeType.TimeMonth);
+                break;
+            // 星期
+            case "W":
+                time = TimeUtils.getTimeCondition(timeValue, timeValue, TimeType.TimeWeekly);
+                break;
+            // 天
+            case "D":
+                time = TimeUtils.getTimeCondition(timeValue, timeValue, TimeType.TimeDay);
+                break;
             default:
-                throw new RuntimeException("the time granularity : " + granularity + "is wrong");
+                break;
         }
+        String start = time.get("start");
+        String end = time.get("end");
+        return String.format(timeStr, start, end, granularity);
     }
 
     /**

@@ -502,10 +502,16 @@
                             var tData = defChinaMapArr[n];
                             for (var x = 0; x < ser.data.length; x ++ ) {
                                 if (tData.name === xAxis.data[x]) {
-                                    tData.value = ser.data[x];
+                                    if (ser.format && ser.format.indexOf('%') >= 0) {
+                                        tData.value = ser.data[x] * 100;
+                                    }
+                                    else {
+                                        tData.value = ser.data[x];
+                                    }
                                     break;
                                 }
                             }
+
                             serData.push(tData);
                         }
                         if (isInArray(ser.name, defaultMeasures)) {
@@ -513,7 +519,6 @@
                             series.push(ser);
                         }
                     }
-
                 }
             }
             else {
@@ -546,7 +551,12 @@
                         var tData = defChinaMapArr[n];
                         for (var x = 0; x < ser.data.length; x ++ ) {
                             if (tData.name === xAxis.data[x]) {
-                                tData.value = ser.data[x];
+                                if (ser.format && ser.format.indexOf('%') >= 0) {
+                                    tData.value = ser.data[x] * 100;
+                                }
+                                else {
+                                    tData.value = ser.data[x];
+                                }
                                 break;
                             }
                         }
@@ -920,8 +930,8 @@
             toolTip.trigger = 'axis';
             // 设置鼠标hover之后，隐藏掉图形的坐标轴显示线 update by majun
             var axisPointer = {
-                    type : 'none'
-                }
+                type : 'none'
+            };
             toolTip.axisPointer = axisPointer;
             toolTip.formatter =  function(data, ticket, callback) {
                 var res = data[0][1];
@@ -1028,6 +1038,9 @@
 
             if (dataArray[x].name === areaName) {
                 result = dataArray[x].value;
+                if (format && format.indexOf('%') >= 0) {
+                    result = result / 100;
+                }
                 if (format) {
                     result = formatNumber(
                         result,
@@ -1141,31 +1154,43 @@
         }
         else if (this._chartType === 'map') {
             var splitNum = 10;
-            // TODO:要考虑到负数
-            //[
-            //    {start: 1000},
-            //    {start: 900, end: 1000},
-            //    {start: 800, end: 900},
-            //    {start: 700, end: 800},
-            //    {start: 10, end: 200, label: '10 到 200（自定义label）'},
-            //    {start: 5, end: 5, label: '5（自定义特殊颜色）', color: 'black'},
-            //    {end: this._mapMinValue}
-            //]
-            var min = this._mapMinValue;
-            var max = this._mapMaxValue;
+            //  TODO:要考虑到负数
+            // [
+            //     {start: 1000},
+            //     {start: 900, end: 1000},
+            //     {start: 800, end: 900},
+            //     {start: 700, end: 800},
+            //     {start: 10, end: 200, label: '10 到 200（自定义label）'},
+            //     {start: 5, end: 5, label: '5（自定义特殊颜色）', color: 'black'},
+            //     {end: this._mapMinValue}
+            // ]
+            var format;
+            var hasPercent;
+            if (options && options.series && options.series[0]) {
+                format = options.series[0].format;
+            }
+            if (format && format.indexOf('%') >= 0) {
+                hasPercent = true;
+            }
+            var min = hasPercent ? this._mapMinValue * 100: this._mapMinValue;
+            var max = hasPercent ? this._mapMaxValue * 100: this._mapMaxValue;
             var split = (max - min) / splitNum;
-            var splitList = [
-                {
-                    start: max
-                }
-            ];
+            var splitList = [{ start: max }];
             var i = 1;
             var tStart = 0;
+            var tEnd = 0;
             while (i <= (splitNum - 2)) {
-                tStart = max - split * i;
+                if (hasPercent) {
+                    tStart = (max - split * i);
+                    tEnd = (max - split * (i - 1));
+                }
+                else {
+                    tStart = max - split * i;
+                    tEnd = max - split * (i - 1);
+                }
                 var item = {
                     start: tStart,
-                    end: max - split * (i - 1)
+                    end: tEnd
                 };
                 splitList.push(item);
                 i++;
@@ -1195,18 +1220,22 @@
         if (this._chartType === 'pie') {
             // 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun
             options.calculable = false;
+            // var colors = [
+            //     '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
+            //     '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
+            // ];
             var colors = [
-                '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
+                '#C0504E', '#4F81BC', '#9BBB58', '#FFB981', '#D97A81',
                 '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
             ];
             // 饼图每个块的颜色，按照UE给出的标准进行重设
             options.color = colors;
         }
 
-        var textStyle = {
-            fontFamily: '微软雅黑',
-            fontSize: '120px'
-        };
+        // var textStyle = {
+        //     fontFamily: '微软雅黑',
+        //     fontSize: '120px'
+        // };
 
         this.$setupLegend(options);
         return options;

@@ -70,6 +70,7 @@ import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * SearchService 实现类，用来连接外部的查询API。
@@ -107,54 +108,59 @@ public class CallbackSearchServiceImpl {
      */
     private class CallbackExecutor implements Callable<CallbackResponse> {
 
-    	private Entry<String, List<MiniCubeMeasure>> group;
-    	private String groupbyParams;
-    	private String whereParams;
-    	// For external usage only
-    	private String callbackMeasures;
-    	
-		/**
-		 * @param group
-		 */
-		public CallbackExecutor(Entry<String, List<MiniCubeMeasure>> group, 
-		        LinkedHashMap<String, List<String>> groupbyParams, LinkedHashMap<String, List<String>> whereParams) {
-			super();
-			this.group = group;
-			this.groupbyParams = AnswerCoreConstant.GSON.toJson(groupbyParams);
-			this.whereParams = AnswerCoreConstant.GSON.toJson(whereParams);
-		}
-		
-		public List<String> getCallbackMeasures() {
-		    
-		    return Arrays.asList(StringUtils.delimitedListToStringArray(callbackMeasures, ","));
-		}
+        private Entry<String, List<MiniCubeMeasure>> group;
+        private String groupbyParams;
+        private String whereParams;
+        // For external usage only
+        private String callbackMeasures;
+        
+        /**
+         * @param group
+         */
+        public CallbackExecutor(Entry<String, List<MiniCubeMeasure>> group, 
+                LinkedHashMap<String, List<String>> groupbyParams, LinkedHashMap<String, List<String>> whereParams) {
+            super();
+            this.group = group;
+            this.groupbyParams = AnswerCoreConstant.GSON.toJson(groupbyParams);
+            this.whereParams = AnswerCoreConstant.GSON.toJson(whereParams);
+        }
+        
+        public List<String> getCallbackMeasures() {
+            
+            return Arrays.asList(StringUtils.delimitedListToStringArray(callbackMeasures, ","));
+        }
 
-		@Override
-		public CallbackResponse call() throws Exception {
-			
-			MiniCubeMeasure maxTimeout = group.getValue().stream().max(new Comparator<MiniCubeMeasure>() {
+        @Override
+        public CallbackResponse call() throws Exception {
+            
+            MiniCubeMeasure maxTimeout = group.getValue().stream().max(new Comparator<MiniCubeMeasure>() {
 
-				@Override
-				public int compare(MiniCubeMeasure o1, MiniCubeMeasure o2) {
-					return new Long(((CallbackMeasure) o1).getSocketTimeOut() - ((CallbackMeasure) o2).getSocketTimeOut()).intValue();
-				}
-				
-			}).get();
-			
-			// Build call-back parameter
-			Map<String, String> merged = new HashMap<String, String>();
-			StringBuilder sb = new StringBuilder();
-			for (MiniCubeMeasure m : group.getValue()) {
-			    sb.append(",").append(m.getName());
-			}
-			if (sb.length() > 0) {
-			    sb.deleteCharAt(0);
-			}
-			// Prepared required parameters (other parameters depend on invoke methods)
-			merged.put(MEASURE_NAMES, callbackMeasures = sb.toString());
-			merged.put(GROUP_BY, groupbyParams);
-			merged.put(FILTER, whereParams);
-			
+                @Override
+                public int compare(MiniCubeMeasure o1, MiniCubeMeasure o2) {
+                    return new Long(((CallbackMeasure) o1).getSocketTimeOut() - ((CallbackMeasure) o2).getSocketTimeOut()).intValue();
+                }
+                
+            }).get();
+            
+            // Build call-back parameter
+            Map<String, String> merged = new HashMap<String, String>();
+//            StringBuilder sb = new StringBuilder();
+            String  callbackMeasures = group.getValue ().stream ()
+                    .map (m -> m.getName ())
+                    .distinct ()
+                    .collect (Collectors.joining (","));
+//            for (MiniCubeMeasure m : group.getValue()) {
+//                sb.append(",").append(m.getName());
+//            }
+//            if (sb.length() > 0) {
+//                sb.deleteCharAt(0);
+//            }
+            // Prepared required parameters (other parameters depend on invoke methods)
+//            merged.put(MEASURE_NAMES, callbackMeasures = sb.toString());
+            merged.put(MEASURE_NAMES, callbackMeasures);
+            merged.put(GROUP_BY, groupbyParams);
+            merged.put(FILTER, whereParams);
+            
             group.getValue().stream().forEach(new Consumer<MiniCubeMeasure>() {
 
                 @Override
@@ -165,10 +171,10 @@ public class CallbackSearchServiceImpl {
                     }
                 }
             });
-			return CallbackServiceInvoker.invokeCallback(group.getKey(), merged, 
-			        CallbackType.MEASURE, ((CallbackMeasure) maxTimeout).getSocketTimeOut());
-		}
-    	
+            return CallbackServiceInvoker.invokeCallback(group.getKey(), merged, 
+                    CallbackType.MEASURE, ((CallbackMeasure) maxTimeout).getSocketTimeOut());
+        }
+        
     }
 
     /**
@@ -205,7 +211,7 @@ public class CallbackSearchServiceImpl {
                     return m;
                 }).collect(Collectors.groupingBy(c -> ((CallbackMeasure) c).getCallbackUrl(), Collectors.toList()));
         if (callbackMeasures == null || callbackMeasures.isEmpty()) {
-        	LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "Empty callback measure", "[callbackquery:" + query
+            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "Empty callback measure", "[callbackquery:" + query
                     + "]"));
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                     IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
@@ -231,14 +237,21 @@ public class CallbackSearchServiceImpl {
                     l.add(TesseractConstant.SUMMARY_KEY);
                 }
                 // Put it into group by field
-                groupbyParams.get(e.getProperties()).addAll(l);
+               for (String  tmp : l) {
+                   if (!groupbyParams.get (e.getProperties()).contains (l)) {
+                       groupbyParams.get(e.getProperties()).add(tmp);
+                   }
+               }
+//                groupbyParams.get(e.getProperties()).addAll(l);
             } else {
                 // Put it into filter field
                 if (CollectionUtils.isEmpty(l)) {
                     List<Set<String>> tmp = 
                             e.getQueryValues().stream().map(v -> v.getLeafValues()).collect(Collectors.toList());
                     List<String> values = Lists.newArrayList();
-                    tmp.forEach(t -> values.addAll(t));
+                    Set<String> filterVal = Sets.newHashSet ();
+                    tmp.forEach(t -> filterVal.addAll(t));
+                    values.addAll (filterVal);
                     whereParams.put(e.getProperties(), values);
                 } else {
                     whereParams.put(e.getProperties(), new ArrayList<String>(l));

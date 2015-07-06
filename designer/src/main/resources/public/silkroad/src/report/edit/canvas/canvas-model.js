@@ -425,14 +425,33 @@ define(
              * @public
              */
             resizeComp: function (paramObj) {
-                this.$reportVm.find('[data-comp-id=' + paramObj.compId + ']').css({
+                var $table = this.$reportVm.find('[data-comp-id=' + paramObj.compId + ']');
+                var height = 71;
+                var hasRichSel = $table.find(
+                    '[data-o_o-di="snpt.'
+                    + paramObj.compId
+                    + '-vu-table-rich-select"]'
+                ).length > 0 ? true : false;
+                var hasBread = $table.find(
+                    '[data-o_o-di="snpt.'
+                    + paramObj.compId
+                    + '-vu-table-breadcrumb"]'
+                ).length > 0 ? true : false;
+
+                if (hasRichSel) {
+                    height += 37;
+                }
+                if (hasBread) {
+                    height += 18;
+                }
+                $table.css({
                     width: paramObj.width,
                     height: paramObj.height
-                }).find('.vu-table').height(parseInt(paramObj.height) - 89);
+                }).find('.vu-table').height(parseInt(paramObj.height) - height);
                 //}).find('.vu-table').height(parseInt(paramObj.height) - 130);
                 // 上下小零件的总高度94（=40+19+35） + 39的padding-top
                 // 面包屑18 + 下载文案24 + 39 + 3（添加下载文案下边距3像素-测量得到）（需要查一下）
-                this.$reportVm.find('[data-comp-id=' + paramObj.compId + ']').css({
+                $table.css({
                     width: paramObj.width,
                     height: paramObj.height
                 }).find('.vu-plane-table').height(parseInt(paramObj.height) - 90);

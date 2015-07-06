@@ -178,6 +178,7 @@ $namespace('di.shared.model');
         // FIXME
         // 现在先写死，不存在上表头下钻
         paramObj['drillAxisName'] = 'ROW';
+        paramObj['rowNum'] = param.rowNum;
 
         return this._fCommonParamGetter(paramObj);
     }

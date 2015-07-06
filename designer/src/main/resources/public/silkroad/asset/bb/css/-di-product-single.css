@@ -3863,9 +3863,13 @@ li {
 /**
  * 标记且功能性css，在console会起标记作用
  */
-/*.ecui-loaded .di-o_o-bgcolor {*/
-    /*background: #F0F4F7;*/
-/*}*/
+
+/*
+.ecui-loaded .di-o_o-bgcolor {
+    background: #F0F4F7;
+}
+*/
+
 .di-o_o-block {
     position: relative;
     /*margin: 0 10px 20px 0;*/
@@ -3987,12 +3991,32 @@ li {
 .canvas .report {
     background-color: #F0F4F7;
 }
+
 /* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #F0F4F7;
     /*font-family: '微软雅黑', '宋体';*/
     font-family: "Microsoft YaHei",Arial,sans-serif;
     font-size: 12px;
+}
+
+/**
+ * 清除浮动-完美清除方案
+ */
+.c-f:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    zoom: 1;
+}
+
+/**
+ * 左浮动
+ */
+.f-l {
+    float: left;
 }
 /**
  * di-ui.css
@@ -4494,13 +4518,18 @@ div.di-dim-level-find-msg span{
 .di-table-down-btn {
     float: right;
 }
-.sxwzbTitle{
+.rich-select-instruction {
+    margin-right: 10px;
+    height: 32px;
+    line-height: 32px;
+}
+.sxwzbTitle {
     font-weight: 700;
     font-size: 14px;
     margin-top: 10px;
     margin-left: 10px;
 }
-.sxwzbContent{
+.sxwzbContent {
     display: none;
     position: absolute;
     border: 1px solid #d9e6eb;
@@ -4511,13 +4540,13 @@ div.di-dim-level-find-msg span{
     overflow-y: scroll;
     font-family: "Microsoft YaHei", Arial, sans-serif;
 }
-.sxwzbCategories{
+.sxwzbCategories {
     vertical-align: top;
     display: inline-block;
     width: 100px;
     margin-top: 5px;
 }
-.sxwzbSubdivisions{
+.sxwzbSubdivisions  {
     display: inline-block;
     width: 400px;
     line-height: 28px;
@@ -4645,6 +4674,15 @@ div.di-dim-level-find-msg span{
 }
 .sxwzbText{
     position: relative;
+    margin-bottom: 5px;
+}
+
+.sxwzbButton.disabled{
+    background-color: #e5e5e5;
+}
+
+.sxwzbCheckBox:checked:disabled:after{
+    background: url(img/rich-select-checkbox-bg.png) no-repeat 0 -48px;
 }
 /**
  * @name                      :roport-ui针对silkroad所做的的css适配

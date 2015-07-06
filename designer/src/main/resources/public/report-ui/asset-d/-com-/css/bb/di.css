@@ -9,9 +9,13 @@
 /**
  * 标记且功能性css，在console会起标记作用
  */
-/*.ecui-loaded .di-o_o-bgcolor {*/
-    /*background: #F0F4F7;*/
-/*}*/
+
+/*
+.ecui-loaded .di-o_o-bgcolor {
+    background: #F0F4F7;
+}
+*/
+
 .di-o_o-block {
     position: relative;
     /*margin: 0 10px 20px 0;*/
@@ -133,10 +137,30 @@
 .canvas .report {
     background-color: #F0F4F7;
 }
+
 /* 皮肤对应的背景色,以及字体显示设置 */
 .ecui-loaded {
     background-color: #F0F4F7;
     /*font-family: '微软雅黑', '宋体';*/
     font-family: "Microsoft YaHei",Arial,sans-serif;
     font-size: 12px;
+}
+
+/**
+ * 清除浮动-完美清除方案
+ */
+.c-f:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    zoom: 1;
+}
+
+/**
+ * 左浮动
+ */
+.f-l {
+    float: left;
 }

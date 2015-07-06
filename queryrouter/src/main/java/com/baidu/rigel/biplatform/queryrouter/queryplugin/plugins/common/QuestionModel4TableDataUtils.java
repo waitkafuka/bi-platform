@@ -123,7 +123,8 @@ public class QuestionModel4TableDataUtils {
                             .getFactTableAliasName()
                             + v.getDefine());
                     oneMeasure.setMeasure(v);
-                    oneMeasure.setColumnKey(System.nanoTime() + oneMeasure.getTableFieldName());
+                    oneMeasure.setColumnKey("[Measure].[" + k + "]");
+                    oneMeasure.setMetaCondition(configQuestionModel.getQueryConditions().get(k));
                 });
 
         // 获取维度元数据
@@ -166,14 +167,15 @@ public class QuestionModel4TableDataUtils {
                             oneDimensionTarget.setDimension(v);
                             oneDimensionTarget.setLevel(oneDimensionSource);
                             oneDimensionTarget.setSqlUniqueColumn((tableName + k).toLowerCase());
-                            oneDimensionTarget.setColumnKey(System.nanoTime()
-                                    + oneDimensionTarget.getTableFieldName());
+                            oneDimensionTarget.setColumnKey("[Dimension]."
+                                    + "[" + k + "]");
+                            oneDimensionTarget.setMetaCondition(configQuestionModel.getQueryConditions().get(k));
                             
                         });
 
         return allColumns;
     }
-
+    
     /**
      * 获取事实表
      * 

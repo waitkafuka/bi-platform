@@ -41,6 +41,7 @@ import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
@@ -681,10 +682,17 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             } else {
                   if (dataRange[0] .contains("-") && dataRange[1] .contains("-")) { 
                       dataRange[0]  = dataRange[0] .replace("-", "");
-                      dataRange[1]  = dataRange[1] .replace("-", "");   
-                      TimeDimension timeDim = (TimeDimension) element;
+                      dataRange[1]  = dataRange[1] .replace("-", ""); 
+                      JSONObject json = new JSONObject(String.valueOf(value)); 
+                      Map<String, TimeType> tmp = Maps.newHashMap ();
+                      tmp.put ("M", TimeType.TimeMonth);
+                      tmp.put ("D", TimeType.TimeDay);
+                      tmp.put ("Y", TimeType.TimeYear);
+                      tmp.put ("Q", TimeType.TimeQuarter);
+                      tmp.put("W", TimeType.TimeWeekly);
+//                      TimeDimension timeDim = (TimeDimension) element;
                       Map<String, String> time = 
-                          TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , timeDim.getDataTimeType());
+                          TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , tmp.get (json.get ("granularity")));
                       dataRange[0] = time.get("start");
                       dataRange[1] = time.get("end");
                   }

@@ -20,6 +20,7 @@ import java.io.Serializable;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 
 /**
@@ -30,75 +31,61 @@ import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
  *
  */
 public class SqlColumn implements Serializable {
-    
+
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 3151301875582323397L;
-    
+
     /**
      * columnKey
      */
     public String columnKey;
-    
+
     /**
      * name
      */
     public String name;
-    
+
     /**
      * sql查询的唯一的列名标示
      */
     public String sqlUniqueColumn;
-    
+
     /**
      * tableFieldName
      */
     public String tableFieldName;
-    
+
     /**
      * caption
      */
     public String caption;
-    
+
     /**
      * tableName
      */
     public String tableName;
-    
+
     /**
      * tableNames
      */
     public String sourceTableName;
-    
+
     /**
      * AxisType
      */
     public AxisType type;
-    
+
     /**
      * dimension
      */
     public Dimension dimension;
-    
+
     /**
      * Level
      */
     public Level level;
-
-    /**
-     * @return the sourceTableName
-     */
-    public String getSourceTableName() {
-        return sourceTableName;
-    }
-
-    /**
-     * @param sourceTableName the sourceTableName to set
-     */
-    public void setSourceTableName(String sourceTableName) {
-        this.sourceTableName = sourceTableName;
-    }
 
     /**
      * measure
@@ -106,6 +93,53 @@ public class SqlColumn implements Serializable {
     public Measure measure;
 
     /**
+     * metaCondition
+     */
+    public MetaCondition metaCondition;
+
+    /**
+     * metaCondition
+     * 
+     * @return the metaCondition to get
+     */
+    public MetaCondition getMetaCondition() {
+        return metaCondition;
+    }
+
+    /**
+     * setMetaCondition
+     * 
+     * @param metaCondition
+     *            the metaCondition to set
+     */
+    public void setMetaCondition(MetaCondition metaCondition) {
+        this.metaCondition = metaCondition;
+    }
+
+    /**
+     * getSourceTableName
+     * 
+     * @return the sourceTableName to get
+     */
+    public String getSourceTableName() {
+        return sourceTableName;
+    }
+
+    /**
+     * setSourceTableName
+     * 
+     * @param sourceTableName
+     *            the sourceTableName to set
+     */
+    public void setSourceTableName(String sourceTableName) {
+        this.sourceTableName = sourceTableName;
+    }
+
+    
+
+    /**
+     * getColumnKey
+     * 
      * @return the columnKey
      */
     public String getColumnKey() {
@@ -113,7 +147,10 @@ public class SqlColumn implements Serializable {
     }
 
     /**
-     * @param columnKey the columnKey to set
+     * setColumnKey
+     * 
+     * @param columnKey
+     *            the columnKey to set
      */
     public void setColumnKey(String columnKey) {
         this.columnKey = columnKey;
@@ -127,7 +164,7 @@ public class SqlColumn implements Serializable {
     public String getSqlUniqueColumn() {
         return sqlUniqueColumn;
     }
-    
+
     /**
      * setSqlUniqueColumn
      * 
@@ -146,7 +183,7 @@ public class SqlColumn implements Serializable {
     public Level getLevel() {
         return level;
     }
-    
+
     /**
      * setLevel
      * 
@@ -156,7 +193,7 @@ public class SqlColumn implements Serializable {
     public void setLevel(Level level) {
         this.level = level;
     }
-    
+
     /**
      * getName
      * 
@@ -165,7 +202,7 @@ public class SqlColumn implements Serializable {
     public String getName() {
         return name;
     }
-    
+
     /**
      * setName
      * 
@@ -175,7 +212,7 @@ public class SqlColumn implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-    
+
     /**
      * getTableFieldName
      * 
@@ -184,7 +221,7 @@ public class SqlColumn implements Serializable {
     public String getTableFieldName() {
         return tableFieldName;
     }
-    
+
     /**
      * setTableFieldName
      * 
@@ -194,7 +231,7 @@ public class SqlColumn implements Serializable {
     public void setTableFieldName(String tableFieldName) {
         this.tableFieldName = tableFieldName;
     }
-    
+
     /**
      * getCaption
      * 
@@ -203,7 +240,7 @@ public class SqlColumn implements Serializable {
     public String getCaption() {
         return caption;
     }
-    
+
     /**
      * setCaption
      * 
@@ -213,7 +250,7 @@ public class SqlColumn implements Serializable {
     public void setCaption(String caption) {
         this.caption = caption;
     }
-    
+
     /**
      * getTableName
      * 
@@ -222,7 +259,7 @@ public class SqlColumn implements Serializable {
     public String getTableName() {
         return tableName;
     }
-    
+
     /**
      * setTableName
      * 
@@ -232,7 +269,7 @@ public class SqlColumn implements Serializable {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-    
+
     /**
      * getType
      * 
@@ -241,7 +278,7 @@ public class SqlColumn implements Serializable {
     public AxisType getType() {
         return type;
     }
-    
+
     /**
      * setType
      * 
@@ -251,7 +288,7 @@ public class SqlColumn implements Serializable {
     public void setType(AxisType type) {
         this.type = type;
     }
-    
+
     /**
      * getDimension
      * 
@@ -260,7 +297,7 @@ public class SqlColumn implements Serializable {
     public Dimension getDimension() {
         return dimension;
     }
-    
+
     /**
      * setDimension
      * 
@@ -270,7 +307,7 @@ public class SqlColumn implements Serializable {
     public void setDimension(Dimension dimension) {
         this.dimension = dimension;
     }
-    
+
     /**
      * getMeasure
      * 
@@ -279,7 +316,7 @@ public class SqlColumn implements Serializable {
     public Measure getMeasure() {
         return measure;
     }
-    
+
     /**
      * setMeasure
      * 
@@ -289,5 +326,5 @@ public class SqlColumn implements Serializable {
     public void setMeasure(Measure measure) {
         this.measure = measure;
     }
-    
+
 }

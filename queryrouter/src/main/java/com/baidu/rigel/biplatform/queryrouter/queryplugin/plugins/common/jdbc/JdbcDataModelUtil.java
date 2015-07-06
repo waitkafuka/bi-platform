@@ -125,11 +125,10 @@ public class JdbcDataModelUtil {
             TableData.Column colum = new TableData.Column(colDefine.getColumnKey(),
                     fieldName, colDefine.getCaption(), tableName);
             dataModel.getTableData().getColumns().add(colum);
-            String tableDataColumnKey = colDefine.getColumnKey();
             dataModel
                     .getTableData()
                     .getColBaseDatas()
-                    .put(tableDataColumnKey,
+                    .put(colDefine.getColumnKey(),
                             new ArrayList<String>());
         });
         return dataModel;

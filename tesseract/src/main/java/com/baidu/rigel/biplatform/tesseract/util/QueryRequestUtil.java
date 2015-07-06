@@ -23,8 +23,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -408,7 +406,7 @@ public class QueryRequestUtil {
     
     public static SearchIndexResultSet processGroupBy(SearchIndexResultSet dataSet,
             QueryRequest query, QueryContext queryContext) throws NoSuchFieldException {
-        
+        query.getDataSourceInfo ();
         List<SearchIndexResultRecord> transList = null;
         long current = System.currentTimeMillis();
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
@@ -487,6 +485,7 @@ public class QueryRequestUtil {
                 if(StringUtils.isNotBlank(properties.childField)) {
                     groupList0.remove(properties.childField);
                 }
+                boolean needSummary =  isNeedSummary(properties, queryContext.getRowMemberTrees ());
                 LinkedList<SearchIndexResultRecord> summaryCalcList = new LinkedList<SearchIndexResultRecord>();
                 for(SearchIndexResultRecord record : transList){
                     SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy(record);
@@ -496,6 +495,9 @@ public class QueryRequestUtil {
                     generateGroupBy(vRecord, groupList0, meta);
 //                    vRecord.setGroupBy(properties.pullupValue); 
                     summaryCalcList.add(vRecord);
+                    if (!needSummary) {
+                        break;
+                    }
                 }
                 transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
             }
@@ -522,6 +524,23 @@ public class QueryRequestUtil {
         return dataSet;
     }
     
+    private static boolean isNeedSummary(PullUpProperties properties, List<MemberNodeTree> rowMemberTrees) {
+       for (MemberNodeTree node : rowMemberTrees) {
+           if (StringUtils.isEmpty (node.getName ()) && node.getChildren () != null) {
+               for (MemberNodeTree child : node.getChildren ()) {
+                   if (child.isCallback () && CollectionUtils.isNotEmpty (child.getSummaryIds ())) {
+                       for (MemberNodeTree tmp : child.getChildren ()) {
+                           if (CollectionUtils.isEqualCollection (child.getSummaryIds (), tmp.getLeafIds ())) {
+                               return false;
+                           }
+                       }
+                   }
+               }
+           }
+       }
+        return true;
+    }
+
 //    /**
 //     * 
 //     * mapLeafValue2ValueOfRecord

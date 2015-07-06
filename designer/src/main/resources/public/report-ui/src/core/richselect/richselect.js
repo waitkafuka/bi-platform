@@ -9,14 +9,30 @@
     var textCache = {};
     var clickCheckbox = [];
     // 创建dom
-    function createDom($ele) {
+    function createDom($ele, insText) {
         // 累计的添加
         var length = $('.sxwzbText').length;
-        $('<div class="sxwzb sxwzbText sxwzbText' + length + '" data-index=' + length + '>'
-        + '<div class="sxwzbButton"><div></div></div>'
-        + '</div><div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo($ele);
+        //$('<div class="sxwzb sxwzbText sxwzbText' + length + '" data-index=' + length + '>'
+        //+ '<div class="sxwzbButton"><div></div></div>'
+        //+ '</div><div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo($ele);
         // $('<div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo(document.body);
-        var $currentContent = $('.sxwzbContent' + length);
+
+        var instruction;
+        insText && (instruction = '<div class="f-l rich-select-instruction">' + insText + '</div>');
+
+        var html = [
+            '<div class="c-f">',
+            insText ? instruction : '',
+            '<div class="sxwzb sxwzbText f-l sxwzbText', length, '" data-index=', length, '>',
+                '<div class="sxwzbButton">',
+                    '<div></div>',
+                '</div>',
+            '<div class="sxwzb sxwzbContent f-l sxwzbContent', length, '" data-index=', length, '></div>',
+            '</div></div>'
+        ].join('');
+
+        $(html).appendTo($ele);
+        $currentContent = $('.sxwzbContent' + length);
         return $currentContent;
     }
     // 渲染窗体内部
@@ -124,16 +140,19 @@
         /**
          * 点击非sxwzb的内容的时候 隐藏窗体
          */
-        $('body').click(function(e){
+        $('body').unbind('click');
+        $('body').bind('click', bodyClick);
+
+        function bodyClick(e) {
             var target = $(e.target);
             if (!(target.parents('.sxwzb').length && !target.hasClass('sxwzb'))) {
                 $('.sxwzbContent').hide();
             }
-        })
+        }
 
         ele.delegate($('.sxwzbButton'), 'click', function(e) {
             var target = e.target;
-            if (target == this) {
+            if (target == this || $(target).hasClass('disabled')) {
                 return;
             }
             var index = $(target).parents('.sxwzbText').attr('data-index');
@@ -165,7 +184,8 @@
             //    'left': left + 'px',
             //    'top': top + 'px'
             //})
-            $('.sxwzbContent' + index).toggle().siblings('.sxwzbContent').hide();
+            $('.sxwzbContent' + index).toggle();
+            e.stopPropagation();
         });
     }
 
@@ -207,6 +227,7 @@
                 checkboxP.prop('checked', checkStatus1);
                 clickCheckbox[index][$self.attr('data-name')] = checkStatus;
             }
+            e.stopPropagation();
         })
         /**
          * 点击确定 重新处理
@@ -236,8 +257,10 @@
             // 重置clickCheckbox
             $.extend(checkStatusCache, clickCheckbox[index]);
             clickCheckbox[index] = {};
+            $('.sxwzbContent' + index).hide();
+            e.stopPropagation();
             // 关闭窗口
-            $button.trigger('click');
+            // $button.trigger('click');
         })
         /**
          * 点击取消的时候 必须重置选中状态
@@ -258,9 +281,11 @@
                 $('.sxwzbContent' + index).find('#' + i).prop('checked', status);
                 delete clickCheckbox[index][i];
             }
-            $button.trigger('click');
+            $('.sxwzbContent' + index).hide();
+            // $button.trigger('click');
 
             judgeCheckbox(index);
+            e.stopPropagation();
         })
     }
     /**
@@ -281,15 +306,15 @@
                 delete defaults[length];
             }
             defaults[length] = options[i];
-            var $content = createDom($(this));
-            if (options[i] && options[i].data) {
+            var $content = createDom($(this), defaults[length].instructionText);
+            if (options[i] && options[i].data && options[i].data.length) {
                 // render数据
                 $content.append(renderCheckbox(options[i].data));
                 setStyle($content);
                 judgeCheckbox();
                 renderInitStatus();
             } else {
-                alert('参数给的不对.');
+                $('.sxwzbText' + length).find('.sxwzbButton').addClass('disabled');
             }
         })
     }

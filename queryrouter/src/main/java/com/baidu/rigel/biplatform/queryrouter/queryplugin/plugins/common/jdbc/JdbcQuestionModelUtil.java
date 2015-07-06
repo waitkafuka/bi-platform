@@ -59,7 +59,6 @@ public class JdbcQuestionModelUtil {
     public SqlExpression convertQuestionModel2Sql(QuestionModel questionModel, String tableName)
             throws QuestionModelTransformationException {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
-        questionModel.setUseIndex(false);
         Map<String, SqlColumn> allColums = QuestionModel4TableDataUtils.getAllCubeColumns(questionModel);
         List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(questionModel);
         SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) configQuestionModel

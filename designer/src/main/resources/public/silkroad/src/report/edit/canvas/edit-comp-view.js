@@ -1765,7 +1765,7 @@ define([
                                 $table.children()[0].remove();
 
                                 // 移除掉$reportVm中的 rich-select容器，移除掉
-                                tableBox.height(tableBox.height() - 30);
+                                tableBox.height(tableBox.height() - 37);
                                 $table = $($(tableBox).children()[0]);
                                 $table.children()[0].remove();
 
@@ -1805,6 +1805,7 @@ define([
                                     compId: compId
                                 };
                                 $table.prepend(html);
+                                tableBox.height(tableBox.height() + 37);
                                 $table = $($(tableBox).children()[0]);
                                 $table.prepend(html);
                                 that.model.get('canvasModel').reportJson.entityDefs.push(json);

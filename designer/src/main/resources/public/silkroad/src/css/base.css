@@ -26,21 +26,21 @@ a {
 .c-p {
     cursor: pointer;
 }
-/* 清除浮动 */
-.c-f:after {
-    content: ".";
-    display: block;
-    height: 0;
-    clear: both;
-    visibility: hidden;
-    zoom: 1;
-}
 .c-m {
     cursor: move;
 }
-.f-l {
-    float: left;
-}
+/* 清除浮动 */
+/*.c-f:after {*/
+    /*content: ".";*/
+    /*display: block;*/
+    /*height: 0;*/
+    /*clear: both;*/
+    /*visibility: hidden;*/
+    /*zoom: 1;*/
+/*}*/
+/*.f-l {*/
+    /*float: left;*/
+/*}*/
 .f-r {
     float: right;
 }

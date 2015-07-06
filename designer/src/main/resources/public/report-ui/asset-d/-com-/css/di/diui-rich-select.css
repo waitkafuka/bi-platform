@@ -1,3 +1,9 @@
+.rich-select-instruction {
+    margin-right: 10px;
+    height: 32px;
+    line-height: 32px;
+}
+
 .sxwzbTitle{
     font-weight: 700;
     font-size: 14px;
@@ -149,4 +155,12 @@
 }
 .sxwzbText{
     position: relative;
+    margin-bottom: 5px;
+}
+.sxwzbButton.disabled{
+    background-color: #e5e5e5;
+}
+
+.sxwzbCheckBox:checked:disabled:after{
+    background: url(img/rich-select-checkbox-bg.png) no-repeat 0 -48px;
 }

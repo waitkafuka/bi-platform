@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.ma.report.query;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +119,7 @@ public class ReportRuntimeModel implements Serializable {
     /**
      * 下钻查询action 历史纪录
      */
-    private Map<String, DrillDownAction> drillDownQueryHistory = Maps.newHashMap ();
+    private LinkedHashMap<String, DrillDownAction> drillDownQueryHistory = Maps.newLinkedHashMap();
 
     private QueryAction linkedQueryAction;
     
@@ -566,9 +567,9 @@ public class ReportRuntimeModel implements Serializable {
     /**
      * @return the drillDownQueryHistory
      */
-    public Map<String, DrillDownAction> getDrillDownQueryHistory() {
+    public LinkedHashMap <String, DrillDownAction> getDrillDownQueryHistory() {
         if (this.drillDownQueryHistory == null) {
-            this.drillDownQueryHistory = Maps.newHashMap ();
+            this.drillDownQueryHistory = Maps.newLinkedHashMap();
         }
         return drillDownQueryHistory;
     }
@@ -577,7 +578,7 @@ public class ReportRuntimeModel implements Serializable {
      * @param drillDownQueryHistory the drillDownQueryHistory to set
      */
     public void setDrillDownQueryHistory(
-            Map<String, DrillDownAction> drillDownQueryHistory) {
+            LinkedHashMap<String, DrillDownAction> drillDownQueryHistory) {
         this.drillDownQueryHistory = drillDownQueryHistory;
     }
     

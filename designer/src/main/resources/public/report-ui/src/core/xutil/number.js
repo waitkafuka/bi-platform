@@ -159,7 +159,8 @@
             } 
             else {
                 replaceStr += (
-                    new Array(matchStr.length - replaceStr.length)
+                    // new Array(matchStr.length - replaceStr.length)
+                    new Array(matchStr.length - replaceStr.length + 1)
                 ).join('0');
             }
             return replaceStr;

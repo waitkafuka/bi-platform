@@ -28,6 +28,7 @@ define(
             dateKey: {},
             clzKey: 'X_CALENDAR'
         };
+
         var entityDescriptionRangeCalendar = {
             clzType: 'VUI',
             name: 'dim_time^_^the_date', // name在report-ui里面会根据dateKey里面的内容改变
@@ -40,10 +41,12 @@ define(
             },
             clzKey: 'RANGE_CALENDAR'
         };
+
         var rangeConfig = {
             start: 0,
             end: 0
         };
+
         // 那些个外在的配置项
         var timeTypeConfig = {
             timeTypeList: {
@@ -215,6 +218,7 @@ define(
             var date;
             for (var name in timeTypeOpt) {
                 var toItem = {};
+
                 fromItem = timeTypeOpt[name];
 
                 // 类型
@@ -241,6 +245,7 @@ define(
          */
         function switchLetter (word) {
             var letter;
+
             switch (word) {
                 case 'ownertable_TimeDay':
                     letter = 'D';
@@ -258,6 +263,7 @@ define(
                     letter = 'Y';
                     break ;
             }
+
             return letter;
         }
 

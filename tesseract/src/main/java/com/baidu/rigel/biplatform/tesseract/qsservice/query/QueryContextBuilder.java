@@ -47,7 +47,6 @@ import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.DimensionCondition;
-import com.baidu.rigel.biplatform.ac.query.model.MeasureCondition;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.QueryData;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
@@ -71,11 +70,11 @@ import com.google.common.collect.Sets;
 @Service
 public class QueryContextBuilder {
     
-	/**
-	 * TODO 此处需要移动到指定类中
-	 */
-	public static final String FILTER_DIM_KEY = "filter_Dim_Key";
-	
+    /**
+     * TODO 此处需要移动到指定类中
+     */
+    public static final String FILTER_DIM_KEY = "filter_Dim_Key";
+    
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     
     
@@ -88,35 +87,35 @@ public class QueryContextBuilder {
     
     
     public static Map<String, String> getRequestParams(QuestionModel questionModel, Cube cube) {
-		Map<String, String> rs = Maps.newHashMap();
-		rs.putAll(questionModel.getRequestParams());
-		StringBuilder filterDimNames = new StringBuilder();
-		if (questionModel.getQueryConditions() != null && questionModel.getQueryConditions().size() > 0) {
-			questionModel.getQueryConditions().forEach((k, v) -> {
-				Dimension dim = cube.getDimensions().get(k);
-				MiniCube miniCube = (MiniCube) cube;
-				if (dim != null && miniCube.getSource().equals (dim.getTableName())) {
-				    DimensionCondition cond = (DimensionCondition) v;
-				    StringBuilder sb = new StringBuilder();
-				    List<QueryData> queryDataNodes = cond.getQueryDataNodes();
-					int size = queryDataNodes.size();
-					String[] strArray = null;
-					for (int index = 0; index < size; ++index) {
-				    		QueryData data = queryDataNodes.get(index);
-				    		strArray = MetaNameUtil.parseUnique2NameArray(data.getUniqueName());
-				    		sb.append(strArray[strArray.length - 1]);
-				    		if (index < size - 1) {
-				    			sb.append(",");
-				    		}
-				    }
-					filterDimNames.append(cond.getMetaName());
-				    rs.put(cond.getMetaName(), sb.toString());
-				}
-			}); 
-		}
-		rs.put(FILTER_DIM_KEY, filterDimNames.toString());
-		return rs;
-	}
+        Map<String, String> rs = Maps.newHashMap();
+        rs.putAll(questionModel.getRequestParams());
+        StringBuilder filterDimNames = new StringBuilder();
+        if (questionModel.getQueryConditions() != null && questionModel.getQueryConditions().size() > 0) {
+            questionModel.getQueryConditions().forEach((k, v) -> {
+                Dimension dim = cube.getDimensions().get(k);
+                MiniCube miniCube = (MiniCube) cube;
+                if (dim != null && miniCube.getSource().equals (dim.getTableName())) {
+                    DimensionCondition cond = (DimensionCondition) v;
+                    StringBuilder sb = new StringBuilder();
+                    List<QueryData> queryDataNodes = cond.getQueryDataNodes();
+                    int size = queryDataNodes.size();
+                    String[] strArray = null;
+                    for (int index = 0; index < size; ++index) {
+                            QueryData data = queryDataNodes.get(index);
+                            strArray = MetaNameUtil.parseUnique2NameArray(data.getUniqueName());
+                            sb.append(strArray[strArray.length - 1]);
+                            if (index < size - 1) {
+                                sb.append(",");
+                            }
+                    }
+                    filterDimNames.append(cond.getMetaName());
+                    rs.put(cond.getMetaName(), sb.toString());
+                }
+            }); 
+        }
+        rs.put(FILTER_DIM_KEY, filterDimNames.toString());
+        return rs;
+    }
     /**
      * 构建查询上下文
      * 
@@ -183,18 +182,19 @@ public class QueryContextBuilder {
                         if (MapUtils.isNotEmpty(filterCondition)) {
                             queryContext.getFilterMemberValues().putAll(filterCondition);
                         }
-                    } else {
-                        MeasureCondition measureCon = (MeasureCondition) condition;
+                    } 
+//                    else {
+//                        MeasureCondition measureCon = (MeasureCondition) condition;
                         // TODO 暂时这个还不会生效
 //                        SQLCondition sqlCondition = measureCon.getMeasureConditions();
                         // TODO
-                        List<String> expression = Lists.newArrayList();
+//                        List<String> expression = Lists.newArrayList();
 //                        for (SQLCondition sqlCondition : conditions) {
-//                        	String expressStr = sqlCondition.parseToExpression();
-//                        	expression.add(expressStr);
+//                            String expressStr = sqlCondition.parseToExpression();
+//                            expression.add(expressStr);
 //                        }
 //                        queryContext.getFilterExpression().put(measureCon.getMetaName(), expression);
-                    }
+//                    }
                     logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
 //                    logger.info("cost:{}ms,in build filter",System.currentTimeMillis() - current);
                     current = System.currentTimeMillis();
@@ -421,6 +421,8 @@ public class QueryContextBuilder {
                 if(callbackMembers.size() == 1) { 
                     List<Member> children = callbackMembers.get(0).getChildren();
                     MemberNodeTree parentNode = new MemberNodeTree(nodeTree);  
+                    parentNode.setCallback (true);
+                    parentNode.setSummaryIds (callbackMembers.get (0).getQueryNodes ());
                     buildMemberNodeByMember(dataSourceInfo, cube, parentNode, callbackMembers.get(0), params);
                     if (CollectionUtils.isNotEmpty (children)) { 
                         children.forEach((child) -> {
@@ -472,8 +474,14 @@ public class QueryContextBuilder {
             node.setHasChildren(true);
         } else if (member.getLevel() instanceof CallbackLevel) {
             CallbackMember m = (CallbackMember) member;
-            if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
-                node.setHasChildren(true);
+            if (CollectionUtils.isNotEmpty(member.getQueryNodes()) ) {
+                if (member.getQueryNodes ().size () == 1 && member.getQueryNodes ().contains (member.getName ())) {
+                    node.setHasChildren (false);
+                } else {
+                    node.setHasChildren(true);
+                }
+                node.setCallback (true);
+                node.setSummaryIds (node.getLeafIds ());
             } else {
                 node.setHasChildren (m.isHasChildren ());
             }
@@ -507,6 +515,8 @@ public class QueryContextBuilder {
             parent.setUniqueName (memberParent.getUniqueName ());
             parent.setName (memberParent.getName ());
             parent.setLeafIds (memberParent.getQueryNodes ());
+            parent.setSummaryIds (memberParent.getQueryNodes ());
+            parent.setCallback (memberParent.getLevel () instanceof CallbackLevel);
             parent.setQuerySource (memberParent.getLevel ().getFactTableColumn ());
             node.setParent (parent);
             parent.getChildren ().add (node);

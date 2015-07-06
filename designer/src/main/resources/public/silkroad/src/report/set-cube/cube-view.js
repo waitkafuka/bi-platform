@@ -19,6 +19,10 @@ define([
     ) {
 
         return Backbone.View.extend({
+
+            /**
+             * 事件绑定
+             */
             events: {
                 'click .j-root-data-sources-list .j-item': 'loadFactTableList',
                 'click .j-con-cube-list .j-item': 'selectCubes',
@@ -39,6 +43,7 @@ define([
             initialize: function (option) {
                 var that = this;
                 this.model = new CubeModel({id: this.id});
+
                 this.listenTo(
                     this.model,
                     'change:activeDataSourcesList',
@@ -47,6 +52,7 @@ define([
                         that.$el.html(html);
                     }
                 );
+
                 this.listenTo(
                     this.model,
                     'change:factTableList',
@@ -90,8 +96,7 @@ define([
                     that.model.loadSelectedDataSources(function (groupId) {
                         that.model.dataSourcesModel.loadDsGroupActive(
                             function() {
-                                // 由于只有在编辑状态下 且 刚进来时需要还原
-                                // 所以在这里用参数的方式来还原数据
+                                // 由于只有在编辑状态下 且 刚进来时需要还原，所以在这里用参数的方式来还原数据
                                 that.model.loadFactTableList(groupId, true);
                             }
                         );
@@ -128,15 +133,18 @@ define([
              */
             selectCubes: function (event) {
                 var $target = $(event.target);
+                var $selectedTables;
+                var table = [];
+
                 if ($target.hasClass('selected')) {
                     $target.removeClass('selected');
                 }
                 else {
                     $target.addClass('selected');
                 }
+
                 $('.j-root-set-group .j-regexps-validate').text('').hide();
-                var $selectedTables = this.$el.find('.j-con-cube-list .j-item.selected');
-                var table = [];
+                $selectedTables = this.$el.find('.j-con-cube-list .j-item.selected');
                 $selectedTables.each(function () {
                     var id = $(this).attr('data-id');
                     var text = $(this).text();
@@ -147,6 +155,7 @@ define([
 
             /**
              * 点击“添加分表匹配规则”添加一规则输入行
+             *
              * @param {event} event 点击事件
              * @public
              */
@@ -164,11 +173,13 @@ define([
                 var $selectedTablesSels = this.$el.find(selector);
 
                 if (!$selectedTables.length) {
-                    $('.j-root-set-group .j-regexps-validate').text('提示：请先选择表格').show();
+                    $('.j-root-set-group .j-regexps-validate')
+                        .text('提示：请先选择表格').show();
                     return;
                 }
                 else if ($selectedTables.length <= $selectedTablesSels.length) {
-                    $('.j-root-set-group .j-regexps-validate').text('提示：不能再添加规则').show();
+                    $('.j-root-set-group .j-regexps-validate')
+                        .text('提示：不能再添加规则').show();
                     return;
                 }
 
@@ -219,6 +230,7 @@ define([
 
             /**
              * 分表规则中，地域时间先啦狂改变事件
+             *
              * @param {event} event 点击事件
              * @public
              */
@@ -228,6 +240,7 @@ define([
                 var html = [];
                 var ruleData = this.model.get('separateTableRuleData');
                 var areaDateDatas = ruleData[val].children;
+
                 for (var i = 0, iLen = areaDateDatas.length; i < iLen; i++ ) {
                     html.push(
                         '<option value="', areaDateDatas[i].value, '">',
@@ -288,7 +301,9 @@ define([
                     }
                 });
                 if (noRepeatFlag) {
-                    $('.j-root-set-group .j-regexps-validate').text('提示：表格不能重复').show();
+                    $('.j-root-set-group .j-regexps-validate')
+                        .text('提示：表格不能重复')
+                        .show();
                     return;
                 }
                 data.regexps = JSON.stringify(regexps);

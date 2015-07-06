@@ -128,6 +128,8 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
             throw new UnsupportedOperationException ("未支持的区域类型");
         }
         modifyLogicModel (areaId, selectedMeasures, model, extendArea);
+        // 已经重置了LogicModel，需要清除操作纪录
+        runTimeModel.getDrillDownQueryHistory ().clear ();
         reportModelCacheManager.updateRunTimeModelToCache (reportId, runTimeModel);
         result.setStatus (0);
         result.setStatusInfo ("successfully");

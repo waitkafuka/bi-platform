@@ -74,7 +74,8 @@ $namespace('di.shared.vui');
                         data: data,
                         clickCallback: function (param) {
                             that.notify('richSelectChange', param);
-                        }
+                        },
+                        instructionText: '指标选择：'
                     }
                 ]
             );

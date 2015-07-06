@@ -836,12 +836,12 @@ public final class DataModelUtils {
         // List<String> allMemUniqNameList=getAllMemUniqNameList(rowHeadFields);
         // int rowWidth=DataModelUtils.getLeafFileds(rowHeadFields).size();
         List<HeadField> leafFileds = DataModelUtils.getLeafNodeList(rowHeadFields);
-        // hasStoredMap用于记录已经存过的rowField
-        Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
         SimpleDateFormat src = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat target = new SimpleDateFormat("yyyy-MM-dd");
         List<HeadField> ancestorFileds = null;
         for (int j = 0; j < leafFileds.size(); ++j) {
+            // hasStoredMap用于记录已经存过的rowField
+            Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
             HeadField filed = leafFileds.get(j);
             ancestorFileds = getHeadListOutofHead(filed);
             Collections.reverse(ancestorFileds);

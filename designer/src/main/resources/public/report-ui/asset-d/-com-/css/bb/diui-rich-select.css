@@ -1,10 +1,15 @@
-.sxwzbTitle{
+.rich-select-instruction {
+    margin-right: 10px;
+    height: 32px;
+    line-height: 32px;
+}
+.sxwzbTitle {
     font-weight: 700;
     font-size: 14px;
     margin-top: 10px;
     margin-left: 10px;
 }
-.sxwzbContent{
+.sxwzbContent {
     display: none;
     position: absolute;
     border: 1px solid #d9e6eb;
@@ -15,13 +20,13 @@
     overflow-y: scroll;
     font-family: "Microsoft YaHei", Arial, sans-serif;
 }
-.sxwzbCategories{
+.sxwzbCategories {
     vertical-align: top;
     display: inline-block;
     width: 100px;
     margin-top: 5px;
 }
-.sxwzbSubdivisions{
+.sxwzbSubdivisions  {
     display: inline-block;
     width: 400px;
     line-height: 28px;
@@ -149,4 +154,13 @@
 }
 .sxwzbText{
     position: relative;
+    margin-bottom: 5px;
+}
+
+.sxwzbButton.disabled{
+    background-color: #e5e5e5;
+}
+
+.sxwzbCheckBox:checked:disabled:after{
+    background: url(img/rich-select-checkbox-bg.png) no-repeat 0 -48px;
 }

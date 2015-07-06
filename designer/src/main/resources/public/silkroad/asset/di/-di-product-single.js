@@ -4221,7 +4221,8 @@ var xutil = {
             } 
             else {
                 replaceStr += (
-                    new Array(matchStr.length - replaceStr.length)
+                    // new Array(matchStr.length - replaceStr.length)
+                    new Array(matchStr.length - replaceStr.length + 1)
                 ).join('0');
             }
             return replaceStr;
@@ -28567,7 +28568,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                     tableCtrl,
                     (ec == 'expanded' ? 'collapse' : 'expand'),
                     null,
-                    [cellWrap, rowWrap]
+                    [cellWrap, rowWrap, pos]
                 );
             }
         }
@@ -34154,10 +34155,16 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                             var tData = defChinaMapArr[n];
                             for (var x = 0; x < ser.data.length; x ++ ) {
                                 if (tData.name === xAxis.data[x]) {
-                                    tData.value = ser.data[x];
+                                    if (ser.format && ser.format.indexOf('%') >= 0) {
+                                        tData.value = ser.data[x] * 100;
+                                    }
+                                    else {
+                                        tData.value = ser.data[x];
+                                    }
                                     break;
                                 }
                             }
+
                             serData.push(tData);
                         }
                         if (isInArray(ser.name, defaultMeasures)) {
@@ -34165,7 +34172,6 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                             series.push(ser);
                         }
                     }
-
                 }
             }
             else {
@@ -34198,7 +34204,12 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                         var tData = defChinaMapArr[n];
                         for (var x = 0; x < ser.data.length; x ++ ) {
                             if (tData.name === xAxis.data[x]) {
-                                tData.value = ser.data[x];
+                                if (ser.format && ser.format.indexOf('%') >= 0) {
+                                    tData.value = ser.data[x] * 100;
+                                }
+                                else {
+                                    tData.value = ser.data[x];
+                                }
                                 break;
                             }
                         }
@@ -34572,8 +34583,8 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
             toolTip.trigger = 'axis';
             // 设置鼠标hover之后，隐藏掉图形的坐标轴显示线 update by majun
             var axisPointer = {
-                    type : 'none'
-                }
+                type : 'none'
+            };
             toolTip.axisPointer = axisPointer;
             toolTip.formatter =  function(data, ticket, callback) {
                 var res = data[0][1];
@@ -34680,6 +34691,9 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
 
             if (dataArray[x].name === areaName) {
                 result = dataArray[x].value;
+                if (format && format.indexOf('%') >= 0) {
+                    result = result / 100;
+                }
                 if (format) {
                     result = formatNumber(
                         result,
@@ -34793,31 +34807,43 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
         }
         else if (this._chartType === 'map') {
             var splitNum = 10;
-            // TODO:要考虑到负数
-            //[
-            //    {start: 1000},
-            //    {start: 900, end: 1000},
-            //    {start: 800, end: 900},
-            //    {start: 700, end: 800},
-            //    {start: 10, end: 200, label: '10 到 200（自定义label）'},
-            //    {start: 5, end: 5, label: '5（自定义特殊颜色）', color: 'black'},
-            //    {end: this._mapMinValue}
-            //]
-            var min = this._mapMinValue;
-            var max = this._mapMaxValue;
+            //  TODO:要考虑到负数
+            // [
+            //     {start: 1000},
+            //     {start: 900, end: 1000},
+            //     {start: 800, end: 900},
+            //     {start: 700, end: 800},
+            //     {start: 10, end: 200, label: '10 到 200（自定义label）'},
+            //     {start: 5, end: 5, label: '5（自定义特殊颜色）', color: 'black'},
+            //     {end: this._mapMinValue}
+            // ]
+            var format;
+            var hasPercent;
+            if (options && options.series && options.series[0]) {
+                format = options.series[0].format;
+            }
+            if (format && format.indexOf('%') >= 0) {
+                hasPercent = true;
+            }
+            var min = hasPercent ? this._mapMinValue * 100: this._mapMinValue;
+            var max = hasPercent ? this._mapMaxValue * 100: this._mapMaxValue;
             var split = (max - min) / splitNum;
-            var splitList = [
-                {
-                    start: max
-                }
-            ];
+            var splitList = [{ start: max }];
             var i = 1;
             var tStart = 0;
+            var tEnd = 0;
             while (i <= (splitNum - 2)) {
-                tStart = max - split * i;
+                if (hasPercent) {
+                    tStart = (max - split * i);
+                    tEnd = (max - split * (i - 1));
+                }
+                else {
+                    tStart = max - split * i;
+                    tEnd = max - split * (i - 1);
+                }
                 var item = {
                     start: tStart,
-                    end: max - split * (i - 1)
+                    end: tEnd
                 };
                 splitList.push(item);
                 i++;
@@ -34847,18 +34873,22 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
         if (this._chartType === 'pie') {
             // 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun
             options.calculable = false;
+            // var colors = [
+            //     '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
+            //     '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
+            // ];
             var colors = [
-                '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
+                '#C0504E', '#4F81BC', '#9BBB58', '#FFB981', '#D97A81',
                 '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
             ];
             // 饼图每个块的颜色，按照UE给出的标准进行重设
             options.color = colors;
         }
 
-        var textStyle = {
-            fontFamily: '微软雅黑',
-            fontSize: '120px'
-        };
+        // var textStyle = {
+        //     fontFamily: '微软雅黑',
+        //     fontSize: '120px'
+        // };
 
         this.$setupLegend(options);
         return options;
@@ -62881,14 +62911,30 @@ $namespace('di.shared.vui');
     var textCache = {};
     var clickCheckbox = [];
     // 创建dom
-    function createDom($ele) {
+    function createDom($ele, insText) {
         // 累计的添加
         var length = $('.sxwzbText').length;
-        $('<div class="sxwzb sxwzbText sxwzbText' + length + '" data-index=' + length + '>'
-        + '<div class="sxwzbButton"><div></div></div>'
-        + '</div><div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo($ele);
+        //$('<div class="sxwzb sxwzbText sxwzbText' + length + '" data-index=' + length + '>'
+        //+ '<div class="sxwzbButton"><div></div></div>'
+        //+ '</div><div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo($ele);
         // $('<div class="sxwzb sxwzbContent sxwzbContent' + length + '" data-index=' + length + '></div>').appendTo(document.body);
-        var $currentContent = $('.sxwzbContent' + length);
+
+        var instruction;
+        insText && (instruction = '<div class="f-l rich-select-instruction">' + insText + '</div>');
+
+        var html = [
+            '<div class="c-f">',
+            insText ? instruction : '',
+            '<div class="sxwzb sxwzbText f-l sxwzbText', length, '" data-index=', length, '>',
+                '<div class="sxwzbButton">',
+                    '<div></div>',
+                '</div>',
+            '<div class="sxwzb sxwzbContent f-l sxwzbContent', length, '" data-index=', length, '></div>',
+            '</div></div>'
+        ].join('');
+
+        $(html).appendTo($ele);
+        $currentContent = $('.sxwzbContent' + length);
         return $currentContent;
     }
     // 渲染窗体内部
@@ -62996,16 +63042,19 @@ $namespace('di.shared.vui');
         /**
          * 点击非sxwzb的内容的时候 隐藏窗体
          */
-        $('body').click(function(e){
+        $('body').unbind('click');
+        $('body').bind('click', bodyClick);
+
+        function bodyClick(e) {
             var target = $(e.target);
             if (!(target.parents('.sxwzb').length && !target.hasClass('sxwzb'))) {
                 $('.sxwzbContent').hide();
             }
-        })
+        }
 
         ele.delegate($('.sxwzbButton'), 'click', function(e) {
             var target = e.target;
-            if (target == this) {
+            if (target == this || $(target).hasClass('disabled')) {
                 return;
             }
             var index = $(target).parents('.sxwzbText').attr('data-index');
@@ -63037,7 +63086,8 @@ $namespace('di.shared.vui');
             //    'left': left + 'px',
             //    'top': top + 'px'
             //})
-            $('.sxwzbContent' + index).toggle().siblings('.sxwzbContent').hide();
+            $('.sxwzbContent' + index).toggle();
+            e.stopPropagation();
         });
     }
 
@@ -63079,6 +63129,7 @@ $namespace('di.shared.vui');
                 checkboxP.prop('checked', checkStatus1);
                 clickCheckbox[index][$self.attr('data-name')] = checkStatus;
             }
+            e.stopPropagation();
         })
         /**
          * 点击确定 重新处理
@@ -63108,8 +63159,10 @@ $namespace('di.shared.vui');
             // 重置clickCheckbox
             $.extend(checkStatusCache, clickCheckbox[index]);
             clickCheckbox[index] = {};
+            $('.sxwzbContent' + index).hide();
+            e.stopPropagation();
             // 关闭窗口
-            $button.trigger('click');
+            // $button.trigger('click');
         })
         /**
          * 点击取消的时候 必须重置选中状态
@@ -63130,9 +63183,11 @@ $namespace('di.shared.vui');
                 $('.sxwzbContent' + index).find('#' + i).prop('checked', status);
                 delete clickCheckbox[index][i];
             }
-            $button.trigger('click');
+            $('.sxwzbContent' + index).hide();
+            // $button.trigger('click');
 
             judgeCheckbox(index);
+            e.stopPropagation();
         })
     }
     /**
@@ -63153,15 +63208,15 @@ $namespace('di.shared.vui');
                 delete defaults[length];
             }
             defaults[length] = options[i];
-            var $content = createDom($(this));
-            if (options[i] && options[i].data) {
+            var $content = createDom($(this), defaults[length].instructionText);
+            if (options[i] && options[i].data && options[i].data.length) {
                 // render数据
                 $content.append(renderCheckbox(options[i].data));
                 setStyle($content);
                 judgeCheckbox();
                 renderInitStatus();
             } else {
-                alert('参数给的不对.');
+                $('.sxwzbText' + length).find('.sxwzbButton').addClass('disabled');
             }
         })
     }
@@ -63242,7 +63297,8 @@ $namespace('di.shared.vui');
                         data: data,
                         clickCallback: function (param) {
                             that.notify('richSelectChange', param);
-                        }
+                        },
+                        instructionText: '指标选择：'
                     }
                 ]
             );
@@ -70927,6 +70983,7 @@ $namespace('di.shared.model');
         // FIXME
         // 现在先写死，不存在上表头下钻
         paramObj['drillAxisName'] = 'ROW';
+        paramObj['rowNum'] = param.rowNum;
 
         return this._fCommonParamGetter(paramObj);
     }
@@ -78510,7 +78567,7 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-    DI_TABLE_CLASS.$handleExpand = function (cellWrap, lineWrap) {
+    DI_TABLE_CLASS.$handleExpand = function (cellWrap, lineWrap, pos) {
         this.$sync(
             this.getModel(),
             'DRILL',
@@ -78519,7 +78576,8 @@ $namespace('di.shared.ui');
                 //action: 'EXPAND',
                 action: 'expand',
                 uniqueName: cellWrap['uniqueName'],
-                lineUniqueName: (lineWrap || {})['uniqueName']
+                lineUniqueName: (lineWrap || {})['uniqueName'],
+                rowNum: pos.y
 
             }
         );
@@ -78530,7 +78588,7 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-    DI_TABLE_CLASS.$handleCollapse = function (cellWrap, lineWrap) {
+    DI_TABLE_CLASS.$handleCollapse = function (cellWrap, lineWrap, pos) {
         this.$sync(
             this.getModel(),
             'DRILL',
@@ -78539,7 +78597,8 @@ $namespace('di.shared.ui');
                 //action: 'COLLAPSE',
                 action: 'collapse',
                 uniqueName: cellWrap['uniqueName'],
-                lineUniqueName: (lineWrap || {})['uniqueName']
+                lineUniqueName: (lineWrap || {})['uniqueName'],
+                rowNum: pos.y
             }
         );
     };

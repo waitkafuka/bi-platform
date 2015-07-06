@@ -284,6 +284,8 @@ public final class QueryUtils {
                                 MiniCubeMember m = (MiniCubeMember) members.get (0);
                                 if (m.getChildren () != null && m.getChildren ().size () > 1) {
                                     return false;
+                                } else if (m.getChildren() == null) {
+                                    return false;
                                 }
                             }
                         } else if (CollectionUtils.isEmpty (condition.getQueryDataNodes ())) {

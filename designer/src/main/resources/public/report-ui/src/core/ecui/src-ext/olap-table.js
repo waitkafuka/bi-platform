@@ -1339,7 +1339,7 @@
                     tableCtrl,
                     (ec == 'expanded' ? 'collapse' : 'expand'),
                     null,
-                    [cellWrap, rowWrap]
+                    [cellWrap, rowWrap, pos]
                 );
             }
         }

@@ -20,6 +20,7 @@ import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -558,6 +559,7 @@ public class QueryDataResource extends BaseResource {
         builder.append("<!DOCTYPE html>");
         builder.append("<html>");
         builder.append("<head>");
+        builder.append("<title>" + model.getName() + "</title>");
         builder.append("<meta content='text/html' 'charset=UTF-8'>");
         final String theme = model.getTheme();
         builder.append("<link rel='stylesheet' href='/silkroad/asset/" + theme + "/css/-di-product-min.css'/>");
@@ -1716,15 +1718,36 @@ public class QueryDataResource extends BaseResource {
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
         // ResultSet previousResult = runTimeModel.getPreviousQueryResult();
-        int rowNum = this.getRowNum(previousResult, condition);
+//        int rowNum = this.getRowNum(previousResult, condition);
+        int rowNum = 0; 
+        try {
+            rowNum = Integer.valueOf(request.getParameter("rowNum"));            
+        } catch (Exception e) {
+            rowNum = this.getRowNum(previousResult, condition);
+        }
         try {
             // 查询下钻的数据
             Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
             if (type.equals("expand")) {
                 // ResultSet result = reportModelQueryService.queryDatas(model, action, true);
                 logger.info("[INFO] --- --- --- ---" + result.getDataModel());
-                runTimeModel.getDrillDownQueryHistory().put(condition,
+                final int curr = 
+                    com.baidu.rigel.biplatform.ac.util.DataModelUtils.getLeafNodeList(result.getDataModel().getRowHeadFields()).size();
+                final int newRowNum = rowNum;
+                LinkedHashMap<String, DrillDownAction> newDrill = Maps.newLinkedHashMap();
+                runTimeModel.getDrillDownQueryHistory().forEach((k, v) -> {
+                    int rowNumIndex = Integer.valueOf(k.substring(k.lastIndexOf("_") + 1));
+                    if (rowNumIndex > newRowNum) {
+                        String prefix = k.substring(0, k.lastIndexOf("_") + 1);
+                        int tmpRowNum = rowNumIndex + curr - 1;
+                        newDrill.put(prefix + tmpRowNum, new DrillDownAction(v.action, tmpRowNum));
+                    } else {
+                        newDrill.put(k, v);
+                    }
+                });
+                newDrill.put(condition + "_" + rowNum,
                         new ReportRuntimeModel.DrillDownAction(action, rowNum));
+                runTimeModel.setDrillDownQueryHistory(newDrill);
                 DataModel newDataModel =
                         DataModelUtils.merageDataModel(previousResult.getDataModel(), result.getDataModel(), rowNum);
                 table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, false, 0, false);
@@ -1738,7 +1761,37 @@ public class QueryDataResource extends BaseResource {
                         queryBuildService.generateTableQueryAction(model, areaId, previousContext.getParams());
                 runTimeModel.updateDatas(recordAction, result);
             } else { // 上卷或者折叠操作
-                runTimeModel.getDrillDownQueryHistory().remove(condition);
+                runTimeModel.getDrillDownQueryHistory().remove(condition + "_" + rowNum);
+                List<HeadField> headField = previousResult.getDataModel().getRowHeadFields();
+                List<HeadField> tmp = com.baidu.rigel.biplatform.ac.util.DataModelUtils.getLeafNodeList(headField);
+                HeadField currRow = tmp.get(rowNum);
+                int curr = 
+                    com.baidu.rigel.biplatform.ac.util.DataModelUtils.getLeafNodeList(Lists.newArrayList(currRow)).size();
+                
+                Iterator<String> it = runTimeModel.getDrillDownQueryHistory().keySet().iterator();
+                while (it.hasNext()) {
+                    String key = it.next();
+                    int rowNumIndex = Integer.valueOf(key.substring(key.lastIndexOf("_") + 1));
+                    if (rowNumIndex >= rowNum && rowNumIndex < (curr + rowNum)) {
+                        it.remove();                       
+                    } 
+                }
+                
+                final int newRowNum = rowNum;
+                final int newCurr = curr;
+                LinkedHashMap<String, DrillDownAction> newDrill = Maps.newLinkedHashMap();
+                runTimeModel.getDrillDownQueryHistory().forEach((k, v) -> {
+                    int rowNumIndex = Integer.valueOf(k.substring(k.lastIndexOf("_") + 1));
+                    if (rowNumIndex > newRowNum) {
+                        String prefix = k.substring(0, k.lastIndexOf("_") + 1);
+                        int tmpRowNum = rowNumIndex - newCurr + 1;
+                        newDrill.put(prefix + tmpRowNum, new DrillDownAction(v.action, tmpRowNum));
+                    } else {
+                        newDrill.put(k, v);
+                    }
+                });
+                runTimeModel.setDrillDownQueryHistory(newDrill);
+                
                 DataModel newModel = DataModelUtils.removeDataFromDataModel(previousResult.getDataModel(), rowNum);
                 table = DataModelUtils.transDataModel2PivotTable(cube, newModel, false, 0, false);
                 result = new ResultSet();
@@ -2144,17 +2197,18 @@ public class QueryDataResource extends BaseResource {
 
         final StringBuilder timeRange = new StringBuilder();
         // 在上下文参数中判断是否有时间参数
-        areaContext.getParams().forEach(
-                (k, v) -> {
-                    if (v instanceof String && v.toString().contains("start") && v.toString().contains("end")
-                            && v.toString().contains("granularity")) {
-                        try {
-                            JSONObject json = new JSONObject(v.toString());
-                            timeRange.append(json.getString("start") + "至" + json.getString("end"));
-                        } catch (Exception e) {
-                        }
-                    }
-                });
+        for (Map.Entry<String, Object> entry : areaContext.getParams().entrySet()) {
+            Object v = entry.getValue();
+            if (v instanceof String && v.toString().contains("start") && v.toString().contains("end")
+                    && v.toString().contains("granularity")) {
+                try {
+                    JSONObject json = new JSONObject(v.toString());
+                    timeRange.append(json.getString("start") + "至" + json.getString("end"));
+                    break;
+                } catch (Exception e) {
+                }
+            }
+        }
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
         response.setContentType("application/x-msdownload;charset=GBK");

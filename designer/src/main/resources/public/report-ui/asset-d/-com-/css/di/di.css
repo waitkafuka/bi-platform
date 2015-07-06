@@ -125,3 +125,22 @@
     font-family: '微软雅黑', '宋体';
     font-size: 12px;
 }
+
+/**
+ * 清除浮动-完美清除方案
+ */
+.c-f:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    zoom: 1;
+}
+
+/**
+ * 左浮动
+ */
+.f-l {
+    float: left;
+}

@@ -97,6 +97,27 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
     
     private boolean isTime;
     
+    /**
+     * summaryIds
+     */
+    private Set<String> summaryIds;
+    
+    private boolean isCallback;
+    
+
+    /**
+     * @return the isCallback
+     */
+    public boolean isCallback() {
+        return isCallback;
+    }
+
+    /**
+     * @param isCallback the isCallback to set
+     */
+    public void setCallback(boolean isCallback) {
+        this.isCallback = isCallback;
+    }
 
     public boolean isTime() {
 		return isTime;
@@ -343,4 +364,20 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
             });
         }
     }
+
+    /**
+     * @return the summaryIds
+     */
+    public Set<String> getSummaryIds() {
+        return summaryIds;
+    }
+
+    /**
+     * @param summaryIds the summaryIds to set
+     */
+    public void setSummaryIds(Set<String> summaryIds) {
+        this.summaryIds = summaryIds;
+    }
+    
+    
 }

@@ -58,7 +58,7 @@ public class SqlExpression implements Serializable {
      * serialVersionUID
      */
     private static final long serialVersionUID = 3151301875582323398L;
-    
+
     /**
      * logger
      */
@@ -88,7 +88,7 @@ public class SqlExpression implements Serializable {
      * 事实表alias
      */
     private String facttableAlias;
-    
+
     /**
      * 事实表名称
      */
@@ -106,19 +106,22 @@ public class SqlExpression implements Serializable {
      * @return String sql
      */
     public void generateSql(QuestionModel questionModel,
-            Map<String, SqlColumn> allColums, List<SqlColumn> needColums) throws QuestionModelTransformationException {
+            Map<String, SqlColumn> allColums, List<SqlColumn> needColums)
+            throws QuestionModelTransformationException {
         if (CollectionUtils.isEmpty(needColums)) {
-            throw new QuestionModelTransformationException("List needColums is empty, there is no SqlColum object available to generate.");
+            throw new QuestionModelTransformationException(
+                    "List needColums is empty, there is no SqlColum object available to generate.");
         }
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         StringBuffer sqlExpression = new StringBuffer();
         try {
             sqlExpression.append(generateSelectExpression(needColums));
-            sqlExpression.append(generateFromExpression(this.getTableName()));
+            sqlExpression.append(generateFromExpression(configQuestionModel,
+                    allColums));
             sqlExpression.append(generateLeftOuterJoinExpression(
                     configQuestionModel, allColums, needColums));
-            sqlExpression.append(generateWhereExpression(configQuestionModel,
-                    allColums, whereValues));
+            sqlExpression.append(generateTotalWhereExpression(
+                    configQuestionModel, allColums));
             sqlExpression.append(generateOrderByExpression(configQuestionModel,
                     allColums));
             // set no paged sql
@@ -131,7 +134,7 @@ public class SqlExpression implements Serializable {
             logger.error("occur sql exception:{}", e.getMessage());
             throw e;
         }
-        
+
     }
 
     /**
@@ -139,8 +142,10 @@ public class SqlExpression implements Serializable {
      * 
      * @param HashMap
      *            allColums
-     * @param HashMap
-     *            needColums
+     * @param hasAlias
+     *            是否添加alias
+     * @param onlyFacttableColumns
+     *            是否只需要事实表的字段
      * @return String sql
      */
     public String generateSelectExpression(List<SqlColumn> needColums) throws QuestionModelTransformationException {
@@ -172,27 +177,30 @@ public class SqlExpression implements Serializable {
      *            cube
      * @return String sql
      */
-    public String generateFromExpression(String tableName) throws QuestionModelTransformationException {
+    public String generateFromExpression(
+            ConfigQuestionModel configQuestionModel, Map<String, SqlColumn> allColums)
+            throws QuestionModelTransformationException {
         if (StringUtils.isEmpty(tableName)) {
-            throw new QuestionModelTransformationException("cube.getSource() can not be empty");
+            throw new QuestionModelTransformationException(
+                    "cube.getSource() can not be empty");
         }
-        String[] tableNames =  tableName.split(",");
+        String[] tableNames = tableName.split(",");
         String sqlFrom = "";
-        if (tableNames.length == 1) {
-        // 一个表
-            sqlFrom = tableName;
-        } else {
-        // 多个表union的情况
-            for (int i = 0; i < tableNames.length; i++) {
-                if (i == 0) {
-                    sqlFrom = " select * from " + tableNames[i];
-                } else {
-                    sqlFrom = sqlFrom + " union all select * from " + tableNames[i];
-                }
+        for (int i = 0; i < tableNames.length; i++) {
+            String tmpSqlFrom = " select * from "
+                    + tableNames[i]
+                    + this.generateMeasureWhereExpression(
+                            configQuestionModel, allColums);
+            if (i == 0) {
+            // 一个表的情况
+                sqlFrom = tmpSqlFrom;
+            } else {
+            // 多个表union的情况
+                sqlFrom = sqlFrom + " union all " + tmpSqlFrom;
             }
-            sqlFrom = "(" + sqlFrom + ")";
         }
-        return " from " + sqlFrom + SqlConstants.SPACE + this.facttableAlias + SqlConstants.SPACE;
+        return " from (" + sqlFrom + ")" + SqlConstants.SPACE
+                + this.facttableAlias + SqlConstants.SPACE;
     }
 
     /**
@@ -208,7 +216,7 @@ public class SqlExpression implements Serializable {
     public String generateLeftOuterJoinExpression(
             ConfigQuestionModel configQuestionModel,
             Map<String, SqlColumn> allColums, List<SqlColumn> needColums)
-                    throws QuestionModelTransformationException {
+            throws QuestionModelTransformationException {
         List<SqlColumn> needJoinColumns = new ArrayList<SqlColumn>();
         needJoinColumns.addAll(needColums);
         StringBuffer leftOuterJoinExpressions = new StringBuffer();
@@ -228,7 +236,8 @@ public class SqlExpression implements Serializable {
                 }
                 Dimension dimension = cube.getDimensions().get(
                         dimensionCondition.getMetaName());
-                if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(dimension)) {
+                if (QuestionModel4TableDataUtils
+                        .isTimeOrCallbackDimension(dimension)) {
                     // 如果为TIME_DIMENSION，name为指标字段
                     continue;
                 }
@@ -249,7 +258,8 @@ public class SqlExpression implements Serializable {
         for (SqlColumn colum : needJoinColumns) {
             if (AxisType.ROW == colum.getType()) {
                 String dimTableName = colum.getTableName();
-                if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(colum.getDimension())) {
+                if (QuestionModel4TableDataUtils
+                        .isTimeOrCallbackDimension(colum.getDimension())) {
                     // 如果为时间维度或callback维护，不需要leftouterjoin
                     continue;
                 }
@@ -264,11 +274,13 @@ public class SqlExpression implements Serializable {
                 joinTables.add(dimTableName);
                 StringBuffer oneLeftOuterJoinExpression = new StringBuffer(
                         " left outer join ");
-                oneLeftOuterJoinExpression.append(dimTableName + SqlConstants.SPACE
-                        + dimTableName + SqlConstants.SPACE);
+                oneLeftOuterJoinExpression.append(dimTableName
+                        + SqlConstants.SPACE + dimTableName
+                        + SqlConstants.SPACE);
                 String dimTableFiled = dimTableName + SqlConstants.DOT
                         + colum.getLevel().getPrimaryKey();
-                String measureTableFiled = this.facttableAlias + SqlConstants.DOT
+                String measureTableFiled = this.facttableAlias
+                        + SqlConstants.DOT
                         + colum.getLevel().getFactTableColumn();
                 oneLeftOuterJoinExpression.append(" on " + dimTableFiled
                         + " = " + measureTableFiled + SqlConstants.SPACE);
@@ -279,66 +291,156 @@ public class SqlExpression implements Serializable {
     }
 
     /**
-     * 生成where sql语句
+     * 生成generateTotalWhereExpression ,Dimension only where sql语句,如果维度表为事实表，将会过滤
      * 
      * @param ConfigQuestionModel
      *            configQuestionModel
      * @return String sql
      */
-    public String generateWhereExpression(
+    public String generateTotalWhereExpression(
             ConfigQuestionModel configQuestionModel,
-            Map<String, SqlColumn> allColums, List<Object> whereValues) {
+            Map<String, SqlColumn> allColums) {
         StringBuffer whereExpressions = new StringBuffer(" where 1=1 ");
-        configQuestionModel.getQueryConditions().forEach((k, v) -> {
-            MetaCondition metaCondition = v;
-            if (metaCondition instanceof DimensionCondition) {
-                // 判断是维度查询
-                DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
-                if (// 如果节点为空，不需要组织条件
-                    !CollectionUtils.isEmpty(dimensionCondition.getQueryDataNodes())
-                    // 如果节点为所有条件，不需要组织条件
-                    && !MetaNameUtil.isAllMemberUniqueName(dimensionCondition.getQueryDataNodes()
-                                .get(0).getUniqueName())) {
-                    // 判断是或否有添加查询
-                    SqlColumn sqlColumn = allColums.get(dimensionCondition.getMetaName());
-                    String equals = "";
-                    String inExpression = "";
-                    for (QueryData queryData : dimensionCondition.getQueryDataNodes()) {
-                        String[] str = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
-                        String value = str[str.length - 1];
-                        inExpression = inExpression + SqlConstants.PARAM + ",";
-                        this.whereValues.add(value);
+        configQuestionModel
+                .getQueryConditions()
+                .forEach((k, v) -> {
+                    MetaCondition metaCondition = v;
+                    if (metaCondition instanceof DimensionCondition) {
+                        // 判断是维度查询
+                        DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
+                        SqlColumn sqlColumn = allColums.get(dimensionCondition
+                                .getMetaName());
+                        if (// 如果节点为空，不需要组织条件
+                        !CollectionUtils.isEmpty(dimensionCondition
+                                .getQueryDataNodes())
+                        // 如果节点为所有条件，不需要组织条件
+                                && !MetaNameUtil
+                                        .isAllMemberUniqueName(dimensionCondition
+                                                .getQueryDataNodes().get(0)
+                                                .getUniqueName())
+                                // 如果table不为事实表的数据
+                                && !sqlColumn.getTableName().equals(
+                                        QuestionModel4TableDataUtils
+                                                .getFactTableAliasName())) {
+                            whereExpressions.append(this
+                                    .generateSqlWhereOneCondition(sqlColumn,
+                                            true));
+                        }
                     }
-                    if (!inExpression.isEmpty()) {
-                        // 如果inExpression没有值，证明没有此条件
-                        String columnSqName = sqlColumn.getTableName() + SqlConstants.DOT
-                                + sqlColumn.getTableFieldName();
-                        equals = " in ("
-                                + inExpression.substring(0, inExpression.lastIndexOf(SqlConstants.COMMA)) + ")";
-                        whereExpressions.append(" and " + columnSqName + equals + SqlConstants.SPACE);
-                    }
-                }
-            } else if (metaCondition instanceof MeasureCondition) {
-                // 判断是指标查询
-                MeasureCondition measureCondition = (MeasureCondition) metaCondition;
-                if (measureCondition.getMeasureConditions() != null) {
-                    // 判断是或否有添加查询
-                    SqlColumn sqlColumn = allColums.get(measureCondition
-                            .getMetaName());
-                    SQLCondition sqlCondition = measureCondition
-                            .getMeasureConditions();
-                    String columnSqName = sqlColumn.getTableName() + SqlConstants.DOT
-                            + sqlColumn.getTableFieldName();
-                    String whereEquals = this.generateWhereEquals(sqlCondition);
-                    if (!StringUtils.isEmpty(whereEquals)) {
-                        whereExpressions.append(" and " + columnSqName + whereEquals + SqlConstants.SPACE);
-                    }
-                }
-            }
-        });
+                });
         return whereExpressions.toString();
     }
-    
+
+    /**
+     * 生成Measure where sql语句
+     * 
+     * @param ConfigQuestionModel
+     *            configQuestionModel
+     * @return String sql
+     */
+    public String generateMeasureWhereExpression(
+            ConfigQuestionModel configQuestionModel,
+            Map<String, SqlColumn> allColums) {
+        StringBuffer whereExpressions = new StringBuffer(" where 1=1 ");
+        configQuestionModel
+                .getQueryConditions()
+                .forEach((k, v) -> {
+                    MetaCondition metaCondition = v;
+                    if (metaCondition instanceof MeasureCondition) {
+                        // 判断是指标查询
+                        MeasureCondition measureCondition = (MeasureCondition) metaCondition;
+                        if (measureCondition.getMeasureConditions() != null) {
+                            // 判断是或否有添加查询
+                            SqlColumn sqlColumn = allColums
+                                    .get(measureCondition.getMetaName());
+                            whereExpressions.append(this
+                                    .generateSqlWhereOneCondition(sqlColumn,
+                                            false));
+                        }
+                    } else if (metaCondition instanceof DimensionCondition) {
+                        // 判断是维度查询
+                        DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
+                        SqlColumn sqlColumn = allColums.get(dimensionCondition
+                                .getMetaName());
+                        if (// 如果节点为空，不需要组织条件
+                        !CollectionUtils.isEmpty(dimensionCondition
+                                .getQueryDataNodes())
+                        // 如果节点为所有条件，不需要组织条件
+                                && !MetaNameUtil
+                                        .isAllMemberUniqueName(dimensionCondition
+                                                .getQueryDataNodes().get(0)
+                                                .getUniqueName())
+                                // 如果table为事实表的数据
+                                && sqlColumn.getTableName().equals(
+                                        QuestionModel4TableDataUtils
+                                                .getFactTableAliasName())) {
+                            whereExpressions.append(this
+                                    .generateSqlWhereOneCondition(sqlColumn,
+                                            false));
+                        }
+                    }
+                });
+        return whereExpressions.toString();
+    }
+
+    /**
+     * 生成维度sqlwhere表达式
+     * 
+     * @param dimensionCondition
+     *            dimensionCondition
+     * @param sqlColumn
+     *            sqlColumn
+     * @return dimensionCondition where sql
+     */
+    protected String generateSqlWhereOneCondition(SqlColumn sqlColumn,
+            boolean gengerateTableAlias) {
+        String equals = "";
+        String inExpression = "";
+        MetaCondition metaCondition = sqlColumn.getMetaCondition();
+        if (metaCondition instanceof MeasureCondition) {
+            // 判断是指标查询
+            MeasureCondition measureCondition = (MeasureCondition) metaCondition;
+            if (measureCondition.getMeasureConditions() != null) {
+                // 判断是或否有添加查询
+                SQLCondition sqlCondition = measureCondition
+                        .getMeasureConditions();
+                String columnSqName = sqlColumn.getTableFieldName();
+                if (gengerateTableAlias) {
+                    columnSqName = sqlColumn.getTableName() + "."
+                            + columnSqName;
+                }
+                String whereEquals = this.generateWhereEquals(sqlCondition);
+                if (!StringUtils.isEmpty(whereEquals)) {
+                    return " and " + columnSqName + whereEquals
+                            + SqlConstants.SPACE;
+                }
+            }
+        } else if (metaCondition instanceof DimensionCondition) {
+            DimensionCondition dimensionCondition = (DimensionCondition) metaCondition;
+            for (QueryData queryData : dimensionCondition.getQueryDataNodes()) {
+                String[] str = MetaNameUtil.parseUnique2NameArray(queryData
+                        .getUniqueName());
+                String value = str[str.length - 1];
+                inExpression = inExpression + SqlConstants.PARAM + ",";
+                this.whereValues.add(value);
+            }
+            if (!inExpression.isEmpty()) {
+                // 如果inExpression没有值，证明没有此条件
+                String columnSqName = sqlColumn.getTableFieldName();
+                if (gengerateTableAlias) {
+                    columnSqName = sqlColumn.getTableName() + SqlConstants.DOT
+                            + columnSqName;
+                }
+                equals = " in ("
+                        + inExpression.substring(0,
+                                inExpression.lastIndexOf(SqlConstants.COMMA))
+                        + ")";
+                return " and " + columnSqName + equals + SqlConstants.SPACE;
+            }
+        }
+        return "";
+    }
+
     /**
      * 获取where equals等式
      * 
@@ -353,78 +455,83 @@ public class SqlExpression implements Serializable {
         }
         SQLConditionType conditionType = sqlCondition.getCondition();
         switch (conditionType) {
-            // 等于
-            case EQ: {
-                this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " = " + SqlConstants.PARAM;
-            }
-            // 不等于
-            case NOT_EQ: {
-                this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " <> " + SqlConstants.PARAM;
-            }
-            // 小于
-            case LT: {
-                this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " < " + SqlConstants.PARAM;
-            }
-            // 小于等于
-            case LT_EQ: {
-                this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " <= " + SqlConstants.PARAM;
-            }
-            // 大于
-            case GT: {
-                this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " > " + SqlConstants.PARAM;
-            }
-            // 大于等于
-            case GT_EQ: {
-                this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " >= " + SqlConstants.PARAM;
-            }
-            // between and
-            case BETWEEN_AND: {
-                if (StringUtils.isNumeric(sqlCondition.getConditionValues().get(0))
-                        && StringUtils.isNumeric(sqlCondition.getConditionValues().get(1))) {
-                    BigDecimal front = new BigDecimal(sqlCondition.getConditionValues().get(0));
-                    BigDecimal back = new BigDecimal(sqlCondition.getConditionValues().get(1));
-                    if (front.compareTo(back) >= 0) {
-                        this.whereValues.add(back);
-                        this.whereValues.add(front);
-                    } else {
-                        this.whereValues.add(front);
-                        this.whereValues.add(back);
-                    }
-                    return " between ? and ?";
+        // 等于
+        case EQ: {
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " = " + SqlConstants.PARAM;
+        }
+        // 不等于
+        case NOT_EQ: {
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " <> " + SqlConstants.PARAM;
+        }
+        // 小于
+        case LT: {
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " < " + SqlConstants.PARAM;
+        }
+        // 小于等于
+        case LT_EQ: {
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " <= " + SqlConstants.PARAM;
+        }
+        // 大于
+        case GT: {
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " > " + SqlConstants.PARAM;
+        }
+        // 大于等于
+        case GT_EQ: {
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " >= " + SqlConstants.PARAM;
+        }
+        // between and
+        case BETWEEN_AND: {
+            if (StringUtils.isNumeric(sqlCondition.getConditionValues().get(0))
+                    && StringUtils.isNumeric(sqlCondition.getConditionValues()
+                            .get(1))) {
+                BigDecimal front = new BigDecimal(sqlCondition
+                        .getConditionValues().get(0));
+                BigDecimal back = new BigDecimal(sqlCondition
+                        .getConditionValues().get(1));
+                if (front.compareTo(back) >= 0) {
+                    this.whereValues.add(back);
+                    this.whereValues.add(front);
                 } else {
-                    this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                    this.whereValues.add(sqlCondition.getConditionValues().get(1));
+                    this.whereValues.add(front);
+                    this.whereValues.add(back);
                 }
-                return " between " + SqlConstants.PARAM + " and " + SqlConstants.PARAM;
-            }
-            // in
-            case IN: {
-                StringBuffer inExpression = new StringBuffer(" in (");
-                for (String value : sqlCondition.getConditionValues()) {
-                    this.whereValues.add(value);
-                    inExpression.append(SqlConstants.PARAM + SqlConstants.COMMA);
-                }
-                return inExpression.toString().substring(0,
-                        inExpression.toString().lastIndexOf(SqlConstants.COMMA))
-                        + ")";
-            }
-            // like
-            case LIKE: {
-                if (SqlConstants.LIKE_ALL.equals(sqlCondition.getConditionValues().get(0))) {
-                    return "";
-                }
+                return " between ? and ?";
+            } else {
                 this.whereValues.add(sqlCondition.getConditionValues().get(0));
-                return " like " + SqlConstants.PARAM;
+                this.whereValues.add(sqlCondition.getConditionValues().get(1));
             }
-            default: {
+            return " between " + SqlConstants.PARAM + " and "
+                    + SqlConstants.PARAM;
+        }
+        // in
+        case IN: {
+            StringBuffer inExpression = new StringBuffer(" in (");
+            for (String value : sqlCondition.getConditionValues()) {
+                this.whereValues.add(value);
+                inExpression.append(SqlConstants.PARAM + SqlConstants.COMMA);
+            }
+            return inExpression.toString().substring(0,
+                    inExpression.toString().lastIndexOf(SqlConstants.COMMA))
+                    + ")";
+        }
+        // like
+        case LIKE: {
+            if (SqlConstants.LIKE_ALL.equals(sqlCondition.getConditionValues()
+                    .get(0))) {
                 return "";
             }
+            this.whereValues.add(sqlCondition.getConditionValues().get(0));
+            return " like " + SqlConstants.PARAM;
+        }
+        default: {
+            return "";
+        }
         }
     }
 
@@ -442,7 +549,8 @@ public class SqlExpression implements Serializable {
         for (SqlColumn colum : needColums) {
             if (AxisType.ROW == colum.getType()) {
                 String columName = "";
-                if (QuestionModel4TableDataUtils.isTimeOrCallbackDimension(colum.getDimension())) {
+                if (QuestionModel4TableDataUtils
+                        .isTimeOrCallbackDimension(colum.getDimension())) {
                     // 如果为时间维度
                     columName = this.facttableAlias + SqlConstants.DOT
                             + colum.getDimension().getFacttableColumn();
@@ -460,8 +568,10 @@ public class SqlExpression implements Serializable {
         if (" group by ".equals(groupbyExpression.toString())) {
             return "";
         } else {
-            return groupbyExpression.toString().substring(0,
-                    groupbyExpression.toString().lastIndexOf(SqlConstants.COMMA));
+            return groupbyExpression.toString().substring(
+                    0,
+                    groupbyExpression.toString()
+                            .lastIndexOf(SqlConstants.COMMA));
         }
 
     }
@@ -477,20 +587,24 @@ public class SqlExpression implements Serializable {
      */
     public String generateOrderByExpression(
             ConfigQuestionModel configQuestionModel,
-            Map<String, SqlColumn> allColums) throws QuestionModelTransformationException {
+            Map<String, SqlColumn> allColums)
+            throws QuestionModelTransformationException {
         if (configQuestionModel.getSortRecord() == null) {
             return "";
         }
         String orderColumnNameTmp = configQuestionModel.getSortRecord()
                 .getSortColumnUniquename();
-        if (StringUtils.isEmpty(orderColumnNameTmp) && MetaNameUtil.isUniqueName(orderColumnNameTmp)) {
-            throw new QuestionModelTransformationException("string of 'SortColumnUniquename' isn't well fromed as [data].[data] .");
+        if (StringUtils.isEmpty(orderColumnNameTmp)
+                && MetaNameUtil.isUniqueName(orderColumnNameTmp)) {
+            throw new QuestionModelTransformationException(
+                    "string of 'SortColumnUniquename' isn't well fromed as [data].[data] .");
         }
         String[] str = MetaNameUtil.parseUnique2NameArray(orderColumnNameTmp);
         String orderColumnName = str[str.length - 1];
         SqlColumn sqlColumn = allColums.get(orderColumnName);
         String orderByType = "";
-        if (SqlConstants.DESC.equals(configQuestionModel.getSortRecord().getSortType().name())) {
+        if (SqlConstants.DESC.equals(configQuestionModel.getSortRecord()
+                .getSortType().name())) {
             orderByType = SqlConstants.DESC;
         }
         return " order by " + sqlColumn.getTableName() + SqlConstants.DOT
@@ -523,49 +637,52 @@ public class SqlExpression implements Serializable {
             size = pageInfo.getPageSize();
         }
         switch (driver) {
-            case "com.mysql.jdbc.Driver": {
-                limitStringBuffer.append(" limit ");
-                limitStringBuffer.append(start);
-                limitStringBuffer.append(SqlConstants.COMMA);
-                limitStringBuffer.append(size);
-                this.setSql(this.getSql() + limitStringBuffer.toString());
-                return;
-            }
-            case "Oracle.jdbc.driver.OracleDriver": {
-                int end = -1;
-                start = pageInfo.getCurrentPage() * pageInfo.getPageSize();
-                end = start + pageInfo.getPageSize();
-                StringBuffer pageString = new StringBuffer();
-                pageString.append("SELECT * FROM (");
-                pageString.append("SELECT A.*, ROWNUM RN");
-                pageString.append(" FROM (SELECT * FROM ( " + this.getSql()
-                            + " )) A ");
-                pageString.append(" WHERE ROWNUM <= " + end);
-                pageString.append(") WHERE RN >=  " + start);
-                this.setSql(pageString.toString());
-                return;
-            }
-            default: {
-                return;
-            }
+        case "com.mysql.jdbc.Driver": {
+            limitStringBuffer.append(" limit ");
+            limitStringBuffer.append(start);
+            limitStringBuffer.append(SqlConstants.COMMA);
+            limitStringBuffer.append(size);
+            this.setSql(this.getSql() + limitStringBuffer.toString());
+            return;
+        }
+        case "Oracle.jdbc.driver.OracleDriver": {
+            int end = -1;
+            start = pageInfo.getCurrentPage() * pageInfo.getPageSize();
+            end = start + pageInfo.getPageSize();
+            StringBuffer pageString = new StringBuffer();
+            pageString.append("SELECT * FROM (");
+            pageString.append("SELECT A.*, ROWNUM RN");
+            pageString.append(" FROM (SELECT * FROM ( " + this.getSql()
+                    + " )) A ");
+            pageString.append(" WHERE ROWNUM <= " + end);
+            pageString.append(") WHERE RN >=  " + start);
+            this.setSql(pageString.toString());
+            return;
+        }
+        default: {
+            return;
+        }
         }
 
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
-    public String toString(){
+    public String toString() {
         String sql = this.getSql();
         if (!StringUtils.isEmpty(this.getSql())) {
-            for(Object value : this.whereValues){
-                sql = StringUtils.replaceOnce(sql, "?", "'" + value.toString() + "'");
+            for (Object value : this.whereValues) {
+                sql = StringUtils.replaceOnce(sql, "?", "'" + value.toString()
+                        + "'");
             }
             return sql;
         } else {
             return "";
-        }    
+        }
     }
 
     /**
@@ -633,19 +750,8 @@ public class SqlExpression implements Serializable {
      */
     public SqlExpression(String driver) {
         this.driver = driver;
-        this.facttableAlias = QuestionModel4TableDataUtils.getFactTableAliasName();
-    }
-    
-    /**
-     * @param driver
-     *            jdbc driver
-     * @param tableName
-     *            tableName 事实表tableName
-     */
-    public SqlExpression(String driver, String tableName) {
-        this.driver = driver;
-        this.tableName = tableName;
-        this.facttableAlias = QuestionModel4TableDataUtils.getFactTableAliasName();
+        this.facttableAlias = QuestionModel4TableDataUtils
+                .getFactTableAliasName();
     }
 
     /**
@@ -656,14 +762,8 @@ public class SqlExpression implements Serializable {
     }
 
     /**
-     * @return the tableName
-     */
-    public String getTableName() {
-        return tableName;
-    }
-
-    /**
-     * @param tableName the tableName to set
+     * @param tableName
+     *            the tableName to set
      */
     public void setTableName(String tableName) {
         this.tableName = tableName;

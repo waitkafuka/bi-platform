@@ -581,7 +581,7 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-    DI_TABLE_CLASS.$handleExpand = function (cellWrap, lineWrap) {
+    DI_TABLE_CLASS.$handleExpand = function (cellWrap, lineWrap, pos) {
         this.$sync(
             this.getModel(),
             'DRILL',
@@ -590,7 +590,8 @@ $namespace('di.shared.ui');
                 //action: 'EXPAND',
                 action: 'expand',
                 uniqueName: cellWrap['uniqueName'],
-                lineUniqueName: (lineWrap || {})['uniqueName']
+                lineUniqueName: (lineWrap || {})['uniqueName'],
+                rowNum: pos.y
 
             }
         );
@@ -601,7 +602,7 @@ $namespace('di.shared.ui');
      *
      * @protected
      */
-    DI_TABLE_CLASS.$handleCollapse = function (cellWrap, lineWrap) {
+    DI_TABLE_CLASS.$handleCollapse = function (cellWrap, lineWrap, pos) {
         this.$sync(
             this.getModel(),
             'DRILL',
@@ -610,7 +611,8 @@ $namespace('di.shared.ui');
                 //action: 'COLLAPSE',
                 action: 'collapse',
                 uniqueName: cellWrap['uniqueName'],
-                lineUniqueName: (lineWrap || {})['uniqueName']
+                lineUniqueName: (lineWrap || {})['uniqueName'],
+                rowNum: pos.y
             }
         );
     };

@@ -3773,6 +3773,25 @@ li {
     font-family: '微软雅黑', '宋体';
     font-size: 12px;
 }
+
+/**
+ * 清除浮动-完美清除方案
+ */
+.c-f:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    zoom: 1;
+}
+
+/**
+ * 左浮动
+ */
+.f-l {
+    float: left;
+}
 /**
  * di-ui.css
  * Copyright 2012 Baidu Inc. All rights reserved.
@@ -4255,6 +4274,12 @@ div.di-dim-level-find-msg span{
 .di-table-down-btn {
     float: left;
 }
+.rich-select-instruction {
+    margin-right: 10px;
+    height: 32px;
+    line-height: 32px;
+}
+
 .sxwzbTitle{
     font-weight: 700;
     font-size: 14px;
@@ -4406,6 +4431,14 @@ div.di-dim-level-find-msg span{
 }
 .sxwzbText{
     position: relative;
+    margin-bottom: 5px;
+}
+.sxwzbButton.disabled{
+    background-color: #e5e5e5;
+}
+
+.sxwzbCheckBox:checked:disabled:after{
+    background: url(img/rich-select-checkbox-bg.png) no-repeat 0 -48px;
 }
 /**
  * @name                      :roport-ui针对silkroad所做的的css适配

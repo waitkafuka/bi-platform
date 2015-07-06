@@ -276,6 +276,9 @@ public class HttpRequest {
                         .setUri(postUrl)
                         .setEntity(entity)
                         .build();
+                // 添加必要的Header属性
+                request.addHeader(new BasicHeader("Accept", "*/*"));
+                request.addHeader(new BasicHeader("Cache-Control", "no-cache"));
                 if (StringUtils.isNotBlank(cookie)) {
                     // 需要将cookie添加进去
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
@@ -285,94 +288,6 @@ public class HttpRequest {
                         String value = headerParams.get(key);
                         request.addHeader(new BasicHeader(key, value));
                     }
-                }
-                LOGGER.info ("[INFO] --- --- execute query with client {}", client);
-                HttpResponse response = client.execute(request);
-                String content = processHttpResponse(client, response, params, false);
-                return content;
-            } catch (Exception e) {
-                LOGGER.warn("send post error " + requestUrl + ",retry next one", e);
-            }
-        }
-        throw new RuntimeException("send post failed[" + requestUrl + "]. params :" + nameValues);
-
-    }
-    
-    /**
-     * 向指定URL发送POST方法的请求，含有url参数
-     * 
-     * @param client httpclient对象
-     * @param url 发送请求的URL
-     * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
-     * @param urlRequestParams request请求参数 的形式。
-     * @return URL 所代表远程资源的响应结果
-     */
-    private static String sendPostWithRequestParam(HttpClient client, String url, Map<String, String> params, Map<String, String> urlRequestParams) {
-        if(client == null) {
-            throw new IllegalArgumentException("client is null");
-        }
-        
-        if(params == null) {
-            params = new HashMap<String, String>(1);
-        }
-        String requestUrl = processPlaceHolder(url, params);
-        
-        String cookie = params.remove(COOKIE_PARAM_NAME);
-       
-        List<NameValuePair> nameValues = new ArrayList<NameValuePair>();
-        params.forEach((k, v) -> {
-            NameValuePair nameValuePair = null;
-            if (!MiniCubeConnection.QUESTIONMODEL_PARAM_KEY.endsWith (k) 
-                    && StringUtils.isNotEmpty (v)) {
-                String tmp = null;
-                try {
-                    tmp = URLEncoder.encode (v == null ? "" : v, "utf-8");
-                } catch (Exception e) {
-                    throw new RuntimeException ("不支持utf字符编码");
-                }
-                if (tmp.getBytes ().length > 1024 * 1024) {
-                    nameValuePair = new BasicNameValuePair(k, "");
-                } else {
-                    nameValuePair = new BasicNameValuePair(k, v);
-                }
-            } else {
-                nameValuePair = new BasicNameValuePair(k, v);
-            }
-            nameValues.add(nameValuePair);
-        });
-
-        String prefix = "", suffix = "";
-        String[] addresses = new String[] { requestUrl };
-        if (requestUrl.contains("[") && requestUrl.contains("]")) {
-            addresses = requestUrl.substring(requestUrl.indexOf("[") + 1, requestUrl.indexOf("]")).split(" ");
-            prefix = requestUrl.substring(0, requestUrl.indexOf("["));
-            suffix = requestUrl.substring(requestUrl.indexOf("]") + 1);
-        }
-        LOGGER.info("start to send post:" + requestUrl);
-        for (String address : addresses) {
-            String postUrl = prefix + address + suffix;
-            LOGGER.info("post url is : " + postUrl);
-            try {
-                if (urlRequestParams != null && !urlRequestParams.isEmpty()) {
-                    for (int i = 0; i < urlRequestParams.keySet().size(); i++) {
-                        String key = urlRequestParams.keySet().toArray()[i].toString();
-                        String value = urlRequestParams.get(key);
-                        if (i == 0) {
-                            postUrl = postUrl + "?" + key + "=" + value;
-                        } else {
-                            postUrl = postUrl + "&" + key + "=" + value;
-                        }
-                    }
-                }
-                LOGGER.info("start to send post url:" + postUrl);
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nameValues, "utf-8");
-                HttpUriRequest request = RequestBuilder.post()
-                        .setUri(postUrl)
-                        .setEntity(entity)
-                        .build();
-                if (StringUtils.isNotBlank(cookie)) {
-                    // 需要将cookie添加进去
-                    request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
                 }
                 LOGGER.info ("[INFO] --- --- execute query with client {}", client);
                 HttpResponse response = client.execute(request);
@@ -405,8 +320,8 @@ public class HttpRequest {
      * @param handerParams header请求参数。
      * @return URL 所代表远程资源的响应结果
      */
-    public static String sendPost(String url, Map<String, String> params,  Map<String, String> urlParams) {
-        return sendPostWithRequestParam(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, urlParams);
+    public static String sendPost(String url, Map<String, String> params,  Map<String, String> handerParams) {
+        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, handerParams);
     }
     
     /**

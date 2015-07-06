@@ -425,7 +425,7 @@ public class PlaneTableUtilsTest {
         // 实际json
         JSONObject actualJson;
         // 日
-        expectValue = "{'start':'2015-06-27','end':'2015-06-27','granularity':'D'}";
+        expectValue = "{'start':'20150627','end':'20150627','granularity':'D'}";
         requestParams.put(GRANULARITY, "D");
         value = "20150627";
         actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
@@ -436,7 +436,7 @@ public class PlaneTableUtilsTest {
         Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
         
         // 周
-        expectValue = "{'start':'2015-06-22','end':'2015-06-22','granularity':'W'}";
+        expectValue = "{'start':'20150622','end':'20150628','granularity':'W'}";
         requestParams.put(GRANULARITY, "W");
         value = "20150622";
         actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
@@ -447,7 +447,7 @@ public class PlaneTableUtilsTest {
         Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
         
         // 月
-        expectValue = "{'start':'2015-06','end':'2015-06','granularity':'M'}";
+        expectValue = "{'start':'20150601','end':'20150630','granularity':'M'}";
         requestParams.put(GRANULARITY, "M");
         value = "201506";
         actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
@@ -458,7 +458,7 @@ public class PlaneTableUtilsTest {
         Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
         
         // 季
-        expectValue = "{'start':'2015-Q1','end':'2015-Q1','granularity':'Q'}";
+        expectValue = "{'start':'20150101','end':'20150331','granularity':'Q'}";
         requestParams.put(GRANULARITY, "Q");
         value = "201501";
         actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
@@ -469,9 +469,9 @@ public class PlaneTableUtilsTest {
         Assert.assertEquals(expectJson.get(GRANULARITY), actualJson.get(GRANULARITY));
                 
         // 年
-        expectValue = "{'start':'2015','end':'2015','granularity':'Y'}";
+        expectValue = "{'start':'20140101','end':'20141231','granularity':'Y'}";
         requestParams.put(GRANULARITY, "Y");
-        value = "2015";
+        value = "2014";
         actualValue = PlaneTableUtils.convert2TimeJson(value, requestParams);
         expectJson = new JSONObject(expectValue);
         actualJson = new JSONObject(actualValue);
