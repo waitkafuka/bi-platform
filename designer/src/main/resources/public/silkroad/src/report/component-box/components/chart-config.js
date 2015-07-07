@@ -18,39 +18,39 @@ define(
         // Chart图形 实例 描述信息（从report-ui里面获取）
         var entityDescription = [
             {
-                "clzType": "COMPONENT",
-                "clzKey": "DI_ECHART",
-                "sync": { "viewDisable": "ALL" },
-                "vuiRef": {},
-                "interactions": [
+                clzType: 'COMPONENT',
+                clzKey: 'DI_ECHART',
+                sync: {viewDisable: 'ALL'},
+                vuiRef: {},
+                interactions: [
                     {
-                        "events": [
+                        events: [
                             {
-                                "rid": "snpt.form",
-                                "name": "dataloaded"
+                                rid: 'snpt.form',
+                                name: 'dataloaded'
                             },
                             {
-                                "rid": "snpt.form",
-                                "name": "submit"
+                                rid: 'snpt.form',
+                                name: 'submit'
                             }
                         ],
-                        "action": {
-                            "name": "sync"
+                        action: {
+                            name: 'sync'
                         },
-                        "argHandlers": [
-                            ["clear"],
-                            ["getValue", "snpt.cnpt-form"]
+                        argHandlers: [
+                            ['clear'],
+                            ['getValue', 'snpt.cnpt-form']
                         ]
                     }
                 ]
             },
             {
-                "clzType": "VUI",
-                "clzKey": "E_CHART",
-                "dataOpt": {
-                    "height": 260,
-                    "legend": { "xMode": "pl" },
-                    "weekViewRange": [null, "-1d"]
+                clzType: 'VUI',
+                clzKey: 'E_CHART',
+                dataOpt: {
+                    height: 260,
+                    legend: {xMode: 'pl'},
+                    weekViewRange: [null, '-1d']
                 }
             }
         ];

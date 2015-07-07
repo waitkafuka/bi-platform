@@ -86,6 +86,20 @@ public final class CallbackServiceInvoker {
         }
         try {
             
+            StringBuilder logStr = new StringBuilder ();
+            params.forEach ((k, v) -> {
+                if (!StringUtils.isEmpty (v)) {
+                    if (v.length () > 1000) {
+                        logStr.append (k + "---" + v.substring (0, 1000) + "...");
+                    } else {
+                        logStr.append (k + "---" + v);
+                    }
+                    logStr.append ("\n");
+                }
+            });
+            LOG.info ("[INFO] --- --- --- --- --- --- --- --- --- --- ---- ---- ---- -- --- --- -- - -- -  - -- - - ");
+            LOG.info ("[INFO] --- --- request params : \n {}", logStr.toString ());
+            LOG.info ("[INFO] --- --- --- --- --- --- --- --- --- --- ---- ---- ---- -- --- --- -- - -- -  - -- - - ");
             String responseStr = HttpRequest.sendPost1(url, params);
             CallbackResponse response = convertStrToResponse(responseStr, type); 
             if (LOG.isDebugEnabled ()) {

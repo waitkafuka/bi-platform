@@ -40,11 +40,30 @@ public class MeasureClassfyObject {
     private String caption;
     
     /**
+     * 指标描述信息
+     */
+    private String desc;
+    
+    /**
      * 当前分类选中状态
      */
     private Boolean selected = false;
     
     private List<MeasureClassfyObject> children;
+    
+    /**
+     * @return the desc
+     */
+    public String getDesc() {
+        return desc;
+    }
+
+    /**
+     * @param desc the desc to set
+     */
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 
     /**
      * @return the name

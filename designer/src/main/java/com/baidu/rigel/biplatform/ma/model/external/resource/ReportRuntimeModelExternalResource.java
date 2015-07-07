@@ -20,6 +20,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,6 +131,11 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         modifyLogicModel (areaId, selectedMeasures, model, extendArea);
         // 已经重置了LogicModel，需要清除操作纪录
         runTimeModel.getDrillDownQueryHistory ().clear ();
+        MiniCube cube = (MiniCube) model.getSchema ().getCubes ().get (extendArea.getCubeId ());
+        LogicModel logicModel = extendArea.getLogicModel ();
+        DataSourceDefine ds = dsService.getDsDefine (model.getDsId ());
+        List<MeasureClassfyObject> rs = getMeasureclassfyDefine(cube.getSource (), ds, logicModel, cube, securityKey);
+        changeMeasureDesc (extendArea, rs);
         reportModelCacheManager.updateRunTimeModelToCache (reportId, runTimeModel);
         result.setStatus (0);
         result.setStatusInfo ("successfully");
@@ -213,10 +219,42 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         MiniCube cube = (MiniCube) model.getSchema ().getCubes ().get (extendArea.getCubeId ());
         DataSourceDefine ds = dsService.getDsDefine (model.getDsId ());
         List<MeasureClassfyObject> rs = getMeasureclassfyDefine(cube.getSource (), ds, logicModel, cube, securityKey);
+        changeMeasureDesc (extendArea, rs);
         result.setStatus (0);
         result.setData (rs);
         result.setStatusInfo ("successfully");
+        reportModelCacheManager.updateRunTimeModelToCache (reportId, runTimeModel);
         return result;
+    }
+
+    private void changeMeasureDesc(ExtendArea extendArea,
+            List<MeasureClassfyObject> rs) {
+        List<MeasureClassfyObject> leafObj = getLeafMeasures(rs);
+        leafObj.forEach (tmp -> {
+            extendArea.getFormatModel ().getToolTips ().put (tmp.getName (), tmp.getDesc());
+        });
+    }
+
+    private List<MeasureClassfyObject> getLeafMeasures(List<MeasureClassfyObject> rs) {
+        List<MeasureClassfyObject> leaf = Lists.newArrayList ();
+        if (CollectionUtils.isEmpty (rs)) {
+            return leaf;
+        }
+        for (MeasureClassfyObject obj : rs) {
+            if (CollectionUtils.isEmpty (obj.getChildren ())) {
+                leaf.add (obj);
+            } else {
+                leaf.addAll (getLeafMeasures(obj.getChildren ()));
+//                for (MeasureClassfyObject child : obj.getChildren ()) {
+//                    if (CollectionUtils.isEmpty (child.getChildren ())) {
+//                        leaf.add (child);
+//                    } else {
+//                        child.getChildren ().forEach (c -> leaf.add (c));
+//                    }
+//                }
+            }
+        }
+        return leaf;
     }
 
     /**

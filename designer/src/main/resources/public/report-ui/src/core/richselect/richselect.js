@@ -58,7 +58,6 @@
                 var random = Math.floor(Math.random() * 100 + 1);
                 var time = new Date().getTime() + '';
                 var timer = time.slice(time.length - 4) + random;
-                console.log(children[j].name);
                 var idStr = children[j].name + timer;
                 htmlArray.push('<div class="sxwzbType"><div class="sxwzbCategories">'
                     + '<input type="checkbox" id=' + idStr + ' class="sxwzbCheckBoxP sxwzbCheckBox">'

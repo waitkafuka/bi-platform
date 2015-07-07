@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -2278,7 +2279,14 @@ public class QueryDataResource extends BaseResource {
         begin = System.currentTimeMillis();
         ReportDesignModel model = runtimeModel.getModel ();
         if (runtimeModel.getDrillDownQueryHistory() != null && !runtimeModel.getDrillDownQueryHistory().isEmpty()) {
-            for (DrillDownAction queryAction : runtimeModel.getDrillDownQueryHistory().values()) {
+            List<String> keys = Lists.newArrayList (runtimeModel.getDrillDownQueryHistory ().keySet ());
+            Collections.sort (keys, (k1, k2) -> {
+                int tmp1 = Integer.valueOf (k1.substring (k1.lastIndexOf ("_") + 1));
+                int tmp2 = Integer.valueOf (k2.substring (k2.lastIndexOf ("_") + 1));
+                return tmp1 - tmp2;
+            });
+            for (String key : keys) {
+                DrillDownAction queryAction = runtimeModel.getDrillDownQueryHistory().get (key);
                 setQueryParams (areaContext, model, queryAction.action.getColumns ());
                 setQueryParams (areaContext, model, queryAction.action.getRows ());
                 setQueryParams (areaContext, model, queryAction.action.getSlices ());

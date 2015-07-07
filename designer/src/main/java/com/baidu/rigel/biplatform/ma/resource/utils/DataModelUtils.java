@@ -839,9 +839,9 @@ public final class DataModelUtils {
         SimpleDateFormat src = new SimpleDateFormat("yyyyMMdd");
         SimpleDateFormat target = new SimpleDateFormat("yyyy-MM-dd");
         List<HeadField> ancestorFileds = null;
+     // hasStoredMap用于记录已经存过的rowField
+        Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
         for (int j = 0; j < leafFileds.size(); ++j) {
-            // hasStoredMap用于记录已经存过的rowField
-            Map<String, HeadField> hasStoredMap = new HashMap<String, HeadField>();
             HeadField filed = leafFileds.get(j);
             ancestorFileds = getHeadListOutofHead(filed);
             Collections.reverse(ancestorFileds);
@@ -849,7 +849,12 @@ public final class DataModelUtils {
             for (int i = 0; i < ancestorFileds.size(); i++) {
                 HeadField headField = ancestorFileds.get(i);
                 if (i == 0 && hasStoredMap.get(headField.getValue()) != null) {
-                    continue;
+                    if(headField.getParent () == null) {
+                        continue;
+                    } else if (headField.getParent ().equals (hasStoredMap.get(headField.getValue()).getParent ()) 
+                        && headField.getParent ().getParent () == null) {
+                        continue;
+                    }
                 } else {
                     hasStoredMap.put(headField.getValue(), headField);
                 }

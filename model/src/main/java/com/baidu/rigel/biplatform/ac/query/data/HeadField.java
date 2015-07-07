@@ -523,13 +523,13 @@ public class HeadField implements Serializable {
         } else if (!nodeUniqueName.equals(other.nodeUniqueName)) {
             return false;
         }
-        if (parent == null) {
-            if (other.parent != null) {
-                return false;
-            }
-        } else if (!parent.equals(other.parent)) {
-            return false;
-        }
+//        if (parent == null) {
+//            if (other.parent != null) {
+//                return false;
+//            }
+//        } else if (!parent.equals(other.parent)) {
+//            return false;
+//        }
         if (parentLevelField == null) {
             if (other.parentLevelField != null) {
                 return false;

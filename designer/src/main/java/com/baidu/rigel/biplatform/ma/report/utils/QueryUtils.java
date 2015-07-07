@@ -245,7 +245,11 @@ public final class QueryUtils {
                 } else {
                     questionModel.setNeedSummary(needSummary(questionModel));
                 }
-            }               
+            } 
+            
+            if (questionModel.isNeedSummary() && "false".equals(area.getOtherSetting().get("needSummary"))) {
+                questionModel.setNeedSummary (false);
+            }
         }
         questionModel.setUseIndex(true);
         
@@ -284,7 +288,7 @@ public final class QueryUtils {
                                 MiniCubeMember m = (MiniCubeMember) members.get (0);
                                 if (m.getChildren () != null && m.getChildren ().size () > 1) {
                                     return false;
-                                } else if (m.getChildren() == null) {
+                                } else if (m.getChildren() == null ) {
                                     return false;
                                 }
                             }

@@ -30,17 +30,17 @@ a {
     cursor: move;
 }
 /* 清除浮动 */
-/*.c-f:after {*/
-    /*content: ".";*/
-    /*display: block;*/
-    /*height: 0;*/
-    /*clear: both;*/
-    /*visibility: hidden;*/
-    /*zoom: 1;*/
-/*}*/
-/*.f-l {*/
-    /*float: left;*/
-/*}*/
+.c-f:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+    zoom: 1;
+}
+.f-l {
+    float: left;
+}
 .f-r {
     float: right;
 }

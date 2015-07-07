@@ -3,17 +3,21 @@
     <div class="data-format-alone">
         <div class="data-format-black">
             <input type="checkbox"
-                   {{if $data.dataFormat.value == "false" }}
-
-            {{else}}
-            checked="checked"
+            {{if $data.filterBlank=="true" }}
+                checked="checked"
             {{/if}} />
             <span>是否过滤空白行</span>
         </div>
         <div class="data-format-black">
-            <input type="checkbox" {{if $data.canChangedMeasure && $data.canChangedMeasure.value == "true"}}
+            <input type="checkbox" {{if $data.canChangedMeasure=="true"}}
             checked="checked" {{/if}} />
             <span>是否显示富文本下拉框</span>
         </div>
+        <div class="data-format-black">
+            <input type="checkbox" {{if $data.needSummary=="true"}}
+            checked="checked" {{/if}} />
+            <span>是否显示合计行</span>
+        </div>
+
     </div>
 </div>

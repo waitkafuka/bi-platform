@@ -40,10 +40,13 @@ public class MeasuerClassfyServiceTest {
     private final String tableCreateSql = "create table FACT_TAB_COL_META_CLASS("
             + "FIRST_CLASS_TYPE varchar(20),"
             + "FIRST_CLASS_TYPE_NAME varchar(20),"
+            + "FIRST_CLASS_TYPE_DESC varchar(20),"
             + "SECOND_CLASS_TYPE varchar(20),"
             + "SECOND_CLASS_TYPE_NAME varchar(20),"
+            + "SECOND_CLASS_TYPE_DESC varchar(20),"
             + "THIRD_CLASS_TYPE varchar(20),"
             + "THIRD_CLASS_TYPE_NAME varchar(20),"
+            + "THIRD_CLASS_TYPE_DESC varchar(20),"
             + "SELECTED_OPERATION_TYPE varchar(2)"
             + ")";
     
@@ -56,11 +59,11 @@ public class MeasuerClassfyServiceTest {
      * insert sql
      */
     private final String insertSql = "insert into FACT_TAB_COL_META_CLASS"
-            + " values ('1', 'test', '11', 'test11', '111', 'test111', '0'),"
-            + " ('1', 'test', '12', 'test12', '121', 'test121', '0'),"
-            + " ('1', 'test', '11', 'test11', '112', 'test112', '0'),"
-            + " ('1', 'test', '12', 'test12', '122', 'test122', '0'),"
-            + " ('2', 'test', '21', 'test21', '211', 'test211', '1');";
+            + " values ('1', 'test', 'abc', '11', 'test11', 'def', '111', 'test111', 'hij', '0'),"
+            + " ('1', 'test', 'abc', '12', 'test12', 'def', '121', 'test121', 'hij', '0'),"
+            + " ('1', 'test', 'abc', '11', 'test11', 'def', '112', 'test112', 'hij', '0'),"
+            + " ('1', 'test', 'abc', '12', 'test12', 'def', '122', 'test122', 'hij', '0'),"
+            + " ('2', 'test', 'abc', '21', 'test21', 'def', '211', 'test211', 'hij', '1');";
     
     
     @Before

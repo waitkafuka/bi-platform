@@ -238,24 +238,20 @@ define(['url', 'constant'], function (Url, Constant) {
                 success: function (data) {
                     var sourceData = data.data;
                     var targetData;
-                    var indList;
                     if (sourceData) {
                         // 组合数据格式列表项
                         targetData = {
                             dataFormat: {},
                             canChangedMeasure: {}
                         };
-                        var length = 0;
-                        for (name in sourceData) {
-                            length ++;
-                        }
-                        if (length == 0) {
-                            targetData.dataFormat['value'] = 'false';
-                        }
-                        else {
-                            targetData.dataFormat['value'] = sourceData['filterBlank'];
-                        }
-                        targetData.canChangedMeasure.value = sourceData.canChangedMeasure;
+                        targetData.filterBlank = sourceData.filterBlank
+                            ? sourceData.filterBlank : 'false';
+
+                        targetData.canChangedMeasure = sourceData.canChangedMeasure
+                            ? sourceData.canChangedMeasure : 'false';
+
+                        targetData.needSummary = sourceData.needSummary
+                            ? sourceData.needSummary : 'true';
                     }
                     /**
                      * dataFormat = {

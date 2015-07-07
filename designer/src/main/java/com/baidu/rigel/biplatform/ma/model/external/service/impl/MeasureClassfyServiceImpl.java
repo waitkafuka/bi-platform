@@ -53,9 +53,9 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
     /**
      * sql
      */
-    private static final String SQL = "SELECT FIRST_CLASS_TYPE, FIRST_CLASS_TYPE_NAME, "
-            + "SECOND_CLASS_TYPE, SECOND_CLASS_TYPE_NAME,"
-            + "THIRD_CLASS_TYPE, THIRD_CLASS_TYPE_NAME,"
+    private static final String SQL = "SELECT FIRST_CLASS_TYPE, FIRST_CLASS_TYPE_NAME, FIRST_CLASS_TYPE_DESC,"
+            + "SECOND_CLASS_TYPE, SECOND_CLASS_TYPE_NAME, SECOND_CLASS_TYPE_DESC,"
+            + "THIRD_CLASS_TYPE, THIRD_CLASS_TYPE_NAME, THIRD_CLASS_TYPE_DESC,"
             + "SELECTED_OPERATION_TYPE"
             + " FROM FACT_TAB_COL_META_CLASS";
     
@@ -102,10 +102,13 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
                 str = new StringBuilder();
                 str.append (rs.getString ("FIRST_CLASS_TYPE") + "\t");
                 str.append (rs.getString ("FIRST_CLASS_TYPE_NAME") + "\t");
+                str.append (rs.getString ("FIRST_CLASS_TYPE_DESC") + "\t");
                 str.append (rs.getString ("SECOND_CLASS_TYPE") + "\t");
                 str.append (rs.getString ("SECOND_CLASS_TYPE_NAME") + "\t");
+                str.append (rs.getString ("SECOND_CLASS_TYPE_DESC") + "\t");
                 str.append (rs.getString ("THIRD_CLASS_TYPE") + "\t");
                 str.append (rs.getString ("THIRD_CLASS_TYPE_NAME") + "\t");
+                str.append (rs.getString ("THIRD_CLASS_TYPE_DESC") + "\t");
                 str.append (rs.getString ("SELECTED_OPERATION_TYPE"));
                 tmp.add (str.toString ());
             }
@@ -126,6 +129,7 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
        for (String tmp : resultList) {
            resultArray = tmp.split ("\t");
            MeasureClassfyObject firstClassObj = new MeasureClassfyObject ();
+           firstClassObj.setDesc (resultArray[2]);
            firstClassObj.setCaption (resultArray[1]);
            firstClassObj.setName (resultArray[0]);
            int index = -1;
@@ -147,9 +151,10 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
     */
     private void genThirdClassfy(String[] resultArray, MeasureClassfyObject secondClassObj) {
         MeasureClassfyObject thirdClassfy = new MeasureClassfyObject ();
-        thirdClassfy.setName (resultArray[4]);
-        thirdClassfy.setCaption (resultArray[5]);
-        if ("1".equals (resultArray[6])) {
+        thirdClassfy.setName (resultArray[6]);
+        thirdClassfy.setCaption (resultArray[7]);
+        thirdClassfy.setDesc (resultArray[8]);
+        if ("1".equals (resultArray[9])) {
             thirdClassfy.setSelected (null);
         }
         List<MeasureClassfyObject> secondClassChildren = secondClassObj.getChildren ();
@@ -162,8 +167,9 @@ public class MeasureClassfyServiceImpl implements MeasureClassfyService {
     private MeasureClassfyObject genSecondClassfy(String[] resultArray, MeasureClassfyObject firstClassObj) {
         int childIndex = -1;
         MeasureClassfyObject secondClassObj = new MeasureClassfyObject();
-        secondClassObj.setName (resultArray[2]);
-        secondClassObj.setCaption (resultArray[3]);
+        secondClassObj.setName (resultArray[3]);
+        secondClassObj.setCaption (resultArray[4]);
+        secondClassObj.setDesc (resultArray[5]);
         List<MeasureClassfyObject> firstClassChildren = firstClassObj.getChildren ();
         if (CollectionUtils.isEmpty (firstClassChildren) 
             || (childIndex = firstClassChildren.indexOf (secondClassObj)) == -1) {

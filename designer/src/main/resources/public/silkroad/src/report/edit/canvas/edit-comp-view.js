@@ -1686,7 +1686,7 @@ define([
              * @param {event} event 点击事件
              * @public
              */
-            getFilterBlankLine: function (event) { //TODO:实现业务逻辑
+            getFilterBlankLine: function (event) {
                 var that = this;
                 var compId = that.getActiveCompId();
                 that.model.getFilterBlankLine(compId, openDataFormatDialog);
@@ -1707,7 +1707,7 @@ define([
                         content: html,
                         dialog: {
                             width: 350,
-                            height: 200,
+                            height: 220,
                             resizable: false,
                             buttons: [
                                 {
@@ -1733,19 +1733,16 @@ define([
                 function saveFilterBlankLine($dialog) {
                     var $checks = $('.data-format-black').find('input');
                     var data = {};
-                    if ($($checks[0]).is(':checked')) {
-                        data.filterBlank = "true";
-                    }
-                    else {
-                        data.filterBlank = "false";
-                    }
+                    var isChecked = false;
 
-                    if ($($checks[1]).is(':checked')) {
-                        data.canChangedMeasure = "true";
-                    }
-                    else {
-                        data.canChangedMeasure = "false";
-                    }
+                    isChecked = $($checks[0]).is(':checked');
+                    data.filterBlank = isChecked ? 'true' : 'false';
+
+                    isChecked = $($checks[1]).is(':checked');
+                    data.canChangedMeasure = isChecked ? 'true' : 'false';
+
+                    isChecked = $($checks[2]).is(':checked');
+                    data.needSummary = isChecked ? 'true' : 'false';
 
                     that.model.saveFilterBlankLine(compId, data, function () {
                         $dialog.dialog('close');
@@ -1788,29 +1785,31 @@ define([
                         }
                         else {
                             var richSelect = $($table.children()[0]).children()[0];
-                            var richSelectId = $(richSelect).attr('data-o_o-di');
+                            if (richSelect) {
+                                var richSelectId = $(richSelect).attr('data-o_o-di');
 
-                            if (richSelectId.indexOf('rich-select') < 0) {
-                                richSelectId = 'snpt.' + compId + '-vu-table-rich-select';
-                                var html = [
-                                    '<div class="di-o_o-line">',
-                                    '<div class="" data-o_o-di="', richSelectId, '"></div>',
-                                    '</div>'
-                                ].join('');
+                                if (richSelectId.indexOf('rich-select') < 0) {
+                                    richSelectId = 'snpt.' + compId + '-vu-table-rich-select';
+                                    var html = [
+                                        '<div class="di-o_o-line">',
+                                        '<div class="" data-o_o-di="', richSelectId, '"></div>',
+                                        '</div>'
+                                    ].join('');
 
-                                var json = {
-                                    clzType: 'VUI',
-                                    clzKey: 'RICH_SELECT',
-                                    id: richSelectId,
-                                    compId: compId
-                                };
-                                $table.prepend(html);
-                                tableBox.height(tableBox.height() + 37);
-                                $table = $($(tableBox).children()[0]);
-                                $table.prepend(html);
-                                that.model.get('canvasModel').reportJson.entityDefs.push(json);
-                                var compEntity = $.getTargetElement(compId, entityDefs);
-                                compEntity.vuiRef.richSelect = richSelectId;
+                                    var json = {
+                                        clzType: 'VUI',
+                                        clzKey: 'RICH_SELECT',
+                                        id: richSelectId,
+                                        compId: compId
+                                    };
+                                    $table.prepend(html);
+                                    tableBox.height(tableBox.height() + 37);
+                                    $table = $($(tableBox).children()[0]);
+                                    $table.prepend(html);
+                                    that.model.get('canvasModel').reportJson.entityDefs.push(json);
+                                    var compEntity = $.getTargetElement(compId, entityDefs);
+                                    compEntity.vuiRef.richSelect = richSelectId;
+                                }
                             }
 
                         }
