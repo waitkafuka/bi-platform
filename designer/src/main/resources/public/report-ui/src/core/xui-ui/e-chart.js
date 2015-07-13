@@ -9,6 +9,7 @@
  */
 
 (function () {
+    /* globals xutil */
     var stringTemplate = xutil.string.template;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
@@ -18,11 +19,13 @@
     var getPreviousSibling = xutil.dom.getPreviousSibling;
     var getNextSibling = xutil.dom.getNextSibling;
     var inheritsObject = xutil.object.inheritsObject;
+    var merge = xutil.object.merge;
     var formatNumber = xutil.number.formatNumber;
     var isArray = xutil.lang.isArray;
     var attachEvent = xutil.dom.attachEvent;
     var detachEvent = xutil.dom.detachEvent;
     var XOBJECT = xui.XObject;
+
     // 图空间样式设置
     var styleConfiguration = {
         textStyle: {
@@ -217,6 +220,11 @@
         this._mapMinValue = dataWrap.mapMinValue;
         this._mapMaxValue = dataWrap.mapMaxValue;
         this._dimMap = dataWrap.dimMap;
+
+        // 个性化设置
+        dataWrap.appearance && (this._appearance = dataWrap.appearance);
+        dataWrap.render && (this._render = dataWrap.render);
+
         !isSilent && this.render();
     };
 
@@ -241,78 +249,78 @@
      *
      * @protected
      */
-    UI_E_CHART_CLASS.$renderCheckBoxs = function () {
+    UI_E_CHART_CLASS.$renderIndArea = function () {
         var me = this,
             allMeasures = me._allMeasures,
             defaultMeasures = me.$getDefaultMeasures(me._chartType),
             measureHtml = [];
 
         // 渲染图形中备选区模块
-        if (allMeasures.length > 0) {
-            if (this._chartType === 'line') {
-                // 多选
-                /**由于商桥的需求，折线图没有checkbox显示
-                for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
-                    measureHtml.push(
-                        '<input type="checkbox" name="echarts-candidate" ',
-                        isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
-                        '/>',
-                        '<label>',allMeasures[i],'</label>'
-                    );
-                }
-                this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
-                    + measureHtml.join('')
-                    + '</div>';
-                // 绑定备选区按钮事件
-                this._eCandidateBox = domChildren(this._eHeader)[0];
-                attachEvent(this._eCandidateBox, 'click', function (ev) {
-                    var oEv = ev || window.event;
-                    var target = oEv.target || oEv.srcElement;
-                    candidateClick.call(me, target);
-                });
-                **/
-            }
-            else {
-                // 单选
-                var radioName = 'echarts-candidate-radio-' + new Date().getTime();
-                for (var i = 0,  iLen = allMeasures.length; i < iLen; i ++) {
-                    var checkAbr = isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked"' : '';
-                    var radioId = [
-                       'allMeasures-radio',
-                        new Date().getTime(),
-                        i
-                    ].join('');
-                    var opt = {
-                        rName: radioName,
-                        rId: radioId,
-                        checked: checkAbr,
-                        text: allMeasures[i]
-                    };
-                    var tpl = '<input type="radio" name="#{rName}" id="#{rId}" #{checked} /><label for="#{rId}">#{text}</label>';
-                    measureHtml.push(stringTemplate(tpl, opt));
-                }
-                me._eHeader.innerHTML = stringTemplate(
-                    '<div class="echarts-candidate" id="echarts-candidate">#{html}</div>',
-                    {
-                        html: measureHtml.join('')
-                    }
-                );
-                me._eCandidateBox = domChildren(me._eHeader)[0];
-                // 重新设置单选按钮位置区域居中
-                var candWidth = me._eCandidateBox.offsetWidth;
-                var headWidth = me._eHeader.offsetWidth;
-                me._eCandidateBox.style.marginLeft = (headWidth - candWidth) / 2 + 'px';
-                var inputRadios = me._eCandidateBox.getElementsByTagName('input');
+        // 单选
+        var radioName = 'echarts-candidate-radio-' + new Date().getTime();
+        for (var i = 0,  iLen = allMeasures.length; i < iLen; i ++) {
+            var checkAbr = isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked"' : '';
+            var radioId = [
+                'allMeasures-radio',
+                new Date().getTime(),
+                i
+            ].join('');
+            var opt = {
+                rName: radioName,
+                rId: radioId,
+                checked: checkAbr,
+                text: allMeasures[i]
+            };
+            var tpl = ''
+                + '<input type="radio" name="#{rName}" id="#{rId}" #{checked} />'
+                + '<label for="#{rId}">#{text}</label>';
 
-                for (var i = 0, iLen = inputRadios.length; i < iLen; i ++) {
-                    inputRadios[i].onclick = (function (j) {
-                        return function () {
-                            me.notify('changeRadioButton', String(j));
-                        }
-                    })(i);
-                }
-            }
+            measureHtml.push(stringTemplate(tpl, opt));
         }
+        me._eHeader.innerHTML = stringTemplate(
+            '<div class="echarts-candidate" id="echarts-candidate">#{html}</div>',
+            {
+                html: measureHtml.join('')
+            }
+        );
+        me._eCandidateBox = domChildren(me._eHeader)[0];
+        // 重新设置单选按钮位置区域居中
+        var candWidth = me._eCandidateBox.offsetWidth;
+        var headWidth = me._eHeader.offsetWidth;
+        me._eCandidateBox.style.marginLeft = (headWidth - candWidth) / 2 + 'px';
+        var inputRadios = me._eCandidateBox.getElementsByTagName('input');
+
+        for (var i = 0, iLen = inputRadios.length; i < iLen; i ++) {
+            inputRadios[i].onclick = (function (j) {
+                return function () {
+                    me.notify('changeRadioButton', String(j));
+                };
+            })(i);
+        }
+
+            // if (this._chartType === 'line') {
+            //     // 多选
+            //     // 由于商桥的需求，折线图没有checkbox显示
+            //     for (var i = 0, iLen = allMeasures.length; i < iLen; i ++) {
+            //         measureHtml.push(
+            //             '<input type="checkbox" name="echarts-candidate" ',
+            //             isInArray(allMeasures[i], defaultMeasures) ? 'checked="checked" ' : '',
+            //             '/>',
+            //             '<label>',allMeasures[i],'</label>'
+            //         );
+            //     }
+            //     this._eHeader.innerHTML = '<div class="echarts-candidate" id="echarts-candidate">'
+            //         + measureHtml.join('')
+            //         + '</div>';
+            //     // 绑定备选区按钮事件
+            //     this._eCandidateBox = domChildren(this._eHeader)[0];
+            //     attachEvent(this._eCandidateBox, 'click', function (ev) {
+            //         var oEv = ev || window.event;
+            //         var target = oEv.target || oEv.srcElement;
+            //         candidateClick.call(me, target);
+            //     });
+            //
+            // }
     };
 
 
@@ -626,7 +634,7 @@
             xAxis.position = 'right';
             // 当图形为条形图时，暂时将动画关掉，以避免条形从左向右铺开的动画效果 update by majun
             options.animation = false;
-            options.grid.x = 20;
+            options.grid.x = 60;
             options.grid.x2 = 130;
 
             // Y轴调到右边需要数据翻转 晓强
@@ -657,153 +665,207 @@
         }
         return options;
     };
+
     /**
-     * 设置y轴
-     * 支持多轴
+     * 设置y轴，支持多轴
+     *
+     * @param {Object} options eCharts接口配置项
+     * @param {Object} options.grid 直角坐标系内绘图网格
+     * @param {Object} options.dataZoom 数据区域缩放
+     * @param {Object} options.series 数据内容
      *
      * @private
      */
     UI_E_CHART_CLASS.$setupYAxis = function (options) {
-        var that = this;
-        if (this._chartType !== 'pie') {
-            var yAxis = [];
-            if (this._aYAxis && this._aYAxis.length > 0) {
-                var yAxisOption;
-                for (var i = 0, option; option = this._aYAxis[i]; i ++) {
-                    yAxisOption = {};
-                    yAxisOption.name = option.title.text;
-                    yAxisOption.type = 'value';
-                    // 设置y轴网格 - 博学
-                    yAxisOption.splitArea = styleConfiguration.splitArea;
-                    yAxisOption.splitLine = styleConfiguration.splitLine;
-                    yAxis.push(yAxisOption);
-                }
-            }
-            else {
-                yAxisOption = {};
-                yAxisOption.type = 'value';
+        var yAxis = [];
+        var axisCaption;
+        var settings = {
+            chartType: this._chartType,
+            splitArea: styleConfiguration.splitArea,
+            splitLine: styleConfiguration.splitLine,
+            textStyle: styleConfiguration.textStyle,
+            lineStyle: styleConfiguration.lineStyle
+        };
 
-                // y轴添加单位 - 晓强
-                yAxisOption.axisLabel = yAxisOption.axisLabel || {};
-                yAxisOption.axisLabel.formatter = function (value) {
-                    var resultStr;
-                    // 确定可以转换成数字
-                    if (!Number.isNaN(value/1)) {
-                        // Y轴调到右边需要数据翻转
-                        if (that._chartType === 'bar') {
-                            value = -1 * value;
-                        }
-                        resultStr = value;
-                        var w = 10000;
-                        var y = 100000000;
-
-                        if (value >= w && value <= y) {
-                            resultStr = (value / w).toFixed(0) + '万';
-                        }
-                        else if (value >= y) {
-                            resultStr = (value / y).toFixed(0) + '亿';
-                        }
-                    }
-
-                    return resultStr;
-                };
-                // 字体修改 - 晓强 (字体修改为微软雅黑，12px - 博学)
-                yAxisOption.axisLabel.textStyle = styleConfiguration.textStyle;
-                // y轴颜色设定
-                yAxisOption.axisLine = yAxisOption.axisLine || {};
-                yAxisOption.axisLine.lineStyle = styleConfiguration.lineStyle;
-                // 设置y轴网格 - 博学
-                yAxisOption.splitArea = styleConfiguration.splitArea;
-                yAxisOption.splitLine = styleConfiguration.splitLine;
-                yAxis.push(yAxisOption);
-            }
-            if (this._isAddYxis && yAxis.length <= 1) {
-                yAxis.push(yAxisOption);
-                for (var i = 0, iLen = options.series.length; i < iLen; i ++) {
-                    var o = options.series[i];
-                    if (o.type === 'bar') {
-                        delete o.yAxisIndex;
-                    }
-                    if (o.type === 'line') {
-                        o.yAxisIndex = 1;
-                    }
-                    else {
-                        o.yAxisIndex = 0;
-                    }
-                }
-            }
+        this._render && (axisCaption = this._render.axisCaption);
+        // 如果是饼图、地图，不需要设置刻度轴；如果没有series，返回；
+        if (this._chartType === 'pie'
+            || this._chartType === 'map'
+            || this._aSeries.length < 1
+        ) {
+            return;
         }
+
+        // 单刻度轴情况
+        if (
+            (this._chartType === 'column' || this._chartType === 'bar')
+            && axisCaption
+        ) {
+            var name = this._aSeries[0].name; // TODO:name属性需要更改
+            axisCaption && (settings.name = axisCaption[name]);
+            yAxis.push(setBasicItems(settings));
+        }
+
+        // 双刻度轴情况
+        if (this._chartType === 'line' && axisCaption) {
+            var leftName = [];
+            var rightName = [];
+            var series = this._aSeries;
+
+            for (var i = 0, iLen = series.length, tSer; i < iLen; i ++) {
+                tSer = series[i];
+                tSer.yAxisIndex === '0'
+                    ? leftName.push(axisCaption[tSer.name])
+                    : rightName.push(axisCaption[tSer.name]);
+            }
+            // 左刻度轴设置
+            settings = merge(settings, {name: leftName.join(',')});
+            yAxis.push(setBasicItems(settings));
+            // 右刻度值设置
+            settings = merge(settings, {name: rightName.join(',')});
+            yAxis.push(setBasicItems(settings));
+        }
+
+
+        // 数据为空时横轴显示修改 博学
         if (this._chartType === 'bar') {
-            // 数据为空时横轴显示修改 博学
             var xAxisSeries = [];
             var xAxisData = [];
-            // 为0的数据个数
-            var sum = 0;
-            // 判断数据书否全部为0
-            var nowxAxis = 0;
+            var sum = 0; // 为0的数据个数
+            var nowxAxis = 0; // 判断数据书否全部为0
             var arrSeries = options.series;
+
             // 判断是否查出数据，没有数据情况判断方式是数据为0
             for (var i = 0; i < arrSeries.length; i ++) {
+
                 xAxisData.push(arrSeries[i].data.length);
                 for (var j = 0; j < arrSeries[i].data.length; j ++) {
+
                     if (arrSeries[i].data[j] == 0) {
-                        sum = sum + 1;
+                        sum += 1;
                     }
                 }
+
                 xAxisSeries.push(sum);
                 sum = 0;
             }
             // 通过判断为0数据并对same进行累加为判断数据准备
             for (var i = 0; i < xAxisSeries.length; i ++) {
-                if (xAxisSeries[i] == xAxisData[i]) {
-                    nowxAxis = nowxAxis + 1;
+                if (xAxisSeries[i] === xAxisData[i]) {
+                    nowxAxis += 1;
                 }
             }
-            if(xAxisSeries.length == nowxAxis && xAxisData.length == nowxAxis) {
+            if (
+                xAxisSeries.length === nowxAxis
+                && xAxisData.length === nowxAxis
+            ) {
                 yAxis[0].max = 0;
                 yAxis[0].min = -10;
             }
             options.xAxis = yAxis;
         }
-        if (this._chartType === 'column') {
+        else if (this._chartType === 'column') {
             options.yAxis = yAxis;
         }
-        if (this._chartType === 'line') {
-            // 超过两个指标时进行y轴格式设定 - 博学
-            if (options.series.length > 1) {
-                // 多于两个指标时显示双y轴
-                yAxis[1] = yAxis[0];
-                options.yAxis = yAxis;
-            }
-            else {
-                options.yAxis = yAxis;
-            }
+        else if (this._chartType === 'line') {
+            options.yAxis = yAxis;
+        }
+
+        /**
+         * 设置yAxis高级项
+         *
+         * @param {Object} advOpt 设置项
+         * @param {string} advOpt.chartType 图形种类
+         *
+         * @param {Object} advOpt.splitArea 分隔区域
+         * @param {Object} advOpt.splitArea.show 是否显示
+         * @param {Object} advOpt.splitArea.areaStyle 区域样式
+         *
+         * @param {Object} advOpt.splitLine 分隔线
+         * @param {Object} advOpt.splitLine.show 是否显示
+         * @param {Object} advOpt.splitLine.lineStyle 线条样式
+         *
+         * @private
+         * @return {Object} item 坐标轴刻度配置项
+         */
+        function setBasicItems(advOpt) {
+            var item = {};
+            item.type = 'value';
+
+            // 设置坐标轴名字
+            advOpt.name && (item.name = advOpt.name);
+
+            advOpt.name && (
+                item.nameLocation = (advOpt.chartType === 'bar')
+                    ? 'start' : 'end'
+            );
+
+            // 设置y轴网格
+            item.splitArea = advOpt.splitArea;
+            item.splitLine = advOpt.splitLine;
+
+            // 设置图形刻度
+            item.axisLabel = {};
+            item.axisLabel.formatter = function (value) {
+                var result;
+                var w;
+                var y;
+                // 确定可以转换成数字
+                if (!Number.isNaN(value / 1)) {
+                    w = 10000; // 万
+                    y = 100000000; // 亿
+
+                    // Y轴调到右边需要数据翻转
+                    if (advOpt.chartType === 'bar') {
+                        value *= -1;
+                    }
+                    result = value;
+
+                    if (value >= w && value <= y) {
+                        result = (value / w).toFixed(0) + '万';
+                    }
+                    else if (value > y) {
+                        result = (value / y).toFixed(0) + '亿';
+                    }
+                }
+
+                return result;
+            };
+            // 字体修改
+            item.axisLabel.textStyle = advOpt.textStyle;
+
+            // y轴颜色设定
+            item.axisLine = {};
+            item.axisLine.lineStyle = advOpt.lineStyle;
+            return item;
+
         }
     };
+
     /**
      * 设置图例
      *
-     * @protected
+     * @param {Object} options eCharts接口配置项
+     * @param {Object} options.grid 直角坐标系内绘图网格
+     * @param {Object} options.dataZoom 数据区域缩放
+     * @param {Object} options.series 数据内容
+     *
+     * @private
      */
     UI_E_CHART_CLASS.$setupLegend = function (options) {
 
         // 控制图例位置 需要同事修改下面两处 - 晓强
         // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
         // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
-        var legend = {
-            x: 'center',
-            y: '20'
-        };
+
+        var legend = {x: 'center', y: '20'};
         var data = [];
         var defaultMeasures = this.$getDefaultMeasures(this._chartType);
+
         if (this._chartType === 'pie') {
             for (var i = 0; i < this._aXAxis.data.length; i++) {
                 data[i] = this._aXAxis.data[i];
             }
-        }
-        // 地图的指标现在都是单指标，所以不需要展示这一图例，暂时将其隐藏   update by majun
-        if (this._chartType === 'map') {
-        	legend.show = false;
         }
         else {
             if (this._aSeries && this._aSeries.length > 0) {
@@ -820,12 +882,10 @@
             }
         }
         legend.data = data;
-        if (this._chartType === 'line') {
-            // 更改折线图图例字体
-            legend.textStyle = styleConfiguration.legendStyle;
-            options.legend = legend;
-        }
+        legend.textStyle = styleConfiguration.legendStyle;
+        options.legend = legend;
     };
+
     /**
      * 设置工具箱
      *
@@ -953,7 +1013,7 @@
                                 true
                         );
                     }
-                    
+
                     res += '<br/>' + data[i][0] + ' : ' + valueLable;
                 }
                 return res;
@@ -1066,7 +1126,20 @@
             noDataContainer,
             me = this;
         me.$disposeChart();
-        me.$preload();
+        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
+            this._chartType = ser.type;
+        }
+
+        // 如果显示指标区域 并且 有指标,则加载指标区域
+        if (
+            this._appearance
+            && this._appearance.isShowInds
+            && this._allMeasures
+            && this._allMeasures.length > 0
+        ) {
+            this.$renderIndArea();
+        }
+
         // 如果没有数据，图形显示 暂无数据
         if (
             !me._aSeries
@@ -1237,19 +1310,17 @@
         //     fontSize: '120px'
         // };
 
-        this.$setupLegend(options);
+        // 如果指标区域不显示，才显示图例；其实图例也应该给开放出去，让用户自己去设置，不应该根据指标区域的逻辑进行处理
+        if (
+            this._appearance
+            && !this._appearance.isShowInds
+        ) {
+            this.$setupLegend(options);
+        }
+
         return options;
     };
 
-    UI_E_CHART_CLASS.$preload = function () {
-        for (var i = 0, ser; ser = this._aSeries[i]; i ++) {
-            this._chartType = ser.type;
-        }
-
-        if (this._allMeasures) {
-            this.$renderCheckBoxs();
-        }
-    };
 
     /**
      * 销毁图表

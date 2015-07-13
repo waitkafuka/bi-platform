@@ -612,6 +612,35 @@ public class ReportRuntimeModel implements Serializable {
     public QueryAction getLinkedQueryAction() {
         return linkedQueryAction;
     }
+
+    /**
+     * @param context the context to set
+     */
+    public void setContext(QueryContext context) {
+        this.context = context;
+    }
+
+    /**
+     * @param timeDimItemIds the timeDimItemIds to set
+     */
+    public void setTimeDimItemIds(List<String> timeDimItemIds) {
+        this.timeDimItemIds = timeDimItemIds;
+    }
+
+    /**
+     * @param localContext the localContext to set
+     */
+    public void setLocalContext(Map<String, QueryContext> localContext) {
+        this.localContext = localContext;
+    }
+
+    /**
+     * @param universalItemStore the universalItemStore to set
+     */
+    public void setUniversalItemStore(
+            Map<String, Map<String, Item>> universalItemStore) {
+        this.universalItemStore = universalItemStore;
+    }
     
     
 }

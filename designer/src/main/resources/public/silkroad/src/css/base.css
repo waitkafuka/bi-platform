@@ -101,6 +101,15 @@ a {
 .mr-30 {
     margin-right: 30px;
 }
+.ml-2 {
+    margin-left: 2px;
+}
+.ml-5 {
+    margin-left: 5px;
+}
+.mb-20 {
+    margin-bottom: 20px;
+}
 .o-h {
     overflow: hidden;
 }

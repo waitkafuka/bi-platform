@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +23,7 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -43,8 +45,11 @@ import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
+import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
+import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -55,6 +60,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
@@ -92,6 +98,9 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      */
     @Resource(name = "reportModelCacheManager")
     private ReportModelCacheManager reportModelCacheManager;
+    
+    @Resource(name = "fileService")
+    private FileService fileService;
 
     /**
      * 报表数据查询服务
@@ -230,7 +239,8 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         for (Item oldItem : oldItems) {
             if (cube != null && cube.getDimensions() != null) {
                 for (Dimension dimension : cube.getDimensions().values()) {
-                    if ((dimension.getId().equals(oldItem.getId()) && dimension.getType() == DimensionType.TIME_DIMENSION)) {
+                    if ((dimension.getId().equals(oldItem.getId()) 
+                        && dimension.getType() == DimensionType.TIME_DIMENSION)) {
                         timeItem.add(oldItem);
                     }
                 }
@@ -494,7 +504,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         }
 
         // 区域上下文
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(areaId);
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportId, areaId);
         areaContext.getParams().clear();
         areaContext.getParams().putAll(runTimeModel.getContext().getParams());
 
@@ -623,23 +633,23 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         return mav;
     }
 
-    /**
-     * 根据reportId得到ReportModel
-     * 
-     * @param reportId 报表id
-     * @return 返回reportId对应的ReportDesignModel对象实例
-     */
-    private ReportDesignModel getReportModel(String reportId) {
-        ReportDesignModel reportModel = null;
-        try {
-            reportModel = reportModelCacheManager.getReportModel(reportId);
-            return reportModel;
-        } catch (CacheOperationException e) {
-            logger.warn("There is no such report model in cache. ", e);
-            logger.info("Add report model into cache. ");
-        }
-        return reportModelCacheManager.loadReportModelToCache(reportId);
-    }
+//    /**
+//     * 根据reportId得到ReportModel
+//     * 
+//     * @param reportId 报表id
+//     * @return 返回reportId对应的ReportDesignModel对象实例
+//     */
+//    private ReportDesignModel getReportModel(String reportId) {
+//        ReportDesignModel reportModel = null;
+//        try {
+//            reportModel = reportModelCacheManager.getReportModel(reportId);
+//            return reportModel;
+//        } catch (CacheOperationException e) {
+//            logger.warn("There is no such report model in cache. ", e);
+//            logger.info("Add report model into cache. ");
+//        }
+//        return reportModelCacheManager.loadReportModelToCache(reportId);
+//    }
 
     /**
      * 产生新的排序信息
@@ -725,5 +735,128 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      */
     ReportDesignModel getDesignModelFromRuntimeModel(String reportId) {
         return reportModelCacheManager.getRuntimeModel(reportId).getModel();
+    }
+    
+    /**
+     * 报表保存功能实现
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/{reportId}/runtime/save", method = RequestMethod.POST)
+    public ResponseResult saveRuntimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        ReportRuntimeModel runTimeModel = null;
+        try {
+            runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        } catch (CacheOperationException e1) {
+            logger.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
+            result.setStatus(1);
+            result.setStatusInfo("未能获取正确的报表定义");
+            return result;
+        }
+
+        if (runTimeModel == null) {
+            logger.info("[INFO] There are no such model in cache. Report Id: " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("未能获取正确的报表定义");
+            return result;
+        }
+        String name =  request.getParameter ("reportName");
+        ReportRuntimeModel copy = copyRuntimeModel (runTimeModel);
+        modifyCopyWithParams(copy, request);
+        copy.getModel ().setName (name);
+        String savedReportPath = getSavedReportPath (request) + File.separator + copy.getReportModelId ();
+        try {
+            fileService.write (savedReportPath, SerializationUtils.serialize (copy), true);
+            reportModelCacheManager.updateRunTimeModelToCache (copy.getReportModelId (), copy);
+        } catch (FileServiceException e) {
+            logger.error (e.getMessage (), e);
+        }
+        result.setStatus (0);
+        result.setStatusInfo ("successfully");
+        result.setData (copy.getReportModelId ());
+        logger.info ("save report succcessfully with id : {} on path {}", copy.getReportModelId (), savedReportPath);
+        return result;
+    }
+    
+    /**
+     * 报表保存功能实现
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/{reportId}/runtime/update", method = RequestMethod.POST)
+    public ResponseResult update(@PathVariable("reportId") String reportId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        ReportRuntimeModel runTimeModel = null;
+        try {
+            runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        } catch (CacheOperationException e1) {
+            logger.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
+            result.setStatus(1);
+            result.setStatusInfo("未能获取正确的报表定义");
+            return result;
+        }
+
+        if (runTimeModel == null) {
+            logger.info("[INFO] There are no such model in cache. Report Id: " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("未能获取正确的报表定义");
+            return result;
+        }
+        String savedReportPath = getSavedReportPath (request) + File.separator + runTimeModel.getReportModelId ();
+        try {
+            fileService.write (savedReportPath, SerializationUtils.serialize (runTimeModel), true);
+        } catch (FileServiceException e) {
+            logger.error (e.getMessage (), e);
+        }
+        result.setStatus (0);
+        result.setStatusInfo ("successfully");
+        logger.info ("save report succcessfully with id : {} on path {}", reportId, savedReportPath);
+        return result;
+    }
+
+    /**
+     * 依据用户请求参数信息，在上下文中保存用户当前请求参数信息
+     * @param copy
+     * @param request
+     */
+    private void modifyCopyWithParams(final ReportRuntimeModel copy, final HttpServletRequest request) {
+        Map<String, ReportParam> reportParams = copy.getModel ().getParams ();
+        if (reportParams == null || reportParams.isEmpty ()) {
+            return;
+        }
+        reportParams.forEach ((k, v) -> {
+            if (!StringUtils.isEmpty (request.getParameter (v.getName ()))) {
+                copy.getContext ().put (v.getName (), request.getParameter (v.getName ()));
+                // TODO 这里需要测试一下 是否需要做此操作
+                copy.getContext ().put (v.getElementId (), request.getParameter (v.getName ()));
+            }
+        });
+    }
+
+    /**
+     * 构建当前runtimeModel的副本
+     * @param runTimeModel
+     * @return ReportRuntimeModel
+     */
+    private ReportRuntimeModel copyRuntimeModel(ReportRuntimeModel runTimeModel) {
+        String uuid = UuidGeneratorUtils.generate ();
+        ReportRuntimeModel copy = new ReportRuntimeModel (uuid);
+        ReportDesignModel model = DeepcopyUtils.deepCopy (runTimeModel.getModel ());
+        model.setId (uuid);
+        copy.setModel (model);
+        copy.setContext (runTimeModel.getContext ());
+        copy.setId (UuidGeneratorUtils.generate ().toString ());
+        copy.setLocalContext (runTimeModel.getLocalContext ());
+        copy.setTimeDimItemIds (runTimeModel.getTimeDimItemIds ());
+        copy.setUniversalItemStore (runTimeModel.getUniversalItemStore ());
+        
+        return copy;
     }
 }

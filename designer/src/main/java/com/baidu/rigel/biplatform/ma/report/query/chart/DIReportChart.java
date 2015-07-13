@@ -36,32 +36,37 @@ public class DIReportChart implements Serializable {
     private static final long serialVersionUID = 3417297142845383674L;
     
     /**
-     * 
+     * title
      */
     private String title;
     
     /**
-     * 
+     * subTitle
      */
     private String subTitle;
     
     /**
-     * 
+     * xAxisType
      */
-    private String xAxisType; // catagory: 'asdf', datatime 2012-12-12, month
+    private String xAxisType;
     
     /**
-     * 
+     * xAxisCategories
      */
     private String[] xAxisCategories;
     
     /**
-     * 
+     * 坐标轴描述信息
+     */
+    private ChartRenderInfo render;
+    
+    /**
+     * yAxises
      */
     private List<YAxis> yAxises;
     
     /**
-     * 
+     * seriesData
      */
     private List<SeriesDataUnit> seriesData;
     
@@ -71,17 +76,17 @@ public class DIReportChart implements Serializable {
     private String[] allMeasures;
     
     /**
-     * 
+     * defaultMeasuers
      */
     private String[] defaultMeasures;
     
     /**
-     * 
+     * allDims
      */
     private String[] allDims;
     
     /**
-     * 
+     * defaultDims
      */
     private String[] defaultDims;
     
@@ -116,7 +121,7 @@ public class DIReportChart implements Serializable {
     private Map<String, String> measureMap = Maps.newHashMap();
     
     /**
-     * 
+     * areaId
      */
     private String areaId;
     
@@ -124,6 +129,8 @@ public class DIReportChart implements Serializable {
      * dimMap
      */
     private Map<String, String> dimMap;
+    
+    private Map<String, Object> appearance;
     
     
     public String getTitle() {
@@ -347,5 +354,37 @@ public class DIReportChart implements Serializable {
         }
         return dimMap;
     }
-    
+
+    /**
+     * @return the render
+     */
+    public ChartRenderInfo getRender() {
+        if (this.render == null) {
+            this.render = new ChartRenderInfo ();
+        }
+        return render;
+    }
+
+    /**
+     * @param render the render to set
+     */
+    public void setRender(ChartRenderInfo render) {
+        this.render = render;
+    }
+
+    /**
+     * @return the appearance
+     */
+    public Map<String, Object> getAppearance() {
+        return appearance;
+    }
+
+    /**
+     * @param appearance the appearance to set
+     */
+    public void setAppearance(Map<String, Object> appearance) {
+        this.appearance = appearance;
+    }
+
+
 }

@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.auth.bo.ReportDesignModelBo;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
@@ -1990,5 +1991,133 @@ public class ReportDesignModelResource extends BaseResource {
             runtimeModel.init(model, true);
             reportModelCacheManager.updateRunTimeModelToCache(model.getId(), runtimeModel);
         }
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @SuppressWarnings("unchecked")
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/axisCaption",
+            method = { RequestMethod.POST })
+    public ResponseResult updateChartCaptionSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin query measuer axis's caption setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getType () != ExtendAreaType.CHART) {
+            throw new UnsupportedOperationException ("非图形区域，不支持操作");
+        }
+        String axisCaption = request.getParameter ("axisCaption");
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        if (StringUtils.isEmpty (axisCaption)) {
+            return result;
+        }
+        Map<String, String> fromJson = AnswerCoreConstant.GSON.fromJson (
+                axisCaption, new TypeToken<Map<String, String>> () {
+                }.getType ());
+        area.getChartFormatModel ().getSetting ().setAxisCaption (fromJson);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms",
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/axisCaption", method = { RequestMethod.GET })
+    public ResponseResult getChartCaptionSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin query measuer axis's caption setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getType () != ExtendAreaType.CHART) {
+            throw new UnsupportedOperationException ("非图形区域，不支持操作");
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        result.setData (area.getChartFormatModel ().getSetting ().getAxisCaption ());
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms",
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/individuation",
+            method = { RequestMethod.POST })
+    public ResponseResult updateChartAppearanceSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info ("begin query measuer appearance setting");
+        long begin = System.currentTimeMillis ();
+        ResponseResult result = new ResponseResult ();
+        ReportDesignModel model = reportModelCacheManager.getReportModel (reportId);
+        ExtendArea area = model.getExtendById (areaId);
+        if (area.getType () != ExtendAreaType.CHART) {
+            throw new UnsupportedOperationException ("非图形区域，不支持操作");
+        }
+        String appearance = request.getParameter ("appearance");
+        result.setStatus (0);
+        result.setStatusInfo (SUCCESS);
+        if (StringUtils.isEmpty (appearance)) {
+            return result;
+        }
+        Map<String, Object> fromJson = AnswerCoreConstant.GSON.fromJson (
+                appearance, new TypeToken<Map<String, Object>> () {
+                }.getType ());
+        area.getChartFormatModel ().getAppearance ().setLegend (fromJson);
+        this.reportModelCacheManager.updateReportModelToCache (reportId, model);
+        logger.info ("[INFO]query measuer setting result {}, cose {} ms", 
+                GsonUtils.toJson (result.getData ()),
+                (System.currentTimeMillis () - begin));
+        return result;
+    }
+    
+    /**
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/individuation", method = { RequestMethod.GET })
+    public ResponseResult getChartAppearanceSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin query measuer appearance setting");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        if (area.getType () != ExtendAreaType.CHART) {
+            throw new UnsupportedOperationException ("非图形区域，不支持操作");
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        Map<String, Map<String, Object>> data = Maps.newHashMap ();
+        data.put ("appearance", area.getChartFormatModel ().getAppearance ().getLegend ());
+        result.setData (data);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        logger.info("[INFO]query measuer setting result {}, cose {} ms",
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
     }
 }

@@ -888,6 +888,34 @@ define(function () {
     };
 
     /**
+     * 报表新建（编辑）- 图形编辑 - 坐标轴名字设置
+     * 获取指标提示信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getAxisTextList = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/caption';
+    };
+
+    /**
+     * 报表新建（编辑）- 图形编辑 - 个性化设置
+     * 获取指标提示信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getIndividuationData = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/individuation';
+    };
+
+    /**
      * 报表新建（编辑）- 表格编辑 - 文本对齐设置
      * 获取文本对齐相关信息
      *
@@ -986,14 +1014,14 @@ define(function () {
 
     /**
      * 报表新建（编辑）-edit-setting
-     * 过滤空白行
+     * 表格-其他设置
      *
      * @param {string} reportId 报表id
      * @param {string} compId 组建区域的id
      * @public
      * @return {string} url
      */
-    Url.getFilterBlankLine = function (reportId, compId) {
+    Url.getTableOtherSetting = function (reportId, compId) {
         return getExtendAreaBaseUrl(reportId, compId)
             + '/othersetting';
     };

@@ -15,9 +15,17 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
-import javax.annotation.Resource;
 
+import java.io.File;
+
+import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+
+import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 
 /**
  * 
@@ -26,6 +34,11 @@ import org.springframework.beans.factory.annotation.Value;
  */
 @Resource(name = "ResourceRepository")
 public class BaseResource {
+    
+    /**
+     * 用户身份标识key
+     */
+    private static final String UID_KEY = "USER_ID";
 
     @Value("${biplatform.ma.ser_key}")
     protected String securityKey;
@@ -37,5 +50,67 @@ public class BaseResource {
      */
     protected String getSecurityKey(String productLine) {
         return null;
+    }
+    
+    /**
+     * 获取用户保存报表的路径
+     * @param request
+     * @return 依据用户标识获取的用户保存报表的路径
+     */
+    protected String getSavedReportPath(HttpServletRequest request) {
+        String  path = "preview";
+        if (isNotPreview(request)) {
+            path = getUserIdendity(request);
+        }
+        return ContextManager.getProductLine () + File.separator + path;
+    }
+
+    /**
+     * 从请求中获取当前访问报表用户用户标识
+     * 
+     * @param request
+     * @return 用户标识
+     */
+    private String getUserIdendity(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies ();
+        String uid = getUidFromCookies(cookies);
+        if (StringUtils.isEmpty (uid)) {
+            uid = request.getHeader (UID_KEY);
+        }
+        if (StringUtils.isEmpty (uid)) {
+            uid = request.getParameter (UID_KEY);
+        }
+        if (StringUtils.isEmpty (uid)) {
+            throw new RuntimeException ("未提供正确用户标识，拒绝服务");
+        }
+        return uid;
+    }
+
+    private String getUidFromCookies(Cookie[] cookies) {
+        if (cookies == null || cookies.length == 0) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (UID_KEY.equals (cookie.getName ())) {
+                return cookie.getValue ();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 判断当前报表访问是否不是预览请求
+     * @param request
+     * @return 预览请求返回false，否则返回true
+     */
+    private boolean isNotPreview(HttpServletRequest request) {
+        if (StringUtils.isNotBlank (request.getParameter ("preview"))) {
+            return false;
+        }
+        String referer = request.getHeader ("referer");
+        if (StringUtils.contains (referer, "preview=true")) {
+            return false;
+        }
+        return true;
     }
 }

@@ -289,6 +289,8 @@ $namespace('di.shared.model');
                     ser.yAxisIndex = yNameMap[ser.yAxisName];
                 }
             }
+            chartData.appearance = rawData.appearance;
+            chartData.render = rawData.render;
             chartData.allMeasures = rawData.allMeasures;
             chartData.defaultMeasures = rawData.defaultMeasures;
             chartData.allDims = rawData.allDims;

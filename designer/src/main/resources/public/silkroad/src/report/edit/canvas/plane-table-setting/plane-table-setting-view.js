@@ -1,5 +1,5 @@
 /**
- * @file: 报表新建（编辑）-- 图形组件编辑模块
+ * @file: 报表新建（编辑）-- 图形组件编辑模块 View
  * 图形topn设置、图形颜色设置（暂时还未重构完，因此只有图形所特有的设置功能）
  * @author: lizhantong
  * @depend:
@@ -11,27 +11,31 @@ define(
         'dialog',
         'report/edit/canvas/plane-table-setting/plane-table-setting-model',
         'report/edit/canvas/table-setting/text-align/text-align-view',
-        'report/edit/canvas/plane-table-setting/field-filter-setting-template'
+        'report/edit/canvas/plane-table-setting/field-filter-setting-template',
+        'report/edit/canvas/plane-table-setting/other-setting/other-setting-view'
     ],
     function (
         dialog,
         TableSettingModel,
         textAlignView,
-        fieldFilterSettingTemplate
+        fieldFilterSettingTemplate,
+        OtherSettingView
     ) {
+
         //------------------------------------------
         // 视图类的声明
         //------------------------------------------
 
-        /**
-         * 维度设置视图类
-         *
-         * @class
-         */
-        var View = Backbone.View.extend({
+        /* globals Backbone */
+        return Backbone.View.extend({
+
+            /**
+             * 事件绑定
+             */
             events: {
                 'click .j-line-s .item': 'setFilter'
             },
+
             //------------------------------------------
             // 公共方法区域
             //------------------------------------------
@@ -51,13 +55,23 @@ define(
                 });
                 this.model.set('compId', this.$el.find('.j-comp-setting').attr('data-comp-id'));
                 this.canvasView = option.canvasView;
-                // 挂载topn设置视图
+
                 this.textAlignView = new textAlignView({
                     el: this.el,
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView
                 });
+                this.othersView = new OtherSettingView({
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
             },
+
+            /**
+             * 设置条件信息
+             * @param {event} event 点击事件
+             */
             setFilter: function(event) {
                 var that = this;
                 var $target = $(event.target);
@@ -66,6 +80,7 @@ define(
                 }
                 var text = $target.text();
                 var id = $target.parent().attr('data-id');
+
                 this.model.getFieldFilterInfo(id, function (data) {
                     data.id = id;
                     data.text = text;
@@ -95,12 +110,20 @@ define(
                     });
                 });
             },
+
+            /**
+             * 保存条件设置信息
+             *
+             * @param {$HTMLElement} $dialog 弹出框$el元素
+             * @private
+             */
             saveFieldFilter: function($dialog) {
                 var $filterSet = $('.silkroad-data-field-filter-set');
                 var fieldId = $filterSet.find('.field-id').attr('data-id');
                 var name = $filterSet.find('.field-name').val();
                 var sqlCondition = $filterSet.find('.condition').val();
                 var defaultValue = $filterSet.find('.default-value').val();
+
                 var data = {
                     name: name,
                     sqlCondition: sqlCondition,
@@ -112,6 +135,7 @@ define(
                     window.dataInsight.main.canvas.showReport();
                 });
             },
+
             /**
              * 销毁
              * @public
@@ -125,5 +149,5 @@ define(
                 this.$el.unbind();
             }
         });
-        return View;
-    });
+    }
+);

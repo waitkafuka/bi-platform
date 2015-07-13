@@ -106,7 +106,7 @@ public class CallbackSearchServiceImpl {
      * @author mengran
      *
      */
-    private class CallbackExecutor implements Callable<CallbackResponse> {
+    public class CallbackExecutor implements Callable<CallbackResponse> {
 
         private Entry<String, List<MiniCubeMeasure>> group;
         private String groupbyParams;
@@ -123,6 +123,14 @@ public class CallbackSearchServiceImpl {
             this.group = group;
             this.groupbyParams = AnswerCoreConstant.GSON.toJson(groupbyParams);
             this.whereParams = AnswerCoreConstant.GSON.toJson(whereParams);
+        }
+        
+        /**
+         * for test
+         * @param callbackMeasures
+         */
+        protected void setCallbackMeasuers(String callbackMeasures) {
+            this.callbackMeasures = callbackMeasures;
         }
         
         public List<String> getCallbackMeasures() {
@@ -303,7 +311,14 @@ public class CallbackSearchServiceImpl {
         return result;
     }
     
-    private SearchIndexResultSet packageResultRecords(QueryRequest query, SqlQuery sqlQuery, Map<CallbackExecutor, CallbackResponse> response) {
+    /**
+     * @param taskExecutor the taskExecutor to set
+     */
+    protected void setTaskExecutor(ThreadPoolTaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
+    protected SearchIndexResultSet packageResultRecords(QueryRequest query, SqlQuery sqlQuery, Map<CallbackExecutor, CallbackResponse> response) {
         List<String> groupby = new ArrayList<String>(query.getGroupBy().getGroups());
         // Confirm meta sequence
         List<Entry<CallbackExecutor, CallbackResponse>> fieldValuesHolderList = new ArrayList<Entry<CallbackExecutor, CallbackResponse>>(response.size());

@@ -644,6 +644,15 @@
     /*margin: 0 auto;*/
     margin: 0 0 10px 50px;
 }
+.data-format-black input {
+    outline: none;
+    height: 25px;
+    line-height: 25px;
+}
+.data-format-black label {
+    height: 25px;
+    line-height: 25px;
+}
 /*@end*/
 
 /**
@@ -682,6 +691,49 @@
 }
 .ind-color-alone-ind > input {
     float: left;
+}
+/*@end*/
+
+/**
+ * @name                      :坐标轴名字设置
+ * @author                    :lizhantong
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @explain                   :数据格式设置模块
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.dialog-content {
+    width: 300px;
+}
+.dialog-content .base-setting-box {
+    padding: 10px 10px;
+}
+.base-setting-box > span {
+    width: 100%;
+    font-weight: bold;
+}
+.base-setting-box .base-setting-item {
+    margin-top: 10px;
+}
+
+.base-setting-item > label {
+    height: 25px;
+    line-height: 25px;
+}
+.base-setting-item > input {
+    outline: none;
+    height: 20px;
+    line-height: 20px;
+}
+.base-setting-item > span{
+    height: 25px;
+    line-height: 25px;
+    width: 110px;
+    text-align: right;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 /*@end*/
 

@@ -11,24 +11,25 @@ define(
         'report/edit/canvas/chart-setting/chart-setting-model',
         'report/edit/canvas/chart-setting/topn/topn-view',
         'report/edit/canvas/chart-setting/axis/axis-view',
-        'report/edit/canvas/chart-setting/ind-color/ind-color-view'
+        'report/edit/canvas/chart-setting/ind-color/ind-color-view',
+        'report/edit/canvas/chart-setting/axis-text/axis-text-view',
+        'report/edit/canvas/chart-setting/individuation/individuation-view'
     ],
     function (
         ChartSettingModel,
         TopnView,
         AxisView,
-        IndColorView
+        IndColorView,
+        AxisTextView,
+        IndividuationView
     ) {
         //------------------------------------------
         // 视图类的声明
         //------------------------------------------
 
-        /**
-         * 维度设置视图类
-         *
-         * @class
-         */
-        var View = Backbone.View.extend({
+        /* globals Backbone */
+        return Backbone.View.extend({
+
             //------------------------------------------
             // 公共方法区域
             //------------------------------------------
@@ -36,6 +37,7 @@ define(
             /**
              * 报表组件的编辑模块 初始化函数
              *
+             * @param {Object} option 设置项
              * @param {$HTMLElement} option.el
              * @param {string} option.reportId 报表的id
              * @param {Object} option.canvasView 画布的view
@@ -65,6 +67,19 @@ define(
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView
                 });
+                // 挂载坐标轴名字设置视图
+                this.axisTextView = new AxisTextView({
+                    // 挂载指标颜色设置视图
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
+                // 挂载个性化设置视图
+                this.individuationView = new IndividuationView({
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
             },
             /**
              * 销毁
@@ -79,6 +94,5 @@ define(
                 this.$el.unbind();
             }
         });
-
-        return View;
-    });
+    }
+);

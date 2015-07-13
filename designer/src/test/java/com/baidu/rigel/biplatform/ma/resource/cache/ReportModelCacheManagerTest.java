@@ -166,21 +166,21 @@ public class ReportModelCacheManagerTest {
 
     @Test
     public void testupdateAreaContext() {
-        cacheManager.updateAreaContext("areaId", new ExtendAreaContext());
+        cacheManager.updateAreaContext("", "areaId", new ExtendAreaContext());
     }
 
     @Test
     public void testgetAreaContext() {
         ExtendAreaContext mockContext = new ExtendAreaContext();
         Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString())).thenReturn(mockContext);
-        ExtendAreaContext resultContext = cacheManager.getAreaContext("areaId");
+        ExtendAreaContext resultContext = cacheManager.getAreaContext("", "areaId");
         Assert.assertNotNull(resultContext);
     }
 
     @Test
     public void testgetAreaContextWithNewContext() {
         Mockito.when(cacheManagerForResource.getFromCache(Mockito.anyString())).thenReturn(null);
-        ExtendAreaContext resultContext = cacheManager.getAreaContext("areaId");
+        ExtendAreaContext resultContext = cacheManager.getAreaContext("", "areaId");
         Assert.assertNotNull(resultContext);
     }
 }

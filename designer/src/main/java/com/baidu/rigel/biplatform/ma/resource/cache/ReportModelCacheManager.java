@@ -236,8 +236,8 @@ public class ReportModelCacheManager {
      * @param areaId 区域id
      * @param context 区域上下文
      */
-    public void updateAreaContext(String areaId, ExtendAreaContext context) {
-        int key = genAreaKey(areaId);
+    public void updateAreaContext(String reportId, String areaId, ExtendAreaContext context) {
+        int key = genAreaKey(reportId, areaId);
         cacheManagerForReource.setToCache(String.valueOf(key), context);
     }
 
@@ -246,8 +246,10 @@ public class ReportModelCacheManager {
      * @param areaId
      * @return int
      */
-    private int genAreaKey(String areaId) {
+    private int genAreaKey(String reportId, String areaId) {
         int key = new StringBuilder()
+                .append (reportId)
+                .append ("_^-^_")
                 .append(areaId)
                 .append("_^-^_")
                 .append(ContextManager.getSessionId())
@@ -264,8 +266,8 @@ public class ReportModelCacheManager {
      * @return ExtendAreaContext
      * 
      */
-    public ExtendAreaContext getAreaContext(String areaId) {
-        int key = genAreaKey(areaId);
+    public ExtendAreaContext getAreaContext(String reportId, String areaId) {
+        int key = genAreaKey(reportId, areaId);
         if (cacheManagerForReource.getFromCache(String.valueOf(key)) == null) {
             return new ExtendAreaContext();
         }

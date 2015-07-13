@@ -43,7 +43,7 @@ define(['template'], function (template) {
         }
         $out+='\n            </span>\n            <span class="icon-letter j-delete" title="删除">×</span>\n        </div>\n        ';
         });
-        $out+='\n    </div>\n    <div class="data-axis-line data-axis-line-48 data-btn-line" style="margin: 5px 0 2px 35px;">\n        <span class="letter">设置:</span>\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\n        <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>\n        <span class="icon-letter icon-letter-btn j-set-text-align">文本对齐</span>\n    </div>\n</div>';
+        $out+='\n    </div>\n    <div class="data-axis-line data-axis-line-48 data-btn-line" style="margin: 5px 0 2px 35px;">\n        <span class="letter">设置:</span>\n        <span class="icon-letter icon-letter-btn j-set-data-format">数据格式</span>\n        <span class="icon-letter icon-letter-btn j-norm-info-depict">指标信息描述</span>\n        <span class="icon-letter icon-letter-btn j-set-text-align">文本对齐</span>\n        <span class="icon-letter icon-letter-btn j-others-operate">其他操作</span>\n    </div>\n</div>';
         return $out;
     }
     return { render: anonymous };

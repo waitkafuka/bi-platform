@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang.SerializationUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +78,8 @@ import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
+import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
+import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -176,6 +180,9 @@ public class QueryDataResource extends BaseResource {
     @Resource
     private AnalysisChartBuildService analysisChartBuildService;
 
+    @Resource(name = "fileService")
+    private FileService fileService;
+    
     /**
      * 报表数据查询服务
      */
@@ -377,18 +384,38 @@ public class QueryDataResource extends BaseResource {
         ReportRuntimeModel runtimeModel = null;
         try {
             if (!StringUtils.isEmpty(reportPreview) && Boolean.valueOf(reportPreview)) {
-                model = DeepcopyUtils.deepCopy(reportModelCacheManager.getReportModel(reportId));
-                model.setPersStatus(false);
+                model = reportModelCacheManager.getReportModel(reportId);
+                if (model != null) {
+                    model = DeepcopyUtils.deepCopy (model);
+                }
+//                model.setPersStatus(false);
             } else {
                 model = reportDesignModelService.getModelByIdOrName(reportId, true);
-                model.setPersStatus(true);
+//                model.setPersStatus(true);
                 // runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
             }
-            runtimeModel = new ReportRuntimeModel(reportId);
-            runtimeModel.init(model, true);
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
-            throw new IllegalStateException();
+//            throw new IllegalStateException();
+        }
+        
+        if (model != null) {
+            runtimeModel = new ReportRuntimeModel(reportId);
+            runtimeModel.init (model, true);
+        } else {
+            try {
+                String path = getSavedReportPath (request);
+                String fileName = path + File.separator + reportId;
+                runtimeModel = 
+                    (ReportRuntimeModel) SerializationUtils.deserialize (fileService.read (fileName));
+                model = runtimeModel.getModel ();
+            } catch (FileServiceException e) {
+                logger.info("[INFO]--- ---加载保存的报表失败 ", e);
+            }
+        }
+        if (runtimeModel == null) {
+            logger.info("[INFO]--- ---init runtime model failed ");
+            throw new RuntimeException("初始化报表模型失败");
         }
         // modify by jiangyichao at 2014-10-10
         // 将url参数添加到全局上下文中
@@ -1129,7 +1156,7 @@ public class QueryDataResource extends BaseResource {
         // 清除当前request中的请求参数，保证areaContext的参数正确
         resetAreaContext(areaContext, request);
         resetContext(runTimeModel.getLocalContext().get(areaId), request);
-        reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
+        reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -1200,7 +1227,8 @@ public class QueryDataResource extends BaseResource {
             ReportRuntimeModel runTimeModel) {
         Map<String, Object> queryParams = updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
         runTimeModel.getLocalContextByAreaId(areaId).getParams().putAll(queryParams);
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        String reportModelId = runTimeModel.getReportModelId ();
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportModelId, targetArea.getId());
         areaContext.getParams().clear();
         areaContext.getParams().putAll(queryParams);
         return areaContext;
@@ -1378,7 +1406,7 @@ public class QueryDataResource extends BaseResource {
             queryParams.put(row.getOlapElementId(), uniqueNameArray);
 
             // TODO 仔细思考一下逻辑
-            reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
+            reportModelCacheManager.getAreaContext(reportId, areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
         } else {
             /**
@@ -1416,7 +1444,7 @@ public class QueryDataResource extends BaseResource {
             queryParams.put(row.getOlapElementId(), drillName);
 
             // TODO 仔细思考一下逻辑
-            reportModelCacheManager.getAreaContext(areaId).getParams().putAll(queryParams);
+            reportModelCacheManager.getAreaContext(reportId, areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
             /**
              * 把下钻的值存下来 TODO 临时放在这里，需要重新考虑
@@ -1471,7 +1499,7 @@ public class QueryDataResource extends BaseResource {
             logger.info(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportId, targetArea.getId());
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * TODO 考虑一下这样的逻辑是否应该放到resource中
@@ -1540,7 +1568,7 @@ public class QueryDataResource extends BaseResource {
         // 清除展开、折叠方式下钻查询历史纪录
         runTimeModel.getDrillDownQueryHistory().clear();
 
-        reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
+        reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(getFormatModel(model, targetArea), table);
         resultMap.put("pivottable", table);
@@ -1639,7 +1667,7 @@ public class QueryDataResource extends BaseResource {
          * TODO 合并当前的全局上下文，需要重构下，整理上下文处理逻辑
          */
         // QueryAction previousAction = runTimeModel.getPreviousQueryAction(areaId);
-        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(targetArea.getId());
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportId, targetArea.getId());
 
         ResultSet previousResult = areaContext.getQueryStatus().getLast();
         LogicModel targetLogicModel = null;
@@ -1807,7 +1835,7 @@ public class QueryDataResource extends BaseResource {
                 runTimeModel.updateDatas(recordAction, result);
             }
             areaContext.getQueryStatus().add(result);
-            reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
+            reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -1991,7 +2019,7 @@ public class QueryDataResource extends BaseResource {
         // reportModelCacheManager.getReportModel(reportId);
         SortRecord.SortType sortType = SortRecord.SortType.valueOf(sort.toUpperCase());
         ExtendArea targetArea = reportModel.getExtendById(areaId);
-        ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
+        ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(reportId, areaId);
         DataModel model = DeepcopyUtils.deepCopy(context.getQueryStatus().getLast().getDataModel());
         SortRecord type = new SortRecord(sortType, uniqueName, 500);
         com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(model, type);
@@ -2025,7 +2053,7 @@ public class QueryDataResource extends BaseResource {
         }
         setTableResultProperty(reportId, table, resultMap);
         context.getQueryStatus().add(rs);
-        reportModelCacheManager.updateAreaContext(areaId, context);
+        reportModelCacheManager.updateAreaContext(reportId, areaId, context);
         logger.info("[INFO]successfully execute sort by measure. cost {} ms", (System.currentTimeMillis() - begin));
         return ResourceUtils.getResult("Success", "Fail", resultMap);
     }
@@ -2122,9 +2150,10 @@ public class QueryDataResource extends BaseResource {
     private void updateLocalContext(String dimId, ReportRuntimeModel model, String[] selectedDims, String areaId) {
         QueryContext localContext = model.getLocalContextByAreaId(areaId);
         localContext.getParams().put(dimId, selectedDims);
-        ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(areaId);
+        String reportModelId = model.getReportModelId ();
+        ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(reportModelId, areaId);
         context.getParams().put(dimId, selectedDims);
-        reportModelCacheManager.updateAreaContext(areaId, context);
+        reportModelCacheManager.updateAreaContext(reportModelId, areaId, context);
     }
 
     /**
@@ -2196,25 +2225,26 @@ public class QueryDataResource extends BaseResource {
         String csvString =
                 downloadService.downloadTableData(questionModel, designModel.getExtendById(areaId).getLogicModel());
 
-        final StringBuilder timeRange = new StringBuilder();
-        // 在上下文参数中判断是否有时间参数
-        for (Map.Entry<String, Object> entry : areaContext.getParams().entrySet()) {
-            Object v = entry.getValue();
-            if (v instanceof String && v.toString().contains("start") && v.toString().contains("end")
-                    && v.toString().contains("granularity")) {
-                try {
-                    JSONObject json = new JSONObject(v.toString());
-                    timeRange.append(json.getString("start") + "至" + json.getString("end"));
-                    break;
-                } catch (Exception e) {
-                }
-            }
-        }
+//        final StringBuilder timeRange = new StringBuilder();
+//        // 在上下文参数中判断是否有时间参数
+//        for (Map.Entry<String, Object> entry : areaContext.getParams().entrySet()) {
+//            Object v = entry.getValue();
+//            if (v instanceof String && v.toString().contains("start") && v.toString().contains("end")
+//                    && v.toString().contains("granularity")) {
+//                try {
+//                    JSONObject json = new JSONObject(v.toString());
+//                    timeRange.append(json.getString("start") + "至" + json.getString("end"));
+//                    break;
+//                } catch (Exception e) {
+//                }
+//            }
+//        }
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
         response.setContentType("application/x-msdownload;charset=GBK");
         // 写入文件
-        final String fileName = report.getName() + "_" +  timeRange.toString();
+        final String fileName = report.getName();
+//                + "_" +  timeRange.toString();
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf8") + ".csv");
         byte[] content = csvString.getBytes("GBK");
         response.setContentLength(content.length);
@@ -2480,7 +2510,7 @@ public class QueryDataResource extends BaseResource {
         // 清除当前request中的请求参数，保证areaContext的参数正确
         resetAreaContext(areaContext, request);
         resetContext(runTimeModel.getLocalContext().get(areaId), request);
-        reportModelCacheManager.updateAreaContext(targetArea.getId(), areaContext);
+        reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));

@@ -73,6 +73,12 @@ public class ExtendArea implements Serializable {
     private FormatModel formatModel = new FormatModel();
     
     /**
+     * 图形属性设置
+     */
+    private ChartFormatModel chartFormatModel = new ChartFormatModel();
+    
+    
+    /**
      * 表格的其他个性化配置，如是否过滤空白行等
      */
     private Map<String, Object> otherSetting = Maps.newHashMap();
@@ -258,7 +264,30 @@ public class ExtendArea implements Serializable {
     public void setOtherSetting(Map<String, Object> otherSetting) {
         this.otherSetting = otherSetting;
     }
-    
+
+    /**
+     * @param formatModel the formatModel to set
+     */
+    public void setFormatModel(FormatModel formatModel) {
+        this.formatModel = formatModel;
+    }
+
+    /**
+     * @return the chartFormatModel
+     */
+    public ChartFormatModel getChartFormatModel() {
+        if (this.chartFormatModel == null) {
+            this.chartFormatModel = new ChartFormatModel ();
+        }
+        return chartFormatModel;
+    }
+
+    /**
+     * @param chartFormatModel the chartFormatModel to set
+     */
+    public void setChartFormatModel(ChartFormatModel chartFormatModel) {
+        this.chartFormatModel = chartFormatModel;
+    }
     
 
 }

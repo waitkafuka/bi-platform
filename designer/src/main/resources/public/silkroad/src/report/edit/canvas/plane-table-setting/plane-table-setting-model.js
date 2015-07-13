@@ -11,11 +11,18 @@ define(['url'], function (Url) {
     //------------------------------------------
 
     var Model = Backbone.Model.extend({
-        defaults: {},
-        initialize: function () { },
+
         /**
-         * 获取数指标颜色设置数据
+         * 构造函数
          *
+         * @constructor
+         */
+        initialize: function () {},
+
+        /**
+         * 获取指标设置信息
+         *
+         * @param {string} itemId 指标项
          * @param {Function} success 回调函数
          * @public
          */
@@ -28,13 +35,26 @@ define(['url'], function (Url) {
 
             };
             $.ajax({
-                url: Url.getFieldFilterInfo(that.get('reportId'), that.get('compId'), itemId),
+                url: Url.getFieldFilterInfo(
+                    that.get('reportId'),
+                    that.get('compId'),
+                    itemId
+                ),
                 type: 'get',
                 success: function (data) {
                     success(data.data);
                 }
             });
         },
+
+        /**
+         * 保存指标设置信息
+         *
+         * @param {string} fieldId 指标项
+         * @param {Object} data 设置保存信息
+         * @param {Function} success 回调函数
+         * @public
+         */
         saveFieldFilterInfo: function (fieldId, data, success) {
             var that = this;
             $.ajax({

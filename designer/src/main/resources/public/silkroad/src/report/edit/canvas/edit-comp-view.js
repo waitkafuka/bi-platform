@@ -29,9 +29,7 @@ define([
         'report/edit/canvas/plane-table-setting/vui-setting-plane-table-template',
         'common/float-window',
         'report/edit/canvas/chart-icon-list-template',
-        'report/edit/canvas/norm-info-depict-template',
-        'report/edit/canvas/filter-blank-line-template',
-        'report/edit/canvas/plane-table-setting/field-filter-setting-template'
+        'report/edit/canvas/norm-info-depict-template'
     ],
     function (
         template,
@@ -56,9 +54,7 @@ define([
         vuiSettingPlaneTableTemplate,
         FloatWindow,
         indMenuTemplate,
-        normInfoDepictTemplate,
-        filterBlankLineTemplate,
-        fieldFilterSettingTemplate
+        normInfoDepictTemplate
     ) {
 
         return Backbone.View.extend({
@@ -72,7 +68,7 @@ define([
                 'click .item .j-icon-chart': 'showChartList',
                 'change .select-type': 'selectTypeChange',
                 'change .select-calendar-type': 'selectCalendarTypeChange',
-                'click .j-others-operate': 'getFilterBlankLine',
+                // 'click .j-others-operate': 'getFilterBlankLine',
                 'change .j-select-setAll': 'changeSelectAll'
             },
 
@@ -1677,151 +1673,6 @@ define([
                         $dialog.dialog('close');
                         that.canvasView.showReport();
                     });
-                }
-            },
-
-            /**
-             * 获取过滤空白行，并弹框展现
-             *
-             * @param {event} event 点击事件
-             * @public
-             */
-            getFilterBlankLine: function (event) {
-                var that = this;
-                var compId = that.getActiveCompId();
-                that.model.getFilterBlankLine(compId, openDataFormatDialog);
-                /**
-                 * 打开数据格式设置弹框
-                 */
-                function openDataFormatDialog(data) {
-                    var html;
-                    if (!data) {
-                        dialog.alert('没有指标');
-                        return;
-                    }
-                    html = filterBlankLineTemplate.render(
-                        data
-                    );
-                    dialog.showDialog({
-                        title: '其他操作',
-                        content: html,
-                        dialog: {
-                            width: 350,
-                            height: 220,
-                            resizable: false,
-                            buttons: [
-                                {
-                                    text: '提交',
-                                    click: function () {
-                                        saveFilterBlankLine($(this));
-                                    }
-                                },
-                                {
-                                    text: '取消',
-                                    click: function () {
-                                        $(this).dialog('close');
-                                    }
-                                }
-                            ]
-                        }
-                    });
-                }
-
-                /**
-                 * 保存数据格式
-                 */
-                function saveFilterBlankLine($dialog) {
-                    var $checks = $('.data-format-black').find('input');
-                    var data = {};
-                    var isChecked = false;
-
-                    isChecked = $($checks[0]).is(':checked');
-                    data.filterBlank = isChecked ? 'true' : 'false';
-
-                    isChecked = $($checks[1]).is(':checked');
-                    data.canChangedMeasure = isChecked ? 'true' : 'false';
-
-                    isChecked = $($checks[2]).is(':checked');
-                    data.needSummary = isChecked ? 'true' : 'false';
-
-                    that.model.saveFilterBlankLine(compId, data, function () {
-                        $dialog.dialog('close');
-
-                        var $table = $($('.active').children()[0]);
-                        var $reportVm = that.model.get('canvasModel').$reportVm;
-                        var tableBox = $reportVm.find('.j-component-item').filter('[data-comp-id=' + compId + ']');
-                        var entityDefs = that.model.get('canvasModel').reportJson.entityDefs;
-
-                        // 1.移除vm  2.移除json 3.重设表格高度
-                        if (data.canChangedMeasure === 'false') {
-                            // 获取到table中rich-select容器，并移除掉
-                            var richSelect = $($table.children()[0]).children()[0];
-                            var richSelectId = $(richSelect).attr('data-o_o-di');
-
-                            if (richSelectId.indexOf('rich-select') > 0) {
-                                $table.children()[0].remove();
-
-                                // 移除掉$reportVm中的 rich-select容器，移除掉
-                                tableBox.height(tableBox.height() - 37);
-                                $table = $($(tableBox).children()[0]);
-                                $table.children()[0].remove();
-
-                                var compEntity = $.getTargetElement(compId, entityDefs);
-                                delete compEntity.vuiRef.richSelect;
-                                var index = 0;
-                                for (var i = 0, iLen = entityDefs.length; i < iLen; i ++) {
-                                    if (entityDefs[i].id === richSelectId) {
-                                        index = i + 1;
-                                        break;
-                                    }
-                                }
-
-                                if (index) {
-                                    that.model.get('canvasModel').reportJson.entityDefs = entityDefs.slice(0, index - 1).concat(entityDefs.slice(index));
-                                }
-                            }
-
-
-                        }
-                        else {
-                            var richSelect = $($table.children()[0]).children()[0];
-                            if (richSelect) {
-                                var richSelectId = $(richSelect).attr('data-o_o-di');
-
-                                if (richSelectId.indexOf('rich-select') < 0) {
-                                    richSelectId = 'snpt.' + compId + '-vu-table-rich-select';
-                                    var html = [
-                                        '<div class="di-o_o-line">',
-                                        '<div class="" data-o_o-di="', richSelectId, '"></div>',
-                                        '</div>'
-                                    ].join('');
-
-                                    var json = {
-                                        clzType: 'VUI',
-                                        clzKey: 'RICH_SELECT',
-                                        id: richSelectId,
-                                        compId: compId
-                                    };
-                                    $table.prepend(html);
-                                    tableBox.height(tableBox.height() + 37);
-                                    $table = $($(tableBox).children()[0]);
-                                    $table.prepend(html);
-                                    that.model.get('canvasModel').reportJson.entityDefs.push(json);
-                                    var compEntity = $.getTargetElement(compId, entityDefs);
-                                    compEntity.vuiRef.richSelect = richSelectId;
-                                }
-                            }
-
-                        }
-                        that.canvasView.model.saveJsonVm(
-                            function () {
-                                that.canvasView.showReport();
-                            }
-                        );
-
-                    });
-
-
                 }
             },
 

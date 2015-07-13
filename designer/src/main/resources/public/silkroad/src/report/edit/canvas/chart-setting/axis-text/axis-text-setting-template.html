@@ -1,0 +1,23 @@
+<!--
+数据例子：
+var demoData = {
+    indList: {
+        click: {
+            caption: '',
+            axisName: ''
+        }
+    }
+};
+-->
+<!-- 指标颜色设置 -->
+<div class="dialog-content">
+    <div class="base-setting-box c-f j-axis-text-setting">
+        <span class="mb-20 f-l">请对坐标轴名字单独设置</span>
+        {{each indList as $ind name}}
+        <div class="base-setting-item f-l j-axis-text-item">
+            <span class="f-l">{{$ind.caption}}：</span>
+            <input class="f-l" type="text" name="{{name}}" value="{{$ind.axisName}}" />
+        </div>
+        {{/each}}
+    </div>
+</div>

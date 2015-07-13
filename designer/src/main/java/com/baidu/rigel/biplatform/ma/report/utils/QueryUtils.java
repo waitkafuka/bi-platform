@@ -733,6 +733,8 @@ public final class QueryUtils {
                     }
                 }
             }
+            chart.getRender ().setAxisCaption (area.getChartFormatModel ().getSetting ().getAxisCaption ());
+            chart.setAppearance (area.getChartFormatModel ().getAppearance ().getLegend ());
             final Map<String, String> dimMap = Maps.newConcurrentMap();
             String[] allDims = area.getLogicModel().getSelectionDims().values().stream().map(item -> {
                 OlapElement tmp = getOlapElement(area, schema, item);
