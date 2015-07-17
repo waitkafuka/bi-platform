@@ -145,6 +145,15 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         if (tmpArray.length >= 2) {
             rs.add(tmpArray[tmpArray.length - 1]);
             rs.add(tmpArray[0]);
+        } else if (tmpArray.length == 1) {
+            BigDecimal val = tmpArray[0];
+            if (val.compareTo (BigDecimal.ZERO) > 0) {
+                rs.add (val);
+                rs.add (BigDecimal.ZERO);
+            } else {
+                rs.add (BigDecimal.ZERO);
+                rs.add (val);
+            }
         }
         return rs;
     }

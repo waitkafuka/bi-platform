@@ -1,5 +1,7 @@
 package com.baidu.rigel.biplatform.ma.download.service.impl;
 
+import java.util.Map;
+
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
@@ -23,5 +25,14 @@ public class PlaneTableOfflineDownloadServiceImpl implements DownloadTableDataSe
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("暂时不支持");
     }
-
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String downloadTableData(QuestionModel questionModel, LogicModel logicModel, 
+            Map<String, Object> setting) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("当前暂不支持");       
+    }
 }

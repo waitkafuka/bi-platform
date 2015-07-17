@@ -19,6 +19,7 @@ import com.baidu.rigel.biplatform.ma.download.DownloadType;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadServiceFactory;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.google.common.collect.Maps;
 
 /**
  * pivotTable在线下载测试
@@ -50,4 +51,24 @@ public class PivotTableOnlineDownloadServiceImplTest {
         Assert.assertNotNull(csvString);
     }
 
+    /**
+     * 
+     */
+    @Test
+    public void testDownloadPivotTableOnlineWithSetting() {
+        DownloadType downloadType = DownloadType.PIVOT_TABLE_ONLINE;
+        DownloadTableDataService downService = DownloadServiceFactory.getDownloadTableDataService(downloadType);
+
+        // Mock一些数据对象
+        LogicModel logicModel = PowerMockito.mock(LogicModel.class);
+        ConfigQuestionModel questionModel = PowerMockito.mock(ConfigQuestionModel.class);
+        MiniCubeConnection connection = PowerMockito.mock(MiniCubeConnection.class);
+        DataModel dataModel = PowerMockito.mock(DataModel.class);
+        // 假定条件
+        PowerMockito.mockStatic(MiniCubeDriverManager.class);
+        PowerMockito.when(MiniCubeDriverManager.getConnection(Mockito.anyObject())).thenReturn(connection);
+        PowerMockito.when(connection.query(questionModel)).thenReturn(dataModel);
+        String csvString = downService.downloadTableData(questionModel, logicModel, Maps.newHashMap());
+        Assert.assertNotNull(csvString);
+    }
 }

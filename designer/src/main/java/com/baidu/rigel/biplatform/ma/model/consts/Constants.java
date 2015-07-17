@@ -115,4 +115,13 @@ public interface Constants {
      */
     String CAN_CHANGED_MEASURE = "canChangedMeasure";
     
+    /**
+     * 平面表分页设置
+     */
+    String PAGINATION_SETTING = "pagination";
+    
+    /**
+     * 设置表格中数据显示0还是-
+     */
+    String IS_SHOW_ZERO = "isShowZero";
 }

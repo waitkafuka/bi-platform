@@ -957,6 +957,20 @@ define(function () {
     };
 
     /**
+     * 报表新建（编辑）- 表格编辑 - 获取分页设置信息
+     * 获取文本对齐相关信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} compId 组建区域的id
+     * @public
+     * @return {string} url
+     */
+    Url.getPaginationData = function (reportId, compId) {
+        return getExtendAreaBaseUrl(reportId, compId)
+            + '/pagination';
+    };
+
+    /**
      * 报表新建（编辑）- 平面表格编辑 - 过滤设置
      * 获取文本对齐相关信息
      *

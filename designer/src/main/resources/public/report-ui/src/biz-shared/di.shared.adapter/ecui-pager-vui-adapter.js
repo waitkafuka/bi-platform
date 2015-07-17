@@ -31,11 +31,11 @@ $namespace('di.shared.adapter');
      *
      * @public
      */
-    function setData(data) {
+    function setData(data, source) {
         this.render(
             data.currentPage,
             data.totalRecordCount,
-            String(data.pageSize)
+            String(source.pageSize)
         );
     }
 

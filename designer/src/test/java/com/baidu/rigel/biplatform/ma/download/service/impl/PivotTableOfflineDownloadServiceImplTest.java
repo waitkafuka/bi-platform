@@ -12,6 +12,7 @@ import com.baidu.rigel.biplatform.ma.download.DownloadType;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadServiceFactory;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.google.common.collect.Maps;
 
 /**
  * pivotTable离线下载实现测试
@@ -32,6 +33,23 @@ public class PivotTableOfflineDownloadServiceImplTest {
 
         try {
             downloadService.downloadTableData(questionModel, logicModel);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDownload4PivotTableOffline() {
+        LogicModel logicModel = PowerMockito.mock(LogicModel.class);
+        QuestionModel questionModel = PowerMockito.mock(QuestionModel.class);
+        DownloadType downType = DownloadType.PIVOT_TABLE_OFFLINE;
+        DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downType);
+
+        try {
+            downloadService.downloadTableData(questionModel, logicModel, Maps.newHashMap());
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }

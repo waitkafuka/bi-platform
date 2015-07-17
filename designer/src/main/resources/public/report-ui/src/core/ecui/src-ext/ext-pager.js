@@ -18,15 +18,10 @@ change:     切换了分页
 
     var core = ecui,
         dom = core.dom,
-        string = core.string,
-        array = core.array,
         ui = core.ui,
         util = core.util,
 
-        undefined,
-        MATH = Math,
 
-        createDom = dom.create,
         children = dom.children,
         extend = util.extend,
         blank = util.blank,
@@ -37,9 +32,7 @@ change:     切换了分页
 
         UI_CONTROL = ui.Control,
         UI_PAGER = ui.Pager,
-        UI_SELECT = ui.Select,
-        UI_CONTROL_CLASS = UI_CONTROL.prototype,
-        UI_PAGER_CLASS = UI_PAGER.prototype;
+        UI_SELECT = ui.Select;
     /**
      * 初始化分页控件。
      * options 对象支持的属性如下：
@@ -56,69 +49,92 @@ change:     切换了分页
             UI_CONTROL,
             'ui-ext-pager',
             function (el, options) {
-                var type = this.getTypes()[0],
-                    i, len, html = [];
-                
-                html.push('<div class="'+ type +'-sum">共<em></em>条记录</div>');
-                html.push('<div class="ui-pager"></div>');
-                html.push('<div class="'+ type +'-pagesize"><span class="' + type + '-text">每页显示</span><select class="ui-select" style="width:55px">');
-                for (i = 0, len = UI_EXT_PAGER.PAGE_SIZE.length; i < len; i++) {
-                    html.push('<option value="'+ UI_EXT_PAGER.PAGE_SIZE[i] +'">' + UI_EXT_PAGER.PAGE_SIZE[i] + '</option>');
-                }
-                html.push('</select><span class="' + type + '-text">条</span>')
-                el.innerHTML = html.join('');
+                var type = this.getTypes()[0];
+                var i;
+                var len;
+                var html = [];
 
-                //处理pageSize
-                options.pageSize = options.pageSize || DEFAULT_PAGE_SIZE;
-                for (i = 0, len = UI_EXT_PAGER.PAGE_SIZE.length; i < len; i++) {
-                    if (UI_EXT_PAGER.PAGE_SIZE[i] == options.pageSize) {
-                        break;
-                    }
-                }
+                options.pageSize = options.pageSize || 10;
+                options.pageSizeOptions = options.pageSizeOptions || [10, 50, 100];
                 
-                if (i >= len) {
-                    options.pageSize = DEFAULT_PAGE_SIZE;
+                html.push(
+                    '<div class="', type, '-sum">',
+                        '共<em></em>条记录',
+                    '</div>',
+                    '<div class="ui-pager"></div>'
+                );
+
+                html.push(
+                    '<div class="', type, '-pagesize">',
+                        '<span class="', type, '-text">每页显示</span>',
+                        '<select class="ui-select" style="width:55px">'
+                );
+
+                for (i = 0, len = options.pageSizeOptions.length; i < len; i ++) {
+                    html.push(
+                        '<option value="', options.pageSizeOptions[i], '">',
+                            options.pageSizeOptions[i],
+                        '</option>'
+                    );
                 }
+                html.push(
+                    '</select>',
+                    '<span class="', type, '-text">条</span>'
+                );
+
+                el.innerHTML = html.join('');
             },
             function (el, options) {
-                var el = children(el),
-                    me = this;
+                var el = children(el);
+                var me = this;
 
                 this._bResizable = false;
                 this._eTotalNum = el[0].getElementsByTagName('em')[0];
                 this._uPager = $fastCreate(UI_PAGER, el[1], this, extend({}, options));
+
                 this._uPager.$change = function (value) {
                     triggerEvent(me, 'change', null, [value, me._uPager._nPageSize]);
-                }
+                };
+
                 this._uSelect = $fastCreate(UI_SELECT, el[2].getElementsByTagName('select')[0], this);
+
                 this._uSelect.$change = function () {
                     triggerEvent(me, 'pagesizechange', null, [this.getValue()]);
-                }
+                };
             }
-        ),
+        );
 
-        UI_EXT_PAGER_CLASS = UI_EXT_PAGER.prototype,
+    var UI_EXT_PAGER_CLASS = UI_EXT_PAGER.prototype;
 
-        DEFAULT_PAGE_SIZE = 1000;
-        
-
-    // UI_EXT_PAGER.PAGE_SIZE = [20, 50, 80];
-    UI_EXT_PAGER.PAGE_SIZE = [1000];
-
+    /**
+     *
+     * 初始化函数
+     * @public
+     */
     UI_EXT_PAGER_CLASS.init = function () {
         this._uPager.init();
         this._uSelect.init();
         this._eTotalNum.innerHTML = this._uPager._nTotal || 0;
         this._uSelect.setValue(this._uPager._nPageSize);
-    }
+    };
 
+    /**
+     *
+     * 渲染组件
+     * @param {number} page 当前页
+     * @param {number} total 总记录数
+     * @param {number} pageSize 每页最大记录数
+     *
+     * @public
+     */
     UI_EXT_PAGER_CLASS.render = function (page, total, pageSize) {
         var item = this._uPager;
 
         this._uSelect.setValue(pageSize);
-        if (total || total == 0) {
+
+        if (total || total === 0) {
             this._eTotalNum.innerHTML = total;
-            item._nTotal = total
+            item._nTotal = total;
         }
         else {
             this._eTotalNum.innerHTML = item._nTotal || 0;
@@ -128,14 +144,35 @@ change:     切换了分页
         item.go(page);
     };
 
+    /**
+     *
+     * 获取当前页
+     *
+     * @public
+     * @return {number} pageSize 当前页
+     */
     UI_EXT_PAGER_CLASS.getPageSize = function () {
         return this._uPager._nPageSize;
     };
 
+    /**
+     *
+     * 获取当前页
+     *
+     * @public
+     * @return {number} page 当前页
+     */
     UI_EXT_PAGER_CLASS.getPage = function () {
         return this._uPager._nPage;
     };
 
+    /**
+     *
+     * 获取总记录数
+     *
+     * @public
+     * @return {number} total 总记录数
+     */
     UI_EXT_PAGER_CLASS.getTotal = function () {
         return this._uPager._nTotal;
     };

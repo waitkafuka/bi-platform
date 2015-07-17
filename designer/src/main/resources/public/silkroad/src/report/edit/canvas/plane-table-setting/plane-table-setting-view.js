@@ -10,15 +10,17 @@ define(
     [
         'dialog',
         'report/edit/canvas/plane-table-setting/plane-table-setting-model',
-        'report/edit/canvas/table-setting/text-align/text-align-view',
         'report/edit/canvas/plane-table-setting/field-filter-setting-template',
+        'report/edit/canvas/table-setting/text-align/text-align-view',
+        'report/edit/canvas/plane-table-setting/pagination/pagination-view',
         'report/edit/canvas/plane-table-setting/other-setting/other-setting-view'
     ],
     function (
         dialog,
         TableSettingModel,
-        textAlignView,
         fieldFilterSettingTemplate,
+        textAlignView,
+        PaginationView,
         OtherSettingView
     ) {
 
@@ -61,6 +63,13 @@ define(
                     reportId: this.model.get('reportId'),
                     canvasView: this.canvasView
                 });
+
+                this.paginationView = new PaginationView({
+                    el: this.el,
+                    reportId: this.model.get('reportId'),
+                    canvasView: this.canvasView
+                });
+
                 this.othersView = new OtherSettingView({
                     el: this.el,
                     reportId: this.model.get('reportId'),

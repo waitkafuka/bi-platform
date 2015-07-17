@@ -173,4 +173,10 @@ public interface ReportDesignModelService {
      */
     void updateAreaTextAlignFormat(ExtendArea area, String textAlignFormat);
 
+    /**
+     * 更新平面表区域的分页设置信息
+     * @param area 区域
+     * @param pageSettingStr 分页设置信息
+     */
+    void updatePageSetting4PlaneTable(ExtendArea area, String pageSettingStr);
 }

@@ -44,6 +44,7 @@ import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.UnicodeUtils;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
@@ -64,6 +65,7 @@ import com.baidu.rigel.biplatform.ma.report.utils.ItemUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
 
 /**
  * 类DataModelUtils.java的实现描述：DataModel操作工具类
@@ -740,7 +742,6 @@ public final class DataModelUtils {
             value = value.setScale(8, RoundingMode.HALF_UP);
             data.setV(value);
         } else {
-            value = BigDecimal.ZERO;
             data.setV(value);
         }
         return data;
@@ -1315,6 +1316,61 @@ public final class DataModelUtils {
 
     /**
      * 
+     * decorateTable
+     * @param formatModel
+     * @param table
+     * @param isShowZero
+     */
+    public static void decorateTable(FormatModel formatModel, PivotTable table, boolean isShowZero) {
+        decorateTable(formatModel, table);
+        if (isShowZero) {
+            List<List<CellData>> cellDatas = table.getDataSourceColumnBased();
+            int cellDatasIndex = 0;
+            if (cellDatas != null) {
+                while(cellDatasIndex < cellDatas.size()) {
+                    List<CellData> cellData = cellDatas.get(cellDatasIndex);
+                    cellDatasIndex++;
+                    if (cellData != null) {
+                        int cellDataIndex = 0;
+                        while(cellDataIndex < cellData.size()) {
+                            if (cellData.get(cellDataIndex).getV() == null) {
+                                cellData.get(cellDataIndex).setV(BigDecimal.ZERO);
+                            } 
+                            cellDataIndex++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * 修饰平面表数据
+     * decoratePlaneTable
+     * @param table
+     * @param isShowZero
+     */
+    public static void decoratePlaneTable(PlaneTable table, boolean isShowZero) {
+        List<Map<String, String>> newDatas = Lists.newArrayList();
+        List<Map<String, String>> datas = table.getData();
+        if (isShowZero) {
+            datas.forEach(data -> {
+                Map<String, String> newData = Maps.newHashMap();
+                data.forEach((k, v) -> {
+                    if (StringUtils.isEmpty(v)) {
+                        newData.put(k, "0");
+                    } else {
+                        newData.put(k, v);
+                    }
+                });
+                newDatas.add(newData);
+            });
+            table.setData(newDatas);
+        }       
+    }
+    
+    /**
+     * 
      * @param formatModel 格式模型
      * @param table 透视表
      */
@@ -1377,7 +1433,8 @@ public final class DataModelUtils {
      * @param dataModel
      * @return
      */
-    public static String convertDataModel2CsvStringForPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel) {
+    public static String convertDataModel2CsvStringForPlaneTable(Cube cube, DataModel dataModel, 
+            LogicModel logicModel, Map<String, Object> setting) {
         long begin = System.currentTimeMillis();
         StringBuilder rs = new StringBuilder();
         if (dataModel == null) {
@@ -1415,7 +1472,13 @@ public final class DataModelUtils {
         for (int i = 0; i < totalRecordSize; i++) {
             Map<String, String> rowBasedData = rowBasedDatas.get(i);
             for (String key : keys) {
-                rs.append(rowBasedData.get(key) + ",");
+                if (!isShowZero(setting) && StringUtils.isEmpty(rowBasedData.get(key))) {
+                    rs.append("-" + ",");
+                } else if (isShowZero(setting) && StringUtils.isEmpty(rowBasedData.get(key))) {
+                    rs.append("0" + ",");
+                } else {
+                    rs.append(rowBasedData.get(key) + ",");                                        
+                }
             }
             rs.replace(rs.length() - 1, rs.length(), "");
             rs.append("\r\n");
@@ -1424,6 +1487,50 @@ public final class DataModelUtils {
         return rs.toString();
     }
 
+    /**
+     * 在显示前对DataModel的数据进行处理，该方法主要针对下载而言
+     * preProcessDataModel4Show
+     * @param dataModel 数据模型
+     * @param setting 配置信息
+     */
+    public static DataModel preProcessDataModel4Show(DataModel dataModel, Map<String, Object> setting) {
+        if (setting == null) {
+            return dataModel;
+        }
+        
+        // 当前对是否显示0还是-进行处理
+        if (isShowZero(setting)) {
+            List<List<BigDecimal>> allDatas = Lists.newArrayList();
+            for (List<BigDecimal> sourcePiece : dataModel.getColumnBaseData()) {
+                List<BigDecimal> rowData = Lists.newArrayList();
+                for (BigDecimal data : sourcePiece) {
+                    if (data == null) {
+                        rowData.add(BigDecimal.ZERO);
+                    } else {
+                        rowData.add(data);
+                    }
+                }
+                allDatas.add(rowData);
+            }
+            dataModel.setColumnBaseData(allDatas);
+        }
+        return dataModel;
+    }   
+    
+    /**
+     * 判断某个表格中的数据是显示0还是-
+     * isShowZero
+     * @param setting
+     * @return
+     */
+    public static boolean isShowZero(Map<String, Object> setting) {
+        boolean isShowZero = true;
+        if (setting != null && setting.containsKey(Constants.IS_SHOW_ZERO)) {
+            isShowZero = Boolean.valueOf((String) setting.get(Constants.IS_SHOW_ZERO));
+        }
+        return isShowZero;
+    }
+    
     /**
      * 将dataModel转化为csv文件
      * 

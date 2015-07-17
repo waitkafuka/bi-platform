@@ -20,8 +20,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
 
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
@@ -34,6 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
@@ -745,7 +749,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime/save", method = RequestMethod.POST)
+    @RequestMapping(value = "/{reportId}/runtime/save", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseResult saveRuntimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
@@ -790,7 +794,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/runtime/update", method = RequestMethod.POST)
+    @RequestMapping(value = "/{reportId}/runtime/update", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseResult update(@PathVariable("reportId") String reportId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
@@ -832,7 +836,11 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             return;
         }
         reportParams.forEach ((k, v) -> {
-            if (!StringUtils.isEmpty (request.getParameter (v.getName ()))) {
+            long count = copy.getModel ().getSchema ()
+                    .getCubes ().values ().stream ()
+                    .filter (cube -> cube.getDimensions ().get (v.getElementId()) instanceof TimeDimension)
+                    .count ();
+            if (count <= 0 && !StringUtils.isEmpty (request.getParameter (v.getName ()))) {
                 copy.getContext ().put (v.getName (), request.getParameter (v.getName ()));
                 // TODO 这里需要测试一下 是否需要做此操作
                 copy.getContext ().put (v.getElementId (), request.getParameter (v.getName ()));

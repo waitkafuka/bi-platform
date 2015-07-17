@@ -12,6 +12,7 @@ import com.baidu.rigel.biplatform.ma.download.DownloadType;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadServiceFactory;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.google.common.collect.Maps;
 
 /**
  * @author yichao.jiang 2015年6月2日 下午3:52:00
@@ -30,6 +31,23 @@ public class PlaneTableOfflineDownloadServiceImplTest {
 
         try {
             downloadService.downloadTableData(questionModel, logicModel);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDownloadPlaneTableOfflineShowZero() {
+        LogicModel logicModel = PowerMockito.mock(LogicModel.class);
+        QuestionModel questionModel = PowerMockito.mock(QuestionModel.class);
+        DownloadType downType = DownloadType.PLANE_TABLE_OFFLINE;
+        DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downType);
+
+        try {
+            downloadService.downloadTableData(questionModel, logicModel, Maps.newHashMap());
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }

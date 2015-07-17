@@ -1064,12 +1064,11 @@ $namespace('di.shared.model');
             var existMethod = getDIAdapterMethod(this, 'setData') || this.setData;
             if (existMethod) {
                 options = options || {};
-                data = mergeOpt(
+                var result = mergeOpt(
                     this.$di('getDef'), data, 'DATA_SET', options
                 );
-                // TODO 
                 // isSilent的统一支持
-                return existMethod.call(this, data);
+                return existMethod.call(this, result, data);
             }
         },
 

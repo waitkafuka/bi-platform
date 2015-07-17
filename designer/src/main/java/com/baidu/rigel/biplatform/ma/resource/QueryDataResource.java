@@ -100,6 +100,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableFormat.PaginationSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -213,6 +214,21 @@ public class QueryDataResource extends BaseResource {
     @Resource
     private QueryDataResourceUtils queryDataResourceUtils;
 
+    /**
+     * pageSize
+     */
+    private static final String PAGE_SIZE = "pageSize";
+    
+    /**
+     * currentPage
+     */
+    private static final String CURRENT_PAGE = "currentPage";
+    
+    /**
+     * totalRecordCount
+     */
+    private static final String TOTAL_RECORD_COUNT = "totalRecordCount";
+    
     /**
      * 初始化查询参数,初始化查询区域参数
      * 
@@ -781,6 +797,7 @@ public class QueryDataResource extends BaseResource {
         // runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
         // }
         // Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
+        runTimeModel.getDrillDownQueryHistory ().clear ();
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", "");
         logger.info("[INFO]current context params status {}", runTimeModel.getContext().getParams());
@@ -1093,19 +1110,29 @@ public class QueryDataResource extends BaseResource {
                 return ResourceUtils.getErrorResult("单次查询至少需要包含一个横轴、一个纵轴元素", 1);
             }
             if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
-                // TODO 构建分页信息
-                // 设置分页大小
-                if (StringUtils.hasLength(request.getParameter("pageSize"))) {
-                    pageInfo.setPageSize(Integer.valueOf(request.getParameter("pageSize")));
-                }
-                // 设置当前页
-                if (StringUtils.hasLength(request.getParameter("currentPage"))) {
-                    pageInfo.setCurrentPage(Integer.valueOf(request.getParameter("currentPage")) - 1);
-                }
-                // 设置总的记录数
-                if (StringUtils.hasLength(request.getParameter("totalRecordCount"))) {
-                    pageInfo.setTotalRecordCount(Integer.valueOf(request.getParameter("totalRecordCount")));
+                // 获取分页设置信息
+                PaginationSetting pageSetting = targetArea.getPlaneTableFormat().getPageSetting();
+                if (pageSetting.getIsPagination()) {
+                    // 设置分页大小
+                    if (StringUtils.hasLength(request.getParameter(PAGE_SIZE))) {
+                        pageInfo.setPageSize(Integer.valueOf(request.getParameter(PAGE_SIZE)));
+                    }
+                    // 设置当前页
+                    if (StringUtils.hasLength(request.getParameter(CURRENT_PAGE))) {
+                        pageInfo.setCurrentPage(Integer.valueOf(request.getParameter(CURRENT_PAGE)) - 1);
+                    }
+                    // 设置总的记录数
+                    if (StringUtils.hasLength(request.getParameter(TOTAL_RECORD_COUNT))) {
+                        pageInfo.setTotalRecordCount(Integer.valueOf(request.getParameter(TOTAL_RECORD_COUNT)));
+                    } else {
+                        pageInfo.setTotalRecordCount(-1);
+                    }                    
                 } else {
+                    // 如果没有分页，则设置第一个页(对于数据库，分页从0开始)
+                    pageInfo.setCurrentPage(0);
+                    // 设置不分页情况下，查询的条数
+                    pageInfo.setPageSize(pageSetting.getPageSize());
+                    // 当该数设置为-1时，不进行count(*)查询
                     pageInfo.setTotalRecordCount(-1);
                 }
                 // 获取上一次查询的QueryAction
@@ -1406,7 +1433,6 @@ public class QueryDataResource extends BaseResource {
             queryParams.put(row.getOlapElementId(), uniqueNameArray);
 
             // TODO 仔细思考一下逻辑
-            reportModelCacheManager.getAreaContext(reportId, areaId).getParams().putAll(queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
         } else {
             /**
@@ -1444,7 +1470,8 @@ public class QueryDataResource extends BaseResource {
             queryParams.put(row.getOlapElementId(), drillName);
 
             // TODO 仔细思考一下逻辑
-            reportModelCacheManager.getAreaContext(reportId, areaId).getParams().putAll(queryParams);
+//            reportModelCacheManager.getAreaContext(reportId, areaId).getParams().putAll(queryParams);
+//            runTimeModel.getLocalContextByAreaId (areaId).setParams (queryParams);
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
             /**
              * 把下钻的值存下来 TODO 临时放在这里，需要重新考虑
@@ -1457,7 +1484,10 @@ public class QueryDataResource extends BaseResource {
         }
         // runTimeModel.getContext().put(uniqueName, action);
         runTimeModel.setLinkedQueryAction(action);
-
+        Cube cube = model.getSchema ().getCubes ().get (targetArea.getCubeId ());
+        Map<String, Object> params = modifyReportParams(model.getParams (), queryParams, cube);
+        reportModelCacheManager.getAreaContext(reportId, areaId).getParams().putAll(params);
+        runTimeModel.getLocalContextByAreaId (areaId).setParams (params);
         /**
          * TODO 针对参数映射修改，将当前下钻条件设置到对应参数上
          */
@@ -1489,10 +1519,10 @@ public class QueryDataResource extends BaseResource {
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
         Dimension drillDim = null;
-        Cube cube = null;
+//        Cube cube = null;
 
         try {
-            cube = model.getSchema().getCubes().get(targetArea.getCubeId());
+//            cube = model.getSchema().getCubes().get(targetArea.getCubeId());
             drillDim = cube.getDimensions().get(elementId);
             table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
         } catch (PivotTableParseException e) {
@@ -1570,12 +1600,40 @@ public class QueryDataResource extends BaseResource {
 
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        DataModelUtils.decorateTable(getFormatModel(model, targetArea), table);
+        DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, 
+                DataModelUtils.isShowZero(targetArea.getOtherSetting()));
         resultMap.put("pivottable", table);
         setTableResultProperty(reportId, table, resultMap);
         ResponseResult rs =
                 ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", resultMap);
         logger.info("[INFO]Successfully execute drill operation. cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
+
+    private Map<String, Object> modifyReportParams(Map<String, ReportParam> params, 
+        Map<String, Object> queryParams, Cube cube) {
+        cube = QueryUtils.transformCube (cube);
+        Map<String, Object> rs = Maps.newHashMap ();
+        rs.putAll (queryParams);
+        final Map<String, String> tmp = Maps.newHashMap ();
+        params.forEach ((k, v) -> tmp.put (v.getElementId(), v.getName ())); 
+        queryParams.forEach ((k, v) -> {
+            if (tmp.containsKey (k) && v != null) {
+                String uniqueName = null;
+                if (v instanceof String[]) {
+                    uniqueName = ((String[]) v)[0];
+                } else if (MetaNameUtil.isUniqueName (v.toString ()) 
+                    && !MetaNameUtil.isAllMemberUniqueName (v.toString ())){
+                    uniqueName = v.toString ();
+                }
+                if (!StringUtils.isEmpty (uniqueName) && MetaNameUtil.isUniqueName (uniqueName)) {
+                    String[] array = MetaNameUtil.parseUnique2NameArray (uniqueName);
+                    rs.put (tmp.get (k), array[array.length - 1]);
+                } else {
+                    rs.put (tmp.get(k), v.toString ());
+                }
+            }
+        });
         return rs;
     }
 
@@ -1843,7 +1901,8 @@ public class QueryDataResource extends BaseResource {
 
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             // TODO 临时解决方案，此处应将查询条件设置到QuestionModel中
-            DataModelUtils.decorateTable(getFormatModel(model, targetArea), table);
+            DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, 
+                    DataModelUtils.isShowZero(targetArea.getOtherSetting()));
             // resultMap.put("rowCheckMin", 1);
             // resultMap.put("rowCheckMax", 5);
             if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
@@ -2042,7 +2101,8 @@ public class QueryDataResource extends BaseResource {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
-        DataModelUtils.decorateTable(reportModel.getExtendById(areaId).getFormatModel(), table);
+        DataModelUtils.decorateTable(reportModel.getExtendById(areaId).getFormatModel(), table, 
+                DataModelUtils.isShowZero(targetArea.getOtherSetting()));
         if (table.getDataSourceColumnBased().size() == 0) {
             ResponseResult tmp = new ResponseResult();
             tmp.setStatus(1);
@@ -2221,9 +2281,11 @@ public class QueryDataResource extends BaseResource {
         DownloadType downloadType = DownloadType.PLANE_TABLE_ONLINE;
         downloadType.setDsType(dsDefine.getDataSourceType().name());
         DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downloadType);
+        Map<String, Object> setting = targetArea.getOtherSetting();
         // 获取下载字符串
         String csvString =
-                downloadService.downloadTableData(questionModel, designModel.getExtendById(areaId).getLogicModel());
+                downloadService.downloadTableData(questionModel,
+                        designModel.getExtendById(areaId).getLogicModel(), setting);
 
 //        final StringBuilder timeRange = new StringBuilder();
 //        // 在上下文参数中判断是否有时间参数
@@ -2275,7 +2337,6 @@ public class QueryDataResource extends BaseResource {
         ExtendArea targetArea = report.getExtendById(areaId);
         Cube cube = report.getSchema().getCubes().get(targetArea.getCubeId());
         final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-
         ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, runtimeModel);
         areaContext.getParams().put(Constants.NEED_LIMITED, false);
         QueryAction action = runtimeModel.getLinkedQueryAction();
@@ -2283,9 +2344,9 @@ public class QueryDataResource extends BaseResource {
             action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
         }
         if (action != null) {
-            setQueryParams (areaContext, runtimeModel.getModel (), action.getColumns ());
-            setQueryParams (areaContext, runtimeModel.getModel (), action.getRows ());
-            setQueryParams (areaContext, runtimeModel.getModel (), action.getSlices ());
+//            setQueryParams (areaContext, runtimeModel.getModel (), action.getColumns ());
+//            setQueryParams (areaContext, runtimeModel.getModel (), action.getRows ());
+//            setQueryParams (areaContext, runtimeModel.getModel (), action.getSlices ());
             action.setChartQuery(false);
         } else {
             throw new RuntimeException("下载失败");
@@ -2326,6 +2387,8 @@ public class QueryDataResource extends BaseResource {
                 dataModel = DataModelUtils.merageDataModel(dataModel, subData.getDataModel(), queryAction.rowNum);
             }
         }
+        // 处理下载请求中对数据的包装
+        dataModel = DataModelUtils.preProcessDataModel4Show(dataModel, targetArea.getOtherSetting());
         String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms");
         response.setCharacterEncoding("utf-8");
@@ -2684,5 +2747,5 @@ public class QueryDataResource extends BaseResource {
     private static boolean isCallbackLevel(Level level) {
         return level != null && level.getType() == LevelType.CALL_BACK;
     }
-    
+
 }

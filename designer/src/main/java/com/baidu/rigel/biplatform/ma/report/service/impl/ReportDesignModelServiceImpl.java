@@ -58,6 +58,8 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableFormat;
+import com.baidu.rigel.biplatform.ma.report.model.PlaneTableFormat.PaginationSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 //import com.baidu.rigel.biplatform.ma.report.service.ReportNoticeByJmsService;
@@ -784,5 +786,22 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
 		Map<String, String> textAlignFormatMap = GsonUtils.fromJson(
 				textAlignFormat, HashMap.class);
 		area.getFormatModel().setTextAlignFormat(textAlignFormatMap);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void updatePageSetting4PlaneTable(ExtendArea area, 
+	        String pageSettingStr) {
+	    if (StringUtils.isEmpty(pageSettingStr)) {
+	        return;
+	    }
+	    PaginationSetting pageSetting = GsonUtils.fromJson(pageSettingStr, PaginationSetting.class);
+	    PaginationSetting defaultSetting = new PlaneTableFormat().new PaginationSetting();
+	    if (StringUtils.isEmpty(pageSetting.getPageSizeOptions())) {
+	        pageSetting.setPageSizeOptions(defaultSetting.getPageSizeOptions());
+	    }
+	    area.getPlaneTableFormat().setPageSetting(pageSetting);
 	}
 }

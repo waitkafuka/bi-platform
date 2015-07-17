@@ -22,8 +22,8 @@ var demoData = {
 };
 -->
 <div class="data-format">
-    <div class="data-format-default">
-        <span>指标默认数据格式：</span>
+    <div class="data-format-default c-f">
+        <span title="指标默认数据格式">指标默认数据格式：</span>
         <select name="defaultFormat">
             <option value=""
             {{if !defaultFormat}} selected="selected" {{/if}}>请选择</option>
@@ -36,11 +36,11 @@ var demoData = {
             {{/each}}
         </select>
     </div>
-    <div class="data-format-alone">
+    <div class="data-format-alone c-f">
         <span>对各指标进行单独设置</span>
         {{each dataFormat as $formatItem name}}
         <div class="data-format-alone-dim">
-            <span>{{$formatItem.caption}}：</span>
+            <span title="{{$formatItem.caption}}">{{$formatItem.caption}}：</span>
             <select name="{{name}}">
                 <option value="" {{if !$formatItem.format}} selected="selected" {{/if}}>请选择</option>
                 {{each options as $option optionKey}}

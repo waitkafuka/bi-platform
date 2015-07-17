@@ -144,7 +144,7 @@ public class Expression implements Serializable {
             if (other.queryValues != null) {
                 return false;
             }
-        } else if (!queryValues.equals(other.queryValues)) {
+        } else if (!CollectionUtils.isEqualCollection (queryValues, other.queryValues)) {
             return false;
         }
         return true;

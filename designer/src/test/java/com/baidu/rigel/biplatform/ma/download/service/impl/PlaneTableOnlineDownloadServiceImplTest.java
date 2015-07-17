@@ -27,6 +27,7 @@ import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ma.download.DownloadType;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadServiceFactory;
 import com.baidu.rigel.biplatform.ma.download.service.DownloadTableDataService;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.google.common.collect.Lists;
@@ -73,7 +74,18 @@ public class PlaneTableOnlineDownloadServiceImplTest {
         csvString = downService.downloadTableData(questionModel, logicModel);
 
         String expectCsvString = "captionDim,captionMeasure\r\n";
-        expectCsvString = expectCsvString + "Dim,Measure\r\n";
+        expectCsvString = expectCsvString + "0,0\r\n";
+        Assert.assertEquals(expectCsvString, csvString);
+        Assert.assertNotNull(csvString);
+        
+        
+        Map<String, Object> setting = Maps.newHashMap();
+        setting.put(Constants.IS_SHOW_ZERO, "true");
+        
+        expectCsvString = "captionDim,captionMeasure\r\n";
+        expectCsvString = expectCsvString + "0,0\r\n";
+        
+        csvString = downService.downloadTableData(questionModel, logicModel, setting);
         Assert.assertEquals(expectCsvString, csvString);
         Assert.assertNotNull(csvString);
     }
@@ -95,11 +107,11 @@ public class PlaneTableOnlineDownloadServiceImplTest {
 
         Map<String, List<String>> data = Maps.newHashMap();
         List<String> data1 = Lists.newArrayList();
-        data1.add("Dim");
+        data1.add("");
         data.put("test.Dim", data1);
 
         List<String> data2 = Lists.newArrayList();
-        data2.add("Measure");
+        data2.add("0");
         data.put("test.Measure", data2);
 
         tableData.setColBaseDatas(data);

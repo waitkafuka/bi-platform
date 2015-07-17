@@ -108,7 +108,7 @@ define(
                     title: '坐标轴名字设置',
                     content: html,
                     dialog: {
-                        width: 340,
+                        width: 400,
                         height: 300,
                         resizable: false,
                         buttons: [
@@ -137,17 +137,42 @@ define(
              */
             _saveAxisTextInfo: function ($dialog) {
                 var texts = $('.j-axis-text-setting .j-axis-text-item input');
+                var errorMsgs = $('.j-axis-text-setting .j-axis-text-item .j-error-msg');
                 var data = {};
 
+                var canSubmit = true;
+                var strLength = 26;
+                errorMsgs.hide();
                 texts.each(function () {
                     var $this = $(this);
+                    var val = $this.val();
+                    if (getStrLength(val) > strLength) {
+                        canSubmit = false;
+                        $this.next('.j-error-msg').show();
+                    }
                     var name = $this.attr('name');
-                    data[name] = $this.val();
+                    data[name] = val;
                 });
+                if (!canSubmit) {
+                    return;
+                }
                 this.model.saveAxisTextInfo(data, function () {
                     $dialog.dialog('close');
                     window.dataInsight.main.canvas.showReport();
                 });
+
+
+                function getStrLength(str) {
+                    var len = 0;
+
+                    if (str.match(/[^ -~]/g) === null) {
+                        len = str.length;
+                    }
+                    else {
+                        len = str.length + str.match(/[^ -~]/g).length;
+                    }
+                    return len;
+                }
             }
         });
     }

@@ -16,6 +16,7 @@ import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
@@ -90,8 +91,12 @@ public class QueryDataResourceUtils {
 			try {
                 baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
                                 targetArea.getFormatModel(), action);
+                
                 Map<String, Object> resultMap = Maps.newHashMap();
                 PlaneTable planeTable = (PlaneTable) baseTable;
+                Map<String, Object> otherSetting = targetArea.getOtherSetting();
+                boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
+                DataModelUtils.decoratePlaneTable(planeTable, isShowZero);
                 if (planeTable != null) {
                     resultMap.put("head", planeTable.getColDefines());
                     resultMap.put("data", planeTable.getData());
@@ -131,7 +136,9 @@ public class QueryDataResourceUtils {
 		Map<String, Object> resultMap = Maps.newHashMap();
 		ReportDesignModel reportDesignModel = runtimeModel.getModel();
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
-            DataModelUtils.decorateTable(targetArea.getFormatModel(), pivotTable);
+            Map<String, Object> otherSetting = targetArea.getOtherSetting();
+            boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
+            DataModelUtils.decorateTable(targetArea.getFormatModel(), pivotTable, isShowZero);
             /**
              * 每次查询以后，清除选中行，设置新的
              */

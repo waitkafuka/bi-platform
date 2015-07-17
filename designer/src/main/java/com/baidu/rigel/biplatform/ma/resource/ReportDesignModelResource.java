@@ -1895,16 +1895,16 @@ public class ReportDesignModelResource extends BaseResource {
     }
 
     /**
-     * 获取表格文本对齐样式
+     * 获取平面表分页信息
      * 
      * @param reportId 报表id
      * @param areaId 区域id
      * @param request http请求
      * @return ResponseResult
      */
-    @RequestMapping(value = "/{id}/extend_area/{areaId}/textAlign",
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/pagination",
             method = { RequestMethod.GET })
-    public ResponseResult getAreaTextAlignFormat(@PathVariable("id") String reportId,
+    public ResponseResult getPlaneTablePaginationSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
         logger.info("begin get text align format");
         long begin = System.currentTimeMillis();
@@ -1912,15 +1912,15 @@ public class ReportDesignModelResource extends BaseResource {
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = model.getExtendById(areaId);
         Map<String, Object> data = Maps.newHashMap();
-        if (area.getFormatModel() == null) {
-            data.put("indList", Maps.newHashMap());
+        if (area.getPlaneTableFormat() == null) {
+            data.put(Constants.PAGINATION_SETTING, Maps.newHashMap());
         } else {
-            data.put("indList", area.getFormatModel().getTextAlignFormat());
+            data.put(Constants.PAGINATION_SETTING, area.getPlaneTableFormat().getPageSetting());
         }
         result.setStatus(0);
         result.setStatusInfo(SUCCESS);
         result.setData(data);
-        logger.info("[INFO]query measure setting result {}, cose {} ms",
+        logger.info("get plane table page setting result {}, cose {} ms",
                 GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
     }
@@ -1982,6 +1982,74 @@ public class ReportDesignModelResource extends BaseResource {
         return result;
     }
 
+    /**
+     * 修改平面表的分页信息
+     * updatePlaneTablePageSetting
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/pagination",
+            method = { RequestMethod.POST })
+    public ResponseResult updatePlaneTablePaginationSetting(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        ResponseResult result = new ResponseResult();
+        if (StringUtils.isEmpty(reportId)) {
+            logger.debug("report id is empty");
+            result.setStatus(1);
+            result.setStatusInfo("report id is empty");
+            return result;
+        }
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        if (model == null) {
+            logger.debug("can not get model with id : " + reportId);
+            result.setStatus(1);
+            result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
+            return result;
+        }
+        result.setStatus(0);
+        String pageSettingStr = request.getParameter(Constants.PAGINATION_SETTING);
+        ExtendArea area = model.getExtendById(areaId);
+        reportDesignModelService.updatePageSetting4PlaneTable(area, pageSettingStr);
+        this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        result.setStatusInfo(SUCCESS);
+        updateRuntimeModel(model);
+        return result;
+    }
+
+    /**
+     * 获取表格文本对齐样式
+     * 
+     * @param reportId 报表id
+     * @param areaId 区域id
+     * @param request http请求
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/textAlign",
+            method = { RequestMethod.GET })
+    public ResponseResult getAreaTextAlignFormat(@PathVariable("id") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        logger.info("begin get text align format");
+        long begin = System.currentTimeMillis();
+        ResponseResult result = new ResponseResult();
+        ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = model.getExtendById(areaId);
+        Map<String, Object> data = Maps.newHashMap();
+        if (area.getFormatModel() == null) {
+            data.put("indList", Maps.newHashMap());
+        } else {
+            data.put("indList", area.getFormatModel().getTextAlignFormat());
+        }
+        result.setStatus(0);
+        result.setStatusInfo(SUCCESS);
+        result.setData(data);
+        logger.info("[INFO]query measure setting result {}, cose {} ms",
+                GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
+        return result;
+    }
+    
+    
     protected void updateRuntimeModel(ReportDesignModel model) {
         if (model != null) {
             ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(model.getId());
@@ -2000,8 +2068,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @param request
      * @return ResponseResult
      */
-    @SuppressWarnings("unchecked")
-    @RequestMapping(value = "/{id}/extend_area/{areaId}/axisCaption",
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/caption",
             method = { RequestMethod.POST })
     public ResponseResult updateChartCaptionSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
@@ -2024,6 +2091,9 @@ public class ReportDesignModelResource extends BaseResource {
                 }.getType ());
         area.getChartFormatModel ().getSetting ().setAxisCaption (fromJson);
         this.reportModelCacheManager.updateReportModelToCache(reportId, model);
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+        runtimeModel.setModel (model);
+        reportModelCacheManager.updateRunTimeModelToCache (reportId, runtimeModel);
         logger.info("[INFO]query measuer setting result {}, cose {} ms",
                 GsonUtils.toJson(result.getData()), (System.currentTimeMillis() - begin));
         return result;
@@ -2036,7 +2106,7 @@ public class ReportDesignModelResource extends BaseResource {
      * @param request
      * @return ResponseResult
      */
-    @RequestMapping(value = "/{id}/extend_area/{areaId}/axisCaption", method = { RequestMethod.GET })
+    @RequestMapping(value = "/{id}/extend_area/{areaId}/caption", method = { RequestMethod.GET })
     public ResponseResult getChartCaptionSetting(@PathVariable("id") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
         logger.info("begin query measuer axis's caption setting");
@@ -2086,6 +2156,9 @@ public class ReportDesignModelResource extends BaseResource {
                 }.getType ());
         area.getChartFormatModel ().getAppearance ().setLegend (fromJson);
         this.reportModelCacheManager.updateReportModelToCache (reportId, model);
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+        runtimeModel.setModel (model);
+        reportModelCacheManager.updateRunTimeModelToCache (reportId, runtimeModel);
         logger.info ("[INFO]query measuer setting result {}, cose {} ms", 
                 GsonUtils.toJson (result.getData ()),
                 (System.currentTimeMillis () - begin));

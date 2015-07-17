@@ -616,7 +616,8 @@ $namespace('di.shared.ui');
             'DATA',
             {
                 componentId: this.$di('getId').split('.')[1],
-                currentPage: this._uPager.getPage(),
+                // currentPage: this._uPager.getPage(),
+                currentPage: 1,
                 pageSize: pageSize,
                 totalRecordCount: this._uPager.getTotal()
             }

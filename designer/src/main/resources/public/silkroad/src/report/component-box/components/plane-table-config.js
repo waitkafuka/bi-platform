@@ -59,7 +59,11 @@ define([
             },
             {
                 clzType: 'VUI',
-                clzKey: 'ECUI_PAGER'
+                clzKey: 'ECUI_PAGER',
+                dataOpt: {
+                    pgeSize: 10,
+                    pageSizeOptions: [10, 50, 100]
+                }
             }
 //            {
 //                clzType: 'VUI',

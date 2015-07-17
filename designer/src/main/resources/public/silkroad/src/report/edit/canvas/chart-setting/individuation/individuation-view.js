@@ -88,6 +88,25 @@ define(
             //------------------------------------------
 
             /**
+             * 绑定事件
+             *
+             * @private
+             */
+            _bindEvent: function () {
+                var $isShowTitle = $('.j-isShowTitle');
+                $isShowTitle.unbind();
+                $isShowTitle.change(function () {
+                    var isChked = $(this).is(':checked');
+                    if (isChked) {
+                        $('.j-appearance-set-title').show();
+                    }
+                    else {
+                        $('.j-appearance-set-title').hide();
+                    }
+                });
+            },
+
+            /**
              * 打开设置弹出框
              *
              * @param {Object} data 个性化设置信息
@@ -120,6 +139,7 @@ define(
                         ]
                     }
                 });
+                that._bindEvent();
             },
 
             /**
@@ -136,7 +156,11 @@ define(
                 appearItems.each(function () {
                     var $chk = $(this).find('input[type="checkbox"]');
                     var name = $chk.attr('name');
+                    if (name === 'isShowTitle' && $chk.is(':checked')) {
+                        appearance.chartTitle = $('.j-appearance-set-title input').val();
+                    }
                     appearance[name] = $chk.is(':checked');
+
                 });
                 data.appearance = JSON.stringify(appearance);
 

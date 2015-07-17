@@ -605,7 +605,7 @@
 .data-format {
     width: 300px;
 }
-.data-format select {
+.data-format > select {
     width: 150px;
     height: 25px;
     margin-left: 5px;
@@ -614,13 +614,26 @@
     padding: 10px 10px;
     border-bottom: 1px solid #C5C5C5;
 }
+.data-format-default > span {
+    width: 110px;
+    float: left;
+    text-align: right;
+    line-height: 25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.data-format-default > select {
+    float: left;
+    width: 150px;
+}
 .data-format .data-format-alone {
     padding: 10px 10px;
 }
 .data-format-alone > span {
     float: left;
     width: 100%;
-    font-weight: bold;
+    font-weight: 700;
     margin-bottom: 20px;
 }
 .data-format-alone .data-format-alone-dim {
@@ -636,8 +649,14 @@
     text-overflow: ellipsis;
     overflow: hidden;
 }
+.data-format-alone-dim .error-msg {
+    width: 110px;
+    float: left;
+    line-height: 25px;
+}
 .data-format-alone-dim > select {
     float: left;
+    width: 150px;
 }
 .data-format-black {
     /*text-align: center;*/
@@ -649,9 +668,17 @@
     height: 25px;
     line-height: 25px;
 }
+.data-format-black .input-text {
+    outline: none;
+    height: 20px;
+    line-height: 20px;
+}
 .data-format-black label {
     height: 25px;
     line-height: 25px;
+}
+.data-format-black .form-common-input-button {
+    padding: 2px 6px;
 }
 /*@end*/
 
@@ -723,6 +750,11 @@
 }
 .base-setting-item > input {
     outline: none;
+    height: 25px;
+    line-height: 25px;
+}
+.base-setting-item  .input-text {
+    outline: none;
     height: 20px;
     line-height: 20px;
 }
@@ -734,6 +766,13 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
+}
+.base-setting-item > .error-msg {
+    height: 25px;
+    line-height: 25px;
+    width: 110px;
+    text-align: left;
+    padding-left: 110px;
 }
 /*@end*/
 

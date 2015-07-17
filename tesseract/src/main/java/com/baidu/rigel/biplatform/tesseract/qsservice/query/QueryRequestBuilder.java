@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
@@ -83,11 +84,13 @@ public class QueryRequestBuilder {
             queryContext.getFilterMemberValues().forEach((properties, values) -> {
                 Expression expression = new Expression(properties);
                 expression.getQueryValues().add(new QueryObject(null, values));
-                request.getWhere().getAndList().add(expression);
+                addExpressionIntoAndList (request, expression);
             });
         }
 
-        request.getWhere().getAndList().addAll(expressions.values());
+        request.getWhere().getAndList().addAll(expressions.values()); 
+        List<Expression> tmp = request.getWhere ().getAndList ().stream ().distinct ().collect (Collectors.toList ());
+        request.getWhere ().setAndList (tmp);
         int start = 0;
         int size = -1;
         if (pageInfo != null) {
@@ -121,7 +124,7 @@ public class QueryRequestBuilder {
                     if (CollectionUtils.isEmpty (node.getChildren ())) {
                         expression.getQueryValues()
                             .add(new QueryObject(node.getName(), node.getLeafIds(), node.isSummary()));
-                        request.getWhere ().getAndList ().add (expression);
+                        addExpressionIntoAndList (request, expression);
                     } 
                     final MemberNodeTree parent = node.getParent ();
                     if (parent != null && StringUtils.isNotBlank (parent.getQuerySource ())
@@ -132,7 +135,7 @@ public class QueryRequestBuilder {
                         } else {
                             Expression e = new Expression (parent.getQuerySource ());
                             e.getQueryValues ().add (queryObj);
-                            request.getWhere ().getAndList ().add (e);
+                            addExpressionIntoAndList (request, e);
                         }
                     }
                 } else if (MetaNameUtil.isAllMemberName(node.getName()) && node.isTime ()) {
@@ -148,13 +151,20 @@ public class QueryRequestBuilder {
                         e.getQueryValues ().add (queryObj);
                     }
                     
-                    request.getWhere ().getAndList ().add (e);
+                    addExpressionIntoAndList (request, e);
                 } 
                 if (CollectionUtils.isNotEmpty(node.getChildren())) {
                     buildSelectAndGroupBy(node.getChildren(), request, expressions);
                 }
             }
         }
+    }
+
+    private static void addExpressionIntoAndList(QueryRequest request, Expression e) {
+        if (request.getWhere ().getAndList ().contains (e)) {
+            return;
+        }
+        request.getWhere ().getAndList ().add (e);
     }
 
     /**

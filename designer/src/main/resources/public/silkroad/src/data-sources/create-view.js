@@ -8,7 +8,6 @@ define([
         'data-sources/create-model'
     ],
     function (template, Model) {
-        var CLASS = template.CLASS;
 
         /**
          * 数据源新建模块视图类
@@ -224,7 +223,7 @@ define([
                 var isAdd = this.model.get('isAdd');
 
                 if (!isAdd) {
-                    $('.' + CLASS.J_INPUT_PASSWORD).val('');
+                    $('.j-input-password').val('');
                 }
             },
 
@@ -239,7 +238,7 @@ define([
                 var isAdd = this.model.get('isAdd');
 
                 if (!isAdd) {
-                    var $el = $('.' + CLASS.J_INPUT_PASSWORD);
+                    var $el = $('.j-input-password');
                     var val = $.trim($el.val());
                     if (val == '') {
                         $el.val(this.model.get('dbData').dbPwd);
@@ -266,12 +265,9 @@ define([
              * @private
              */
             _addReserveAddress: function () {
-                var selector = '.'
-                    + CLASS.J_DATA_SOURCES_PART
-                    + ' .'
-                    + CLASS.J_DATASOURCE_RESERVEADDRESS_MOUDLE;
+                var selector = '.j-data-sources-part .j-datasource-reserveAddress-moudle';
 
-                $('.' + CLASS.J_DATASOURCE_DATABASE_BOX)
+                $('.j-datasource-database-box')
                     .before($(selector).clone(true));
             },
 

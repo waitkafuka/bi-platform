@@ -701,7 +701,7 @@
             (this._chartType === 'column' || this._chartType === 'bar')
             && axisCaption
         ) {
-            var name = this._aSeries[0].name; // TODO:name属性需要更改
+            var name = this._aSeries[0].yAxisName;
             axisCaption && (settings.name = axisCaption[name]);
             yAxis.push(setBasicItems(settings));
         }
@@ -714,15 +714,33 @@
 
             for (var i = 0, iLen = series.length, tSer; i < iLen; i ++) {
                 tSer = series[i];
-                tSer.yAxisIndex === '0'
-                    ? leftName.push(axisCaption[tSer.name])
-                    : rightName.push(axisCaption[tSer.name]);
+                var name = tSer.yAxisName;
+                if (name) {
+                    tSer.yAxisIndex === '0'
+                        ? leftName.push(axisCaption[name])
+                        : rightName.push(axisCaption[name]);
+                }
+
             }
+            if (leftName.length === 1) {
+                leftName = leftName[0];
+            }
+            else if (leftName.length > 1) {
+                leftName = leftName.join(',');
+            }
+
+            if (rightName.length === 1) {
+                rightName = rightName[0];
+            }
+            else if (rightName.length > 1) {
+                rightName = rightName.join(',');
+            }
+
             // 左刻度轴设置
-            settings = merge(settings, {name: leftName.join(',')});
+            settings = merge(settings, {name: leftName});
             yAxis.push(setBasicItems(settings));
             // 右刻度值设置
-            settings = merge(settings, {name: rightName.join(',')});
+            settings = merge(settings, {name: rightName});
             yAxis.push(setBasicItems(settings));
         }
 
@@ -858,7 +876,8 @@
         // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
         // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
 
-        var legend = {x: 'center', y: '20'};
+        // var legend = {x: 'center', y: '20'};
+        var legend = {x: 'center', y: 'top'};
         var data = [];
         var defaultMeasures = this.$getDefaultMeasures(this._chartType);
 
@@ -1131,6 +1150,24 @@
         }
 
         // 如果显示指标区域 并且 有指标,则加载指标区域
+        // 做兼容老保表
+        // 如果个性化设置不存在;或者，个性化设置存在，显示图例不存在；此时，就是老报表状态；除了线图，都添加指标区域；
+        if (
+            !this._appearance
+            || (
+                this._appearance
+                && (
+                    this._appearance.isShowInds === null
+                    || this._appearance.isShowInds === undefined
+                )
+            )
+        ) {
+            if (this._chartType !== 'line') {
+                this.$renderIndArea();
+            }
+        }
+
+        // 正常逻辑
         if (
             this._appearance
             && this._appearance.isShowInds
@@ -1193,6 +1230,18 @@
      */
     UI_E_CHART_CLASS.$initOptions = function () {
         var options = {};
+        // 显示标题
+        if (this._appearance && this._appearance.isShowTitle) {
+            options.title = {
+                text: this._appearance.chartTitle,
+                x: 'center',
+                y: 'top',
+                textStyle: {
+                    fontSize: 12,
+                    fontWeight: 'normal'
+                }
+            };
+        }
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
@@ -1212,6 +1261,9 @@
                     x2: 80,
                     y: 20,
                     borderWidth: 0
+                };
+                if (this._appearance && this._appearance.isShowTitle) {
+                    options.grid.y = 30;
                 }
                 // 当不为饼图时，都需要设置x轴属性，否则图形都显示不出来 updata by majun
                 this.$setupXAxis(options);
@@ -1245,8 +1297,14 @@
             if (format && format.indexOf('%') >= 0) {
                 hasPercent = true;
             }
+
+            if (hasPercent) {
+                this._mapMaxValue = this._mapMaxValue > 1 ? 1 : this._mapMaxValue;
+            }
+
             var min = hasPercent ? this._mapMinValue * 100: this._mapMinValue;
             var max = hasPercent ? this._mapMaxValue * 100: this._mapMaxValue;
+
             var split = (max - min) / splitNum;
             var splitList = [{ start: max }];
             var i = 1;
@@ -1293,10 +1351,6 @@
         if (this._chartType === 'pie') {
             // 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun
             options.calculable = false;
-            // var colors = [
-            //     '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
-            //     '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
-            // ];
             var colors = [
                 '#C0504E', '#4F81BC', '#9BBB58', '#FFB981', '#D97A81',
                 '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
@@ -1305,16 +1359,25 @@
             options.color = colors;
         }
 
-        // var textStyle = {
-        //     fontFamily: '微软雅黑',
-        //     fontSize: '120px'
-        // };
-
-        // 如果指标区域不显示，才显示图例；其实图例也应该给开放出去，让用户自己去设置，不应该根据指标区域的逻辑进行处理
+        // 做兼容老保表
+        // 如果个性化设置不存在;或者，个性化设置存在，显示图例不存在；此时，就是老报表状态；如果是线图，就添加图例，否则，就不添加；
         if (
-            this._appearance
-            && !this._appearance.isShowInds
+            !this._appearance
+            || (
+                this._appearance
+                && (
+                    this._appearance.isShowLegend === null
+                    || this._appearance.isShowLegend === undefined
+                )
+            )
         ) {
+            if (this._chartType === 'line') {
+                this.$setupLegend(options);
+            }
+        }
+
+        // 正常逻辑，如果显示图例
+        if (this._appearance && this._appearance.isShowLegend) {
             this.$setupLegend(options);
         }
 

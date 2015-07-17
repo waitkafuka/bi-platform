@@ -14,9 +14,10 @@ var demoData = {
     <div class="base-setting-box c-f j-axis-text-setting">
         <span class="mb-20 f-l">请对坐标轴名字单独设置</span>
         {{each indList as $ind name}}
-        <div class="base-setting-item f-l j-axis-text-item">
+        <div class="base-setting-item f-l c-f j-axis-text-item">
             <span class="f-l">{{$ind.caption}}：</span>
-            <input class="f-l" type="text" name="{{name}}" value="{{$ind.axisName}}" />
+            <input class="f-l" type="text" name="{{name}}" value="{{$ind.axisName}}" placeholder="请不要超过26个字符" />
+            <span class="f-l error-msg cor-red j-error-msg hide">字符超过指定长度</span>
         </div>
         {{/each}}
     </div>

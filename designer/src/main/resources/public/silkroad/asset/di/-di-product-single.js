@@ -28088,7 +28088,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         }
         // 增加判断逻辑，如果改行是手动汇总行，那么linkBridge也不能有点击，否则后台没法处理
 //        else if (defItem && defItem.linkBridge && wrap.cellId && wrap.cellId.indexOf('[SUMMARY_NODE].[ALL]') < 0) {
-        else if (defItem && defItem.linkBridge) {
+        else if (value !== '-' && defItem && defItem.linkBridge) {
             attrStr.push('data-cell-link="true"');
             // value = '<a href="#" class="' + type + '-cell-link" data-cell-link-bridge-a="1">' + value + '</a>';
             value = [
@@ -28409,7 +28409,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             ? wrap.str
             : String(
                 wrap.v == null
-                ? ' - '
+                ? '-'
                 : format
                 ? formatNumber(wrap.v, format, void 0, void 0, true)
                 : wrap.v
@@ -28421,11 +28421,11 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             // 注释掉字符串截断
             value = sliceByte(value, cut, 'gbk');
             if (value.length < prompt.length) {
-                  value += '...';
+                value += '...';
             }
             /* 由于在ie7下 行头不能很好的设置宽度，所以ie7的行头统一加title；其它情况置空prompt */
             else if (!(dom.ieVersion < 8 && cellType == 'ROWHCELL')){
-                 prompt = null;
+                prompt = null;
             }
         }
         return {
@@ -30138,15 +30138,10 @@ change:     切换了分页
 
     var core = ecui,
         dom = core.dom,
-        string = core.string,
-        array = core.array,
         ui = core.ui,
         util = core.util,
 
-        undefined,
-        MATH = Math,
 
-        createDom = dom.create,
         children = dom.children,
         extend = util.extend,
         blank = util.blank,
@@ -30157,9 +30152,7 @@ change:     切换了分页
 
         UI_CONTROL = ui.Control,
         UI_PAGER = ui.Pager,
-        UI_SELECT = ui.Select,
-        UI_CONTROL_CLASS = UI_CONTROL.prototype,
-        UI_PAGER_CLASS = UI_PAGER.prototype;
+        UI_SELECT = ui.Select;
     /**
      * 初始化分页控件。
      * options 对象支持的属性如下：
@@ -30176,69 +30169,92 @@ change:     切换了分页
             UI_CONTROL,
             'ui-ext-pager',
             function (el, options) {
-                var type = this.getTypes()[0],
-                    i, len, html = [];
-                
-                html.push('<div class="'+ type +'-sum">共<em></em>条记录</div>');
-                html.push('<div class="ui-pager"></div>');
-                html.push('<div class="'+ type +'-pagesize"><span class="' + type + '-text">每页显示</span><select class="ui-select" style="width:55px">');
-                for (i = 0, len = UI_EXT_PAGER.PAGE_SIZE.length; i < len; i++) {
-                    html.push('<option value="'+ UI_EXT_PAGER.PAGE_SIZE[i] +'">' + UI_EXT_PAGER.PAGE_SIZE[i] + '</option>');
-                }
-                html.push('</select><span class="' + type + '-text">条</span>')
-                el.innerHTML = html.join('');
+                var type = this.getTypes()[0];
+                var i;
+                var len;
+                var html = [];
 
-                //处理pageSize
-                options.pageSize = options.pageSize || DEFAULT_PAGE_SIZE;
-                for (i = 0, len = UI_EXT_PAGER.PAGE_SIZE.length; i < len; i++) {
-                    if (UI_EXT_PAGER.PAGE_SIZE[i] == options.pageSize) {
-                        break;
-                    }
-                }
+                options.pageSize = options.pageSize || 10;
+                options.pageSizeOptions = options.pageSizeOptions || [10, 50, 100];
                 
-                if (i >= len) {
-                    options.pageSize = DEFAULT_PAGE_SIZE;
+                html.push(
+                    '<div class="', type, '-sum">',
+                        '共<em></em>条记录',
+                    '</div>',
+                    '<div class="ui-pager"></div>'
+                );
+
+                html.push(
+                    '<div class="', type, '-pagesize">',
+                        '<span class="', type, '-text">每页显示</span>',
+                        '<select class="ui-select" style="width:55px">'
+                );
+
+                for (i = 0, len = options.pageSizeOptions.length; i < len; i ++) {
+                    html.push(
+                        '<option value="', options.pageSizeOptions[i], '">',
+                            options.pageSizeOptions[i],
+                        '</option>'
+                    );
                 }
+                html.push(
+                    '</select>',
+                    '<span class="', type, '-text">条</span>'
+                );
+
+                el.innerHTML = html.join('');
             },
             function (el, options) {
-                var el = children(el),
-                    me = this;
+                var el = children(el);
+                var me = this;
 
                 this._bResizable = false;
                 this._eTotalNum = el[0].getElementsByTagName('em')[0];
                 this._uPager = $fastCreate(UI_PAGER, el[1], this, extend({}, options));
+
                 this._uPager.$change = function (value) {
                     triggerEvent(me, 'change', null, [value, me._uPager._nPageSize]);
-                }
+                };
+
                 this._uSelect = $fastCreate(UI_SELECT, el[2].getElementsByTagName('select')[0], this);
+
                 this._uSelect.$change = function () {
                     triggerEvent(me, 'pagesizechange', null, [this.getValue()]);
-                }
+                };
             }
-        ),
+        );
 
-        UI_EXT_PAGER_CLASS = UI_EXT_PAGER.prototype,
+    var UI_EXT_PAGER_CLASS = UI_EXT_PAGER.prototype;
 
-        DEFAULT_PAGE_SIZE = 1000;
-        
-
-    // UI_EXT_PAGER.PAGE_SIZE = [20, 50, 80];
-    UI_EXT_PAGER.PAGE_SIZE = [1000];
-
+    /**
+     *
+     * 初始化函数
+     * @public
+     */
     UI_EXT_PAGER_CLASS.init = function () {
         this._uPager.init();
         this._uSelect.init();
         this._eTotalNum.innerHTML = this._uPager._nTotal || 0;
         this._uSelect.setValue(this._uPager._nPageSize);
-    }
+    };
 
+    /**
+     *
+     * 渲染组件
+     * @param {number} page 当前页
+     * @param {number} total 总记录数
+     * @param {number} pageSize 每页最大记录数
+     *
+     * @public
+     */
     UI_EXT_PAGER_CLASS.render = function (page, total, pageSize) {
         var item = this._uPager;
 
         this._uSelect.setValue(pageSize);
-        if (total || total == 0) {
+
+        if (total || total === 0) {
             this._eTotalNum.innerHTML = total;
-            item._nTotal = total
+            item._nTotal = total;
         }
         else {
             this._eTotalNum.innerHTML = item._nTotal || 0;
@@ -30248,14 +30264,35 @@ change:     切换了分页
         item.go(page);
     };
 
+    /**
+     *
+     * 获取当前页
+     *
+     * @public
+     * @return {number} pageSize 当前页
+     */
     UI_EXT_PAGER_CLASS.getPageSize = function () {
         return this._uPager._nPageSize;
     };
 
+    /**
+     *
+     * 获取当前页
+     *
+     * @public
+     * @return {number} page 当前页
+     */
     UI_EXT_PAGER_CLASS.getPage = function () {
         return this._uPager._nPage;
     };
 
+    /**
+     *
+     * 获取总记录数
+     *
+     * @public
+     * @return {number} total 总记录数
+     */
     UI_EXT_PAGER_CLASS.getTotal = function () {
         return this._uPager._nTotal;
     };
@@ -34356,7 +34393,7 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
             (this._chartType === 'column' || this._chartType === 'bar')
             && axisCaption
         ) {
-            var name = this._aSeries[0].name; // TODO:name属性需要更改
+            var name = this._aSeries[0].yAxisName;
             axisCaption && (settings.name = axisCaption[name]);
             yAxis.push(setBasicItems(settings));
         }
@@ -34369,15 +34406,33 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
 
             for (var i = 0, iLen = series.length, tSer; i < iLen; i ++) {
                 tSer = series[i];
-                tSer.yAxisIndex === '0'
-                    ? leftName.push(axisCaption[tSer.name])
-                    : rightName.push(axisCaption[tSer.name]);
+                var name = tSer.yAxisName;
+                if (name) {
+                    tSer.yAxisIndex === '0'
+                        ? leftName.push(axisCaption[name])
+                        : rightName.push(axisCaption[name]);
+                }
+
             }
+            if (leftName.length === 1) {
+                leftName = leftName[0];
+            }
+            else if (leftName.length > 1) {
+                leftName = leftName.join(',');
+            }
+
+            if (rightName.length === 1) {
+                rightName = rightName[0];
+            }
+            else if (rightName.length > 1) {
+                rightName = rightName.join(',');
+            }
+
             // 左刻度轴设置
-            settings = merge(settings, {name: leftName.join(',')});
+            settings = merge(settings, {name: leftName});
             yAxis.push(setBasicItems(settings));
             // 右刻度值设置
-            settings = merge(settings, {name: rightName.join(',')});
+            settings = merge(settings, {name: rightName});
             yAxis.push(setBasicItems(settings));
         }
 
@@ -34513,7 +34568,8 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
         // 控制图例位置 UI_E_CHART_CLASS.$setupLegend
         // 控制grid的位置 UI_E_CHART_CLASS.$initOptions
 
-        var legend = {x: 'center', y: '20'};
+        // var legend = {x: 'center', y: '20'};
+        var legend = {x: 'center', y: 'top'};
         var data = [];
         var defaultMeasures = this.$getDefaultMeasures(this._chartType);
 
@@ -34786,6 +34842,24 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
         }
 
         // 如果显示指标区域 并且 有指标,则加载指标区域
+        // 做兼容老保表
+        // 如果个性化设置不存在;或者，个性化设置存在，显示图例不存在；此时，就是老报表状态；除了线图，都添加指标区域；
+        if (
+            !this._appearance
+            || (
+                this._appearance
+                && (
+                    this._appearance.isShowInds === null
+                    || this._appearance.isShowInds === undefined
+                )
+            )
+        ) {
+            if (this._chartType !== 'line') {
+                this.$renderIndArea();
+            }
+        }
+
+        // 正常逻辑
         if (
             this._appearance
             && this._appearance.isShowInds
@@ -34848,6 +34922,18 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
      */
     UI_E_CHART_CLASS.$initOptions = function () {
         var options = {};
+        // 显示标题
+        if (this._appearance && this._appearance.isShowTitle) {
+            options.title = {
+                text: this._appearance.chartTitle,
+                x: 'center',
+                y: 'top',
+                textStyle: {
+                    fontSize: 12,
+                    fontWeight: 'normal'
+                }
+            };
+        }
 
         this.$setupSeries(options);
         this.$setupTooltip(options);
@@ -34867,6 +34953,9 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                     x2: 80,
                     y: 20,
                     borderWidth: 0
+                };
+                if (this._appearance && this._appearance.isShowTitle) {
+                    options.grid.y = 30;
                 }
                 // 当不为饼图时，都需要设置x轴属性，否则图形都显示不出来 updata by majun
                 this.$setupXAxis(options);
@@ -34900,8 +34989,14 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
             if (format && format.indexOf('%') >= 0) {
                 hasPercent = true;
             }
+
+            if (hasPercent) {
+                this._mapMaxValue = this._mapMaxValue > 1 ? 1 : this._mapMaxValue;
+            }
+
             var min = hasPercent ? this._mapMinValue * 100: this._mapMinValue;
             var max = hasPercent ? this._mapMaxValue * 100: this._mapMaxValue;
+
             var split = (max - min) / splitNum;
             var splitList = [{ start: max }];
             var i = 1;
@@ -34948,10 +35043,6 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
         if (this._chartType === 'pie') {
             // 拖拽重计算在线上项目应用不多，且有bug，先行关闭该高级功能 updata by majun
             options.calculable = false;
-            // var colors = [
-            //     '#2EC6C9', '#B6A2DE', '#5AB1EE', '#FFB981', '#D97A81',
-            //     '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
-            // ];
             var colors = [
                 '#C0504E', '#4F81BC', '#9BBB58', '#FFB981', '#D97A81',
                 '#D6A7C9', '#7E95D8', '#70CBA0', '#B7Cb8C', '#E6D88D'
@@ -34960,16 +35051,25 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
             options.color = colors;
         }
 
-        // var textStyle = {
-        //     fontFamily: '微软雅黑',
-        //     fontSize: '120px'
-        // };
-
-        // 如果指标区域不显示，才显示图例；其实图例也应该给开放出去，让用户自己去设置，不应该根据指标区域的逻辑进行处理
+        // 做兼容老保表
+        // 如果个性化设置不存在;或者，个性化设置存在，显示图例不存在；此时，就是老报表状态；如果是线图，就添加图例，否则，就不添加；
         if (
-            this._appearance
-            && !this._appearance.isShowInds
+            !this._appearance
+            || (
+                this._appearance
+                && (
+                    this._appearance.isShowLegend === null
+                    || this._appearance.isShowLegend === undefined
+                )
+            )
         ) {
+            if (this._chartType === 'line') {
+                this.$setupLegend(options);
+            }
+        }
+
+        // 正常逻辑，如果显示图例
+        if (this._appearance && this._appearance.isShowLegend) {
             this.$setupLegend(options);
         }
 
@@ -66392,12 +66492,11 @@ $namespace('di.shared.model');
             var existMethod = getDIAdapterMethod(this, 'setData') || this.setData;
             if (existMethod) {
                 options = options || {};
-                data = mergeOpt(
+                var result = mergeOpt(
                     this.$di('getDef'), data, 'DATA_SET', options
                 );
-                // TODO 
                 // isSilent的统一支持
-                return existMethod.call(this, data);
+                return existMethod.call(this, result, data);
             }
         },
 
@@ -68735,11 +68834,11 @@ $namespace('di.shared.adapter');
      *
      * @public
      */
-    function setData(data) {
+    function setData(data, source) {
         this.render(
             data.currentPage,
             data.totalRecordCount,
-            String(data.pageSize)
+            String(source.pageSize)
         );
     }
 
@@ -76818,7 +76917,8 @@ $namespace('di.shared.ui');
             'DATA',
             {
                 componentId: this.$di('getId').split('.')[1],
-                currentPage: this._uPager.getPage(),
+                // currentPage: this._uPager.getPage(),
+                currentPage: 1,
                 pageSize: pageSize,
                 totalRecordCount: this._uPager.getTotal()
             }

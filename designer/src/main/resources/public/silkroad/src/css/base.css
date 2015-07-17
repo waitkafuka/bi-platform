@@ -107,6 +107,12 @@ a {
 .ml-5 {
     margin-left: 5px;
 }
+.ml-15 {
+    margin-left: 15px;
+}
+.ml-25 {
+    margin-left: 25px;
+}
 .mb-20 {
     margin-bottom: 20px;
 }
@@ -134,17 +140,29 @@ a {
 .w-100 {
     width: 100px;
 }
+.w-105 {
+    width: 105px;
+}
 .w-130 {
     width: 130px;
 }
 .w-150 {
     width: 150px;
 }
+.w-170 {
+    width: 170px;
+}
 .w-200 {
     width: 200px;
 }
 .w-p-40 {
     width: 40%;
+}
+.w-p-100 {
+    width: 100%;
+}
+.h-25 {
+    height: 25px;
 }
 .cor-red {
     color: red;

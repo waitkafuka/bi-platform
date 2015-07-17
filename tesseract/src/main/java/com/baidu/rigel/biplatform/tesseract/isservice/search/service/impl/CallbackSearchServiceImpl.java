@@ -70,7 +70,6 @@ import com.baidu.rigel.biplatform.tesseract.util.TesseractExceptionUtils;
 import com.baidu.rigel.biplatform.tesseract.util.isservice.LogInfoConstants;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * SearchService 实现类，用来连接外部的查询API。
@@ -106,7 +105,7 @@ public class CallbackSearchServiceImpl {
      * @author mengran
      *
      */
-    public class CallbackExecutor implements Callable<CallbackResponse> {
+    protected class CallbackExecutor implements Callable<CallbackResponse> {
 
         private Entry<String, List<MiniCubeMeasure>> group;
         private String groupbyParams;
@@ -125,14 +124,6 @@ public class CallbackSearchServiceImpl {
             this.whereParams = AnswerCoreConstant.GSON.toJson(whereParams);
         }
         
-        /**
-         * for test
-         * @param callbackMeasures
-         */
-        protected void setCallbackMeasuers(String callbackMeasures) {
-            this.callbackMeasures = callbackMeasures;
-        }
-        
         public List<String> getCallbackMeasures() {
             
             return Arrays.asList(StringUtils.delimitedListToStringArray(callbackMeasures, ","));
@@ -145,27 +136,23 @@ public class CallbackSearchServiceImpl {
 
                 @Override
                 public int compare(MiniCubeMeasure o1, MiniCubeMeasure o2) {
-                    return new Long(((CallbackMeasure) o1).getSocketTimeOut() - ((CallbackMeasure) o2).getSocketTimeOut()).intValue();
+                    return new Long(((CallbackMeasure) o1).getSocketTimeOut() - 
+                        ((CallbackMeasure) o2).getSocketTimeOut()).intValue();
                 }
                 
             }).get();
             
             // Build call-back parameter
             Map<String, String> merged = new HashMap<String, String>();
-//            StringBuilder sb = new StringBuilder();
-            String  callbackMeasures = group.getValue ().stream ()
-                    .map (m -> m.getName ())
-                    .distinct ()
-                    .collect (Collectors.joining (","));
-//            for (MiniCubeMeasure m : group.getValue()) {
-//                sb.append(",").append(m.getName());
-//            }
-//            if (sb.length() > 0) {
-//                sb.deleteCharAt(0);
-//            }
+            StringBuilder sb = new StringBuilder();
+            for (MiniCubeMeasure m : group.getValue()) {
+                sb.append(",").append(m.getName());
+            }
+            if (sb.length() > 0) {
+                sb.deleteCharAt(0);
+            }
             // Prepared required parameters (other parameters depend on invoke methods)
-//            merged.put(MEASURE_NAMES, callbackMeasures = sb.toString());
-            merged.put(MEASURE_NAMES, callbackMeasures);
+            merged.put(MEASURE_NAMES, callbackMeasures = sb.toString());
             merged.put(GROUP_BY, groupbyParams);
             merged.put(FILTER, whereParams);
             
@@ -182,6 +169,10 @@ public class CallbackSearchServiceImpl {
             return CallbackServiceInvoker.invokeCallback(group.getKey(), merged, 
                     CallbackType.MEASURE, ((CallbackMeasure) maxTimeout).getSocketTimeOut());
         }
+
+        public void setCallbackMeasuers(String m) {
+            this.callbackMeasures = m;
+        }
         
     }
 
@@ -192,10 +183,10 @@ public class CallbackSearchServiceImpl {
      * @throws IndexAndSearchException exception occurred when 
      */
     public SearchIndexResultSet query(QueryContext context, QueryRequest query) throws IndexAndSearchException {
-//        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_BEGIN, "callbackquery", "[callbackquery:" + query + "]"));
         if (query == null || context == null || StringUtils.isEmpty(query.getCubeId())) {
-            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "callbackquery", "[callbackquery:" + query
-                    + "]"));
+            LOGGER.error(
+                    String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, 
+                    "callbackquery", "[callbackquery:" + query + "]"));
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                     IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
@@ -219,8 +210,8 @@ public class CallbackSearchServiceImpl {
                     return m;
                 }).collect(Collectors.groupingBy(c -> ((CallbackMeasure) c).getCallbackUrl(), Collectors.toList()));
         if (callbackMeasures == null || callbackMeasures.isEmpty()) {
-            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "Empty callback measure", "[callbackquery:" + query
-                    + "]"));
+            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, 
+                "Empty callback measure", "[callbackquery:" + query + "]"));
             throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                     IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
                     IndexAndSearchExceptionType.ILLEGALARGUMENT_EXCEPTION),
@@ -245,21 +236,14 @@ public class CallbackSearchServiceImpl {
                     l.add(TesseractConstant.SUMMARY_KEY);
                 }
                 // Put it into group by field
-               for (String  tmp : l) {
-                   if (!groupbyParams.get (e.getProperties()).contains (l)) {
-                       groupbyParams.get(e.getProperties()).add(tmp);
-                   }
-               }
-//                groupbyParams.get(e.getProperties()).addAll(l);
+                groupbyParams.get(e.getProperties()).addAll(l);
             } else {
                 // Put it into filter field
                 if (CollectionUtils.isEmpty(l)) {
                     List<Set<String>> tmp = 
                             e.getQueryValues().stream().map(v -> v.getLeafValues()).collect(Collectors.toList());
                     List<String> values = Lists.newArrayList();
-                    Set<String> filterVal = Sets.newHashSet ();
-                    tmp.forEach(t -> filterVal.addAll(t));
-                    values.addAll (filterVal);
+                    tmp.forEach(t -> values.addAll(t));
                     whereParams.put(e.getProperties(), values);
                 } else {
                     whereParams.put(e.getProperties(), new ArrayList<String>(l));
@@ -271,7 +255,8 @@ public class CallbackSearchServiceImpl {
 //        CountDownLatch latch = new CountDownLatch(response.size());
 //        List<Future<CallbackResponse>> results = Lists.newArrayList();
         Map<CallbackExecutor, Future<CallbackResponse>> results = Maps.newHashMap();
-        ExecutorCompletionService<CallbackResponse> service = new ExecutorCompletionService<CallbackResponse>(taskExecutor);
+        ExecutorCompletionService<CallbackResponse> service = 
+            new ExecutorCompletionService<CallbackResponse>(taskExecutor);
         StringBuilder callbackMeasureNames = new StringBuilder();
         for (Entry<String, List<MiniCubeMeasure>> e : callbackMeasures.entrySet()) {
             CallbackExecutor ce = new CallbackExecutor(e, groupbyParams, whereParams);
@@ -307,21 +292,15 @@ public class CallbackSearchServiceImpl {
             result = new SearchIndexResultSet(new Meta(query.getGroupBy().getGroups().toArray(new String[0])), 0);
         }
 
-//        LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_END, "query", "[query:" + query + "]"));
         return result;
     }
     
-    /**
-     * @param taskExecutor the taskExecutor to set
-     */
-    protected void setTaskExecutor(ThreadPoolTaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
-    }
-
-    protected SearchIndexResultSet packageResultRecords(QueryRequest query, SqlQuery sqlQuery, Map<CallbackExecutor, CallbackResponse> response) {
+    protected SearchIndexResultSet packageResultRecords(
+        QueryRequest query, SqlQuery sqlQuery, Map<CallbackExecutor, CallbackResponse> response) {
         List<String> groupby = new ArrayList<String>(query.getGroupBy().getGroups());
         // Confirm meta sequence
-        List<Entry<CallbackExecutor, CallbackResponse>> fieldValuesHolderList = new ArrayList<Entry<CallbackExecutor, CallbackResponse>>(response.size());
+        List<Entry<CallbackExecutor, CallbackResponse>> fieldValuesHolderList 
+            = new ArrayList<Entry<CallbackExecutor, CallbackResponse>>(response.size());
         for (Entry<CallbackExecutor, CallbackResponse> e : response.entrySet()) {
             groupby.addAll(e.getKey().getCallbackMeasures());
             fieldValuesHolderList.add(e);
@@ -340,19 +319,28 @@ public class CallbackSearchServiceImpl {
             fieldValues.addAll(Arrays.asList(StringUtils.delimitedListToStringArray(key, RESPONSE_VALUE_SPLIT)));
             fieldValues.addAll(mv.get(key));
             for (int i = 1; i < fieldValuesHolderList.size(); i++) {
-                CallbackMeasureVaue callbackMeasureValue = (CallbackMeasureVaue) fieldValuesHolderList.get(i).getValue().getData().get(index);
+                CallbackMeasureVaue callbackMeasureValue = 
+                    (CallbackMeasureVaue) fieldValuesHolderList.get(i).getValue().getData().get(index);
                 if (key.equals(callbackMeasureValue.keySet().iterator().next())) {
                     fieldValues.addAll(callbackMeasureValue.get(key));
                 } else {
-                    LOGGER.error("Wrong SEQ of callback response of {} : {}", fieldValuesHolderList.get(i).getKey().group.getKey(), callbackMeasureValue);
+                    LOGGER.error("Wrong SEQ of callback response of {} : {}", 
+                        fieldValuesHolderList.get(i).getKey().group.getKey(), callbackMeasureValue);
                 }
             }
-            SearchIndexResultRecord record = new SearchIndexResultRecord(fieldValues.toArray(new Serializable[0]), StringUtils.collectionToCommaDelimitedString(fieldValues));
+            SearchIndexResultRecord record = 
+                    new SearchIndexResultRecord(
+                    fieldValues.toArray(new Serializable[0]), 
+                    StringUtils.collectionToCommaDelimitedString(fieldValues));
             
             result.addRecord(record);
         }
         
         return result;
+    }
+
+    public void setTaskExecutor(ThreadPoolTaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
     }
 
 }

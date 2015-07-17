@@ -859,7 +859,7 @@
         }
         // 增加判断逻辑，如果改行是手动汇总行，那么linkBridge也不能有点击，否则后台没法处理
 //        else if (defItem && defItem.linkBridge && wrap.cellId && wrap.cellId.indexOf('[SUMMARY_NODE].[ALL]') < 0) {
-        else if (defItem && defItem.linkBridge) {
+        else if (value !== '-' && defItem && defItem.linkBridge) {
             attrStr.push('data-cell-link="true"');
             // value = '<a href="#" class="' + type + '-cell-link" data-cell-link-bridge-a="1">' + value + '</a>';
             value = [
@@ -1180,7 +1180,7 @@
             ? wrap.str
             : String(
                 wrap.v == null
-                ? ' - '
+                ? '-'
                 : format
                 ? formatNumber(wrap.v, format, void 0, void 0, true)
                 : wrap.v
@@ -1189,6 +1189,7 @@
         var cut = this._oCut[cellType];
         if (cut) {
             prompt = value;
+            // 注释掉字符串截断
             value = sliceByte(value, cut, 'gbk');
             if (value.length < prompt.length) {
                 value += '...';
@@ -1200,7 +1201,8 @@
         }
         return {
             value: encodeHTML(value),
-            prompt: prompt && encodeHTML(prompt)
+            prompt: value && encodeHTML(value)
+            // prompt: prompt && encodeHTML(prompt)
         };
     }
 

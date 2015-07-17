@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
@@ -288,6 +290,23 @@ public class DataModelUtilsTest {
         try {
             DataModelUtils.decorateTable(formatModel, table);
             Assert.assertEquals("abc", table.getColDefine().get(0).getFormat());
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+    
+    /**
+     * 
+     */
+    @Test
+    public void testDecorateTableIsShowZero() {
+        FormatModel formatModel = new FormatModel();
+        PivotTable table = new PivotTable();
+        table.setDataSourceColumnBased(parseCellDatas(buildDataModel().getColumnBaseData()));
+        try {
+            DataModelUtils.decorateTable(formatModel, table, true);
+            BigDecimal actual = table.getDataSourceColumnBased().get(0).get(0).getV();
+            Assert.assertEquals(BigDecimal.ZERO, actual);
         } catch (Exception e) {
             Assert.fail();
         }
@@ -725,6 +744,46 @@ public class DataModelUtilsTest {
     }
 
     /**
+     * 测试
+     * testDecoratePlaneTable
+     */
+    @Test
+    public void testDecoratePlaneTable() {
+        PlaneTable planeTable = this.buildPlaneTable();
+        List<Map<String, String>> expect = this.buildTableData(new String[] {"key1", "key2"}, new String[] {"0",  "0"});
+        DataModelUtils.decoratePlaneTable(planeTable, true);
+        List<Map<String, String>> actual = planeTable.getData();
+        Assert.assertEquals(expect, actual);
+        
+        
+    }
+    
+    /**
+     * 构建平面表
+     * buildPlaneTable
+     * @return
+     */
+    private PlaneTable buildPlaneTable() {
+        PlaneTable planeTable = new PlaneTable();
+        planeTable.setData(this.buildTableData(new String[] {"key1", "key2"}, new String[] {"",  "0"}));
+        return planeTable;
+    }
+    
+    /**
+     * 构建平面表的测试tableData
+     * buildTableData
+     * @return
+     */
+    private List<Map<String, String>> buildTableData(String[] key, String[] value) {
+        List<Map<String, String>> datas = Lists.newArrayList();
+        Map<String, String> data = Maps.newHashMap();
+        data.put(key[0], value[0]);
+        data.put(key[1], value[1]);
+        datas.add(data);
+        return datas;
+    }
+    
+    /**
      * 构建DataModel buildDataModel
      * 
      * @return
@@ -732,6 +791,15 @@ public class DataModelUtilsTest {
     private DataModel buildDataModel() {
         DataModel dataModel = new DataModel();
         TableData tableData = new TableData();
+        // 构建多维数据
+        List<List<BigDecimal>> multiDatas = Lists.newArrayList();
+        List<BigDecimal> multiData = Lists.newArrayList();
+        multiData.add(null);
+        multiData.add(null);
+        multiDatas.add(multiData);
+        dataModel.setColumnBaseData(multiDatas);
+        
+        // 构建平面表数据
         Column columnDim = new Column("test.Dim", "Dim", "captionDim", "test");
         Column columnMeasure = new Column("test.Measure", "Measure", "captionMeasure", "test");
         List<Column> columns = Lists.newArrayList();
@@ -751,5 +819,42 @@ public class DataModelUtilsTest {
         tableData.setColBaseDatas(data);
         dataModel.setTableData(tableData);
         return dataModel;
+    }
+    
+    /**
+     * 将数据转为cellData
+     * parseCellDatas
+     * @param source
+     * @return
+     */
+    private static List<List<CellData>> parseCellDatas(List<List<BigDecimal>> source) {
+        List<List<CellData>> cellDatas = Lists.newArrayList();
+        for (List<BigDecimal> sourcePiece : source) {
+            List<CellData> cellRow = Lists.newArrayList();
+            for (BigDecimal data : sourcePiece) {
+                cellRow.add(parseCellData(data));
+            }
+            cellDatas.add(cellRow);
+        }
+        return cellDatas;
+    }
+
+    /**
+     * 将数据转为cellData
+     * parseCellData
+     * @param value
+     * @return
+     */
+    private static CellData parseCellData(BigDecimal value) {
+        CellData data = new CellData();
+        data.setCellId("");
+        data.setFormattedValue("I,III.DD");
+        if (value != null) {
+            value = value.setScale(8, RoundingMode.HALF_UP);
+            data.setV(value);
+        } else {
+            data.setV(value);
+        }
+        return data;
     }
 }

@@ -169,7 +169,7 @@ public class QueryServiceImpl implements QueryService {
                             try {
                                 SearchIndexResultSet resultSet = callbackSearchService
                                         .query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, 
-                                        context, questionModel.isUseIndex(),null));
+                                        context, questionModel.isUseIndex(), null));
                                 dm = new DataModelBuilder(resultSet, context).build(true);
                             } catch (Exception e) {
                                 logger.error("catch error when process callback measure {}",e.getMessage());

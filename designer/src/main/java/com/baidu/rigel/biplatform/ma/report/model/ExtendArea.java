@@ -77,6 +77,10 @@ public class ExtendArea implements Serializable {
      */
     private ChartFormatModel chartFormatModel = new ChartFormatModel();
     
+    /**
+     * 平面表样式信息
+     */
+    private PlaneTableFormat planeTableFormat = new PlaneTableFormat();
     
     /**
      * 表格的其他个性化配置，如是否过滤空白行等
@@ -287,6 +291,30 @@ public class ExtendArea implements Serializable {
      */
     public void setChartFormatModel(ChartFormatModel chartFormatModel) {
         this.chartFormatModel = chartFormatModel;
+    }
+
+    
+    /** 
+     * 获取 planeTableFormat 
+     * @return the planeTableFormat 
+     */
+    public PlaneTableFormat getPlaneTableFormat() {
+        if (this.planeTableFormat == null) {
+            this.planeTableFormat = new PlaneTableFormat();
+        }
+        return planeTableFormat;
+        
+    }
+
+    
+    /** 
+     * 设置 planeTableFormat 
+     * @param planeTableFormat the planeTableFormat to set 
+     */
+    public void setPlaneTableFormat(PlaneTableFormat planeTableFormat) {
+        
+        this.planeTableFormat = planeTableFormat;
+        
     }
     
 

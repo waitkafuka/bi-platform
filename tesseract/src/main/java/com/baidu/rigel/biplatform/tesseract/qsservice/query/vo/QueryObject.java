@@ -19,6 +19,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
+
 /**
  * 查询的节点属性
  * @author xiaoming.chen
@@ -120,7 +122,7 @@ public class QueryObject implements Serializable {
             if (other.leafValues != null) {
                 return false;
             }
-        } else if (!leafValues.equals(other.leafValues)) {
+        } else if (!CollectionUtils.isEqualCollection (leafValues, other.leafValues)) {
             return false;
         }
         if (value == null) {
