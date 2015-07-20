@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -178,7 +179,11 @@ abstract class RateConditionProcessHandler {
                         .get(AxisType.ROW).getCrossjoinDims().indexOf(dimension.getName());
                 MemberNodeTree tree = builder.buildQueryMemberTree(
                         adapter.getDataSoruceInfo(), cube, tmp, false, questionModel.getRequestParams());
-                context.getRowMemberTrees().set(index, tree);
+                if (context.getRowMemberTrees () instanceof LinkedList) {
+                    context.getRowMemberTrees().add (tree);
+                } else {
+                    context.getRowMemberTrees().set(index, tree);
+                }
             } else {
                 Map<String, Set<String>> fiters = builder.buildFilterCondition(
                         adapter.getDataSoruceInfo(), cube, tmp, questionModel.getRequestParams());
