@@ -59,7 +59,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     /**
      * LOGGER
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataQueryServiceImplTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataQueryServiceImpl.class);
     /**
      * jdbcTemplate
      */
