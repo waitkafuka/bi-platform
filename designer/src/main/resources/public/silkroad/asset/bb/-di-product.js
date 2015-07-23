@@ -8,6 +8,7 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/LinkedHashMap.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/ajax.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/collection.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/commonUtil.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/date.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/dom.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/file.js" type="text/javascript"><\/script>' );

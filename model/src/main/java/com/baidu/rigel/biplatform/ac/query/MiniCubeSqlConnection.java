@@ -68,6 +68,7 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
         long curr = System.currentTimeMillis();
         String response = null;
         String questionModelJson = null;
+        questionModel.setQueryId(Long.valueOf(System.nanoTime()).toString());
         if (ConfigInfoUtils
                 .getServerAddressByProperty("server.queryrouter.address") != null) {
             String systemCode = ConfigInfoUtils
@@ -103,7 +104,7 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
                                     + "/queryrouter/query", params);
         } else {
             questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
-            log.info("begin execute query with tesseract ");
+            log.info("queryId:{} begin execute query with tesseract ", questionModel.getQueryId());
             params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
             response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress()
                     + "/query", params);
@@ -114,9 +115,7 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(
                 response, ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
-            String dataModelJson = responseResult.getData().replace("\\", "");
-            dataModelJson = dataModelJson.substring(1,
-                    dataModelJson.length() - 1);
+            String dataModelJson = responseResult.getData();
             DataModel dataModel = JsonUnSeriallizableUtils
                     .dataModelFromJson(dataModelJson);
             StringBuilder sb = new StringBuilder();

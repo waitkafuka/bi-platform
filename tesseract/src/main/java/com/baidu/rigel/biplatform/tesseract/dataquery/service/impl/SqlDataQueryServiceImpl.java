@@ -59,7 +59,7 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
     /**
      * LOGGER
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataQueryServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SqlDataQueryServiceImplTest.class);
     /**
      * jdbcTemplate
      */
@@ -232,9 +232,9 @@ public class SqlDataQueryServiceImpl implements DataQueryService {
             LOGGER.warn("no result from sql query:" + sqlQuery.toSql());
             return resultSet;
         }
-        
-        resultSet.setDataList(AggregateCompute.aggregate(resultSet.getDataList(), queryRequest));
-        
+        if (!sqlQuery.isAggSql()) {
+            resultSet.setDataList(AggregateCompute.aggregate(resultSet.getDataList(), queryRequest));
+        }
         LOGGER.debug("group by cost:" + (System.currentTimeMillis() - current));
 
         return resultSet;

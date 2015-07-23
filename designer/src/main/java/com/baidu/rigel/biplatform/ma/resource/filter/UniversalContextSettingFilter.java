@@ -149,7 +149,11 @@ public class UniversalContextSettingFilter implements Filter {
             productLineCookie.setPath(Constants.COOKIE_PATH);
             ((HttpServletResponse) response).addCookie(productLineCookie);
             // 对productLine进行重新解密，以便放到ContextManager中
-            productLine = AesUtil.getInstance().decodeAnddecrypt (productLine, securityKey);
+            try {
+                productLine = AesUtil.getInstance().decodeAnddecrypt (productLine, securityKey);
+            } catch (Exception e) {
+                productLine = AesUtil.getInstance().decrypt (productLine, securityKey);
+            }
         }
         return productLine;
     }
@@ -233,8 +237,12 @@ public class UniversalContextSettingFilter implements Filter {
             try {
                 innerProductLine = AesUtil.getInstance().decodeAnddecrypt(innerProductLine, securityKey);
             } catch (Exception e) {
-                LOG.error(innerProductLine);
-                LOG.error(e.getMessage(),e);
+                try {
+                    innerProductLine = AesUtil.getInstance ().decrypt (innerProductLine, securityKey);
+                } catch (Exception e1) {
+                    LOG.error (e1.getMessage (), e1);
+                }
+//                LOG.error(e.getMessage(),e);
                 //e.printStackTrace();
             }
         } // 产品线value不为空

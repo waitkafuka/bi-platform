@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -111,7 +112,9 @@ import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.query.chart.ChartShowType;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo.SeriesUnitType;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
 import com.baidu.rigel.biplatform.ma.report.service.AnalysisChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
@@ -551,6 +554,11 @@ public class QueryDataResource extends BaseResource {
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         StringBuilder builder = buildVMString(reportId, request, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
+        // 如果请求中包含UID 信息，则将uid信息写入cookie中，方便后边查询请求应用
+        String uid = request.getParameter (UID_KEY);
+        if (uid != null) {
+            response.addCookie (new Cookie (UID_KEY, uid));
+        }
         return builder.toString();
     }
 
@@ -2748,4 +2756,80 @@ public class QueryDataResource extends BaseResource {
         return level != null && level.getType() == LevelType.CALL_BACK;
     }
 
+    
+    /**
+     * 数据查询API，获取基于报表模型的数据
+     * @param reportId
+     * @param request
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/{reportId}/data", method = { RequestMethod.POST , RequestMethod.GET})
+    public ResponseResult queryData(@PathVariable("reportId") String reportId, 
+        HttpServletRequest request, HttpServletResponse response) throws Exception {
+        long begin = System.currentTimeMillis ();
+        queryVM (reportId, request, response);
+        ResponseResult rs = updateContext (reportId, request);
+        if (rs.getStatus () != 0) {
+            return rs;
+        }
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+        ReportDesignModel model = this.getRealModel (reportId, runtimeModel);
+        rs = new ResponseResult ();
+        if (model == null) {
+            rs.setStatus (1);
+            rs.setStatusInfo ("未找到相应数据模型");
+            logger.info ("cannot get report define in queryData");
+        }
+        if (model.getExtendAreas ().size () != 1) {
+            rs.setStatus (1);
+            rs.setStatusInfo ("数据区域个数大于2, 不能确定数据区域");
+            logger.info ("more than one data areas, return");
+        } else {
+            ExtendArea area = model.getExtendAreaList ()[0];
+            rs = queryArea (reportId, area.getId (), request);
+            if (rs.getStatus () != 0) {
+                logger.info ("unknown error!");
+                return rs;
+            }
+            Map<String, Object> data = (Map<String, Object>) rs.getData ();
+            Map<String, List<String>> datas = Maps.newHashMap ();
+            if (data.containsKey ("pivottable")) {
+                PivotTable pivotTable = (PivotTable) data.get ("pivottable");
+                pivotTable.getDataSourceColumnBased ();
+                List<List<RowHeadField>> rowHeadFields = pivotTable.getRowHeadFields ();
+                List<List<RowHeadField>> colFieldBaseRow = Lists.newArrayList ();
+                // 行列互转
+                for (int i = 0; i < rowHeadFields.size (); ++i) {
+                    for (int j = 0; j < rowHeadFields.get (i).size (); ++j) {
+                        if (colFieldBaseRow.size () <= j) {
+                            List<RowHeadField> tmp = Lists.newArrayList ();
+                            tmp.add (rowHeadFields.get (i).get (j));
+                            colFieldBaseRow.add (tmp);
+                        } else {
+                            colFieldBaseRow.get (j).add (rowHeadFields.get (i).get (j));
+                        }
+                    }
+                }
+                colFieldBaseRow.forEach (list -> {
+                    String key = list.get (0).getUniqueName ();
+                    key = MetaNameUtil.getDimNameFromUniqueName (key);
+                    List<String> value = list.stream ().map (f -> f.getV ()).collect (Collectors.toList ());
+                    datas.put (key, value);
+                });
+                for (int i = 0; i < pivotTable.getColDefine ().size (); ++i) {
+                    String key = pivotTable.getColDefine ().get (i).getUniqueName ();
+                    key = MetaNameUtil.getNameFromMetaName (key);
+                    List<CellData> v = pivotTable.getDataSourceColumnBased ().get (i);
+                    List<String> tmpV = 
+                        v.stream ().map (cellData -> cellData.getV ().toString ()).collect (Collectors.toList ());
+                    datas.put (key, tmpV);
+                }
+            } else {
+                // DoNothing 暂时不支持平面表 
+            }
+            rs.setData (datas);
+        }
+        logger.info ("successfully get data from report model, cost {} ms", (System.currentTimeMillis () - begin));
+        return rs;
+    }
 }

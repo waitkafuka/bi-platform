@@ -17,12 +17,6 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model;
 
 import java.io.Serializable;
 
-import com.baidu.rigel.biplatform.ac.model.Dimension;
-import com.baidu.rigel.biplatform.ac.model.Level;
-import com.baidu.rigel.biplatform.ac.model.Measure;
-import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
-
 /**
  * 
  * Description: sql数据表列元数据信息描述
@@ -46,6 +40,21 @@ public class SqlColumn implements Serializable {
      * name
      */
     public String name;
+    
+    /**
+     * operator
+     */
+    public String operator;
+    
+    /**
+     * type
+     */
+    public ColumnType type;
+    
+    /**
+     * dataType
+     */
+    public String dataType;
 
     /**
      * sql查询的唯一的列名标示
@@ -56,6 +65,16 @@ public class SqlColumn implements Serializable {
      * tableFieldName
      */
     public String tableFieldName;
+    
+    /**
+     * joinTableFieldName
+     */
+    public String joinTableFieldName;
+    
+    /**
+     * factTableFieldName
+     */
+    public String factTableFieldName;
 
     /**
      * caption
@@ -73,47 +92,118 @@ public class SqlColumn implements Serializable {
     public String sourceTableName;
 
     /**
-     * AxisType
+     * columnCondition
      */
-    public AxisType type;
+    public ColumnCondition columnCondition;
 
+    
     /**
-     * dimension
-     */
-    public Dimension dimension;
-
-    /**
-     * Level
-     */
-    public Level level;
-
-    /**
-     * measure
-     */
-    public Measure measure;
-
-    /**
-     * metaCondition
-     */
-    public MetaCondition metaCondition;
-
-    /**
-     * metaCondition
+     * getDataType
      * 
-     * @return the metaCondition to get
+     * @return the dataType
      */
-    public MetaCondition getMetaCondition() {
-        return metaCondition;
+    public String getDataType() {
+        return dataType;
     }
 
     /**
-     * setMetaCondition
+     * setDataType
      * 
-     * @param metaCondition
-     *            the metaCondition to set
+     * @param dataType the dataType to set
      */
-    public void setMetaCondition(MetaCondition metaCondition) {
-        this.metaCondition = metaCondition;
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
+    }
+
+    /**
+     * getJoinTableFieldName
+     * 
+     * @return the joinTableFieldName
+     */
+    public String getJoinTableFieldName() {
+        return joinTableFieldName;
+    }
+
+    /**
+     * setJoinTableFieldName
+     * 
+     * @param joinTableFieldName the joinTableFieldName to set
+     */
+    public void setJoinTableFieldName(String joinTableFieldName) {
+        this.joinTableFieldName = joinTableFieldName;
+    }
+
+    /**
+     * getFactTableFieldName
+     * 
+     * @return the factTableFieldName
+     */
+    public String getFactTableFieldName() {
+        return factTableFieldName;
+    }
+
+    /**
+     * setFactTableFieldName
+     * 
+     * @param factTableFieldName the factTableFieldName to set
+     */
+    public void setFactTableFieldName(String factTableFieldName) {
+        this.factTableFieldName = factTableFieldName;
+    }
+
+    /**
+     * getOperator
+     * 
+     * @return the operator
+     */
+    public String getOperator() {
+        return operator;
+    }
+
+    /**
+     * setOperator
+     * 
+     * @param operator the operator to set
+     */
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    /**
+     * getType
+     * 
+     * @return the type
+     */
+    public ColumnType getType() {
+        return type;
+    }
+
+    /**
+     * setType
+     * 
+     * @param type the type to set
+     */
+    public void setType(ColumnType type) {
+        this.type = type;
+    }
+
+    /**
+     * columnCondition
+     * 
+     * @return the columnCondition to get
+     */
+    public ColumnCondition getColumnCondition() {
+        return columnCondition;
+    }
+
+    /**
+     * setColumnCondition
+     * 
+     * @param columnCondition
+     *            the columnCondition to set
+     */
+    public void setColumnCondition(ColumnCondition columnCondition) {
+        this.columnCondition = columnCondition;
     }
 
     /**
@@ -173,25 +263,6 @@ public class SqlColumn implements Serializable {
      */
     public void setSqlUniqueColumn(String sqlUniqueColumn) {
         this.sqlUniqueColumn = sqlUniqueColumn;
-    }
-
-    /**
-     * getLevel
-     * 
-     * @return Level level
-     */
-    public Level getLevel() {
-        return level;
-    }
-
-    /**
-     * setLevel
-     * 
-     * @param Level
-     *            level
-     */
-    public void setLevel(Level level) {
-        this.level = level;
     }
 
     /**
@@ -269,62 +340,4 @@ public class SqlColumn implements Serializable {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-
-    /**
-     * getType
-     * 
-     * @return AxisType type
-     */
-    public AxisType getType() {
-        return type;
-    }
-
-    /**
-     * setType
-     * 
-     * @param AxisType
-     *            type
-     */
-    public void setType(AxisType type) {
-        this.type = type;
-    }
-
-    /**
-     * getDimension
-     * 
-     * @return dimension dimension
-     */
-    public Dimension getDimension() {
-        return dimension;
-    }
-
-    /**
-     * setDimension
-     * 
-     * @param Dimension
-     *            dimension
-     */
-    public void setDimension(Dimension dimension) {
-        this.dimension = dimension;
-    }
-
-    /**
-     * getMeasure
-     * 
-     * @return measure measure
-     */
-    public Measure getMeasure() {
-        return measure;
-    }
-
-    /**
-     * setMeasure
-     * 
-     * @param measure
-     *            measure
-     */
-    public void setMeasure(Measure measure) {
-        this.measure = measure;
-    }
-
 }

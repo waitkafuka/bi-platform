@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -130,7 +131,7 @@ public class ChartBuildServiceImpl implements ChartBuildService {
         
 //        });
         List<BigDecimal> rs = Lists.newArrayList();
-        if (reportChart.getSeriesData () == null && reportChart.getSeriesData ().size()  == 0) {
+        if (CollectionUtils.isEmpty(reportChart.getSeriesData())) {
             return rs;
         }
         if (reportChart.getSeriesData ().get (0) == null) {

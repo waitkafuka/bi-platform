@@ -221,7 +221,7 @@ public class QueryDataResourceUtils {
      * @return Map<String, String>
      * 
      */
-    private Map<String, String> genRootDimCaption(PivotTable table, LogicModel logicModel, Map<String, Object> params, Cube cube) {
+    protected Map<String, String> genRootDimCaption(PivotTable table, LogicModel logicModel, Map<String, Object> params, Cube cube) {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
@@ -250,7 +250,7 @@ public class QueryDataResourceUtils {
         return root;
     }
     
-	 private void setTableResultProperty(String reportId, PivotTable table, Map<String, Object> resultMap) {
+    protected void setTableResultProperty(String reportId, PivotTable table, Map<String, Object> resultMap) {
 	        resultMap.put("rowCheckMin", 1);
 	        resultMap.put("rowCheckMax", 5);
 	        resultMap.put("reportTemplateId", reportId);
@@ -266,7 +266,7 @@ public class QueryDataResourceUtils {
 	        }
 	    }
 	 
-    private String genRootUniqueName(final String uniqueName) {
+    protected String genRootUniqueName(final String uniqueName) {
         if (uniqueName.endsWith ("@") && uniqueName.startsWith ("@")) {
             return uniqueName;
         }
@@ -279,7 +279,7 @@ public class QueryDataResourceUtils {
      * @param targetArea ExtendArea
      * @return SeriesUnitType
      */
-    private Map<String, String> getChartTypeWithExtendArea(ReportDesignModel model, ExtendArea targetArea) {
+    protected Map<String, String> getChartTypeWithExtendArea(ReportDesignModel model, ExtendArea targetArea) {
         Map<String, String> chartTypes = Maps.newHashMap();
         if (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             chartTypes.put("null", SeriesUnitType.LINE.name());

@@ -105,7 +105,7 @@ public class QueryRouterApplication4Enterprise extends SpringBootServletInitiali
         registrationBean.setFilter(contextFilter);
         String urlPattern = "/queryrouter/*";
         registrationBean.addUrlPatterns(urlPattern);
-        registrationBean.setOrder(2);
+        registrationBean.setOrder(20000);
         return registrationBean;
     }
     

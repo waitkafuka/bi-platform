@@ -56,7 +56,8 @@ public class AnswerCoreConstant {
     public static final Gson GSON;
 
     static {
-        GsonBuilder builder = new GsonBuilder();
+        GsonBuilder builder = new GsonBuilder()
+        .disableHtmlEscaping();
         // 添加如果有GsonIgnore注解，忽略序列化
         builder.addSerializationExclusionStrategy(new ExclusionStrategy() {
 

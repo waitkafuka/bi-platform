@@ -64,7 +64,12 @@ public enum DataSourceType {
     /**
      * H2
      */
-    H2("org.h2.Driver", "jdbc:h2:tcp://", "/");
+    H2("org.h2.Driver", "jdbc:h2:tcp://", "/"),
+    
+    /**
+     * PALO
+     */
+    PALO("com.mysql.jdbc.Driver", "jdbc:mysql://", "/");
     
     /**
      * driver

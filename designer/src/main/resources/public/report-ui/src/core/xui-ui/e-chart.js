@@ -683,7 +683,7 @@
             chartType: this._chartType,
             splitArea: styleConfiguration.splitArea,
             splitLine: styleConfiguration.splitLine,
-            textStyle: styleConfiguration.textStyle,
+            textStyle: styleConfiguration.çƒ,
             lineStyle: styleConfiguration.lineStyle
         };
 
@@ -1238,7 +1238,8 @@
                 y: 'top',
                 textStyle: {
                     fontSize: 12,
-                    fontWeight: 'normal'
+                    fontWeight: 'normal',
+                    fontFamily: '微软雅黑'
                 }
             };
         }
@@ -1338,8 +1339,8 @@
                 options.dataRange = {
                     x: 'left',
                     y: 'bottom',
-                    //                text:['高','低'],           // 文本，默认为数值文本
-                    //                calculable: true,
+                    text: ['高', '低'],           // 文本，默认为数值文本
+                    itemGap: 0,
                     // 设置地图值域字体
                     textStyle: styleConfiguration.dataRangeStyle,
                     color: styleConfiguration.dataRangeColor,

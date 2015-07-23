@@ -15,14 +15,48 @@
  */
 package com.baidu.rigel.biplatform.ma.resource.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
+import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
+import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
+import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
+import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
+import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTable;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.PlaneTableColDefine;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowDefine;
+import com.baidu.rigel.biplatform.ma.report.query.pivottable.RowHeadField;
 import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
+import com.baidu.rigel.biplatform.ma.resource.ResponseResult;
 
 /**
  * 
@@ -31,149 +65,21 @@ import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
  * @author luowenlei
  * @version 1.0.0.1
  */
+@RunWith(PowerMockRunner.class)
 public class QueryDataResourceUtilsTest {
-    
-    /**
-     * 测试的LiteOlapExtendJson
-     */
-    public static String testLiteOlapExtendJson = "{\"selectionAreaId\":\"de7c2119e1bf80b88e01eef97c12bcff\","
-            + "\"tableAreaId\":\"3d7fb4d40119c001ff15f5bc4aaed18f\","
-            + "\"chartAreaId\":\"9ba105e62fe7a89872237cf4796b43a7\","
-            + "\"candDims\":{\"cc72b5b0c600ab9de45461a4c3b18d70\":{\"id\":\"cc72b5b0c600ab9de45461a4c3b18d70\","
-            + "\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\",\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\","
-            + "\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"cc72b5b0c600ab9de45461a4c3b18d70\",\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"S\"}},"
-            + "\"candInds\":{\"0822254b1a448221ad26dcc55b072141\":{\"id\":\"0822254b1a448221ad26dcc55b072141\","
-            + "\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\",\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\","
-            + "\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"0822254b1a448221ad26dcc55b072141\",\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"X\"},"
-            + "\"81687190ae9647ed36b4316b5c2ff2bc\":{\"id\":\"81687190ae9647ed36b4316b5c2ff2bc\","
-            + "\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\",\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\","
-            + "\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"81687190ae9647ed36b4316b5c2ff2bc\",\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"X\"}},\"id\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\",\"logicModel\":{"
-            + "\"columns\":{\"0822254b1a448221ad26dcc55b072141\":{\"id\":\"0822254b1a448221ad26dcc55b072141\","
-            + "\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\",\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\","
-            + "\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"0822254b1a448221ad26dcc55b072141\","
-            + "\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"Y\"},\"81687190ae9647ed36b4316b5c2ff2bc\":{"
-            + "\"id\":\"81687190ae9647ed36b4316b5c2ff2bc\",\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\","
-            + "\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\",\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"81687190ae9647ed36b4316b5c2ff2bc\",\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"Y\"}},\"rows\":{\"cc72b5b0c600ab9de45461a4c3b18d70\":{"
-            + "\"id\":\"cc72b5b0c600ab9de45461a4c3b18d70\",\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\","
-            + "\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\",\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"cc72b5b0c600ab9de45461a4c3b18d70\",\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"X\"}},\"slices\":{\"cc72b5b0c600ab9de45461a4c3b18d70\":{"
-            + "\"id\":\"cc72b5b0c600ab9de45461a4c3b18d70\",\"cubeId\":\"79fc851cea4dc7d09492a430fbeb7c39\","
-            + "\"schemaId\":\"ebfb78fcaecece539689f5ec353b9765\",\"reportId\":\"4001b325e0d9a65ccdf2d045c2688a53\","
-            + "\"olapElementId\":\"cc72b5b0c600ab9de45461a4c3b18d70\",\"areaId\":\"e50c6910dc1969992d70af87857cc03e\","
-            + "\"params\":{},\"positionType\":\"S\"}},\"selectionDims\":{},\"selectionMeasures\":{}},"
-            + "\"type\":\"LITEOLAP\",\"formatModel\":{\"dataFormat\":{\"last_month_cash\":\"I.DD%\","
-            + "\"this_month_cash\":\"I,III.DD\",\"defaultFormat\":\"I,III\"},\"conditionFormat\":{},"
-            + "\"toolTips\":{\"last_month_cash\":\"last_month_cash\","
-            + "\"this_month_cash\":\"this_month_cash\"},\"colorFormat\":{},"
-            + "\"positions\":{\"last_month_cash\":\"0\",\"this_month_cash\":\"0\"},"
-            + "\"textAlignFormat\":{\"last_month_cash\":\"left\",\"this_month_cash\":\"left\"}},\"otherSetting\":{}}";
-    
-    public static String schemaJson = "{\"cubes\":{\"79fc851cea4dc7d09492a430fbeb7c39\":{\"dimensions\":{\"cc72b5b0c600ab9de45461a4c3b18d70\":{\"tableName\":\"td_area\","
-            + "\"type\":\"STANDARD_DIMENSION\","
-            + "\"levels\":{\"d7346c3612312ef26ebe6568fac956e5\":{\"source\":\"province_name\","
-            + "\"type\":\"REGULAR\","
-            + "\"dimTable\":\"td_area\","
-            + "\"factTableColumn\":\"area_id\","
-            + "\"id\":\"d7346c3612312ef26ebe6568fac956e5\","
-            + "\"name\":\"province_name\","
-            + "\"caption\":\"省名称\","
-            + "\"visible\":true,"
-            + "\"primaryKey\":\"area_id\"}},"
-            + "\"facttableColumn\":\"area_id\","
-            + "\"facttableCaption\":\"所在地区Id\","
-            + "\"id\":\"cc72b5b0c600ab9de45461a4c3b18d70\","
-            + "\"name\":\"td_area_province_name\","
-            + "\"caption\":\"省名称\","
-            + "\"visible\":true,"
-            + "\"primaryKey\":\"area_id\"},"
-            + "\"df7464aca31fd7943b496f01f697e161\":{\"tableName\":\"td_area\","
-            + "\"type\":\"STANDARD_DIMENSION\","
-            + "\"levels\":{\"ee48883c6de109fbaf725a28d14fcc95\":{\"source\":\"city_name\","
-            + "\"type\":\"REGULAR\","
-            + "\"dimTable\":\"td_area\","
-            + "\"factTableColumn\":\"area_id\","
-            + "\"id\":\"ee48883c6de109fbaf725a28d14fcc95\","
-            + "\"name\":\"city_name\","
-            + "\"caption\":\"城市名称\","
-            + "\"visible\":true,"
-            + "\"primaryKey\":\"area_id\"}},"
-            + "\"facttableColumn\":\"area_id\","
-            + "\"facttableCaption\":\"所在地区Id\","
-            + "\"id\":\"df7464aca31fd7943b496f01f697e161\","
-            + "\"name\":\"td_area_city_name\","
-            + "\"caption\":\"城市名称\","
-            + "\"visible\":true,"
-            + "\"primaryKey\":\"area_id\"}},"
-            + "\"measures\":{\"0822254b1a448221ad26dcc55b072141\":{\"aggregator\":\"SUM\","
-            + "\"type\":\"COMMON\","
-            + "\"define\":\"last_month_cash\","
-            + "\"id\":\"0822254b1a448221ad26dcc55b072141\","
-            + "\"name\":\"last_month_cash\","
-            + "\"caption\":\"上月消费\","
-            + "\"visible\":true},"
-            + "\"81687190ae9647ed36b4316b5c2ff2bc\":{\"aggregator\":\"SUM\","
-            + "\"type\":\"COMMON\","
-            + "\"define\":\"this_month_cash\","
-            + "\"id\":\"81687190ae9647ed36b4316b5c2ff2bc\","
-            + "\"name\":\"this_month_cash\","
-            + "\"caption\":\"本月消费\","
-            + "\"visible\":true},"
-            + "\"c25357c7ec63a47c9d83be3a2cdd5439\":{\"aggregator\":\"SUM\","
-            + "\"type\":\"COMMON\","
-            + "\"define\":\"customer_id\","
-            + "\"id\":\"c25357c7ec63a47c9d83be3a2cdd5439\","
-            + "\"name\":\"customer_id\","
-            + "\"caption\":\"客户ID\","
-            + "\"visible\":true},"
-            + "\"aade54a3e4c52a23cddf5e7e94e9b104\":{\"aggregator\":\"SUM\","
-            + "\"type\":\"COMMON\","
-            + "\"define\":\"pdate\","
-            + "\"id\":\"aade54a3e4c52a23cddf5e7e94e9b104\","
-            + "\"name\":\"pdate\","
-            + "\"caption\":\"消费日期\","
-            + "\"visible\":true},"
-            + "\"4565a7cfa5848f536b74d2f46cf60751\":{\"aggregator\":\"SUM\","
-            + "\"type\":\"COMMON\","
-            + "\"define\":\"cash\","
-            + "\"id\":\"4565a7cfa5848f536b74d2f46cf60751\","
-            + "\"name\":\"cash\","
-            + "\"caption\":\"账户余额\","
-            + "\"visible\":true}},"
-            + "\"enableCache\":true,"
-            + "\"source\":\"tb_customer_cash_psum\","
-            + "\"mutilple\":false,"
-            + "\"id\":\"79fc851cea4dc7d09492a430fbeb7c39\","
-            + "\"name\":\"cube_tb_customer_cash_psum\","
-            + "\"caption\":\"tb_customer_cash_psum\","
-            + "\"visible\":true}},"
-            + "\"datasource\":\"70c160f1b99b3965bc897141a037e1e2\","
-            + "\"id\":\"ebfb78fcaecece539689f5ec353b9765\","
-            + "\"name\":\"schema_ebfb78fcaecece539689f5ec353b9765\"," + "\"visible\":true}";
-    
+
     @InjectMocks
     private QueryDataResourceUtils queryDataResourceUtils;
-    
+
     @Mock
     private QueryBuildService queryBuildService;
-    
+
     /**
      * chartBuildService
      */
     @Mock
     private ChartBuildService chartBuildService;
-    
+
     /**
      * 
      */
@@ -181,9 +87,253 @@ public class QueryDataResourceUtilsTest {
     public void before() {
         MockitoAnnotations.initMocks(this);
     }
-    
+
     @Test
     public void testParseQueryResultToResponseResult() {
-        
+        PlaneTable planeTable = new PlaneTable();
+        planeTable.setColDefines(new ArrayList<PlaneTableColDefine>());
+        planeTable.setData(new ArrayList<Map<String, String>>());
+        planeTable.setPageInfo(new PageInfo());
+        Schema schema = AnswerCoreConstant.GSON.fromJson(
+                LiteOlapViewUtilsTest.schemaJson, Schema.class);
+        Mockito.when(
+                queryBuildService.parseToPlaneTable(Mockito.any(),
+                        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(planeTable);
+
+        ResultSet resultSet = new ResultSet();
+        resultSet.setDataModel(new DataModel());
+
+        ReportRuntimeModel reportRuntimeModel = new ReportRuntimeModel("test");
+        ReportDesignModel reportDesignModel = new ReportDesignModel();
+        reportDesignModel.setSchema(schema);
+        reportDesignModel.getSchema().getCubes().get("test");
+        reportRuntimeModel.setModel(reportDesignModel);
+        ExtendArea targetArea = new ExtendArea();
+        targetArea.setCubeId("test");
+        targetArea.setReferenceAreaId("test");
+        targetArea.setType(ExtendAreaType.PLANE_TABLE);
+
+        QueryAction queryAction = new QueryAction();
+        Map<Item, Object> rows = new HashMap<Item, Object>();
+
+        queryAction.setRows(rows);
+        LogicModel logicModel = new LogicModel();
+
+        Item item = new Item();
+        item.setOlapElementId("test");
+        logicModel.addRow(item);
+        rows.put(item, "test");
+
+        targetArea.setLogicModel(logicModel);
+        Map<String, ExtendArea> extendAreas = new HashMap<String, ExtendArea>();
+        extendAreas.put("test", targetArea);
+        reportDesignModel.setExtendAreas(extendAreas);
+
+        ResponseResult responseResult = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResult.getStatus() == 0);
+
+        targetArea.setType(ExtendAreaType.TABLE);
+        PivotTable pivotTable = new PivotTable();
+        RowDefine rowDefine = new RowDefine();
+        rowDefine.setSelected(true);
+        rowDefine.setUniqueName("test");
+        ArrayList<RowDefine> arrayList = new ArrayList<RowDefine>();
+        arrayList.add(rowDefine);
+        pivotTable.setRowDefine(new ArrayList<RowDefine>());
+        pivotTable.getRowDefine().add(rowDefine);
+
+        List<List<CellData>> listcell = new ArrayList<List<CellData>>();
+        List<CellData> licell = new ArrayList<CellData>();
+        CellData cellData = new CellData();
+        licell.add(cellData);
+        listcell.add(licell);
+        pivotTable.setDataSourceColumnBased(listcell);
+
+        List<List<RowHeadField>> list = new ArrayList<List<RowHeadField>>();
+        List<RowHeadField> listrf = new ArrayList<RowHeadField>();
+        RowHeadField rowHeadField = new RowHeadField();
+        rowHeadField.setV("test");
+        listrf.add(rowHeadField);
+        list.add(listrf);
+        pivotTable.setRowHeadFields(list);
+        Mockito.when(
+                queryBuildService.parseToPivotTable(Mockito.any(),
+                        Mockito.any())).thenReturn(pivotTable);
+        ResponseResult responseResultLiteOlap = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResultLiteOlap.getStatus() == 0);
+        List<List<CellData>> dataSourceColumnBased = new ArrayList<List<CellData>>();
+        List<CellData> cellDataList = new ArrayList<CellData>();
+        dataSourceColumnBased.add(cellDataList);
+        pivotTable.setDataSourceColumnBased(dataSourceColumnBased);
+        ResponseResult responseResultLiteOlap1 = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResultLiteOlap1.getStatus() == 0);
+
+        // 测试 LITEOLAP_TABLE分支 pivotTable.getDataSourceColumnBased().size() == 0
+        targetArea.setType(ExtendAreaType.LITEOLAP_TABLE);
+        for (int i = 0; i < 5; i++) {
+            Item itemTmp = new Item();
+            itemTmp.setOlapElementId("test" + i);
+            logicModel.addRow(itemTmp);
+            rows.put(itemTmp, "test" + i);
+        }
+        targetArea.setCubeId("79fc851cea4dc7d09492a430fbeb7c39");
+        Cube cube = reportRuntimeModel.getModel().getSchema().getCubes()
+                .get("79fc851cea4dc7d09492a430fbeb7c39");
+        Dimension dim = cube.getDimensions().get(
+                "cc72b5b0c600ab9de45461a4c3b18d70");
+        cube.getDimensions().put("test", dim);
+        // planeTable
+        ResponseResult responseResultLiteOlap3 = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResultLiteOlap3.getStatus() == 0);
+
+        // 测试 LITEOLAP_TABLE分支 pivotTable.getDataSourceColumnBased().size() == 0
+        pivotTable.setDataSourceColumnBased(new ArrayList<List<CellData>>());
+        ResponseResult responseResultLiteOlap4 = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResultLiteOlap4.getStatus() == 0);
+
+        // 测试 ExtendAreaType.CHART elseif的情况
+        targetArea.setType(ExtendAreaType.LITEOLAP_CHART);
+        DIReportChart diReportChart = new DIReportChart();
+        Mockito.when(
+                chartBuildService.parseToChart(Mockito.anyObject(),
+                        Mockito.anyObject(), Mockito.anyBoolean())).thenReturn(diReportChart);
+        ResponseResult responseResultLiteOlap5 = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResultLiteOlap5.getStatus() == 0);
+
+        // 测试 ExtendAreaType.CHART elseif的情况 and action.getRows().size() == 1
+        Map<Item, Object> rows1 = new HashMap<Item, Object>();
+        Item itemTmp = new Item();
+        itemTmp.setOlapElementId("test");
+        rows1.put(itemTmp, "test");
+        queryAction.setRows(rows1);
+        ResponseResult responseResultLiteOlap6 = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertTrue(responseResultLiteOlap6.getStatus() == 0);
+
+        // 异常情况
+        targetArea.setType(ExtendAreaType.TABLE);
+        Mockito.when(
+                queryBuildService.parseToPivotTable(Mockito.any(),
+                        Mockito.any())).thenThrow(new PivotTableParseException(""));
+        ResponseResult responseResultLiteOlap2 = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, new ExtendAreaContext(), queryAction);
+        Assert.assertEquals(responseResultLiteOlap2.getStatusInfo(),
+                "Fail in parsing result to pivotTable. ");
+    }
+
+    @Test
+    public void testParseQueryResultToResponseResultException() {
+        PlaneTable planeTable = new PlaneTable();
+        planeTable.setColDefines(new ArrayList<PlaneTableColDefine>());
+        planeTable.setData(new ArrayList<Map<String, String>>());
+        planeTable.setPageInfo(new PageInfo());
+        Schema schema = AnswerCoreConstant.GSON.fromJson(
+                LiteOlapViewUtilsTest.schemaJson, Schema.class);
+        Mockito.when(
+                queryBuildService.parseToPlaneTable(Mockito.any(),
+                        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+                                .thenThrow(new PlaneTableParseException(""));
+
+        ResultSet resultSet = new ResultSet();
+        resultSet.setDataModel(new DataModel());
+
+        ReportRuntimeModel reportRuntimeModel = new ReportRuntimeModel("test");
+        ReportDesignModel reportDesignModel = new ReportDesignModel();
+        reportDesignModel.setSchema(schema);
+        reportDesignModel.getSchema().getCubes().get("test");
+        reportRuntimeModel.setModel(reportDesignModel);
+        ExtendArea targetArea = new ExtendArea();
+        targetArea.setCubeId("test");
+        targetArea.setType(ExtendAreaType.PLANE_TABLE);
+        targetArea.setLogicModel(new LogicModel());
+        ResponseResult responseResult = queryDataResourceUtils
+                .parseQueryResultToResponseResult(reportRuntimeModel,
+                        targetArea, resultSet, null, null);
+        Assert.assertTrue(responseResult.getStatus() == 1);
+    }
+
+    @Test
+    public void testGenRootDimCaption() {
+        PivotTable pivotTable = new PivotTable();
+        RowDefine rowDefine = new RowDefine();
+        rowDefine.setSelected(true);
+        rowDefine.setUniqueName("test");
+        ArrayList<RowDefine> arrayList = new ArrayList<RowDefine>();
+        arrayList.add(rowDefine);
+        pivotTable.setRowDefine(new ArrayList<RowDefine>());
+        pivotTable.getRowDefine().add(rowDefine);
+
+        List<List<CellData>> listcell = new ArrayList<List<CellData>>();
+        List<CellData> licell = new ArrayList<CellData>();
+        CellData cellData = new CellData();
+        licell.add(cellData);
+        listcell.add(licell);
+        pivotTable.setDataSourceColumnBased(listcell);
+
+        List<List<RowHeadField>> list = new ArrayList<List<RowHeadField>>();
+        List<RowHeadField> listrf = new ArrayList<RowHeadField>();
+        RowHeadField rowHeadField = new RowHeadField();
+        rowHeadField.setV("test");
+        listrf.add(rowHeadField);
+        list.add(listrf);
+        pivotTable.setRowHeadFields(list);
+        PlaneTable planeTable = new PlaneTable();
+        planeTable.setColDefines(new ArrayList<PlaneTableColDefine>());
+        planeTable.setData(new ArrayList<Map<String, String>>());
+        planeTable.setPageInfo(new PageInfo());
+        Schema schema = AnswerCoreConstant.GSON.fromJson(
+                LiteOlapViewUtilsTest.schemaJson, Schema.class);
+
+        ResultSet resultSet = new ResultSet();
+        resultSet.setDataModel(new DataModel());
+
+        ReportRuntimeModel reportRuntimeModel = new ReportRuntimeModel("test");
+        ReportDesignModel reportDesignModel = new ReportDesignModel();
+        reportDesignModel.setSchema(schema);
+        reportDesignModel.getSchema().getCubes().get("test");
+        reportRuntimeModel.setModel(reportDesignModel);
+        ExtendArea targetArea = new ExtendArea();
+        targetArea.setCubeId("test");
+        targetArea.setReferenceAreaId("test");
+        targetArea.setType(ExtendAreaType.PLANE_TABLE);
+
+        QueryAction queryAction = new QueryAction();
+        Map<Item, Object> rows = new HashMap<Item, Object>();
+
+        queryAction.setRows(rows);
+        LogicModel logicModel = new LogicModel();
+
+        Item item = new Item();
+        item.setOlapElementId("test");
+        logicModel.addRow(item);
+        rows.put(item, "test");
+        logicModel.addColumn(item);
+
+        targetArea.setLogicModel(logicModel);
+        Map<String, ExtendArea> extendAreas = new HashMap<String, ExtendArea>();
+        extendAreas.put("test", targetArea);
+        reportDesignModel.setExtendAreas(extendAreas);
+        Cube cube = reportRuntimeModel.getModel().getSchema().getCubes()
+                .get("79fc851cea4dc7d09492a430fbeb7c39");
+        Map<String, Object> params = new HashMap<String, Object>();
+        try {
+            queryDataResourceUtils.genRootDimCaption(pivotTable, logicModel, params, cube);
+        } catch (Exception e) {
+            Assert.assertNotNull(e);
+        }
     }
 }

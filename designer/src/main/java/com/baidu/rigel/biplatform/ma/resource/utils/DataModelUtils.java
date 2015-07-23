@@ -515,7 +515,11 @@ public final class DataModelUtils {
         for (int i = 0; i < totalRecordSize; i++) {
             Map<String, String> value = Maps.newLinkedHashMap();
             for (String key : keys) {
-                value.put(key, UnicodeUtils.unicode2String(data.get(key).get(i)));
+                try {
+                    value.put(key, UnicodeUtils.unicode2String(data.get(key).get(i)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             planeTableData.add(value);
         }

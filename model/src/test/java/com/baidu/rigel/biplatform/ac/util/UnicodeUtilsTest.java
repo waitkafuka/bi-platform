@@ -30,5 +30,13 @@ public class UnicodeUtilsTest {
         String chn = "3434";
         Assert.assertEquals(UnicodeUtils.unicode2String(chn), chn);
     }
+    
+    @Test
+    public void testUnicode2StringNumber() {
+        String chn = "";
+        String unicode = UnicodeUtils.string2Unicode(chn);
+        Assert.assertEquals(UnicodeUtils.unicode2String(unicode), chn);
+    }
+
 
 }

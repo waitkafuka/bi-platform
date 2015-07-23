@@ -78,6 +78,12 @@ public class AggregateCompute {
         Set<Integer> countIndex = Sets.newHashSet();
         for (int i = 0 ; i < queryMeasures.size() ; i++) {
             if (queryMeasures.get(i).getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
+                if (LOGGER.isDebugEnabled ()) {
+                    LOGGER.info ( queryMeasures.get(i) + " ============= begin print values ===== ===="); 
+                    final int tmp = i;
+                    dataList.forEach (rs -> LOGGER.info (rs.getField (tmp) + ""));
+                    LOGGER.info ( " ============= end print measure values =============="); 
+                }
                 countIndex.add(i);
             }
         }

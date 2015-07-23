@@ -50,7 +50,10 @@ public class QueryTessractPlugin implements QueryPlugin {
      */
     private static Logger logger = LoggerFactory
             .getLogger(QueryTessractPlugin.class);
-
+    /**
+     * TESSERACT_NAME
+     */
+    private static String TESSERACT_TYPE = "TESSERACT";
     /**
      * QUESTIONMODEL_PARAM_KEY
      */
@@ -85,7 +88,8 @@ public class QueryTessractPlugin implements QueryPlugin {
         params.put(QUESTIONMODEL_PARAM_KEY,
                 AnswerCoreConstant.GSON.toJson(questionModel));
         Map<String, String> headerParams = new HashMap<String, String>();
-        headerParams.put(BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM, questionModel.getQuerySource());
+        headerParams.put(BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM, TESSERACT_TYPE);
+        
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         headerParams.put(BIPLATFORM_PRODUCTLINE_PARAM, configQuestionModel.getDataSourceInfo().getProductLine());
         long curr = System.currentTimeMillis();
@@ -102,20 +106,16 @@ public class QueryTessractPlugin implements QueryPlugin {
             tesseractHost = ConfigInfoUtils.getServerAddressByProperty(TESSERACT_SERVER_PRO);
         }
         String response = HttpRequest.sendPost(tesseractHost + "/query", params, headerParams);
-        logger.info("execute query with tesseract cost {} ms",
-                (System.currentTimeMillis() - curr));
+        logger.info("queryId:{} execute query with tesseract cost {} ms",
+        		questionModel.getQueryId(), System.currentTimeMillis() - curr);
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(
                 response, ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
-            String dataModelJson = responseResult.getData().replace("\\", "");
-            dataModelJson = dataModelJson.substring(1,
-                    dataModelJson.length() - 1);
+            String dataModelJson = responseResult.getData();
             DataModel dataModel = JsonUnSeriallizableUtils
                     .dataModelFromJson(dataModelJson);
-            StringBuilder sb = new StringBuilder();
-            sb.append("execute query questionModel cost:")
-                    .append(System.currentTimeMillis() - current).append("ms");
-            logger.info(sb.toString());
+            logger.info("queryId:{} execute query questionModel cost {} ms",
+            		questionModel.getQueryId(), System.currentTimeMillis() - current);
             dataModel.setOthers(responseResult.getStatusInfo());
             return dataModel;
         }

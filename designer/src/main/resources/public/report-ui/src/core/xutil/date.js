@@ -10,10 +10,10 @@
  */
 
 (function () {
-    
+    /* globals xutil */
     var DATE = xutil.date;
     var LANG = xutil.lang;
-    var NUMBER = xutil.number;
+    var COMMONUTIL = xutil.commonUtil;
         
     var DAY_MILLISECOND = 24*60*60*1000;
     
@@ -429,7 +429,7 @@
      * @return {string} 格式化后的字符串
      */
     DATE.format = function (source, pattern) {
-        var pad = NUMBER.pad;
+        var pad = COMMONUTIL.pad;
         if (!LANG.isString(pattern)) {
             return source.toString();
         }
@@ -471,7 +471,7 @@
     *
     **/
     DATE.formatTime = function(source,pattern){
-        var pad = NUMBER.pad;
+        var pad = COMMONUTIL.pad;
         if (!LANG.isString(pattern)) {
             return source.toString();
         }

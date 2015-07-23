@@ -100,6 +100,29 @@ public class QuestionModel implements Serializable {
     public String querySource;
     
     /**
+     * 查询Id
+     */
+    public String queryId;
+    
+    /**
+     * getQueryId
+     * 
+	 * @return the queryId
+	 */
+	public String getQueryId() {
+		return queryId;
+	}
+
+	/**
+	 * setQueryId
+	 * 
+	 * @param queryId the queryId to set
+	 */
+	public void setQueryId(String queryId) {
+		this.queryId = queryId;
+	}
+
+	/**
      * getter method for property querySource
      * 
      * @return querySource

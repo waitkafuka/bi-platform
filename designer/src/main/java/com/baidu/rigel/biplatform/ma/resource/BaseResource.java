@@ -38,7 +38,7 @@ public class BaseResource {
     /**
      * 用户身份标识key
      */
-    private static final String UID_KEY = "USER_ID";
+    public static final String UID_KEY = "USER_ID";
 
     @Value("${biplatform.ma.ser_key}")
     protected String securityKey;
@@ -58,7 +58,7 @@ public class BaseResource {
      * @return 依据用户标识获取的用户保存报表的路径
      */
     protected String getSavedReportPath(HttpServletRequest request) {
-        String  path = "preview";
+        String  path = "savedreport/preview";
         if (isNotPreview(request)) {
             path = getUserIdendity(request);
         }

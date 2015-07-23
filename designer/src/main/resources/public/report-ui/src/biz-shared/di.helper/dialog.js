@@ -16,14 +16,14 @@ $namespace('di.helper');
     // 引用
     //--------------------------------
 
-    // FIXME 
-    // 后续去除此ecui引用
     var ui = ecui;
     var encodeHTML = xutil.string.encodeHTML;
     var LANG;
     var UTIL;
     var DICT;
     var DI_FACTORY;
+    /* globals xutil */
+    var domQ = xutil.dom.q;
 
     $link(function() {
         LANG = di.config.Lang;
@@ -43,7 +43,6 @@ $namespace('di.helper');
     var promptTimer = null;
     //  是否需要调整弹出窗口位置（当嵌套两层iframe时，可以根据父窗口滚动条修正弹出位置）
     var bAdjustDialogPosition = false;
-    bAdjustDialogPosition = true; //  TODO 临时重置，上线可删除
 
     DIALOG.prompt = function () {
         prompt.apply(this, arguments);
@@ -380,4 +379,59 @@ $namespace('di.helper');
         DIALOG.alert(LANG.ERROR);
     };
 
+    /**
+     * 遮罩层，防止二次点击
+     * 如果启用，先判断body里面是否已经生成遮罩
+     * 如果已经生成，就不做处理，如果没有生成，就生成一个
+     * 如果禁用，就删除掉遮罩层
+     * 其实，在body里面始终只存在一个遮罩层
+     * 缺陷：创建删除dom操作，感觉不是很理想
+     * 不过ajax请求不会很多，性能应该不会影响很大
+     *
+     * @private
+     * @param {boolean} status 状态：启用还是禁用遮罩
+     */
+    DIALOG.mask = function (status) {
+        var oLayerMasks = domQ('ui-reportSave-layerMask',
+            document.body);
+        var oLayerMask;
+
+        // oLayerMasks为一个数组
+        if (oLayerMasks.length === 1) {
+            oLayerMask = oLayerMasks[0];
+        }
+
+        // 启用
+        if (status) {
+            // 如果 遮罩层不存在就创建一个
+            // 这里用nodeType判断是否为element元素,实现不是很好
+            if (!oLayerMask
+                || (oLayerMask && !oLayerMask.nodeType)
+            ) {
+                oLayerMask = document.createElement('div');
+                var maskCss = [
+                    'background-color: #e3e3e3;',
+                    'position: absolute;',
+                    'z-index: 1000;',
+                    'left: 0;',
+                    'top: 0;',
+                    'width: 100%;',
+                    'height: 100%;',
+                    'opacity: 0;',
+                    'filter: alpha(opacity=0);',
+                    '-moz-opacity: 0;'
+                ].join('');
+                oLayerMask.style.cssText = maskCss;
+                oLayerMask.style.width = document.documentElement.scrollWidth + 'px';
+                oLayerMask.className = 'ui-reportSave-layerMask';
+                document.body.appendChild(oLayerMask);
+            }
+        }
+        // 禁用
+        else {
+            if (oLayerMask && oLayerMask.nodeType) {
+                document.body.removeChild(oLayerMask);
+            }
+        }
+    };
 })();

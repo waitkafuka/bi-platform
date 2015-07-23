@@ -143,8 +143,8 @@ public interface MiniCubeConnection {
         SQL(1), // if a sql connection ,we need a datasource
         FILE(2), // not implement
         HIVE(4),
-        CUSTOM(3); // user custom datasource,support user custom data process
-
+        CUSTOM(3), // user custom datasource,support user custom data process
+        PALO(6); // palo
         /**
          * id ID
          */

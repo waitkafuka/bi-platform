@@ -8,13 +8,12 @@
  */
 
 (function () {
-    
+    /* globals xutil */
     var LANG = xutil.lang;
-    var STRING = xutil.string;
+    var utilTrim = xutil.commonUtil.trim;
     var objProto = Object.prototype;
     var objProtoToString = objProto.toString;
     var hasOwnProperty = objProto.hasOwnProperty;
-    var trim = STRING.trim;
     /**
      * 判断变量是否有值
      * null或undefined时返回false。
@@ -38,7 +37,7 @@
      */
     LANG.hasValueNotBlank = function (variable) {
         return LANG.hasValue(variable)
-           && (!LANG.isString(variable) || trim(variable) != '');
+           && (!LANG.isString(variable) || utilTrim(variable) !== '');
     };
 
     /**
@@ -53,10 +52,10 @@
      */    
     LANG.isBlank = function (variable) {
         if (LANG.isString(variable)) { 
-            return trim(variable) == '';
+            return utilTrim(variable) === '';
         } 
         else if (LANG.isArray(variable)) {
-            return variable.length == 0;
+            return variable.length === 0;
         } 
         else if (LANG.isObject(variable)) {
             for (var k in variable) {
@@ -260,7 +259,7 @@
      */
     LANG.stringToBoolean = function (input) {
         if (LANG.isString(input)) {
-            return trim(input) == 'true';
+            return utilTrim(input) === 'true';
         } 
         else {
             return !!input; 

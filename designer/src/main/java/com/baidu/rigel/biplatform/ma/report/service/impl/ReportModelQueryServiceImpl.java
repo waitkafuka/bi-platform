@@ -45,6 +45,7 @@ import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFacto
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -267,10 +268,11 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         DataModel dataModel;
         try {
             long start = new Date().getTime();
+            questionModel.setQueryId(UuidGeneratorUtils.generate());
             dataModel = connection.query(questionModel);
             long end = new Date().getTime();
             long seconds = (end - start) / 1000;
-            logger.debug("Query Cost: " + seconds);
+            logger.debug("Query with queryId " + questionModel.getQueryId() + " Cost: " + seconds);
         } catch (MiniCubeQueryException e) {
             logger.error("Fail in quering data ! ", e);
             throw e;

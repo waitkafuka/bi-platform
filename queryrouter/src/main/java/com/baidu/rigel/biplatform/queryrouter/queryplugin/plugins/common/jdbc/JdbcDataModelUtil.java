@@ -26,16 +26,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
-import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.TableData;
 import com.baidu.rigel.biplatform.ac.query.data.TableData.Column;
-import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.util.UnicodeUtils;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.SqlExpression;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.meta.TableMetaService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnType;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 
 /**
@@ -59,7 +60,19 @@ public class JdbcDataModelUtil {
      */
     @Resource(name = "jdbcHandler")
     private JdbcHandler jdbcHandler;
+    
+    /**
+     * tableMetaService
+     */
+    @Resource(name = "tableMetaService")
+    private TableMetaService tableMetaService;
 
+    /**
+     * JoinTableDataService
+     */
+    @Resource(name = "joinTableDataService")
+    private JoinTableDataService joinTableDataService;
+    
     /**
      * executeSql
      * 
@@ -69,17 +82,18 @@ public class JdbcDataModelUtil {
      *            sqlExpression
      * @return DataModel DataModel
      */
-    public DataModel executeSql(QuestionModel questionModel,
+    public DataModel executeSql(QuestionModel questionModel, Map<String, SqlColumn> allColumns,
             SqlExpression sqlExpression) {
-        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
-        DataSourceInfo dataSourceInfo = configQuestionModel.getDataSourceInfo();
-        questionModel.setUseIndex(false);
+        PlaneTableQuestionModel planeQuestionModel = (PlaneTableQuestionModel) questionModel;
+        SqlDataSourceInfo dataSourceInfo = (SqlDataSourceInfo)planeQuestionModel.getDataSourceInfo();
 
         List<Map<String, Object>> rowBasedList = jdbcHandler.queryForList(
-                sqlExpression, dataSourceInfo);
+                sqlExpression.getSqlQuery().toSql(),
+                        sqlExpression.getSqlQuery().getWhere().getValues(), dataSourceInfo);
 
         // get need columns from AxisMetas
-        List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(questionModel);
+        List<SqlColumn> needColums = PlaneTableQuestionModel2SqlColumnUtils
+                .getNeedColumns(allColumns, planeQuestionModel.getSelection());
 
         // init DataModel
         DataModel dataModel = this.getEmptyDataModel(needColums);
@@ -89,12 +103,27 @@ public class JdbcDataModelUtil {
         // 如果为getRecordSize为-1，那么需要搜索dataModel.getRecordSize() from database
         if (questionModel.getPageInfo() != null
                 && questionModel.getPageInfo().getTotalRecordCount() == PARMA_NEED_CONTAIN_TOTALSIZE) {
-            dataModel.setRecordSize(jdbcHandler.queryForInt(
-                    sqlExpression, dataSourceInfo));
+            // 按照tablename, 组织sqlColumnList，以便于按表查询所有的字段信息
+            HashMap<String, List<SqlColumn>> tables = new HashMap<String, List<SqlColumn>>();
+            for (SqlColumn sqlColumn : allColumns.values()) {
+                if (sqlColumn.getType() == ColumnType.JOIN) {
+                    if (tables.get(sqlColumn.getTableName()) == null) {
+                        tables.put(sqlColumn.getTableName(), new ArrayList<SqlColumn>());
+                    }
+                    tables.get(sqlColumn.getTableName()).add(sqlColumn);
+                }
+            }
+            // 查询jointable中的主表的id信息
+            Map<String, List<Object>> values = joinTableDataService
+                    .getJoinTableData(planeQuestionModel, allColumns, tables);
+            // set total count sql
+            sqlExpression.generateCountSql(planeQuestionModel, allColumns, needColums, values);
+            dataModel.setRecordSize(jdbcHandler.queryForInt(sqlExpression.getCountSqlQuery().toCountSql(),
+                    sqlExpression.getCountSqlQuery().getWhere().getValues(), dataSourceInfo));
         }
         return dataModel;
     }
-
+    
     /**
      * getEmptyDataModel,初始化dataModel
      * 
@@ -112,18 +141,12 @@ public class JdbcDataModelUtil {
         }
         needColums.forEach((colDefine) -> {
             String tableName = "";
-            String fieldName = "";
-            if (AxisType.COLUMN == colDefine.getType()) {
-            // 指标
+            tableName = colDefine.getTableName();
+            if (ColumnType.COMMON == colDefine.getType()) {
                 tableName = colDefine.getSourceTableName();
-                fieldName = colDefine.getMeasure().getDefine();
-            } else {
-            // 维度
-                tableName = colDefine.getLevel().getDimTable();
-                fieldName = colDefine.getLevel().getName();
             }
-            TableData.Column colum = new TableData.Column(colDefine.getColumnKey(),
-                    fieldName, colDefine.getCaption(), tableName);
+            Column colum = new Column(colDefine.getColumnKey(),
+                    colDefine.getTableFieldName(), colDefine.getCaption(), tableName);
             dataModel.getTableData().getColumns().add(colum);
             dataModel
                     .getTableData()

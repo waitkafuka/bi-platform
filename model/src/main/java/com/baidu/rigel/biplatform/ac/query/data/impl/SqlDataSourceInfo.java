@@ -141,6 +141,10 @@ public class SqlDataSourceInfo implements DataSourceInfo {
          */
         MYSQL(1, DataSourceInfo.MYSQL_DRIVERMANAGER),
         /**
+         * PALO
+         */
+        PALO(6, DataSourceInfo.MYSQL_DRIVERMANAGER),
+        /**
          * H2
          */
         H2(2, DataSourceInfo.H2_DRIVERMANAGER),

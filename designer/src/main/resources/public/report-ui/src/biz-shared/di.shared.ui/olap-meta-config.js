@@ -361,6 +361,7 @@ $namespace('di.shared.ui');
     OLAP_META_CONFIG_CLASS.enable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('enable');
         OLAP_META_CONFIG.superClass.enable.call(this);
+        DIALOG.mask(false);
     };    
 
     /**
@@ -371,6 +372,7 @@ $namespace('di.shared.ui');
     OLAP_META_CONFIG_CLASS.disable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('disable');
         OLAP_META_CONFIG.superClass.disable.call(this);
+        DIALOG.mask(true);
     };    
 
     /**

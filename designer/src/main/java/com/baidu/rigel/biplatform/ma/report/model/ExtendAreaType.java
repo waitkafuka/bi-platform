@@ -100,6 +100,11 @@ public enum ExtendAreaType {
     LITEOLAP,
     
     /**
+     * 报表保存保存
+     */
+    REPORT_SAVE_COMP,
+    
+    /**
      * 联动部件
      */
     CASCADE_SELECT;

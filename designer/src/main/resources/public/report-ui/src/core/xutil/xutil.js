@@ -23,5 +23,6 @@ var xutil = {
     dom: {},
     uid: {},
     graphic: {},
-    ajax: {}
+    ajax: {},
+    commonUtil: {}
 };

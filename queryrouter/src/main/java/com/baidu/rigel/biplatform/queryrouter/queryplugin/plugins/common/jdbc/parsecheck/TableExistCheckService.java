@@ -33,7 +33,6 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlConstants;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 /**
  * 
@@ -71,28 +70,23 @@ public class TableExistCheckService {
         List<String> result = new ArrayList<String>();
         Set<String> set = new HashSet<String>(Arrays.asList(cubeSource
                 .split(SqlConstants.COMMA)));
-        SqlExpression sqlExpression = new SqlExpression(dataSourceInfo
-                .getDataBase().getDriver());
         logger.info("search tables from database, check tables \"" + cubeSource
                 + "\" exists.");
-        switch (dataSourceInfo.getDataBase().getDriver()) {
-            case SqlConstants.DRIVER_MYSQL: {
-                sqlExpression
-                        .setSql("select table_name from information_schema.tables where table_schema='"
-                                + dataSourceInfo.getInstanceName() + "'");
-                List<Map<String, Object>> datas = jdbcHandler.queryForList(
-                        sqlExpression, dataSourceInfo);
-                datas.forEach((row) -> {
-                    String tableName = row.get(META_MYSQL_TABLENAME).toString();
-                    if (set.contains(tableName)) {
-                        result.add(tableName);
-                    }
-                });
-            }
-            default: {
-                logger.info("no available driver handler match:"
-                        + dataSourceInfo.getDataBase().getDriver());
-            }
+        if (SqlConstants.DRIVER_MYSQL.equals(dataSourceInfo.getDataBase()
+                .getDriver())) {
+            String sql = "select table_name from information_schema.tables where table_schema='"
+                            + dataSourceInfo.getInstanceName() + "'";
+            List<Map<String, Object>> datas = jdbcHandler.queryForList(
+                    sql, new ArrayList<Object>(), dataSourceInfo);
+            datas.forEach((row) -> {
+                String tableName = row.get(META_MYSQL_TABLENAME).toString();
+                if (set.contains(tableName)) {
+                    result.add(tableName);
+                }
+            });
+        } else {
+            logger.info("no available driver handler match:"
+                    + dataSourceInfo.getDataBase().getDriver());
         }
         String resultStr = "";
         for (String tableName : result) {

@@ -387,7 +387,7 @@
         handleShowWaiting(requestId, showWaiting);
         
         handleBusinessAbort(requestId, businessKey);
-        
+
         // 发送请求
         xhrSet[requestId] = {
             xhr: exRequest(url, options),

@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
@@ -23,19 +24,21 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.SqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcDataModelUtil;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcQuestionModelUtil;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.meta.TableMetaService;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.parsecheck.TableExistCheckService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
+import com.baidu.rigel.biplatform.queryrouter.utils.PlaneTableUtils;
 
 /**
  * mysql查询的插件
@@ -52,18 +55,24 @@ public class QuerySqlPlugin implements QueryPlugin {
      */
     @Resource(name = "jdbcDataModelUtil")
     private JdbcDataModelUtil jdbcDataModelUtil;
-    
+
     /**
      * jdbcResultSet to DataModel
      */
     @Resource(name = "jdbcQuestionModelUtil")
     private JdbcQuestionModelUtil jdbcQuestionModelUtil;
-    
+
     /**
      * TableExistCheck
      */
     @Resource(name = "tableExistCheckService")
     private TableExistCheckService tableExistCheckService;
+
+    /**
+     * tableMetaService
+     */
+    @Resource(name = "tableMetaService")
+    private TableMetaService tableMetaService;
     
     /*
      * (non-Javadoc)
@@ -73,21 +82,29 @@ public class QuerySqlPlugin implements QueryPlugin {
      * .baidu.rigel.biplatform.ac.query.model.QuestionModel)
      */
     @Override
-    public DataModel query(QuestionModel questionModel) throws QuestionModelTransformationException {
-        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
-        MiniCube cube = (MiniCube) configQuestionModel.getCube();
-        SqlDataSourceInfo dataSourceInfo = (SqlDataSourceInfo) configQuestionModel.getDataSourceInfo();
-        questionModel.setUseIndex(false);
+    public DataModel query(QuestionModel questionModel)
+            throws QuestionModelTransformationException {
+        PlaneTableQuestionModel planeTableQuestionModel = PlaneTableUtils.convertConfigQuestionModel2PtQuestionModel(
+                (ConfigQuestionModel) questionModel, false);
+        SqlDataSourceInfo dataSourceInfo = (SqlDataSourceInfo) planeTableQuestionModel
+                .getDataSourceInfo();
         
+        // 获取所有元数据
+        Map<String, SqlColumn> allColumns = PlaneTableQuestionModel2SqlColumnUtils
+                .getAllColumns(planeTableQuestionModel);
+        allColumns = tableMetaService.generateColumnDataType(allColumns, dataSourceInfo);
         // 检验cube.getSource中的事实表是否在数据库中存在，并过滤不存在的数据表
-        String tableNames = tableExistCheckService.getExistTableList(cube.getSource(), dataSourceInfo);
+        String tableNames = tableExistCheckService.getExistTableList(
+                planeTableQuestionModel.getSource(), dataSourceInfo);
         if (StringUtils.isEmpty(tableNames)) {
-            List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(questionModel);
+            List<SqlColumn> needColums = PlaneTableQuestionModel2SqlColumnUtils
+                    .getNeedColumns(allColumns, planeTableQuestionModel.getSelection());
             return jdbcDataModelUtil.getEmptyDataModel(needColums);
         }
-        SqlExpression sqlCause = jdbcQuestionModelUtil.convertQuestionModel2Sql(questionModel, tableNames);
-        DataModel dataModel = jdbcDataModelUtil.executeSql(questionModel, sqlCause);
+        SqlExpression sqlCause = jdbcQuestionModelUtil
+                .convertQuestionModel2Sql(planeTableQuestionModel, allColumns, tableNames);
+        DataModel dataModel = jdbcDataModelUtil.executeSql(planeTableQuestionModel, allColumns, sqlCause);
         return dataModel;
     }
-    
+
 }

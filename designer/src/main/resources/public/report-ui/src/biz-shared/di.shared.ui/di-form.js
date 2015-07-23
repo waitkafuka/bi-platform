@@ -19,6 +19,8 @@ $namespace('di.shared.ui');
     var inheritsObject = xutil.object.inheritsObject;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
+    /* globals di */
+    var DIALOG = di.helper.Dialog;
     var objKey = xutil.object.objKey;
     var isObject = xutil.lang.isObject;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
@@ -311,6 +313,7 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('enable');
         DI_FORM.superClass.enable.call(this);
+        DIALOG.mask(false);
     };
 
     /**
@@ -324,6 +327,7 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('disable');
         DI_FORM.superClass.disable.call(this);
+        DIALOG.mask(true);
     };
 
     /**

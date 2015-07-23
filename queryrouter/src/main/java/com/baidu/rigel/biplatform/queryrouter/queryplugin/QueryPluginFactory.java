@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2014 Baidu, Inc. All Rights Reserved.
  *
@@ -20,6 +19,11 @@ import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.QuerySqlPlugin;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.QueryTessractPlugin;
 
@@ -31,19 +35,19 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.QueryTessractP
  */
 @Service
 public class QueryPluginFactory {
-    
+
     /**
      * TessractPlugin
      */
     @Resource(name = "queryTessractPlugin")
     private QueryTessractPlugin queryTessractPlugin;
-    
+
     /**
      * queryMysqlPlugin
      */
     @Resource(name = "querySqlPlugin")
     private QuerySqlPlugin querySqlPlugin;
-    
+
     /**
      * 获取查询插件
      *
@@ -51,12 +55,32 @@ public class QueryPluginFactory {
      *            认证策略
      * @return QueryPlugin 认证服务实例
      */
-    public QueryPlugin getPlugin(String queryPluginEnum) {
-        switch (queryPluginEnum) {
-            case "TESSERACT":
-                return queryTessractPlugin;
-            case "SQL":
-                return querySqlPlugin;
+    public QueryPlugin getPlugin(QuestionModel questionModel) {
+        if (questionModel instanceof ConfigQuestionModel) {
+            ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+            if (configQuestionModel.getDataSourceInfo().getDataSourceType() == DataSourceType.SQL) {
+                SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo) configQuestionModel
+                        .getDataSourceInfo();
+                if (sqlDataSourceInfo.getDataBase() == DataBase.MYSQL) {
+                    // 临时方案 通过querysource判断
+                    if ("TESSERACT"
+                            .equals(configQuestionModel.getQuerySource())) {
+                        return queryTessractPlugin;
+                    } else if ("SQL".equals(configQuestionModel
+                            .getQuerySource())) {
+                        return querySqlPlugin;
+                    }
+                } else if (sqlDataSourceInfo.getDataBase() == DataBase.PALO) {
+                    // 临时方案 通过querysource判断
+                    if ("TESSERACT"
+                            .equals(configQuestionModel.getQuerySource())) {
+                        return queryTessractPlugin;
+                    } else if ("SQL".equals(configQuestionModel
+                            .getQuerySource())) {
+                        return querySqlPlugin;
+                    }
+                }
+            }
         }
         return null;
     }

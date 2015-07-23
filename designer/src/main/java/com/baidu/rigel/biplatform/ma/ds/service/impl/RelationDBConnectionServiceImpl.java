@@ -165,6 +165,8 @@ public class RelationDBConnectionServiceImpl implements
         switch (dsType) {
             case MYSQL:
                 return DataBase.MYSQL;
+            case PALO:
+                return DataBase.PALO;
             case ORACLE:
                 return DataBase.ORACLE;
             case H2:

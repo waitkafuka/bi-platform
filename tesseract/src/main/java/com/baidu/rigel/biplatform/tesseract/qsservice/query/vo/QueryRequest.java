@@ -23,6 +23,8 @@ import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 
 /**
  * 问题查询模型
@@ -86,7 +88,7 @@ public class QueryRequest implements Serializable {
      * useIndex 是否使用索引
      */
     private boolean useIndex = true;
-    
+
     /**
      * 实否使用distinct 只有在退化维查询成员时为true，其他情况为false
      */
@@ -104,7 +106,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property dataSourceInfo
      * 
-     * @param dataSourceInfo the dataSourceInfo to set
+     * @param dataSourceInfo
+     *            the dataSourceInfo to set
      */
     public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
         this.dataSourceInfo = dataSourceInfo;
@@ -122,7 +125,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property cube
      * 
-     * @param cube the cube to set
+     * @param cube
+     *            the cube to set
      */
     public void setCubeName(String cubeName) {
         this.cubeName = cubeName;
@@ -140,7 +144,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property select
      * 
-     * @param select the select to set
+     * @param select
+     *            the select to set
      */
     public void setSelect(Select select) {
         this.select = select;
@@ -161,7 +166,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property where
      * 
-     * @param where the where to set
+     * @param where
+     *            the where to set
      */
     public void setWhere(Where where) {
         this.where = where;
@@ -179,7 +185,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property groupBy
      * 
-     * @param groupBy the groupBy to set
+     * @param groupBy
+     *            the groupBy to set
      */
     public void setGroupBy(GroupBy groupBy) {
         this.groupBy = groupBy;
@@ -197,7 +204,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property order
      * 
-     * @param order the order to set
+     * @param order
+     *            the order to set
      */
     public void setOrder(Order order) {
         this.order = order;
@@ -218,7 +226,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property limit
      * 
-     * @param limit the limit to set
+     * @param limit
+     *            the limit to set
      */
     public void setLimit(Limit limit) {
         this.limit = limit;
@@ -236,7 +245,8 @@ public class QueryRequest implements Serializable {
     /**
      * setter method for property from
      * 
-     * @param from the from to set
+     * @param from
+     *            the from to set
      */
     public void setFrom(From from) {
         this.from = from;
@@ -245,12 +255,15 @@ public class QueryRequest implements Serializable {
     /**
      * 将指定属性添加到select和group条件中
      * 
-     * @param column 指定的字段信息
-     * @throws IllegalArgumentException column为空抛出异常
+     * @param column
+     *            指定的字段信息
+     * @throws IllegalArgumentException
+     *             column为空抛出异常
      */
     public void selectAndGroupBy(String column) {
         if (StringUtils.isBlank(column)) {
-            throw new IllegalArgumentException("can not select and group by empty column");
+            throw new IllegalArgumentException(
+                    "can not select and group by empty column");
         }
         if (this.select == null) {
             select = new Select();
@@ -276,7 +289,8 @@ public class QueryRequest implements Serializable {
     /**
      * set cubeId with cubeId
      * 
-     * @param cubeId the cubeId to set
+     * @param cubeId
+     *            the cubeId to set
      */
     public void setCubeId(String cubeId) {
         this.cubeId = cubeId;
@@ -294,7 +308,8 @@ public class QueryRequest implements Serializable {
     /**
      * set useIndex with useIndex
      * 
-     * @param useIndex the useIndex to set
+     * @param useIndex
+     *            the useIndex to set
      */
     public void setUseIndex(boolean useIndex) {
         this.useIndex = useIndex;
@@ -308,9 +323,11 @@ public class QueryRequest implements Serializable {
     @Override
     public String toString() {
         return "";
-//        return "QueryRequest [dataSourceInfo=" + dataSourceInfo + ", cubeName=" + cubeName + ", cubeId=" + cubeId
-//                + ", select=" + select + ", from=" + from + ", where=" + where + ", groupBy=" + groupBy + ", order="
-//                + order + ", limit=" + limit + ", useIndex=" + useIndex + "]";
+        // return "QueryRequest [dataSourceInfo=" + dataSourceInfo +
+        // ", cubeName=" + cubeName + ", cubeId=" + cubeId
+        // + ", select=" + select + ", from=" + from + ", where=" + where +
+        // ", groupBy=" + groupBy + ", order="
+        // + order + ", limit=" + limit + ", useIndex=" + useIndex + "]";
     }
 
     /*
@@ -323,8 +340,10 @@ public class QueryRequest implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((cubeId == null) ? 0 : cubeId.hashCode());
-        result = prime * result + ((cubeName == null) ? 0 : cubeName.hashCode());
-        result = prime * result + ((dataSourceInfo == null) ? 0 : dataSourceInfo.hashCode());
+        result = prime * result
+                + ((cubeName == null) ? 0 : cubeName.hashCode());
+        result = prime * result
+                + ((dataSourceInfo == null) ? 0 : dataSourceInfo.hashCode());
         result = prime * result + ((from == null) ? 0 : from.hashCode());
         result = prime * result + ((groupBy == null) ? 0 : groupBy.hashCode());
         result = prime * result + ((limit == null) ? 0 : limit.hashCode());
@@ -425,16 +444,28 @@ public class QueryRequest implements Serializable {
      * @return the distinct
      */
     public boolean isDistinct() {
+        
         return distinct;
     }
 
     /**
-     * @param distinct the distinct to set
+     * @param distinct
+     *            the distinct to set
      */
     public void setDistinct(boolean distinct) {
         this.distinct = distinct;
     }
 
-    
-    
+    /**
+     * 判断是否是sql做agg计算
+     * 
+     * @return
+     */
+    public boolean isSqlAgg() {
+        if (((SqlDataSourceInfo) this.getDataSourceInfo()).getDataBase() == DataBase.PALO) {
+            return true;
+        }
+        return false;
+    }
+
 }

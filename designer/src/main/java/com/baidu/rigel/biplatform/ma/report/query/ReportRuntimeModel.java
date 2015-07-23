@@ -103,6 +103,11 @@ public class ReportRuntimeModel implements Serializable {
     private ReportDesignModel model;
     
     /**
+     * 当前RuntimeModel生成的最终原始报表id，如果为空，则与reportId相同
+     */
+    private String oriReportId;
+    
+    /**
      * 是否已经初始化
      */
     private boolean isInited = false;
@@ -151,6 +156,23 @@ public class ReportRuntimeModel implements Serializable {
     
     public void setId(String id) {
         this.id = id;
+    }
+    
+    /**
+     * @return the oriReportId
+     */
+    public String getOriReportId() {
+        if (this.oriReportId == null) {
+            this.oriReportId = this.reportModelId;
+        }
+        return oriReportId;
+    }
+
+    /**
+     * @param oriReportId the oriReportId to set
+     */
+    public void setOriReportId(String oriReportId) {
+        this.oriReportId = oriReportId;
     }
     
     /**

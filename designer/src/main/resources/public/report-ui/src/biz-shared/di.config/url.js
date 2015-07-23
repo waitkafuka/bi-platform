@@ -246,8 +246,14 @@ $namespace('di.config');
     URL_SET.RTPL_CLONE_GETDEFAULTIMAGENAME = '/image/getDefaultImageName.action';
     URL_SET.RTPL_CLONE_CLEAR = '/image/deleteImage.action';
     //报表保存镜像操作url
-    URL_SET.RTPL_SAVE_ADD = '/image/addImage.action';
-    URL_SET.RTPL_SAVE_UPDATE = '/image/updateImage.action';
-    URL_SET.RTPL_SAVE_GETIMAGES = '/image/getUserImages.action';
-    URL_SET.RTPL_SAVE_DELETE = '/image/deleteImage.action';
+    // URL_SET.RTPL_SAVE_ADD = '/image/addImage.action';
+    // URL_SET.RTPL_SAVE_UPDATE = '/image/updateImage.action';
+    // URL_SET.RTPL_SAVE_GETIMAGES = '/image/getUserImages.action';
+    // URL_SET.RTPL_SAVE_DELETE = '/image/deleteImage.action';
+
+    URL_SET.RTPL_SAVE_ADD = '/reports/runtime/#{reportId}/new_status';
+    URL_SET.RTPL_SAVE_UPDATE = '/reports/runtime/#{reportId}/status';
+    URL_SET.RTPL_SAVE_GETIMAGES = '/reports/runtime/#{reportId}/status/list';
+    URL_SET.RTPL_SAVE_DELETE = '/reports/runtime/#{reportId}/del_status';
+
 })();

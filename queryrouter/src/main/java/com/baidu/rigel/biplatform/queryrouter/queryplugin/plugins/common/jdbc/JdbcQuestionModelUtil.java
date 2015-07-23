@@ -24,13 +24,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.QuestionModel4TableDataUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.SqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.parsecheck.TableExistCheckService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlExpression;
 
 /**
  * 
@@ -49,23 +48,23 @@ public class JdbcQuestionModelUtil {
     @Resource(name = "tableExistCheckService")
     private TableExistCheckService tableExistCheckService;
 
+
     /**
-     * convertQuestionModel2Sql
+     * 将questionModel转换成Sql对象
      * 
      * @param questionModel
      *            questionModel
      * @return String sql str
      */
-    public SqlExpression convertQuestionModel2Sql(QuestionModel questionModel, String tableName)
-            throws QuestionModelTransformationException {
-        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
-        Map<String, SqlColumn> allColums = QuestionModel4TableDataUtils.getAllCubeColumns(questionModel);
-        List<SqlColumn> needColums = QuestionModel4TableDataUtils.getNeedColumns(questionModel);
-        SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) configQuestionModel
+    public SqlExpression convertQuestionModel2Sql(PlaneTableQuestionModel planeTableQuestionModel,
+            Map<String, SqlColumn> allColumns, String tableName) throws QuestionModelTransformationException {
+        SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) planeTableQuestionModel
                 .getDataSourceInfo();
+        List<SqlColumn> needColums = PlaneTableQuestionModel2SqlColumnUtils
+                .getNeedColumns(allColumns, planeTableQuestionModel.getSelection());
         SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver());
         sqlExpression.setTableName(tableName);
-        sqlExpression.generateSql(configQuestionModel, allColums, needColums);
+        sqlExpression.generateSql(planeTableQuestionModel, allColumns, needColums);
         return sqlExpression;
     }
     

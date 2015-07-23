@@ -17,7 +17,6 @@ package com.baidu.rigel.biplatform.ac.util;
 
 import org.apache.commons.lang.StringUtils;
 
-
 /**
  * REST工具类
  * 
@@ -35,7 +34,8 @@ public class ResponseResultUtils {
      * @param data
      * @return
      */
-    public static ResponseResult getResult(String successMessage, String errorMessage, Object data) {
+    public static ResponseResult getResult(String successMessage,
+            String errorMessage, Object data) {
         ResponseResult rs = new ResponseResult();
         if (data == null) {
             rs.setStatus(ResponseResult.FAILED);
@@ -55,7 +55,8 @@ public class ResponseResultUtils {
      * @param errorCode
      * @return
      */
-    public static ResponseResult getErrorResult(String errorMessage, int errorCode) {
+    public static ResponseResult getErrorResult(String errorMessage,
+            int errorCode) {
         ResponseResult rs = new ResponseResult();
         rs.setStatus(errorCode);
         rs.setStatusInfo(errorMessage);
@@ -69,20 +70,51 @@ public class ResponseResultUtils {
      * @param data
      * @return
      */
-    public static ResponseResult getCorrectResult(String successMessage, Object data) {
+    public static ResponseResult getCorrectResult(String successMessage,
+            Object data) {
         ResponseResult rs = new ResponseResult();
         rs.setStatus(ResponseResult.SUCCESS);
-//        rs.setStatusInfo(successMessage);
+        // rs.setStatusInfo(successMessage);
         rs.setData(data);
         try {
-            String errorMessage = 
-                    (String) ThreadLocalPlaceholder.getProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY);
-            if (StringUtils.isNotBlank (errorMessage)) {
-                rs.setStatusInfo (errorMessage);
+            String errorMessage = (String) ThreadLocalPlaceholder
+                    .getProperty(ThreadLocalPlaceholder.ERROR_MSG_KEY);
+            if (StringUtils.isNotBlank(errorMessage)) {
+                rs.setStatusInfo(errorMessage);
             }
-        } catch(Exception e) {
-        }finally {
-            ThreadLocalPlaceholder.unbindProperty (ThreadLocalPlaceholder.ERROR_MSG_KEY);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            ThreadLocalPlaceholder
+                    .unbindProperty(ThreadLocalPlaceholder.ERROR_MSG_KEY);
+        }
+        return rs;
+    }
+
+    /**
+     * 构建返回结果
+     * 
+     * @param successMessage
+     * @param String
+     *            data
+     * @return
+     */
+    public static ResponseResult getCorrectResult(String successMessage,
+            String data) {
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(ResponseResult.SUCCESS);
+        rs.setData(data);
+        try {
+            String errorMessage = (String) ThreadLocalPlaceholder
+                    .getProperty(ThreadLocalPlaceholder.ERROR_MSG_KEY);
+            if (StringUtils.isNotBlank(errorMessage)) {
+                rs.setStatusInfo(errorMessage);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            ThreadLocalPlaceholder
+                    .unbindProperty(ThreadLocalPlaceholder.ERROR_MSG_KEY);
         }
         return rs;
     }

@@ -145,7 +145,8 @@ public class MetaQueryAction {
                 StringBuilder sb = new StringBuilder();
                 sb.append("get ").append(members.size()).append(" members from dimension:").append(dimName)
                         .append(" in level:").append(levelName);
-                return ResponseResultUtils.getCorrectResult(sb.toString(), metaJsons);
+                return ResponseResultUtils.getCorrectResult("query success.",
+                        AnswerCoreConstant.GSON.toJson(metaJsons));
             }
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
@@ -162,7 +163,7 @@ public class MetaQueryAction {
         return ResponseResultUtils.getErrorResult(errorMsg, 100);
     }
 
-	
+    
 
     @RequestMapping(value = "/meta/getChildren", method = RequestMethod.POST)
 //    @ResponseBody
@@ -215,7 +216,8 @@ public class MetaQueryAction {
                     StringBuilder sb = new StringBuilder();
                     sb.append("get ").append(children.size()).append(" children from dimension:").append(metaName)
                             .append(" by uniqueName:").append(uniqueName);
-                    return ResponseResultUtils.getCorrectResult(sb.toString(), metaJsons);
+                    return ResponseResultUtils.getCorrectResult("query success.",
+                            AnswerCoreConstant.GSON.toJson(metaJsons));
                 }
             }
         } catch (JsonSyntaxException e) {
@@ -294,7 +296,8 @@ public class MetaQueryAction {
             
             LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             curr = System.currentTimeMillis();
-            ResponseResult rs = ResponseResultUtils.getCorrectResult("query success.", AnswerCoreConstant.GSON.toJson(dataModel));
+            ResponseResult rs = ResponseResultUtils.getCorrectResult("query success.",
+                    AnswerCoreConstant.GSON.toJson(dataModel));
             LOG.info("cost:" + (System.currentTimeMillis() - curr) + "ms convert dataModel to json");
             return rs;
         } catch (JsonSyntaxException e) {
@@ -386,9 +389,9 @@ public class MetaQueryAction {
                         CollectionUtils.isNotEmpty(dimCondition.getQueryDataNodes()) ? dimCondition.getQueryDataNodes()
                                 .get(0).getUniqueName() : null;
                 Cube cube = questionModel.getCube();
-				MiniCubeMember member =
+                MiniCubeMember member =
                         metaDataService.lookUp(questionModel.getDataSourceInfo(), cube, uniqueName,
-                        	QueryContextBuilder.getRequestParams(questionModel, cube));
+                                QueryContextBuilder.getRequestParams(questionModel, cube));
 
                 return ResponseResultUtils.getCorrectResult("return member:" + member.getName(),
                         JsonUnSeriallizableUtils.parseMember2MetaJson(member));

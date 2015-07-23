@@ -1163,7 +1163,8 @@ var xutil = {
     dom: {},
     uid: {},
     graphic: {},
-    ajax: {}
+    ajax: {},
+    commonUtil: {}
 };
 /**
  * xutil.LinkedHashMap
@@ -2294,7 +2295,7 @@ var xutil = {
         handleShowWaiting(requestId, showWaiting);
         
         handleBusinessAbort(requestId, businessKey);
-        
+
         // 发送请求
         xhrSet[requestId] = {
             xhr: exRequest(url, options),
@@ -2824,6 +2825,52 @@ var xutil = {
 /**
  * xutil.date
  * Copyright 2012 Baidu Inc. All rights reserved.
+ *
+ * @change: 增加到秒粒度的日期format，增加方法#isValidFormatPattern。by MENGRAN at 2013-12-06
+ * @file:   时间相关工具函数集合。
+ *          便于工程中统一时间格式，并提供时间相关的数学操作。
+ * @author: sushuang(sushuang)
+ * @depend: xutil.lang, xutil.number
+ */
+
+(function () {
+    var COMMONUTIL = xutil.commonUtil;
+    /**
+     * 数值前部补0
+     *
+     * @public
+     * @param {(number|string)} source 输入数值, 可以整数或小数
+     * @param {number} length 输出数值长度
+     * @return {string} 输出数值
+     */
+    COMMONUTIL.pad = function (source, length) {
+        var pre = "";
+        var negative = (source < 0);
+        var string = String(Math.abs(source));
+        if (string.length < length) {
+            pre = (new Array(length - string.length + 1)).join('0');
+        }
+        return (negative ?  "-" : "") + pre + string;
+    };
+    /**
+     * 删除目标字符串两端的空白字符 (@see tangram)
+     *
+     * @pubilc
+     * @param {string} source 目标字符串
+     * @returns {string} 删除两端空白字符后的字符串
+     */
+    COMMONUTIL.trim = function (source) {
+        var TRIMER = new RegExp(
+            "(^[\\s\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\s\\t]+\x24)", "g"
+        );
+        return source == null
+            ? ""
+            : String(source).replace(TRIMER, "");
+    };
+})();
+/**
+ * xutil.date
+ * Copyright 2012 Baidu Inc. All rights reserved.
  * 
  * @change: 增加到秒粒度的日期format，增加方法#isValidFormatPattern。by MENGRAN at 2013-12-06
  * @file:   时间相关工具函数集合。
@@ -2836,7 +2883,7 @@ var xutil = {
     
     var DATE = xutil.date;
     var LANG = xutil.lang;
-    var NUMBER = xutil.number;
+    var COMMONUTIL = xutil.commonUtil;
         
     var DAY_MILLISECOND = 24*60*60*1000;
     
@@ -3252,7 +3299,7 @@ var xutil = {
      * @return {string} 格式化后的字符串
      */
     DATE.format = function (source, pattern) {
-        var pad = NUMBER.pad;
+        var pad = COMMONUTIL.pad;
         if (!LANG.isString(pattern)) {
             return source.toString();
         }
@@ -3294,7 +3341,7 @@ var xutil = {
     *
     **/
     DATE.formatTime = function(source,pattern){
-        var pad = NUMBER.pad;
+        var pad = COMMONUTIL.pad;
         if (!LANG.isString(pattern)) {
             return source.toString();
         }
@@ -3801,11 +3848,10 @@ var xutil = {
 (function () {
     
     var LANG = xutil.lang;
-    var STRING = xutil.string;
+    var utilTrim = xutil.commonUtil.trim;
     var objProto = Object.prototype;
     var objProtoToString = objProto.toString;
     var hasOwnProperty = objProto.hasOwnProperty;
-    var trim = STRING.trim;
     /**
      * 判断变量是否有值
      * null或undefined时返回false。
@@ -3829,7 +3875,7 @@ var xutil = {
      */
     LANG.hasValueNotBlank = function (variable) {
         return LANG.hasValue(variable)
-           && (!LANG.isString(variable) || trim(variable) != '');
+           && (!LANG.isString(variable) || utilTrim(variable) != '');
     };
 
     /**
@@ -3844,7 +3890,7 @@ var xutil = {
      */    
     LANG.isBlank = function (variable) {
         if (LANG.isString(variable)) { 
-            return trim(variable) == '';
+            return utilTrim(variable) == '';
         } 
         else if (LANG.isArray(variable)) {
             return variable.length == 0;
@@ -4051,7 +4097,7 @@ var xutil = {
      */
     LANG.stringToBoolean = function (input) {
         if (LANG.isString(input)) {
-            return trim(input) == 'true';
+            return utilTrim(input) == 'true';
         } 
         else {
             return !!input; 
@@ -34375,7 +34421,7 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
             chartType: this._chartType,
             splitArea: styleConfiguration.splitArea,
             splitLine: styleConfiguration.splitLine,
-            textStyle: styleConfiguration.textStyle,
+            textStyle: styleConfiguration.çƒ,
             lineStyle: styleConfiguration.lineStyle
         };
 
@@ -34930,7 +34976,8 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                 y: 'top',
                 textStyle: {
                     fontSize: 12,
-                    fontWeight: 'normal'
+                    fontWeight: 'normal',
+                    fontFamily: '微软雅黑'
                 }
             };
         }
@@ -35030,8 +35077,8 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                 options.dataRange = {
                     x: 'left',
                     y: 'bottom',
-                    //                text:['高','低'],           // 文本，默认为数值文本
-                    //                calculable: true,
+                    text:['高','低'],           // 文本，默认为数值文本
+                    itemGap : 0,
                     // 设置地图值域字体
                     textStyle: styleConfiguration.dataRangeStyle,
                     color: styleConfiguration.dataRangeColor,
@@ -36401,10 +36448,16 @@ $namespace('di.config');
     URL_SET.RTPL_CLONE_GETDEFAULTIMAGENAME = '/image/getDefaultImageName.action';
     URL_SET.RTPL_CLONE_CLEAR = '/image/deleteImage.action';
     //报表保存镜像操作url
-    URL_SET.RTPL_SAVE_ADD = '/image/addImage.action';
-    URL_SET.RTPL_SAVE_UPDATE = '/image/updateImage.action';
-    URL_SET.RTPL_SAVE_GETIMAGES = '/image/getUserImages.action';
-    URL_SET.RTPL_SAVE_DELETE = '/image/deleteImage.action';
+    // URL_SET.RTPL_SAVE_ADD = '/image/addImage.action';
+    // URL_SET.RTPL_SAVE_UPDATE = '/image/updateImage.action';
+    // URL_SET.RTPL_SAVE_GETIMAGES = '/image/getUserImages.action';
+    // URL_SET.RTPL_SAVE_DELETE = '/image/deleteImage.action';
+
+    URL_SET.RTPL_SAVE_ADD = '/reports/runtime/#{reportId}/new_status';
+    URL_SET.RTPL_SAVE_UPDATE = '/reports/runtime/#{reportId}/status';
+    URL_SET.RTPL_SAVE_GETIMAGES = '/reports/runtime/#{reportId}/status/list';
+    URL_SET.RTPL_SAVE_DELETE = '/reports/runtime/#{reportId}/del_status';
+
 })();
 /**
  * di.helper.Dialog
@@ -36432,6 +36485,7 @@ $namespace('di.helper');
     var UTIL;
     var DICT;
     var DI_FACTORY;
+    var domQ = xutil.dom.q;
 
     $link(function() {
         LANG = di.config.Lang;
@@ -36451,7 +36505,6 @@ $namespace('di.helper');
     var promptTimer = null;
     //  是否需要调整弹出窗口位置（当嵌套两层iframe时，可以根据父窗口滚动条修正弹出位置）
     var bAdjustDialogPosition = false;
-    bAdjustDialogPosition = true; //  TODO 临时重置，上线可删除
 
     DIALOG.prompt = function () {
         prompt.apply(this, arguments);
@@ -36788,6 +36841,61 @@ $namespace('di.helper');
         DIALOG.alert(LANG.ERROR);
     };
 
+    /**
+     * 遮罩层，防止二次点击
+     * 如果启用，先判断body里面是否已经生成遮罩
+     * 如果已经生成，就不做处理，如果没有生成，就生成一个
+     * 如果禁用，就删除掉遮罩层
+     * 其实，在body里面始终只存在一个遮罩层
+     * 缺陷：创建删除dom操作，感觉不是很理想
+     * 不过ajax请求不会很多，性能应该不会影响很大
+     *
+     * @private
+     * @param {boolean} status 状态：启用还是禁用遮罩
+     */
+    DIALOG.mask = function (status) {
+        var oLayerMasks = domQ('ui-reportSave-layerMask',
+            document.body);
+        var oLayerMask;
+
+        // oLayerMasks为一个数组
+        if (oLayerMasks.length === 1){
+            oLayerMask = oLayerMasks[0];
+        }
+
+        // 启用
+        if (status) {
+            // 如果 遮罩层不存在就创建一个
+            // 这里用nodeType判断是否为element元素,实现不是很好
+            if (!oLayerMask
+                || (oLayerMask && !oLayerMask.nodeType)
+            ) {
+                oLayerMask = document.createElement('div');
+                var maskCss = [
+                    'background-color: #e3e3e3;',
+                    'position: absolute;',
+                    'z-index: 1000;',
+                    'left: 0;',
+                    'top: 0;',
+                    'width: 100%;',
+                    'height: 100%;',
+                    'opacity: 0;',
+                    'filter: alpha(opacity=0);',
+                    '-moz-opacity: 0;'
+                ].join('');
+                oLayerMask.style.cssText = maskCss;
+                oLayerMask.style.width = document.documentElement.scrollWidth + "px";
+                oLayerMask.className = 'ui-reportSave-layerMask';
+                document.body.appendChild(oLayerMask);
+            }
+        }
+        // 禁用
+        else {
+            if (oLayerMask && oLayerMask.nodeType) {
+                document.body.removeChild(oLayerMask);
+            }
+        }
+    };
 })();
 /**
  * di.helper.Formatter
@@ -63663,8 +63771,7 @@ $namespace('di.shared.vui');
      * @protected
      */
     SAVE_BUTTON_CLASS.disable = function () {
-        mask(true);
-    }
+    };
     
     /**
      * 启用操作
@@ -63672,8 +63779,7 @@ $namespace('di.shared.vui');
      * @protected
      */
     SAVE_BUTTON_CLASS.enable = function () {
-        mask(false);  
-    }
+    };
 
     /**
      * 绑定事件
@@ -63855,65 +63961,6 @@ $namespace('di.shared.vui');
         
         return true;
     }
-    
-    /**
-     * 遮罩层，防止二次点击
-     * 如果启用，先判断body里面是否已经生成遮罩
-     * 如果已经生成，就不做处理，如果没有生成，就生成一个
-     * 如果禁用，就删除掉遮罩层
-     * 其实，在body里面始终只存在一个遮罩层
-     * 缺陷：创建删除dom操作，感觉不是很理想
-     * 不过ajax请求不会很多，性能应该不会影响很大
-     * 
-     * @private
-     * @param {boolean} status 状态：启用还是禁用遮罩
-     */
-    function mask(status) {
-        var oLayerMasks = domQ('ui-reportSave-layerMask', 
-                               document.body);
-        var oLayerMask;
-        
-        // oLayerMasks为一个数组
-        if (oLayerMasks.length === 1){
-            oLayerMask = oLayerMasks[0];
-        }
-        
-        // 启用
-        if (status) {
-            // 如果 遮罩层不存在就创建一个
-            // 这里用nodeType判断是否为element元素,实现不是很好
-            if (!oLayerMask 
-                || (oLayerMask && !oLayerMask.nodeType)
-            ) {
-                oLayerMask = document.createElement('div');
-                
-                var maskCss = [
-                    'background-color: #e3e3e3;',
-                    'position: absolute;',
-                    'z-index: 1000;',
-                    'left: 0;',
-                    'top: 0;',
-                    'width: 100%;',
-                    'height: 100%;',
-                    'opacity: 0;',
-                    'filter: alpha(opacity=0);',
-                    '-moz-opacity: 0;'
-                    ].join('');
-                
-                oLayerMask.style.cssText = maskCss;
-                oLayerMask.style.width = document.documentElement.scrollWidth 
-                                         + "px";
-                oLayerMask.className = 'ui-reportSave-layerMask';
-                document.body.appendChild(oLayerMask);
-            }
-        }
-        // 禁用
-        else {
-              if (oLayerMask && oLayerMask.nodeType) {
-                document.body.removeChild(oLayerMask);
-            }
-        }
-    }
 
 })();
 /**
@@ -63960,7 +64007,7 @@ $namespace('di.shared.vui');
 
     /**
      * 文字区
-     * 直接指定文字，或者html，
+     * 直接指定can文字，或者html，
      * 或者模板（模板形式参见xutil.string.template）
      * 初始dom中的内容被认为是初始模板。
      * 也可以用参数传入模板。
@@ -64145,16 +64192,14 @@ $namespace('di.shared.vui');
      * @protected
      */
     TAB_BUTTON_CLASS.disable = function () {
-        mask(true);   
     };
-    
+
     /**
      * 启用操作
      *
      * @protected
      */
     TAB_BUTTON_CLASS.enable = function () {
-        mask(false);   
     };
     
     /**
@@ -64366,63 +64411,6 @@ $namespace('di.shared.vui');
             
             imgId = oLi.getAttribute('imgid');
             me._reloadReportCallback(imgId);
-        }
-    }
-    
-    /**
-     * 遮罩层，防止二次点击
-     * 如果启用，先判断body里面是否已经生成遮罩
-     * 如果已经生成，就不做处理，如果没有生成，就生成一个
-     * 如果禁用，就删除掉遮罩层
-     * 其实，在body里面始终只存在一个遮罩层
-     * 缺陷：创建删除dom操作，感觉不是很理想
-     * 不过ajax请求不会很多，性能应该不会影响很大
-     * 
-     * @private
-     * @param {boolean} status 状态：启用还是禁用遮罩
-     */
-    function mask(status) {
-        var oLayerMasks = domQ('ui-reportSave-layerMask', 
-                               document.body);
-        var oLayerMask;
-        
-        // oLayerMasks为一个数组
-        if (oLayerMasks.length === 1){
-            oLayerMask = oLayerMasks[0];
-        }
-        
-        // 启用
-        if (status) {
-            // 如果 遮罩层不存在就创建一个
-            // 这里用nodeType判断是否为element元素,实现不是很好
-            if (!oLayerMask 
-                || (oLayerMask && !oLayerMask.nodeType)
-            ) {
-                oLayerMask = document.createElement('div');
-                var maskCss = [
-                    'background-color: #e3e3e3;',
-                    'position: absolute;',
-                    'z-index: 1000;',
-                    'left: 0;',
-                    'top: 0;',
-                    'width: 100%;',
-                    'height: 100%;',
-                    'opacity: 0;',
-                    'filter: alpha(opacity=0);',
-                    '-moz-opacity: 0;'
-                    ].join('');
-                oLayerMask.style.cssText = maskCss;
-                oLayerMask.style.width = document.documentElement.scrollWidth 
-                                         + "px";
-                oLayerMask.className = 'ui-reportSave-layerMask';
-                document.body.appendChild(oLayerMask);
-            }
-        }
-        // 禁用
-        else {
-              if (oLayerMask && oLayerMask.nodeType) {
-                document.body.removeChild(oLayerMask);
-            }
         }
     }
     
@@ -75254,6 +75242,7 @@ $namespace('di.shared.ui');
             'enable'
         );
         DI_ECHART.superClass.enable.call(this);
+        DIALOG.mask(false);
     };    
 
     /**
@@ -75267,6 +75256,7 @@ $namespace('di.shared.ui');
             'disable'
         );
         DI_ECHART.superClass.disable.call(this);
+        DIALOG.mask(true);
     };    
 
     /**
@@ -75433,6 +75423,7 @@ $namespace('di.shared.ui');
     var inheritsObject = xutil.object.inheritsObject;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
+    var DIALOG = di.helper.Dialog;
     var objKey = xutil.object.objKey;
     var isObject = xutil.lang.isObject;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
@@ -75725,6 +75716,7 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('enable');
         DI_FORM.superClass.enable.call(this);
+        DIALOG.mask(false);
     };
 
     /**
@@ -75738,6 +75730,7 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('disable');
         DI_FORM.superClass.disable.call(this);
+        DIALOG.mask(true);
     };
 
     /**
@@ -76681,6 +76674,7 @@ $namespace('di.shared.ui');
             'enable'
         );
         DI_PLANE_TABLE.superClass.enable.call(this);
+        DIALOG.mask(false);
     };
 
     /**
@@ -76701,6 +76695,7 @@ $namespace('di.shared.ui');
             'disable'
         );
         DI_PLANE_TABLE.superClass.disable.call(this);
+        DIALOG.mask(true);
     };
 
     /**
@@ -77315,9 +77310,11 @@ $namespace('di.shared.ui');
         // 更新报表
         model.attach(
             ['sync.preprocess.UPDATE', this.disable, this],
-            ['sync.result.UPDATE', 
-             this.$handleUpdateImageSuccess, 
-             this],
+            [
+                'sync.result.UPDATE',
+                this.$handleUpdateImageSuccess,
+                this
+            ],
             ['sync.error.UPDATE', this.$handleError, this],
             ['sync.complete.UPDATE', this.enable, this]
         );
@@ -77325,9 +77322,11 @@ $namespace('di.shared.ui');
         // 获取tab全部镜像
         model.attach(
             ['sync.preprocess.GET_IMAGES', this.disable, this],
-            ['sync.result.GET_IMAGES', 
-             this.$handleGetAllImagesSuccess, 
-             this],
+            [
+                'sync.result.GET_IMAGES',
+                this.$handleGetAllImagesSuccess,
+                this
+            ],
             ['sync.error.GET_IMAGES', this.$handleError, this],
             ['sync.complete.GET_IMAGES', this.enable, this]
         );
@@ -78593,6 +78592,7 @@ $namespace('di.shared.ui');
             'enable'
         ); 
         DI_TABLE.superClass.enable.call(this);
+        DIALOG.mask(false);
     };
 
     /**
@@ -78612,6 +78612,7 @@ $namespace('di.shared.ui');
             'disable'
         ); 
         DI_TABLE.superClass.disable.call(this);
+        DIALOG.mask(true);
     };
 
     /**
@@ -79789,6 +79790,7 @@ $namespace('di.shared.ui');
     LITEOLAP_META_CONFIG_CLASS.enable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('enable');
         LITEOLAP_META_CONFIG.superClass.enable.call(this);
+        DIALOG.mask(false);
     };    
 
     /**
@@ -79799,6 +79801,7 @@ $namespace('di.shared.ui');
     LITEOLAP_META_CONFIG_CLASS.disable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('disable');
         LITEOLAP_META_CONFIG.superClass.disable.call(this);
+        DIALOG.mask(true);
     };    
 
     /**
@@ -80845,6 +80848,7 @@ $namespace('di.shared.ui');
     OLAP_META_CONFIG_CLASS.enable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('enable');
         OLAP_META_CONFIG.superClass.enable.call(this);
+        DIALOG.mask(false);
     };    
 
     /**
@@ -80855,6 +80859,7 @@ $namespace('di.shared.ui');
     OLAP_META_CONFIG_CLASS.disable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('disable');
         OLAP_META_CONFIG.superClass.disable.call(this);
+        DIALOG.mask(true);
     };    
 
     /**

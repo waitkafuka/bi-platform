@@ -433,6 +433,7 @@ $namespace('di.shared.ui');
             'enable'
         ); 
         DI_TABLE.superClass.enable.call(this);
+        DIALOG.mask(false);
     };
 
     /**
@@ -452,6 +453,7 @@ $namespace('di.shared.ui');
             'disable'
         ); 
         DI_TABLE.superClass.disable.call(this);
+        DIALOG.mask(true);
     };
 
     /**

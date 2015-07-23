@@ -104,8 +104,7 @@ public interface Level extends OlapElement, Cloneable {
         String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/meta/getMembers", requestParams);
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
-            String memberListJson = responseResult.getData().replace("\\", "");
-//            memberListJson = memberListJson.substring(1, memberListJson.length() - 1);
+            String memberListJson = responseResult.getData();
             List<MetaJsonDataInfo> metaJsons = AnswerCoreConstant.GSON.fromJson(memberListJson, new TypeToken<List<MetaJsonDataInfo>>(){}.getType());
             List<Member> members = new ArrayList<Member>(metaJsons.size());
             if(CollectionUtils.isNotEmpty(metaJsons)){
