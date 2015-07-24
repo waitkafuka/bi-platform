@@ -112,7 +112,6 @@ public class SecurityFilter implements Filter {
         String realRequestUri = httpRequest.getRequestURI().substring(1);
         String requestURI = realRequestUri.substring(realRequestUri.indexOf("/"), realRequestUri.length());
         if (isExcludeUrl (requestURI)) {
-            logger.info ("[INFO]  ==================== request uri info : " + requestURI);
             chain.doFilter (request, response);
             return;
         }

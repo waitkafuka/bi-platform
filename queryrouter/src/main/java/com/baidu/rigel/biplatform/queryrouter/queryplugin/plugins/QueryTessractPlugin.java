@@ -95,16 +95,16 @@ public class QueryTessractPlugin implements QueryPlugin {
         long curr = System.currentTimeMillis();
         logger.info("begin execute query with tesseract ");
         String tesseractHost = "";
-        String acConfigFile = System.getProperty("ac.config.location");
-        if (StringUtils.isEmpty(acConfigFile)) {
-            acConfigFile = "server.tesseract.address=http://[127.0.0.1:8080]/";
-            logger.warn("please set -Dac.config.location=XXX for jvm params");
-            logger.warn("can not provider auth server file, application will started by default:"
-                    + acConfigFile);
-            tesseractHost = "127.0.0.1:8080";
-        } else {
-            tesseractHost = ConfigInfoUtils.getServerAddressByProperty(TESSERACT_SERVER_PRO);
-        }
+//        String acConfigFile = System.getProperty("ac.config.location");
+//        if (StringUtils.isEmpty(acConfigFile)) {
+//            acConfigFile = "server.tesseract.address=http://[127.0.0.1:8080]/";
+//            logger.warn("please set -Dac.config.location=XXX for jvm params");
+//            logger.warn("can not provider auth server file, application will started by default:"
+//                    + acConfigFile);
+//            tesseractHost = "127.0.0.1:8080";
+//        } else {
+        tesseractHost = ConfigInfoUtils.getServerAddress ();
+//        }
         String response = HttpRequest.sendPost(tesseractHost + "/query", params, headerParams);
         logger.info("queryId:{} execute query with tesseract cost {} ms",
         		questionModel.getQueryId(), System.currentTimeMillis() - curr);

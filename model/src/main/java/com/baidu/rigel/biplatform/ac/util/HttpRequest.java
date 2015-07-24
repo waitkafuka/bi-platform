@@ -291,6 +291,7 @@ public class HttpRequest {
                 }
                 LOGGER.info ("[INFO] --- --- execute query with client {}", client);
                 HttpResponse response = client.execute(request);
+                LOGGER.info ("[INFO] response --- --- " + response);
                 String content = processHttpResponse(client, response, params, false);
                 return content;
             } catch (Exception e) {

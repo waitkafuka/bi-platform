@@ -26,7 +26,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.SqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlConstants;
@@ -87,10 +86,8 @@ public class JoinTableDataService {
                     + whereSql;
             List<Map<String, Object>> datas = jdbcHandler.queryForList(sql,
                     sqlQuery.getWhere().getValues(), dataSourceInfo);
+            result.put(factTableColumnName, new ArrayList<Object>());
             for (Map<String, Object> data : datas) {
-                if (result.get(factTableColumnName) == null) {
-                    result.put(factTableColumnName, new ArrayList<Object>());
-                }
                 result.get(factTableColumnName).add(data.get(joinTableFieldId));
             }
         }

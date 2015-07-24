@@ -107,9 +107,10 @@ public class TesseractApplication {
                 connector.setAttribute ("socket.directBuffer", true);
                 Http11Nio2Protocol protocol = (Http11Nio2Protocol) connector.getProtocolHandler ();
                 protocol.setMaxThreads (1000);
-                protocol.setMinSpareThreads (100);
-                protocol.setMaxThreads (500);
-                protocol.setMaxConnections (700);
+                protocol.setMinSpareThreads (75);
+                protocol.setAcceptorThreadPriority (10);
+                protocol.setPollerThreadPriority (10);
+                protocol.setMaxKeepAliveRequests (100);
             }
         };
     }

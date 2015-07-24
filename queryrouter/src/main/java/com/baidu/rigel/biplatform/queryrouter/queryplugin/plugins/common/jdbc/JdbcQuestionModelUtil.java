@@ -25,8 +25,7 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.SqlExpression;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.parsecheck.TableExistCheckService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.meta.TableExistCheckService;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;

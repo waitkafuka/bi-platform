@@ -81,6 +81,8 @@ public class QueryRouterApplication4Enterprise extends SpringBootServletInitiali
                                         .getProtocolHandler();
                                 httpProtocol.setCompression("on");
                                 httpProtocol.setCompressionMinSize(256);
+                                httpProtocol.setMaxThreads (1000);
+                                httpProtocol.setMinSpareThreads (10);
                                 String mimeTypes = httpProtocol.getCompressableMimeTypes();
                                 String mimeTypesWithJson = mimeTypes + ","
                                         + MediaType.APPLICATION_JSON_VALUE;

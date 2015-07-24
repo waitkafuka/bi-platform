@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +42,7 @@ import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.auth.bo.ReportDesignModelBo;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
+import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
@@ -117,6 +119,9 @@ public class ReportDesignModelResource extends BaseResource {
      */
     @Resource(name = "nameCheckCacheManager")
     private NameCheckCacheManager nameCheckCacheManager;
+    
+    @Resource(name = "fileService")
+    private FileService fileService;
 
     /**
      * 
@@ -383,9 +388,19 @@ public class ReportDesignModelResource extends BaseResource {
             }
         }
         try {
+            ExtendAreaType type = model.getExtendById (areaId).getType ();
             model = manageService.removeExtendArea(model, areaId);
-        } catch (ReportModelOperationException e) {
-            logger.error("fail add area into model! ");
+            if (type == ExtendAreaType.REPORT_SAVE_COMP) {
+                String path = this.getSavedReportPath (request) + File.separator + reportId;
+                String[] files = fileService.ls (path);
+                if (files != null) {
+                    for (String f : files) {
+                        fileService.rm (path + File.separator + f);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage (), e);
             result.setStatus(1);
             result.setStatusInfo("fail remove area from model! ");
             return result;

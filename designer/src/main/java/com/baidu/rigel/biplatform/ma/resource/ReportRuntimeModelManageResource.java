@@ -126,6 +126,10 @@ public class ReportRuntimeModelManageResource extends BaseResource {
     @Resource
     private ReportDesignModelService reportDesignModelService;
 
+    private String reportImageName = "reportImageName";
+    
+    private String reportImageId = "reportImageId";
+    
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/dimAndInds", method = RequestMethod.POST)
     public ResponseResult getAllDimAndMeasuers(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) {
@@ -747,7 +751,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/status", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = "/{reportId}/new_status", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseResult saveRuntimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
@@ -766,7 +770,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             result.setStatusInfo("未能获取正确的报表定义");
             return result;
         }
-        String name =  request.getParameter ("reportName");
+        String name =  request.getParameter (reportImageName);
         ReportRuntimeModel copy = copyRuntimeModel (runTimeModel);
         modifyCopyWithParams(copy, request);
         copy.getModel ().setName (name);
@@ -779,7 +783,10 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         }
         result.setStatus (0);
         result.setStatusInfo ("successfully");
-        result.setData (copy.getReportModelId ());
+        Map<String, String> datas = Maps.newHashMap ();
+        
+        datas.put (reportImageId, copy.getReportModelId ());
+        result.setData (datas);
         logger.info ("save report succcessfully with id : {} on path {}", copy.getReportModelId (), savedReportPath);
         return result;
     }
@@ -792,11 +799,12 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/{reportId}/new_status", method = {RequestMethod.POST, RequestMethod.GET})
+    @RequestMapping(value = "/{reportId}/status", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseResult update(@PathVariable("reportId") String reportId, HttpServletRequest request) {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
         try {
+            reportId = request.getParameter (reportImageId);
             runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         } catch (CacheOperationException e1) {
             logger.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
@@ -811,12 +819,13 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             result.setStatusInfo("未能获取正确的报表定义");
             return result;
         }
+        runTimeModel.getModel ().setName (request.getParameter ("reportImageName"));
         String savedReportPath = getRealStorePath (request, runTimeModel);
         try {
             fileService.write (savedReportPath, SerializationUtils.serialize (runTimeModel), true);
         } catch (FileServiceException e) {
             logger.error (e.getMessage (), e);
-        }
+        } 
         result.setStatus (0);
         result.setStatusInfo ("successfully");
         logger.info ("save report succcessfully with id : {} on path {}", reportId, savedReportPath);
@@ -836,6 +845,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
         try {
+            reportId = request.getParameter (reportImageId);
             runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         } catch (CacheOperationException e1) {
             logger.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
@@ -855,6 +865,9 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             fileService.rm (removeFile);
         } catch (FileServiceException e) {
             logger.error (e.getMessage (), e);
+            result.setStatus (1);
+            result.setStatusInfo ("error");
+            return result;
         }
         result.setStatus (0);
         result.setStatusInfo ("successfully");
@@ -866,17 +879,25 @@ public class ReportRuntimeModelManageResource extends BaseResource {
     public ResponseResult listAllSavedReport(@PathVariable("reportId") String reportId, HttpServletRequest request) 
         throws Exception {
         ResponseResult result = new ResponseResult();
-        String removeFile = this.getSavedReportPath (request) + File.separator + reportId;
-        String[] files = fileService.ls (removeFile);
+        String fileList = this.getSavedReportPath (request) + File.separator + reportId;
+        String[] files = fileService.ls (fileList);
         LinkedHashMap<String, String> rep = Maps.newLinkedHashMap ();
+        if (files == null) {
+            result.setStatus (0);
+            result.setStatusInfo ("successfully");
+            result.setData (Maps.newHashMap ());
+            return result;
+        }
         for (String file : files) {
-            ReportRuntimeModel model = (ReportRuntimeModel) SerializationUtils.deserialize (fileService.read (file));
+            String filePath = fileList +  File.separator + file;
+            ReportRuntimeModel model = 
+                (ReportRuntimeModel) SerializationUtils.deserialize (fileService.read (filePath));
             rep.put (model.getReportModelId (), model.getModel ().getName ());
         }
         result.setData (rep);
         result.setStatus (0);
         result.setStatusInfo ("successfully");
-        logger.info ("save report succcessfully with id : {} on path {}", reportId, removeFile);
+        logger.info ("save report succcessfully with id : {} on path {}", reportId, fileList);
         return result;
     }
 

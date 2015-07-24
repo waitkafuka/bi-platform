@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.parsecheck;
+package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.meta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,11 +24,11 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcHandler;
@@ -89,10 +89,12 @@ public class TableExistCheckService {
                     + dataSourceInfo.getDataBase().getDriver());
         }
         String resultStr = "";
-        for (String tableName : result) {
-            resultStr = resultStr + tableName + SqlConstants.COMMA;
-        }
-        if (!StringUtils.isEmpty(resultStr)) {
+        if (CollectionUtils.isEmpty(result)) {
+            return resultStr;
+        } else {
+            for (String tableName : result) {
+                resultStr = resultStr + tableName + SqlConstants.COMMA;
+            }
             resultStr = resultStr.substring(0, resultStr.length() - 1);
         }
         logger.info("found tables: \"" + resultStr + "\" in database.");

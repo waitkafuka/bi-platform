@@ -39,7 +39,13 @@ public class ConfigInfoUtils {
 
     private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
     
-    private static final String DEFAULT_AC_CONFIG_FILENAME="ac.properties";
+    private static String DEFAULT_AC_CONFIG_FILENAME = "ac.properties";
+
+    private static String QUERY_ROUTER_SYSTEM_CODE = null;
+
+    private static String QUERY_ROUTER_SYSTEM_KEY = null;
+    
+    private static String QUERY_ROUTER_ADDRESS = null;
 
     private static Properties properties;
     /**
@@ -50,15 +56,18 @@ public class ConfigInfoUtils {
     static {
         FileInputStream inStream = null;
         try {
-             String answerCoreConfFile = System.getProperty("ac.config.location");
-             if (StringUtils.isEmpty (answerCoreConfFile)) {
-                 answerCoreConfFile = System.getProperty("user.dir") + File.separator + DEFAULT_AC_CONFIG_FILENAME;
-             }
-            properties = new Properties();
-            inStream = new FileInputStream(answerCoreConfFile);
-            properties.load(inStream);
-            SERVERADDRESS = properties.getProperty("server.tesseract.address", DEFAULT_SERVER_ADDRESS);
-            LOG.info("load serveraddress from properties:{}", SERVERADDRESS);
+            String answerCoreConfFile = System.getProperty("ac.config.location");
+            if (StringUtils.isEmpty (answerCoreConfFile)) {
+                answerCoreConfFile = System.getProperty ("user.dir") + File.separator + DEFAULT_AC_CONFIG_FILENAME;
+            }
+            properties = new Properties ();
+            inStream = new FileInputStream (answerCoreConfFile);
+            properties.load (inStream);
+            SERVERADDRESS = properties.getProperty ("server.tesseract.address", DEFAULT_SERVER_ADDRESS);
+            QUERY_ROUTER_ADDRESS = properties.getProperty ("server.queryrouter.address");
+            QUERY_ROUTER_SYSTEM_CODE = properties.getProperty ("server.queryrouter.systemcode");
+            QUERY_ROUTER_SYSTEM_KEY = properties.getProperty ("server.queryrouter.systemkey");
+            LOG.info ("load serveraddress from properties:{}, {}", SERVERADDRESS, QUERY_ROUTER_ADDRESS);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             // throw new IllegalStateException("不能获取ac配置文件");
@@ -86,8 +95,8 @@ public class ConfigInfoUtils {
      * 
      * @return the sERVERADDRESS
      */
-    public static String getServerAddressByProperty(String key) {
-        return properties.getProperty(key);
+    public static String getQueryRouterAddress() {
+        return QUERY_ROUTER_ADDRESS;
     }
 
     /**
@@ -97,6 +106,14 @@ public class ConfigInfoUtils {
      */
     public static String getServerAddress() {
         return SERVERADDRESS;
+    }
+
+    public static String getQueryRouterSystemCode() {
+        return QUERY_ROUTER_SYSTEM_CODE;
+    }
+
+    public static String getQueryRouterSystemKey() {
+        return QUERY_ROUTER_SYSTEM_KEY;
     }
 
 }

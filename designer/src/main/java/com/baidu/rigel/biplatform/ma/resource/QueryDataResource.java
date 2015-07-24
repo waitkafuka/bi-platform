@@ -400,15 +400,18 @@ public class QueryDataResource extends BaseResource {
         long begin = System.currentTimeMillis();
         ReportDesignModel model = null;
         String reportPreview = request.getParameter("reportPreview");
+        String imageId = request.getParameter ("reportImageId");
         ReportRuntimeModel runtimeModel = null;
         try {
-            if (!StringUtils.isEmpty(reportPreview) && Boolean.valueOf(reportPreview)) {
+            if (StringUtils.isEmpty (imageId) 
+                    && !StringUtils.isEmpty(reportPreview) 
+                    && Boolean.valueOf(reportPreview)) {
                 model = reportModelCacheManager.getReportModel(reportId);
                 if (model != null) {
                     model = DeepcopyUtils.deepCopy (model);
                 }
 //                model.setPersStatus(false);
-            } else {
+            } else if (StringUtils.isEmpty (imageId)) {
                 model = reportDesignModelService.getModelByIdOrName(reportId, true);
 //                model.setPersStatus(true);
                 // runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
@@ -424,7 +427,7 @@ public class QueryDataResource extends BaseResource {
         } else {
             try {
                 String path = getSavedReportPath (request);
-                String fileName = path + File.separator + reportId;
+                String fileName = path + File.separator + reportId + File.separator + imageId;
                 runtimeModel = 
                     (ReportRuntimeModel) SerializationUtils.deserialize (fileService.read (fileName));
                 model = runtimeModel.getModel ();
@@ -2791,6 +2794,7 @@ public class QueryDataResource extends BaseResource {
                 logger.info ("unknown error!");
                 return rs;
             }
+            @SuppressWarnings("unchecked")
             Map<String, Object> data = (Map<String, Object>) rs.getData ();
             Map<String, List<String>> datas = Maps.newHashMap ();
             if (data.containsKey ("pivottable")) {

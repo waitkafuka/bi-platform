@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common;
+package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -35,6 +35,7 @@ import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterResource;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorType;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnCondition;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnType;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
@@ -71,12 +72,12 @@ public class SqlExpression implements Serializable {
     /**
      * sqlQuery
      */
-    SqlQuery sqlQuery = new SqlQuery();
+    private SqlQuery sqlQuery;
     
     /**
      * sqlQuery
      */
-    SqlQuery countSqlQuery = new SqlQuery();
+    private SqlQuery countSqlQuery;
     
     /**
      * allColumns
@@ -231,12 +232,11 @@ public class SqlExpression implements Serializable {
         for (int i = 0; i < tableNames.length; i++) {
             StringBuffer tmpSqlFrom = new StringBuffer(" select * from ");
             tmpSqlFrom.append(tableNames[i]);
+            tmpSqlFrom.append(" where 1=1 ");
             tmpSqlFrom.append(this.generateSourceWhereExpression(planeTableQuestionModel, sqlQuery, allColums));
             if (i == 0) {
-            // 一个表的情况
                 sqlFrom.append(tmpSqlFrom.toString());
             } else {
-            // 多个表union的情况
                 sqlFrom.append(" union all " + tmpSqlFrom.toString());
             }
         }
@@ -346,11 +346,13 @@ public class SqlExpression implements Serializable {
             if (StringUtils.isNotEmpty(where.getSql())) {
                 whereExpressions.append(" and " + k + " ");
                 whereExpressions.append(where.getSql());
+            } else {
+                whereExpressions.append(" and " + WHERE_NO_DATA);
             }
             this.countSqlQuery.getWhere().getValues().addAll(where.getValues());
         });
         whereExpressions.append(this.generateSingleTableSourceWhere(
-        		planeTableQuestionModel, this.countSqlQuery, allColums));
+                planeTableQuestionModel, this.countSqlQuery, allColums));
         return whereExpressions.toString();
     }
 
@@ -448,8 +450,7 @@ public class SqlExpression implements Serializable {
      * @return where equals sting
      */
     public String generateWhereEquals(SQLCondition sqlCondition, SqlQuery sqlQuery, String dateType) {
-        if (sqlCondition == null || sqlCondition.getConditionValues() == null
-                || sqlCondition.getConditionValues().size() == 0) {
+        if (sqlCondition == null || CollectionUtils.isEmpty(sqlCondition.getConditionValues())) {
             return "";
         }
         List<Object> values = new ArrayList<Object>();
@@ -478,8 +479,11 @@ public class SqlExpression implements Serializable {
      * @param values values
      * @return sql string
      */
-    private Where getWhereEquals(SQLConditionType conditionType, List<Object> values){
+    public Where getWhereEquals(SQLConditionType conditionType, List<Object> values){
         Where where = new Where();
+        if (CollectionUtils.isEmpty(values)) {
+            return where;
+        }
         switch (conditionType) {
         // 等于
         case EQ: {
@@ -631,8 +635,7 @@ public class SqlExpression implements Serializable {
         }
         String orderColumnNameTmp = planeTableQuestionModel.getSortRecord()
                 .getSortColumnUniquename();
-        if (StringUtils.isEmpty(orderColumnNameTmp)
-                && MetaNameUtil.isUniqueName(orderColumnNameTmp)) {
+        if (!MetaNameUtil.isUniqueName(orderColumnNameTmp)) {
             throw new QuestionModelTransformationException(
                     "string of 'SortColumnUniquename' isn't well fromed as [data].[data] .");
         }
@@ -656,32 +659,15 @@ public class SqlExpression implements Serializable {
     }
 
     /**
-     * getDriver
-     * 
-     * @return String String
-     */
-    public String getDriver() {
-        return driver;
-    }
-
-    /**
-     * setDriver
-     * 
-     * @param driver
-     *            driver
-     */
-    public void setDriver(String driver) {
-        this.driver = driver;
-    }
-
-    /**
      * @param driver
      *            jdbc driver
      * @param facttableAlias
      *            facttableAlias facttableAlias
      */
     public SqlExpression(String driver) {
-        this.driver = driver;
+        this.setDriver(driver);
+        sqlQuery = new SqlQuery(this.driver);
+        countSqlQuery = new SqlQuery(this.driver);
         this.facttableAlias = PlaneTableQuestionModel2SqlColumnUtils
                 .getFactTableAliasName();
     }
@@ -730,6 +716,15 @@ public class SqlExpression implements Serializable {
      */
     public Map<String, SqlColumn> getAllColumns() {
         return allColumns;
+    }
+
+    /**
+     * setDriver
+     * 
+     * @param driver the driver to set
+     */
+    public void setDriver(String driver) {
+        this.driver = driver;
     }
 
     /**

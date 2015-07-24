@@ -60,7 +60,7 @@ public class BaseResource {
     protected String getSavedReportPath(HttpServletRequest request) {
         String  path = "savedreport/preview";
         if (isNotPreview(request)) {
-            path = getUserIdendity(request);
+            path = "savereport/" + getUserIdendity(request);
         }
         return ContextManager.getProductLine () + File.separator + path;
     }
@@ -81,7 +81,7 @@ public class BaseResource {
             uid = request.getParameter (UID_KEY);
         }
         if (StringUtils.isEmpty (uid)) {
-            throw new RuntimeException ("未提供正确用户标识，拒绝服务");
+            throw new RuntimeException("未提供正确的用户身份标识");
         }
         return uid;
     }
@@ -104,11 +104,14 @@ public class BaseResource {
      * @return 预览请求返回false，否则返回true
      */
     private boolean isNotPreview(HttpServletRequest request) {
-        if (StringUtils.isNotBlank (request.getParameter ("preview"))) {
+        if (StringUtils.isNotBlank (request.getParameter ("reportPreview"))) {
+            return false;
+        }
+        if (StringUtils.isNotBlank (request.getParameter ("isInDesigner"))) {
             return false;
         }
         String referer = request.getHeader ("referer");
-        if (StringUtils.contains (referer, "preview=true")) {
+        if (StringUtils.contains (referer, "reportPreview=true")) {
             return false;
         }
         return true;

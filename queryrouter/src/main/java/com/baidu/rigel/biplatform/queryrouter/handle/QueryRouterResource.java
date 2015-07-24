@@ -54,7 +54,7 @@ public class QueryRouterResource {
     /**
      * log4j最长打印字符串长度
      */
-    private static final int MAX_PRINT_LENGTH = 3000;
+    private static final int MAX_PRINT_LENGTH = 5000;
 
     /**
      * 出参参的参数“成功”
@@ -99,7 +99,6 @@ public class QueryRouterResource {
         } else {
             logger.info("queryId:{} request questionmodel json:{}", questionModel.getQueryId(), questionStr);
         }
-        logger.info("queryId:{} request questionmodel json:{}", questionModel.getQueryId(), questionStr);
         return this.dispatch(questionModel);
     }
 

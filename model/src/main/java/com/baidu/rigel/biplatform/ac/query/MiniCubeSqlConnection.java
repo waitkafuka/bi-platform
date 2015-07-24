@@ -69,12 +69,9 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
         String response = null;
         String questionModelJson = null;
         questionModel.setQueryId(Long.valueOf(System.nanoTime()).toString());
-        if (ConfigInfoUtils
-                .getServerAddressByProperty("server.queryrouter.address") != null) {
-            String systemCode = ConfigInfoUtils
-                    .getServerAddressByProperty("server.queryrouter.systemcode");
-            String systemkey = ConfigInfoUtils
-                    .getServerAddressByProperty("server.queryrouter.systemkey");
+        if (ConfigInfoUtils.getQueryRouterAddress() != null) {
+            String systemCode = ConfigInfoUtils.getQueryRouterSystemCode();
+            String systemkey = ConfigInfoUtils.getQueryRouterSystemKey();
             if (systemCode == null || systemkey == null) {
                 log.error("properties conf at : \"server.queryrouter.systemcode\" "
                         + "or \"server.queryrouter.systemkey\"   is null");
@@ -91,23 +88,15 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
                         .encryptAndUrlEncoding(systemCode));
             } catch (Exception e) {
                 log.info("params token encrypt error, systemCode:" + systemCode);
-                throw new MiniCubeQueryException(
-                        "occur error before query queryrouter,msg:"
-                                + e.getCause().getMessage());
+                throw new MiniCubeQueryException(e.getMessage());
             }
-            params.put("signature",
-                    Md5Util.encode(questionModelJson, systemkey));
-            response = HttpRequest
-                    .sendPost(
-                            ConfigInfoUtils
-                                    .getServerAddressByProperty("server.queryrouter.address")
-                                    + "/queryrouter/query", params);
+            params.put("signature", Md5Util.encode(questionModelJson, systemkey));
+            response = HttpRequest.sendPost(ConfigInfoUtils.getQueryRouterAddress() + "/queryrouter/query", params);
         } else {
             questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
             log.info("queryId:{} begin execute query with tesseract ", questionModel.getQueryId());
             params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
-            response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress()
-                    + "/query", params);
+            response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params);
         }
 
         log.info("execute query with tesseract/queryrouter cost {} ms",
