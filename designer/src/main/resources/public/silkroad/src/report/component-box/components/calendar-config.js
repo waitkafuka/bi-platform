@@ -78,7 +78,7 @@ define(
                     // 事件范围
                     range: [
                         '2011-01-01',
-                        '-1D'
+                        '0D'
                     ],
                     selModeList: [
                         {
@@ -96,7 +96,7 @@ define(
                     ],
                     range: [
                         '2011-01-01',
-                        '-1W'
+                        '0W'
                     ],
                     selModeList: [
                         {
@@ -119,7 +119,7 @@ define(
                     ],
                     range: [
                         '2011-01-01',
-                        '-1M'
+                        '0M'
                     ],
                     selModeList: [
                         {
@@ -142,7 +142,7 @@ define(
                     ],
                     range: [
                         '2011-01-01',
-                        '-1D'
+                        '0D'
                     ],
                     selModeList: [
                         {

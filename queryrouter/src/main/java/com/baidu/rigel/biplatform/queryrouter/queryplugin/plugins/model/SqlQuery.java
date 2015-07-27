@@ -53,7 +53,7 @@ public class SqlQuery implements Serializable {
     /**
      * pageInfo
      */
-    private PageInfo pageInfo = new PageInfo();
+    private PageInfo pageInfo;
 
     /**
      * driver
@@ -270,7 +270,7 @@ public class SqlQuery implements Serializable {
         int size = -1;
 
         if (pageInfo == null) {
-            return "";
+            return finallySql;
         } else {
             if (pageInfo.getCurrentPage() < 0) {
                 pageInfo.setCurrentPage(0);
@@ -303,7 +303,7 @@ public class SqlQuery implements Serializable {
                 return pageString.toString();
             }
             default: {
-                return "";
+                return finallySql;
             }
         }
 

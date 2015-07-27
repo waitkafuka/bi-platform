@@ -47,7 +47,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
@@ -714,8 +714,8 @@ public class DataModelUtilsTest {
 
         FormatModel formatModel = PowerMockito.mock(FormatModel.class);
         QueryAction queryAction = new QueryAction();
-        MeasureOrderDesc orderDesc = new MeasureOrderDesc("Measure", "DESC", 500);
-        queryAction.setMeasureOrderDesc(orderDesc);
+        OrderDesc orderDesc = new OrderDesc("Measure", "DESC", 500);
+        queryAction.setOrderDesc(orderDesc);
 
         PlaneTable planeTable =
                 DataModelUtils.transDataModel2PlaneTable(cube, dataModel, logicModel, formatModel, queryAction);

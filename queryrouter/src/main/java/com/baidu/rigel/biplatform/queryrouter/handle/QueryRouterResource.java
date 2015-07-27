@@ -54,7 +54,7 @@ public class QueryRouterResource {
     /**
      * log4j最长打印字符串长度
      */
-    private static final int MAX_PRINT_LENGTH = 5000;
+    private static final int MAX_PRINT_LENGTH = 30000;
 
     /**
      * 出参参的参数“成功”
@@ -82,20 +82,23 @@ public class QueryRouterResource {
      */
     @RequestMapping(value = "/query", method = { RequestMethod.POST })
     public ResponseResult dispatch(HttpServletRequest request) {
-
         if (request.getAttribute(PRAMA_QUESTION) == null) {
             return ResponseResultUtils.getErrorResult(
-                    "get members question is null", 100);
+                    "question is null", 100);
         }
         String questionStr = request.getAttribute(PRAMA_QUESTION).toString();
-
         // convert json to QuestionModel
         ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(
                 questionStr, ConfigQuestionModel.class);
+        QueryRouterContext.setQueryInfo(questionModel.getQueryId());
+        logger.info("queryId:{} querycurrent handle size:{} , begin to handle this queryId.",
+                questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());
         // 限制日志输出
         if (questionStr.length() > MAX_PRINT_LENGTH) {
-            logger.info("queryId:{} request questionmodel json:{}", questionModel.getQueryId(),
-                    questionStr.substring(0, MAX_PRINT_LENGTH));
+            logger.info("queryId:{} querycurrent handle size:{} request questionmodel json:{}",
+                    questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize(),
+                            questionStr.substring(0, MAX_PRINT_LENGTH));
+            logger.debug("queryId:{} request questionmodel json:{}", questionModel.getQueryId(), questionStr);
         } else {
             logger.info("queryId:{} request questionmodel json:{}", questionModel.getQueryId(), questionStr);
         }
@@ -112,10 +115,7 @@ public class QueryRouterResource {
     public ResponseResult dispatch(QuestionModel questionModel) {
         long begin = System.currentTimeMillis();
         try {
-            QueryRouterContext.setQueryInfo(questionModel.getQueryId());
-            // convert 请求中的请求的questionmodel
-            QueryPlugin queryPlugin = queryPluginFactory
-                    .getPlugin(questionModel);
+            QueryPlugin queryPlugin = queryPluginFactory.getPlugin(questionModel);
             logger.debug("queryId:{} dispatch cost:{} ms", questionModel.getQueryId(),
                     System.currentTimeMillis() - begin);
 

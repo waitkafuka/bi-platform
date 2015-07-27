@@ -44,6 +44,16 @@ public class QueryRouterContext {
 		String threadId = Long.valueOf(Thread.currentThread().getId()).toString();
 		return QUERY_REQUEST_CONTEXT.get(threadId);
 	}
+	
+	/**
+	 * 获取当前正在查询的线程数
+	 * 
+	 * @param threadId
+	 * @return
+	 */
+	public static int getQueryCurrentHandleSize() {
+		return QUERY_REQUEST_CONTEXT.size();
+	}
 
 	/**
 	 * 获取查询的queryId

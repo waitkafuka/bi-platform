@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,indList=$data.indList,$value=$data.$value,$index=$data.$index,$escape=$utils.$escape,hasDerive=$data.hasDerive,$out='';$out+='<div class="data-sources-derive-inds c-f">\r\n    <ul class="data-sources-derive-inds-tab">\r\n        <li class="classification classification-focus j-classification f-l" id="j-tab-create"><span>创建计算列</span></li>\r\n        <li class="classification j-classification f-l" id="j-tab-select"><span>快速选择计算列</span></li>\r\n        <li class="classification j-classification f-l" id="j-tab-callback"><span>回调指标</span></li>\r\n    </ul>\r\n\r\n    <div class="norm-box" id="j-box-norm">\r\n        <div class="description">\r\n            <div class="description-create">\r\n                点击左侧指标，可进入右侧区域，参与计算；当前支持的运算包括+、-、*、/、%\r\n                <div class="derive-inds-error hide j-derive-inds-error"></div>\r\n            </div>\r\n            <div class="description-select hide">\r\n                可双击左侧指标，进入右侧区域，生成对应指标的计算列\r\n                <div class="derive-inds-error hide j-derive-inds-error"></div>\r\n            </div>\r\n        </div>\r\n        <div class="ind-cal-setting f-l">\r\n            ';

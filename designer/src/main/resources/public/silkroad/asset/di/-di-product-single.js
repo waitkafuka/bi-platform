@@ -1167,6 +1167,52 @@ var xutil = {
     commonUtil: {}
 };
 /**
+ * xutil.date
+ * Copyright 2012 Baidu Inc. All rights reserved.
+ *
+ * @file:   类库所依赖的公共方法库
+ * @author: lizhantong
+ */
+
+(function () {
+    /* globals xutil */
+    var COMMONUTIL = xutil.commonUtil;
+
+    /**
+     * 数值前部补0
+     *
+     * @public
+     * @param {(number|string)} source 输入数值, 可以整数或小数
+     * @param {number} length 输出数值长度
+     * @return {string} 输出数值
+     */
+    COMMONUTIL.pad = function (source, length) {
+        var pre = '';
+        var negative = (source < 0);
+        var string = String(Math.abs(source));
+        if (string.length < length) {
+            pre = (new Array(length - string.length + 1)).join('0');
+        }
+        return (negative ?  '-' : '') + pre + string;
+    };
+
+    /**
+     * 删除目标字符串两端的空白字符 (@see tangram)
+     *
+     * @pubilc
+     * @param {string} source 目标字符串
+     * @return {string} 删除两端空白字符后的字符串
+     */
+    COMMONUTIL.trim = function (source) {
+        var TRIMER = new RegExp(
+            '(^[\\s\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\s\\t]+\x24)', 'g'
+        );
+        return source == null
+            ? ''
+            : String(source).replace(TRIMER, '');
+    };
+})();
+/**
  * xutil.LinkedHashMap
  * Copyright 2012 Baidu Inc. All rights reserved.
  *
@@ -2825,52 +2871,6 @@ var xutil = {
 /**
  * xutil.date
  * Copyright 2012 Baidu Inc. All rights reserved.
- *
- * @change: 增加到秒粒度的日期format，增加方法#isValidFormatPattern。by MENGRAN at 2013-12-06
- * @file:   时间相关工具函数集合。
- *          便于工程中统一时间格式，并提供时间相关的数学操作。
- * @author: sushuang(sushuang)
- * @depend: xutil.lang, xutil.number
- */
-
-(function () {
-    var COMMONUTIL = xutil.commonUtil;
-    /**
-     * 数值前部补0
-     *
-     * @public
-     * @param {(number|string)} source 输入数值, 可以整数或小数
-     * @param {number} length 输出数值长度
-     * @return {string} 输出数值
-     */
-    COMMONUTIL.pad = function (source, length) {
-        var pre = "";
-        var negative = (source < 0);
-        var string = String(Math.abs(source));
-        if (string.length < length) {
-            pre = (new Array(length - string.length + 1)).join('0');
-        }
-        return (negative ?  "-" : "") + pre + string;
-    };
-    /**
-     * 删除目标字符串两端的空白字符 (@see tangram)
-     *
-     * @pubilc
-     * @param {string} source 目标字符串
-     * @returns {string} 删除两端空白字符后的字符串
-     */
-    COMMONUTIL.trim = function (source) {
-        var TRIMER = new RegExp(
-            "(^[\\s\\t\\xa0\\u3000]+)|([\\u3000\\xa0\\s\\t]+\x24)", "g"
-        );
-        return source == null
-            ? ""
-            : String(source).replace(TRIMER, "");
-    };
-})();
-/**
- * xutil.date
- * Copyright 2012 Baidu Inc. All rights reserved.
  * 
  * @change: 增加到秒粒度的日期format，增加方法#isValidFormatPattern。by MENGRAN at 2013-12-06
  * @file:   时间相关工具函数集合。
@@ -2880,7 +2880,7 @@ var xutil = {
  */
 
 (function () {
-    
+    /* globals xutil */
     var DATE = xutil.date;
     var LANG = xutil.lang;
     var COMMONUTIL = xutil.commonUtil;
@@ -3846,7 +3846,7 @@ var xutil = {
  */
 
 (function () {
-    
+    /* globals xutil */
     var LANG = xutil.lang;
     var utilTrim = xutil.commonUtil.trim;
     var objProto = Object.prototype;
@@ -3875,7 +3875,7 @@ var xutil = {
      */
     LANG.hasValueNotBlank = function (variable) {
         return LANG.hasValue(variable)
-           && (!LANG.isString(variable) || utilTrim(variable) != '');
+           && (!LANG.isString(variable) || utilTrim(variable) !== '');
     };
 
     /**
@@ -3890,10 +3890,10 @@ var xutil = {
      */    
     LANG.isBlank = function (variable) {
         if (LANG.isString(variable)) { 
-            return utilTrim(variable) == '';
+            return utilTrim(variable) === '';
         } 
         else if (LANG.isArray(variable)) {
-            return variable.length == 0;
+            return variable.length === 0;
         } 
         else if (LANG.isObject(variable)) {
             for (var k in variable) {
@@ -4097,7 +4097,7 @@ var xutil = {
      */
     LANG.stringToBoolean = function (input) {
         if (LANG.isString(input)) {
-            return utilTrim(input) == 'true';
+            return utilTrim(input) === 'true';
         } 
         else {
             return !!input; 
@@ -35077,8 +35077,8 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                 options.dataRange = {
                     x: 'left',
                     y: 'bottom',
-                    text:['高','低'],           // 文本，默认为数值文本
-                    itemGap : 0,
+                    text: ['高', '低'],           // 文本，默认为数值文本
+                    itemGap: 0,
                     // 设置地图值域字体
                     textStyle: styleConfiguration.dataRangeStyle,
                     color: styleConfiguration.dataRangeColor,
@@ -36443,20 +36443,12 @@ $namespace('di.config');
     URL_SET.MOLD_QUERY = '/manage/moldTemplate/getMoldTemplates.action';
     //mold模板查询url
     URL_SET.PAHNTOMJS_INFO = '/myview/getPhantomJsInfo.action';
-    //报表模板镜像操作url
-    URL_SET.RTPL_CLONE_SAVE = '/image/delAndAddImage.action';
-    URL_SET.RTPL_CLONE_GETDEFAULTIMAGENAME = '/image/getDefaultImageName.action';
-    URL_SET.RTPL_CLONE_CLEAR = '/image/deleteImage.action';
-    //报表保存镜像操作url
-    // URL_SET.RTPL_SAVE_ADD = '/image/addImage.action';
-    // URL_SET.RTPL_SAVE_UPDATE = '/image/updateImage.action';
-    // URL_SET.RTPL_SAVE_GETIMAGES = '/image/getUserImages.action';
-    // URL_SET.RTPL_SAVE_DELETE = '/image/deleteImage.action';
 
-    URL_SET.RTPL_SAVE_ADD = '/reports/runtime/#{reportId}/new_status';
-    URL_SET.RTPL_SAVE_UPDATE = '/reports/runtime/#{reportId}/status';
-    URL_SET.RTPL_SAVE_GETIMAGES = '/reports/runtime/#{reportId}/status/list';
-    URL_SET.RTPL_SAVE_DELETE = '/reports/runtime/#{reportId}/del_status';
+    //报表保存镜像操作url
+    URL_SET.RTPL_SAVE_ADD = '/reports/#{reportId}/new_status';
+    URL_SET.RTPL_SAVE_UPDATE = '/reports/#{reportId}/status';
+    URL_SET.RTPL_SAVE_GETIMAGES = '/reports/#{reportId}/status/list';
+    URL_SET.RTPL_SAVE_DELETE = '/reports/#{reportId}/del_status';
 
 })();
 /**
@@ -36477,14 +36469,13 @@ $namespace('di.helper');
     // 引用
     //--------------------------------
 
-    // FIXME 
-    // 后续去除此ecui引用
     var ui = ecui;
     var encodeHTML = xutil.string.encodeHTML;
     var LANG;
     var UTIL;
     var DICT;
     var DI_FACTORY;
+    /* globals xutil */
     var domQ = xutil.dom.q;
 
     $link(function() {
@@ -36859,7 +36850,7 @@ $namespace('di.helper');
         var oLayerMask;
 
         // oLayerMasks为一个数组
-        if (oLayerMasks.length === 1){
+        if (oLayerMasks.length === 1) {
             oLayerMask = oLayerMasks[0];
         }
 
@@ -36884,7 +36875,7 @@ $namespace('di.helper');
                     '-moz-opacity: 0;'
                 ].join('');
                 oLayerMask.style.cssText = maskCss;
-                oLayerMask.style.width = document.documentElement.scrollWidth + "px";
+                oLayerMask.style.width = document.documentElement.scrollWidth + 'px';
                 oLayerMask.className = 'ui-reportSave-layerMask';
                 document.body.appendChild(oLayerMask);
             }
@@ -63615,29 +63606,22 @@ $namespace('di.shared.vui');
     // 引用 
     //------------------------------------------
 
-
+    /* globals xutil */
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
     var domChildren = xutil.dom.children;
     var getParent = xutil.dom.getParent;
     var hasClass = xutil.dom.hasClass;
+    /* globals di */
     var confirm = di.helper.Dialog.confirm;
     var alert = di.helper.Dialog.alert;
-    var domQ = xutil.dom.q;
-    var extend = xutil.object.extend;
-    var encodeHTML = xutil.string.encodeHTML;
-    var isObject = xutil.lang.isObject;
-    var isArray = xutil.lang.isArray;
-    var template = xutil.string.template;
     var textLength = xutil.string.textLength;
     var XOBJECT = xui.XObject;
-
 
     //------------------------------------------
     // 类型声明 
     //------------------------------------------
-
 
     /**
      * 文字区
@@ -63654,12 +63638,10 @@ $namespace('di.shared.vui');
     var SAVE_BUTTON = $namespace().SaveButton =
             inheritsObject(XOBJECT, constructor);
     var SAVE_BUTTON_CLASS = SAVE_BUTTON.prototype;
-    
-    
+
     //------------------------------------------
     // 常量 
     //------------------------------------------
-
 
     // 显示错误提示，验证镜像名称时使用
     var SHOW_ERROR_TIPS = true;
@@ -63685,7 +63667,7 @@ $namespace('di.shared.vui');
         DIALOG_ITEM_CLASS_NAME: 'ui-reportSave-save-dialog-form-item',
         // 弹出框中的错误提示样式
         DIALOG_ERROR_CLASS_NAME: 'ui-reportSave-save-dialog-form-error'
-    }
+    };
     
     // 提示信息
     var MESSAGE = {
@@ -63712,7 +63694,9 @@ $namespace('di.shared.vui');
      * @param {Object} options 参数
      * @param {Object} options.el 容器元素
      */
-    function constructor(options) { 
+    function constructor(options) {
+        var elChildrens;
+        var btnOperates;
         var el = this._eMain = options.el;
         var html = [
             '<div class="', SAVE_CLASS.SAVE_BUTTON_CLASS_NAME, '">保存报表</div>',
@@ -63723,14 +63707,9 @@ $namespace('di.shared.vui');
                 '<li>更新当前报表</li>',
             '</ul>'
         ].join('');
-        var elChildrens;
-        var btnOperates;
-        
+
         addClass(el, SAVE_CLASS.SAVE_CLASS_NAME);
         el.innerHTML = html;
-
-        //设置最外层父亲z-Index
-        //resetContainParentZIndex(el);
 
         // 获取保存按钮并挂载上
         elChildrens = domChildren(el);
@@ -63761,6 +63740,7 @@ $namespace('di.shared.vui');
         this._getCurrentTabName = options.getCurrentTabName;
         this._maxTabNum = options.maxTabNum;
         this._getTabsNums = options.getTabsNums;
+
         // 绑定事件
         bindEvent.call(this);
     };
@@ -63770,16 +63750,14 @@ $namespace('di.shared.vui');
      *
      * @protected
      */
-    SAVE_BUTTON_CLASS.disable = function () {
-    };
+    SAVE_BUTTON_CLASS.disable = function () {};
     
     /**
      * 启用操作
      *
      * @protected
      */
-    SAVE_BUTTON_CLASS.enable = function () {
-    };
+    SAVE_BUTTON_CLASS.enable = function () {};
 
     /**
      * 绑定事件
@@ -63791,17 +63769,20 @@ $namespace('di.shared.vui');
 
         // 绑定保存按钮click与mouseleave事件
         me._btnSave.onclick = function () {
+            if (me._isInDesigner) {
+                return;
+            }
             removeClass(me._btnOperates, SAVE_CLASS.HIDE);
-        }
+        };
         me._btnSave.onmouseover = function () {
             addClass(this, SAVE_CLASS.SAVE_BUTTON_HOVER_CLASS_NAME);
-        }
+        };
         me._btnSave.onmouseout = function () {
             removeClass(this, SAVE_CLASS.SAVE_BUTTON_HOVER_CLASS_NAME);
-        }
+        };
         me._eMain.onmouseleave = function () {
             addClass(me._btnOperates, SAVE_CLASS.HIDE);
-        }
+        };
 
         // 绑定新增按钮点击事件
         me._btnAdd.onclick = function (ev) {
@@ -63809,52 +63790,34 @@ $namespace('di.shared.vui');
 
             // 隐藏按钮选项
             hideOperates(me._btnOperates, oEv);
-            
             if (me._getTabsNums() > me._maxTabNum) {
                 alert(MESSAGE.TAB_MAX_NUM_WARN);
                 return; 
             }
             // 保证this指向
-            dialog.call(me, 
-                        HIDE_ERROR_TIPS, 
-                        '', 
-                        dialogCallback, 
-                        ADD_MODE);
-        }
+            dialog.call(
+                me,
+                HIDE_ERROR_TIPS,
+                '',
+                dialogCallback,
+                ADD_MODE
+            );
+        };
 
         // 绑定更新按钮点击事件
         me._btnUpdate.onclick = function (ev) {
             var oEv = ev || window.event;
-
             // 隐藏按钮选项
             hideOperates(me._btnOperates, oEv);
-            
-            dialog.call(me, 
-                        HIDE_ERROR_TIPS,
-                        me._getCurrentTabName(), 
-                        dialogCallback, 
-                        UPDATE_MODE);
-        }
+            dialog.call(
+                me,
+                HIDE_ERROR_TIPS,
+                me._getCurrentTabName(),
+                dialogCallback,
+                UPDATE_MODE
+            );
+        };
     };
-
-    /**
-     * 设置父亲包含块的z-Index
-     * 
-     * @private
-     * @param {HTMLElement} el vui-save的容器
-     */
-    function resetContainParentZIndex(el) {
-    	 var parentClassName = 'di-o_o-block';
-         var parent = el.parentNode;
-
-         while (parent) {
-             parent.style.zIndex = 100;
-             if (hasClass(parent, parentClassName)) {
-                 break;
-             }
-             parent = getParent(parent);
-         }
-    }
 
     /**
      * 隐藏按钮操作项
@@ -63866,7 +63829,6 @@ $namespace('di.shared.vui');
     function hideOperates(el, ev) {
         // 隐藏按钮选项
         addClass(el, SAVE_CLASS.HIDE);
-
         // 阻止事件冒泡
         ev.stopPropagation 
         ? (ev.stopPropagation()) 
@@ -63879,31 +63841,26 @@ $namespace('di.shared.vui');
      * @private
      * @param {string} showErrorTips 显示错误提示的方式：是否显示
      * @param {string} value 用户输入的名称
-     * @param {function} callback 弹出框点击确定后的回调事件
+     * @param {Function} callback 弹出框点击确定后的回调事件
      * @param {boolean} isAdd 新增或者更新
      */
     function dialog(showErrorTips, value, callback, isAdd) {
         var me = this;
         // 默认项不能编辑，这块的实现不是很好
-        if (value == '默认') {
+        if (value === '默认') {
             alert(MESSAGE.TAB_UPDATE_DEFAULT_WARN);
             return;
         }
         
         var html = [
-           '<div class="', SAVE_CLASS.DIALOG_ERROR_CLASS_NAME, '">',
+            '<div class="', SAVE_CLASS.DIALOG_ERROR_CLASS_NAME, '">',
                 showErrorTips ? MESSAGE.NAME_WARN : '',
             '</div>',
             '<div class="', SAVE_CLASS.DIALOG_ITEM_CLASS_NAME, '">',
-                '<label>',
-                    '名称',
-                '</label>',
-                '<input type="text" id="reportSaveName" ',
-                   'value="',
-                    value,
-                    '"',
-                    isAdd ? '' : 'disabled="disabled"',
-                    ' placeholder="', MESSAGE.NAME_PLACE_HOLDER, '" />',
+            '<label>', '名称', '</label>',
+            '<input type="text" id="reportSaveName" ', 'value="', value, '"',
+//                    isAdd ? '' : 'disabled="disabled"',
+            ' placeholder="', MESSAGE.NAME_PLACE_HOLDER, '" />',
             '</div>'
         ].join('');
         
@@ -63931,13 +63888,14 @@ $namespace('di.shared.vui');
      * @param {string} name 用户输入的名称
      */
     function dialogCallback(isAdd, name) {
-        
-        if(!validate(name)) {
-            dialog.call(this, 
-                        SHOW_ERROR_TIPS, 
-                        name , 
-                        dialogCallback, 
-                        isAdd);
+        if (!validate(name.trim())) {
+            dialog.call(
+                this,
+                SHOW_ERROR_TIPS,
+                name,
+                dialogCallback,
+                isAdd
+            );
         }
         else {
             this._saveImageNameCallBack(isAdd, name);
@@ -63952,13 +63910,9 @@ $namespace('di.shared.vui');
      */
     function validate(name) {
         var l = textLength(name);
-        
-        if (name === '' 
-            || l > TAB_NAME_MAX_LENGTH
-        ) {
+        if (name === '' || l > TAB_NAME_MAX_LENGTH) {
             return false;
         } 
-        
         return true;
     }
 
@@ -63980,22 +63934,17 @@ $namespace('di.shared.vui');
     //------------------------------------------
     // 引用 
     //------------------------------------------
- 
 
+    /* globals xutil */
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
     var hasClass = xutil.dom.hasClass;
     var domChildren = xutil.dom.children;
     var getParent = xutil.dom.getParent;
-    var domQ = xutil.dom.q;
-    var extend = xutil.object.extend;
     var encodeHTML = xutil.string.encodeHTML;
-    var parseParam = xutil.url.parseParam;
-    var isObject = xutil.lang.isObject;
-    var isArray = xutil.lang.isArray;
-    var template = xutil.string.template;
     var textLength = xutil.string.textLength;
     var textSubstr = xutil.string.textSubstr;
+    /* globals di */
     var confirm = di.helper.Dialog.confirm;
     var XOBJECT = xui.XObject;
     
@@ -64025,7 +63974,6 @@ $namespace('di.shared.vui');
     //------------------------------------------
     // 常量 
     //------------------------------------------
-
 
     var TAB_CLASS = {
         // tab容器样式
@@ -64068,7 +64016,6 @@ $namespace('di.shared.vui');
      */
     function constructor(options) {
         var el = this._eMain = options.el;
-        
         addClass(el, TAB_CLASS.TAB_CLASS_NAME);
     }
     
@@ -64084,68 +64031,59 @@ $namespace('di.shared.vui');
      * @param {string} currentTabId 
      */
     TAB_BUTTON_CLASS.init = function (currentTabId, preDeleteTabCallback, reloadReportCallback, data) {
-//        var html = [
-//            '<ul>',
-//                '<li class="tab-normal" imgid="123">',
-//                    '<span>默认</span>',
-//                '</li>',
-//                '<li class="tab-normal tab-focus" imgid="123">',
-//                    '<span>123</span>',
-//                    '<a href="#">×</a>',
-//                '</li>',
-//            '</ul>'
-//        ].join('');
         var me = this;
         var el = this._eMain;
-        var imgsData = data.imageConfigs;
+        var imgsData = data.reportImage;
         // 如果当前currentTabId为-1，说明是通过点击默认tab跳转过来,需要为默认添加高亮
         // 如果currentTabId为undefined，说明是第一次进来，
         // 并且后端没有返回默认，之前没有设置默认，需要为默认添加高亮
-        var className = (currentTabId === undefined || currentTabId === '-1')
+        var className = (!currentTabId || data.reportId === currentTabId)
             ? ' ' + TAB_CLASS.CURRENT_TAB_CLASS_NAME
             : '';
         var html = ['<ul>'];
         
         html.push(
-            '<li class="',
-                TAB_CLASS.NORMAL_TAB_CLASS_NAME, className, '">',
+            '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, className, '"',
+            ' imgid="', data.reportId, '">',
                 '<span class="',
-                    TAB_CLASS.TAB_TEXT_CLASS_NAME ,
-                    '">默认</span>',
+                    TAB_CLASS.TAB_TEXT_CLASS_NAME, '"',
+                '>默认</span>',
             '</li>'
         );
         
         for (var key in imgsData) {
-            var imgData = imgsData[key];
-            
-            var liClassName = (imgData.reportImageId == currentTabId) 
-                ? (' ' + TAB_CLASS.CURRENT_TAB_CLASS_NAME) : '';
+            var imgName = imgsData[key];
+
+            var liClassName = (key === currentTabId)
+                ? (' ' + TAB_CLASS.CURRENT_TAB_CLASS_NAME)
+                : '';
                 
-            var aClassName = (imgData.reportImageId == currentTabId) 
-                ? (' ' + TAB_CLASS.CURRENT_TAB_CLOSE_CLASS_NAME) : '';
+            var aClassName = (key === currentTabId)
+                ? (' ' + TAB_CLASS.CURRENT_TAB_CLOSE_CLASS_NAME)
+                : '';
                 
             html.push(
-               '<li class="',
-                    TAB_CLASS.NORMAL_TAB_CLASS_NAME, 
-                    liClassName,
-                    '" imgid="', imgData.reportImageId, '">',
-                    buildImageNameHtml(imgData.reportImageName),
-                    '<a class="', 
-                        TAB_CLASS.TAB_CLOSE_CLASS_NAME, 
-                        aClassName, 
-                        '" href="javascript:void(0)">×</a>',
-                '</li>'
+               '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, liClassName, '"',
+                    'title="', imgName, '"', ' imgid="', key, '">',
+                    buildImageNameHtml(imgName),
+                    '<a class="', TAB_CLASS.TAB_CLOSE_CLASS_NAME, aClassName,
+                    '" href="javascript:void(0)">×</a>',
+               '</li>'
             );
         }
         html.push('</ul>');
-        
         el.innerHTML = html.join('');
+
         // 保存component中删除tab的callback
         this._preDeleteTabCallback = preDeleteTabCallback;
         this._reloadReportCallback = reloadReportCallback;
+
         // 保存ul的dom对象
         this._tabUl = domChildren(el)[0];
         this._tabUl.onclick = function (ev) {
+            if (me._isInDesigner) {
+                return;
+            }
             var oEv = ev || window.event;
             tabClick.call(me,oEv);
         };
@@ -64168,7 +64106,7 @@ $namespace('di.shared.vui');
         
         if (l > TAB_NAME_SHOW_LENGTH) {
             
-            name = textSubstr(name, 0, TAB_NAME_SHOW_LENGTH)+'...';
+            name = textSubstr(name, 0, TAB_NAME_SHOW_LENGTH) + '...';
             spanHTML.push(
                 'title="',title,'">',
                     encodeHTML(name), 
@@ -64236,14 +64174,13 @@ $namespace('di.shared.vui');
      * @public
      */
     TAB_BUTTON_CLASS.updateCurrentTab = function (name) {
-//      var curentTab = this.getCurrentTab();
-//      var tabSpan = domChildren(curentTab)[0];
-//      
-//      if (tabSpan) {
-//          //TODO:截取加title，因为更新不让修改名字，因此没做此功能
-//          tabSpan.innerHTML = encodeHTML(name);
-//          tabSpan.title = name;
-//      }
+        var curentTab = this.getCurrentTab();
+        var tabSpan = domChildren(curentTab)[0];
+
+        if (tabSpan) {
+            tabSpan.innerHTML = encodeHTML(name);
+            tabSpan.title = name;
+        }
     };
      
     /**
@@ -64376,17 +64313,17 @@ $namespace('di.shared.vui');
                      * 事件为getHandleDeleteImage中返回的匿名函数
                      */
                     me._preDeleteTabCallback(
-                            imgId, 
-                            imgName, 
-                            prevImgId
+                        imgId,
+                        imgName,
+                        prevImgId
                     );
                 }
                 else {
                     me._preDeleteTabCallback(
-                            imgId, 
-                            imgName, 
-                            prevImgId,
-                            deleteTabCallBack
+                        imgId,
+                        imgName,
+                        prevImgId,
+                        deleteTabCallBack
                     );
                 }
             }); 
@@ -64886,8 +64823,8 @@ $namespace('di.shared.model');
             var o = {};
             // 后天的参数的优先级比externalParam高
             extend(o, externalParam, paramObj);
-            // o.reportTemplateId = reportTemplateId;
-            o.reportId = reportId;
+            o.reportId = paramObj.reportId ? paramObj.reportId : externalParam.reportId;
+            o.reportId = o.reportId ? o.reportId : reportId;
             var excludes = options.excludes || [];
             for (var i = 0; i < excludes.length; i ++) {
                 delete o[excludes[i]];
@@ -66326,12 +66263,23 @@ $namespace('di.shared.model');
             // 如果是从di-stub初始化的报表
             if (instance.diAgent === 'STUB') {
                 instance.eventChannel.triggerEvent('reloadReport', [paramObj]);
-
             }
             // 如果是用户自己创建iframe加载的报表
             else {
                 var url = window.location.href;
-                url = replaceIntoParam(url, 'reportImageId', paramObj.reportImageId, 1);
+                if (url.indexOf('?') > 0) {
+                    if (url.indexOf('reportImageId') > 0) {
+                        var urlArr = url.split('&');
+                        urlArr.splice(urlArr.length - 1, 1, 'reportImageId=' + paramObj.reportImageId);
+                        url = urlArr.join('&');
+                    }
+                    else {
+                        url += '&reportImageId=' + paramObj.reportImageId;
+                    }
+                }
+                else {
+                    url += '?reportImageId=' + paramObj.reportImageId;
+                }
                 window.location.href = url;
             }
         },
@@ -75423,6 +75371,7 @@ $namespace('di.shared.ui');
     var inheritsObject = xutil.object.inheritsObject;
     var q = xutil.dom.q;
     var bind = xutil.fn.bind;
+    /* globals di */
     var DIALOG = di.helper.Dialog;
     var objKey = xutil.object.objKey;
     var isObject = xutil.lang.isObject;
@@ -77213,25 +77162,18 @@ $namespace('di.shared.ui');
 
 (function () {
 
-
     //------------------------------------------
     // 引用 
     //------------------------------------------
 
-
+    /* globals di */
     var UTIL = di.helper.Util;
+
+    /* globals xutil */
     var inheritsObject = xutil.object.inheritsObject;
-    var bind = xutil.fn.bind;
-    var objKey = xutil.object.objKey;
-    var isObject = xutil.lang.isObject;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
-    var extend = xutil.object.extend;
-    var confirm = di.helper.Dialog.confirm;
-    var alert = di.helper.Dialog.alert;
-    var domChildren = xutil.dom.children;
-    var getParent = xutil.dom.getParent;
-    var hasClass = xutil.dom.hasClass;
-    var parseParam = xutil.url.parseParam;
+    var DIALOG = di.helper.Dialog;
+    var alert = DIALOG.alert;
     var foreachDo = UTIL.foreachDo;
 
 
@@ -77251,11 +77193,9 @@ $namespace('di.shared.ui');
         inheritsObject(INTERACT_ENTITY);
     var DI_REPORTSAVE_CLASS = DI_REPORTSAVE.prototype;
 
-
     //------------------------------------------
     // 常量 
     //------------------------------------------
-
 
     /**
      * 定义
@@ -77269,11 +77209,9 @@ $namespace('di.shared.ui');
         }
     };
 
-
     //------------------------------------------
     // 方法
     //------------------------------------------
-
 
     /**
      * 创建View
@@ -77285,10 +77223,11 @@ $namespace('di.shared.ui');
         // 创建tab组件
         this._saveRptTabBtn = this.$di('vuiCreate', 'saveRptTab');
         this._saveRptTabBtn._maxTabNum = this.$di('getDef').maxTabNum || 4;
-        
         // 创建保存组件
         this._saveRptSaveBtn = this.$di('vuiCreate', 'saveRptSave');
-        
+        this._saveRptSaveBtn._isInDesigner = this.$di('getDef').isInDesigner;
+        this._isInDesigner = this._saveRptSaveBtn._isInDesigner;
+        this._saveRptTabBtn._isInDesigner = this.$di('getDef').isInDesigner;
     };
 
     /**
@@ -77336,31 +77275,33 @@ $namespace('di.shared.ui');
 
     /**
      * 新增报表镜像-触发ajax请求
-     * 
+     *
+     * @param {string} name 镜像名称
      * @protected
      */
     DI_REPORTSAVE_CLASS.$handleAddImage = function (name) {
         var model = this.getModel();
-        
+        var args = {
+            reportImageName: name,
+            asDefault: true
+        };
+        this._isInDesigner && (args.isInDesigner = this._isInDesigner);
+
         model.sync(
-            { 
-                datasourceId: 'ADD', 
-                args: {
-                    reportImageName: name,
-                    asDefault: true
-                }
-            }
+            {datasourceId: 'ADD', args: args}
         );
     };
     
     /**
      * 新增报表镜像-ajax请求成功回调
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
      * @protected
      */
-    DI_REPORTSAVE_CLASS.$handleAddImageSuccess = function (data,ejsonObj, options) {
+    DI_REPORTSAVE_CLASS.$handleAddImageSuccess = function (data, ejsonObj, options) {
         var saveRptTabBtn = this._saveRptTabBtn;
-
         if (ejsonObj.status === 0) {
             saveRptTabBtn.appendTab(
                 data.reportImageId, 
@@ -77374,26 +77315,24 @@ $namespace('di.shared.ui');
 
     /**
      * 更新报表镜像-触发ajax请求
-     * 
+     *
+     * @param {string} id 镜像id
+     * @param {string} name 镜像name
      * @protected
      */
-    DI_REPORTSAVE_CLASS.$handleUpdateImage = function (id,name) {
+    DI_REPORTSAVE_CLASS.$handleUpdateImage = function (id, name) {
         var model = this.getModel();
-        
-        model.sync(
-            { 
-                datasourceId: 'UPDATE', 
-                args: {
-                    reportImageId: id,
-                    reportImageName: name
-                }
-            }
-        );
+        var args = {reportImageName: name};
+        this._isInDesigner && (args.isInDesigner = this._isInDesigner);
+        model.sync({datasourceId: 'UPDATE', args: args});
     };
     
     /**
      * 更新报表镜像-ajax请求成功回调
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
      * @protected
      */
     DI_REPORTSAVE_CLASS.$handleUpdateImageSuccess = function (data, ejsonObj, options) {
@@ -77401,7 +77340,6 @@ $namespace('di.shared.ui');
 
         if (ejsonObj.status === 0) {
            saveRptTabBtn.updateCurrentTab(options.args.reportImageName);
-            //TODO:alert：看需求
         }
         else {
             alert(ejsonObj.statusInfo);
@@ -77415,18 +77353,19 @@ $namespace('di.shared.ui');
      */ 
     DI_REPORTSAVE_CLASS.$handleGetAllImages = function () {
         var model = this.getModel();
+        var args = {};
 
-        model.sync(
-            { 
-                datasourceId: 'GET_IMAGES'
-            }
-        );
+        this._isInDesigner && (args.isInDesigner = this._isInDesigner);
+        model.sync({datasourceId: 'GET_IMAGES', args: args});
     };
     
     /**
      * 获取报表镜像-ajax请求成功回调
      * vui初始化入口
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
      * @protected
      */ 
     DI_REPORTSAVE_CLASS.$handleGetAllImagesSuccess = function (data, ejsonObj, options) {
@@ -77438,16 +77377,16 @@ $namespace('di.shared.ui');
         
         // 如果currentImgId为undefined，就去后端取当前报表选中值
         // 报表选中值可能有，也可能没有
-        if (currentImgId === undefined) {
-            currentImgId = data.defaultImageId;
+        if (!currentImgId) {
+            currentImgId = request('reportImageId');
         }
 
         if (ejsonObj.status === 0) {
             saveRptTabBtn.init(
-            		currentImgId, 
-                    getHandleDeleteImage.call(this),
-                    me.reloadReport(),
-                    data
+                currentImgId,
+                getHandleDeleteImage.call(this),
+                me.reloadReport(),
+                data
             );
             
             var options = {
@@ -77467,6 +77406,7 @@ $namespace('di.shared.ui');
                     return saveRptTabBtn.getCurrentTabName();
                 }
             };
+
             saveRptSaveBtn.init(options);
         }
         else {
@@ -77486,7 +77426,8 @@ $namespace('di.shared.ui');
                 this._saveRptSaveBtn
             ],
             'enable'
-        ); 
+        );
+        DIALOG.mask(false);
     };
     
     /**
@@ -77501,12 +77442,17 @@ $namespace('di.shared.ui');
                 this._saveRptSaveBtn
             ],
             'disable'
-        ); 
+        );
+        DIALOG.mask(true);
     };
     
     /**
      * 操作失败之后提醒
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
+     *
      * @protected
      */
     DI_REPORTSAVE_CLASS.$handleError = function (data, ejsonObj, options) {
@@ -77518,16 +77464,12 @@ $namespace('di.shared.ui');
      *
      * @public
      */
-    DI_REPORTSAVE_CLASS.resize = function () {
-
-    };
+    DI_REPORTSAVE_CLASS.resize = function () {};
     
     /**
      * @override
      */
-    DI_REPORTSAVE_CLASS.dispose = function () {
-        
-    };
+    DI_REPORTSAVE_CLASS.dispose = function () {};
     
     /**
      * 重新刷新报表
@@ -77536,11 +77478,9 @@ $namespace('di.shared.ui');
      */
     DI_REPORTSAVE_CLASS.reloadReport = function () {
         var me = this;
-        
         return function (imgId) {
-            me.$di('reloadReport', { reportImageId: imgId || -1 });
+            me.$di('reloadReport', {reportImageId: imgId});
         };
-
     };
     
     /**
@@ -77558,51 +77498,60 @@ $namespace('di.shared.ui');
         var t = {
             imgId: '',
             callback: null
-        }
+        };
         // 追加事件，所以放在外面
         model.attach(
-                    ['sync.preprocess.DELETE', me.disable, me],
-                    [
-                        'sync.result.DELETE',
-                        function (data, ejsonObj, options) {
-                           if (ejsonObj.status === 0) {
-                        	   // 如果删除的不是当前，就回vui进行dom删除操作
-                        	   if (t.callback) {
-                        		   t.callback.call(saveRptTabBtn, 
-                                           t.imgId);
-                        	   }
-                        	   // 删除的是当前，就在component中进行进行页面刷新
-                        	   else {
-                        		   me.$di('reloadReport', { reportImageId: options.args.preImageId || -1 });
-                        	   }
-                                
-                            }
-                            else {
-                                alert(ejsonObj.statusInfo);
-                            }
-                        },
-                        me
-                    ],
-                  ['sync.error.DELETE', me.$handleError, me],
-                  ['sync.complete.DELETE', me.enable, me]
-              );
+            ['sync.preprocess.DELETE', me.disable, me],
+            [
+                'sync.result.DELETE',
+                function (data, ejsonObj, options) {
+                    if (ejsonObj.status === 0) {
+                        // 如果删除的不是当前，就回vui进行dom删除操作
+                        if (t.callback) {
+                            t.callback.call(saveRptTabBtn, t.imgId);
+                        }
+                        // 删除的是当前，就在component中进行进行页面刷新
+                        else {
+                            me.$di('reloadReport', {reportImageId: options.args.preImageId});
+                        }
+                    }
+                    else {
+                        alert(ejsonObj.statusInfo);
+                    }
+                },
+                me
+            ],
+            ['sync.error.DELETE', me.$handleError, me],
+            ['sync.complete.DELETE', me.enable, me]
+        );
         
         return function (imgId, imgName, preImgId, deleteTabCallBack) {
+            var args = {
+                reportId: imgId
+            };
+            this._isInDesigner && (args.isInDesigner = this._isInDesigner);
 
             t.callback = deleteTabCallBack;
             t.imgId = imgId;
-            var args = {
-                reportImageId: imgId,
-                reportImageName: imgName
-            };
-            preImgId ? args.preImageId = preImgId : null;          
-            model.sync(
-                { 
-                    datasourceId: 'DELETE', 
-                    args: args
-                }
-            );
+            preImgId ? (args.preImageId = preImgId) : null;
+            model.sync({datasourceId: 'DELETE', args: args});
         };
+    }
+
+    /**
+     * 获取url传参值
+     * @param {string} key url 参数
+     * @private
+     * @return {string} 匹配到的参数值
+     */
+    function request(key) {
+        var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
     }
 })();
 /**

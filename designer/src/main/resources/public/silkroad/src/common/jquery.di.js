@@ -118,6 +118,23 @@ $.isObjectEmpty = function (obj) {
     return flag;
 };
 
+/**
+ * 对目标字符串进行html编码 (@see tangram)
+ * 编码字符有5个：& < > " '
+ *
+ * @public
+ * @param {string} source 目标字符串
+ * @returns {string} html编码后的字符串
+ */
+$.encodeHTML = function(source) {
+    return String(source)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+};
+
 // 获取到含有当前id的组件实例
 // TODO:写注释
 $.getTargetElement = function (id, entityArray) {

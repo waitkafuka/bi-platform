@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,dataSourcesGroupList=$data.dataSourcesGroupList,$dsGroup=$data.$dsGroup,index=$data.index,$escape=$utils.$escape,$ds=$data.$ds,$index=$data.$index,$out='';$out+='<div class="j-root-report-list">\r\n    <div class="con-common-line">\r\n        <div class="con-common-max-min">\r\n            <span class="btn-has-icon btn-has-icon-new c-p j-add-data-sources-group">新建数据源组</span>\r\n            <span class="btn-has-icon btn-has-icon-new c-p j-add-data-sources">新建数据源</span>\r\n        </div>\r\n    </div>\r\n    <div class="con-report-list con-common-max-min">\r\n        <table cellspacing="0">\r\n            <thead>\r\n            <tr>\r\n                <!--<th class="report-index">序号</th>-->\r\n                <th class="report-name">数据源名称</th>\r\n                <th class="data-sources-btns">操作按钮</th>\r\n            </tr>\r\n            </thead>\r\n            <tbody class="j-data-sources-tbody">\r\n            ';

@@ -15,22 +15,17 @@ $namespace('di.shared.vui');
     //------------------------------------------
     // 引用 
     //------------------------------------------
- 
 
+    /* globals xutil */
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
     var hasClass = xutil.dom.hasClass;
     var domChildren = xutil.dom.children;
     var getParent = xutil.dom.getParent;
-    var domQ = xutil.dom.q;
-    var extend = xutil.object.extend;
     var encodeHTML = xutil.string.encodeHTML;
-    var parseParam = xutil.url.parseParam;
-    var isObject = xutil.lang.isObject;
-    var isArray = xutil.lang.isArray;
-    var template = xutil.string.template;
     var textLength = xutil.string.textLength;
     var textSubstr = xutil.string.textSubstr;
+    /* globals di */
     var confirm = di.helper.Dialog.confirm;
     var XOBJECT = xui.XObject;
     
@@ -42,7 +37,7 @@ $namespace('di.shared.vui');
 
     /**
      * 文字区
-     * 直接指定文字，或者html，
+     * 直接指定can文字，或者html，
      * 或者模板（模板形式参见xutil.string.template）
      * 初始dom中的内容被认为是初始模板。
      * 也可以用参数传入模板。
@@ -60,7 +55,6 @@ $namespace('di.shared.vui');
     //------------------------------------------
     // 常量 
     //------------------------------------------
-
 
     var TAB_CLASS = {
         // tab容器样式
@@ -103,7 +97,6 @@ $namespace('di.shared.vui');
      */
     function constructor(options) {
         var el = this._eMain = options.el;
-        
         addClass(el, TAB_CLASS.TAB_CLASS_NAME);
     }
     
@@ -119,68 +112,59 @@ $namespace('di.shared.vui');
      * @param {string} currentTabId 
      */
     TAB_BUTTON_CLASS.init = function (currentTabId, preDeleteTabCallback, reloadReportCallback, data) {
-//        var html = [
-//            '<ul>',
-//                '<li class="tab-normal" imgid="123">',
-//                    '<span>默认</span>',
-//                '</li>',
-//                '<li class="tab-normal tab-focus" imgid="123">',
-//                    '<span>123</span>',
-//                    '<a href="#">×</a>',
-//                '</li>',
-//            '</ul>'
-//        ].join('');
         var me = this;
         var el = this._eMain;
-        var imgsData = data.imageConfigs;
+        var imgsData = data.reportImage;
         // 如果当前currentTabId为-1，说明是通过点击默认tab跳转过来,需要为默认添加高亮
         // 如果currentTabId为undefined，说明是第一次进来，
         // 并且后端没有返回默认，之前没有设置默认，需要为默认添加高亮
-        var className = (currentTabId === undefined || currentTabId === '-1')
+        var className = (!currentTabId || data.reportId === currentTabId)
             ? ' ' + TAB_CLASS.CURRENT_TAB_CLASS_NAME
             : '';
         var html = ['<ul>'];
         
         html.push(
-            '<li class="',
-                TAB_CLASS.NORMAL_TAB_CLASS_NAME, className, '">',
+            '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, className, '"',
+            ' imgid="', data.reportId, '">',
                 '<span class="',
-                    TAB_CLASS.TAB_TEXT_CLASS_NAME ,
-                    '">默认</span>',
+                    TAB_CLASS.TAB_TEXT_CLASS_NAME, '"',
+                '>默认</span>',
             '</li>'
         );
         
         for (var key in imgsData) {
-            var imgData = imgsData[key];
-            
-            var liClassName = (imgData.reportImageId == currentTabId) 
-                ? (' ' + TAB_CLASS.CURRENT_TAB_CLASS_NAME) : '';
+            var imgName = imgsData[key];
+
+            var liClassName = (key === currentTabId)
+                ? (' ' + TAB_CLASS.CURRENT_TAB_CLASS_NAME)
+                : '';
                 
-            var aClassName = (imgData.reportImageId == currentTabId) 
-                ? (' ' + TAB_CLASS.CURRENT_TAB_CLOSE_CLASS_NAME) : '';
+            var aClassName = (key === currentTabId)
+                ? (' ' + TAB_CLASS.CURRENT_TAB_CLOSE_CLASS_NAME)
+                : '';
                 
             html.push(
-               '<li class="',
-                    TAB_CLASS.NORMAL_TAB_CLASS_NAME, 
-                    liClassName,
-                    '" imgid="', imgData.reportImageId, '">',
-                    buildImageNameHtml(imgData.reportImageName),
-                    '<a class="', 
-                        TAB_CLASS.TAB_CLOSE_CLASS_NAME, 
-                        aClassName, 
-                        '" href="javascript:void(0)">×</a>',
-                '</li>'
+               '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, liClassName, '"',
+                    'title="', imgName, '"', ' imgid="', key, '">',
+                    buildImageNameHtml(imgName),
+                    '<a class="', TAB_CLASS.TAB_CLOSE_CLASS_NAME, aClassName,
+                    '" href="javascript:void(0)">×</a>',
+               '</li>'
             );
         }
         html.push('</ul>');
-        
         el.innerHTML = html.join('');
+
         // 保存component中删除tab的callback
         this._preDeleteTabCallback = preDeleteTabCallback;
         this._reloadReportCallback = reloadReportCallback;
+
         // 保存ul的dom对象
         this._tabUl = domChildren(el)[0];
         this._tabUl.onclick = function (ev) {
+            if (me._isInDesigner) {
+                return;
+            }
             var oEv = ev || window.event;
             tabClick.call(me,oEv);
         };
@@ -203,7 +187,7 @@ $namespace('di.shared.vui');
         
         if (l > TAB_NAME_SHOW_LENGTH) {
             
-            name = textSubstr(name, 0, TAB_NAME_SHOW_LENGTH)+'...';
+            name = textSubstr(name, 0, TAB_NAME_SHOW_LENGTH) + '...';
             spanHTML.push(
                 'title="',title,'">',
                     encodeHTML(name), 
@@ -227,16 +211,14 @@ $namespace('di.shared.vui');
      * @protected
      */
     TAB_BUTTON_CLASS.disable = function () {
-        mask(true);   
     };
-    
+
     /**
      * 启用操作
      *
      * @protected
      */
     TAB_BUTTON_CLASS.enable = function () {
-        mask(false);   
     };
     
     /**
@@ -273,14 +255,13 @@ $namespace('di.shared.vui');
      * @public
      */
     TAB_BUTTON_CLASS.updateCurrentTab = function (name) {
-//      var curentTab = this.getCurrentTab();
-//      var tabSpan = domChildren(curentTab)[0];
-//      
-//      if (tabSpan) {
-//          //TODO:截取加title，因为更新不让修改名字，因此没做此功能
-//          tabSpan.innerHTML = encodeHTML(name);
-//          tabSpan.title = name;
-//      }
+        var curentTab = this.getCurrentTab();
+        var tabSpan = domChildren(curentTab)[0];
+
+        if (tabSpan) {
+            tabSpan.innerHTML = encodeHTML(name);
+            tabSpan.title = name;
+        }
     };
      
     /**
@@ -413,17 +394,17 @@ $namespace('di.shared.vui');
                      * 事件为getHandleDeleteImage中返回的匿名函数
                      */
                     me._preDeleteTabCallback(
-                            imgId, 
-                            imgName, 
-                            prevImgId
+                        imgId,
+                        imgName,
+                        prevImgId
                     );
                 }
                 else {
                     me._preDeleteTabCallback(
-                            imgId, 
-                            imgName, 
-                            prevImgId,
-                            deleteTabCallBack
+                        imgId,
+                        imgName,
+                        prevImgId,
+                        deleteTabCallBack
                     );
                 }
             }); 
@@ -448,63 +429,6 @@ $namespace('di.shared.vui');
             
             imgId = oLi.getAttribute('imgid');
             me._reloadReportCallback(imgId);
-        }
-    }
-    
-    /**
-     * 遮罩层，防止二次点击
-     * 如果启用，先判断body里面是否已经生成遮罩
-     * 如果已经生成，就不做处理，如果没有生成，就生成一个
-     * 如果禁用，就删除掉遮罩层
-     * 其实，在body里面始终只存在一个遮罩层
-     * 缺陷：创建删除dom操作，感觉不是很理想
-     * 不过ajax请求不会很多，性能应该不会影响很大
-     * 
-     * @private
-     * @param {boolean} status 状态：启用还是禁用遮罩
-     */
-    function mask(status) {
-        var oLayerMasks = domQ('ui-reportSave-layerMask', 
-                               document.body);
-        var oLayerMask;
-        
-        // oLayerMasks为一个数组
-        if (oLayerMasks.length === 1){
-            oLayerMask = oLayerMasks[0];
-        }
-        
-        // 启用
-        if (status) {
-            // 如果 遮罩层不存在就创建一个
-            // 这里用nodeType判断是否为element元素,实现不是很好
-            if (!oLayerMask 
-                || (oLayerMask && !oLayerMask.nodeType)
-            ) {
-                oLayerMask = document.createElement('div');
-                var maskCss = [
-                    'background-color: #e3e3e3;',
-                    'position: absolute;',
-                    'z-index: 1000;',
-                    'left: 0;',
-                    'top: 0;',
-                    'width: 100%;',
-                    'height: 100%;',
-                    'opacity: 0;',
-                    'filter: alpha(opacity=0);',
-                    '-moz-opacity: 0;'
-                    ].join('');
-                oLayerMask.style.cssText = maskCss;
-                oLayerMask.style.width = document.documentElement.scrollWidth 
-                                         + "px";
-                oLayerMask.className = 'ui-reportSave-layerMask';
-                document.body.appendChild(oLayerMask);
-            }
-        }
-        // 禁用
-        else {
-              if (oLayerMask && oLayerMask.nodeType) {
-                document.body.removeChild(oLayerMask);
-            }
         }
     }
     

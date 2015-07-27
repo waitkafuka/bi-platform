@@ -95,7 +95,9 @@ define(function () {
         EUUI_INPUT_TREE: '-vu-form-ecui-input-tree',
         CHART: '-vu-chart',
         TABLE: '-vu-table',
-        H_BUTTON: '-vu-confirm'
+        H_BUTTON: '-vu-confirm',
+        TAB_BUTTON: '-vu-tab-button',
+        SAVE_BUTTON: '-vu-save-button'
     };
 
     return {

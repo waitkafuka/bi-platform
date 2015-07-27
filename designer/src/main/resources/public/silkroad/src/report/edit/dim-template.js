@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,dimList=$data.dimList,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<div class="title">\r\n    维度\r\n    <!--<span class="icon-data-sources j-setting-dim-group" title="维度组管理"></span>-->\r\n</div>\r\n<div class="j-con-org-dim con-org-dim">\r\n    ';

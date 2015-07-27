@@ -134,7 +134,7 @@ define([
                 dialog.showDialog({
                     title: '添加数据源组',
                     content: setNameTemplate.render({
-                        text: '数据源名称'
+                        text: '数据源组名称'
                     }),
                     dialog: {
                         width: 300,
@@ -197,7 +197,7 @@ define([
                 dialog.showDialog({
                     title: '编辑数据源组名称',
                     content: setNameTemplate.render({
-                        text: '数据源名称',
+                        text: '数据源组名称',
                         name: groupName
                     }),
                     dialog: {

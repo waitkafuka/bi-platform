@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,list=$data.list,item=$data.item,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<div class="con-tab">\r\n    <!--<span class="item">静止时间</span>-->\r\n    <span class="item">动态时间</span>\r\n</div>\r\n<div class="con-tab-content">\r\n    ';

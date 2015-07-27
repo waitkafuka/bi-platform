@@ -111,8 +111,10 @@ define([
                     drop: function (event, ui) {
                         var $report = $(this);
                         var compType = ui.helper.attr('data-component-type');
-                        if (compType === 'H_BUTTON') {
-                            if (isHaveConfirmEntity(compType, entityDefs)){
+                        if (compType === 'H_BUTTON' || compType === 'REPORT_SAVE_COMP') {
+                            var comT = (compType === 'REPORT_SAVE_COMP') ? 'DI_REPORTSAVE' : compType;
+                            if (isHaveConfirmEntity(comT, entityDefs)) {
+                                dialog.alert('当前组件只能拖一个');
                                 return;
                             }
                         }
@@ -160,10 +162,7 @@ define([
                     var result = false;
                     for (var i = 0; i < entitys.length; i++) {
                         if (entitys[i].clzKey === clzKey) {
-                            // FIXME:用这种方式判断，我自己都要吐槽了
-                            if (entitys[i].dataOpt && entitys[i].dataOpt.text === '查询') {
                                 result = true;
-                            }
                         }
                     }
                     return result;
@@ -265,9 +264,13 @@ define([
                             'height': 'auto'
                         });
                         //.find('.j-fold').html('－');
-                        if (compType === 'TEXT' || compType === 'H_BUTTON') {
+                        if (compType === 'TEXT' || compType === 'H_BUTTON' || compType === 'REPORT_SAVE_COMP') {
                             that.showReport(true);
+                            if (compType === 'REPORT_SAVE_COMP') {
+                                dialog.alert('报表保存在设计端不能使用');
+                            }
                         }
+
                     }
                 );
             },
@@ -284,7 +287,8 @@ define([
                 var $comp = $target.parents('.j-component-item');
                 var compId = $comp.attr('data-comp-id');
                 var reportCompId = $comp.attr('report-comp-id');
-                this.model.deleteComp(compId, reportCompId, function () {
+                var compType = $comp.attr('data-component-type');
+                this.model.deleteComp(compId, reportCompId, compType, function () {
                     $comp.remove();
                     that.editCompView.hideEditBar();
                     // 刷新报表展示
@@ -345,6 +349,8 @@ define([
                 that.dragWidthHeight($component, 'SELECT', 33, 33);
                 // 固定多选下拉框的高度
                 that.dragWidthHeight($component, 'MULTISELECT', 33, 33);
+
+                that.dragWidthHeight($component, 'REPORT_SAVE_COMP', 33, 33);
                 // 固定文本框的高度
                 that.dragWidthHeight($component, 'TEXT', 33, 33);
                 // 固定查询按钮的高度
@@ -428,6 +434,7 @@ define([
                     if (
                         compType === 'TEXT'
                         || compType === 'H_BUTTON'
+                        || compType === 'REPORT_SAVE_COMP'
                     ) {
                         $($component[i]).find('.j-setting').remove();
                     }
@@ -619,8 +626,13 @@ define([
                     parentEl: that.$el.find('.j-report')[0],
                     reportId: that.id,
                     rptHtml: that.model.$reportVm.prop('outerHTML'),
-                    rptJson: that.model.reportJson
+                    rptJson: $.extend(true, {}, that.model.reportJson)
                 };
+                for (var i = 0; i < options.rptJson.entityDefs.length; i++) {
+                    if (options.rptJson.entityDefs[i].clzKey === 'DI_REPORTSAVE') {
+                        options.rptJson.entityDefs[i].isInDesigner = true;
+                    }
+                }
                 that._firstShowReport = false;
                 if (that._component === undefined) {
                     require(

@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,dataSourcesList=$data.dataSourcesList,$dsGroup=$data.$dsGroup,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<div>\r\n    <div class="con-set-cube c-f">\r\n        <div class="con-data-sources-list f-l j-root-data-sources-list">\r\n            <div class="title fs-14">请选择数据源</div>\r\n            ';

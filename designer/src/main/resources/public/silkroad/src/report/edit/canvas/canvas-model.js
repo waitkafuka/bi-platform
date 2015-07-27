@@ -178,6 +178,10 @@ define(
                         serverData: serverData
                     })
                 );
+                if (compData.type === 'REPORT_SAVE_COMP') {
+                    var tabVm = vm.children()[0];
+                    this.$reportVm.prepend(tabVm);
+                }
                 this.$reportVm.append(vm);
             },
 
@@ -256,17 +260,18 @@ define(
              *
              * @param {string} compId 组件Id
              * @param {string} reportCompId 组件在report-ui端使用的Id
+             * @param {string} compType 组件在report-ui端使用的类型
              * @param {Function} success 回调函数
              * @public
              */
-            deleteComp: function (compId, reportCompId, success) {
+            deleteComp: function (compId, reportCompId, compType, success) {
                 var that = this;
 
                 $.ajax({
                     url: Url.deleteComp(that.id, compId),
                     type: 'DELETE',
                     success: function () {
-                        that._deleteComp(compId, reportCompId, success);
+                        that._deleteComp(compId, reportCompId, compType, success);
                     }
                 });
             },
@@ -276,10 +281,11 @@ define(
              *
              * @param {string} compId 组件Id
              * @param {string} reportCompId 组件在report-ui端使用的Id
+             * @param {string} compType 组件在report-ui端使用的类型
              * @param {Function} success 回调函数
              * @private
              */
-            _deleteComp: function (compId, reportCompId, success) {
+            _deleteComp: function (compId, reportCompId, compType, success) {
                 var that = this;
                 var isDeleteVUI = false;
                 var isDeleteConfirm = false;
@@ -287,6 +293,9 @@ define(
                 // 移除vm中的东西
                 var selector = '[data-comp-id=' + compId + ']';
                 that.$reportVm.find(selector).remove();
+                if (compType === 'REPORT_SAVE_COMP') {
+                    that.$reportVm.children()[0].remove();
+                }
 
                 // 移除json中的东西
                 var arr = that.reportJson.entityDefs;
@@ -510,6 +519,7 @@ define(
                     }
                 });
             },
+
             /**
              * 保存更改报表名称
              *

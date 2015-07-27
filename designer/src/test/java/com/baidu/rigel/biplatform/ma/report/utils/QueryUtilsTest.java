@@ -54,7 +54,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.google.common.collect.Maps;
 
 /**
@@ -257,8 +257,8 @@ public class QueryUtilsTest {
         PowerMockito.when(HttpRequest.sendPost(Mockito.anyString(), Mockito.anyMap())).thenReturn(jsonStr);
         QuestionModel questionModel = null;
         queryAction.setExtendAreaId("testTableExtendAreaId");
-        MeasureOrderDesc measureOrderDesc = new MeasureOrderDesc("testMeasure", String.valueOf(SortType.ASC), 100);
-        queryAction.setMeasureOrderDesc(measureOrderDesc);
+        OrderDesc measureOrderDesc = new OrderDesc("testMeasure", String.valueOf(SortType.ASC), 100);
+        queryAction.setOrderDesc(measureOrderDesc);
         queryAction.setNeedOthers(true);
         Map<Item, Object> drillDimValues = new HashMap<Item, Object>();
         queryAction.setDrillDimValues(drillDimValues);

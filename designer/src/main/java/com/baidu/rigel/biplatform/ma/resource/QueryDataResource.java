@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -403,18 +402,15 @@ public class QueryDataResource extends BaseResource {
         String imageId = request.getParameter ("reportImageId");
         ReportRuntimeModel runtimeModel = null;
         try {
-            if (StringUtils.isEmpty (imageId) 
-                    && !StringUtils.isEmpty(reportPreview) 
-                    && Boolean.valueOf(reportPreview)) {
-                model = reportModelCacheManager.getReportModel(reportId);
-                if (model != null) {
-                    model = DeepcopyUtils.deepCopy (model);
+            if (StringUtils.isEmpty (imageId) || reportId.equals (imageId)) {
+                if (!StringUtils.isEmpty (reportPreview) && Boolean.valueOf (reportPreview)) {
+                    model = reportModelCacheManager.getReportModel (reportId);
+                    if (model != null) {
+                        model = DeepcopyUtils.deepCopy (model);
+                    }
+                } else {
+                    model = reportDesignModelService.getModelByIdOrName (reportId, true);
                 }
-//                model.setPersStatus(false);
-            } else if (StringUtils.isEmpty (imageId)) {
-                model = reportDesignModelService.getModelByIdOrName(reportId, true);
-//                model.setPersStatus(true);
-                // runtimeModel = reportModelCacheManager.loadRunTimeModelToCache(reportId);
             }
         } catch (CacheOperationException e1) {
             logger.info("[INFO]--- ---Fail in loading release report model into cache. ", e1);
@@ -554,13 +550,19 @@ public class QueryDataResource extends BaseResource {
             Map<String, Object> tmp = QueryUtils.resetContextParam(request, model);
             runtimeModel.getContext().getParams().putAll(tmp);            
         }
-        reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
+        if (StringUtils.isEmpty (imageId) || reportId.equals (imageId)) {
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
+        } else {
+            reportModelCacheManager.updateRunTimeModelToCache(imageId, runtimeModel);
+        }
         StringBuilder builder = buildVMString(reportId, request, response, model);
         logger.info("[INFO] query vm operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
         // 如果请求中包含UID 信息，则将uid信息写入cookie中，方便后边查询请求应用
         String uid = request.getParameter (UID_KEY);
         if (uid != null) {
-            response.addCookie (new Cookie (UID_KEY, uid));
+            Cookie cookie = new Cookie (UID_KEY, uid);
+            cookie.setPath (Constants.COOKIE_PATH);
+            response.addCookie (cookie);
         }
         return builder.toString();
     }
@@ -575,12 +577,13 @@ public class QueryDataResource extends BaseResource {
             ReportDesignModel model) {
         // TODO 临时方案，以后前端做
         String vm = model.getVmContent();
+        String imageId = request.getParameter ("reportImageId");
         String js =
                 "<script type='text/javascript'>" + "\r\n" + "        (function(NS) {" + "\r\n"
                         + "            NS.xui.XView.start(" + "\r\n"
                         + "                'di.product.display.ui.LayoutPage'," + "\r\n" + "                {" + "\r\n"
                         + "                    externalParam: {" + "\r\n" + "                    'reportId':'"
-                        + reportId
+                        + (StringUtils.isEmpty (imageId) ? reportId : imageId)
                         + "','phase':'dev'},"
                         + "\r\n"
                         + "                    globalType: 'PRODUCT',"
@@ -588,7 +591,7 @@ public class QueryDataResource extends BaseResource {
                         + "                    diAgent: '',"
                         + "\r\n"
                         + "                    reportId: '"
-                        + reportId
+                        + (StringUtils.isEmpty (imageId) ? reportId : imageId)
                         + "',"
                         + "\r\n"
                         + "                    webRoot: '/silkroad',"
@@ -596,7 +599,7 @@ public class QueryDataResource extends BaseResource {
                         + "                    phase: 'dev',"
                         + "\r\n"
                         + "                    serverTime: ' "
-                        + new Date().getTime()
+                        + (StringUtils.isEmpty (imageId) ? reportId : imageId)
                         + "',"
                         + "\r\n"
                         + "                    funcAuth: null,"
@@ -804,11 +807,7 @@ public class QueryDataResource extends BaseResource {
              */
 
         }
-        // for (Map.Entry<String, Object> entry : runtimeParams.entrySet ()) {
-        // runTimeModel.getContext ().put (entry.getKey (), entry.getValue ());
-        // }
-        // Map<String, Object> runtimeParams = QueryUtils.resetContextParam (request, model);
-        runTimeModel.getDrillDownQueryHistory ().clear ();
+        restartOtherStatus (runTimeModel);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", "");
         logger.info("[INFO]current context params status {}", runTimeModel.getContext().getParams());
@@ -1150,7 +1149,7 @@ public class QueryDataResource extends BaseResource {
                 QueryAction queryActionPrevious = runTimeModel.getPreviousQueryAction(areaId);
                 // 携带之前的排序信息
                 if (queryActionPrevious != null) {
-                    action.setMeasureOrderDesc(queryActionPrevious.getMeasureOrderDesc());                     
+                    action.setOrderDesc(queryActionPrevious.getOrderDesc());                     
                 }
                 result =
                         reportModelQueryService.queryDatas(model, action, true, areaContext.getParams(), pageInfo,
@@ -1607,7 +1606,7 @@ public class QueryDataResource extends BaseResource {
         // 更新局部区域参数，避免漏掉当前请求查询的
 
         // 清除展开、折叠方式下钻查询历史纪录
-        runTimeModel.getDrillDownQueryHistory().clear();
+        restartOtherStatus (runTimeModel);
 
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -1619,6 +1618,12 @@ public class QueryDataResource extends BaseResource {
                 ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", resultMap);
         logger.info("[INFO]Successfully execute drill operation. cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
+    }
+
+    private void restartOtherStatus(ReportRuntimeModel runTimeModel) {
+        runTimeModel.getDrillDownQueryHistory().clear();
+        runTimeModel.getOrderedStatus ().clear ();
+        runTimeModel.setSortRecord (null);
     }
 
     private Map<String, Object> modifyReportParams(Map<String, ReportParam> params, 
@@ -1860,6 +1865,7 @@ public class QueryDataResource extends BaseResource {
                 runTimeModel.updateDatas(recordAction, result);
             } else { // 上卷或者折叠操作
                 runTimeModel.getDrillDownQueryHistory().remove(condition + "_" + rowNum);
+                runTimeModel.getOrderedStatus ().remove (condition + "_" + rowNum);
                 List<HeadField> headField = previousResult.getDataModel().getRowHeadFields();
                 List<HeadField> tmp = com.baidu.rigel.biplatform.ac.util.DataModelUtils.getLeafNodeList(headField);
                 HeadField currRow = tmp.get(rowNum);
@@ -2102,6 +2108,21 @@ public class QueryDataResource extends BaseResource {
             }
         });
         rs.setDataModel(model);
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+        if (runtimeModel.getDrillDownQueryHistory() != null) {
+            List<HeadField> headFields = 
+                com.baidu.rigel.biplatform.ac.util.DataModelUtils.getLeafNodeList (model.getRowHeadFields ());
+            for (int i = 0; i < headFields.size (); ++i) {
+                String nodeUniqueName = headFields.get (i).getNodeUniqueName ();
+                for (Map.Entry<String, DrillDownAction> entry : runtimeModel.getDrillDownQueryHistory ().entrySet ()) {
+                    if (entry.getKey ().startsWith (nodeUniqueName)) {
+                        runtimeModel.getOrderedStatus ().put (entry.getKey (), i);
+                    }
+                }
+            }
+        }
+        runtimeModel.setSortRecord(type);
+        reportModelCacheManager.updateRunTimeModelToCache (reportId, runtimeModel);
         context.getQueryStatus().add(rs);
         PivotTable table = null;
         Map<String, Object> resultMap = Maps.newHashMap();
@@ -2365,6 +2386,12 @@ public class QueryDataResource extends BaseResource {
         ResultSet queryRs =
                 reportModelQueryService.queryDatas(report, action, true, true, areaContext.getParams(), securityKey);
         DataModel dataModel = queryRs.getDataModel();
+        SortRecord oriSortRecord = runtimeModel.getSortRecord ();
+        if (oriSortRecord != null) {
+            SortRecord sortRecord = 
+                new SortRecord (oriSortRecord.getSortType (), oriSortRecord.getSortColumnUniquename (), 100000);
+            com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord);
+        }
         final StringBuilder timeRange = new StringBuilder();
         areaContext.getParams().forEach(
                 (k, v) -> {
@@ -2384,7 +2411,13 @@ public class QueryDataResource extends BaseResource {
             List<String> keys = Lists.newArrayList (runtimeModel.getDrillDownQueryHistory ().keySet ());
             Collections.sort (keys, (k1, k2) -> {
                 int tmp1 = Integer.valueOf (k1.substring (k1.lastIndexOf ("_") + 1));
+                if (runtimeModel.getOrderedStatus ().get (k1) != null) {
+                    tmp1 = runtimeModel.getOrderedStatus ().get (k1);
+                }
                 int tmp2 = Integer.valueOf (k2.substring (k2.lastIndexOf ("_") + 1));
+                if (runtimeModel.getOrderedStatus ().get (k2) != null) {
+                    tmp2 = runtimeModel.getOrderedStatus ().get (k2);
+                }
                 return tmp1 - tmp2;
             });
             for (String key : keys) {
@@ -2395,7 +2428,11 @@ public class QueryDataResource extends BaseResource {
                 ResultSet subData =
                         reportModelQueryService.queryDatas(report, queryAction.action, true, true,
                                 areaContext.getParams(), securityKey);
-                dataModel = DataModelUtils.merageDataModel(dataModel, subData.getDataModel(), queryAction.rowNum);
+                int rowNum = queryAction.rowNum;
+                if (runtimeModel.getOrderedStatus ().get (key) != null) {
+                    rowNum = runtimeModel.getOrderedStatus ().get (key);
+                }
+                dataModel = DataModelUtils.merageDataModel(dataModel, subData.getDataModel(), rowNum);
             }
         }
         // 处理下载请求中对数据的包装

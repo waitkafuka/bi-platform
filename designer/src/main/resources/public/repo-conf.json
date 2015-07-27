@@ -18,7 +18,8 @@
             "<%= prop.dirSrcCore %>/xui/xproject.js",
             "<%= prop.dirSrcCore %>/tangram/tangram-1.5.13.customized-prod-source.js",
             "<%= prop.dirSrcCore %>/e-json.js",
-            "<%= prop.dirSrcCore %>/xutil/xutil.js", 
+            "<%= prop.dirSrcCore %>/xutil/xutil.js",
+            "<%= prop.dirSrcCore %>/xutil/commonUtil.js",
             "<%= prop.dirSrcCore %>/xutil/*.js", // 先xutil.js再其余
             "<%= prop.dirSrcCore %>/xui/xobject.js",
             "<%= prop.dirSrcCore %>/xui/xdatasource.js",

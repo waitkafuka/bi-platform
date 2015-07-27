@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,option=$data.option,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<!-- 其他操作 -->\n<div class="data-format">\n    <div class="data-format-alone c-f">\n        <div class="data-format-black f-l c-f w-p-100">\n            <input type="checkbox" name="isPagination" class="f-l c-p j-isPagination" ';

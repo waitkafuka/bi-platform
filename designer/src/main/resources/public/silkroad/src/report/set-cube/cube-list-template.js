@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,factTables=$data.factTables,$each=$utils.$each,$item=$data.$item,$index=$data.$index,$escape=$utils.$escape,regexps=$data.regexps,$itemReg=$data.$itemReg,index=$data.index,separateTableRuleData=$data.separateTableRuleData,sepIndex=$data.sepIndex,$itemChildren=$data.$itemChildren,$out='';$out+='<div class="title fs-14">请选择要使用的事实表（可多选）</div>\r\n';

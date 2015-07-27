@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,tableId=$data.tableId,$each=$utils.$each,currDims=$data.currDims,$dim=$data.$dim,$index=$data.$index,$escape=$utils.$escape,fields=$data.fields,$level=$data.$level,$field=$data.$field,dateFormatOptions=$data.dateFormatOptions,$format=$data.$format,$out='';if(tableId === "0" || tableId === "ownertable"){

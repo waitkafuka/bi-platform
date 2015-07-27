@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,dim=$data.dim,$cube=$data.$cube,i=$data.i,$escape=$utils.$escape,cubes=$data.cubes,j=$data.j,$dim=$data.$dim,$index=$data.$index,relationTables=$data.relationTables,$relationTable=$data.$relationTable,$field=$data.$field,$out='';$out+='<div class="dim-container-normal">\r\n    <ul class="normal-column-names c-f">\r\n        <li><span>主数据表</span></li>\r\n        <li><span>主表字段</span></li>\r\n        <li><span>关联数据表</span></li>\r\n        <li><span>关联表字段</span></li>\r\n    </ul>\r\n    <div class="normal-main j-normal-main">\r\n        <!--循环cube列表（dim.normal）-->\r\n        ';

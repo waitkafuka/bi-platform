@@ -77,7 +77,7 @@ public class QueryAction implements Serializable {
      */
     private boolean chartQuery;
     
-    private MeasureOrderDesc measureOrderDesc;
+    private OrderDesc orderDesc;
     
     /**
      * 
@@ -230,29 +230,29 @@ public class QueryAction implements Serializable {
     }
     
     /**
-     * @return the measureOrderDesc
+     * @return the orderDesc
      */
-    public MeasureOrderDesc getMeasureOrderDesc() {
-        return measureOrderDesc;
+    public OrderDesc getOrderDesc() {
+        return orderDesc;
     }
     
     /**
-     * @param measureOrderDesc
-     *            the measureOrderDesc to set
+     * @param oderDesc
+     *            the orderDesc to set
      */
-    public void setMeasureOrderDesc(MeasureOrderDesc measureOrderDesc) {
-        this.measureOrderDesc = measureOrderDesc;
+    public void setOrderDesc(OrderDesc oderDesc) {
+        this.orderDesc = oderDesc;
     }
     
     /**
-     * 
+     * 排序定义
      * @author david.wang
      *
      */
-    public static class MeasureOrderDesc implements Serializable {
+    public static class OrderDesc implements Serializable {
         
         /**
-         * 
+         * 序列id
          */
         private static final long serialVersionUID = -1589055019481416885L;
         
@@ -277,7 +277,7 @@ public class QueryAction implements Serializable {
          * @param orderType
          * @param recordSize
          */
-        public MeasureOrderDesc(String name, String orderType, int recordSize) {
+        public OrderDesc(String name, String orderType, int recordSize) {
             super ();
             this.name = name;
             this.orderType = orderType;

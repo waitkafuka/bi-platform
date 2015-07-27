@@ -62,7 +62,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
@@ -369,12 +369,12 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         fillFilterBlankDesc (areaId, reportModel, action);
         ExtendArea area = reportModel.getExtendById(areaId);
         if (area.getType() != ExtendAreaType.PLANE_TABLE) {
-            QueryAction.MeasureOrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+            QueryAction.OrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
             if (orderDesc == null) {
                 orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
             }
             logger.info ("[INFO] -------- order desc = " + orderDesc);
-            action.setMeasureOrderDesc(orderDesc);            
+            action.setOrderDesc(orderDesc);            
         }
         // remove dumplated conditions
         Iterator<Item> it = action.getSlices ().keySet ().iterator ();
@@ -442,7 +442,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * @param cube
      * @return
      */
-    private MeasureOrderDesc genDimensionOrderDesc(LogicModel targetLogicModel, QueryAction action ,
+    private OrderDesc genDimensionOrderDesc(LogicModel targetLogicModel, QueryAction action ,
         final Cube cube) {
         if(!action.getColumns().isEmpty()) {
             Dimension[] tmp = action.getColumns().keySet().stream().filter(item -> {
@@ -453,9 +453,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             if (tmp != null && tmp.length >0) {
                 if (tmp[0] instanceof TimeDimension) {
                     Level l = tmp[0].getLevels().values().toArray(new Level[0])[0];
-                    return new MeasureOrderDesc(l.getFactTableColumn(), "DESC", 500);
+                    return new OrderDesc(l.getFactTableColumn(), "DESC", 500);
                 }
-                return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
+                return new OrderDesc(tmp[0].getName(), "DESC", 500);
             }
         }
         return null;
@@ -468,7 +468,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * @param cube
      * @return
      */
-    private MeasureOrderDesc genMeasureOrderDesc(LogicModel targetLogicModel,
+    private OrderDesc genMeasureOrderDesc(LogicModel targetLogicModel,
         Map<String, Object> context, QueryAction action, final Cube cube) {
         Map<String, Measure> measures = cube.getMeasures();
         MeasureTopSetting topSet = targetLogicModel.getTopSetting();
@@ -481,28 +481,28 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 }).toArray(Measure[] :: new);
                 if (tmp != null && tmp.length > 0 && context.get(Constants.NEED_LIMITED) == null) {
                     if ( isTimeDimOnFirstCol(action.getRows (), cube)) {
-                        return new MeasureOrderDesc(tmp[0].getName(), "NONE", 500);
+                        return new OrderDesc(tmp[0].getName(), "NONE", 500);
                     }
-                    return new MeasureOrderDesc(tmp[0].getName(), "DESC", 500);
+                    return new OrderDesc(tmp[0].getName(), "DESC", 500);
                 } else  if (context.get ("time_line") != null) { // 时间序列图
-                    return new MeasureOrderDesc (tmp[0].getName (), "NONE", Integer.MAX_VALUE);
+                    return new OrderDesc (tmp[0].getName (), "NONE", Integer.MAX_VALUE);
                 } else {
                     context.remove(Constants.NEED_LIMITED);
                     boolean isTimeDimOnFirstCol = isTimeDimOnFirstCol(action.getRows (), cube);
                     if (isTimeDimOnFirstCol) {
-                        return new MeasureOrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
+                        return new OrderDesc(tmp[0].getName(), "NONE", Integer.MAX_VALUE);
                     }
                     if (tmp != null && tmp.length != 0) {
-                        return new MeasureOrderDesc(tmp[0].getName(), "DESC", Integer.MAX_VALUE);                        
+                        return new OrderDesc(tmp[0].getName(), "DESC", Integer.MAX_VALUE);                        
                     }
                 }
             } else {
                     if (context.get("time_line") != null) { //时间序列图
-                    return  new MeasureOrderDesc(
+                    return  new OrderDesc(
                         measures.get(topSet.getMeasureId()).getName(), "NONE", Integer.MAX_VALUE);
                     }
                 String olapElementId = action.getColumns().keySet().toArray(new Item[0])[0].getOlapElementId();
-                return  new MeasureOrderDesc(measures.get(olapElementId).getName(),
+                return  new OrderDesc(measures.get(olapElementId).getName(),
                     topSet.getTopType().name(), topSet.getRecordSize());
             }
         }

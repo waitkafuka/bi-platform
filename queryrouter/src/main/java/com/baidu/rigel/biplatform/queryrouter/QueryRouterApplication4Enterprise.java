@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.AbstractHttp11Protocol;
+import org.apache.coyote.http11.Http11Nio2Protocol;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +29,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.redis.RedisAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.boot.context.embedded.EmbeddedServletContainerFactory;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
 import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer;
 import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
@@ -40,7 +39,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
@@ -69,26 +67,24 @@ public class QueryRouterApplication4Enterprise extends SpringBootServletInitiali
      * 设置gzip压缩
      */
     @Bean
-    public EmbeddedServletContainerCustomizer servletContainerCustomizer() {
-        return new EmbeddedServletContainerCustomizer() {
+    public EmbeddedServletContainerFactory servletContainer () {
+        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory ();
+        tomcat.setProtocol ("org.apache.coyote.http11.Http11Nio2Protocol");
+        tomcat.addConnectorCustomizers (customizer());
+        return tomcat;
+    }
+
+    @Bean
+    public TomcatConnectorCustomizer customizer () {
+        return new TomcatConnectorCustomizer() {
+            
             @Override
-            public void customize(ConfigurableEmbeddedServletContainer servletContainer) {
-                ((TomcatEmbeddedServletContainerFactory) servletContainer)
-                        .addConnectorCustomizers(new TomcatConnectorCustomizer() {
-                            @Override
-                            public void customize(Connector connector) {
-                                AbstractHttp11Protocol<?> httpProtocol = (AbstractHttp11Protocol<?>) connector
-                                        .getProtocolHandler();
-                                httpProtocol.setCompression("on");
-                                httpProtocol.setCompressionMinSize(256);
-                                httpProtocol.setMaxThreads (1000);
-                                httpProtocol.setMinSpareThreads (10);
-                                String mimeTypes = httpProtocol.getCompressableMimeTypes();
-                                String mimeTypesWithJson = mimeTypes + ","
-                                        + MediaType.APPLICATION_JSON_VALUE;
-                                httpProtocol.setCompressableMimeTypes(mimeTypesWithJson);
-                            }
-                        });
+            public void customize(Connector connector) {
+                connector.setAttribute ("socket.directBuffer", true);
+                Http11Nio2Protocol protocol = (Http11Nio2Protocol) connector.getProtocolHandler ();
+                protocol.setMaxThreads (1000);
+                protocol.setMinSpareThreads (100);
+                protocol.setMaxConnections (700);
             }
         };
     }

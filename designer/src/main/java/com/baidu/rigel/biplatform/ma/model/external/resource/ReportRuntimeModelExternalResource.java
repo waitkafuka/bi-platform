@@ -114,6 +114,9 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
         try {
+            if (StringUtils.isNotEmpty (request.getParameter ("reportImageId"))) {
+                reportId = request.getParameter ("reportImageId");
+            }
             runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         } catch (CacheOperationException e1) {
             LOG.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
@@ -130,7 +133,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         }
         modifyLogicModel (areaId, selectedMeasures, model, extendArea);
         // 已经重置了LogicModel，需要清除操作纪录
-        runTimeModel.getDrillDownQueryHistory ().clear ();
+        restOtherStatus (runTimeModel);
         MiniCube cube = (MiniCube) model.getSchema ().getCubes ().get (extendArea.getCubeId ());
         LogicModel logicModel = extendArea.getLogicModel ();
         DataSourceDefine ds = dsService.getDsDefine (model.getDsId ());
@@ -140,6 +143,12 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         result.setStatus (0);
         result.setStatusInfo ("successfully");
         return result;
+    }
+
+    private void restOtherStatus(ReportRuntimeModel runTimeModel) {
+        runTimeModel.getDrillDownQueryHistory ().clear ();
+        runTimeModel.getOrderedStatus ().clear ();
+        runTimeModel.setSortRecord (null);
     }
 
     /**

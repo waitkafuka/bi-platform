@@ -52,7 +52,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
@@ -396,7 +396,7 @@ public final class DataModelUtils {
         Item[] items = logicModel.getColumns();
 
         // 获取排序维度或者指标
-        MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
+        OrderDesc orderDesc = queryAction.getOrderDesc();
         // Item的索引
         int itemIndex = 0;
         // 是否已经设置排序列
@@ -448,8 +448,8 @@ public final class DataModelUtils {
                         }
                     } else {
                         // TODO 之后需要修改
-                        if (orderDesc != null && (column.tableName + "_" + column.name).equals(orderDesc.getName())
-                                && !setOrder) {
+                        if (orderDesc != null && ((column.tableName + "_" + column.name).equals(orderDesc.getName()) ||
+                                column.name.equals(orderDesc.getName())) && !setOrder) {
                             colDefine.setOrderby(orderDesc.getOrderType().toLowerCase());
                             setOrder = true;
                         }
@@ -475,9 +475,14 @@ public final class DataModelUtils {
      * @param cube
      * @return
      */
-    private static boolean isMeasure(String name, Cube cube) {
+    public static boolean isMeasure(String name, Cube cube) {
         MiniCube miniCube = (MiniCube) cube;
-        String colName = name.split("\\.")[1];
+        String colName = "";
+        try {
+            colName = name.split("\\.")[1];
+        } catch (Exception e) {
+            colName = name;
+        }
         Cube cubeNew = QueryUtils.transformCube(miniCube);
         return cubeNew.getMeasures().get(colName) != null;
     }

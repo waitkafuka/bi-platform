@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
+import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.query.model.TimeCondition;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
@@ -125,8 +126,15 @@ public class ReportRuntimeModel implements Serializable {
      * 下钻查询action 历史纪录
      */
     private LinkedHashMap<String, DrillDownAction> drillDownQueryHistory = Maps.newLinkedHashMap();
+    
+    /**
+     * 排序后下钻数据行改变状态：key为下钻行nodeUniqueName, value为改编后行号
+     */
+    private Map<String, Integer> orderedStatus = Maps.newHashMap ();
 
     private QueryAction linkedQueryAction;
+
+    private SortRecord sortRecord;
     
     /**
      * 构造函数
@@ -662,6 +670,34 @@ public class ReportRuntimeModel implements Serializable {
     public void setUniversalItemStore(
             Map<String, Map<String, Item>> universalItemStore) {
         this.universalItemStore = universalItemStore;
+    }
+
+    /**
+     * @return the orderedStatus
+     */
+    public Map<String, Integer> getOrderedStatus() {
+        if (this.orderedStatus == null) {
+            this.orderedStatus = Maps.newHashMap ();
+        }
+        return orderedStatus;
+    }
+
+    /**
+     * @param orderedStatus the orderedStatus to set
+     */
+    public void setOrderedStatus(Map<String, Integer> orderedStatus) {
+        this.orderedStatus = orderedStatus;
+    }
+
+    public void setSortRecord(SortRecord sortRecord) {
+        this.sortRecord = sortRecord;
+    }
+
+    /**
+     * @return the sortRecord
+     */
+    public SortRecord getSortRecord() {
+        return sortRecord;
     }
     
     

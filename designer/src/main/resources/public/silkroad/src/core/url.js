@@ -522,7 +522,7 @@ define(function () {
      * @return {string} url
      */
     Url.deleteComp = function (reportId, componentId) {
-        return getExtendAreaBaseUrl(reportId, componentId);
+        return getExtendAreaBaseUrl(reportId, componentId) + '?isInDesigner=true';
     };
 
     /**
@@ -1085,7 +1085,7 @@ define(function () {
      */
     Url.editReportName = function (reportId) {
         return getReportName(reportId)
-            + '/name/';
+            + '/name';
     };
     /**
      * 保存更换报表名称

@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,cubeList=$data.cubeList,$value=$data.$value,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<div class="con-report-edit">\r\n    <div class="data-sources-setting overflow j-data-sources-setting">\r\n        <div class="overflow j-scroll-data-sources">\r\n            <div class="con-data-table p-r c-f">\r\n                <select class="data-table-select j-cube-select">\r\n                    ';

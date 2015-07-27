@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,7 @@ import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
@@ -126,9 +127,9 @@ public class ReportRuntimeModelManageResource extends BaseResource {
     @Resource
     private ReportDesignModelService reportDesignModelService;
 
-    private String reportImageName = "reportImageName";
+    private static final String REPORT_IMAGE_NAME = "reportImageName";
     
-    private String reportImageId = "reportImageId";
+    private static final  String REPORT_IMAGE_ID = "reportImageId";
     
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/dimAndInds", method = RequestMethod.POST)
     public ResponseResult getAllDimAndMeasuers(@PathVariable("reportId") String reportId,
@@ -523,10 +524,10 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         // 获取上一次查询的QueryAction
         QueryAction queryAction = runTimeModel.getPreviousQueryAction(areaId);
         // 获取排序条件
-        MeasureOrderDesc orderDesc = this.getNewOrderDesc(cube, elementId, sort);
+        OrderDesc orderDesc = this.getNewOrderDesc(cube, elementId, sort);
         if (orderDesc != null) {
             // 重新设置QueryAction的排序方式
-            queryAction.setMeasureOrderDesc(orderDesc);
+            queryAction.setOrderDesc(orderDesc);
         }
         // 构建分页信息
         PageInfo pageInfo = this.getPageInfo(request);
@@ -665,7 +666,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
      * @param sort
      * @return
      */
-    private MeasureOrderDesc getNewOrderDesc(Cube cube, String elementId, String sort) {
+    private OrderDesc getNewOrderDesc(Cube cube, String elementId, String sort) {
         // 获取指标
         Map<String, Measure> measures = cube.getMeasures();
         // 获取维度
@@ -673,19 +674,19 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         // 如果待排序列为指标
         if (measures.containsKey(elementId)) {
             Measure measure = measures.get(elementId);
-            // 指定排序的名称、排序方式，最后一个暂不解析
-            return new MeasureOrderDesc(measure.getName(), sort, 500);
+            return new OrderDesc(measure.getName(), sort, 500);
         } else if (dimensions.containsKey(elementId)) {
             // 如果待排序列为维度
             Dimension dimension = dimensions.get(elementId);
             if (dimension.getType() == DimensionType.TIME_DIMENSION) {
                 Level l = dimension.getLevels().values().toArray(new Level[0])[0];
-                // 指定排序的名称、排序方式，最后一个暂不解析
-                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
+                return new OrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
             } else {
                 Level l = dimension.getLevels().values().toArray(new Level[0])[0];
-                // 指定排序的名称、排序方式，最后一个暂不解析
-                return new MeasureOrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
+                if (l.getDimension() != null) {
+                    return new OrderDesc(l.getDimension().getName(), sort, 500);                    
+                }
+                return new OrderDesc(l.getDimTable() + "_" + l.getName(), sort, 500);
             }
         }
         return null;
@@ -770,7 +771,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             result.setStatusInfo("未能获取正确的报表定义");
             return result;
         }
-        String name =  request.getParameter (reportImageName);
+        String name =  request.getParameter (REPORT_IMAGE_NAME);
         ReportRuntimeModel copy = copyRuntimeModel (runTimeModel);
         modifyCopyWithParams(copy, request);
         copy.getModel ().setName (name);
@@ -785,7 +786,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         result.setStatusInfo ("successfully");
         Map<String, String> datas = Maps.newHashMap ();
         
-        datas.put (reportImageId, copy.getReportModelId ());
+        datas.put (REPORT_IMAGE_ID, copy.getReportModelId ());
         result.setData (datas);
         logger.info ("save report succcessfully with id : {} on path {}", copy.getReportModelId (), savedReportPath);
         return result;
@@ -804,7 +805,6 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
         try {
-            reportId = request.getParameter (reportImageId);
             runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         } catch (CacheOperationException e1) {
             logger.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
@@ -819,7 +819,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             result.setStatusInfo("未能获取正确的报表定义");
             return result;
         }
-        runTimeModel.getModel ().setName (request.getParameter ("reportImageName"));
+        runTimeModel.getModel ().setName (request.getParameter (REPORT_IMAGE_NAME));
         String savedReportPath = getRealStorePath (request, runTimeModel);
         try {
             fileService.write (savedReportPath, SerializationUtils.serialize (runTimeModel), true);
@@ -845,7 +845,6 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runTimeModel = null;
         try {
-            reportId = request.getParameter (reportImageId);
             runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         } catch (CacheOperationException e1) {
             logger.info("[INFO] There are no such model in cache. Report Id: " + reportId, e1);
@@ -879,7 +878,8 @@ public class ReportRuntimeModelManageResource extends BaseResource {
     public ResponseResult listAllSavedReport(@PathVariable("reportId") String reportId, HttpServletRequest request) 
         throws Exception {
         ResponseResult result = new ResponseResult();
-        String fileList = this.getSavedReportPath (request) + File.separator + reportId;
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+        String fileList = this.getSavedReportPath (request) + File.separator + runtimeModel.getOriReportId ();
         String[] files = fileService.ls (fileList);
         LinkedHashMap<String, String> rep = Maps.newLinkedHashMap ();
         if (files == null) {
@@ -888,13 +888,19 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             result.setData (Maps.newHashMap ());
             return result;
         }
-        for (String file : files) {
+        Map<String, Object> datas = Maps.newHashMap ();
+        List<String> tmp = Lists.newArrayList (files);
+        Collections.sort (tmp);
+        for (String file : tmp) {
             String filePath = fileList +  File.separator + file;
             ReportRuntimeModel model = 
                 (ReportRuntimeModel) SerializationUtils.deserialize (fileService.read (filePath));
             rep.put (model.getReportModelId (), model.getModel ().getName ());
         }
-        result.setData (rep);
+        
+        datas.put ("reportId", runtimeModel.getOriReportId ());
+        datas.put ("reportImage", rep);
+        result.setData (datas);
         result.setStatus (0);
         result.setStatusInfo ("successfully");
         logger.info ("save report succcessfully with id : {} on path {}", reportId, fileList);
@@ -939,7 +945,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         String uuid = UuidGeneratorUtils.generate ();
         ReportRuntimeModel copy = new ReportRuntimeModel (uuid);
         ReportDesignModel model = DeepcopyUtils.deepCopy (runTimeModel.getModel ());
-        copy.setOriReportId (model.getId ());
+        copy.setOriReportId (runTimeModel.getOriReportId ());
         model.setId (uuid);
         copy.setModel (model);
         copy.setContext (runTimeModel.getContext ());

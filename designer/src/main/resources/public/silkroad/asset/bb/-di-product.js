@@ -5,10 +5,10 @@
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/tangram/tangram-1.5.13.customized-prod-source.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/e-json.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/xutil.js" type="text/javascript"><\/script>' );
+   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/commonUtil.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/LinkedHashMap.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/ajax.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/collection.js" type="text/javascript"><\/script>' );
-   document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/commonUtil.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/date.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/dom.js" type="text/javascript"><\/script>' );
    document.write( '<script src="' + WEB_ROOT + '/report-ui/src/core/xutil/file.js" type="text/javascript"><\/script>' );

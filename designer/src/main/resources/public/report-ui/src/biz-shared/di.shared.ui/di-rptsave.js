@@ -11,25 +11,18 @@ $namespace('di.shared.ui');
 
 (function () {
 
-
     //------------------------------------------
     // 引用 
     //------------------------------------------
 
-
+    /* globals di */
     var UTIL = di.helper.Util;
+
+    /* globals xutil */
     var inheritsObject = xutil.object.inheritsObject;
-    var bind = xutil.fn.bind;
-    var objKey = xutil.object.objKey;
-    var isObject = xutil.lang.isObject;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
-    var extend = xutil.object.extend;
-    var confirm = di.helper.Dialog.confirm;
-    var alert = di.helper.Dialog.alert;
-    var domChildren = xutil.dom.children;
-    var getParent = xutil.dom.getParent;
-    var hasClass = xutil.dom.hasClass;
-    var parseParam = xutil.url.parseParam;
+    var DIALOG = di.helper.Dialog;
+    var alert = DIALOG.alert;
     var foreachDo = UTIL.foreachDo;
 
 
@@ -49,11 +42,9 @@ $namespace('di.shared.ui');
         inheritsObject(INTERACT_ENTITY);
     var DI_REPORTSAVE_CLASS = DI_REPORTSAVE.prototype;
 
-
     //------------------------------------------
     // 常量 
     //------------------------------------------
-
 
     /**
      * 定义
@@ -67,11 +58,9 @@ $namespace('di.shared.ui');
         }
     };
 
-
     //------------------------------------------
     // 方法
     //------------------------------------------
-
 
     /**
      * 创建View
@@ -83,10 +72,11 @@ $namespace('di.shared.ui');
         // 创建tab组件
         this._saveRptTabBtn = this.$di('vuiCreate', 'saveRptTab');
         this._saveRptTabBtn._maxTabNum = this.$di('getDef').maxTabNum || 4;
-        
         // 创建保存组件
         this._saveRptSaveBtn = this.$di('vuiCreate', 'saveRptSave');
-        
+        this._saveRptSaveBtn._isInDesigner = this.$di('getDef').isInDesigner;
+        this._isInDesigner = this._saveRptSaveBtn._isInDesigner;
+        this._saveRptTabBtn._isInDesigner = this.$di('getDef').isInDesigner;
     };
 
     /**
@@ -108,9 +98,11 @@ $namespace('di.shared.ui');
         // 更新报表
         model.attach(
             ['sync.preprocess.UPDATE', this.disable, this],
-            ['sync.result.UPDATE', 
-             this.$handleUpdateImageSuccess, 
-             this],
+            [
+                'sync.result.UPDATE',
+                this.$handleUpdateImageSuccess,
+                this
+            ],
             ['sync.error.UPDATE', this.$handleError, this],
             ['sync.complete.UPDATE', this.enable, this]
         );
@@ -118,9 +110,11 @@ $namespace('di.shared.ui');
         // 获取tab全部镜像
         model.attach(
             ['sync.preprocess.GET_IMAGES', this.disable, this],
-            ['sync.result.GET_IMAGES', 
-             this.$handleGetAllImagesSuccess, 
-             this],
+            [
+                'sync.result.GET_IMAGES',
+                this.$handleGetAllImagesSuccess,
+                this
+            ],
             ['sync.error.GET_IMAGES', this.$handleError, this],
             ['sync.complete.GET_IMAGES', this.enable, this]
         );
@@ -130,31 +124,33 @@ $namespace('di.shared.ui');
 
     /**
      * 新增报表镜像-触发ajax请求
-     * 
+     *
+     * @param {string} name 镜像名称
      * @protected
      */
     DI_REPORTSAVE_CLASS.$handleAddImage = function (name) {
         var model = this.getModel();
-        
+        var args = {
+            reportImageName: name,
+            asDefault: true
+        };
+        this._isInDesigner && (args.isInDesigner = this._isInDesigner);
+
         model.sync(
-            { 
-                datasourceId: 'ADD', 
-                args: {
-                    reportImageName: name,
-                    asDefault: true
-                }
-            }
+            {datasourceId: 'ADD', args: args}
         );
     };
     
     /**
      * 新增报表镜像-ajax请求成功回调
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
      * @protected
      */
-    DI_REPORTSAVE_CLASS.$handleAddImageSuccess = function (data,ejsonObj, options) {
+    DI_REPORTSAVE_CLASS.$handleAddImageSuccess = function (data, ejsonObj, options) {
         var saveRptTabBtn = this._saveRptTabBtn;
-
         if (ejsonObj.status === 0) {
             saveRptTabBtn.appendTab(
                 data.reportImageId, 
@@ -168,26 +164,24 @@ $namespace('di.shared.ui');
 
     /**
      * 更新报表镜像-触发ajax请求
-     * 
+     *
+     * @param {string} id 镜像id
+     * @param {string} name 镜像name
      * @protected
      */
-    DI_REPORTSAVE_CLASS.$handleUpdateImage = function (id,name) {
+    DI_REPORTSAVE_CLASS.$handleUpdateImage = function (id, name) {
         var model = this.getModel();
-        
-        model.sync(
-            { 
-                datasourceId: 'UPDATE', 
-                args: {
-                    reportImageId: id,
-                    reportImageName: name
-                }
-            }
-        );
+        var args = {reportImageName: name};
+        this._isInDesigner && (args.isInDesigner = this._isInDesigner);
+        model.sync({datasourceId: 'UPDATE', args: args});
     };
     
     /**
      * 更新报表镜像-ajax请求成功回调
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
      * @protected
      */
     DI_REPORTSAVE_CLASS.$handleUpdateImageSuccess = function (data, ejsonObj, options) {
@@ -195,7 +189,6 @@ $namespace('di.shared.ui');
 
         if (ejsonObj.status === 0) {
            saveRptTabBtn.updateCurrentTab(options.args.reportImageName);
-            //TODO:alert：看需求
         }
         else {
             alert(ejsonObj.statusInfo);
@@ -209,18 +202,19 @@ $namespace('di.shared.ui');
      */ 
     DI_REPORTSAVE_CLASS.$handleGetAllImages = function () {
         var model = this.getModel();
+        var args = {};
 
-        model.sync(
-            { 
-                datasourceId: 'GET_IMAGES'
-            }
-        );
+        this._isInDesigner && (args.isInDesigner = this._isInDesigner);
+        model.sync({datasourceId: 'GET_IMAGES', args: args});
     };
     
     /**
      * 获取报表镜像-ajax请求成功回调
      * vui初始化入口
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
      * @protected
      */ 
     DI_REPORTSAVE_CLASS.$handleGetAllImagesSuccess = function (data, ejsonObj, options) {
@@ -232,16 +226,16 @@ $namespace('di.shared.ui');
         
         // 如果currentImgId为undefined，就去后端取当前报表选中值
         // 报表选中值可能有，也可能没有
-        if (currentImgId === undefined) {
-            currentImgId = data.defaultImageId;
+        if (!currentImgId) {
+            currentImgId = request('reportImageId');
         }
 
         if (ejsonObj.status === 0) {
             saveRptTabBtn.init(
-            		currentImgId, 
-                    getHandleDeleteImage.call(this),
-                    me.reloadReport(),
-                    data
+                currentImgId,
+                getHandleDeleteImage.call(this),
+                me.reloadReport(),
+                data
             );
             
             var options = {
@@ -261,6 +255,7 @@ $namespace('di.shared.ui');
                     return saveRptTabBtn.getCurrentTabName();
                 }
             };
+
             saveRptSaveBtn.init(options);
         }
         else {
@@ -280,7 +275,8 @@ $namespace('di.shared.ui');
                 this._saveRptSaveBtn
             ],
             'enable'
-        ); 
+        );
+        DIALOG.mask(false);
     };
     
     /**
@@ -295,12 +291,17 @@ $namespace('di.shared.ui');
                 this._saveRptSaveBtn
             ],
             'disable'
-        ); 
+        );
+        DIALOG.mask(true);
     };
     
     /**
      * 操作失败之后提醒
-     * 
+     *
+     * @param {Object} data 数据
+     * @param {Object} ejsonObj json数据
+     * @param {Object} options 参数
+     *
      * @protected
      */
     DI_REPORTSAVE_CLASS.$handleError = function (data, ejsonObj, options) {
@@ -312,16 +313,12 @@ $namespace('di.shared.ui');
      *
      * @public
      */
-    DI_REPORTSAVE_CLASS.resize = function () {
-
-    };
+    DI_REPORTSAVE_CLASS.resize = function () {};
     
     /**
      * @override
      */
-    DI_REPORTSAVE_CLASS.dispose = function () {
-        
-    };
+    DI_REPORTSAVE_CLASS.dispose = function () {};
     
     /**
      * 重新刷新报表
@@ -330,11 +327,9 @@ $namespace('di.shared.ui');
      */
     DI_REPORTSAVE_CLASS.reloadReport = function () {
         var me = this;
-        
         return function (imgId) {
-            me.$di('reloadReport', { reportImageId: imgId || -1 });
+            me.$di('reloadReport', {reportImageId: imgId});
         };
-
     };
     
     /**
@@ -352,50 +347,59 @@ $namespace('di.shared.ui');
         var t = {
             imgId: '',
             callback: null
-        }
+        };
         // 追加事件，所以放在外面
         model.attach(
-                    ['sync.preprocess.DELETE', me.disable, me],
-                    [
-                        'sync.result.DELETE',
-                        function (data, ejsonObj, options) {
-                           if (ejsonObj.status === 0) {
-                        	   // 如果删除的不是当前，就回vui进行dom删除操作
-                        	   if (t.callback) {
-                        		   t.callback.call(saveRptTabBtn, 
-                                           t.imgId);
-                        	   }
-                        	   // 删除的是当前，就在component中进行进行页面刷新
-                        	   else {
-                        		   me.$di('reloadReport', { reportImageId: options.args.preImageId || -1 });
-                        	   }
-                                
-                            }
-                            else {
-                                alert(ejsonObj.statusInfo);
-                            }
-                        },
-                        me
-                    ],
-                  ['sync.error.DELETE', me.$handleError, me],
-                  ['sync.complete.DELETE', me.enable, me]
-              );
+            ['sync.preprocess.DELETE', me.disable, me],
+            [
+                'sync.result.DELETE',
+                function (data, ejsonObj, options) {
+                    if (ejsonObj.status === 0) {
+                        // 如果删除的不是当前，就回vui进行dom删除操作
+                        if (t.callback) {
+                            t.callback.call(saveRptTabBtn, t.imgId);
+                        }
+                        // 删除的是当前，就在component中进行进行页面刷新
+                        else {
+                            me.$di('reloadReport', {reportImageId: options.args.preImageId});
+                        }
+                    }
+                    else {
+                        alert(ejsonObj.statusInfo);
+                    }
+                },
+                me
+            ],
+            ['sync.error.DELETE', me.$handleError, me],
+            ['sync.complete.DELETE', me.enable, me]
+        );
         
         return function (imgId, imgName, preImgId, deleteTabCallBack) {
+            var args = {
+                reportId: imgId
+            };
+            this._isInDesigner && (args.isInDesigner = this._isInDesigner);
 
             t.callback = deleteTabCallBack;
             t.imgId = imgId;
-            var args = {
-                reportImageId: imgId,
-                reportImageName: imgName
-            };
-            preImgId ? args.preImageId = preImgId : null;          
-            model.sync(
-                { 
-                    datasourceId: 'DELETE', 
-                    args: args
-                }
-            );
+            preImgId ? (args.preImageId = preImgId) : null;
+            model.sync({datasourceId: 'DELETE', args: args});
         };
+    }
+
+    /**
+     * 获取url传参值
+     * @param {string} key url 参数
+     * @private
+     * @return {string} 匹配到的参数值
+     */
+    function request(key) {
+        var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
     }
 })();

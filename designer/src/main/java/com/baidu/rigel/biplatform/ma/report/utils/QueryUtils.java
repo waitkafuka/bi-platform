@@ -84,9 +84,10 @@ import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
-import com.baidu.rigel.biplatform.ma.report.query.QueryAction.MeasureOrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
+import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -191,10 +192,16 @@ public final class QueryUtils {
         } catch (Exception e) {
             throw new RuntimeException (e);
         }
-        MeasureOrderDesc orderDesc = queryAction.getMeasureOrderDesc();
+        OrderDesc orderDesc = queryAction.getOrderDesc();
         if (orderDesc != null) {
             SortType sortType = SortType.valueOf(orderDesc.getOrderType());
-            String uniqueName = "[Measure].[" +orderDesc.getName()+ "]";
+            String uniqueName = "";
+            if (DataModelUtils.isMeasure(orderDesc.getName(), cube)) {
+                uniqueName = uniqueName + "[Measure].";
+            } else {
+                uniqueName = uniqueName + "[Dimension].";
+            }
+            uniqueName = uniqueName + "[" +orderDesc.getName()+ "]";
             SortRecord sortRecord = new SortRecord(sortType, uniqueName , orderDesc.getRecordSize());
             questionModel.setSortRecord(sortRecord);
         }

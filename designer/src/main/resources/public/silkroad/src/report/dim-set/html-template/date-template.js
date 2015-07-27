@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,dim=$data.dim,$cube=$data.$cube,i=$data.i,$escape=$utils.$escape,cubes=$data.cubes,dateRelationTables=$data.dateRelationTables,$dateRelationTable=$data.$dateRelationTable,j=$data.j,$dim=$data.$dim,$index=$data.$index,defaultDate=$data.defaultDate,$level=$data.$level,$format=$data.$format,$field=$data.$field,$out='';$out+='<div class="dim-container-date hide j-date-main">\r\n    <ul class="date-column-names c-f">\r\n        <li class="date-column-names-main-table"><span>主数据表</span></li>\r\n        <li class="date-column-names-setting"><span>配置区</span></li>\r\n    </ul>\r\n    <!--循环cube列表（dim.normal）-->\r\n    ';

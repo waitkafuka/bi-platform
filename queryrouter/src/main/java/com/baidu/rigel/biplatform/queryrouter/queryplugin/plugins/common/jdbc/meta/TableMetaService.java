@@ -60,88 +60,105 @@ public class TableMetaService {
     /**
      * 查询所有字段在数据库中的数据类型并添入到sqlColumnMap中
      * 
-     * @param sqlColumnMap 所有的字段
-     * @param SqlDataSourceInfo dataSourceInfo
+     * @param sqlColumnMap
+     *            所有的字段
+     * @param SqlDataSourceInfo
+     *            dataSourceInfo
      * @return List<String> 存在的表
      */
-    public Map<String, SqlColumn> generateColumnDataType(Map<String, SqlColumn> sqlColumnMap,
-    		SqlDataSourceInfo dataSourceInfo) {
+    public Map<String, SqlColumn> generateColumnDataType(
+            Map<String, SqlColumn> sqlColumnMap,
+            SqlDataSourceInfo dataSourceInfo) {
         Set<String> tableNameSet = new HashSet<String>();
-    	Set<String> columnNameSet = new HashSet<String>();
-    	for (SqlColumn sqlColumn : sqlColumnMap.values()) {
-    		String tableNameTmp = "";
-    		String columnNameTmp = "";
-    		if (sqlColumn.getType() == ColumnType.TIME) {
-    			tableNameTmp = sqlColumn.getSourceTableName();
-    			columnNameTmp = sqlColumn.getFactTableFieldName();
-    		} else {
-    			tableNameTmp = sqlColumn.getTableName();
-    			columnNameTmp = sqlColumn.getTableFieldName();
-    		}
-    		if (tableNameTmp.indexOf(",") >= 0) {
-    		// 为多事实表
-    			tableNameTmp = tableNameTmp.substring(0, tableNameTmp.indexOf(","));
-    		}
-    		tableNameSet.add(tableNameTmp);
-    		columnNameSet.add(columnNameTmp);
-    	}
-    	String tableNameStringIn = convertSet2InString(tableNameSet);
-    	String columnNameStringIn = convertSet2InString(columnNameSet);
+        Set<String> columnNameSet = new HashSet<String>();
+        for (SqlColumn sqlColumn : sqlColumnMap.values()) {
+            String tableNameTmp = "";
+            String columnNameTmp = "";
+            if (sqlColumn.getType() == ColumnType.TIME) {
+                tableNameTmp = sqlColumn.getSourceTableName();
+                columnNameTmp = sqlColumn.getFactTableFieldName();
+            } else if (sqlColumn.getType() == ColumnType.CALLBACK) {
+                tableNameTmp = sqlColumn.getSourceTableName();
+                columnNameTmp = sqlColumn.getFactTableFieldName();
+            } else {
+                tableNameTmp = sqlColumn.getTableName();
+                columnNameTmp = sqlColumn.getTableFieldName();
+            }
+            if (StringUtils.isNotEmpty(tableNameTmp)
+                    && tableNameTmp.indexOf(",") >= 0) {
+                // 如果为多事实表，那么取一个表的数据类型
+                tableNameTmp = tableNameTmp.substring(0,
+                        tableNameTmp.indexOf(","));
+            }
+            tableNameSet.add(tableNameTmp);
+            columnNameSet.add(columnNameTmp);
+        }
+        String tableNameStringIn = convertSet2InString(tableNameSet);
+        String columnNameStringIn = convertSet2InString(columnNameSet);
         String dataType = "";
         if (SqlConstants.DRIVER_MYSQL.equals(dataSourceInfo.getDataBase()
                 .getDriver())) {
             String sql = "select column_name,table_name,data_type from information_schema.`columns` "
-                    		+ "where table_name in (" + tableNameStringIn + ")"
-                    				+ "and column_name in (" + columnNameStringIn + ")";
-            List<Map<String, Object>> datas = jdbcHandler.queryForList(
-            		sql, new ArrayList<Object>(), dataSourceInfo);
+                    + "where table_name in ("
+                    + tableNameStringIn
+                    + ")"
+                    + "and column_name in (" + columnNameStringIn + ")";
+            List<Map<String, Object>> datas = jdbcHandler.queryForList(sql,
+                    new ArrayList<Object>(), dataSourceInfo);
             if (CollectionUtils.isEmpty(datas)) {
-            	logger.warn(" can not found tablenames:" + tableNameStringIn
-            			+ " and columnNames:" + columnNameStringIn + " in database.");
-            	return sqlColumnMap;
+                logger.warn(" can not found tablenames:" + tableNameStringIn
+                        + " and columnNames:" + columnNameStringIn
+                        + " in database.");
+                return sqlColumnMap;
             }
             for (SqlColumn sqlColumn : sqlColumnMap.values()) {
-            	String tableNameTmp1 = "";
-        		String columnNameTmp1 = "";
-            	if (sqlColumn.getType() == ColumnType.TIME) {
-        			tableNameTmp1 = sqlColumn.getSourceTableName();
-        			columnNameTmp1 = sqlColumn.getFactTableFieldName();
-        		} else {
-        			tableNameTmp1 = sqlColumn.getTableName();
-        			columnNameTmp1 = sqlColumn.getTableFieldName();
-        		}
-        		if (tableNameTmp1.indexOf(",") >= 0) {
-        		// 为多事实表
-        			tableNameTmp1 = tableNameTmp1.substring(0, tableNameTmp1.indexOf(","));
-        		}
-            	for (Map<String, Object> data : datas) {
-                	String tableNameTmp = data.get("table_name").toString();
+                String tableNameTmp1 = "";
+                String columnNameTmp1 = "";
+                if (sqlColumn.getType() == ColumnType.TIME) {
+                    tableNameTmp1 = sqlColumn.getSourceTableName();
+                    columnNameTmp1 = sqlColumn.getFactTableFieldName();
+                } else if (sqlColumn.getType() == ColumnType.CALLBACK) {
+                    tableNameTmp1 = sqlColumn.getSourceTableName();
+                    columnNameTmp1 = sqlColumn.getFactTableFieldName();
+                } else {
+                    tableNameTmp1 = sqlColumn.getTableName();
+                    columnNameTmp1 = sqlColumn.getTableFieldName();
+                }
+                if (StringUtils.isNotEmpty(tableNameTmp1)
+                        && tableNameTmp1.indexOf(",") >= 0) {
+                    // 为多事实表的情况
+                    tableNameTmp1 = tableNameTmp1.substring(0,
+                            tableNameTmp1.indexOf(","));
+                }
+                for (Map<String, Object> data : datas) {
+                    String tableNameTmp = data.get("table_name").toString();
                     String columnNameTmp = data.get("column_name").toString();
                     String dataTypeTmp = data.get("data_type").toString();
-            		if (tableNameTmp1.equals(tableNameTmp) && columnNameTmp1.equals(columnNameTmp)) {
-            			sqlColumn.setDataType(dataTypeTmp);
-            			break;
-            		}
+                    if (tableNameTmp1.equals(tableNameTmp)
+                            && columnNameTmp1.equals(columnNameTmp)) {
+                        sqlColumn.setDataType(dataTypeTmp);
+                        break;
+                    }
                 }
-        	}
+            }
         } else {
             logger.info("no available driver handler match:"
                     + dataSourceInfo.getDataBase().getDriver());
         }
         logger.info("found table column datatype is:" + dataType
-        		+ "in tablenames:" + tableNameStringIn + " and columnNames:" + columnNameStringIn);
+                + "in tablenames:" + tableNameStringIn + " and columnNames:" + columnNameStringIn);
         return sqlColumnMap;
     }
-    
+
     private static String convertSet2InString(Set<String> set) {
-    	String result = "";
-    	for(String name : set) {
-    		result = result + "'" + name + "',";
-    	}
-    	if (StringUtils.isEmpty(result)) {
-    		return "";
-    	} else {
-        	return result.substring(0, result.lastIndexOf(","));
-    	}
-    }   
+        String result = "";
+        for (String name : set) {
+            result = result + "'" + name + "',";
+        }
+        if (StringUtils.isEmpty(result)) {
+            return "";
+        } else {
+            return result.substring(0, result.lastIndexOf(","));
+        }
+    }
 }

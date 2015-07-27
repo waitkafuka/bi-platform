@@ -1,6 +1,5 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename
-        /**/) {
+    function anonymous($data,$filename) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,lineIndex=$data.lineIndex,$each=$utils.$each,currDims=$data.currDims,$dim=$data.$dim,$index=$data.$index,boxIndex=$data.boxIndex,refreshType=$data.refreshType,$out='';$out+='<!--\r\nvar demoData = {\r\n                currDims: [\r\n                    {"id": "dim1", "name": "维度1"},\r\n                    {"id": "dim2", "name": "维度2"},\r\n                    {"id": "dim3", "name": "维度3"}\r\n                ],\r\n                boxIndex: 1,\r\n                lineIndex: 2\r\n            };\r\n-->\r\n<div class="callback-relation-box c-f j-callback-relation-box" bodyIndex=';

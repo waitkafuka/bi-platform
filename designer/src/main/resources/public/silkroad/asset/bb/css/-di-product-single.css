@@ -3598,6 +3598,14 @@ li {
     background-color: #E3E1DD
 }
 
+.ui-reportSave-tab-tabNormal > span {
+    display: inline-block;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .ui-reportSave-tab-close {
     float: right;
     position: absolute;

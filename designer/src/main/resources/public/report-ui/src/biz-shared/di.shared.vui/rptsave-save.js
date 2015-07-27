@@ -16,29 +16,22 @@ $namespace('di.shared.vui');
     // 引用 
     //------------------------------------------
 
-
+    /* globals xutil */
     var inheritsObject = xutil.object.inheritsObject;
     var addClass = xutil.dom.addClass;
     var removeClass = xutil.dom.removeClass;
     var domChildren = xutil.dom.children;
     var getParent = xutil.dom.getParent;
     var hasClass = xutil.dom.hasClass;
+    /* globals di */
     var confirm = di.helper.Dialog.confirm;
     var alert = di.helper.Dialog.alert;
-    var domQ = xutil.dom.q;
-    var extend = xutil.object.extend;
-    var encodeHTML = xutil.string.encodeHTML;
-    var isObject = xutil.lang.isObject;
-    var isArray = xutil.lang.isArray;
-    var template = xutil.string.template;
     var textLength = xutil.string.textLength;
     var XOBJECT = xui.XObject;
-
 
     //------------------------------------------
     // 类型声明 
     //------------------------------------------
-
 
     /**
      * 文字区
@@ -55,12 +48,10 @@ $namespace('di.shared.vui');
     var SAVE_BUTTON = $namespace().SaveButton =
             inheritsObject(XOBJECT, constructor);
     var SAVE_BUTTON_CLASS = SAVE_BUTTON.prototype;
-    
-    
+
     //------------------------------------------
     // 常量 
     //------------------------------------------
-
 
     // 显示错误提示，验证镜像名称时使用
     var SHOW_ERROR_TIPS = true;
@@ -86,7 +77,7 @@ $namespace('di.shared.vui');
         DIALOG_ITEM_CLASS_NAME: 'ui-reportSave-save-dialog-form-item',
         // 弹出框中的错误提示样式
         DIALOG_ERROR_CLASS_NAME: 'ui-reportSave-save-dialog-form-error'
-    }
+    };
     
     // 提示信息
     var MESSAGE = {
@@ -113,7 +104,9 @@ $namespace('di.shared.vui');
      * @param {Object} options 参数
      * @param {Object} options.el 容器元素
      */
-    function constructor(options) { 
+    function constructor(options) {
+        var elChildrens;
+        var btnOperates;
         var el = this._eMain = options.el;
         var html = [
             '<div class="', SAVE_CLASS.SAVE_BUTTON_CLASS_NAME, '">保存报表</div>',
@@ -124,14 +117,9 @@ $namespace('di.shared.vui');
                 '<li>更新当前报表</li>',
             '</ul>'
         ].join('');
-        var elChildrens;
-        var btnOperates;
-        
+
         addClass(el, SAVE_CLASS.SAVE_CLASS_NAME);
         el.innerHTML = html;
-
-        //设置最外层父亲z-Index
-        //resetContainParentZIndex(el);
 
         // 获取保存按钮并挂载上
         elChildrens = domChildren(el);
@@ -162,6 +150,7 @@ $namespace('di.shared.vui');
         this._getCurrentTabName = options.getCurrentTabName;
         this._maxTabNum = options.maxTabNum;
         this._getTabsNums = options.getTabsNums;
+
         // 绑定事件
         bindEvent.call(this);
     };
@@ -171,18 +160,14 @@ $namespace('di.shared.vui');
      *
      * @protected
      */
-    SAVE_BUTTON_CLASS.disable = function () {
-        mask(true);
-    }
+    SAVE_BUTTON_CLASS.disable = function () {};
     
     /**
      * 启用操作
      *
      * @protected
      */
-    SAVE_BUTTON_CLASS.enable = function () {
-        mask(false);  
-    }
+    SAVE_BUTTON_CLASS.enable = function () {};
 
     /**
      * 绑定事件
@@ -194,17 +179,20 @@ $namespace('di.shared.vui');
 
         // 绑定保存按钮click与mouseleave事件
         me._btnSave.onclick = function () {
+            if (me._isInDesigner) {
+                return;
+            }
             removeClass(me._btnOperates, SAVE_CLASS.HIDE);
-        }
+        };
         me._btnSave.onmouseover = function () {
             addClass(this, SAVE_CLASS.SAVE_BUTTON_HOVER_CLASS_NAME);
-        }
+        };
         me._btnSave.onmouseout = function () {
             removeClass(this, SAVE_CLASS.SAVE_BUTTON_HOVER_CLASS_NAME);
-        }
+        };
         me._eMain.onmouseleave = function () {
             addClass(me._btnOperates, SAVE_CLASS.HIDE);
-        }
+        };
 
         // 绑定新增按钮点击事件
         me._btnAdd.onclick = function (ev) {
@@ -212,52 +200,34 @@ $namespace('di.shared.vui');
 
             // 隐藏按钮选项
             hideOperates(me._btnOperates, oEv);
-            
             if (me._getTabsNums() > me._maxTabNum) {
                 alert(MESSAGE.TAB_MAX_NUM_WARN);
                 return; 
             }
             // 保证this指向
-            dialog.call(me, 
-                        HIDE_ERROR_TIPS, 
-                        '', 
-                        dialogCallback, 
-                        ADD_MODE);
-        }
+            dialog.call(
+                me,
+                HIDE_ERROR_TIPS,
+                '',
+                dialogCallback,
+                ADD_MODE
+            );
+        };
 
         // 绑定更新按钮点击事件
         me._btnUpdate.onclick = function (ev) {
             var oEv = ev || window.event;
-
             // 隐藏按钮选项
             hideOperates(me._btnOperates, oEv);
-            
-            dialog.call(me, 
-                        HIDE_ERROR_TIPS,
-                        me._getCurrentTabName(), 
-                        dialogCallback, 
-                        UPDATE_MODE);
-        }
+            dialog.call(
+                me,
+                HIDE_ERROR_TIPS,
+                me._getCurrentTabName(),
+                dialogCallback,
+                UPDATE_MODE
+            );
+        };
     };
-
-    /**
-     * 设置父亲包含块的z-Index
-     * 
-     * @private
-     * @param {HTMLElement} el vui-save的容器
-     */
-    function resetContainParentZIndex(el) {
-    	 var parentClassName = 'di-o_o-block';
-         var parent = el.parentNode;
-
-         while (parent) {
-             parent.style.zIndex = 100;
-             if (hasClass(parent, parentClassName)) {
-                 break;
-             }
-             parent = getParent(parent);
-         }
-    }
 
     /**
      * 隐藏按钮操作项
@@ -269,7 +239,6 @@ $namespace('di.shared.vui');
     function hideOperates(el, ev) {
         // 隐藏按钮选项
         addClass(el, SAVE_CLASS.HIDE);
-
         // 阻止事件冒泡
         ev.stopPropagation 
         ? (ev.stopPropagation()) 
@@ -282,31 +251,26 @@ $namespace('di.shared.vui');
      * @private
      * @param {string} showErrorTips 显示错误提示的方式：是否显示
      * @param {string} value 用户输入的名称
-     * @param {function} callback 弹出框点击确定后的回调事件
+     * @param {Function} callback 弹出框点击确定后的回调事件
      * @param {boolean} isAdd 新增或者更新
      */
     function dialog(showErrorTips, value, callback, isAdd) {
         var me = this;
         // 默认项不能编辑，这块的实现不是很好
-        if (value == '默认') {
+        if (value === '默认') {
             alert(MESSAGE.TAB_UPDATE_DEFAULT_WARN);
             return;
         }
         
         var html = [
-           '<div class="', SAVE_CLASS.DIALOG_ERROR_CLASS_NAME, '">',
+            '<div class="', SAVE_CLASS.DIALOG_ERROR_CLASS_NAME, '">',
                 showErrorTips ? MESSAGE.NAME_WARN : '',
             '</div>',
             '<div class="', SAVE_CLASS.DIALOG_ITEM_CLASS_NAME, '">',
-                '<label>',
-                    '名称',
-                '</label>',
-                '<input type="text" id="reportSaveName" ',
-                   'value="',
-                    value,
-                    '"',
-                    isAdd ? '' : 'disabled="disabled"',
-                    ' placeholder="', MESSAGE.NAME_PLACE_HOLDER, '" />',
+            '<label>', '名称', '</label>',
+            '<input type="text" id="reportSaveName" ', 'value="', value, '"',
+//                    isAdd ? '' : 'disabled="disabled"',
+            ' placeholder="', MESSAGE.NAME_PLACE_HOLDER, '" />',
             '</div>'
         ].join('');
         
@@ -334,13 +298,14 @@ $namespace('di.shared.vui');
      * @param {string} name 用户输入的名称
      */
     function dialogCallback(isAdd, name) {
-        
-        if(!validate(name)) {
-            dialog.call(this, 
-                        SHOW_ERROR_TIPS, 
-                        name , 
-                        dialogCallback, 
-                        isAdd);
+        if (!validate(name.trim())) {
+            dialog.call(
+                this,
+                SHOW_ERROR_TIPS,
+                name,
+                dialogCallback,
+                isAdd
+            );
         }
         else {
             this._saveImageNameCallBack(isAdd, name);
@@ -355,73 +320,10 @@ $namespace('di.shared.vui');
      */
     function validate(name) {
         var l = textLength(name);
-        
-        if (name === '' 
-            || l > TAB_NAME_MAX_LENGTH
-        ) {
+        if (name === '' || l > TAB_NAME_MAX_LENGTH) {
             return false;
         } 
-        
         return true;
-    }
-    
-    /**
-     * 遮罩层，防止二次点击
-     * 如果启用，先判断body里面是否已经生成遮罩
-     * 如果已经生成，就不做处理，如果没有生成，就生成一个
-     * 如果禁用，就删除掉遮罩层
-     * 其实，在body里面始终只存在一个遮罩层
-     * 缺陷：创建删除dom操作，感觉不是很理想
-     * 不过ajax请求不会很多，性能应该不会影响很大
-     * 
-     * @private
-     * @param {boolean} status 状态：启用还是禁用遮罩
-     */
-    function mask(status) {
-        var oLayerMasks = domQ('ui-reportSave-layerMask', 
-                               document.body);
-        var oLayerMask;
-        
-        // oLayerMasks为一个数组
-        if (oLayerMasks.length === 1){
-            oLayerMask = oLayerMasks[0];
-        }
-        
-        // 启用
-        if (status) {
-            // 如果 遮罩层不存在就创建一个
-            // 这里用nodeType判断是否为element元素,实现不是很好
-            if (!oLayerMask 
-                || (oLayerMask && !oLayerMask.nodeType)
-            ) {
-                oLayerMask = document.createElement('div');
-                
-                var maskCss = [
-                    'background-color: #e3e3e3;',
-                    'position: absolute;',
-                    'z-index: 1000;',
-                    'left: 0;',
-                    'top: 0;',
-                    'width: 100%;',
-                    'height: 100%;',
-                    'opacity: 0;',
-                    'filter: alpha(opacity=0);',
-                    '-moz-opacity: 0;'
-                    ].join('');
-                
-                oLayerMask.style.cssText = maskCss;
-                oLayerMask.style.width = document.documentElement.scrollWidth 
-                                         + "px";
-                oLayerMask.className = 'ui-reportSave-layerMask';
-                document.body.appendChild(oLayerMask);
-            }
-        }
-        // 禁用
-        else {
-              if (oLayerMask && oLayerMask.nodeType) {
-                document.body.removeChild(oLayerMask);
-            }
-        }
     }
 
 })();

@@ -1,5 +1,7 @@
 ﻿/**
- * Created by v_zhaoxiaoqiang on 2014/5/22.
+ * @file 系统入口
+ * @author 赵晓强
+ * @date 2014-05-22
  */
 define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
     var ajaxError;
@@ -7,7 +9,7 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
     // 全局的log容错
     window.dataInsight = window.dataInsight || {};
     dataInsight.log = function (str) {
-        if (typeof console == 'object' && typeof console.log == 'function') {
+        if (typeof console === 'object' && typeof console.log === 'function') {
             console.log(str);
         }
     };
@@ -18,9 +20,7 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
         type: 'GET',
         dataType: 'json',
         contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
-        beforeSend: function (XMLHttpRequest) {
-
-        },
+        beforeSend: function (XMLHttpRequest) {},
         dataFilter: function (response, dataType) {
             var result;
             if (dataType == 'json' && window.JSON && window.JSON.parse) {
@@ -57,7 +57,10 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
         }
     });
 
-    // 异步加载某模块，可在此处做一些路由处理
+    /**
+     * 异步加载某模块，可在此处做一些路由处理
+     * @param {Object} option 设置信息
+     */
     var enter = function (option) {
         var windowHeight;
         var navHeight;
@@ -67,7 +70,7 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
         // 设置全局url基本路径
         Url.setWebRoot(option.webRoot);
         require(['nav/nav-view', 'nav/nav-model'], function (View, Model) {
-            new View({ el: $('.j-nav'), model: new Model() });
+            new View({el: $('.j-nav'), model: new Model()});
         });
 
         // 设置主区域的最小高度
@@ -75,6 +78,7 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
         navHeight = $('.j-nav').height();
         footHeight = $('.j-foot').height();
         mainMinHeight = windowHeight - navHeight - footHeight;
+
         $('.j-main').css({
             'min-height': mainMinHeight + 'px'
         });

@@ -910,12 +910,23 @@ $namespace('di.shared.model');
             // 如果是从di-stub初始化的报表
             if (instance.diAgent === 'STUB') {
                 instance.eventChannel.triggerEvent('reloadReport', [paramObj]);
-
             }
             // 如果是用户自己创建iframe加载的报表
             else {
                 var url = window.location.href;
-                url = replaceIntoParam(url, 'reportImageId', paramObj.reportImageId, 1);
+                if (url.indexOf('?') > 0) {
+                    if (url.indexOf('reportImageId') > 0) {
+                        var urlArr = url.split('&');
+                        urlArr.splice(urlArr.length - 1, 1, 'reportImageId=' + paramObj.reportImageId);
+                        url = urlArr.join('&');
+                    }
+                    else {
+                        url += '&reportImageId=' + paramObj.reportImageId;
+                    }
+                }
+                else {
+                    url += '?reportImageId=' + paramObj.reportImageId;
+                }
                 window.location.href = url;
             }
         },
