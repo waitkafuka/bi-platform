@@ -1,12 +1,13 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,option=$data.option,$index=$data.$index,$escape=$utils.$escape,$out='';$out+='<!-- 其他操作 -->\n<div class="data-format">\n    <div class="data-format-alone c-f">\n        <div class="data-format-black f-l c-f w-p-100">\n            <input type="checkbox" name="isPagination" class="f-l c-p j-isPagination" ';
         if($data.isPagination==true){
         $out+='\n                   checked="checked" ';
         }
-        $out+=' />\n            <label class="f-l ml-2">是否显示分页</label>\n        </div>\n        <div class="data-format-black f-l c-f w-p-100 j-isPaginationBox ';
+        $out+=' />\n            <label class="f-l ml-2">显示分页</label>\n        </div>\n        <div class="data-format-black f-l c-f w-p-100 j-isPaginationBox ';
         if($data.isPagination!=true){
         $out+='hide';
         }
@@ -35,7 +36,7 @@ define(['template'], function (template) {
         $out+='value=';
         $out+=$escape($data.pageSize);
         }
-        $out+=' />\n        </div>\n    </div>\n</div>';
+        $out+=' placeholder="请输入数字"/>\n        </div>\n        <div class="data-format-black f-l c-f w-p-100 cor-red hide j-pagination-error-msg"></div>\n    </div>\n</div>';
         return $out;
     }
     return { render: anonymous };

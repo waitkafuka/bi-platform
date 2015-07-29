@@ -924,15 +924,14 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             return;
         }
         reportParams.forEach ((k, v) -> {
-            long count = copy.getModel ().getSchema ()
-                    .getCubes ().values ().stream ()
-                    .filter (cube -> cube.getDimensions ().get (v.getElementId()) instanceof TimeDimension)
-                    .count ();
-            if (count <= 0 && !StringUtils.isEmpty (request.getParameter (v.getName ()))) {
+//            long count = copy.getModel ().getSchema ()
+//                    .getCubes ().values ().stream ()
+//                    .filter (cube -> cube.getDimensions ().get (v.getElementId()) instanceof TimeDimension)
+//                    .count ();
+//            if (count <= 0 && !StringUtils.isEmpty (request.getParameter (v.getName ()))) {
                 copy.getContext ().put (v.getName (), request.getParameter (v.getName ()));
-                // TODO 这里需要测试一下 是否需要做此操作
                 copy.getContext ().put (v.getElementId (), request.getParameter (v.getName ()));
-            }
+//            }
         });
     }
 

@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,$out='';$out+='<tr class="report-line j-root-line" data-id="';

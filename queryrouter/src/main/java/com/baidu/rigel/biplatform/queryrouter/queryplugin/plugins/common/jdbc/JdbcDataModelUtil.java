@@ -59,7 +59,7 @@ public class JdbcDataModelUtil {
      */
     @Resource(name = "jdbcHandler")
     private JdbcHandler jdbcHandler;
-    
+
     /**
      * tableMetaService
      */
@@ -105,6 +105,10 @@ public class JdbcDataModelUtil {
             // 按照tablename, 组织sqlColumnList，以便于按表查询所有的字段信息
             HashMap<String, List<SqlColumn>> tables = new HashMap<String, List<SqlColumn>>();
             for (SqlColumn sqlColumn : allColumns.values()) {
+                if (sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                // 过滤事实表及退化维
+                    continue;
+                }
                 if (sqlColumn.getType() == ColumnType.JOIN) {
                     if (tables.get(sqlColumn.getTableName()) == null) {
                         tables.put(sqlColumn.getTableName(), new ArrayList<SqlColumn>());
@@ -117,6 +121,8 @@ public class JdbcDataModelUtil {
                     .getJoinTableData(planeQuestionModel, allColumns, tables);
             // set total count sql
             sqlExpression.generateCountSql(planeQuestionModel, allColumns, needColums, values);
+           
+            // set count size
             dataModel.setRecordSize(jdbcHandler.queryForInt(sqlExpression.getCountSqlQuery().toCountSql(),
                     sqlExpression.getCountSqlQuery().getWhere().getValues(), dataSourceInfo));
         }

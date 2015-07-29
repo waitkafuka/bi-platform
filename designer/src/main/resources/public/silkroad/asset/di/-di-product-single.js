@@ -35278,7 +35278,8 @@ $namespace('di.config');
      */
     AJAX.handleDefaultTimeout = function() {
         DIALOG.hidePrompt();
-    }
+        DIALOG.mask(false);
+    };
     
     /**
      * 默认的请求参数
@@ -35291,7 +35292,7 @@ $namespace('di.config');
         paramArr.push('_cltime=' + date.getTime()); // 供后台log当前时间
         paramArr.push('_cltimezone=' + date.getTimezoneOffset()); // 供后台log当前时区
         return paramArr.join('&');
-    }
+    };
     
     /**
      * 用于显示全局的等待提示，当第一个需要显示等待的请求发生时会调用
@@ -35300,7 +35301,8 @@ $namespace('di.config');
      */
     AJAX.showWaiting = function() {
         DIALOG.waitingPrompt(LANG.AJAX_WAITING);
-    }
+        DIALOG.mask(true);
+    };
     
     /**
      * 用于隐藏全局的等待提示，当最后一个需要显示等待的请求结束时会调用
@@ -35309,7 +35311,8 @@ $namespace('di.config');
      */
     AJAX.hideWaiting = function() {
         DIALOG.hidePrompt();
-    }
+        DIALOG.mask(false);
+    };
         
     /**
      * 挂载配置
@@ -64823,7 +64826,9 @@ $namespace('di.shared.model');
             var o = {};
             // 后天的参数的优先级比externalParam高
             extend(o, externalParam, paramObj);
-            o.reportId = paramObj.reportId ? paramObj.reportId : externalParam.reportId;
+            if (paramObj) {
+                o.reportId = paramObj.reportId ? paramObj.reportId : externalParam.reportId;
+            }
             o.reportId = o.reportId ? o.reportId : reportId;
             var excludes = options.excludes || [];
             for (var i = 0; i < excludes.length; i ++) {
@@ -75190,8 +75195,7 @@ $namespace('di.shared.ui');
             'enable'
         );
         DI_ECHART.superClass.enable.call(this);
-        DIALOG.mask(false);
-    };    
+    };
 
     /**
      * 禁用操作
@@ -75204,8 +75208,7 @@ $namespace('di.shared.ui');
             'disable'
         );
         DI_ECHART.superClass.disable.call(this);
-        DIALOG.mask(true);
-    };    
+    };
 
     /**
      * 下载操作
@@ -75665,7 +75668,6 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('enable');
         DI_FORM.superClass.enable.call(this);
-        DIALOG.mask(false);
     };
 
     /**
@@ -75679,7 +75681,6 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('disable');
         DI_FORM.superClass.disable.call(this);
-        DIALOG.mask(true);
     };
 
     /**
@@ -76623,7 +76624,6 @@ $namespace('di.shared.ui');
             'enable'
         );
         DI_PLANE_TABLE.superClass.enable.call(this);
-        DIALOG.mask(false);
     };
 
     /**
@@ -76644,7 +76644,6 @@ $namespace('di.shared.ui');
             'disable'
         );
         DI_PLANE_TABLE.superClass.disable.call(this);
-        DIALOG.mask(true);
     };
 
     /**
@@ -77427,7 +77426,6 @@ $namespace('di.shared.ui');
             ],
             'enable'
         );
-        DIALOG.mask(false);
     };
     
     /**
@@ -77443,7 +77441,6 @@ $namespace('di.shared.ui');
             ],
             'disable'
         );
-        DIALOG.mask(true);
     };
     
     /**
@@ -78541,7 +78538,6 @@ $namespace('di.shared.ui');
             'enable'
         ); 
         DI_TABLE.superClass.enable.call(this);
-        DIALOG.mask(false);
     };
 
     /**
@@ -78561,7 +78557,6 @@ $namespace('di.shared.ui');
             'disable'
         ); 
         DI_TABLE.superClass.disable.call(this);
-        DIALOG.mask(true);
     };
 
     /**
@@ -79739,8 +79734,7 @@ $namespace('di.shared.ui');
     LITEOLAP_META_CONFIG_CLASS.enable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('enable');
         LITEOLAP_META_CONFIG.superClass.enable.call(this);
-        DIALOG.mask(false);
-    };    
+    };
 
     /**
      * 禁用操作
@@ -79750,8 +79744,7 @@ $namespace('di.shared.ui');
     LITEOLAP_META_CONFIG_CLASS.disable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('disable');
         LITEOLAP_META_CONFIG.superClass.disable.call(this);
-        DIALOG.mask(true);
-    };    
+    };
 
     /**
      * 获取元数据初始化错误处理
@@ -80797,8 +80790,7 @@ $namespace('di.shared.ui');
     OLAP_META_CONFIG_CLASS.enable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('enable');
         OLAP_META_CONFIG.superClass.enable.call(this);
-        DIALOG.mask(false);
-    };    
+    };
 
     /**
      * 禁用操作
@@ -80808,8 +80800,7 @@ $namespace('di.shared.ui');
     OLAP_META_CONFIG_CLASS.disable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('disable');
         OLAP_META_CONFIG.superClass.disable.call(this);
-        DIALOG.mask(true);
-    };    
+    };
 
     /**
      * 获取元数据初始化错误处理

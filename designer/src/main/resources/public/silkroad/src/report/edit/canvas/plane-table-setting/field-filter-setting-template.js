@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$escape=$utils.$escape,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    type: \'\',\n    name: \'\',\n    defaultValue: \'\',\n    sqlContidion: \'\'\n};\n-->\n<div class="silkroad-data-field-filter-set">\n    <span class="field-id" data-id="';

@@ -100,7 +100,7 @@ import com.google.common.collect.Sets;
  * @author david.wang
  * @version 1.0.0.1
  */
-public final class QueryUtils {
+public class QueryUtils {
   
     private static final Logger LOG = LoggerFactory.getLogger (QueryUtils.class);
     /**

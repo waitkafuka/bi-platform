@@ -368,14 +368,19 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         
         fillFilterBlankDesc (areaId, reportModel, action);
         ExtendArea area = reportModel.getExtendById(areaId);
+        QueryAction.OrderDesc orderDesc = null;
         if (area.getType() != ExtendAreaType.PLANE_TABLE) {
-            QueryAction.OrderDesc orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+            orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
             if (orderDesc == null) {
                 orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
             }
-            logger.info ("[INFO] -------- order desc = " + orderDesc);
-            action.setOrderDesc(orderDesc);            
+        } else {
+            // 平面表排序信息
+            orderDesc =
+                    this.genFirstOrderDescForPlaneTable(targetLogicModel, action, oriCube4QuestionModel);
         }
+        logger.info ("[INFO] -------- order desc = " + orderDesc);
+        action.setOrderDesc(orderDesc);            
         // remove dumplated conditions
         Iterator<Item> it = action.getSlices ().keySet ().iterator ();
         while (it.hasNext ()) {
@@ -435,6 +440,42 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         return oriCube4QuestionModel;
     }
 
+    /**
+     * 获取平面表排序的第一列
+     * @param targetLogicModel
+     * @param action
+     * @param cube
+     * @return
+     */
+    public OrderDesc genFirstOrderDescForPlaneTable(LogicModel targetLogicModel, 
+            QueryAction action, final Cube cube) {
+        if (targetLogicModel == null) {
+            return null;
+        }
+        if (cube == null) {
+            return null;
+        }
+        Item[] items = targetLogicModel.getColumns();
+        if (items != null && items.length != 0) {
+            Item item = items[0];
+            if (cube.getMeasures() != null) {
+                for (Measure measure : cube.getMeasures().values()) {
+                    if (measure.getId().equals(item.getOlapElementId())) {
+                        return new OrderDesc(measure.getName(), "DESC", 500);
+                    }
+                }                
+            }
+            
+            if (cube.getDimensions() != null) {
+                for (Dimension dimension : cube.getDimensions().values()) {
+                    if (dimension.getId().equals(item.getOlapElementId())) {
+                        return new OrderDesc(dimension.getName(), "DESC", 500);
+                    }
+                }
+            }
+        }
+        return null;
+    }
     /**
      * 产生维度排序，对于平面表排序，默认使用第一个指标，如果指标为空，则使用第一个维度
      * 注:此处维度和指标使用同一个指标排序信息，后续考虑修改

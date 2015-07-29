@@ -251,25 +251,18 @@ public class QueryDataResource extends BaseResource {
         }
         final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
         final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-        Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
+        Map<String, Object> datas = Maps.newConcurrentMap();
         Map<String, String> params = Maps.newHashMap();
         runtimeModel.getContext().getParams().forEach((k, v) -> {
             params.put(k, v == null ? "" : v.toString());
         });
 
-        // DataSourceInfo dsInfo = null;
-        // try {
-        // dsInfo = DataSourceDefineUtil.parseToDataSourceInfo(dsService.getDsDefine(model.getDsId()),
-        // securityKey);
-        // } catch (DataSourceOperationException e1) {
-        // logger.error(e1.getMessage(), e1);
-        // }
         for (final String areaId : areaIds) {
             ExtendArea area = model.getExtendById(areaId);
             Cube cube = null;
             if (area != null) {
                 // 获取对应的cube
-                cube = model.getSchema().getCubes().get(area.getCubeId());                
+                cube = model.getSchema().getCubes().get(area.getCubeId());
             }
             // TODO 查询条件回填？
             if (area != null && isQueryComp(area.getType()) && !area.listAllItems().isEmpty()) {
@@ -307,8 +300,17 @@ public class QueryDataResource extends BaseResource {
                         });
                         // List<Map<String, String>> values =
                         // QueryUtils.getMembersWithChildrenValue(members, tmpCube, dsInfo, Maps.newHashMap());
-                        Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
+                        Map<String, Object> datasource = Maps.newHashMap();
                         datasource.put("datasource", values);
+                        runtimeModel.getLocalContext ().forEach ((k, v) -> {
+                            if (v.getParams ().containsKey (dim.getId ())) {
+                                Object value = v.getParams ().get (dim.getId ());
+                                if (value != null && value instanceof String) {
+                                    List<String> lists = Lists.newArrayList (((String) value).split (","));
+                                    datasource.put ("value", lists);
+                                }
+                            }
+                        });
                         datas.put(areaId, datasource);
                     } catch (Exception e) {
                         logger.info(e.getMessage(), e);
@@ -599,7 +601,7 @@ public class QueryDataResource extends BaseResource {
                         + "                    phase: 'dev',"
                         + "\r\n"
                         + "                    serverTime: ' "
-                        + (StringUtils.isEmpty (imageId) ? reportId : imageId)
+                        + System.currentTimeMillis ()
                         + "',"
                         + "\r\n"
                         + "                    funcAuth: null,"
@@ -765,6 +767,11 @@ public class QueryDataResource extends BaseResource {
                         }
                     }
                     runTimeModel.getContext().put(getRealKey(model, key), realValue);
+                    runTimeModel.getLocalContext ().forEach ((k, v) -> {
+                        if (v.getParams ().containsKey (getRealKey(model, key))) {
+                            v.getParams ().put (key, realValue);
+                        }
+                    });
                 } else {
                     runTimeModel.getContext().removeParam(getRealKey(model, key));
                 }
@@ -807,7 +814,7 @@ public class QueryDataResource extends BaseResource {
              */
 
         }
-        restartOtherStatus (runTimeModel);
+        resetOtherStatus (runTimeModel);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", "");
         logger.info("[INFO]current context params status {}", runTimeModel.getContext().getParams());
@@ -1148,7 +1155,7 @@ public class QueryDataResource extends BaseResource {
                 // 获取上一次查询的QueryAction
                 QueryAction queryActionPrevious = runTimeModel.getPreviousQueryAction(areaId);
                 // 携带之前的排序信息
-                if (queryActionPrevious != null) {
+                if (queryActionPrevious != null && action.getOrderDesc() != queryActionPrevious.getOrderDesc()) {
                     action.setOrderDesc(queryActionPrevious.getOrderDesc());                     
                 }
                 result =
@@ -1606,7 +1613,7 @@ public class QueryDataResource extends BaseResource {
         // 更新局部区域参数，避免漏掉当前请求查询的
 
         // 清除展开、折叠方式下钻查询历史纪录
-        restartOtherStatus (runTimeModel);
+        resetOtherStatus (runTimeModel);
 
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
@@ -1620,7 +1627,7 @@ public class QueryDataResource extends BaseResource {
         return rs;
     }
 
-    private void restartOtherStatus(ReportRuntimeModel runTimeModel) {
+    private void resetOtherStatus(ReportRuntimeModel runTimeModel) {
         runTimeModel.getDrillDownQueryHistory().clear();
         runTimeModel.getOrderedStatus ().clear ();
         runTimeModel.setSortRecord (null);

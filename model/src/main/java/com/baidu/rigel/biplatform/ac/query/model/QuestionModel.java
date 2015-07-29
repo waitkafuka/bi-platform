@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
+import com.google.common.collect.Maps;
 
 /**
  * 问题模型
@@ -146,6 +147,9 @@ public class QuestionModel implements Serializable {
      * @return the axisMetas
      */
     public Map<AxisType, AxisMeta> getAxisMetas() {
+        if (axisMetas == null) {
+            this.axisMetas = Maps.newHashMap ();
+        }
         return axisMetas;
     }
 

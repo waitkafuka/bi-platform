@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,6 +161,9 @@ public class JdbcHandler {
      * @return sql String
      */
     public String toPrintString(String sql, List<Object> objects) {
+        if (CollectionUtils.isEmpty(objects)) {
+            return sql;
+        }
         String printSql = new String(sql);
         int valuesCount = 0;
         if (!StringUtils.isEmpty(printSql)) {

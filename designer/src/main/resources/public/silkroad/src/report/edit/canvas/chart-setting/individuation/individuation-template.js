@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,appearance=$data.appearance,$escape=$utils.$escape,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    indList: {\n        click: {\n            caption: \'\',\n            axisName: \'\'\n        }\n    }\n};\n-->\n<!-- 指标颜色设置 -->\n<div class="dialog-content">\n    <div class="base-setting-box c-f j-appearance-setting">\n        <span class="f-l">外观设置</span>\n        <div class="base-setting-item f-l c-f w-p-100 ml-5 j-appearance-item">\n            <input type="checkbox" class="f-l c-p" name="isShowInds" ';

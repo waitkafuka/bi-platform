@@ -25,6 +25,7 @@ import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.collect.Maps;
 
 /**
  * Callback的层级
@@ -123,6 +124,9 @@ public class CallbackLevel extends OlapElementDef implements Level {
      * @return the callbackParams
      */
     public Map<String, String> getCallbackParams() {
+        if (this.callbackParams == null) {
+            this.callbackParams = Maps.newHashMap ();
+        }
         return callbackParams;
     }
 

@@ -276,7 +276,6 @@ $namespace('di.shared.ui');
             ],
             'enable'
         );
-        DIALOG.mask(false);
     };
     
     /**
@@ -292,7 +291,6 @@ $namespace('di.shared.ui');
             ],
             'disable'
         );
-        DIALOG.mask(true);
     };
     
     /**

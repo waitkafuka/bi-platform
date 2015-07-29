@@ -35,7 +35,6 @@ import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterResource;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorType;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorUtils;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnCondition;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnType;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
@@ -156,7 +155,14 @@ public class SqlExpression implements Serializable {
                     "List needColums is empty, there is no SqlColum object available to generate.");
         }
         try {
-            countSqlQuery.getSelect().setSql(" select 1 ");
+            String valueName = "*";
+            for(SqlColumn sqlColumn : allColums.values()) {
+                if (sqlColumn.getType() == ColumnType.COMMON) {
+                    valueName = sqlColumn.getFactTableFieldName();
+                    break;
+                }
+            }
+            countSqlQuery.getSelect().setSql(" select count(" + valueName + ") as totalc ");
             countSqlQuery.getSelect().setSelectList(needColums);
             countSqlQuery.getFrom().setSql(generateFromExpression(questionModel, countSqlQuery, allColums));
             countSqlQuery.getWhere().setSql(
@@ -184,21 +190,21 @@ public class SqlExpression implements Serializable {
         for (SqlColumn colum : needColums) {
             if (ColumnType.JOIN == colum.getType() && contentJoinSelect) {
                 // join表字段
-                select.append(colum.getTableName() + SqlConstants.DOT + colum.getTableFieldName()
+                select.append(this.getSqlColumnName(colum, true)
                         + " as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
             } else if (ColumnType.TIME == colum.getType() || ColumnType.CALLBACK == colum.getType()){
                 // 如果为时间或cb字段
-                select.append(facttableAlias + SqlConstants.DOT + colum.getFactTableFieldName()
+                select.append(this.getSqlColumnName(colum, true)
                         + " as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
             } else {
                 // 普通事实表字段
                 if (!StringUtils.isEmpty(colum.getOperator())
                         && OperatorUtils.getOperatorType(colum) == OperatorType.AGG) {
                     // 需要聚合
-                    select.append(colum.getOperator() + "(" + facttableAlias + SqlConstants.DOT + colum.getTableFieldName()
+                    select.append(colum.getOperator() + "(" + this.getSqlColumnName(colum, true)
                             + ") as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
                 } else {
-                    select.append(facttableAlias + SqlConstants.DOT + colum.getTableFieldName()
+                    select.append(this.getSqlColumnName(colum, true)
                             + " as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
                 }
             }
@@ -280,12 +286,16 @@ public class SqlExpression implements Serializable {
         });
         for (SqlColumn colum : needJoinColumns) {
             String joinTable = colum.getTableName();
+            if (colum.getTableName().equals(this.facttableAlias)) {
+            // 可能有退化维的存在，
+                continue;
+            }
             if (joinTables.contains(joinTable)) {
-                // 如果join的dimTableName已在sql中存在，
+            // 如果join的dimTableName已在sql中存在，
                 continue;
             }
             if (ColumnType.JOIN == colum.getType()) {
-                // 如果为JOIN 字段
+            // 如果为JOIN 字段
                  joinTables.add(joinTable);
                  StringBuffer oneLeftOuterJoinExpression = new StringBuffer(" left outer join ");
                  oneLeftOuterJoinExpression.append(joinTable
@@ -325,7 +335,11 @@ public class SqlExpression implements Serializable {
                         SqlColumn sqlColumn = allColums.get(columnCondition
                                 .getMetaName());
                         if (sqlColumn.getType() == ColumnType.JOIN) {
-                            whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery, true));
+                        // 获取JOIN where
+                            if (!sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                            // 过滤退化维的情况
+                                whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery, true));
+                            }
                         }
                     }
                 });
@@ -392,20 +406,30 @@ public class SqlExpression implements Serializable {
             PlaneTableQuestionModel planeTableQuestionModel, SqlQuery sqlQuery,
             Map<String, SqlColumn> allColums, boolean gengerateTableAlias) {
         StringBuffer whereExpressions = new StringBuffer("");
-        
-        planeTableQuestionModel.getQueryConditions()
-                .forEach((k, v) -> {
-                    ColumnCondition columnCondition = (ColumnCondition) v;
-                    SqlColumn sqlColumn = allColums.get(k);
-                    if (ColumnType.COMMON == sqlColumn.getType()
-                            || ColumnType.TIME == sqlColumn.getType()
-                            || ColumnType.CALLBACK == sqlColumn.getType()) {
-                        // 判断是事实表查询
-                        if (columnCondition != null) {
-                            whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery, gengerateTableAlias));
-                        }
-                    }
-                });
+        HashSet<String> uniqueNameSet = new HashSet<String>();
+        for (Map.Entry<String, SqlColumn> entry : allColums.entrySet()) {
+            String k = entry.getKey();
+            SqlColumn v = entry.getValue();
+            if (uniqueNameSet.contains(k)) {
+                continue;
+            }
+            ColumnCondition columnCondition = (ColumnCondition) v.getColumnCondition();
+            SqlColumn sqlColumn = allColums.get(k);
+            // 判断是事实表查询
+            if (columnCondition != null) {
+                if (sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                    whereExpressions.append(this
+                            .generateSqlWhereOneCondition(sqlColumn, sqlQuery, gengerateTableAlias));
+                    uniqueNameSet.add(k);
+                } else if (sqlColumn.getType() == ColumnType.CALLBACK
+                        || sqlColumn.getType() == ColumnType.TIME
+                        || sqlColumn.getType() == ColumnType.COMMON){
+                    whereExpressions.append(this
+                            .generateSqlWhereOneCondition(sqlColumn, sqlQuery, gengerateTableAlias));
+                    uniqueNameSet.add(k);
+                }
+            }
+        }
         return whereExpressions.toString();
     }
 
@@ -446,7 +470,12 @@ public class SqlExpression implements Serializable {
         String columnSqName = "";
         if (gengerateTableAlias) {
             if (ColumnType.JOIN == sqlColumn.getType()) {
-                columnSqName = sqlColumn.getTableName() + SqlConstants.DOT + sqlColumn.getTableFieldName();
+                if (sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                // 退化维
+                    columnSqName = this.facttableAlias + SqlConstants.DOT + sqlColumn.getFactTableFieldName();
+                } else {
+                    columnSqName = sqlColumn.getTableName() + SqlConstants.DOT + sqlColumn.getTableFieldName();
+                }
             } else if (ColumnType.TIME == sqlColumn.getType()
                     || ColumnType.CALLBACK == sqlColumn.getType()){
                 columnSqName = this.facttableAlias + SqlConstants.DOT + sqlColumn.getFactTableFieldName();
@@ -616,17 +645,8 @@ public class SqlExpression implements Serializable {
                     && OperatorUtils.getOperatorType(colum) == OperatorType.AGG) {
                 needGroupBy = true;    
             } else {
-                if (ColumnType.JOIN == colum.getType()) {
-                    // 如果为时间字段
-                    String columName = colum.getTableName();
-                    groupbyTmpExpression.append(columName + SqlConstants.DOT
-                            + colum.getTableFieldName() + SqlConstants.COMMA);
-                } else {
-                    // 如果为其他字段
-                    String columName = this.facttableAlias + SqlConstants.DOT
-                            + colum.getFactTableFieldName();
-                    groupbyTmpExpression.append(columName + SqlConstants.COMMA);
-                } 
+                groupbyTmpExpression.append(this.getSqlColumnName(colum, true));
+                groupbyTmpExpression.append(SqlConstants.COMMA);
             }
         }
         if (needGroupBy) {
@@ -671,16 +691,7 @@ public class SqlExpression implements Serializable {
                 .getSortType().name())) {
             orderByType = SqlConstants.DESC;
         }
-        String tableName = this.facttableAlias;
-        String fieldName = sqlColumn.getTableFieldName();
-        if (ColumnType.JOIN == sqlColumn.getType()) {
-            tableName = sqlColumn.getTableName();
-        }
-        if (ColumnType.TIME == sqlColumn.getType()) {
-            fieldName = sqlColumn.getFactTableFieldName();
-        }
-        return " order by " + tableName + SqlConstants.DOT
-                + fieldName + SqlConstants.SPACE
+        return " order by " + this.getSqlColumnName(sqlColumn, true) + SqlConstants.SPACE
                 + orderByType + SqlConstants.SPACE;
     }
 
@@ -694,8 +705,7 @@ public class SqlExpression implements Serializable {
         this.setDriver(driver);
         sqlQuery = new SqlQuery(this.driver);
         countSqlQuery = new SqlQuery(this.driver);
-        this.facttableAlias = PlaneTableQuestionModel2SqlColumnUtils
-                .getFactTableAliasName();
+        this.facttableAlias = SqlConstants.SOURCE_TABLE_ALIAS_NAME;
     }
 
 

@@ -361,8 +361,7 @@ $namespace('di.shared.ui');
     LITEOLAP_META_CONFIG_CLASS.enable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('enable');
         LITEOLAP_META_CONFIG.superClass.enable.call(this);
-        DIALOG.mask(false);
-    };    
+    };
 
     /**
      * 禁用操作
@@ -372,8 +371,7 @@ $namespace('di.shared.ui');
     LITEOLAP_META_CONFIG_CLASS.disable = function () {
         this._uOlapMetaSelector && this._uOlapMetaSelector.$di('disable');
         LITEOLAP_META_CONFIG.superClass.disable.call(this);
-        DIALOG.mask(true);
-    };    
+    };
 
     /**
      * 获取元数据初始化错误处理

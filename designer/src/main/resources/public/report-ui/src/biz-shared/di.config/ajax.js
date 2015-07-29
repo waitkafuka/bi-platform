@@ -118,7 +118,8 @@ $namespace('di.config');
      */
     AJAX.handleDefaultTimeout = function() {
         DIALOG.hidePrompt();
-    }
+        DIALOG.mask(false);
+    };
     
     /**
      * 默认的请求参数
@@ -131,7 +132,7 @@ $namespace('di.config');
         paramArr.push('_cltime=' + date.getTime()); // 供后台log当前时间
         paramArr.push('_cltimezone=' + date.getTimezoneOffset()); // 供后台log当前时区
         return paramArr.join('&');
-    }
+    };
     
     /**
      * 用于显示全局的等待提示，当第一个需要显示等待的请求发生时会调用
@@ -140,7 +141,8 @@ $namespace('di.config');
      */
     AJAX.showWaiting = function() {
         DIALOG.waitingPrompt(LANG.AJAX_WAITING);
-    }
+        DIALOG.mask(true);
+    };
     
     /**
      * 用于隐藏全局的等待提示，当最后一个需要显示等待的请求结束时会调用
@@ -149,7 +151,8 @@ $namespace('di.config');
      */
     AJAX.hideWaiting = function() {
         DIALOG.hidePrompt();
-    }
+        DIALOG.mask(false);
+    };
         
     /**
      * 挂载配置

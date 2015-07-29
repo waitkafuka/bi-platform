@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,$item=$data.$item,index=$data.index,$escape=$utils.$escape,$out='';$out+='<ul class="comp-setting-charticons">\r\n    ';

@@ -88,9 +88,15 @@ public class PlaneTableQuestionModel2SqlColumnUtils {
                             sqlColumn.setFactTableFieldName(v.getFacttableColumnName());
                             sqlColumn.setCaption(v.getCaption());
                             if (ColumnType.JOIN == v.getColumnType()) {
-                                sqlColumn.setSqlUniqueColumn(v.getTableName() + v.getName());
+                                if (v.getTableName().equals(v.getFacttableName())) {
+                                // 退化维
+                                    sqlColumn.setSqlUniqueColumn(SqlConstants.SOURCE_TABLE_ALIAS_NAME
+                                            + v.getFacttableColumnName());
+                                } else {
+                                    sqlColumn.setSqlUniqueColumn(v.getTableName() + v.getName());
+                                }
                             } else {
-                                sqlColumn.setSqlUniqueColumn(getFactTableAliasName() + v.getName());
+                                sqlColumn.setSqlUniqueColumn(SqlConstants.SOURCE_TABLE_ALIAS_NAME + v.getName());
                             }
                             sqlColumn.setJoinTableFieldName(v.getJoinTableFieldName());
                             sqlColumn.setType(v.getColumnType());
@@ -99,14 +105,5 @@ public class PlaneTableQuestionModel2SqlColumnUtils {
                                     .getQueryConditions().get(k));
                         });
         return allColumns;
-    }
-
-    /**
-     * 获取事实表
-     * 
-     * @return
-     */
-    public static String getFactTableAliasName() {
-        return SqlConstants.SOURCE_TABLE_ALIAS_NAME;
     }
 }

@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,columnDefine=$data.columnDefine,$column=$data.$column,name=$data.name,$escape=$utils.$escape,planeTableList=$data.planeTableList,$planeTable=$data.$planeTable,$index=$data.$index,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    "columnDefine": [\n        {"text": "文本1", "value": "text1", "selectedTable": "table1"},\n        {"text": "文本2", "value": "text2", "selectedTable": "table2"},\n        {"text": "文本3", "value": "text3", "selectedTable": "table3"}\n    ],\n    "planeTableList": [\n        {\n            "text": "表1",\n            "value": "table1"\n        },\n        {\n            "text": "表2",\n            "value": "table2"\n},\n        {\n            "text": "表3",\n            "value": "table3"\n        }\n    ]\n};\n-->\n<!-- 指标颜色设置 -->\n<div class="table-link-set">\n    <div class="table-link-set-area j-table-link-set-column-table">\n        <label>请设置列与跳转表格的关系</label>\n        <div class="table-link-set-area-items">\n            ';

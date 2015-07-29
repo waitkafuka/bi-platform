@@ -229,8 +229,7 @@ $namespace('di.shared.ui');
             'enable'
         );
         DI_ECHART.superClass.enable.call(this);
-        DIALOG.mask(false);
-    };    
+    };
 
     /**
      * 禁用操作
@@ -243,8 +242,7 @@ $namespace('di.shared.ui');
             'disable'
         );
         DI_ECHART.superClass.disable.call(this);
-        DIALOG.mask(true);
-    };    
+    };
 
     /**
      * 下载操作

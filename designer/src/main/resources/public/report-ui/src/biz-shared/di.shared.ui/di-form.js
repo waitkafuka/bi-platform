@@ -313,7 +313,6 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('enable');
         DI_FORM.superClass.enable.call(this);
-        DIALOG.mask(false);
     };
 
     /**
@@ -327,7 +326,6 @@ $namespace('di.shared.ui');
         }
         this._uConfirmBtn && this._uConfirmBtn.$di('disable');
         DI_FORM.superClass.disable.call(this);
-        DIALOG.mask(true);
     };
 
     /**

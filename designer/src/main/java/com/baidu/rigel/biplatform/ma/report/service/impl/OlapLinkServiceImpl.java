@@ -177,7 +177,12 @@ public class OlapLinkServiceImpl implements OlapLinkService {
             ExtendArea extendArea, Map<String, Map<String, String>> conditionMap) {
         // 如果是过滤条件的话，维度必须放在row上，并且维值只能有一个
         String olapElementId = condDim.getOlapElementId();
-        String condDimValue = String.valueOf(queryContext.get(olapElementId));
+        String condDimValue = "";
+        if (queryContext.get(olapElementId) == null) {
+            condDimValue = null;
+        } else {
+            condDimValue = String.valueOf(queryContext.get(olapElementId));
+        }
         Cube cube = olapTableDesignModel.getSchema().getCubes().get(extendArea.getCubeId());
         Dimension dim = cube.getDimensions().get(olapElementId);
         String condDimName = dim.getName();

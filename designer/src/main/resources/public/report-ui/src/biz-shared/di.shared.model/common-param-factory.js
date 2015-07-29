@@ -130,7 +130,9 @@ $namespace('di.shared.model');
             var o = {};
             // 后天的参数的优先级比externalParam高
             extend(o, externalParam, paramObj);
-            o.reportId = paramObj.reportId ? paramObj.reportId : externalParam.reportId;
+            if (paramObj) {
+                o.reportId = paramObj.reportId ? paramObj.reportId : externalParam.reportId;
+            }
             o.reportId = o.reportId ? o.reportId : reportId;
             var excludes = options.excludes || [];
             for (var i = 0; i < excludes.length; i ++) {

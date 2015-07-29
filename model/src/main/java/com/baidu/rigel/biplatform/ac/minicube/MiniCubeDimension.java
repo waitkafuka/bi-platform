@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -59,6 +60,9 @@ public abstract class MiniCubeDimension extends OlapElementDef implements Dimens
     }
 
     public LinkedHashMap<String, Level> getLevels() {
+        if (this.levels == null) {
+            this.levels = Maps.newLinkedHashMap ();
+        }
         return levels;
     }
 

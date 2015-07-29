@@ -131,6 +131,7 @@ define(
             _bindEvent: function () {
                 var $isPagination = $('.j-isPagination');
                 var $pageSize = $('.j-isPaginationBox .j-pageSize');
+                var $defaultPageSize = $('.j-notPaginationBox input');
 
                 // 绑定是否显示分页事件
                 $isPagination.unbind();
@@ -151,19 +152,33 @@ define(
                 $pageSize.keyup(function (event) {
                     var $input = $(event.target);
                     var pageSize = $input.val().trim();
-                    pageSize = pageSize.replace(/\D/g, '');
 
                     // 如果输入不合法，返回
-                    if (pageSize === '') {
-                        $input.val(pageSize);
+                    if (!(/^\d+$/.test(pageSize))) {
+                        $input.val('');
                         return;
                     }
                 });
+
+                $defaultPageSize.unbind();
+                $defaultPageSize.keyup(function (event) {
+                    var $input = $(event.target);
+                    var pageSize = $input.val().trim();
+
+                    // 如果输入不合法，返回
+                    if (!(/^\d+$/.test(pageSize))) {
+                        $input.val('');
+                        return;
+                    }
+                });
+
                 $('.j-new-pageSize').unbind();
                 $('.j-new-pageSize').click(function () {
+                    $('.j-pagination-error-msg').hide();
                     var html = [];
                     var pageSize = $('.j-pageSize').val().trim();
-                    if (pageSize === '') {
+                    if (!$.isPositiveInt(pageSize)) {
+                        $('.j-pagination-error-msg').html('请输入正确格式的数字').show();
                         return;
                     }
                     // 获取下拉框,重新渲染下拉框内容（包括了新输入的pageSize项）
@@ -194,6 +209,7 @@ define(
                 });
                 $('.j-reset-pageSize').unbind();
                 $('.j-reset-pageSize').click(function () {
+                    $('.j-pagination-error-msg').hide();
                     var html = [];
                     var pageSizeOptions = [10, 50, 100];
 
@@ -216,6 +232,7 @@ define(
              * @private
              */
             _savePaginationInfo: function ($dialog) {
+                $('.j-pagination-error-msg').hide();
                 var that = this;
                 var $pageSizeOptions;
                 var pageSize;
@@ -230,7 +247,7 @@ define(
                 // 如果分页
                 if (isPagination) {
                     $pageSizeOptions = $('.j-isPaginationBox .j-pageSizeOptions');
-                    pageSize = $pageSizeOptions.val();
+                    pageSize = $pageSizeOptions.val().trim();
                     pageSizeOptions = [];
                     options = $pageSizeOptions[0].options;
                     for (var i = 0, iLen = options.length; i < iLen; i ++) {
@@ -241,8 +258,12 @@ define(
                     pagination.pageSizeOptions = pageSizeOptions;
                 }
                 else {
-                    var val = $('.j-notPaginationBox input').val();
-                    pagination.pageSize = val;
+                    var val = $('.j-notPaginationBox input').val().trim();
+                    if (!$.isPositiveInt(val)) {
+                        $('.j-pagination-error-msg').html('请输入正确格式的数字').show();
+                        return;
+                    }
+                    pagination.pageSize = Number(val);
                 }
 
                 var formData = {

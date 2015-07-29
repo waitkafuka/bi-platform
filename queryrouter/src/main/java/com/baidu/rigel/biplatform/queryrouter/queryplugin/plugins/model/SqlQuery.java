@@ -209,7 +209,7 @@ public class SqlQuery implements Serializable {
             return "";
         }
         try {
-            sqlExpression.append(" select 1 ");
+            sqlExpression.append(select.getSql());
             sqlExpression.append(from.getSql());
             sqlExpression.append(where.getSql());
             sqlExpression.append(this.generateGroupBy());
@@ -217,8 +217,7 @@ public class SqlQuery implements Serializable {
             logger.error("occur sql exception:{}", e.getMessage());
             throw e;
         }
-        return " select count(1) as totalc from (" + sqlExpression.toString()
-                + ") t";
+        return sqlExpression.toString();
     }
 
     public String generateGroupBy() {

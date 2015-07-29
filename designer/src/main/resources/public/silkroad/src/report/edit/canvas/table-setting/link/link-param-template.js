@@ -1,5 +1,6 @@
 define(['template'], function (template) {
-    function anonymous($data,$filename) {
+    function anonymous($data,$filename
+        /**/) {
         'use strict';
         $data=$data||{};
         var $utils=template.utils,$helpers=$utils.$helpers,$each=$utils.$each,planeTableParamList=$data.planeTableParamList,$planeParam=$data.$planeParam,$index=$data.$index,$escape=$utils.$escape,olapTableDimList=$data.olapTableDimList,$dim=$data.$dim,$out='';$out+='<!--\n数据例子：\nvar demoData = {\n    "olapTableParamList": [\n        {"text": "文本1", "value": "text1", "relationParam": "table1"},\n        {"text": "文本2", "value": "text2", "relationParam": "table2"},\n        {"text": "文本3", "value": "text3", "relationParam": "table3"}\n    ],\n    "planeTableParamList": [\n        {\n            "text": "表1",\n            "value": "table1"\n        },\n        {\n            "text": "表2",\n            "value": "table2"\n        },\n        {\n            "text": "表3",\n            "value": "table3"\n        }\n    ]\n};\n-->\n';

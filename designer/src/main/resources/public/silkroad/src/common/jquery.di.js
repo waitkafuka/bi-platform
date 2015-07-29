@@ -241,4 +241,22 @@ $.isHaveEntity = function (clzKey, entitys) {
     return result;
 };
 
+/**
+ * 是否是正整数
+ *
+ * @param {string} val 待验证字符串
+ *
+ * @return {boolean}
+ */
+$.isPositiveInt = function (val) {
+    var result = false;
+    var numberMax = 2147483647;
+    val = Number(val);
+
+    if (val > 0 && val <= numberMax) {
+        result = true;
+    }
+    return result;
+};
+
 
