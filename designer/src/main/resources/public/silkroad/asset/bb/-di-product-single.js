@@ -39874,22 +39874,34 @@ $namespace('di.shared.vui');
      * @param {*} data.value 当前数据
      */
     CASCADE_SELECT_CLASS.setData = function (data) {
-        var me = this,
-            def = me.$di('getDef'),
-            compId = def.compId;
-            selElId = compId + '-0',
-            html = ['<select id="', selElId, '">'],
-            data = data.datasource;
+        var me = this;
+        var def = me.$di('getDef');
+        var compId = def.compId;
+        var selElId = compId + '-0';
+        var html = ['<select id="', selElId, '">'];
+        var datasource = data.datasource;
 
         me._compId = compId;
         me._curIndex = 0;
         me._selValue = '';
         me._allSel = def.selectAllDim.length;
-
+        if (data.value && data.value.length > 0) {
+            var selArr = data.value[0].split('.');
+            var resArr = [];
+            for (var i = 0; i <= (me._curIndex + 1); i ++) {
+                resArr.push(selArr[i]);
+            }
+            me._selValue = resArr.join('.');
+        }
+        else {
+            me._selValue = datasource[0].value;
+        }
         // 渲染第一个select
-        for(var i = 0, len = data.length; i < len; i ++) {
+        for (var i = 0, len = datasource.length; i < len; i ++) {
             html.push(
-                '<option value="', data[i].value, '">', data[i].text,
+                '<option value="', datasource[i].value, '"',
+                datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                '>', datasource[i].text,
                 '</option>'
             );
         }
@@ -39912,12 +39924,11 @@ $namespace('di.shared.vui');
                 }
             }
         });
-        $('select[id='+ selElId +']').remove();
-        me._selValue = data[0].value;
+        $('select[id=' + selElId + ']').remove();
 
         // 当初始化完第一个下拉框，如果是多级，就去触发第二个
         if(me._curIndex < me._allSel - 1) {
-            me.getNextLevel(data[0].value);
+            me.getNextLevel(me._selValue);
         }
         else {
             me.notify('cascadeSelectChange');
@@ -39952,11 +39963,16 @@ $namespace('di.shared.vui');
      * @param {*} data.value 当前数据
      */
     CASCADE_SELECT_CLASS.renderNextLevel = function(data) {
-        var me = this,
-            compId = me._compId,
-            dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
+        var me = this;
+        var compId = me._compId;
+        var datasource;
+        var dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
 
-        data && data[compId] && (data = data[compId].datasource);
+        if (data && data[compId]) {
+            data = data[compId];
+            datasource = data.datasource;
+        }
+
         // 先移除掉触发者以后的所有下拉框
         for (var i = dif - 1; i >= 0; i --) {
             var _cur = me._curIndex + (dif - i);
@@ -39967,13 +39983,28 @@ $namespace('di.shared.vui');
                 }
             });
         }
-        if (data instanceof Array && dif !== 0) {
+
+        if (datasource instanceof Array && dif !== 0) {
             // 渲染触发者的下一个下拉框
             var selElId = compId + '-' + (++ me._curIndex);
+            if (data.value && data.value.length > 0) {
+                var selArr = data.value[0].split('.');
+                var resArr = [];
+                for (var i = 0; i <= (me._curIndex + 1); i ++) {
+                    resArr.push(selArr[i]);
+                }
+                me._selValue = resArr.join('.');
+            }
+            else {
+                me._selValue = datasource[0].value;
+            }
+
             var html = ['<select id="', selElId, '">'];
-            for (var i = 0, len = data.length; i < len; i ++) {
+            for (var i = 0, len = datasource.length; i < len; i ++) {
                 html.push(
-                    '<option value="', data[i].value, '">', data[i].text,
+                    '<option value="', datasource[i].value, '"',
+                    datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                    '>', datasource[i].text,
                     '</option>'
                 );
             }
@@ -40001,9 +40032,8 @@ $namespace('di.shared.vui');
             dif = me._allSel - 1 - me._curIndex;
             isGoToNext = dif > 0 ? true : false;
 
-            me._selValue = data[0].value;
             if (isGoToNext) {
-                me.getNextLevel(data[0].value);
+                me.getNextLevel(me._selValue);
             }
             else {
                 me.notify('cascadeSelectChange');
@@ -63648,8 +63678,6 @@ $namespace('di.shared.vui');
 
     // 显示错误提示，验证镜像名称时使用
     var SHOW_ERROR_TIPS = true;
-    // 隐藏错误提示，验证镜像名称时使用
-    var HIDE_ERROR_TIPS = false;
     var ADD_MODE = true;
     var UPDATE_MODE = false;
     // 镜像名称能保存的最大字符长度（一个中文两个英文）
@@ -63674,8 +63702,11 @@ $namespace('di.shared.vui');
     
     // 提示信息
     var MESSAGE = {
+        HIDE: '',
         // 镜像名称验证失败提示
         NAME_WARN: '请您输入正确格式的名称',
+        // 镜像名称验证失败提示
+        SAME_NAME_WARN: '不能输入重复的名称',
         // 镜像名称placehoder
         NAME_PLACE_HOLDER: '请您输入正确格式的名称',
         // 如果是默认项不能被编辑提示
@@ -63743,6 +63774,7 @@ $namespace('di.shared.vui');
         this._getCurrentTabName = options.getCurrentTabName;
         this._maxTabNum = options.maxTabNum;
         this._getTabsNums = options.getTabsNums;
+        this._getAllTabName = options.getAllTabName;
 
         // 绑定事件
         bindEvent.call(this);
@@ -63800,7 +63832,7 @@ $namespace('di.shared.vui');
             // 保证this指向
             dialog.call(
                 me,
-                HIDE_ERROR_TIPS,
+                MESSAGE.HIDE,
                 '',
                 dialogCallback,
                 ADD_MODE
@@ -63814,7 +63846,7 @@ $namespace('di.shared.vui');
             hideOperates(me._btnOperates, oEv);
             dialog.call(
                 me,
-                HIDE_ERROR_TIPS,
+                MESSAGE.HIDE,
                 me._getCurrentTabName(),
                 dialogCallback,
                 UPDATE_MODE
@@ -63842,22 +63874,21 @@ $namespace('di.shared.vui');
      * 弹出框事件
      * 
      * @private
-     * @param {string} showErrorTips 显示错误提示的方式：是否显示
+     * @param {string} errorTips 错误提示
      * @param {string} value 用户输入的名称
      * @param {Function} callback 弹出框点击确定后的回调事件
      * @param {boolean} isAdd 新增或者更新
      */
-    function dialog(showErrorTips, value, callback, isAdd) {
+    function dialog(errorTips, value, callback, isAdd) {
         var me = this;
         // 默认项不能编辑，这块的实现不是很好
         if (value === '默认') {
             alert(MESSAGE.TAB_UPDATE_DEFAULT_WARN);
             return;
         }
-        
         var html = [
             '<div class="', SAVE_CLASS.DIALOG_ERROR_CLASS_NAME, '">',
-                showErrorTips ? MESSAGE.NAME_WARN : '',
+            errorTips,
             '</div>',
             '<div class="', SAVE_CLASS.DIALOG_ITEM_CLASS_NAME, '">',
             '<label>', '名称', '</label>',
@@ -63872,7 +63903,7 @@ $namespace('di.shared.vui');
             function () {
                 var name = document.getElementById('reportSaveName').value;
                 // 传递this指向
-                callback.call(me, isAdd, name);
+                callback.call(me, isAdd, name, value);
             }
         );
     }
@@ -63890,11 +63921,20 @@ $namespace('di.shared.vui');
      * @param {string} isAdd true表示新增，反之为更新
      * @param {string} name 用户输入的名称
      */
-    function dialogCallback(isAdd, name) {
+    function dialogCallback(isAdd, name, oldName) {
         if (!validate(name.trim())) {
             dialog.call(
                 this,
-                SHOW_ERROR_TIPS,
+                MESSAGE.NAME_WARN,
+                name,
+                dialogCallback,
+                isAdd
+            );
+        }
+        else if (hasSameTabName.call(this, isAdd, name, oldName)) {
+            dialog.call(
+                this,
+                MESSAGE.SAME_NAME_WARN,
                 name,
                 dialogCallback,
                 isAdd
@@ -63904,7 +63944,31 @@ $namespace('di.shared.vui');
             this._saveImageNameCallBack(isAdd, name);
         } 
     }
-    
+
+    /**
+     * 是否含有相同名字的tab
+     *
+     *
+     * @private
+     * @param {string} name 用户输入的名称
+     * @return {string} 是否已经有相同名称
+     */
+    function hasSameTabName(isAdd, name, oldName) {
+        var result = false;
+        var tabNames = this._getAllTabName();
+        // 如果是编辑
+        if (!isAdd) {
+            if (name === oldName) {
+                var index = tabNames.indexOf(oldName);
+                tabNames = tabNames.slice(0, index).concat(tabNames.slice(index + 1, tabNames.length));
+            }
+        }
+        if (tabNames.indexOf(name) >= 0) {
+            result = true;
+        }
+        return result;
+    }
+
     /**
      * 验证名称
      * 
@@ -64047,7 +64111,7 @@ $namespace('di.shared.vui');
         
         html.push(
             '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, className, '"',
-            ' imgid="', data.reportId, '">',
+            ' imgid="', data.reportId, '" title="默认">',
                 '<span class="',
                     TAB_CLASS.TAB_TEXT_CLASS_NAME, '"',
                 '>默认</span>',
@@ -64064,10 +64128,10 @@ $namespace('di.shared.vui');
             var aClassName = (key === currentTabId)
                 ? (' ' + TAB_CLASS.CURRENT_TAB_CLOSE_CLASS_NAME)
                 : '';
-                
+
             html.push(
                '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, liClassName, '"',
-                    'title="', imgName, '"', ' imgid="', key, '">',
+                    'title="', encodeHTML(imgName), '"', ' imgid="', key, '">',
                     buildImageNameHtml(imgName),
                     '<a class="', TAB_CLASS.TAB_CLOSE_CLASS_NAME, aClassName,
                     '" href="javascript:void(0)">×</a>',
@@ -64101,29 +64165,11 @@ $namespace('di.shared.vui');
     function buildImageNameHtml(name) {
         var spanHTML = [
             '<span class="',
-                TAB_CLASS.TAB_TEXT_CLASS_NAME,
-                '" '
+            TAB_CLASS.TAB_TEXT_CLASS_NAME,
+            '" >',
+            encodeHTML(name),
+            '</span>'
         ];
-        var l = textLength(name);
-        var title = name;
-        
-        if (l > TAB_NAME_SHOW_LENGTH) {
-            
-            name = textSubstr(name, 0, TAB_NAME_SHOW_LENGTH) + '...';
-            spanHTML.push(
-                'title="',title,'">',
-                    encodeHTML(name), 
-                '</span>'
-            );
-        } 
-        else {
-            
-            spanHTML.push(
-                '>',
-                    encodeHTML(name), 
-                '</span>'
-            );
-        }
         return spanHTML.join('');
     }
     
@@ -64150,10 +64196,11 @@ $namespace('di.shared.vui');
      * @param {string} id 需要预存的镜像id
      * @param {string} name 需要预存的镜像名称
      */
-    TAB_BUTTON_CLASS.appendTab= function (id, name) {
+    TAB_BUTTON_CLASS.appendTab = function (id, name) {
         var tabUl = this._tabUl;
         // 创建li标签
         var oLi = document.createElement("li");
+        oLi.title = encodeHTML(name);
         addClass(oLi, TAB_CLASS.NORMAL_TAB_CLASS_NAME);
         
         var html = [
@@ -64179,10 +64226,10 @@ $namespace('di.shared.vui');
     TAB_BUTTON_CLASS.updateCurrentTab = function (name) {
         var curentTab = this.getCurrentTab();
         var tabSpan = domChildren(curentTab)[0];
-
+        var parentTab = getParent(tabSpan);
         if (tabSpan) {
             tabSpan.innerHTML = encodeHTML(name);
-            tabSpan.title = name;
+            parentTab.title = name;
         }
     };
      
@@ -64223,12 +64270,29 @@ $namespace('di.shared.vui');
             return '';
         }
     };
+
+    /**
+     * 获取所有tab名字
+     *
+     * @public
+     * @return {Array}  所有tab名字
+     *
+     */
+    TAB_BUTTON_CLASS.getAllTabName = function () {
+        var tabUl = this._tabUl;
+        var oLis = domChildren(tabUl);
+        var tabNameArr = [];
+        for (var i = 0, iLen = oLis.length; i < iLen; i ++) {
+            tabNameArr.push(domChildren(oLis[i])[0].innerHTML);
+        }
+        return tabNameArr;
+    };
     
     /**
      * 获取存在的tab个数
      * 
      * @public
-     * returns {string}  存在的tab的个数 
+     * return {string}  存在的tab的个数
      */
     TAB_BUTTON_CLASS.getTabsNums = function () {
         var tabUl = this._tabUl;
@@ -68844,14 +68908,18 @@ $namespace('di.shared.adapter');
             getType.call(this) == 'ui-multi-select' ? [] : null
         );
         while(this.remove(0)) {}
-        // 补全多选下拉框默认选中值 TODO:这个value是需要后端补全的
-        if (getType.call(this) == 'ui-multi-select') {
+        // 多选下拉框：如果后端返回选中值，非正常，补全多选下拉框默认选中值
+        if (
+            (getType.call(this) === 'ui-multi-select')
+            && (!data.value || (data.value && data.value.length === 0))
+        ) {
             var value = [];
             for (var i = 0, len = datasource.length; i < len; i ++) {
                 value.push(datasource[i].value);
             }
             data.value = value;
         }
+
         // 当是多选下拉框，含有全选按钮，返回的数据中含有 全部节点 时，过滤掉此节点，然后把‘全选’按钮的text给换成此节点的text（为了适应业务逻辑，不得不加这一段代码）
         // callback维度会返回一个全部节点
         if (getType.call(this) == 'ui-multi-select'
@@ -77403,6 +77471,9 @@ $namespace('di.shared.ui');
                 },
                 getCurrentTabName: function () {
                     return saveRptTabBtn.getCurrentTabName();
+                },
+                getAllTabName: function () {
+                    return saveRptTabBtn.getAllTabName();
                 }
             };
 

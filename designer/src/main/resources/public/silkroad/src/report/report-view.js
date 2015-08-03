@@ -44,7 +44,8 @@ define([
 
                 this.model.publishReport(type, reportId, function (data) {
                     var renderData = {
-                        url: data,
+                        content: data,
+                        url: data === 'Not published!' ? '#' : data,
                         type: type
                     };
 

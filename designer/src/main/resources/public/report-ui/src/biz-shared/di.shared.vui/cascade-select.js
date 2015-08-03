@@ -62,22 +62,34 @@ $namespace('di.shared.vui');
      * @param {*} data.value 当前数据
      */
     CASCADE_SELECT_CLASS.setData = function (data) {
-        var me = this,
-            def = me.$di('getDef'),
-            compId = def.compId;
-            selElId = compId + '-0',
-            html = ['<select id="', selElId, '">'],
-            data = data.datasource;
+        var me = this;
+        var def = me.$di('getDef');
+        var compId = def.compId;
+        var selElId = compId + '-0';
+        var html = ['<select id="', selElId, '">'];
+        var datasource = data.datasource;
 
         me._compId = compId;
         me._curIndex = 0;
         me._selValue = '';
         me._allSel = def.selectAllDim.length;
-
+        if (data.value && data.value.length > 0) {
+            var selArr = data.value[0].split('.');
+            var resArr = [];
+            for (var i = 0; i <= (me._curIndex + 1); i ++) {
+                resArr.push(selArr[i]);
+            }
+            me._selValue = resArr.join('.');
+        }
+        else {
+            me._selValue = datasource[0].value;
+        }
         // 渲染第一个select
-        for(var i = 0, len = data.length; i < len; i ++) {
+        for (var i = 0, len = datasource.length; i < len; i ++) {
             html.push(
-                '<option value="', data[i].value, '">', data[i].text,
+                '<option value="', datasource[i].value, '"',
+                datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                '>', datasource[i].text,
                 '</option>'
             );
         }
@@ -100,12 +112,11 @@ $namespace('di.shared.vui');
                 }
             }
         });
-        $('select[id='+ selElId +']').remove();
-        me._selValue = data[0].value;
+        $('select[id=' + selElId + ']').remove();
 
         // 当初始化完第一个下拉框，如果是多级，就去触发第二个
         if(me._curIndex < me._allSel - 1) {
-            me.getNextLevel(data[0].value);
+            me.getNextLevel(me._selValue);
         }
         else {
             me.notify('cascadeSelectChange');
@@ -140,11 +151,16 @@ $namespace('di.shared.vui');
      * @param {*} data.value 当前数据
      */
     CASCADE_SELECT_CLASS.renderNextLevel = function(data) {
-        var me = this,
-            compId = me._compId,
-            dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
+        var me = this;
+        var compId = me._compId;
+        var datasource;
+        var dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
 
-        data && data[compId] && (data = data[compId].datasource);
+        if (data && data[compId]) {
+            data = data[compId];
+            datasource = data.datasource;
+        }
+
         // 先移除掉触发者以后的所有下拉框
         for (var i = dif - 1; i >= 0; i --) {
             var _cur = me._curIndex + (dif - i);
@@ -155,13 +171,28 @@ $namespace('di.shared.vui');
                 }
             });
         }
-        if (data instanceof Array && dif !== 0) {
+
+        if (datasource instanceof Array && dif !== 0) {
             // 渲染触发者的下一个下拉框
             var selElId = compId + '-' + (++ me._curIndex);
+            if (data.value && data.value.length > 0) {
+                var selArr = data.value[0].split('.');
+                var resArr = [];
+                for (var i = 0; i <= (me._curIndex + 1); i ++) {
+                    resArr.push(selArr[i]);
+                }
+                me._selValue = resArr.join('.');
+            }
+            else {
+                me._selValue = datasource[0].value;
+            }
+
             var html = ['<select id="', selElId, '">'];
-            for (var i = 0, len = data.length; i < len; i ++) {
+            for (var i = 0, len = datasource.length; i < len; i ++) {
                 html.push(
-                    '<option value="', data[i].value, '">', data[i].text,
+                    '<option value="', datasource[i].value, '"',
+                    datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                    '>', datasource[i].text,
                     '</option>'
                 );
             }
@@ -189,9 +220,8 @@ $namespace('di.shared.vui');
             dif = me._allSel - 1 - me._curIndex;
             isGoToNext = dif > 0 ? true : false;
 
-            me._selValue = data[0].value;
             if (isGoToNext) {
-                me.getNextLevel(data[0].value);
+                me.getNextLevel(me._selValue);
             }
             else {
                 me.notify('cascadeSelectChange');

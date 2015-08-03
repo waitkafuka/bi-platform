@@ -474,7 +474,6 @@ public class QueryRequestUtil {
         current = System.currentTimeMillis();
 
         if (CollectionUtils.isEmpty(queryMeasures)) {
-
             dataSet.setDataList(AggregateCompute.distinct(transList));
             return dataSet;
         }
@@ -486,45 +485,79 @@ public class QueryRequestUtil {
                 if (StringUtils.isNotBlank(properties.childField)) {
                     groupList0.remove(properties.childField);
                 }
-                boolean needSummary = isNeedSummary(properties,
-                        queryContext.getRowMemberTrees());
+                List<MemberNodeTree> rowMemberTrees = queryContext.getRowMemberTrees();
+                boolean needSummary = isNeedSummary(properties, rowMemberTrees);
+                
                 LinkedList<SearchIndexResultRecord> summaryCalcList = new LinkedList<SearchIndexResultRecord>();
                 for (SearchIndexResultRecord record : transList) {
-                    SearchIndexResultRecord vRecord = DeepcopyUtils
-                            .deepCopy(record);
-                    vRecord.setField(
-                            meta.getFieldIndex(properties.pullupField),
-                            properties.pullupValue);
-
-                    generateGroupBy(vRecord, groupList0, meta);
-                    summaryCalcList.add(vRecord);
                     if (!needSummary) {
+                        MemberNodeTree tmp = getCurrentNode (properties.pullupValue, rowMemberTrees);
+                        // TODO 理论上这里不会有错误
+                        String recordName = getSameNode (tmp, tmp.getChildren ()).getName ();
+                        SearchIndexResultRecord vRecord = null;
+                        for (SearchIndexResultRecord currRecord : transList) {
+                            Serializable field = currRecord.getField (meta.getFieldIndex (properties.pullupField));
+                            if (field.equals(recordName)) {
+                                vRecord = DeepcopyUtils.deepCopy(currRecord);
+                                break;
+                            }
+                        }
+                        vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
+                        generateGroupBy(vRecord, groupList0, meta);
+                        summaryCalcList.add(vRecord);
                         break;
+                    } else {
+                        SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy(record);
+                        vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
+                        generateGroupBy(vRecord, groupList0, meta);
+                        summaryCalcList.add(vRecord);
                     }
                 }
-                transList.addAll(AggregateCompute.aggregate(summaryCalcList,
-                        dimSize, queryMeasures));
+                transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
             }
         }
 
         dataSet.setDataList(transList);
-        LOGGER.info("cost :" + (System.currentTimeMillis() - current)
-                + " aggregator leaf.");
+        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " aggregator leaf.");
         return dataSet;
     }
 
-    private static boolean isNeedSummary(PullUpProperties properties,
-            List<MemberNodeTree> rowMemberTrees) {
+    protected static MemberNodeTree getCurrentNode(String name, List<MemberNodeTree> nodeTrees) {
+        MemberNodeTree rs = null;
+        if (CollectionUtils.isEmpty (nodeTrees)) {
+            return rs;
+        }
+        for (MemberNodeTree m : nodeTrees) {
+            if (name.equals(m.getName ())) {
+                return m;
+            } else {
+                if (CollectionUtils.isNotEmpty (m.getChildren ())) {
+                    return getCurrentNode(name, m.getChildren ());
+                }
+            }
+        }
+        return rs;
+    }
+    
+    protected static MemberNodeTree getSameNode(MemberNodeTree node, List<MemberNodeTree> nodeTrees) {
+        if (CollectionUtils.isEmpty (nodeTrees)) {
+            return node;
+        }
+        for (MemberNodeTree m : nodeTrees) {
+            if (CollectionUtils.isEqualCollection (node.getLeafIds (), m.getLeafIds ())) {
+                return m;
+            }
+        }
+        return node;
+    }
+    
+    protected static boolean isNeedSummary(PullUpProperties properties, List<MemberNodeTree> rowMemberTrees) {
         for (MemberNodeTree node : rowMemberTrees) {
-            if (StringUtils.isEmpty(node.getName())
-                    && node.getChildren() != null) {
+            if (StringUtils.isEmpty(node.getName()) && CollectionUtils.isNotEmpty (node.getChildren())) {
                 for (MemberNodeTree child : node.getChildren()) {
-                    if (child.isCallback()
-                            && CollectionUtils
-                                    .isNotEmpty(child.getSummaryIds())) {
+                    if (child.isCallback() && CollectionUtils.isNotEmpty (child.getSummaryIds())) {
                         for (MemberNodeTree tmp : child.getChildren()) {
-                            if (CollectionUtils.isEqualCollection(
-                                    child.getSummaryIds(), tmp.getLeafIds())) {
+                            if (CollectionUtils.isEqualCollection (child.getSummaryIds(), tmp.getLeafIds())) {
                                 return false;
                             }
                         }
@@ -535,8 +568,8 @@ public class QueryRequestUtil {
         return true;
     }
 
-    public static void generateGroupBy(SearchIndexResultRecord record,
-            List<String> groups, Meta meta) throws NoSuchFieldException {
+    public static void generateGroupBy(SearchIndexResultRecord record, 
+        List<String> groups, Meta meta) throws NoSuchFieldException {
         if (CollectionUtils.isNotEmpty(groups)) {
             Serializable field = null;
             List<String> fields = new ArrayList<>();

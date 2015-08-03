@@ -82,7 +82,8 @@ public interface QueryBuildService {
      * @return
      * @throws Exception
      */
-    PivotTable parseToPivotTable(Cube cube, DataModel dataModel) throws PivotTableParseException;
+    PivotTable parseToPivotTable(Cube cube, DataModel dataModel, 
+        LogicModel logicModel) throws PivotTableParseException;
 
     /**
      * 将DataModel模型转为平面表模型
@@ -94,7 +95,8 @@ public interface QueryBuildService {
      * @return 平面表模型
      * @throws PlaneTableParseException
      */
-    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel, FormatModel formatModel, QueryAction queryAction) throws PlaneTableParseException;
+    PlaneTable parseToPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel,
+        FormatModel formatModel, QueryAction queryAction) throws PlaneTableParseException;
     /**
      * @param model
      * @param areaId
@@ -105,6 +107,6 @@ public interface QueryBuildService {
      */
     QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
             Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
-                    throws QueryModelBuildException;
+            throws QueryModelBuildException;
     
 }

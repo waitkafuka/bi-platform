@@ -776,7 +776,9 @@ public class QueryUtils {
             if (index >= 0 && index < chart.getAllMeasures().length) {
                 chart.setDefaultMeasures(new String[]{ chart.getAllMeasures()[index] });
             } 
-        } 
+        } else if (area.getType() == ExtendAreaType.LITEOLAP_CHART) {
+            addDataFormatInfo (chart, area.getFormatModel ().getDataFormat ());
+        }
     }
 
     private static void addDataFormatInfo(DIReportChart chart, Map<String, String> dataFormat) {
@@ -787,7 +789,11 @@ public class QueryUtils {
             if (seriesData == null) {
                 continue;
             }
-            seriesData.setFormat (dataFormat.get (seriesData.getyAxisName ()));
+            String format = dataFormat.get (seriesData.getyAxisName ());
+            if (StringUtils.isEmpty (format)) {
+                format = dataFormat.get ("defaultFormat");
+            }
+            seriesData.setFormat (format);
         }
     }
 

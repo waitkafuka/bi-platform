@@ -136,6 +136,10 @@ public class ReportRuntimeModel implements Serializable {
 
     private SortRecord sortRecord;
     
+    private long createTime;
+    
+    
+    
     /**
      * 构造函数
      * 
@@ -698,6 +702,23 @@ public class ReportRuntimeModel implements Serializable {
      */
     public SortRecord getSortRecord() {
         return sortRecord;
+    }
+
+    /**
+     * @return the createTime
+     */
+    public long getCreateTime() {
+        if (this.createTime == 0) {
+            this.createTime = System.currentTimeMillis ();
+        }
+        return createTime;
+    }
+
+    /**
+     * @param createTime the createTime to set
+     */
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
     
     

@@ -1,6 +1,6 @@
 <div class="con-releaseBox">
     <div class="con-head">
-        <a href="{{url}}" target="_blank"><div class="con-hRead"></div></a>
+        <a href="{{url}}" {{if url!=='#'}}target="_blank"{{/if}}><div class="con-hRead"></div></a>
         {{if type == 'POST'}}
         <a href="javascript:;"><div class="con-hReturn j-report-list"></div></a>
         {{else}}
@@ -11,11 +11,11 @@
         <div class="con-report-url">
             <ul class="con-url">
                 <li>你可以将下面的报表地址分享给好友，或者通过邮件的方式发送出去</li>
-                <li id="copyUrlBtnCopyContent" class="con-url-text con-br">{{url}}</li>
+                <li id="copyUrlBtnCopyContent" class="con-url-text con-br">{{content}}</li>
             </ul>
             <ul class="con-url-a" id="copyUrlBtnContainer">
                 <li id="copyUrlBtn"><a><span class="conspan">复制URL地址</span></a></li>
-                <li><a href="{{url}}" target="_blank"><span class="conspan">新窗口浏览</span></a></li>
+                <li><a href="{{url}}" {{if url!=='#'}}target="_blank"{{/if}}><span class="conspan">新窗口浏览</span></a></li>
             </ul>
         </div>
         <div class="con-tiled">

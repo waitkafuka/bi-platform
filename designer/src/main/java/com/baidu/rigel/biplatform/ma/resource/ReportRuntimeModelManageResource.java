@@ -17,6 +17,7 @@ package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -777,6 +779,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         copy.getModel ().setName (name);
         String savedReportPath = getRealStorePath (request, copy);
         try {
+            copy.setCreateTime (System.nanoTime ());
             fileService.write (savedReportPath, SerializationUtils.serialize (copy), true);
             reportModelCacheManager.updateRunTimeModelToCache (copy.getReportModelId (), copy);
         } catch (FileServiceException e) {
@@ -826,6 +829,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         } catch (FileServiceException e) {
             logger.error (e.getMessage (), e);
         } 
+        reportModelCacheManager.updateRunTimeModelToCache (reportId, runTimeModel);
         result.setStatus (0);
         result.setStatusInfo ("successfully");
         logger.info ("save report succcessfully with id : {} on path {}", reportId, savedReportPath);
@@ -889,13 +893,22 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             return result;
         }
         Map<String, Object> datas = Maps.newHashMap ();
-        List<String> tmp = Lists.newArrayList (files);
-        Collections.sort (tmp);
-        for (String file : tmp) {
+        List<ReportRuntimeModel> tmp = Lists.newArrayList ();
+        for (String file : files) {
             String filePath = fileList +  File.separator + file;
             ReportRuntimeModel model = 
                 (ReportRuntimeModel) SerializationUtils.deserialize (fileService.read (filePath));
-            rep.put (model.getReportModelId (), model.getModel ().getName ());
+            tmp.add (model);
+        }
+        Collections.sort (tmp, new Comparator<ReportRuntimeModel>() {
+
+            @Override
+            public int compare(ReportRuntimeModel o1, ReportRuntimeModel o2) {
+                return Long.valueOf (o1.getCreateTime ()).compareTo (o2.getCreateTime ());
+            }
+        });
+        for (ReportRuntimeModel m : tmp) {
+            rep.put (m.getReportModelId (), m.getModel ().getName ());
         }
         
         datas.put ("reportId", runtimeModel.getOriReportId ());

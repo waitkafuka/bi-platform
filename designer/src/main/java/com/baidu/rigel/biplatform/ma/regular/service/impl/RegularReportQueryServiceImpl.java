@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
@@ -43,6 +44,7 @@ import com.google.common.collect.Maps;
  * @author david.wang
  *
  */
+@Service
 public class RegularReportQueryServiceImpl implements RegularReportQueryService {
     
     /**
@@ -99,7 +101,7 @@ public class RegularReportQueryServiceImpl implements RegularReportQueryService 
         }
         long end = System.currentTimeMillis ();
         LOG.info ("generate report data cost {} ms", (end - begin));
-        return null;
+        return rs;
     }
     
     

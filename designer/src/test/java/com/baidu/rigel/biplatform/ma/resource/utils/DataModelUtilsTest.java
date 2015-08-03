@@ -72,7 +72,7 @@ public class DataModelUtilsTest {
     @Test
     public void testTransDataModel2PivotTableWithNullModel() {
         try {
-            DataModelUtils.transDataModel2PivotTable(null, null, true, 100, true);
+            DataModelUtils.transDataModel2PivotTable(null, null, true, 100, true, null);
             Assert.fail();
         } catch (Throwable e) {
             Assert.assertNotNull(e);
@@ -91,10 +91,10 @@ public class DataModelUtilsTest {
         Cube cube = Mockito.mock(Cube.class);
         PowerMockito.when(QueryUtils.transformCube(cube)).thenReturn(cube);
         long begin = System.currentTimeMillis();
-        DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, true);
+        DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, true, null);
         long end = System.currentTimeMillis() - begin;
         begin = System.currentTimeMillis();
-        DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+        DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false, null);
         long endAnohter = System.currentTimeMillis() - begin;
         Assert.assertTrue(end > endAnohter);
     }
@@ -109,7 +109,7 @@ public class DataModelUtilsTest {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setRowHeadFields(null);
             Cube cube = Mockito.mock(Cube.class);
-            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false, null);
             Assert.assertTrue(table.getRowHeadFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -126,7 +126,7 @@ public class DataModelUtilsTest {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setRowHeadFields(Lists.newArrayList());
             Cube cube = Mockito.mock(Cube.class);
-            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false, null);
             Assert.assertTrue(table.getRowHeadFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -143,7 +143,7 @@ public class DataModelUtilsTest {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setColumnHeadFields(null);
             Cube cube = Mockito.mock(Cube.class);
-            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false, null);
             Assert.assertTrue(table.getColFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -160,7 +160,7 @@ public class DataModelUtilsTest {
             DataModel dataModel = Mockito.mock(DataModel.class);
             dataModel.setColumnHeadFields(Lists.newArrayList());
             Cube cube = Mockito.mock(Cube.class);
-            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+            PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false, null);
             Assert.assertTrue(table.getColFields().size() == 0);
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -210,7 +210,7 @@ public class DataModelUtilsTest {
         }
         dataModel.setColumnBaseData(datas);
         Cube cube = Mockito.mock(Cube.class);
-        PivotTable pivotTable = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false);
+        PivotTable pivotTable = DataModelUtils.transDataModel2PivotTable(cube, dataModel, true, 100, false, null);
         Assert.assertNotNull(pivotTable);
         Assert.assertEquals(1, pivotTable.getColFields().size());
         Assert.assertEquals(10, pivotTable.getRowHeadFields().size());
@@ -621,7 +621,7 @@ public class DataModelUtilsTest {
     public void testConvert2StringWithEmptyModel() {
         try {
             Cube cube = Mockito.mock(Cube.class);
-            DataModelUtils.convertDataModel2CsvString(cube, null);
+            DataModelUtils.convertDataModel2CsvString(cube, null, null);
             Assert.fail();
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -637,7 +637,7 @@ public class DataModelUtilsTest {
             headField.setCaption("test");
             headField.setNodeUniqueName("[test].[test]");
             dataModel.setRowHeadFields(rowHeadFields);
-            String str = DataModelUtils.convertDataModel2CsvString(null, dataModel);
+            String str = DataModelUtils.convertDataModel2CsvString(null, dataModel, null);
             Assert.assertEquals("", str);
         } catch (Exception e) {
             Assert.assertNotNull(e);
@@ -660,8 +660,8 @@ public class DataModelUtilsTest {
             datas.add(BigDecimal.ZERO);
             columnBaseData.add(datas);
             dataModel.setColumnBaseData(columnBaseData);
-            String str = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
-            Assert.assertEquals("dim,a,0\r\n", str);
+            String str = DataModelUtils.convertDataModel2CsvString(cube, dataModel, null);
+            Assert.assertNotNull (str);
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
@@ -821,6 +821,28 @@ public class DataModelUtilsTest {
         return dataModel;
     }
     
+    @Test
+    public void testGetDimCaption() {
+        String[] rs = DataModelUtils.getDimCaptions (null, null);
+        Assert.assertEquals (0, rs.length);
+        Cube cube = Mockito.mock (Cube.class);
+        rs = DataModelUtils.getDimCaptions (cube, null);
+        Assert.assertEquals (0, rs.length);
+        LogicModel model = Mockito.mock (LogicModel.class);
+        rs = DataModelUtils.getDimCaptions (cube, model);
+        Assert.assertEquals (0, rs.length);
+        Item[] items = new Item[1];
+        items[0] = new Item();
+        items[0].setOlapElementId ("1");
+        Map<String, Dimension> dims = Maps.newHashMap ();
+        Dimension dim = Mockito.mock (Dimension.class);
+        Mockito.doReturn ("a").when (dim).getCaption ();
+        dims.put ("1", dim);
+        Mockito.doReturn (dims).when (cube).getDimensions ();
+        Mockito.doReturn (items).when (model).getRows ();
+        rs = DataModelUtils.getDimCaptions (cube, model);
+        Assert.assertEquals (1, rs.length);
+    }
     /**
      * 将数据转为cellData
      * parseCellDatas
@@ -857,4 +879,5 @@ public class DataModelUtilsTest {
         }
         return data;
     }
+    
 }

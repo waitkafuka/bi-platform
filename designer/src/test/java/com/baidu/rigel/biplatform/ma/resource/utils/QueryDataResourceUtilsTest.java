@@ -160,7 +160,7 @@ public class QueryDataResourceUtilsTest {
         pivotTable.setRowHeadFields(list);
         Mockito.when(
                 queryBuildService.parseToPivotTable(Mockito.any(),
-                        Mockito.any())).thenReturn(pivotTable);
+                        Mockito.any(), Mockito.any ())).thenReturn(pivotTable);
         ResponseResult responseResultLiteOlap = queryDataResourceUtils
                 .parseQueryResultToResponseResult(reportRuntimeModel,
                         targetArea, resultSet, new ExtendAreaContext(), queryAction);
@@ -226,7 +226,7 @@ public class QueryDataResourceUtilsTest {
         // 异常情况
         targetArea.setType(ExtendAreaType.TABLE);
         Mockito.when(
-                queryBuildService.parseToPivotTable(Mockito.any(),
+                queryBuildService.parseToPivotTable(Mockito.any(), Mockito.any(),
                         Mockito.any())).thenThrow(new PivotTableParseException(""));
         ResponseResult responseResultLiteOlap2 = queryDataResourceUtils
                 .parseQueryResultToResponseResult(reportRuntimeModel,

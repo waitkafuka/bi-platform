@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -390,8 +389,9 @@ public class DimConfigResource extends BaseResource {
             if (cube != null) {
                 LogicModel logicModel = area.getLogicModel ();
                 if (logicModel != null) {
-                    updateLogicModelWithCube(logicModel, cube);
-                    if (area.getType() == ExtendAreaType.PLANE_TABLE) {
+                    boolean isPlaneTable = area.getType() == ExtendAreaType.PLANE_TABLE;
+                    updateLogicModelWithCube(logicModel, cube, isPlaneTable);
+                    if (isPlaneTable) {
                         updatePlaneTableCond(reportModel.getPlaneTableConditions(), logicModel.getSlices());
                     }
                 }
@@ -399,10 +399,10 @@ public class DimConfigResource extends BaseResource {
         });
     }
 
-    private void updateLogicModelWithCube(LogicModel logicModel, Cube cube) {
+    private void updateLogicModelWithCube(LogicModel logicModel, Cube cube, boolean isPlaneTable) {
         Item[] cols = logicModel.getColumns ();
         if (cols.length > 0) {
-            updateCols (logicModel, cube, cols);
+            updateCols (logicModel, cube, cols, isPlaneTable);
         }
         
         if (logicModel.getSelectionMeasures () != null && !logicModel.getSelectionMeasures ().isEmpty ()) {
@@ -431,8 +431,11 @@ public class DimConfigResource extends BaseResource {
         }
     }
 
-    private void updateCols(LogicModel logicModel, Cube cube, Item[] cols) {
+    private void updateCols(LogicModel logicModel, Cube cube, Item[] cols, boolean isPlaneTable) {
         for (Item item : cols) {
+            if (isPlaneTable && cube.getDimensions ().containsKey (item.getOlapElementId ())) {
+                continue;
+            }
             if (cube.getMeasures ().containsKey (item.getOlapElementId ())) {
                 continue;
             }

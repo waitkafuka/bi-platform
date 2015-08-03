@@ -62,7 +62,8 @@ public class PivotTableOnlineDownloadServiceImpl implements DownloadTableDataSer
             dataModel = DataModelUtils.preProcessDataModel4Show(dataModel, setting);
         }
         // 获取csv字符串
-        String csvString = DataModelUtils.convertDataModel2CsvString(configQuestionModel.getCube(), dataModel);
+        String csvString = 
+            DataModelUtils.convertDataModel2CsvString(configQuestionModel.getCube(), dataModel, logicModel);
         return csvString;
     }
 }

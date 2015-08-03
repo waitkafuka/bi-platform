@@ -125,7 +125,7 @@ $namespace('di.shared.vui');
         
         html.push(
             '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, className, '"',
-            ' imgid="', data.reportId, '">',
+            ' imgid="', data.reportId, '" title="默认">',
                 '<span class="',
                     TAB_CLASS.TAB_TEXT_CLASS_NAME, '"',
                 '>默认</span>',
@@ -142,10 +142,10 @@ $namespace('di.shared.vui');
             var aClassName = (key === currentTabId)
                 ? (' ' + TAB_CLASS.CURRENT_TAB_CLOSE_CLASS_NAME)
                 : '';
-                
+
             html.push(
                '<li class="', TAB_CLASS.NORMAL_TAB_CLASS_NAME, liClassName, '"',
-                    'title="', imgName, '"', ' imgid="', key, '">',
+                    'title="', encodeHTML(imgName), '"', ' imgid="', key, '">',
                     buildImageNameHtml(imgName),
                     '<a class="', TAB_CLASS.TAB_CLOSE_CLASS_NAME, aClassName,
                     '" href="javascript:void(0)">×</a>',
@@ -179,29 +179,11 @@ $namespace('di.shared.vui');
     function buildImageNameHtml(name) {
         var spanHTML = [
             '<span class="',
-                TAB_CLASS.TAB_TEXT_CLASS_NAME,
-                '" '
+            TAB_CLASS.TAB_TEXT_CLASS_NAME,
+            '" >',
+            encodeHTML(name),
+            '</span>'
         ];
-        var l = textLength(name);
-        var title = name;
-        
-        if (l > TAB_NAME_SHOW_LENGTH) {
-            
-            name = textSubstr(name, 0, TAB_NAME_SHOW_LENGTH) + '...';
-            spanHTML.push(
-                'title="',title,'">',
-                    encodeHTML(name), 
-                '</span>'
-            );
-        } 
-        else {
-            
-            spanHTML.push(
-                '>',
-                    encodeHTML(name), 
-                '</span>'
-            );
-        }
         return spanHTML.join('');
     }
     
@@ -228,10 +210,11 @@ $namespace('di.shared.vui');
      * @param {string} id 需要预存的镜像id
      * @param {string} name 需要预存的镜像名称
      */
-    TAB_BUTTON_CLASS.appendTab= function (id, name) {
+    TAB_BUTTON_CLASS.appendTab = function (id, name) {
         var tabUl = this._tabUl;
         // 创建li标签
         var oLi = document.createElement("li");
+        oLi.title = encodeHTML(name);
         addClass(oLi, TAB_CLASS.NORMAL_TAB_CLASS_NAME);
         
         var html = [
@@ -257,10 +240,10 @@ $namespace('di.shared.vui');
     TAB_BUTTON_CLASS.updateCurrentTab = function (name) {
         var curentTab = this.getCurrentTab();
         var tabSpan = domChildren(curentTab)[0];
-
+        var parentTab = getParent(tabSpan);
         if (tabSpan) {
             tabSpan.innerHTML = encodeHTML(name);
-            tabSpan.title = name;
+            parentTab.title = name;
         }
     };
      
@@ -301,12 +284,29 @@ $namespace('di.shared.vui');
             return '';
         }
     };
+
+    /**
+     * 获取所有tab名字
+     *
+     * @public
+     * @return {Array}  所有tab名字
+     *
+     */
+    TAB_BUTTON_CLASS.getAllTabName = function () {
+        var tabUl = this._tabUl;
+        var oLis = domChildren(tabUl);
+        var tabNameArr = [];
+        for (var i = 0, iLen = oLis.length; i < iLen; i ++) {
+            tabNameArr.push(domChildren(oLis[i])[0].innerHTML);
+        }
+        return tabNameArr;
+    };
     
     /**
      * 获取存在的tab个数
      * 
      * @public
-     * returns {string}  存在的tab的个数 
+     * return {string}  存在的tab的个数
      */
     TAB_BUTTON_CLASS.getTabsNums = function () {
         var tabUl = this._tabUl;

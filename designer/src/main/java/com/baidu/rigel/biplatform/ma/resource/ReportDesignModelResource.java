@@ -16,6 +16,7 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.File;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -1194,7 +1195,20 @@ public class ReportDesignModelResource extends BaseResource {
         }
         result.setStatus(0);
         ExtendArea area = model.getExtendById(areaId);
-        result.setData(area.getFormatModel().getDataFormat());
+        LinkedHashMap<String, String> tmp = Maps.newLinkedHashMap ();
+        Item[] items = area.getLogicModel ().getColumns ();
+        Map<String, String> dataFormat = area.getFormatModel ().getDataFormat ();
+        String defaultFormatKey = "defaultFormat";
+        tmp.put (defaultFormatKey, dataFormat.get(defaultFormatKey));
+        if (items != null && items.length > 0) {
+            Cube cube = model.getSchema ().getCubes ().get (area.getCubeId ());
+            for (Item item : items) {
+                String olapElementId = item.getOlapElementId ();
+                String indName = cube.getMeasures ().get (olapElementId).getName ();
+                tmp.put (indName, dataFormat.get (indName));
+            }
+        }
+        result.setData(tmp);
         result.setStatusInfo(SUCCESS);
         return result;
     }

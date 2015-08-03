@@ -103,15 +103,16 @@ public class JdbcHandler {
         long begin = System.currentTimeMillis();
         List<Map<String, Object>> result = null;
         try {
+            logger.info("queryId:{} sql: {}", QueryRouterContext
+                    .getQueryId(), this.toPrintString(sql, whereValues));
             result = this.jdbcTemplate.queryForList(sql, whereValues.toArray());
         } catch (Exception e) {
             logger.error("queryId:{} select sql error:{}",
                     QueryRouterContext.getQueryId(), e.getCause().getMessage());
             throw e;
         } finally {
-            logger.info("queryId:{} select sql cost:{} ms sql: {}",
-                    QueryRouterContext.getQueryId(), System.currentTimeMillis()
-                            - begin, this.toPrintString(sql, whereValues));
+            logger.info("queryId:{} select sql cost:{} ms",
+                    QueryRouterContext.getQueryId(), System.currentTimeMillis() - begin);
         }
         return result;
     }
@@ -134,6 +135,8 @@ public class JdbcHandler {
         Map<String, Object> result = null;
         int count = 0;
         try {
+            logger.info("queryId:{} count sql: {}", QueryRouterContext
+                    .getQueryId(), this.toPrintString(sql, whereValues));
             result = this.jdbcTemplate.queryForMap(sql, whereValues.toArray());
             count = Integer.valueOf(result.values().toArray()[0].toString())
                     .intValue();
@@ -142,11 +145,9 @@ public class JdbcHandler {
                     QueryRouterContext.getQueryId(), e.getCause().getMessage());
             throw e;
         } finally {
-            logger.info(
-                    "queryId:{} select count sql cost:{} ms, result: {}, count sql: {}",
+            logger.info("queryId:{} select count sql cost:{} ms, result: {}",
                     QueryRouterContext.getQueryId(), System.currentTimeMillis()
-                            - begin, count,
-                    this.toPrintString(sql, whereValues));
+                            - begin, count);
         }
         return count;
     }

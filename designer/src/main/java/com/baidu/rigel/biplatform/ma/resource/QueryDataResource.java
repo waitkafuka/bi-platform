@@ -242,14 +242,18 @@ public class QueryDataResource extends BaseResource {
     public ResponseResult initParams(@PathVariable("reportId") String reportId, HttpServletRequest request) {
         long begin = System.currentTimeMillis();
         logger.info("[INFO]--- ---begin init params with report id {}", reportId);
-        String[] areaIds = request.getParameter("paramList").split(",");
+        String areaIdList = request.getParameter("paramList");
+        String[] areaIds = null;
+        final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
+        if (!StringUtils.isEmpty (areaIdList)) {
+            areaIds = areaIdList.split(",");
+        } 
         if (areaIds == null || areaIds.length == 0) {
             ResponseResult rs = new ResponseResult();
             rs.setStatus(0);
             logger.info("[INFO]--- --- not needed init global params");
             return rs;
         }
-        final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
         final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         Map<String, Object> datas = Maps.newConcurrentMap();
         Map<String, String> params = Maps.newHashMap();
@@ -302,15 +306,7 @@ public class QueryDataResource extends BaseResource {
                         // QueryUtils.getMembersWithChildrenValue(members, tmpCube, dsInfo, Maps.newHashMap());
                         Map<String, Object> datasource = Maps.newHashMap();
                         datasource.put("datasource", values);
-                        runtimeModel.getLocalContext ().forEach ((k, v) -> {
-                            if (v.getParams ().containsKey (dim.getId ())) {
-                                Object value = v.getParams ().get (dim.getId ());
-                                if (value != null && value instanceof String) {
-                                    List<String> lists = Lists.newArrayList (((String) value).split (","));
-                                    datasource.put ("value", lists);
-                                }
-                            }
-                        });
+                        fillBackParamValues (runtimeModel, dim, datasource);
                         datas.put(areaId, datasource);
                     } catch (Exception e) {
                         logger.info(e.getMessage(), e);
@@ -324,6 +320,19 @@ public class QueryDataResource extends BaseResource {
         rs.setStatusInfo("OK");
         logger.info("[INFO]--- --- successfully init params, cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
+    }
+
+    private void fillBackParamValues(final ReportRuntimeModel runtimeModel,
+            Dimension dim, Map<String, Object> datasource) {
+        runtimeModel.getLocalContext ().forEach ((k, v) -> {
+            if (v.getParams ().containsKey (dim.getId ())) {
+                Object value = v.getParams ().get (dim.getId ());
+                if (value != null && value instanceof String) {
+                    List<String> lists = Lists.newArrayList (((String) value).split (","));
+                    datasource.put ("value", lists);
+                }
+            }
+        });
     }
 
     private List<Map<String, String>> getChildren(Member parent, List<Member> children) {
@@ -816,9 +825,10 @@ public class QueryDataResource extends BaseResource {
         }
         resetOtherStatus (runTimeModel);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", "");
         logger.info("[INFO]current context params status {}", runTimeModel.getContext().getParams());
         logger.info("[INFO]successfully update global context, cost {} ms", (System.currentTimeMillis() - begin));
+//        return initParams (reportId, request);
+        ResponseResult rs = ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", "");
         return rs;
     }
 
@@ -1063,16 +1073,24 @@ public class QueryDataResource extends BaseResource {
             throw new IllegalStateException("can't get report define");
         }
 
-        // Map<String, Object> tmp =
-        // QueryUtils.resetContextParam(request, model);
-        // runTimeModel.getContext().getParams().putAll(tmp);
         /**
          * 4. 更新区域本地的上下文
          */
         ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
 
         logger.info("[INFO] --- --- --- --- --- ---params with context is : " + areaContext.getParams());
-
+        
+        LogicModel logicModel = targetArea.getLogicModel ();
+        if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE
+            || targetArea.getType () == ExtendAreaType.LITEOLAP_CHART) {
+            logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
+        }
+        if (logicModel == null) {
+            ResponseResult response = new ResponseResult ();
+            response.setStatus (1);
+            response.setStatusInfo ("未设置坐标轴内容");
+            return response;
+        }
         /**
          * 5. 生成查询动作QueryAction
          */
@@ -1085,8 +1103,7 @@ public class QueryDataResource extends BaseResource {
             try {
                 String topSetting = request.getParameter(Constants.TOP);
                 if (!StringUtils.isEmpty(topSetting)) {
-                    model.getExtendById(areaId).getLogicModel()
-                            .setTopSetting(GsonUtils.fromJson(topSetting, MeasureTopSetting.class));
+                    logicModel.setTopSetting(GsonUtils.fromJson(topSetting, MeasureTopSetting.class));
                 }
                 action =
                         queryBuildService.generateChartQueryAction(model, areaId, areaContext.getParams(), indNames,
@@ -1175,9 +1192,9 @@ public class QueryDataResource extends BaseResource {
          * 7. 对返回结果进行处理，用于表、图显示
          */
         runTimeModel.setModel(model);
-        ResponseResult rs =
-                queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, targetArea, result, areaContext,
-                        action);
+        ResponseResult rs = queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, 
+                targetArea, result, areaContext,
+                action);
         runTimeModel.setModel(oriDesignModel);
         // TODO 对于平面表，需要维护分页信息
         if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
@@ -1541,7 +1558,7 @@ public class QueryDataResource extends BaseResource {
         try {
 //            cube = model.getSchema().getCubes().get(targetArea.getCubeId());
             drillDim = cube.getDimensions().get(elementId);
-            table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
+            table = queryBuildService.parseToPivotTable(cube, result.getDataModel(), targetLogicModel);
         } catch (PivotTableParseException e) {
             logger.info(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
@@ -1860,7 +1877,9 @@ public class QueryDataResource extends BaseResource {
                 runTimeModel.setDrillDownQueryHistory(newDrill);
                 DataModel newDataModel =
                         DataModelUtils.merageDataModel(previousResult.getDataModel(), result.getDataModel(), rowNum);
-                table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, false, 0, false);
+                table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, 
+                        false, 0, false, 
+                        targetLogicModel);
                 result.setDataModel(newDataModel);
                 /**
                  * TODO 这里重新生成当前条件对应的action，而不是下钻使用的action，为的是记录下当前表的结果
@@ -1904,7 +1923,9 @@ public class QueryDataResource extends BaseResource {
                 runTimeModel.setDrillDownQueryHistory(newDrill);
                 
                 DataModel newModel = DataModelUtils.removeDataFromDataModel(previousResult.getDataModel(), rowNum);
-                table = DataModelUtils.transDataModel2PivotTable(cube, newModel, false, 0, false);
+                table = DataModelUtils.transDataModel2PivotTable(cube, newModel,
+                        false, 0, false, 
+                        targetLogicModel);
                 result = new ResultSet();
                 result.setDataModel(newModel);
                 /**
@@ -2135,7 +2156,12 @@ public class QueryDataResource extends BaseResource {
         Map<String, Object> resultMap = Maps.newHashMap();
         try {
             Cube cube = reportModel.getSchema().getCubes().get(targetArea.getCubeId());
-            table = queryBuildService.parseToPivotTable(cube, model);
+            LogicModel logicModel = targetArea.getLogicModel ();
+            if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE 
+                || targetArea.getType () == ExtendAreaType.LITEOLAP_CHART) {
+                logicModel = reportModel.getExtendById (targetArea.getReferenceAreaId ()).getLogicModel ();
+            }
+            table = queryBuildService.parseToPivotTable(cube, model, logicModel);
         } catch (PivotTableParseException e) {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
@@ -2444,7 +2470,7 @@ public class QueryDataResource extends BaseResource {
         }
         // 处理下载请求中对数据的包装
         dataModel = DataModelUtils.preProcessDataModel4Show(dataModel, targetArea.getOtherSetting());
-        String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel);
+        String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel, targetArea.getLogicModel ());
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms");
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
@@ -2597,7 +2623,7 @@ public class QueryDataResource extends BaseResource {
         Map<String, Object> resultMap = Maps.newHashMap();
         try {
             Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
-            table = queryBuildService.parseToPivotTable(cube, result.getDataModel());
+            table = queryBuildService.parseToPivotTable(cube, result.getDataModel(), targetArea.getLogicModel ());
         } catch (PivotTableParseException e) {
             logger.info(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
@@ -2667,7 +2693,7 @@ public class QueryDataResource extends BaseResource {
         int level = MetaNameUtil.parseUnique2NameArray(currentUniqueName).length - 1;
         final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
         final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-        Map<String, Map<String, List<Map<String, String>>>> datas = Maps.newConcurrentMap();
+        Map<String, Object> datas = Maps.newConcurrentMap();
         Map<String, String> params = Maps.newHashMap();
         runtimeModel.getContext().getParams().forEach((k, v) -> {
             params.put(k, v == null ? "" : v.toString());
@@ -2693,8 +2719,11 @@ public class QueryDataResource extends BaseResource {
                         tmp.put("isLeaf", Boolean.toString(level < dim.getLevels().size()));
                         values.add(tmp);
                     });
-                    Map<String, List<Map<String, String>>> datasource = Maps.newHashMap();
+                    Map<String, Object> datasource = Maps.newHashMap();
                     datasource.put("datasource", values);
+                    if (area.getType () == ExtendAreaType.CASCADE_SELECT) {
+                        fillBackParamValues (runtimeModel, dim, datasource);
+                    }
                     datas.put(areaId, datasource);
                 } catch (Exception e) {
                     logger.info(e.getMessage(), e);

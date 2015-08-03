@@ -55,8 +55,6 @@ $namespace('di.shared.vui');
 
     // 显示错误提示，验证镜像名称时使用
     var SHOW_ERROR_TIPS = true;
-    // 隐藏错误提示，验证镜像名称时使用
-    var HIDE_ERROR_TIPS = false;
     var ADD_MODE = true;
     var UPDATE_MODE = false;
     // 镜像名称能保存的最大字符长度（一个中文两个英文）
@@ -81,8 +79,11 @@ $namespace('di.shared.vui');
     
     // 提示信息
     var MESSAGE = {
+        HIDE: '',
         // 镜像名称验证失败提示
         NAME_WARN: '请您输入正确格式的名称',
+        // 镜像名称验证失败提示
+        SAME_NAME_WARN: '不能输入重复的名称',
         // 镜像名称placehoder
         NAME_PLACE_HOLDER: '请您输入正确格式的名称',
         // 如果是默认项不能被编辑提示
@@ -150,6 +151,7 @@ $namespace('di.shared.vui');
         this._getCurrentTabName = options.getCurrentTabName;
         this._maxTabNum = options.maxTabNum;
         this._getTabsNums = options.getTabsNums;
+        this._getAllTabName = options.getAllTabName;
 
         // 绑定事件
         bindEvent.call(this);
@@ -207,7 +209,7 @@ $namespace('di.shared.vui');
             // 保证this指向
             dialog.call(
                 me,
-                HIDE_ERROR_TIPS,
+                MESSAGE.HIDE,
                 '',
                 dialogCallback,
                 ADD_MODE
@@ -221,7 +223,7 @@ $namespace('di.shared.vui');
             hideOperates(me._btnOperates, oEv);
             dialog.call(
                 me,
-                HIDE_ERROR_TIPS,
+                MESSAGE.HIDE,
                 me._getCurrentTabName(),
                 dialogCallback,
                 UPDATE_MODE
@@ -249,22 +251,21 @@ $namespace('di.shared.vui');
      * 弹出框事件
      * 
      * @private
-     * @param {string} showErrorTips 显示错误提示的方式：是否显示
+     * @param {string} errorTips 错误提示
      * @param {string} value 用户输入的名称
      * @param {Function} callback 弹出框点击确定后的回调事件
      * @param {boolean} isAdd 新增或者更新
      */
-    function dialog(showErrorTips, value, callback, isAdd) {
+    function dialog(errorTips, value, callback, isAdd) {
         var me = this;
         // 默认项不能编辑，这块的实现不是很好
         if (value === '默认') {
             alert(MESSAGE.TAB_UPDATE_DEFAULT_WARN);
             return;
         }
-        
         var html = [
             '<div class="', SAVE_CLASS.DIALOG_ERROR_CLASS_NAME, '">',
-                showErrorTips ? MESSAGE.NAME_WARN : '',
+            errorTips,
             '</div>',
             '<div class="', SAVE_CLASS.DIALOG_ITEM_CLASS_NAME, '">',
             '<label>', '名称', '</label>',
@@ -279,7 +280,7 @@ $namespace('di.shared.vui');
             function () {
                 var name = document.getElementById('reportSaveName').value;
                 // 传递this指向
-                callback.call(me, isAdd, name);
+                callback.call(me, isAdd, name, value);
             }
         );
     }
@@ -297,11 +298,20 @@ $namespace('di.shared.vui');
      * @param {string} isAdd true表示新增，反之为更新
      * @param {string} name 用户输入的名称
      */
-    function dialogCallback(isAdd, name) {
+    function dialogCallback(isAdd, name, oldName) {
         if (!validate(name.trim())) {
             dialog.call(
                 this,
-                SHOW_ERROR_TIPS,
+                MESSAGE.NAME_WARN,
+                name,
+                dialogCallback,
+                isAdd
+            );
+        }
+        else if (hasSameTabName.call(this, isAdd, name, oldName)) {
+            dialog.call(
+                this,
+                MESSAGE.SAME_NAME_WARN,
                 name,
                 dialogCallback,
                 isAdd
@@ -311,7 +321,31 @@ $namespace('di.shared.vui');
             this._saveImageNameCallBack(isAdd, name);
         } 
     }
-    
+
+    /**
+     * 是否含有相同名字的tab
+     *
+     *
+     * @private
+     * @param {string} name 用户输入的名称
+     * @return {string} 是否已经有相同名称
+     */
+    function hasSameTabName(isAdd, name, oldName) {
+        var result = false;
+        var tabNames = this._getAllTabName();
+        // 如果是编辑
+        if (!isAdd) {
+            if (name === oldName) {
+                var index = tabNames.indexOf(oldName);
+                tabNames = tabNames.slice(0, index).concat(tabNames.slice(index + 1, tabNames.length));
+            }
+        }
+        if (tabNames.indexOf(name) >= 0) {
+            result = true;
+        }
+        return result;
+    }
+
     /**
      * 验证名称
      * 

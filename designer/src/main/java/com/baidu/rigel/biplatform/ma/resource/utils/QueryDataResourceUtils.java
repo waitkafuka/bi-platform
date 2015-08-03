@@ -15,14 +15,15 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
-import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
 import com.baidu.rigel.biplatform.ma.report.exception.PlaneTableParseException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
+import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -53,16 +54,16 @@ import com.google.common.collect.Maps;
 @Service("queryDataResourceUtils")
 public class QueryDataResourceUtils {
 
-	/**
-	 * 日志对象
-	 */
-	private static final Logger LOG = LoggerFactory
-			.getLogger(QueryDataResourceUtils.class);	
-	/**
-	 * queryBuildService
-	 */
-	@Resource
-	private QueryBuildService queryBuildService;
+    /**
+     * 日志对象
+     */
+    private static final Logger LOG = LoggerFactory
+            .getLogger(QueryDataResourceUtils.class);    
+    /**
+     * queryBuildService
+     */
+    @Resource
+    private QueryBuildService queryBuildService;
 
     /**
      * chartBuildService
@@ -79,16 +80,16 @@ public class QueryDataResourceUtils {
      * @param action QueryAction
      * @return
      */
-	public ResponseResult parseQueryResultToResponseResult(ReportRuntimeModel runtimeModel, ExtendArea targetArea,
-			ResultSet result, ExtendAreaContext areaContext, QueryAction action ) {
-		BaseTable baseTable = null;
-		ReportDesignModel designModel = runtimeModel.getModel();
+    public ResponseResult parseQueryResultToResponseResult(ReportRuntimeModel runtimeModel, ExtendArea targetArea,
+            ResultSet result, ExtendAreaContext areaContext, QueryAction action ) {
+        BaseTable baseTable = null;
+        ReportDesignModel designModel = runtimeModel.getModel();
 
-		Cube cube = designModel.getSchema().getCubes().get(targetArea.getCubeId());
+        Cube cube = designModel.getSchema().getCubes().get(targetArea.getCubeId());
 
-		if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
-			// 获取平面表
-			try {
+        if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
+            // 获取平面表
+            try {
                 baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
                                 targetArea.getFormatModel(), action);
                 
@@ -102,43 +103,56 @@ public class QueryDataResourceUtils {
                     resultMap.put("data", planeTable.getData());
                     resultMap.put("pageInfo", planeTable.getPageInfo());
                 }
-				return ResourceUtils.getResult("Success", "Fail", resultMap);
-			} catch (PlaneTableParseException e) {
-				LOG.info(e.getMessage(), e);
-				return ResourceUtils.getErrorResult("Fail in parsing result to planeTable. ",
-						1);
-			}
-		} else {
-			// 获取pivotTable
-			try {
-				baseTable = queryBuildService.parseToPivotTable(cube, result.getDataModel());
-				// 对多维表格进行处理
-				return this.handlePivotTable((PivotTable) baseTable, runtimeModel, 
-						targetArea, areaContext, action, cube);
-			} catch (PivotTableParseException e) {
-				LOG.info(e.getMessage(), e);
-				return ResourceUtils.getErrorResult("Fail in parsing result to pivotTable. ",
-						1);
-			}
-		}
-	}
+                return ResourceUtils.getResult("Success", "Fail", resultMap);
+            } catch (PlaneTableParseException e) {
+                LOG.info(e.getMessage(), e);
+                return ResourceUtils.getErrorResult("Fail in parsing result to planeTable. ",
+                        1);
+            }
+        } else {
+            // 获取pivotTable
+            try {
+                LogicModel logicModel = targetArea.getLogicModel ();
+                if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
+                    logicModel = 
+                        runtimeModel.getModel ().getExtendById (targetArea.getReferenceAreaId ()).getLogicModel ();
+                }
+                baseTable = 
+                    queryBuildService.parseToPivotTable(cube, result.getDataModel(), logicModel);
+                // 对多维表格进行处理
+                return this.handlePivotTable((PivotTable) baseTable, runtimeModel, 
+                        targetArea, areaContext, action, cube);
+            } catch (PivotTableParseException e) {
+                LOG.info(e.getMessage(), e);
+                return ResourceUtils.getErrorResult("Fail in parsing result to pivotTable. ",
+                        1);
+            }
+        }
+    }
 
-	/**
-	 * 对表数据进行处理
-	 * 
-	 * @param table
-	 * @param targetArea
-	 * @param runtimeModel
-	 */
-	private ResponseResult handlePivotTable(PivotTable pivotTable, ReportRuntimeModel runtimeModel, ExtendArea targetArea,
-			 ExtendAreaContext areaContext, QueryAction action, Cube cube) {
-		
-		Map<String, Object> resultMap = Maps.newHashMap();
-		ReportDesignModel reportDesignModel = runtimeModel.getModel();
+    /**
+     * 对表数据进行处理
+     * 
+     * @param table
+     * @param targetArea
+     * @param runtimeModel
+     */
+    private ResponseResult handlePivotTable(PivotTable pivotTable, ReportRuntimeModel runtimeModel, ExtendArea targetArea,
+             ExtendAreaContext areaContext, QueryAction action, Cube cube) {
+        
+        FormatModel formatModel = targetArea.getFormatModel();
+        if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE 
+                || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
+            ExtendArea refArea = runtimeModel.getModel ().getExtendById (targetArea.getReferenceAreaId ());
+            formatModel = refArea.getFormatModel ();
+        }
+        
+        Map<String, Object> resultMap = Maps.newHashMap();
+        ReportDesignModel reportDesignModel = runtimeModel.getModel();
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             Map<String, Object> otherSetting = targetArea.getOtherSetting();
             boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
-            DataModelUtils.decorateTable(targetArea.getFormatModel(), pivotTable, isShowZero);
+            DataModelUtils.decorateTable(formatModel, pivotTable, isShowZero);
             /**
              * 每次查询以后，清除选中行，设置新的
              */
@@ -206,13 +220,15 @@ public class QueryDataResourceUtils {
             } else {
                 chart = chartBuildService.parseToChart(pivotTable, chartType, false);
             }
-            QueryUtils.decorateChart(chart, targetArea, reportDesignModel.getSchema(), -1);
+            ExtendArea area = DeepcopyUtils.deepCopy (targetArea);
+            area.setFormatModel (formatModel);
+            QueryUtils.decorateChart(chart, area, reportDesignModel.getSchema(), -1);
             resultMap.put("reportChart", chart);
         }
         ResponseResult rs = ResourceUtils.getResult("Success", "Fail", resultMap);
         return rs;
-	}
-	
+    }
+    
     /**
      * 
      * @param table
@@ -251,21 +267,21 @@ public class QueryDataResourceUtils {
     }
     
     protected void setTableResultProperty(String reportId, PivotTable table, Map<String, Object> resultMap) {
-	        resultMap.put("rowCheckMin", 1);
-	        resultMap.put("rowCheckMax", 5);
-	        resultMap.put("reportTemplateId", reportId);
-	        if (table.getActualSize () <= 1) {
-	            resultMap.put("totalSize", table.getActualSize());
-	        } else {
-	            resultMap.put("totalSize", table.getActualSize() - 1);
-	        }
-	        if (table.getDataSourceRowBased().size() <= 1) {
-	            resultMap.put("currentSize", table.getDataSourceRowBased().size());
-	        } else {
-	            resultMap.put("currentSize", table.getDataSourceRowBased().size() - 1);
-	        }
-	    }
-	 
+            resultMap.put("rowCheckMin", 1);
+            resultMap.put("rowCheckMax", 5);
+            resultMap.put("reportTemplateId", reportId);
+            if (table.getActualSize () <= 1) {
+                resultMap.put("totalSize", table.getActualSize());
+            } else {
+                resultMap.put("totalSize", table.getActualSize() - 1);
+            }
+            if (table.getDataSourceRowBased().size() <= 1) {
+                resultMap.put("currentSize", table.getDataSourceRowBased().size());
+            } else {
+                resultMap.put("currentSize", table.getDataSourceRowBased().size() - 1);
+            }
+        }
+     
     protected String genRootUniqueName(final String uniqueName) {
         if (uniqueName.endsWith ("@") && uniqueName.startsWith ("@")) {
             return uniqueName;

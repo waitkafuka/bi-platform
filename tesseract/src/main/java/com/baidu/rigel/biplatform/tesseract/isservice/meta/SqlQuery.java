@@ -422,29 +422,6 @@ public class SqlQuery {
                     }
                 }
             }
-            if (this.limitMap != null) {
-                // 处理limit
-                StringBuffer limitStringBuffer = new StringBuffer();
-
-                long limitStart = 0;
-                if (this.limitMap.get(LIMITMAP_KEY_LIMITSTART) != null) {
-                    limitStart = this.limitMap.get(LIMITMAP_KEY_LIMITSTART);
-                }
-                long limitEnd = 0;
-                if (this.limitMap.get(LIMITMAP_KEY_LIMITEND) != null) {
-                    limitEnd = this.limitMap.get(LIMITMAP_KEY_LIMITEND);
-                }
-                if (limitStart >= 0 && limitEnd > 0) {
-                    limitStringBuffer.append(" limit ");
-                    limitStringBuffer.append(limitStart);
-                    limitStringBuffer.append(",");
-                    limitStringBuffer.append(limitEnd);
-                } else if (limitEnd > 0) {
-                    limitStringBuffer.append(" limit ");
-                    limitStringBuffer.append(limitEnd);
-                }
-                sb.append(limitStringBuffer);
-            }
         }
         return sb.toString();
     }

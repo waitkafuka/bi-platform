@@ -155,14 +155,7 @@ public class SqlExpression implements Serializable {
                     "List needColums is empty, there is no SqlColum object available to generate.");
         }
         try {
-            String valueName = "*";
-            for(SqlColumn sqlColumn : allColums.values()) {
-                if (sqlColumn.getType() == ColumnType.COMMON) {
-                    valueName = sqlColumn.getFactTableFieldName();
-                    break;
-                }
-            }
-            countSqlQuery.getSelect().setSql(" select count(" + valueName + ") as totalc ");
+            countSqlQuery.getSelect().setSql(" select count(*) as totalc ");
             countSqlQuery.getSelect().setSelectList(needColums);
             countSqlQuery.getFrom().setSql(generateFromExpression(questionModel, countSqlQuery, allColums));
             countSqlQuery.getWhere().setSql(
@@ -280,13 +273,13 @@ public class SqlExpression implements Serializable {
                     // 如果不为TIME CALLBACK字段
                     && ColumnType.CALLBACK != column.getType()
                     // 如果不为事实表join
-                    && !column.getTableName().equals(this.facttableAlias)) {
+                    && !column.getSourceTableName().equals(column.getTableName())) {
                 needJoinColumns.add(column);
             }
         });
         for (SqlColumn colum : needJoinColumns) {
             String joinTable = colum.getTableName();
-            if (colum.getTableName().equals(this.facttableAlias)) {
+            if (colum.getSourceTableName().equals(colum.getTableName())) {
             // 可能有退化维的存在，
                 continue;
             }
@@ -336,7 +329,7 @@ public class SqlExpression implements Serializable {
                                 .getMetaName());
                         if (sqlColumn.getType() == ColumnType.JOIN) {
                         // 获取JOIN where
-                            if (!sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                            if (!sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
                             // 过滤退化维的情况
                                 whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery, true));
                             }
@@ -417,7 +410,7 @@ public class SqlExpression implements Serializable {
             SqlColumn sqlColumn = allColums.get(k);
             // 判断是事实表查询
             if (columnCondition != null) {
-                if (sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                if (sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
                     whereExpressions.append(this
                             .generateSqlWhereOneCondition(sqlColumn, sqlQuery, gengerateTableAlias));
                     uniqueNameSet.add(k);
@@ -470,7 +463,7 @@ public class SqlExpression implements Serializable {
         String columnSqName = "";
         if (gengerateTableAlias) {
             if (ColumnType.JOIN == sqlColumn.getType()) {
-                if (sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                if (sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
                 // 退化维
                     columnSqName = this.facttableAlias + SqlConstants.DOT + sqlColumn.getFactTableFieldName();
                 } else {

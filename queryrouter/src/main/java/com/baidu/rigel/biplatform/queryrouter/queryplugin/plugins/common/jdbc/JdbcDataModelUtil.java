@@ -105,7 +105,7 @@ public class JdbcDataModelUtil {
             // 按照tablename, 组织sqlColumnList，以便于按表查询所有的字段信息
             HashMap<String, List<SqlColumn>> tables = new HashMap<String, List<SqlColumn>>();
             for (SqlColumn sqlColumn : allColumns.values()) {
-                if (sqlColumn.getTableName().equals(sqlColumn.getSourceTableName())) {
+                if (sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
                 // 过滤事实表及退化维
                     continue;
                 }

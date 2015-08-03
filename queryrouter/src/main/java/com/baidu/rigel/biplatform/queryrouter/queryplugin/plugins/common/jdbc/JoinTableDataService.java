@@ -80,7 +80,7 @@ public class JoinTableDataService {
             }
             if (SqlConstants.WHERE_TRUE.equals(whereSql)) {
                 // 如果搜索为所有条件，则不组织wheresql
-                break;
+                continue;
             }
             String sql = "select " + joinTableFieldId + " from " + tableName
                     + whereSql;

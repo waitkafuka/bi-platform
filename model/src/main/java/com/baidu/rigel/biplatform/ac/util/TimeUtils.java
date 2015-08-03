@@ -449,6 +449,7 @@ public class TimeUtils {
                 end = endYear + endDate;
                 break;
             case TimeMonth:
+                cal.clear();
                 String startMonth = start.substring(4);
                 start = startYear + startMonth + "01";
                 String endMonth = end.substring(4);

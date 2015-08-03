@@ -822,8 +822,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
      * parseToPivotTable(com.baidu.rigel.biplatform.ma.report.query.DataModel)
      */
     @Override
-    public PivotTable parseToPivotTable(Cube cube, DataModel dataModel) throws PivotTableParseException {
-        PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, false, 0, false);
+    public PivotTable parseToPivotTable(Cube cube, DataModel dataModel, LogicModel logicModel) throws PivotTableParseException {
+        PivotTable table = DataModelUtils.transDataModel2PivotTable(cube, dataModel, false, 0, false, logicModel);
         return table;
     }
 

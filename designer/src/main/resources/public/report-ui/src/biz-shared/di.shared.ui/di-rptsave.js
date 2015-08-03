@@ -253,6 +253,9 @@ $namespace('di.shared.ui');
                 },
                 getCurrentTabName: function () {
                     return saveRptTabBtn.getCurrentTabName();
+                },
+                getAllTabName: function () {
+                    return saveRptTabBtn.getAllTabName();
                 }
             };
 

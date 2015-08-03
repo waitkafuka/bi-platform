@@ -249,10 +249,11 @@ public class MetaQueryAction {
         String errorMsg = null;
         try {
             Map<String, String> requestParams = parseRequestJson(requestJson);
-
+            
             ConfigQuestionModel questionModel =
                     AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY),
                             ConfigQuestionModel.class);
+            String queryId = questionModel.getQueryId();
             setMDCContext(questionModel.getRequestParams().get("_flag"));
             DataSourceInfo dataSourceInfo = questionModel.getDataSourceInfo();
             if (dataSourceInfo == null) {
@@ -298,7 +299,7 @@ public class MetaQueryAction {
             curr = System.currentTimeMillis();
             ResponseResult rs = ResponseResultUtils.getCorrectResult("query success.",
                     AnswerCoreConstant.GSON.toJson(dataModel));
-            LOG.info("cost:" + (System.currentTimeMillis() - curr) + "ms convert dataModel to json");
+            LOG.info("queryId:{} cost:{} ms convert dataModel to json", queryId, System.currentTimeMillis() - curr);
             return rs;
         } catch (JsonSyntaxException e) {
             e.printStackTrace();

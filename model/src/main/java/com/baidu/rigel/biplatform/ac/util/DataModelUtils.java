@@ -186,7 +186,7 @@ public class DataModelUtils {
                     if (columnBaseData.size() <= j) {
                         columnBaseData.add(new ArrayList<BigDecimal>(columnLeafs.size()));
                     }
-                    if (rowFiled.getCompareDatas().size() < j) {
+                    if (rowFiled.getCompareDatas().size() <= j) {
                         columnBaseData.get(j).add(null);
                     } else {
                         columnBaseData.get(j).add(rowFiled.getCompareDatas().get(j));
@@ -269,14 +269,6 @@ public class DataModelUtils {
             }
         }
     }
-
-    // private static void addTailFiled(List<HeadField> leafFileds, HeadField insertFiled) {
-    // for (HeadField leafFiled : leafFileds) {
-    // HeadField insertFiledCopy = insertFiled.simpleClone();
-    // insertFiledCopy.setParentLevelField(leafFiled);
-    // leafFiled.getNodeList().add(insertFiledCopy);
-    // }
-    // }
 
     /**
      * 过滤DataModel中的空白行

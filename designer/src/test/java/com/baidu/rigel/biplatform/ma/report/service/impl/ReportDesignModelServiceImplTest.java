@@ -587,9 +587,9 @@ public class ReportDesignModelServiceImplTest {
     @Test
     public void testReportNameWithExists() throws Exception {
         Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(
-                new String[] { "ID" + Constants.FILE_NAME_SEPERATOR + "reportName".hashCode()
+                new String[] { "ID" + Constants.FILE_NAME_SEPERATOR + "reportName"
                         + Constants.FILE_NAME_SEPERATOR + "DsID", "." });
-        Assert.assertFalse(reportDesignModelService.isNameExist("reportName"));
+        Assert.assertTrue(reportDesignModelService.isNameExist("reportName"));
     }
 
     /**
