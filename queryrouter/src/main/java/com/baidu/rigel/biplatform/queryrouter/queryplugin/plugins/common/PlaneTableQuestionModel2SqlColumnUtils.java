@@ -98,7 +98,7 @@ public class PlaneTableQuestionModel2SqlColumnUtils {
                             } else {
                                 sqlColumn.setSqlUniqueColumn(SqlConstants.SOURCE_TABLE_ALIAS_NAME + v.getName());
                             }
-                            sqlColumn.setJoinTableFieldName(v.getJoinTableFieldName());
+                            sqlColumn.setJoinTable(v.getJoinTable());
                             sqlColumn.setType(v.getColumnType());
                             sqlColumn.setColumnKey(k);
                             sqlColumn.setColumnCondition((ColumnCondition)planeTableQuestionModel

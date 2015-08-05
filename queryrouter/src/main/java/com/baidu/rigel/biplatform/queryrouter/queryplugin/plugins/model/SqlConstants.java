@@ -28,6 +28,11 @@ public final class SqlConstants {
     public static final String PARAM = "?";
     
     /**
+     * 等于
+     */
+    public static final String EQUALS = "=";
+    
+    /**
      * LIKE_ALL
      */
     public static final String LIKE_ALL = "%";
@@ -38,9 +43,24 @@ public final class SqlConstants {
     public static final String DESC = "DESC";
     
     /**
+     * sql and
+     */
+    public static final String AND = " and ";
+    
+    /**
+     * sql join on
+     */
+    public static final String JOIN_ON = " on ";
+    
+    /**
      * WHERE_TRUE
      */
     public static final String WHERE_TRUE = " where 1 = 1 ";
+    
+    /**
+     * SQL_TRUE
+     */
+    public static final String SQL_TRUE = " 1 = 1 ";
 
     /**
      * facttable alias name

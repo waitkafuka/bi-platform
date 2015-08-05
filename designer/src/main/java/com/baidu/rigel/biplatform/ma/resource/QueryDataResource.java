@@ -453,8 +453,10 @@ public class QueryDataResource extends BaseResource {
         Map<String, String> requestParams = Maps.newHashMap();
         while (params.hasMoreElements()) {
             String paramName = params.nextElement();
-            runtimeModel.getContext().put(paramName, request.getParameter(paramName));
-            requestParams.put(paramName, request.getParameter(paramName));
+            if (request.getParameter (paramName) != null) {
+                runtimeModel.getContext().put(paramName, request.getParameter(paramName));
+                requestParams.put(paramName, request.getParameter(paramName));
+            }
         }
         // 添加cookie内容
         runtimeModel.getContext().put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
@@ -500,6 +502,21 @@ public class QueryDataResource extends BaseResource {
             // 如果包含跳转参数
             if (fromParams != null && fromParams.containsKey("linkBridgeParams")) {
                 Map<String, LinkParams> linkParams = (Map<String, LinkParams>) fromParams.get("linkBridgeParams");
+                Map<String, String> planeTableCond = Maps.newHashMap();
+                if (planeTableConditions == null || planeTableConditions.size() == 0) {
+                    throw new RuntimeException("the plane table conditions is empty, its id is : " + toReportId);
+                }
+                planeTableConditions.forEach( (k, v) -> {
+//                    LinkParams linkParam = linkParams.get(v.getName());
+//                    if (StringUtils.isEmpty(linkParam) ||
+//                            StringUtils.isEmpty(linkParam.getOriginalDimValue()) ||
+//                                StringUtils.isEmpty(linkParam.getUniqueName())) {
+//                        throw new RuntimeException("the need params { " + v.getName() + " } is empty, please check!");
+//                    }
+                    planeTableCond.put(v.getName(), v.getElementId());
+                    planeTableCond.put(v.getElementId(), v.getName());
+                });
+                
                 for (String key : linkParams.keySet()) {
                     LinkParams linkParam = linkParams.get(key);                   
                     if (StringUtils.isEmpty(linkParam.getOriginalDimValue()) ||
@@ -509,11 +526,6 @@ public class QueryDataResource extends BaseResource {
                     String newValue = null;
                     String planeTableConditionKey = null;
                     try {
-                        Map<String, String> planeTableCond = Maps.newHashMap();
-                        planeTableConditions.forEach( (k, v) -> {
-                            planeTableCond.put(v.getName(), v.getElementId());
-                            planeTableCond.put(v.getElementId(), v.getName());
-                        });
                         planeTableConditionKey = planeTableCond.get(linkParam.getParamName());
 //                        for (String conditionKey : planeTableConditions.keySet()) {
 //                            if (planeTableConditions.get(conditionKey).getName().
@@ -732,13 +744,8 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO]------begin update global runtime context");
         Map<String, String[]> contextParams = request.getParameterMap();
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-        // modify by jiangyichao at 2014-11-06 对时间条件进行特殊处理
-        if (contextParams.get(Constants.IN_EDITOR) != null
-                || runTimeModel.getContext().getParams().containsKey(Constants.IN_EDITOR)) {
-        }
 
         ReportDesignModel model = runTimeModel.getModel();
-        // reportModelCacheManager.getReportModel(reportId);
         Map<String, String> params = Maps.newHashMap();
         if (model.getParams() != null) {
             model.getParams().forEach((k, v) -> {
@@ -762,7 +769,9 @@ public class QueryDataResource extends BaseResource {
                 String realValue = modifyFilterValue(value[0]);
                 if (realValue != null) {
                     // 移除运行态模型的Context中的已有时间维度,保证有且仅有一个时间维度
-                    if (realValue.contains("start") && realValue.contains("end") && realValue.contains("granularity")) {
+                    boolean isTimeDim = 
+                        realValue.contains("start") && realValue.contains("end") && realValue.contains("granularity");
+                    if (isTimeDim) {
                         for (Entry<String, Object> tmpEntry : runTimeModel.getContext().getParams().entrySet()) {
                             String tmpStr = String.valueOf(tmpEntry.getValue());
                             if (tmpStr.contains("start") || tmpStr.contains("end") || tmpStr.contains("granularity")) {
@@ -775,11 +784,9 @@ public class QueryDataResource extends BaseResource {
                             }
                         }
                     }
-                    runTimeModel.getContext().put(getRealKey(model, key), realValue);
+                    runTimeModel.getContext().getParams ().put(getRealKey(model, key), realValue);
                     runTimeModel.getLocalContext ().forEach ((k, v) -> {
-                        if (v.getParams ().containsKey (getRealKey(model, key))) {
-                            v.getParams ().put (key, realValue);
-                        }
+                        v.getParams ().put (getRealKey(model, key), realValue);
                     });
                 } else {
                     runTimeModel.getContext().removeParam(getRealKey(model, key));
@@ -817,10 +824,6 @@ public class QueryDataResource extends BaseResource {
                     runTimeModel.getContext().put(conditionName, "");
                 }
             }
-            /**
-             * 修正报表配置的参数的值
-             * 
-             */
 
         }
         resetOtherStatus (runTimeModel);
@@ -1041,7 +1044,7 @@ public class QueryDataResource extends BaseResource {
          * 3. 获取运行时对象
          */
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-
+        
         try {
             model = getRealModel(reportId, runTimeModel);
             oriDesignModel = DeepcopyUtils.deepCopy(model);
@@ -1216,7 +1219,7 @@ public class QueryDataResource extends BaseResource {
 
         // 清除当前request中的请求参数，保证areaContext的参数正确
         resetAreaContext(areaContext, request);
-        resetContext(runTimeModel.getLocalContext().get(areaId), request);
+        resetContext(runTimeModel.getLocalContextByAreaId (areaId), request);
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         
         runTimeModel.updateDatas(action, result);
@@ -2320,7 +2323,9 @@ public class QueryDataResource extends BaseResource {
         // 设置查询不受限制
         areaContext.getParams().put(Constants.NEED_LIMITED, false);
         // 获取查询action
-        QueryAction action = queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
+        // 获取上一次查询的QueryAction
+        QueryAction action = runtimeModel.getPreviousQueryAction(areaId);
+//        QueryAction action =  queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
         if (action != null) {
             action.setChartQuery(false);
         } else {
@@ -2653,7 +2658,7 @@ public class QueryDataResource extends BaseResource {
         areaContext.getQueryStatus().add(result);
         // 清除当前request中的请求参数，保证areaContext的参数正确
         resetAreaContext(areaContext, request);
-        resetContext(runTimeModel.getLocalContext().get(areaId), request);
+        resetContext(runTimeModel.getLocalContextByAreaId (areaId), request);
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);

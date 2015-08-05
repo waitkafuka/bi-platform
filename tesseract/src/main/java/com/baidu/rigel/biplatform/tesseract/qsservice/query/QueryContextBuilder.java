@@ -230,6 +230,9 @@ public class QueryContextBuilder {
         boolean hasCallbackLevel = false;
         int callbackLevelIndex = 0;
         List<String> callbackParams = null;
+        if (dimension == null) {
+            return null;
+        }
         List<Level> levels = Lists.newArrayList(dimension.getLevels().values());
         for(int i = 0; i < levels.size(); i++) {
             if(levels.get(i).getType().equals(LevelType.CALL_BACK)) {

@@ -52,6 +52,7 @@ import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
@@ -66,6 +67,7 @@ import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
 import com.baidu.rigel.biplatform.ma.report.utils.ExtendAreaUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.NameCheckUtils;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.NameCheckCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
@@ -374,23 +376,32 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("不能获取报表定义 报表ID：" + reportId);
             return result;
         }
+        ReportDesignModel copy = DeepcopyUtils.deepCopy (model);
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-        if (runTimeModel != null) {
-            /**
-             * 删除区域时，清除运行时的上下文中的维度条件 TODO 这里的逻辑要移除到别处
-             */
-            ExtendArea area = model.getExtendById(areaId);
-            for (final Item item : area.listAllItems().values()) {
-                String dimId = item.getOlapElementId();
-                runTimeModel.getContext().getParams().remove(dimId);
-                runTimeModel.getLocalContext().values().forEach(ctx -> {
-                    ctx.getParams().remove(dimId);
-                });
-            }
-        }
         try {
-            ExtendAreaType type = model.getExtendById (areaId).getType ();
+            ExtendArea area = DeepcopyUtils.deepCopy (model.getExtendById (areaId));
             model = manageService.removeExtendArea(model, areaId);
+            ExtendAreaType type = area.getType ();
+            if (runTimeModel != null && QueryUtils.isFilterArea (type)) {
+                /**
+                 * 删除区域时，清除运行时的上下文中的维度条件 TODO 这里的逻辑要移除到别处
+                 */
+                for (final Item item : area.listAllItems().values()) {
+                    String dimId = item.getOlapElementId();
+                    runTimeModel.getContext().getParams().remove(dimId);
+                    runTimeModel.getLocalContext().values().forEach(ctx -> {
+                        ctx.getParams().remove(dimId);
+                    });
+                    // TODO 需要优化测出执行逻辑
+                    copy.getExtendAreas ().forEach ((k, v) -> {
+                        ExtendAreaContext ctx = reportModelCacheManager.getAreaContext (reportId, k);
+                        if (ctx != null) {
+                            ctx.getParams ().remove (dimId);
+                            reportModelCacheManager.updateAreaContext (reportId, k, ctx);
+                        }
+                    });
+                }
+            }
             if (type == ExtendAreaType.REPORT_SAVE_COMP) {
                 String path = this.getSavedReportPath (request) + File.separator + reportId;
                 String[] files = fileService.ls (path);
@@ -406,6 +417,8 @@ public class ReportDesignModelResource extends BaseResource {
             result.setStatusInfo("fail remove area from model! ");
             return result;
         }
+        
+       
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("successfully create area for current report");
@@ -1204,8 +1217,10 @@ public class ReportDesignModelResource extends BaseResource {
             Cube cube = model.getSchema ().getCubes ().get (area.getCubeId ());
             for (Item item : items) {
                 String olapElementId = item.getOlapElementId ();
-                String indName = cube.getMeasures ().get (olapElementId).getName ();
-                tmp.put (indName, dataFormat.get (indName));
+                if (cube.getMeasures() != null && cube.getMeasures().containsKey(olapElementId)) {
+                    String indName = cube.getMeasures ().get (olapElementId).getName ();
+                    tmp.put (indName, dataFormat.get (indName));                    
+                }
             }
         }
         result.setData(tmp);

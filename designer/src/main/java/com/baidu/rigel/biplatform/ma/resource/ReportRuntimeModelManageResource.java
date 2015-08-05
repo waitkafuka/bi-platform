@@ -26,7 +26,6 @@ import java.util.Map.Entry;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
@@ -599,6 +597,11 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         LinkInfo linkInfo = linkInfoMap.get(measureId);
         String planeTableId = linkInfo.getPlaneTableId();
 
+        Map<String, Object> params = reportRuntimeModel.getContext().getParams();
+        reportRuntimeModel.getLocalContext().forEach((k, v) -> {
+            params.putAll (v.getParams());            
+        });
+        reportRuntimeModel.getContext().setParams(params);
         Map<String, Map<String, String>> conditionMap =
                 this.olapLinkService.buildConditionMapFromRequestParams(uniqueName, olapTableDesignModel,
                         reportRuntimeModel.getContext());
@@ -937,14 +940,10 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             return;
         }
         reportParams.forEach ((k, v) -> {
-//            long count = copy.getModel ().getSchema ()
-//                    .getCubes ().values ().stream ()
-//                    .filter (cube -> cube.getDimensions ().get (v.getElementId()) instanceof TimeDimension)
-//                    .count ();
-//            if (count <= 0 && !StringUtils.isEmpty (request.getParameter (v.getName ()))) {
-                copy.getContext ().put (v.getName (), request.getParameter (v.getName ()));
-                copy.getContext ().put (v.getElementId (), request.getParameter (v.getName ()));
-//            }
+                String parameter = request.getParameter (v.getName ());
+                if (parameter != null) {
+                    copy.getContext ().put (v.getName (), parameter);
+                }
         });
     }
 

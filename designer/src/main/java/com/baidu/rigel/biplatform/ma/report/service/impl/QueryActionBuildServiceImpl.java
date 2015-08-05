@@ -405,7 +405,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         for (String key : context.keySet()) {
             OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, key);
 //            Object level = context.get(key + "_level");
-            if (element != null && !targetLogicModel.containsOlapElement(element.getId())) {
+            if (element != null 
+                    && !targetLogicModel.containsOlapElement(element.getId())) {
                 Item item = new Item();
                 item.setAreaId(areaId);
                 item.setCubeId(cubeId);

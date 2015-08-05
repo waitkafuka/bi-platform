@@ -37,6 +37,10 @@ public class DownloadTableDataHelper {
             String h2DataDownloadForPlaneTableOnline = DownloadType.PLANE_TABLE_ONLINE.getName() + "_" + DataSourceType.H2;
             SERVICE_REPOSITORY.put(h2DataDownloadForPlaneTableOnline ,
                     new PlaneTableOnlineDownloadServiceImpl());
+            String paloDataDownloadForPlaneTableOnline = DownloadType.PLANE_TABLE_ONLINE.getName()
+                    + "_" + DataSourceType.PALO;
+            SERVICE_REPOSITORY.put(paloDataDownloadForPlaneTableOnline ,
+                    new PlaneTableOnlineDownloadServiceImpl());
             String mysqlDataDownloadForPlaneTableOffline = DownloadType.PLANE_TABLE_OFFLINE.getName() + "_" + DataSourceType.MYSQL;
             SERVICE_REPOSITORY.put(mysqlDataDownloadForPlaneTableOffline ,
                     new PlaneTableOfflineDownloadServiceImpl());
@@ -45,6 +49,10 @@ public class DownloadTableDataHelper {
                     new PlaneTableOfflineDownloadServiceImpl());
             String h2DataDownloadForPlaneTableOffline = DownloadType.PLANE_TABLE_OFFLINE.getName() + "_" + DataSourceType.H2;
             SERVICE_REPOSITORY.put(h2DataDownloadForPlaneTableOffline ,
+                    new PlaneTableOfflineDownloadServiceImpl());
+            String paloDataDownloadForPlaneTableOffline = DownloadType.PLANE_TABLE_OFFLINE.getName()
+                    + "_" + DataSourceType.PALO;
+            SERVICE_REPOSITORY.put(paloDataDownloadForPlaneTableOffline ,
                     new PlaneTableOfflineDownloadServiceImpl());
             
             String mysqlDataDownloadForPivotTableOnline = DownloadType.PIVOT_TABLE_ONLINE.getName() + "_" + DataSourceType.MYSQL;

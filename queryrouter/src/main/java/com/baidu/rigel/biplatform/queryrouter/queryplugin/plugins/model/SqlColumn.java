@@ -25,17 +25,17 @@ import java.io.Serializable;
  *
  */
 public class SqlColumn implements Serializable {
-
+    
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 3151301875582323397L;
-
+    
     /**
      * columnKey
      */
     public String columnKey;
-
+    
     /**
      * name
      */
@@ -55,47 +55,65 @@ public class SqlColumn implements Serializable {
      * dataType
      */
     public String dataType;
-
+    
     /**
      * sql查询的唯一的列名标示
      */
     public String sqlUniqueColumn;
-
+    
     /**
      * tableFieldName
      */
     public String tableFieldName;
     
     /**
-     * joinTableFieldName
-     */
-    public String joinTableFieldName;
-    
-    /**
      * factTableFieldName
      */
     public String factTableFieldName;
-
+    
     /**
      * caption
      */
     public String caption;
-
+    
     /**
      * tableName
      */
     public String tableName;
-
+    
     /**
      * tableNames
      */
     public String sourceTableName;
-
+    
     /**
      * columnCondition
      */
     public ColumnCondition columnCondition;
-
+    
+    /**
+     * join
+     */
+    private JoinTable joinTable;
+    
+    /**
+     * default generate get joinTable
+     * 
+     * @return the joinTable
+     */
+    public JoinTable getJoinTable() {
+        return joinTable;
+    }
+    
+    /**
+     * default generate set joinTable
+     * 
+     * @param joinTable
+     *            the joinTable to set
+     */
+    public void setJoinTable(JoinTable joinTable) {
+        this.joinTable = joinTable;
+    }
     
     /**
      * getDataType
@@ -105,34 +123,17 @@ public class SqlColumn implements Serializable {
     public String getDataType() {
         return dataType;
     }
-
+    
     /**
      * setDataType
      * 
-     * @param dataType the dataType to set
+     * @param dataType
+     *            the dataType to set
      */
     public void setDataType(String dataType) {
         this.dataType = dataType;
     }
-
-    /**
-     * getJoinTableFieldName
-     * 
-     * @return the joinTableFieldName
-     */
-    public String getJoinTableFieldName() {
-        return joinTableFieldName;
-    }
-
-    /**
-     * setJoinTableFieldName
-     * 
-     * @param joinTableFieldName the joinTableFieldName to set
-     */
-    public void setJoinTableFieldName(String joinTableFieldName) {
-        this.joinTableFieldName = joinTableFieldName;
-    }
-
+    
     /**
      * getFactTableFieldName
      * 
@@ -141,16 +142,17 @@ public class SqlColumn implements Serializable {
     public String getFactTableFieldName() {
         return factTableFieldName;
     }
-
+    
     /**
      * setFactTableFieldName
      * 
-     * @param factTableFieldName the factTableFieldName to set
+     * @param factTableFieldName
+     *            the factTableFieldName to set
      */
     public void setFactTableFieldName(String factTableFieldName) {
         this.factTableFieldName = factTableFieldName;
     }
-
+    
     /**
      * getOperator
      * 
@@ -159,16 +161,17 @@ public class SqlColumn implements Serializable {
     public String getOperator() {
         return operator;
     }
-
+    
     /**
      * setOperator
      * 
-     * @param operator the operator to set
+     * @param operator
+     *            the operator to set
      */
     public void setOperator(String operator) {
         this.operator = operator;
     }
-
+    
     /**
      * getType
      * 
@@ -177,16 +180,17 @@ public class SqlColumn implements Serializable {
     public ColumnType getType() {
         return type;
     }
-
+    
     /**
      * setType
      * 
-     * @param type the type to set
+     * @param type
+     *            the type to set
      */
     public void setType(ColumnType type) {
         this.type = type;
     }
-
+    
     /**
      * columnCondition
      * 
@@ -195,7 +199,7 @@ public class SqlColumn implements Serializable {
     public ColumnCondition getColumnCondition() {
         return columnCondition;
     }
-
+    
     /**
      * setColumnCondition
      * 
@@ -205,7 +209,7 @@ public class SqlColumn implements Serializable {
     public void setColumnCondition(ColumnCondition columnCondition) {
         this.columnCondition = columnCondition;
     }
-
+    
     /**
      * getSourceTableName
      * 
@@ -214,7 +218,7 @@ public class SqlColumn implements Serializable {
     public String getSourceTableName() {
         return sourceTableName;
     }
-
+    
     /**
      * setSourceTableName
      * 
@@ -224,9 +228,7 @@ public class SqlColumn implements Serializable {
     public void setSourceTableName(String sourceTableName) {
         this.sourceTableName = sourceTableName;
     }
-
     
-
     /**
      * getColumnKey
      * 
@@ -235,7 +237,7 @@ public class SqlColumn implements Serializable {
     public String getColumnKey() {
         return columnKey;
     }
-
+    
     /**
      * setColumnKey
      * 
@@ -245,7 +247,7 @@ public class SqlColumn implements Serializable {
     public void setColumnKey(String columnKey) {
         this.columnKey = columnKey;
     }
-
+    
     /**
      * getSqlUniqueColumn
      * 
@@ -254,7 +256,7 @@ public class SqlColumn implements Serializable {
     public String getSqlUniqueColumn() {
         return sqlUniqueColumn;
     }
-
+    
     /**
      * setSqlUniqueColumn
      * 
@@ -264,7 +266,7 @@ public class SqlColumn implements Serializable {
     public void setSqlUniqueColumn(String sqlUniqueColumn) {
         this.sqlUniqueColumn = sqlUniqueColumn;
     }
-
+    
     /**
      * getName
      * 
@@ -273,7 +275,7 @@ public class SqlColumn implements Serializable {
     public String getName() {
         return name;
     }
-
+    
     /**
      * setName
      * 
@@ -283,7 +285,7 @@ public class SqlColumn implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
+    
     /**
      * getTableFieldName
      * 
@@ -292,7 +294,7 @@ public class SqlColumn implements Serializable {
     public String getTableFieldName() {
         return tableFieldName;
     }
-
+    
     /**
      * setTableFieldName
      * 
@@ -302,7 +304,7 @@ public class SqlColumn implements Serializable {
     public void setTableFieldName(String tableFieldName) {
         this.tableFieldName = tableFieldName;
     }
-
+    
     /**
      * getCaption
      * 
@@ -311,7 +313,7 @@ public class SqlColumn implements Serializable {
     public String getCaption() {
         return caption;
     }
-
+    
     /**
      * setCaption
      * 
@@ -321,7 +323,7 @@ public class SqlColumn implements Serializable {
     public void setCaption(String caption) {
         this.caption = caption;
     }
-
+    
     /**
      * getTableName
      * 
@@ -330,7 +332,7 @@ public class SqlColumn implements Serializable {
     public String getTableName() {
         return tableName;
     }
-
+    
     /**
      * setTableName
      * 

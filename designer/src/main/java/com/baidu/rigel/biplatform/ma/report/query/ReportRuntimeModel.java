@@ -220,7 +220,7 @@ public class ReportRuntimeModel implements Serializable {
      * @return 如果已经初始化，返回context 否则返回null
      */
     public QueryContext getContext() {
-        if (!this.isInited || this.context == null) {
+        if (this.context == null) {
             this.context = new QueryContext();
         }
         return this.context;

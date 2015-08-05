@@ -24,7 +24,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.datasource.PaloSqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.meta.TableExistCheckService;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
@@ -46,8 +48,7 @@ public class JdbcQuestionModelUtil {
      */
     @Resource(name = "tableExistCheckService")
     private TableExistCheckService tableExistCheckService;
-
-
+    
     /**
      * 将questionModel转换成Sql对象
      * 
@@ -56,12 +57,18 @@ public class JdbcQuestionModelUtil {
      * @return String sql str
      */
     public SqlExpression convertQuestionModel2Sql(PlaneTableQuestionModel planeTableQuestionModel,
-            Map<String, SqlColumn> allColumns, String tableName) throws QuestionModelTransformationException {
+            Map<String, SqlColumn> allColumns, String tableName)
+            throws QuestionModelTransformationException {
         SqlDataSourceInfo sqlDataSource = (SqlDataSourceInfo) planeTableQuestionModel
                 .getDataSourceInfo();
-        List<SqlColumn> needColums = PlaneTableQuestionModel2SqlColumnUtils
-                .getNeedColumns(allColumns, planeTableQuestionModel.getSelection());
-        SqlExpression sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver());
+        List<SqlColumn> needColums = PlaneTableQuestionModel2SqlColumnUtils.getNeedColumns(
+                allColumns, planeTableQuestionModel.getSelection());
+        SqlExpression sqlExpression = null;
+        if (sqlDataSource.getDataBase() == DataBase.PALO) {
+            sqlExpression = new PaloSqlExpression(sqlDataSource.getDataBase().getDriver());
+        } else {
+            sqlExpression = new SqlExpression(sqlDataSource.getDataBase().getDriver());
+        }
         sqlExpression.setTableName(tableName);
         sqlExpression.generateSql(planeTableQuestionModel, allColumns, needColums);
         return sqlExpression;

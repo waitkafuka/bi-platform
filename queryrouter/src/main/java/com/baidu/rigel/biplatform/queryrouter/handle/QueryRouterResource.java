@@ -45,7 +45,7 @@ import com.google.gson.JsonSyntaxException;
 @RestController
 @RequestMapping("/queryrouter")
 public class QueryRouterResource {
-
+    
     /**
      * logger
      */
@@ -55,23 +55,23 @@ public class QueryRouterResource {
      * log4j最长打印字符串长度
      */
     private static final int MAX_PRINT_LENGTH = 5000;
-
+    
     /**
      * 出参参的参数“成功”
      */
     private static final String SUCCESS = "success";
-
+    
     /**
      * 入参参的参数“问题模型参数”
      */
     private static final String PRAMA_QUESTION = "question";
-
+    
     /**
      * queryPluginFactory
      */
     @Resource
     private QueryPluginFactory queryPluginFactory;
-
+    
     /**
      * 查询一个报表中，某个区域的数据
      * 
@@ -83,13 +83,12 @@ public class QueryRouterResource {
     @RequestMapping(value = "/query", method = { RequestMethod.POST })
     public ResponseResult dispatch(HttpServletRequest request) {
         if (request.getAttribute(PRAMA_QUESTION) == null) {
-            return ResponseResultUtils.getErrorResult(
-                    "question is null", 100);
+            return ResponseResultUtils.getErrorResult("question is null", 100);
         }
         String questionStr = request.getAttribute(PRAMA_QUESTION).toString();
         // convert json to QuestionModel
-        ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(
-                questionStr, ConfigQuestionModel.class);
+        ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(questionStr,
+                ConfigQuestionModel.class);
         QueryRouterContext.setQueryInfo(questionModel.getQueryId());
         logger.info("queryId:{} querycurrent handle size:{} , begin to handle this queryId.",
                 questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());
@@ -97,14 +96,16 @@ public class QueryRouterResource {
         if (questionStr.length() > MAX_PRINT_LENGTH) {
             logger.info("queryId:{} querycurrent handle size:{} request questionmodel json:{}",
                     questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize(),
-                            questionStr.substring(0, MAX_PRINT_LENGTH));
-            logger.debug("queryId:{} request questionmodel json:{}", questionModel.getQueryId(), questionStr);
+                    questionStr.substring(0, MAX_PRINT_LENGTH));
+            logger.debug("queryId:{} request questionmodel json:{}", questionModel.getQueryId(),
+                    questionStr);
         } else {
-            logger.info("queryId:{} request questionmodel json:{}", questionModel.getQueryId(), questionStr);
+            logger.info("queryId:{} request questionmodel json:{}", questionModel.getQueryId(),
+                    questionStr);
         }
         return this.dispatch(questionModel);
     }
-
+    
     /**
      * 将传入的request中的questionStr通过dispatch后分发到相应的Plugin，然后转换成DataModel的json字符串
      * 
@@ -118,21 +119,23 @@ public class QueryRouterResource {
             QueryPlugin queryPlugin = queryPluginFactory.getPlugin(questionModel);
             logger.debug("queryId:{} dispatch cost:{} ms", questionModel.getQueryId(),
                     System.currentTimeMillis() - begin);
-
+            
             // dispatch
             long queryPluginBegin = System.currentTimeMillis();
-
+            
             DataModel dataModel = queryPlugin.query(questionModel);
-            logger.info("queryId:{} queryPlugin finished cost:{} ms",
-                    questionModel.getQueryId(), System.currentTimeMillis() - queryPluginBegin);
+            logger.info("queryId:{} queryPlugin finished cost:{} ms", questionModel.getQueryId(),
+                    System.currentTimeMillis() - queryPluginBegin);
             String dataModelJson = AnswerCoreConstant.GSON.toJson(dataModel);
             // 限制日志输出
             if (dataModelJson.length() > MAX_PRINT_LENGTH) {
-                logger.debug("queryId:{} response modeldata json:{}", questionModel.getQueryId(), dataModelJson);
-                logger.info("queryId:{} response modeldata json:{}...",
-                        questionModel.getQueryId(), dataModelJson.substring(0, MAX_PRINT_LENGTH));
+                logger.debug("queryId:{} response modeldata json:{}", questionModel.getQueryId(),
+                        dataModelJson);
+                logger.info("queryId:{} response modeldata json:{}...", questionModel.getQueryId(),
+                        dataModelJson.substring(0, MAX_PRINT_LENGTH));
             } else {
-                logger.info("queryId:{} response modeldata json:{}", questionModel.getQueryId(), dataModelJson);
+                logger.info("queryId:{} response modeldata json:{}", questionModel.getQueryId(),
+                        dataModelJson);
             }
             logger.info("queryId:{} response query toal cost:{} ms", questionModel.getQueryId(),
                     System.currentTimeMillis() - begin);
@@ -146,13 +149,12 @@ public class QueryRouterResource {
             logger.error(e.getMessage());
             // 说明模型参数传入有问题
             return ResponseResultUtils.getErrorResult(
-                    "question model exception, questionmodel is incorrect.",
-                    100);
+                    "question model exception, questionmodel is incorrect.", 100);
         } finally {
             QueryRouterContext.removeQueryInfo();
         }
     }
-
+    
     /**
      * 判断服务是否存活
      * 

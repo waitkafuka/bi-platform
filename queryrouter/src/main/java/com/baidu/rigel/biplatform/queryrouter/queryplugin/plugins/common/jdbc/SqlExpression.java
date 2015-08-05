@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.queryrouter.operator.OperatorType;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnCondition;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnType;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.Join;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
@@ -52,17 +53,17 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.Where;
  *
  */
 public class SqlExpression implements Serializable {
-
+    
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 3151301875582323398L;
-
+    
     /**
      * logger
      */
     private Logger logger = LoggerFactory.getLogger(QueryRouterResource.class);
-
+    
     /**
      * where 1=2
      */
@@ -87,17 +88,17 @@ public class SqlExpression implements Serializable {
      * jdbc driver
      */
     private String driver;
-
+    
     /**
      * 事实表alias
      */
     private String facttableAlias;
-
+    
     /**
      * 事实表名称
      */
     private String tableName;
-
+    
     /**
      * 生成组织sql string
      * 
@@ -119,10 +120,9 @@ public class SqlExpression implements Serializable {
         try {
             sqlQuery.getSelect().setSql(generateSelectExpression(sqlQuery, needColums, true));
             sqlQuery.getFrom().setSql(generateFromExpression(questionModel, sqlQuery, allColums));
-            sqlQuery.getJoin().setSql(generateLeftOuterJoinExpression(
-                    questionModel, allColums, needColums));
-            sqlQuery.getWhere().setSql(generateTotalWhereExpression(
-                    questionModel, sqlQuery, allColums));
+            sqlQuery.setJoin(generateLeftOuterJoinExpression(questionModel, allColums, needColums));
+            sqlQuery.getWhere().setSql(
+                    generateTotalWhereExpression(questionModel, sqlQuery, allColums));
             sqlQuery.getOrderBy().setSql(generateOrderByExpression(questionModel, allColums));
             if (questionModel.getPageInfo() != null) {
                 sqlQuery.setPageInfo(questionModel.getPageInfo());
@@ -148,8 +148,8 @@ public class SqlExpression implements Serializable {
      * @return String sql
      */
     public void generateCountSql(PlaneTableQuestionModel questionModel,
-            Map<String, SqlColumn> allColums, List<SqlColumn> needColums, Map<String, List<Object>> whereData)
-            throws QuestionModelTransformationException {
+            Map<String, SqlColumn> allColums, List<SqlColumn> needColums,
+            Map<String, List<Object>> whereData) throws QuestionModelTransformationException {
         if (CollectionUtils.isEmpty(needColums)) {
             throw new QuestionModelTransformationException(
                     "List needColums is empty, there is no SqlColum object available to generate.");
@@ -157,15 +157,17 @@ public class SqlExpression implements Serializable {
         try {
             countSqlQuery.getSelect().setSql(" select count(*) as totalc ");
             countSqlQuery.getSelect().setSelectList(needColums);
-            countSqlQuery.getFrom().setSql(generateFromExpression(questionModel, countSqlQuery, allColums));
+            countSqlQuery.getFrom().setSql(
+                    generateFromExpression(questionModel, countSqlQuery, allColums));
             countSqlQuery.getWhere().setSql(
-                    generateCountTotalWhereExpression(questionModel, allColums, SQLConditionType.IN, whereData));
+                    generateCountTotalWhereExpression(questionModel, allColums,
+                            SQLConditionType.IN, whereData));
         } catch (Exception e) {
             logger.error("occur sql exception:{}", e.getMessage());
             throw e;
         }
     }
-
+    
     /**
      * 生成select sql语句
      * 
@@ -177,18 +179,19 @@ public class SqlExpression implements Serializable {
      *            是否只需要事实表的字段
      * @return String sql
      */
-    public String generateSelectExpression(SqlQuery sqlQuery, List<SqlColumn> needColums, boolean contentJoinSelect) throws QuestionModelTransformationException {
+    public String generateSelectExpression(SqlQuery sqlQuery, List<SqlColumn> needColums,
+            boolean contentJoinSelect) throws QuestionModelTransformationException {
         sqlQuery.getSelect().setSelectList(needColums);
         StringBuffer select = new StringBuffer("select ");
         for (SqlColumn colum : needColums) {
             if (ColumnType.JOIN == colum.getType() && contentJoinSelect) {
                 // join表字段
-                select.append(this.getSqlColumnName(colum, true)
-                        + " as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
-            } else if (ColumnType.TIME == colum.getType() || ColumnType.CALLBACK == colum.getType()){
+                select.append(this.getSqlColumnName(colum, true) + " as "
+                        + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
+            } else if (ColumnType.TIME == colum.getType() || ColumnType.CALLBACK == colum.getType()) {
                 // 如果为时间或cb字段
-                select.append(this.getSqlColumnName(colum, true)
-                        + " as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
+                select.append(this.getSqlColumnName(colum, true) + " as "
+                        + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
             } else {
                 // 普通事实表字段
                 if (!StringUtils.isEmpty(colum.getOperator())
@@ -197,16 +200,15 @@ public class SqlExpression implements Serializable {
                     select.append(colum.getOperator() + "(" + this.getSqlColumnName(colum, true)
                             + ") as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
                 } else {
-                    select.append(this.getSqlColumnName(colum, true)
-                            + " as " + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
+                    select.append(this.getSqlColumnName(colum, true) + " as "
+                            + colum.getSqlUniqueColumn() + SqlConstants.COMMA);
                 }
             }
         }
-        return select.toString().substring(0,
-                select.toString().lastIndexOf(SqlConstants.COMMA))
+        return select.toString().substring(0, select.toString().lastIndexOf(SqlConstants.COMMA))
                 + SqlConstants.SPACE;
     }
-
+    
     /**
      * 生成from sql语句
      * 
@@ -214,18 +216,17 @@ public class SqlExpression implements Serializable {
      *            cube
      * @return String sql
      */
-    public String generateFromExpression(
-            PlaneTableQuestionModel planeTableQuestionModel, SqlQuery sqlQuery, Map<String, SqlColumn> allColums)
+    public String generateFromExpression(PlaneTableQuestionModel planeTableQuestionModel,
+            SqlQuery sqlQuery, Map<String, SqlColumn> allColums)
             throws QuestionModelTransformationException {
         if (StringUtils.isEmpty(tableName)) {
-            throw new QuestionModelTransformationException(
-                    "cube.getSource() can not be empty");
+            throw new QuestionModelTransformationException("cube.getSource() can not be empty");
         }
         String[] tableNames = tableName.split(",");
         if (tableNames.length == 1) {
-        // 为单表
-            String from = " from " + tableNames[0] + SqlConstants.SPACE
-                    + this.facttableAlias + SqlConstants.SPACE;
+            // 为单表
+            String from = " from " + tableNames[0] + SqlConstants.SPACE + this.facttableAlias
+                    + SqlConstants.SPACE;
             return from;
         }
         // 此处处理多表的情况
@@ -234,18 +235,18 @@ public class SqlExpression implements Serializable {
             StringBuffer tmpSqlFrom = new StringBuffer(" select * from ");
             tmpSqlFrom.append(tableNames[i]);
             tmpSqlFrom.append(" where 1=1 ");
-            tmpSqlFrom.append(this
-                    .generateSourceWhereExpression(planeTableQuestionModel, sqlQuery, allColums, false));
+            tmpSqlFrom.append(this.generateSourceWhereExpression(planeTableQuestionModel, sqlQuery,
+                    allColums, false));
             if (i == 0) {
                 sqlFrom.append(tmpSqlFrom.toString());
             } else {
                 sqlFrom.append(" union all " + tmpSqlFrom.toString());
             }
         }
-        return " from (" + sqlFrom.toString() + ")" + SqlConstants.SPACE
-                + this.facttableAlias + SqlConstants.SPACE;
+        return " from (" + sqlFrom.toString() + ")" + SqlConstants.SPACE + this.facttableAlias
+                + SqlConstants.SPACE;
     }
-
+    
     /**
      * 生成leftouterjoin sql语句
      * 
@@ -254,23 +255,21 @@ public class SqlExpression implements Serializable {
      * @param HashMap
      *            needColums
      * 
-     * @return String sql
+     * @return Join Join
      */
-    public String generateLeftOuterJoinExpression(
-            PlaneTableQuestionModel planeTableQuestionModel,
+    public Join generateLeftOuterJoinExpression(PlaneTableQuestionModel planeTableQuestionModel,
             Map<String, SqlColumn> allColums, List<SqlColumn> needColums)
             throws QuestionModelTransformationException {
+        Join join = new Join();
         Set<SqlColumn> needJoinColumns = new HashSet<SqlColumn>();
         needJoinColumns.addAll(needColums);
-        StringBuffer leftOuterJoinExpressions = new StringBuffer();
         HashSet<String> joinTables = new HashSet<String>();
-        Map<String, MetaCondition> metaConditionMap = planeTableQuestionModel
-                .getQueryConditions();
+        Map<String, MetaCondition> metaConditionMap = planeTableQuestionModel.getQueryConditions();
         // 添加Where中有字段，而select中没有的sqlcolumns
         metaConditionMap.forEach((k, v) -> {
             SqlColumn column = allColums.get(k);
-            if (ColumnType.TIME != column.getType() 
-                    // 如果不为TIME CALLBACK字段
+            if (ColumnType.TIME != column.getType()
+            // 如果不为TIME CALLBACK字段
                     && ColumnType.CALLBACK != column.getType()
                     // 如果不为事实表join
                     && !column.getSourceTableName().equals(column.getTableName())) {
@@ -280,67 +279,55 @@ public class SqlExpression implements Serializable {
         for (SqlColumn colum : needJoinColumns) {
             String joinTable = colum.getTableName();
             if (colum.getSourceTableName().equals(colum.getTableName())) {
-            // 可能有退化维的存在，
+                // 可能有退化维的存在，
                 continue;
             }
             if (joinTables.contains(joinTable)) {
-            // 如果join的dimTableName已在sql中存在，
+                // 如果join的dimTableName已在sql中存在，
                 continue;
             }
             if (ColumnType.JOIN == colum.getType()) {
-            // 如果为JOIN 字段
-                 joinTables.add(joinTable);
-                 StringBuffer oneLeftOuterJoinExpression = new StringBuffer(" left outer join ");
-                 oneLeftOuterJoinExpression.append(joinTable
-                         + SqlConstants.SPACE + joinTable
-                         + SqlConstants.SPACE);
-                 String tableFiled = joinTable + SqlConstants.DOT
-                         + colum.joinTableFieldName;
-                 String sourceTableFiled = this.facttableAlias
-                         + SqlConstants.DOT
-                         + colum.factTableFieldName;
-                 oneLeftOuterJoinExpression.append(" on " + tableFiled
-                         + " = " + sourceTableFiled + SqlConstants.SPACE);
-                 leftOuterJoinExpressions.append(oneLeftOuterJoinExpression);
+                // 如果为JOIN 字段
+                joinTables.add(joinTable);
+                if (colum.getJoinTable() != null) {
+                    join.getJoinTables().add(colum.getJoinTable());
+                }
             }
         }
-        return leftOuterJoinExpressions.toString();
+        return join;
     }
-
-    /** 
+    
+    /**
      * 生成generateTotalWhereExpression ,Dimension only where sql语句,如果维度表为事实表，将会过滤
      * 
      * @param ConfigQuestionModel
      *            configQuestionModel
      * @return String sql
      */
-    public String generateTotalWhereExpression(
-            PlaneTableQuestionModel planeTableQuestionModel, SqlQuery sqlQuery,
-            Map<String, SqlColumn> allColums) {
+    public String generateTotalWhereExpression(PlaneTableQuestionModel planeTableQuestionModel,
+            SqlQuery sqlQuery, Map<String, SqlColumn> allColums) {
         StringBuffer whereExpressions = new StringBuffer(" where 1=1 ");
-        planeTableQuestionModel
-                .getQueryConditions()
-                .forEach((k, v) -> {
-                    MetaCondition metaCondition = v;
-                    if (metaCondition instanceof ColumnCondition) {
-                        // 判断是维度查询
-                        ColumnCondition columnCondition = (ColumnCondition) metaCondition;
-                        SqlColumn sqlColumn = allColums.get(columnCondition
-                                .getMetaName());
-                        if (sqlColumn.getType() == ColumnType.JOIN) {
-                        // 获取JOIN where
-                            if (!sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
-                            // 过滤退化维的情况
-                                whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery, true));
-                            }
-                        }
+        planeTableQuestionModel.getQueryConditions().forEach((k, v) -> {
+            MetaCondition metaCondition = v;
+            if (metaCondition instanceof ColumnCondition) {
+                // 判断是维度查询
+                ColumnCondition columnCondition = (ColumnCondition) metaCondition;
+                SqlColumn sqlColumn = allColums.get(columnCondition.getMetaName());
+                if (sqlColumn.getType() == ColumnType.JOIN) {
+                    // 获取JOIN where
+                    if (!sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
+                        // 过滤退化维的情况
+                        whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn,
+                                sqlQuery, true));
                     }
-                });
-        whereExpressions.append(this
-                .generateSingleTableSourceWhere(planeTableQuestionModel, sqlQuery, allColums, true));
+                }
+            }
+        });
+        whereExpressions.append(this.generateSingleTableSourceWhere(planeTableQuestionModel,
+                sqlQuery, allColums, true));
         return whereExpressions.toString();
     }
-
+    
     /**
      * 生成generateCountTotalWhereExpression
      * 
@@ -348,9 +335,9 @@ public class SqlExpression implements Serializable {
      *            SQLConditionType
      * @return String sql
      */
-    public String generateCountTotalWhereExpression(PlaneTableQuestionModel planeTableQuestionModel,
-            Map<String, SqlColumn> allColums, SQLConditionType sqlConditionType,
-                    Map<String, List<Object>> whereData) {
+    public String generateCountTotalWhereExpression(
+            PlaneTableQuestionModel planeTableQuestionModel, Map<String, SqlColumn> allColums,
+            SQLConditionType sqlConditionType, Map<String, List<Object>> whereData) {
         StringBuffer whereExpressions = new StringBuffer(" where 1=1 ");
         whereData.forEach((k, v) -> {
             Where where = this.getWhereEquals(sqlConditionType, v);
@@ -362,16 +349,18 @@ public class SqlExpression implements Serializable {
             }
             this.countSqlQuery.getWhere().getValues().addAll(where.getValues());
         });
-        whereExpressions.append(this.generateSingleTableSourceWhere(
-                planeTableQuestionModel, this.countSqlQuery, allColums, true));
+        whereExpressions.append(this.generateSingleTableSourceWhere(planeTableQuestionModel,
+                this.countSqlQuery, allColums, true));
         return whereExpressions.toString();
     }
-
+    
     /**
      * 查询单个表的where
      * 
-     * @param planeTableQuestionModel planeTableQuestionModel
-     * @param allColums allColums
+     * @param planeTableQuestionModel
+     *            planeTableQuestionModel
+     * @param allColums
+     *            allColums
      * @return where sql
      */
     public String generateSingleTableSourceWhere(PlaneTableQuestionModel planeTableQuestionModel,
@@ -380,14 +369,13 @@ public class SqlExpression implements Serializable {
             // 为单表的情况下需要添加where
             String[] tableNames = tableName.split(",");
             if (tableNames.length == 1) {
-                return this
-                        .generateSourceWhereExpression(
-                                planeTableQuestionModel, sqlQuery, allColums, gengerateTableAlias);
+                return this.generateSourceWhereExpression(planeTableQuestionModel, sqlQuery,
+                        allColums, gengerateTableAlias);
             }
         }
         return "";
     }
-
+    
     /**
      * 生成Source(Form里面的where sql) where sql语句
      * 
@@ -395,9 +383,8 @@ public class SqlExpression implements Serializable {
      *            configQuestionModel
      * @return String sql
      */
-    public String generateSourceWhereExpression(
-            PlaneTableQuestionModel planeTableQuestionModel, SqlQuery sqlQuery,
-            Map<String, SqlColumn> allColums, boolean gengerateTableAlias) {
+    public String generateSourceWhereExpression(PlaneTableQuestionModel planeTableQuestionModel,
+            SqlQuery sqlQuery, Map<String, SqlColumn> allColums, boolean gengerateTableAlias) {
         StringBuffer whereExpressions = new StringBuffer("");
         HashSet<String> uniqueNameSet = new HashSet<String>();
         for (Map.Entry<String, SqlColumn> entry : allColums.entrySet()) {
@@ -411,21 +398,21 @@ public class SqlExpression implements Serializable {
             // 判断是事实表查询
             if (columnCondition != null) {
                 if (sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
-                    whereExpressions.append(this
-                            .generateSqlWhereOneCondition(sqlColumn, sqlQuery, gengerateTableAlias));
+                    whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery,
+                            gengerateTableAlias));
                     uniqueNameSet.add(k);
                 } else if (sqlColumn.getType() == ColumnType.CALLBACK
                         || sqlColumn.getType() == ColumnType.TIME
-                        || sqlColumn.getType() == ColumnType.COMMON){
-                    whereExpressions.append(this
-                            .generateSqlWhereOneCondition(sqlColumn, sqlQuery, gengerateTableAlias));
+                        || sqlColumn.getType() == ColumnType.COMMON) {
+                    whereExpressions.append(this.generateSqlWhereOneCondition(sqlColumn, sqlQuery,
+                            gengerateTableAlias));
                     uniqueNameSet.add(k);
                 }
             }
         }
         return whereExpressions.toString();
     }
-
+    
     /**
      * 生成维度sqlwhere表达式
      * 
@@ -439,10 +426,11 @@ public class SqlExpression implements Serializable {
             boolean gengerateTableAlias) {
         ColumnCondition columnCondition = sqlColumn.getColumnCondition();
         if (columnCondition != null) {
-        // 判断是或否有添加查询
+            // 判断是或否有添加查询
             SQLCondition sqlCondition = columnCondition.getColumnConditions();
             String columnSqName = this.getSqlColumnName(sqlColumn, gengerateTableAlias);
-            String whereEquals = this.generateWhereEquals(sqlCondition, sqlQuery, sqlColumn.getDataType());
+            String whereEquals = this.generateWhereEquals(sqlCondition, sqlQuery,
+                    sqlColumn.getDataType());
             if (!StringUtils.isEmpty(whereEquals)) {
                 if (WHERE_NO_DATA == whereEquals) {
                     return " and " + WHERE_NO_DATA;
@@ -452,11 +440,12 @@ public class SqlExpression implements Serializable {
         }
         return "";
     }
-
+    
     /**
      * 根据sqlcolumn生成sql column name
      * 
-     * @param sqlColumn sqlColumn
+     * @param sqlColumn
+     *            sqlColumn
      * @return sqlColumn name
      */
     public String getSqlColumnName(SqlColumn sqlColumn, boolean gengerateTableAlias) {
@@ -464,20 +453,24 @@ public class SqlExpression implements Serializable {
         if (gengerateTableAlias) {
             if (ColumnType.JOIN == sqlColumn.getType()) {
                 if (sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())) {
-                // 退化维
-                    columnSqName = this.facttableAlias + SqlConstants.DOT + sqlColumn.getFactTableFieldName();
+                    // 退化维
+                    columnSqName = this.facttableAlias + SqlConstants.DOT
+                            + sqlColumn.getFactTableFieldName();
                 } else {
-                    columnSqName = sqlColumn.getTableName() + SqlConstants.DOT + sqlColumn.getTableFieldName();
+                    columnSqName = sqlColumn.getTableName() + SqlConstants.DOT
+                            + sqlColumn.getTableFieldName();
                 }
             } else if (ColumnType.TIME == sqlColumn.getType()
-                    || ColumnType.CALLBACK == sqlColumn.getType()){
-                columnSqName = this.facttableAlias + SqlConstants.DOT + sqlColumn.getFactTableFieldName();
+                    || ColumnType.CALLBACK == sqlColumn.getType()) {
+                columnSqName = this.facttableAlias + SqlConstants.DOT
+                        + sqlColumn.getFactTableFieldName();
             } else {
-                columnSqName = this.facttableAlias + SqlConstants.DOT + sqlColumn.getTableFieldName();
+                columnSqName = this.facttableAlias + SqlConstants.DOT
+                        + sqlColumn.getTableFieldName();
             }
         } else {
             if (ColumnType.TIME == sqlColumn.getType()
-                    || ColumnType.CALLBACK == sqlColumn.getType()){
+                    || ColumnType.CALLBACK == sqlColumn.getType()) {
                 columnSqName = sqlColumn.getFactTableFieldName();
             } else {
                 columnSqName = sqlColumn.getTableFieldName();
@@ -499,8 +492,7 @@ public class SqlExpression implements Serializable {
         }
         List<Object> values = new ArrayList<Object>();
         for (String value : sqlCondition.getConditionValues()) {
-            if (StringUtils.isEmpty(dateType)
-                    || dateType.toLowerCase().startsWith("varchar")
+            if (StringUtils.isEmpty(dateType) || dateType.toLowerCase().startsWith("varchar")
                     || dateType.toLowerCase().startsWith("char")) {
                 values.add(value);
             } else {
@@ -519,15 +511,17 @@ public class SqlExpression implements Serializable {
         sqlQuery.getWhere().getValues().addAll(where.getValues());
         return where.getSql();
     }
-
+    
     /**
      * 生成one where
      * 
-     * @param conditionType conditionType
-     * @param values values
+     * @param conditionType
+     *            conditionType
+     * @param values
+     *            values
      * @return sql string
      */
-    public Where getWhereEquals(SQLConditionType conditionType, List<Object> values){
+    public Where getWhereEquals(SQLConditionType conditionType, List<Object> values) {
         Where where = new Where();
         if (CollectionUtils.isEmpty(values)) {
             return where;
@@ -572,8 +566,7 @@ public class SqlExpression implements Serializable {
         // between and
         case BETWEEN_AND: {
             if (StringUtils.isNumeric(values.get(0).toString())
-                    && StringUtils.isNumeric(values
-                            .get(1).toString())) {
+                    && StringUtils.isNumeric(values.get(1).toString())) {
                 BigDecimal front = new BigDecimal(values.get(0).toString());
                 BigDecimal back = new BigDecimal(values.get(1).toString());
                 if (front.compareTo(back) >= 0) {
@@ -589,8 +582,7 @@ public class SqlExpression implements Serializable {
                 where.getValues().add(values.get(0));
                 where.getValues().add(values.get(1));
             }
-            where.setSql(" between " + SqlConstants.PARAM + " and "
-                    + SqlConstants.PARAM);
+            where.setSql(" between " + SqlConstants.PARAM + " and " + SqlConstants.PARAM);
             break;
         }
         // in
@@ -621,7 +613,7 @@ public class SqlExpression implements Serializable {
         }
         return where;
     }
-
+    
     /**
      * 生成groupby sql语句
      * 
@@ -636,7 +628,7 @@ public class SqlExpression implements Serializable {
         for (SqlColumn colum : needColums) {
             if (!StringUtils.isEmpty(colum.getOperator())
                     && OperatorUtils.getOperatorType(colum) == OperatorType.AGG) {
-                needGroupBy = true;    
+                needGroupBy = true;
             } else {
                 groupbyTmpExpression.append(this.getSqlColumnName(colum, true));
                 groupbyTmpExpression.append(SqlConstants.COMMA);
@@ -648,14 +640,12 @@ public class SqlExpression implements Serializable {
         if (" group by ".equals(groupbyExpression.toString())) {
             return "";
         } else {
-            return groupbyExpression.toString().substring(
-                    0,
-                    groupbyExpression.toString()
-                            .lastIndexOf(SqlConstants.COMMA));
+            return groupbyExpression.toString().substring(0,
+                    groupbyExpression.toString().lastIndexOf(SqlConstants.COMMA));
         }
-
+        
     }
-
+    
     /**
      * 生成orderby sql语句
      * 
@@ -665,10 +655,8 @@ public class SqlExpression implements Serializable {
      *            allColums
      * @return String orderby sql
      */
-    public String generateOrderByExpression(
-            PlaneTableQuestionModel planeTableQuestionModel,
-            Map<String, SqlColumn> allColums)
-            throws QuestionModelTransformationException {
+    public String generateOrderByExpression(PlaneTableQuestionModel planeTableQuestionModel,
+            Map<String, SqlColumn> allColums) throws QuestionModelTransformationException {
         if (planeTableQuestionModel.getSortRecord() == null) {
             return "";
         }
@@ -680,14 +668,13 @@ public class SqlExpression implements Serializable {
         }
         SqlColumn sqlColumn = allColums.get(orderColumnNameTmp);
         String orderByType = "";
-        if (SqlConstants.DESC.equals(planeTableQuestionModel.getSortRecord()
-                .getSortType().name())) {
+        if (SqlConstants.DESC.equals(planeTableQuestionModel.getSortRecord().getSortType().name())) {
             orderByType = SqlConstants.DESC;
         }
         return " order by " + this.getSqlColumnName(sqlColumn, true) + SqlConstants.SPACE
                 + orderByType + SqlConstants.SPACE;
     }
-
+    
     /**
      * @param driver
      *            jdbc driver
@@ -700,8 +687,7 @@ public class SqlExpression implements Serializable {
         countSqlQuery = new SqlQuery(this.driver);
         this.facttableAlias = SqlConstants.SOURCE_TABLE_ALIAS_NAME;
     }
-
-
+    
     /**
      * @param tableName
      *            the tableName to set
@@ -709,35 +695,37 @@ public class SqlExpression implements Serializable {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
-
+    
     /**
      * @return the sqlQuery
      */
     public SqlQuery getSqlQuery() {
         return sqlQuery;
     }
-
+    
     /**
-     * @param sqlQuery the sqlQuery to set
+     * @param sqlQuery
+     *            the sqlQuery to set
      */
     public void setSqlQuery(SqlQuery sqlQuery) {
         this.sqlQuery = sqlQuery;
     }
-
+    
     /**
      * @return the countSqlQuery
      */
     public SqlQuery getCountSqlQuery() {
         return countSqlQuery;
     }
-
+    
     /**
-     * @param countSqlQuery the countSqlQuery to set
+     * @param countSqlQuery
+     *            the countSqlQuery to set
      */
     public void setCountSqlQuery(SqlQuery countSqlQuery) {
         this.countSqlQuery = countSqlQuery;
     }
-
+    
     /**
      * getAllColumns
      * 
@@ -746,20 +734,22 @@ public class SqlExpression implements Serializable {
     public Map<String, SqlColumn> getAllColumns() {
         return allColumns;
     }
-
+    
     /**
      * setDriver
      * 
-     * @param driver the driver to set
+     * @param driver
+     *            the driver to set
      */
     public void setDriver(String driver) {
         this.driver = driver;
     }
-
+    
     /**
      * setAllColumns
      * 
-     * @param allColumns the allColumns to set
+     * @param allColumns
+     *            the allColumns to set
      */
     public void setAllColumns(Map<String, SqlColumn> allColumns) {
         this.allColumns = allColumns;

@@ -45,7 +45,7 @@ public class SqlQuery implements Serializable {
     /**
      * join
      */
-    private Join join = new Join();
+    private Join join;
     /**
      * orderBy
      */
@@ -118,8 +118,7 @@ public class SqlQuery implements Serializable {
     }
 
     /**
-     * getJoin
-     * 
+     * default generate get join
      * @return the join
      */
     public Join getJoin() {
@@ -127,10 +126,8 @@ public class SqlQuery implements Serializable {
     }
 
     /**
-     * setJoin
-     * 
-     * @param join
-     *            the join to set
+     * default generate set join
+     * @param join the join to set
      */
     public void setJoin(Join join) {
         this.join = join;
@@ -269,7 +266,11 @@ public class SqlQuery implements Serializable {
         int size = -1;
 
         if (pageInfo == null) {
-            return finallySql;
+            // 临时方案，目前下载数据超过6万时，需要修改显示为6万数据下载
+            pageInfo = new PageInfo();
+            pageInfo.setCurrentPage(0);
+            pageInfo.setPageSize(60000);
+            // return finallySql;
         } else {
             if (pageInfo.getCurrentPage() < 0) {
                 pageInfo.setCurrentPage(0);
@@ -277,9 +278,9 @@ public class SqlQuery implements Serializable {
             if (pageInfo.getPageSize() < 0) {
                 pageInfo.setPageSize(0);
             }
-            start = pageInfo.getCurrentPage() * pageInfo.getPageSize();
-            size = pageInfo.getPageSize();
         }
+        start = pageInfo.getCurrentPage() * pageInfo.getPageSize();
+        size = pageInfo.getPageSize();
         switch (driver) {
             case "com.mysql.jdbc.Driver": {
                 limitStringBuffer.append(" limit ");
