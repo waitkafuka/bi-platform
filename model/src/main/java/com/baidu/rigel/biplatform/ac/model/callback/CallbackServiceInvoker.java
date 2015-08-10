@@ -106,6 +106,7 @@ public final class CallbackServiceInvoker {
                 LOG.debug("[INFO] --- --- resposne : {}", response);
                 LOG.debug("[INFO] -------------------------------------------------------------------------\r\n" );
             }
+            LOG.info("[INFO] --- --- resposne : {}", response);
             long end = System.currentTimeMillis() - begin;
             LOG.info("[INFO] --- --- invoke callback service cost : " + end + "ms,"
                     + " cost on data transfer : " + (end - response.getCost()) + "ms,"

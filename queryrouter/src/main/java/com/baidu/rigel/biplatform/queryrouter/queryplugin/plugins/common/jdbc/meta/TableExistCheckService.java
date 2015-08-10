@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlConstants;
 
@@ -70,8 +71,8 @@ public class TableExistCheckService {
         List<String> result = new ArrayList<String>();
         Set<String> set = new HashSet<String>(Arrays.asList(cubeSource
                 .split(SqlConstants.COMMA)));
-        logger.info("search tables from database, check tables \"" + cubeSource
-                + "\" exists.");
+        logger.info("queryId:{} search tables from database, check tables '{}' exists.",
+                QueryRouterContext.getQueryId(), cubeSource);
         if (SqlConstants.DRIVER_MYSQL.equals(dataSourceInfo.getDataBase()
                 .getDriver())) {
             String sql = "select table_name from information_schema.tables where table_schema='"
@@ -85,11 +86,13 @@ public class TableExistCheckService {
                 }
             });
         } else {
-            logger.info("no available driver handler match:"
-                    + dataSourceInfo.getDataBase().getDriver());
+            logger.info("queryId:{} no available driver handler match:{}",
+                    QueryRouterContext.getQueryId(), dataSourceInfo.getDataBase().getDriver());
         }
         String resultStr = "";
         if (CollectionUtils.isEmpty(result)) {
+            logger.warn("queryId:{} Table :'{}' not in database. please check the source table!",
+                    QueryRouterContext.getQueryId(), cubeSource);
             return resultStr;
         } else {
             for (String tableName : result) {
@@ -97,7 +100,8 @@ public class TableExistCheckService {
             }
             resultStr = resultStr.substring(0, resultStr.length() - 1);
         }
-        logger.info("found tables: \"" + resultStr + "\" in database.");
+        logger.info("queryId:{} found tables: '{}' in database.",
+                QueryRouterContext.getQueryId(), resultStr);
         return resultStr;
     }
 }

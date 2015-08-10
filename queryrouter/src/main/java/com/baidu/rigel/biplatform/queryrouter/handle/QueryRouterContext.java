@@ -1,6 +1,6 @@
 package com.baidu.rigel.biplatform.queryrouter.handle;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * QueryRouterContext记录查询的上下文
@@ -13,7 +13,7 @@ public class QueryRouterContext {
 	/**
 	 * queryId的context
 	 */
-	private static HashMap<String, String> QUERY_REQUEST_CONTEXT = new HashMap<String, String>();
+	private static ConcurrentHashMap<String, String> QUERY_REQUEST_CONTEXT = new ConcurrentHashMap<String, String>();
 	
 	/**
 	 * map size的最大值
@@ -29,7 +29,7 @@ public class QueryRouterContext {
 	public static void setQueryInfo(String queryId) {
 		String threadId = Long.valueOf(Thread.currentThread().getId()).toString();
 		if (QUERY_REQUEST_CONTEXT.size() > MAX_SIZE) {
-			QUERY_REQUEST_CONTEXT = new HashMap<String, String>();
+			QUERY_REQUEST_CONTEXT = new ConcurrentHashMap<String, String>();
 		}
 		QUERY_REQUEST_CONTEXT.put(threadId, queryId);
 	}

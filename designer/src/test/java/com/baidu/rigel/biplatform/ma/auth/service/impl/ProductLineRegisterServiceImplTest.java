@@ -16,11 +16,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
+import com.baidu.rigel.biplatform.api.client.service.FileService;
+import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.auth.bo.ProductlineInfo;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineManageService;
 import com.baidu.rigel.biplatform.ma.auth.service.ProductLineRegisterService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 
 /**
  * 

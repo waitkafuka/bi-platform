@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
 
@@ -234,6 +235,10 @@ public class QueryContextBuilder {
             return null;
         }
         List<Level> levels = Lists.newArrayList(dimension.getLevels().values());
+        if (levels.size () <= 0) {
+            throw new RuntimeException("当前维度定义错误");
+        }
+        
         for(int i = 0; i < levels.size(); i++) {
             if(levels.get(i).getType().equals(LevelType.CALL_BACK)) {
                 hasCallbackLevel = true;
@@ -242,14 +247,59 @@ public class QueryContextBuilder {
                 break;
             }
         }
-        
-        
+        boolean onlyOneTable = true;
+        if (!hasCallbackLevel) {
+            String tableName = levels.get (0).getDimTable ();
+            for (int i = 1; i < levels.size (); ++i) {
+                if (StringUtils.isEmpty(tableName) && StringUtils.isNotEmpty(levels.get (i).getDimTable ())) {
+                    onlyOneTable = false;
+                    break;
+                } else if (StringUtils.isNotEmpty(tableName) && !tableName.equals(levels.get (i).getDimTable ())) {
+                    onlyOneTable = false;
+                    break;
+                }
+            }
+        }
+         // 优化查询逻辑
+        // 1.优先过滤全部节点查询条件，避免后续做更多无用功
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName()) 
                 && !dimension.isTimeDimension ()) {
                 logger.info("filter axises ignore all member filter");
                 return null;
             }
+        }
+        
+        /**
+         *  2. 对于同一张表中的维度过滤，进行一次查询，返回结果
+         *  当前查询不考虑跨层级过滤问题
+         */
+        if (!hasCallbackLevel && onlyOneTable && !dimension.isTimeDimension ()) {
+            List<String> uniqueNameList = dimCondition.getQueryDataNodes ().stream ()
+                    .filter (data -> MetaNameUtil.isUniqueName (data.getUniqueName()))
+                    .map (data -> data.getUniqueName ())
+                    .collect (Collectors.toList ());
+            try {
+                List<MiniCubeMember> members = metaDataService.lookUp (dataSourceInfo, cube, uniqueNameList, params);
+                if (CollectionUtils.isNotEmpty (members)) {
+                    final Set<String> queryNodes = Sets.newHashSet ();
+                    members.stream ().forEach (m -> {
+                        if (CollectionUtils.isEmpty (m.getQueryNodes ())) {
+                            queryNodes.add (m.getName());
+                        } else {
+                            queryNodes.addAll(m.getQueryNodes ());
+                        }
+                    });
+                    filterValues.put (members.get (0).getLevel ().getFactTableColumn (), queryNodes);
+                }
+                return filterValues;
+            } catch (Exception e) {
+                logger.error (e.getMessage (), e);
+            }
+            return null;
+        }
+        
+        for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
             if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
                 callbackParams.add(names[names.length - 1]);
@@ -259,8 +309,8 @@ public class QueryContextBuilder {
                 if (member != null) {
                     String querySource = member.getLevel().getFactTableColumn();
                     Set<String> nodes =
-                            CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
-                                    .getQueryNodes();
+                            CollectionUtils.isEmpty(member.getQueryNodes()) 
+                            ? Sets.newHashSet(member.getName()) : member.getQueryNodes();
                     if (filterValues.containsKey(querySource)) {
                         filterValues.get(querySource).addAll(nodes);
                     } else {
@@ -274,20 +324,21 @@ public class QueryContextBuilder {
         if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
             Map<String, String> newParams = new HashMap<>(params);
             newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
-            List<MiniCubeMember> callbackMembers = callbackDimensionService.getMembers(cube, levels.get(callbackLevelIndex), dataSourceInfo, null, newParams);
+            Level callbackLevel = levels.get(callbackLevelIndex);
+            List<MiniCubeMember> callbackMembers = 
+                callbackDimensionService.getMembers(cube, callbackLevel, dataSourceInfo, null, newParams);
             String querySource = null;
             if(CollectionUtils.isNotEmpty(callbackMembers)) {
                 for(MiniCubeMember member : callbackMembers) {
                     querySource = member.getLevel().getFactTableColumn();
                     Set<String> nodes =
-                            CollectionUtils.isEmpty(member.getQueryNodes()) ? Sets.newHashSet(member.getName()) : member
-                                    .getQueryNodes();
-                            if (filterValues.containsKey(querySource)) {
-                                filterValues.get(querySource).addAll(nodes);
-                            } else {
-                                filterValues.put(querySource, nodes);
-                            }
-                    
+                            CollectionUtils.isEmpty(member.getQueryNodes()) 
+                            ? Sets.newHashSet(member.getName()) : member.getQueryNodes();
+                    if (filterValues.containsKey(querySource)) {
+                        filterValues.get(querySource).addAll(nodes);
+                    } else {
+                        filterValues.put(querySource, nodes);
+                    }
                 }
             }
         }
@@ -419,7 +470,9 @@ public class QueryContextBuilder {
         if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
             Map<String, String> newParams = new HashMap<>(params);
             newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
-            List<MiniCubeMember> callbackMembers = callbackDimensionService.getMembers(cube, levels.get(callbackLevelIndex), dataSourceInfo, null, newParams);
+            Level callbackLevel = levels.get(callbackLevelIndex);
+            List<MiniCubeMember> callbackMembers = 
+                callbackDimensionService.getMembers(cube, callbackLevel, dataSourceInfo, null, newParams);
             if(CollectionUtils.isNotEmpty(callbackMembers)) {
                 if(callbackMembers.size() == 1) { 
                     List<Member> children = callbackMembers.get(0).getChildren();
@@ -430,7 +483,9 @@ public class QueryContextBuilder {
                     if (CollectionUtils.isNotEmpty (children)) { 
                         children.forEach((child) -> {
                             MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                            childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, (MiniCubeMember) child, params);
+                            MiniCubeMember child2 = (MiniCubeMember) child;
+                            childNode = 
+                                buildMemberNodeByMember(dataSourceInfo, cube, childNode, child2, params);
                             parentNode.getChildren().add(childNode);
                         });
                     }
@@ -528,5 +583,12 @@ public class QueryContextBuilder {
         return node;
     }
 
+    /**
+     * for test
+     * @param service
+     */
+    public void setMetaDataService(MetaDataService service) {
+        this.metaDataService = service;
+    }
 }
 

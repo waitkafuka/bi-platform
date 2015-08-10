@@ -32,6 +32,7 @@ import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterResource;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorType;
 import com.baidu.rigel.biplatform.queryrouter.operator.OperatorUtils;
@@ -129,7 +130,7 @@ public class SqlExpression implements Serializable {
             }
             // set no paged sql
         } catch (Exception e) {
-            logger.error("occur sql exception:{}", e.getMessage());
+            logger.error("queryId:{} occur sql exception:{}", QueryRouterContext.getQueryId(), e.getMessage());
             throw e;
         }
     }
@@ -163,7 +164,7 @@ public class SqlExpression implements Serializable {
                     generateCountTotalWhereExpression(questionModel, allColums,
                             SQLConditionType.IN, whereData));
         } catch (Exception e) {
-            logger.error("occur sql exception:{}", e.getMessage());
+            logger.error("queryId:{} occur sql exception:{}", QueryRouterContext.getQueryId(), e.getMessage());
             throw e;
         }
     }

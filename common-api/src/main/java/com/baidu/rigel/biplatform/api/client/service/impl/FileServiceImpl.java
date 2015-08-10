@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.file.client.service.impl;
+package com.baidu.rigel.biplatform.api.client.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,10 +23,10 @@ import javax.annotation.Resource;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.api.client.service.FileService;
+import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Command;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Request;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 
 /**
  * 客户端文件操作实现类

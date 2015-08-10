@@ -24,11 +24,11 @@ import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.api.client.service.FileService;
+import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.PrepareMemDb4Test;
 import com.baidu.rigel.biplatform.ma.PrepareModelObject4Test;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;

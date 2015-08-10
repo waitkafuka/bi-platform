@@ -31,6 +31,7 @@ public class CallbackResponse implements Serializable {
      */
     private static final long serialVersionUID = -737085085913204438L;
     
+    
     /**
      * 响应状态
      * @see ResponseStatus
@@ -156,8 +157,8 @@ public class CallbackResponse implements Serializable {
         str.append(", message : " + message);
         str.append(", data : [");
         if (data != null) {
-            for (CallbackValue value : data) {
-                str.append(value.toString() + ",");
+            for (int i = 0; i < (data.size () < 100 ? data.size () : 100); ++i) {
+                str.append(data.get (i) + ",");
             }
         }
         str.append("]");

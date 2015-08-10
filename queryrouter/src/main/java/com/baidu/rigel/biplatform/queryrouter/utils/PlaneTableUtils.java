@@ -186,7 +186,7 @@ public class PlaneTableUtils {
             column.setJoinTable(convertLevels2JoinList(levels));
         }
         column.setName(oneDimensionSource.getName());
-        column.setCaption(oneDimensionSource.getCaption());
+        column.setCaption(v.getCaption());
         column.setFacttableName(source);
         column.setFacttableColumnName(oneDimensionSource.getFactTableColumn());
         column.setFacttableColumnName(v.getFacttableColumn());

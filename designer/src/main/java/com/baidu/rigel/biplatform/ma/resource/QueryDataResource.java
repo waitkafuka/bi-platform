@@ -68,6 +68,8 @@ import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
+import com.baidu.rigel.biplatform.api.client.service.FileService;
+import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
 import com.baidu.rigel.biplatform.ma.download.DownloadType;
@@ -78,8 +80,6 @@ import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileService;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -2900,7 +2900,9 @@ public class QueryDataResource extends BaseResource {
                 });
                 for (int i = 0; i < pivotTable.getColDefine ().size (); ++i) {
                     String key = pivotTable.getColDefine ().get (i).getUniqueName ();
-                    key = MetaNameUtil.getNameFromMetaName (key);
+                    if (MetaNameUtil.isUniqueName(key)) {
+                        key = MetaNameUtil.getNameFromMetaName (key);
+                    }
                     List<CellData> v = pivotTable.getDataSourceColumnBased ().get (i);
                     List<String> tmpV = 
                         v.stream ().map (cellData -> cellData.getV ().toString ()).collect (Collectors.toList ());

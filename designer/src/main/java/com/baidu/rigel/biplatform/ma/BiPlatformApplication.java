@@ -40,10 +40,11 @@ import com.baidu.rigel.biplatform.ma.resource.filter.UniversalContextSettingFilt
  */
 @Configuration
 @ComponentScan
-@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, RedisAutoConfiguration.class})
-@ImportResource({"conf/applicationContext-cache.xml","applicationContext.xml"})
+@EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, RedisAutoConfiguration.class })
+@ImportResource({ "conf/applicationContext-cache.xml", "conf/applicationContext-common-api.xml",
+        "conf/applicationContext-schedule.xml", "applicationContext.xml" })
 public class BiPlatformApplication extends SpringBootServletInitializer {
-    
+
     @Bean
     public FilterRegistrationBean contextFilterRegistrationBean() {
         FilterRegistrationBean registrationBean = new FilterRegistrationBean();
@@ -52,17 +53,16 @@ public class BiPlatformApplication extends SpringBootServletInitializer {
         registrationBean.setOrder(1);
         return registrationBean;
     }
-    
-    
+
     /**
      * 
      * @param args 外部参数
      */
     public static void main(String[] args) {
         ConfigurableApplicationContext context = SpringApplication.run(BiPlatformApplication.class, args);
-        ApplicationContextHelper.setContext (context);
+        ApplicationContextHelper.setContext(context);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -70,5 +70,5 @@ public class BiPlatformApplication extends SpringBootServletInitializer {
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(BiPlatformApplication.class);
     }
-    
+
 }

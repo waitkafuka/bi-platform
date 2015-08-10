@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.file.client.service.impl;
+package com.baidu.rigel.biplatform.api.client.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,10 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Request;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.Response;
 import com.baidu.rigel.biplatform.ma.common.file.protocol.ResponseStatus;
-import com.baidu.rigel.biplatform.ma.file.client.service.FileServiceException;
 
 /**
  * 文件流操作实现类，主要提供读取内容，向服务器写内容
@@ -43,12 +43,12 @@ public class RequestProxy {
      * 日志对象
      */
     private static final Logger LOG = LoggerFactory.getLogger(RequestProxy.class);
-    
+
     /**
      * 服务器地址、端口缓存
      */
     private static final List<String> SERVERS = Collections.synchronizedList(new ArrayList<String>());
-    
+
     /**
      * 文件服务器客户端
      */
@@ -59,7 +59,7 @@ public class RequestProxy {
      */
     @Value("${biplatform.ma.fileserver.inetaddress}")
     private String host;
-    
+
     /**
      * 文件服务器操作请求
      * 
@@ -75,8 +75,8 @@ public class RequestProxy {
         } catch (Throwable e) {
             LOG.error(e.getMessage(), e);
         }
-        //需要重新定义response的datas属性
-        if (response.getStatus() == ResponseStatus.SUCCESS) { //兼容原有逻辑，后续需要调整
+        // 需要重新定义response的datas属性
+        if (response.getStatus() == ResponseStatus.SUCCESS) { // 兼容原有逻辑，后续需要调整
             return (Map<String, Object>) response.getDatas();
         }
         LOG.debug("do action on remote file sys: " + request.getCommand());

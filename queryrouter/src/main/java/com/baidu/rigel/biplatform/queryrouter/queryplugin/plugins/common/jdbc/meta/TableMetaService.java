@@ -31,6 +31,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.ColumnType;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
@@ -106,9 +107,9 @@ public class TableMetaService {
             List<Map<String, Object>> datas = jdbcHandler.queryForList(sql,
                     new ArrayList<Object>(), dataSourceInfo);
             if (CollectionUtils.isEmpty(datas)) {
-                logger.warn(" can not found tablenames:" + tableNameStringIn
+                logger.warn("queryId:{} can not found tablenames:" + tableNameStringIn
                         + " and columnNames:" + columnNameStringIn
-                        + " in database.");
+                        + " in database.", QueryRouterContext.getQueryId());
                 return sqlColumnMap;
             }
             for (SqlColumn sqlColumn : sqlColumnMap.values()) {
@@ -142,11 +143,11 @@ public class TableMetaService {
                 }
             }
         } else {
-            logger.info("no available driver handler match:"
-                    + dataSourceInfo.getDataBase().getDriver());
+            logger.info("queryId:{} no available driver handler match:"
+                    + dataSourceInfo.getDataBase().getDriver(), QueryRouterContext.getQueryId());
         }
-        logger.info("found table column datatype is:" + dataType
-                + "in tablenames:" + tableNameStringIn + " and columnNames:" + columnNameStringIn);
+        logger.info("queryId:{} found table column datatype is:{} in tablenames:{} and columnNames:{}",
+                QueryRouterContext.getQueryId(), dataType, tableNameStringIn, columnNameStringIn);
         return sqlColumnMap;
     }
 

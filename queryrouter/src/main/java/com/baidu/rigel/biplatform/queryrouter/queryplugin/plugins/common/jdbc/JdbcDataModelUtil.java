@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -188,7 +189,12 @@ public class JdbcDataModelUtil {
                             .put(tableDataColumnKey, new ArrayList<String>());
                 }
                 if (column.getSqlUniqueColumn() != null && row.get(column.getSqlUniqueColumn()) != null) {
-                    cell = row.get(column.getSqlUniqueColumn()).toString();
+                    Object obj = row.get(column.getSqlUniqueColumn());
+                    if (obj instanceof BigDecimal) {
+                        cell = ((BigDecimal) obj).setScale(8).toPlainString();
+                    } else {
+                        cell = obj.toString();
+                    }
                 }
                 // get Data from
                 List<String> oneColData = rowBaseData.get(tableDataColumnKey);
