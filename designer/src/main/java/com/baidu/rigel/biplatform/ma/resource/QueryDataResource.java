@@ -2169,7 +2169,11 @@ public class QueryDataResource extends BaseResource {
             logger.error(e.getMessage(), e);
             return ResourceUtils.getErrorResult("Fail in parsing result. ", 1);
         }
-        DataModelUtils.decorateTable(reportModel.getExtendById(areaId).getFormatModel(), table, 
+        ExtendArea area = reportModel.getExtendById(areaId);
+        if (area.getType () == ExtendAreaType.LITEOLAP_TABLE) {
+            area = reportModel.getExtendById (area.getReferenceAreaId ());
+        }
+        DataModelUtils.decorateTable(area.getFormatModel(), table, 
                 DataModelUtils.isShowZero(targetArea.getOtherSetting()));
         if (table.getDataSourceColumnBased().size() == 0) {
             ResponseResult tmp = new ResponseResult();

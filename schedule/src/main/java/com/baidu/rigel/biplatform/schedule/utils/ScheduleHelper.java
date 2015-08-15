@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.schedule.bo.ScheduleTaskInfo;
+import com.baidu.rigel.biplatform.schedule.exception.ProductLineNameIsNullException;
 import com.baidu.rigel.biplatform.schedule.exception.ScheduleException;
 
 /**
@@ -22,6 +23,8 @@ public class ScheduleHelper {
      */
     private static final String TASK_KEY = "schedule-task";
 
+    private static final String PRODUCTLINE_NAME_DIVIDE_FLAG = "&";
+
     /**
      * 根据任务信息，生成随机的任务id
      * 
@@ -30,6 +33,33 @@ public class ScheduleHelper {
      */
     public static String generateTaskId(ScheduleTaskInfo taskInfo) {
         return Md5Util.encode(taskInfo.toString());
+    }
+
+    /**
+     * 根据产品线名称，拼装该产品线下持久化过之后的调度任务保存目录
+     * 
+     * @param productLineName 产品线名称
+     * @return 产品线下持久化过之后的调度任务保存目录
+     */
+    public static String getTaskSavedRootPath(String productLineName) {
+        StringBuffer pathBuffer = new StringBuffer(productLineName);
+        pathBuffer.append(File.separator);
+        pathBuffer.append(TASK_KEY);
+        return pathBuffer.toString();
+    }
+
+    /**
+     * 根据用户标识，得出产品线名称
+     * 
+     * @param userStr 用户标识
+     * @return 返回产品线名称
+     */
+    public static String parserProductLineNameFromUserDesc(String userStr) {
+        String productLineName = null;
+        if (userStr.contains(PRODUCTLINE_NAME_DIVIDE_FLAG)) {
+            productLineName = userStr.split(PRODUCTLINE_NAME_DIVIDE_FLAG)[0];
+        }
+        return productLineName;
     }
 
     /**
@@ -64,6 +94,6 @@ public class ScheduleHelper {
             // pathBuffer.append(File.separator);
             return pathBuffer.toString();
         }
-        throw new ScheduleException("productline name can not be empty!");
+        throw new ProductLineNameIsNullException("productline name can not be empty!");
     }
 }

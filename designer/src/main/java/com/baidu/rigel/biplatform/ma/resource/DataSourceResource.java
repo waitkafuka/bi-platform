@@ -114,8 +114,7 @@ public class DataSourceResource extends BaseResource {
             tables = cubeMetaBuildService.getAllTable (dsGId, securityKey);
         } catch (DataSourceOperationException e) {
             logger.error ("fail in get all table from ds. ds id: " + dsGId, e);
-            return ResourceUtils.getErrorResult (
-                    "未能查到相关数据库表信息，由于 " + e.getMessage (), 1);
+            return ResourceUtils.getCorrectResult ("未查到表定义信息", Maps.newHashMap ());
         }
         Map<String, Object> data = Maps.newHashMap ();
         data.put ("tables", tables);

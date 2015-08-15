@@ -1,7 +1,6 @@
 package com.baidu.rigel.biplatform.schedule.job;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.quartz.Job;
 import org.quartz.JobDataMap;
@@ -9,11 +8,15 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.schedule.constant.ScheduleConstant;
+import com.google.common.collect.Maps;
 
 /**
  * 该job只负责做httpclient的job处理
@@ -22,16 +25,19 @@ import com.baidu.rigel.biplatform.schedule.constant.ScheduleConstant;
  *
  */
 @Service
-public class HttpClientExcuteJob implements Job {
+public class HttpClientExcuteJob implements Job, BeanFactoryAware {
     /**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(HttpClientExcuteJob.class);
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    // private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     private static final String SEPARATOR = "/";
 
-    @Value("${schedule.excuteActionUrlHost}")
-    private String excuteActionUrlHost = null;
+    public static final String EXCUTE_ACTION_URLHOST = "${schedule.excuteActionUrlHost}";
+
+    private static AtomicReference<String> excuteActionUrlHostRef = null;
+
+    private ConfigurableBeanFactory beanFactoryHeld;
 
     /*
      * (non-Javadoc)
@@ -41,16 +47,49 @@ public class HttpClientExcuteJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
-        String excuteAction = String.valueOf(jobDataMap.get(ScheduleConstant.EXCUTE_ACTION_KEY));
-        System.out.println(SDF.format(new Date()) + "-----------------------HttpClientExcuteJob's excuteAction is : ["
-                + excuteAction + "]");
+        Object excuteActionObj = jobDataMap.get(ScheduleConstant.EXCUTE_ACTION_KEY);
+        String excuteAction = excuteActionObj == null ? "" : String.valueOf(excuteActionObj);
+        // System.out.println(SDF.format(new Date()) +
+        // "-----------------------HttpClientExcuteJob's excuteAction is : ["
+        // + excuteAction + "]");
         LOG.info("-----------------------HttpClientExcuteJob's excuteAction is : [" + excuteAction + "]");
+        String excuteActionUrlHost = excuteActionUrlHostRef.get();
         StringBuffer sb = new StringBuffer(excuteActionUrlHost);
         if (!excuteActionUrlHost.endsWith(SEPARATOR)) {
             sb.append("/");
         }
         sb.append(excuteAction);
         // TODO 联调时需要补充http参数部分逻辑
-        HttpRequest.sendGet(excuteActionUrlHost, null);
+
+        try {
+            HttpRequest.sendGet(sb.toString(), Maps.newHashMap());
+        } catch (Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
+
+    // /**
+    // * setExcuteActionUrlHost
+    // *
+    // * @param value realvalue
+    // */
+    // @Value("${schedule.excuteActionUrlHost}")
+    // public void setExcuteActionUrlHost(String value) {
+    // this.excuteActionUrlHost = value;
+    // }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+     */
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactoryHeld = (ConfigurableBeanFactory) beanFactory;
+        String excuteActionUrlHostStr = beanFactoryHeld.resolveEmbeddedValue(EXCUTE_ACTION_URLHOST);
+        excuteActionUrlHostRef = new AtomicReference<String>(excuteActionUrlHostStr);
+
+    }
+
 }

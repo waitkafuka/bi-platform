@@ -291,7 +291,7 @@ public class MetaQueryAction {
                 }
                 curr=System.currentTimeMillis();
                 dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
-                        questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
+                    questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
                 LOG.info("cost:" + (System.currentTimeMillis() - curr) + "ms sortAandTrunc.");
             }
             

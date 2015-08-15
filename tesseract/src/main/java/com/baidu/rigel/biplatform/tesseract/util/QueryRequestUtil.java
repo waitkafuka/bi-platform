@@ -55,6 +55,7 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -109,10 +110,8 @@ public class QueryRequestUtil {
      *         Map<String,String> key is leafvalue of QueryObject and value is
      *         value of QueryObject
      */
-    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(
-            QueryRequest query) {
-        if (query == null || query.getWhere() == null
-                || query.getWhere().getAndList() == null) {
+    public static Map<String, Map<String, Set<String>>> transQueryRequest2LeafMap(QueryRequest query) {
+        if (query == null || query.getWhere() == null || query.getWhere().getAndList() == null) {
             throw new IllegalArgumentException();
         }
 
@@ -138,9 +137,8 @@ public class QueryRequestUtil {
                     }
                 }
             }
-            if (query.getSelect().getQueryProperties()
-                    .contains(ex.getProperties())
-                    && !curr.isEmpty()) {
+            if (query.getSelect().getQueryProperties().contains(ex.getProperties())
+                && !curr.isEmpty()) {
                 resultMap.put(ex.getProperties(), curr);
             }
         }
@@ -204,8 +202,7 @@ public class QueryRequestUtil {
         result.setFromList(fromList);
         // 处理limit
         if (query.getLimit() != null) {
-            result.setLimitMap(query.getLimit().getStart(), query.getLimit()
-                    .getSize());
+            result.setLimitMap(query.getLimit().getStart(), query.getLimit().getSize());
         }
 
         /**
@@ -221,18 +218,17 @@ public class QueryRequestUtil {
             for (String s : query.getSelect().getQueryProperties()) {
                 result.getSqlSelectColumn(s).setSelect(s);
             }
-            if (CollectionUtils
-                    .isNotEmpty(query.getSelect().getQueryMeasures())) {
+            if (CollectionUtils.isNotEmpty(query.getSelect().getQueryMeasures())) {
                 for (QueryMeasure qm : query.getSelect().getQueryMeasures()) {
                     result.getSqlSelectColumn(qm.getProperties()).setSelect(qm.getProperties());
                     result.getSqlSelectColumn(qm.getProperties()).setOperator(qm.getAggregator().name());
                     
                     if (SqlQuery.getAggcommonoperator().contains(qm.getAggregator().name())) {
                         result.getSqlSelectColumn(qm.getProperties())
-                                .setSqlSelectColumnType(SqlSelectColumnType.OPERATOR_COMMON);
+                            .setSqlSelectColumnType(SqlSelectColumnType.OPERATOR_COMMON);
                     } else {
                         result.getSqlSelectColumn(qm.getProperties())
-                                .setSqlSelectColumnType(SqlSelectColumnType.OPERATOR_DISTINCT_COUNT);
+                            .setSqlSelectColumnType(SqlSelectColumnType.OPERATOR_DISTINCT_COUNT);
                     }
                     selectList.add(qm.getProperties());
                 }
@@ -258,8 +254,7 @@ public class QueryRequestUtil {
             if (key.equals(betweenStr)) {
                 continue;
             }
-            if (andCondition.get(key) == null
-                    || andCondition.get(key).size() == 0) {
+            if (andCondition.get(key) == null || andCondition.get(key).size() == 0) {
                 continue;
             }
             result.getSqlSelectColumn(key).setSelect(key);
@@ -267,8 +262,7 @@ public class QueryRequestUtil {
             StringBuilder sb = new StringBuilder();
             sb.append(key);
             sb.append(" in (");
-            sb.append(StringUtils.join(
-                    transValue2SqlString(andCondition.get(key)), ","));
+            sb.append(StringUtils.join(transValue2SqlString(andCondition.get(key)), ","));
             sb.append(")");
             whereList.add(sb.toString());
         }
@@ -394,20 +388,16 @@ public class QueryRequestUtil {
         return result;
     }
 
-    public static SearchIndexResultSet processGroupBy(
-            SearchIndexResultSet dataSet, QueryRequest query,
-            QueryContext queryContext) throws NoSuchFieldException {
+    public static SearchIndexResultSet processGroupBy(SearchIndexResultSet dataSet, QueryRequest query,
+        QueryContext queryContext) throws NoSuchFieldException {
         List<SearchIndexResultRecord> transList = null;
         long current = System.currentTimeMillis();
-        Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil
-                .transQueryRequest2LeafMap(query);
+        Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil.transQueryRequest2LeafMap(query);
         List<PullUpProperties> allDimVal = collectAllMem(queryContext);
-
-        LOGGER.info("cost :" + (System.currentTimeMillis() - current)
-                + " to collect leaf map.");
+        
+        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
         current = System.currentTimeMillis();
-        List<String> groupList = Lists.newArrayList(query.getGroupBy()
-                .getGroups());
+        List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
         // 这里开始算值都得将count改成sum了
         queryMeasures.forEach(measure -> {
@@ -419,11 +409,30 @@ public class QueryRequestUtil {
             }
         });
         Meta meta = dataSet.getMeta();
+        List<MemberNodeTree> rowMemberTrees = queryContext.getRowMemberTrees ();
+        boolean hasSameNode = false;
+        for (MemberNodeTree tmp : getLeafNodes (rowMemberTrees)) {
+            if (tmp != null && tmp.isCallback () && hasSameNode(tmp, rowMemberTrees)) {
+                    hasSameNode = true;
+                    break;
+                }
+        }
+        
+        MemberNodeTree root = getRootMember (rowMemberTrees);
+        if (hasSameNode) {
+            Map<String, SearchIndexResultRecord> tmpMap = Maps.newHashMap ();
+            dataSet.getDataList ().forEach (d -> {
+                SearchIndexResultRecord copy = DeepcopyUtils.deepCopy (d);
+                copy.setGroupBy (root.getName ());
+                copy.setField (meta.getFieldIndex (root.getQuerySource ()), root.getName ());
+                tmpMap.put (d.getField (meta.getFieldIndex (root.getQuerySource ())) + "", copy);
+            });
+            dataSet.getDataList ().addAll(tmpMap.values ());
+        }
+        
         int dimSize = query.getSelect().getQueryProperties().size();
-        if (dataSet != null && dataSet.size() != 0
-                && dataSet instanceof SearchIndexResultSet) {
+        if (dataSet != null && dataSet.size() != 0) {
             transList = dataSet.getDataList();
-
             if (MapUtils.isNotEmpty(leafValueMap)) {
                 // 如果一个叶子对应多个父节点，克隆一个再塞回去
                 List<SearchIndexResultRecord> copyLeafRecords = new ArrayList<SearchIndexResultRecord>();
@@ -434,43 +443,38 @@ public class QueryRequestUtil {
                                     .getFieldIndex(prop)) != null ? record
                                     .getField(meta.getFieldIndex(prop))
                                     .toString() : null;
-                            Set<String> valueSet = leafValueMap.get(prop).get(
-                                    currValue);
+                            Set<String> valueSet = leafValueMap.get(prop).get(currValue);
                             if (valueSet != null) {
                                 int i = 0;
                                 for (String value : valueSet) {
                                     if (i > 0) {
                                         // 如果一个节点有多个父亲，那么在算总的汇总值得时候，会有数据问题。
-                            SearchIndexResultRecord newRec = DeepcopyUtils
-                                    .deepCopy(record);
-                            newRec.setField(meta.getFieldIndex(prop), value);
-                            generateGroupBy(newRec, groupList, meta);
-                            copyLeafRecords.add(newRec);
-                        } else {
-                            record.setField(meta.getFieldIndex(prop), value);
-                            generateGroupBy(record, groupList, meta);
+                                        SearchIndexResultRecord newRec = DeepcopyUtils.deepCopy(record);
+                                        newRec.setField(meta.getFieldIndex(prop), value);
+                                        generateGroupBy(newRec, groupList, meta);
+                                        copyLeafRecords.add(newRec);
+                                    } else {
+                                        record.setField(meta.getFieldIndex(prop), value);
+                                        generateGroupBy(record, groupList, meta);
+                                    }
+                                    i++;
+                                }
+                            }
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
-                        i++;
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        })            ;
+                    });
                 });
                 if (CollectionUtils.isNotEmpty(copyLeafRecords)) {
                     // 处理汇总节点的时候，得进行下处理和过滤
                     transList.addAll(copyLeafRecords);
                 }
-                transList = AggregateCompute.aggregate(transList, dimSize,
-                        queryMeasures);
+                transList = AggregateCompute.aggregate(transList, dimSize, queryMeasures);
             }
         } else {
             return dataSet;
         }
-        LOGGER.info("cost :" + (System.currentTimeMillis() - current)
-                + " to map leaf.");
+        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
         current = System.currentTimeMillis();
 
         if (CollectionUtils.isEmpty(queryMeasures)) {
@@ -480,46 +484,89 @@ public class QueryRequestUtil {
 
         if (CollectionUtils.isNotEmpty(allDimVal)) {
             for (PullUpProperties properties : allDimVal) {
-
                 List<String> groupList0 = new ArrayList<>(groupList);
                 if (StringUtils.isNotBlank(properties.childField)) {
                     groupList0.remove(properties.childField);
                 }
-                List<MemberNodeTree> rowMemberTrees = queryContext.getRowMemberTrees();
-                boolean needSummary = isNeedSummary(properties, rowMemberTrees);
-                
                 LinkedList<SearchIndexResultRecord> summaryCalcList = new LinkedList<SearchIndexResultRecord>();
                 for (SearchIndexResultRecord record : transList) {
-                    if (!needSummary) {
-                        MemberNodeTree tmp = getCurrentNode (properties.pullupValue, rowMemberTrees);
-                        // TODO 理论上这里不会有错误
-                        String recordName = getSameNode (tmp, tmp.getChildren ()).getName ();
-                        SearchIndexResultRecord vRecord = null;
-                        for (SearchIndexResultRecord currRecord : transList) {
-                            Serializable field = currRecord.getField (meta.getFieldIndex (properties.pullupField));
-                            if (field.equals(recordName)) {
-                                vRecord = DeepcopyUtils.deepCopy(currRecord);
-                                break;
-                            }
+                    int index = meta.getFieldIndex(properties.pullupField);
+                    String name = String.valueOf (record.getField (index));
+                    if (hasSameNode) {
+                        if (name.equals (root.getName ())) {
+                            summaryCalcList.add (record);
+                            break;
                         }
-                        vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
-                        generateGroupBy(vRecord, groupList0, meta);
-                        summaryCalcList.add(vRecord);
-                        break;
-                    } else {
-                        SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy(record);
-                        vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
-                        generateGroupBy(vRecord, groupList0, meta);
-                        summaryCalcList.add(vRecord);
+                        continue;
                     }
+                    SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy (record);
+                    vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
+                    generateGroupBy(vRecord, groupList0, meta);
+                    summaryCalcList.add(vRecord);
                 }
-                transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
+                if (!hasSameNode) {
+                    transList.addAll(AggregateCompute.aggregate(summaryCalcList, dimSize, queryMeasures));
+                }
             }
         }
 
         dataSet.setDataList(transList);
         LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " aggregator leaf.");
         return dataSet;
+    }
+
+    private static boolean hasSameNode(MemberNodeTree member, List<MemberNodeTree> rowMemberTrees) {
+        List<MemberNodeTree> tmp = getLeafNodes(rowMemberTrees);
+        if (CollectionUtils.isEmpty (tmp)) {
+            return false;
+        }
+        String uinqueName = getRootUniqueName(rowMemberTrees);
+        if (StringUtils.isNotEmpty (uinqueName) && uinqueName.equals (member.getUniqueName ())) {
+            return false;
+        }
+        for (MemberNodeTree node : tmp) {
+            if (!member.equals (node) 
+                && CollectionUtils.isEqualCollection (node.getLeafIds (), member.getLeafIds ())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static MemberNodeTree getRootMember(List<MemberNodeTree> rowMemberTrees) {
+        MemberNodeTree tmp = rowMemberTrees.get (0);
+        if (StringUtils.isNotEmpty (tmp.getUniqueName ())) {
+            return tmp;
+        }
+        if (CollectionUtils.isNotEmpty (tmp.getChildren ())) {
+            return getRootMember(tmp.getChildren ());
+        }
+        return null;
+    }
+    
+    private static String getRootUniqueName(List<MemberNodeTree> rowMemberTrees) {
+        MemberNodeTree tmp = rowMemberTrees.get (0);
+        if (StringUtils.isNotEmpty (tmp.getUniqueName ())) {
+            return tmp.getUniqueName ();
+        }
+        if (CollectionUtils.isNotEmpty (tmp.getChildren ())) {
+            return getRootUniqueName(tmp.getChildren ());
+        }
+        return null;
+    }
+
+    private static List<MemberNodeTree> getLeafNodes(List<MemberNodeTree> rowMemberTrees) {
+        List<MemberNodeTree> rs = Lists.newArrayList ();
+        if (CollectionUtils.isEmpty (rowMemberTrees)) {
+            return rs;
+        }
+        for (MemberNodeTree tree : rowMemberTrees) {
+            rs.add(tree);
+            if (CollectionUtils.isNotEmpty (tree.getChildren ())) {
+                rs.addAll (getLeafNodes(tree.getChildren ()));
+            }
+        }
+        return rs;
     }
 
     protected static MemberNodeTree getCurrentNode(String name, List<MemberNodeTree> nodeTrees) {

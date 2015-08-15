@@ -36,4 +36,11 @@ public interface TaskManagerService {
      * @throws ScheduleException ScheduleException
      */
     public boolean deleteTask4ScheduleEngine(ScheduleTaskInfo taskInfo) throws ScheduleException;
+
+    /**
+     * 加载持久化任务到调度引擎中
+     * 
+     * @return 返回加载成功与否的标识
+     */
+    public boolean loadPersistScheduleTaskToEngine();
 }

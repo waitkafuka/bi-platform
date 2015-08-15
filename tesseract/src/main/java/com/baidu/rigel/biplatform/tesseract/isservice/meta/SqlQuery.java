@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.SqlSelectColumn;
@@ -412,7 +413,8 @@ public class SqlQuery {
                     if (i > 0) {
                         sb.append(",");
                     }
-                    if (selectMap.get(orderByArr[i]).getSqlSelectColumnType() == SqlSelectColumnType.COMMON
+                    if (MapUtils.isEmpty(selectMap)
+                            || selectMap.get(orderByArr[i]).getSqlSelectColumnType() == SqlSelectColumnType.COMMON
                             || selectMap.get(orderByArr[i])
                                     .getSqlSelectColumnType() == SqlSelectColumnType.OPERATOR_COMMON) {
                         sb.append(MAIN_TABLE_ALIAS + "." + orderByArr[i]);
@@ -421,6 +423,30 @@ public class SqlQuery {
                         sb.append(orderByArr[i] + "table." + orderByArr[i]);
                     }
                 }
+            }
+
+            if (this.limitMap != null) {
+                // 添加limit
+                StringBuffer limitStringBuffer = new StringBuffer();
+
+                long limitStart = 0;
+                if (this.limitMap.get(LIMITMAP_KEY_LIMITSTART) != null) {
+                    limitStart = this.limitMap.get(LIMITMAP_KEY_LIMITSTART);
+                }
+                long limitEnd = 0;
+                if (this.limitMap.get(LIMITMAP_KEY_LIMITEND) != null) {
+                    limitEnd = this.limitMap.get(LIMITMAP_KEY_LIMITEND);
+                }
+                if (limitStart >= 0 && limitEnd > 0) {
+                    limitStringBuffer.append(" limit ");
+                    limitStringBuffer.append(limitStart);
+                    limitStringBuffer.append(",");
+                    limitStringBuffer.append(limitEnd);
+                } else if (limitEnd > 0) {
+                    limitStringBuffer.append(" limit ");
+                    limitStringBuffer.append(limitEnd);
+                }
+                sb.append(limitStringBuffer);
             }
         }
         return sb.toString();

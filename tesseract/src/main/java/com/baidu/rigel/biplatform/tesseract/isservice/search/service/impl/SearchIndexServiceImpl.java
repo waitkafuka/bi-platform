@@ -264,6 +264,7 @@ public class SearchIndexServiceImpl implements SearchService {
             try {
                 idxShardResultSetList.add(completionService.take().get());
             } catch (InterruptedException | ExecutionException e) {
+                LOGGER.error (e.getMessage (), e);
                 throw new IndexAndSearchException(TesseractExceptionUtils.getExceptionMessage(
                         IndexAndSearchException.QUERYEXCEPTION_MESSAGE,
                         IndexAndSearchExceptionType.NETWORK_EXCEPTION), e,

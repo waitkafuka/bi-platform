@@ -492,7 +492,7 @@ public class DataModelUtils {
             try {
                 int index =
                         DataModelUtils.foundIndexByLeafeValue(dataModel.getColumnHeadFields(),
-                                sortRecord.getSortColumnUniquename());
+                        sortRecord.getSortColumnUniquename());
                 dataModel.setOperateIndex(index);
                 DataModelUtils.sortByRow(dataModel, sortRecord.getSortType());
             } catch (Exception e) {

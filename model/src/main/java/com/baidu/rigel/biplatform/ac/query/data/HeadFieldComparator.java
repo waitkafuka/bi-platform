@@ -62,17 +62,17 @@ public class HeadFieldComparator implements Comparator<HeadField> {
                     return 1;
                 }
             } else {
-                if (filed1.getSummarizeData().compareTo(filed2.getSummarizeData()) == 0) {
-                    boolean asc = sortType.equals(SortType.ASC);
+                if (filed1.getSummarizeData ().compareTo (filed2.getSummarizeData ()) == 0) {
+                    boolean asc = sortType.equals (SortType.ASC);
                     if (asc) {
-                       return filed1.getCaption ().compareTo (filed2.getCaption ());
-                   } else {
-                       return filed2.getCaption ().compareTo (filed1.getCaption ());
-                   }
-                } else if (sortType.equals(SortType.ASC)) {
-                    return filed1.getSummarizeData().compareTo(filed2.getSummarizeData());
+                        return filed1.getCaption ().compareTo (filed2.getCaption ());
+                    } else {
+                        return filed2.getCaption ().compareTo (filed1.getCaption ());
+                    }
+                } else if (sortType.equals (SortType.ASC)) {
+                    return filed1.getSummarizeData ().compareTo (filed2.getSummarizeData ());
                 } else {
-                    return -filed1.getSummarizeData().compareTo(filed2.getSummarizeData());
+                    return -filed1.getSummarizeData ().compareTo (filed2.getSummarizeData ());
                 }
 
             }

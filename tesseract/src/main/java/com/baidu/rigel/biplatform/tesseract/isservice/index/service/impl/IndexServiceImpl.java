@@ -1272,7 +1272,7 @@ public class IndexServiceImpl implements IndexService {
 			needMerge = Boolean.TRUE;
 		}
 		//get select 
-		Set<String> selectList = this.indexMetaService.getSelectList(idxMeta, needMerge);		
+		Set<String> selectList = this.indexMetaService.getSelectList(idxMeta, needMerge);	
 		
 		for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
 			SqlQuery sqlQuery = new SqlQuery();
@@ -1304,9 +1304,10 @@ public class IndexServiceImpl implements IndexService {
 			if (!StringUtils.isEmpty(idName)) {
 				sqlQuery.setIdName(idName);
 				sqlQuery.getOrderBy().add(sqlQuery.getIdName());
-				if(!CollectionUtils.isEmpty(sqlQuery.getSelectList())){
-					sqlQuery.getSelectList().add(sqlQuery.getIdName());
-				}
+                if (!CollectionUtils.isEmpty(sqlQuery.getSelectList())
+                    && !sqlQuery.getSelectList().contains(sqlQuery.getIdName())) {
+                    sqlQuery.getSelectList().add(sqlQuery.getIdName());
+                }
 			}
 			
 //			//设置排序字段
