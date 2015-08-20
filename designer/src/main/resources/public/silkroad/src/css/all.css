@@ -7,6 +7,8 @@
 @import url(component/button.css);
 @import url(component/form.css);
 @import url(component/spectrum/spectrum.css);
+@import url(component/ztree/ztree.css);
+@import url(component/select-tree/select-tree.css);
 
 /* 业务逻辑 */
 @import url(biz/nav.css);

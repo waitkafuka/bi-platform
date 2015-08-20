@@ -180,6 +180,10 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 continue;
             }
         }
+        if (cubes.size() == 0) {
+            logger.info("cube is empty, don't need to create index!");
+            return true;
+        }
         new Thread() {
             public void run() {
                 MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);

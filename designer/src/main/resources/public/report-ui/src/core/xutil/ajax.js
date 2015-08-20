@@ -32,6 +32,7 @@
     
     var AJAX = xutil.ajax;
     var exRequest = baidu.ejson.request;
+    var dataCache;
         
     /**
      * 外部接口，可以在工程中定义这些方法的实现或变量的赋值（也均可缺省）
@@ -269,14 +270,15 @@
      * @param {Object} options.syncWrap 用于请求的同步，参见createSyncWrap方法
      * @return {string} options.requestId request的标志，用于abort
      */
-    AJAX.request = function (url, options) {
+    AJAX.request = function (url, options, param) {
+
         options = extend(
             extend(
                 {}, AJAX.DEFAULT_OPTIONS || {}
             ), 
             options || {}
         );
-        var requestId = 'AJAX_' + (++uniqueIndex);
+        var requestId = 'AJAX_' + (++ uniqueIndex);
         var businessKey = options.businessKey;
         var defaultFailureHandler = 
                 options.defaultFailureHandler || null;
@@ -308,11 +310,25 @@
 
         options.data = appendDefaultParams(options.data || '');
 
+
         // 构造sucess handler
         options.onsuccess = function (data, obj) {
             if (requestId in xhrSet) { // 判断abort
                 try {
                     if (!oncomplete || oncomplete(obj) !== false) {
+                        // 如果是固定报表，会发一次请求，请求回来就缓存数据
+                        if (param.reportType
+                            && param.reportType === 'REGULAR'
+                            && !dataCache
+                        ) {
+                            dataCache = data;
+                            data = {
+                                statusInfo: '',
+                                status: 0,
+                                data: '',
+                                properties: {}
+                            };
+                        }
                         onsuccess(data, obj);
                     }
                     onfinalize && onfinalize(obj);
@@ -384,18 +400,41 @@
             delete options.timeout;
         }
         
-        handleShowWaiting(requestId, showWaiting);
-        
-        handleBusinessAbort(requestId, businessKey);
+        var resultData = {};
+        // TODO:这块的验证
+        // 如果是固定报表,如果存在固定报表缓存数据
+        if (dataCache) {
+            // 获取组件data
+            if (param.componentId && dataCache[param.componentId]) {
+                resultData = {
+                    statusInfo: '',
+                    status: 0,
+                    data: dataCache[param.componentId]
+                };
+            }
+            // context时，就不发请求，在这里进行模拟
+            else {
+                resultData = {
+                    statusInfo: '',
+                    status: 0,
+                    data: {},
+                    properties: {}
+                };
+            }
+            onsuccess(resultData.data, resultData);
+            return;
+        }
 
-        // 发送请求
+        handleShowWaiting(requestId, showWaiting);
+
+        handleBusinessAbort(requestId, businessKey);
+        // 发送请求(第一次init_params需要发请求)
         xhrSet[requestId] = {
             xhr: exRequest(url, options),
             clear: clear
         };
-        
         return requestId;
-    }
+    };
 
     /**
      * 发送POST请求

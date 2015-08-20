@@ -2692,8 +2692,8 @@ tr > td:last-child:after{
 
 
 .ui-tip {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
     background-repeat: no-repeat;
     background-color: transparent;
     overflow: hidden;

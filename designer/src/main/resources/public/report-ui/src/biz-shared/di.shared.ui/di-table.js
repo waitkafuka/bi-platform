@@ -652,7 +652,7 @@ $namespace('di.shared.ui');
                 datasourceId, 
                 {
                     uniqueName: rowDefItem.uniqueName,
-                    componentId : this.$di('getId').split('.')[1]
+                    componentId: this.$di('getId').split('.')[1]
                 },
                 null,
                 {

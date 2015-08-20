@@ -128,7 +128,6 @@ public class SqlExpression implements Serializable {
             if (questionModel.getPageInfo() != null) {
                 sqlQuery.setPageInfo(questionModel.getPageInfo());
             }
-            // set no paged sql
         } catch (Exception e) {
             logger.error("queryId:{} occur sql exception:{}", QueryRouterContext.getQueryId(), e.getMessage());
             throw e;

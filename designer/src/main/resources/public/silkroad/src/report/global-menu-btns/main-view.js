@@ -6,12 +6,14 @@
 define([
         'dialog',
         'report/global-menu-btns/component-menu-template',
-        'report/global-menu-btns/main-model'
+        'report/global-menu-btns/main-model',
+        'report/global-menu-btns/fix-report/fix-report-view'
     ],
     function (
         dialog,
         ComponentMenuTemplate,
-        MenuMainModel
+        MenuMainModel,
+        FixReportView
     ) {
         return Backbone.View.extend({
             // view事件绑定
@@ -32,6 +34,13 @@ define([
                 this.model = new MenuMainModel();
                 var Model = this.model;
                 this.canvasView = option.canvasView;
+
+                this.fixReportView = new FixReportView({
+                    el: this.el,
+                    canvasView: this.canvasView,
+                    reportId: option.reportId
+                });
+
                 // 工具条按钮区域按钮添加
                 this.$el.find('.j-global-btn').html(this.createBtns());
                 // 工具条菜单区域菜单添加
@@ -144,6 +153,12 @@ define([
                     picName: 'para',
                     title: '参数维度设置',
                     className: 'global-para'
+                },
+                {
+                    id: 'fix-report',
+                    picName: 'fix_report',
+                    title: '固定报表',
+                    className: 'fix-report'
                 },
                 {
                     id: 'component',

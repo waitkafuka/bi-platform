@@ -45,7 +45,6 @@
     var pushArray = Array.prototype.push;
     // 引用了外部库
     var formatNumber = xutil.number.formatNumber;
-
     var MATH = Math;
     var MIN = MATH.min;
     var WINDOW = window;
@@ -399,6 +398,8 @@
 
         this.$bindCellLink();
 
+        this.$renderTips();
+
         attachEvent(WINDOW, 'resize', repaint);
 
         // console.log('=================== olap-table setData 6] ' + ((new Date()).getTime() - ddd));
@@ -638,9 +639,10 @@
             attrStr.push('uniqueName="' + colDefItem.uniqueName + '"');
         }
         // 如果是维度列，就不显示tooltip图标
-        if (!wrap.colSpan) {
+        if (!wrap.colspan) {
             //tooltipTag += '<div class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</div>';
-            tooltipTag += '<span class="'+ type + '-head-tips" data-message="' + string.encodeHTML(colDefItem.toolTip) + '"></span>'
+            var toolTipText = colDefItem.toolTip ? string.encodeHTML(colDefItem.toolTip) : '';
+            tooltipTag += '<span class="' + type + '-head-tips" data-message="' + toolTipText + '"></span>';
             //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         else {
@@ -1270,6 +1272,74 @@
                 );
             }
         }
+    };
+
+    /**
+     * 渲染tips
+     *
+     * @public
+     */
+    UI_OLAP_TABLE_CLASS.$renderTips = function () {
+        // var hCells = this._aHCells;
+        var type = this.getType();
+        var hCells;
+        var headTableHead = dom.children(this._uHead._eBody)[0];
+        headTableHead && (hCells = dom.children(headTableHead));
+        if (!hCells) {
+            return;
+        }
+        for (var i = 0; i < hCells.length; i ++) {
+            // var el = hCells[i]._eBody;
+            var el = hCells[i];
+            var tipsEl = dom.getElementsByClass(el, 'span', type + '-head-tips');
+            if (tipsEl.length > 0) {
+                var target = tipsEl[0];
+                /* globals esui */
+                var tip = esui.create(
+                    'Tip',
+                    {
+                        type: 'ui-tip',
+                        content: target.getAttribute('data-message'),
+                        showMode: 'over',
+                        delayTime: 400,
+                        showDuration: 400,
+                        positionOpt: {top: 'bottom', left: 'left'},
+                        main: target
+                    }
+                );
+                tip.render();
+            }
+        }
+
+        var rows = this._aRows;
+        for (var x = 0; x < rows.length; x ++) {
+            var cells = rows[x]._aElements;
+            for (var y = 0; y < cells.length; y ++) {
+                var el = cells[y];
+                var ec;
+                if (el.getAttribute('data-row-h') || (ec = el.getAttribute('data-e-c'))) {
+                    var tipsEl = dom.getElementsByClass(el, 'span', 'tip-layer-div');
+                    if (tipsEl.length > 0) {
+                        var target = tipsEl[0];
+                        /* globals esui */
+                        var tipLayer = esui.create('TipLayer', {
+                            arrow: 0,
+                            content: target.getAttribute('data-message')
+                        });
+
+                        tipLayer.appendTo(document.body);
+                        tipLayer.attachTo({
+                            targetDOM: target,
+                            showMode: 'over',
+                            delayTime: 500,
+                            showDuration: 500,
+                            positionOpt: {top: 'bottom', left: 'left'}
+                        });
+                    }
+                }
+            }
+        }
+
     };
 
     // UI_TABLE_HCELL_CLASS.$mouseover = function (event) {

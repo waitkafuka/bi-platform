@@ -20,6 +20,7 @@ package com.baidu.rigel.biplatform.tesseract.qsservice.query.vo;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
@@ -55,7 +56,7 @@ public class GroupBy implements Serializable {
      * 默认构造方法
      */
     public GroupBy() {
-        this.groups = new HashSet<String>();
+        this.groups = new LinkedHashSet<String>();
     }
 
     /**
@@ -65,7 +66,7 @@ public class GroupBy implements Serializable {
      */
     public Set<String> getGroups() {
         if (this.groups == null) {
-            this.groups = new HashSet<String>();
+            this.groups = new LinkedHashSet<String>();
         }
         return groups;
     }

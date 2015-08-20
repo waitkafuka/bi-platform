@@ -248,4 +248,20 @@
         return paramArr;
     };
 
+    /**
+     * 获取url传参值
+     * @param {string} key url参数
+     * @private
+     * @return {string} 匹配到的参数值
+     */
+    URL.request = function (key) {
+        var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
+    };
+
 })();

@@ -12,6 +12,9 @@ div, p, ul, li, input {
     margin: 0px;
     padding: 0px;
 }
+input {
+    outline: none;
+}
 li {
     list-style: none;
 }
@@ -92,6 +95,9 @@ a {
 .mt-100 {
     margin-top: 100px;
 }
+.mt-260 {
+    margin-top: 260px;
+}
 .mr-10 {
     margin-right: 10px;
 }
@@ -155,6 +161,9 @@ a {
 .w-200 {
     width: 200px;
 }
+.w-300 {
+    width: 300px;
+}
 .w-p-40 {
     width: 40%;
 }
@@ -169,4 +178,8 @@ a {
 }
 .h-30 {
     height: 30px;
+}
+.word-bread {
+    word-wrap: break-word;
+    overflow: hidden;
 }

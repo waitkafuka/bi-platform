@@ -413,7 +413,9 @@ public class HttpRequest {
 
     private static final class ClientInstance {
         
-        private static final HttpClient INSTANCE;
+        private static HttpClient INSTANCE;
+        
+        private static final Object LOCK_OBJ = new Object();
         
         private static final CookieSpecProvider cookieSpecProvider = new CookieSpecProvider() {
             
@@ -428,31 +430,46 @@ public class HttpRequest {
                 };
             }
         };
-        
-        static {
-            Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
-                    .register(NO_CHECK_COOKIES, cookieSpecProvider)
-                    .build();
-            // 设置默认的cookie的安全策略为不校验
-            RequestConfig requestConfigBuilder = RequestConfig.custom()
-                    .setCookieSpec(NO_CHECK_COOKIES)
-                    .setSocketTimeout(1000) // 握手超时 ms
-                    .setConnectTimeout(1800000) // 连接超时 ms
-                    .build();
-            PoolingHttpClientConnectionManager connectionManager = 
-                new PoolingHttpClientConnectionManager ();
-            connectionManager.setMaxTotal (100);
-            List<HttpRoute> routee = getRoutee ();
-            int maxPerRoute = 100 / routee.size ();
-            connectionManager.setDefaultMaxPerRoute (maxPerRoute);
-            INSTANCE = HttpClients.custom()
-                    .setDefaultCookieSpecRegistry(cookieSpecRegistry)
-                    .setDefaultRequestConfig(requestConfigBuilder)
-                    .setConnectionManager (connectionManager)
-                    .build();
-        }
-        
         public static HttpClient getClientInstance (Map<String, String> params) {
+            if (INSTANCE == null) {
+                synchronized (LOCK_OBJ) {
+                    if (INSTANCE == null) {
+                        Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
+                                .register(NO_CHECK_COOKIES, cookieSpecProvider)
+                                .build();
+                        String socketTimeout = "1800000";
+                        String connTimeout = "1800000";
+                        if (params != null) {
+                            if (params.containsKey(SOCKET_TIME_OUT)) {
+                                socketTimeout = params.get(SOCKET_TIME_OUT);
+                            }
+                            if (params.containsKey(CONNECTION_TIME_OUT)) {
+                                socketTimeout = params.get(CONNECTION_TIME_OUT);
+                            }
+                        }
+                        // 设置默认的cookie的安全策略为不校验
+                        RequestConfig requestConfigBuilder = RequestConfig.custom()
+                                .setCookieSpec(NO_CHECK_COOKIES)
+                                .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
+                                .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
+                                .build();
+                        PoolingHttpClientConnectionManager connectionManager = 
+                            new PoolingHttpClientConnectionManager ();
+                        connectionManager.setDefaultMaxPerRoute(100);
+                        connectionManager.setMaxTotal (100);
+                        List<HttpRoute> routee = getRoutee ();
+                        for (HttpRoute route : routee) {
+                            connectionManager.setMaxPerRoute (route, 100);
+                        }
+                        INSTANCE = HttpClients.custom()
+                                .setDefaultCookieSpecRegistry(cookieSpecRegistry)
+                                .setDefaultRequestConfig(requestConfigBuilder)
+                                .setConnectionManager (connectionManager)
+                                .build();
+                    }
+                }
+            }
+            
             return INSTANCE;
         }
         

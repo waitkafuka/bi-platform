@@ -123,7 +123,7 @@ $namespace('di.config');
 
     URL_SET.DIM_MULTISELECT_TABLE = '/reports/runtime/extend_area/#{componentId}/dims/#{dimSelectName}/members';
     URL_SET.DIM_MULTISELECT_CHART = '/reportTemplate/chart/getDimMultiSelect.action';
-    
+
 //    URL_SET.DIM_SELECT_SAVE_TABLE = '/reportTemplate/table/updateDimNodes.action';
 //    URL_SET.DIM_SELECT_SAVE_CHART = '/reportTemplate/chart/updateDimNodes.action';
 
@@ -157,28 +157,16 @@ $namespace('di.config');
     URL_SET.CONSOLE_CHART_CONFIG_SUBMIT = '/reportTemplate/chart/updateChartSettings.action';
 
     // 表单
-//    URL_SET.FORM_DATA = '/reportTemplate/initParams.action';
     URL_SET.FORM_ASYNC_DATA = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
     URL_SET.FORM_DATA = '/reports/#{reportId}/init_params';
     URL_SET.FORM_UPDATE_CONTEXT = '/reports/#{reportId}/runtime/context';
     URL_SET.FORM_CASCADE_GETLEVEL = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
-
-    // PIVOIT表（透视表）
-//    URL_SET.OLAP_TABLE_DATA = '/reportTemplate/table/transform.action';
-//    URL_SET.OLAP_TABLE_DRILL = '/reportTemplate/table/drill.action';
-//    URL_SET.OLAP_TABLE_LINK_DRILL = '/reportTemplate/table/drillByLink.action';
-//    URL_SET.OLAP_TABLE_SORT = '/reportTemplate/table/sort.action';
-//    URL_SET.OLAP_TABLE_CHECK = '/reportTemplate/table/checkRow.action';
-//    URL_SET.OLAP_TABLE_SELECT = '/reportTemplate/table/selectRow.action';
-//    URL_SET.OLAP_TABLE_DOWNLOAD = '/reportTemplate/table/download.action';
-//    URL_SET.OLAP_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/table/downloadOffLine.action';
-//    URL_SET.OLAP_TABLE_LINK_BRIDGE = '/reportTemplate/table/linkBridge.action';
+    URL_SET.FORM_REGULAR = '/reports/#{reportId}/regular/#{taskId}';
     URL_SET.OLAP_TABLE_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
     URL_SET.OLAP_TABLE_DRILL =  '/reports/#{reportId}/runtime/extend_area/#{componentId}/drill/#{action}';
     URL_SET.OLAP_TABLE_LINK_DRILL = '/reports/#{reportId}/runtime/extend_area/#{componentId}/drill';
     URL_SET.OLAP_TABLE_SELECT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/selected_row';
     URL_SET.OLAP_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
-    URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
     URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
     URL_SET.OLAP_TABLE_RICH_SELECT_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}/changablemeasures';
     URL_SET.OLAP_TABLE_RICH_SELECT_CHANGE = '/reports/#{reportId}/runtime/extend_area/#{componentId}/changedMeasures';
@@ -191,25 +179,6 @@ $namespace('di.config');
     URL_SET.PLANE_TABLE_SUBMIT_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/submitSetInfo';
     URL_SET.PLANE_TABLE_DELETE_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/item/#{elementId}/removeSetInfo';
     URL_SET.PLANE_TABLE_DOWNLOAD = '/reports/#{reportId}/downloadOnline/#{componentId}';
-//    URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
-//    URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
-//    URL_SET.PLANE_TABLE_DOWNLOAD = '/reportTemplate/planeTable/download.action';
-//    URL_SET.PLANE_TABLE_DOWNLOADEXCEL = '/reportTemplate/planeTable/downloadExcel.action';
-//    URL_SET.PLANE_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/planeTable/downloadOffLine.action';
-//    URL_SET.PLANE_TABLE_LINK_BRIDGE = '/reportTemplate/planeTable/linkBridge.action';
-
-    // 图
-//    URL_SET.OLAP_CHART_DATA = '/reportTemplate/chart/transform.action';
-//    // 根据liteOlap的表格数据和相应条件生成图形数据
-//    URL_SET.LITEOLAP_CHART_DATA = '/reportTemplate/liteolap/generateAnalysisChart.action';
-//    URL_SET.OLAP_CHART_X_DATA = '/reportTemplate/chart/reDraw.action';
-//    URL_SET.OLAP_CHART_S_DATA = '/reportTemplate/chart/reDrawSeries.action'; // 传入维度参数
-//    URL_SET.OLAP_CHART_S_ADD_DATA = '/reportTemplate/chart/addChartSeries.action'; // 传入维度参数，增加趋势线
-//    URL_SET.OLAP_CHART_S_REMOVE_DATA = '/reportTemplate/chart/removeChartSeries.action'; // 传入维度参数，删除趋势线
-//    URL_SET.OLAP_CHART_BASE_CONFIG_INIT = '/reportTemplate/chart/config.action';
-//    URL_SET.OLAP_CHART_BASE_CONFIG_SUBMIT = '/reportTemplate/chart/config.action';
-//    URL_SET.OLAP_CHART_DOWNLOAD = '/reportTemplate/chart/download.action';
-//    URL_SET.OLAP_CHART_OFFLINE_DOWNLOAD = '/reportTemplate/chart/downloadOffLine.action';
 
     // 图-最新路径
     URL_SET.OLAP_CHART_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';

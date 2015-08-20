@@ -62,54 +62,54 @@ import com.google.gson.reflect.TypeToken;
 @RestController
 @RequestMapping("/silkroad/reports")
 public class CubeTableResource extends BaseResource {
-    
+
     /**
      * logger
      */
     private Logger logger = LoggerFactory.getLogger(CacheManagerForResource.class);
-    
+
     /**
      * reportModelCacheManager
      */
     @Resource
     private ReportModelCacheManager reportModelCacheManager;
-    
+
     /**
      * cubeMetaBuildService
      */
     @Resource
     private CubeMetaBuildService cubeBuildService;
-    
+
     /**
      * starModelBuildService
      */
     @Resource
     private StarModelBuildService starModelBuildService;
-    
+
     /**
      * director
      */
     @Resource
     private Director director;
-    
+
     /**
      * dsService
      */
     @Resource
     private DataSourceService dsService;
-    
+
     /**
      * dsGService
      */
     @Resource
     private DataSourceGroupService dsGService;
-    
+
     /**
      * nameCheckCacheManager
      */
     @Resource
     private NameCheckCacheManager nameCheckCacheManager;
-    
+
     /**
      * 
      * @param reportId
@@ -117,37 +117,35 @@ public class CubeTableResource extends BaseResource {
      * @return ResonseResult
      */
     @RequestMapping(value = "/{id}/star_models", method = { RequestMethod.POST })
-    public ResponseResult saveCubeTables(@PathVariable("id") String reportId,
-            HttpServletRequest request) {
+    public ResponseResult saveCubeTables(@PathVariable("id") String reportId, HttpServletRequest request) {
         String dsId = request.getParameter("dataSourceId");
         // String dsGroupId = request.getParameter("dataSourceGroupId");
         /**
          * check ds
          */
         nameCheckCacheManager.existsDSName(dsId);
-        
+
         String[] selectedTables = StringUtils.split(request.getParameter("selectedTables"), ",");
         String regexpStr = request.getParameter("regexps");
-        
+
         // 获取正则表达式
         Map<String, DivideTableStrategyVo> regexps = Maps.newHashMap();
         if (!StringUtils.isEmpty(regexpStr)) {
-            regexps = GsonUtils.fromJson(request.getParameter("regexps"),
-                    new TypeToken<Map<String, DivideTableStrategyVo>>() {
-                    }.getType());
+            regexps =
+                    GsonUtils.fromJson(request.getParameter("regexps"),
+                            new TypeToken<Map<String, DivideTableStrategyVo>>() {
+                            }.getType());
         }
-        
+
         // 选中的表
         List<String> selectedList = Lists.newArrayList();
         if (selectedTables != null && selectedTables.length > 0) {
             selectedList.addAll(Lists.newArrayList(selectedTables));
         }
 
-              
         List<FactTableMetaDefine> cubeTables = null;
         try {
-            cubeTables = cubeBuildService.initCubeTables(dsId, selectedList,
-                regexps, securityKey);
+            cubeTables = cubeBuildService.initCubeTables(dsId, selectedList, regexps, securityKey);
         } catch (DataSourceOperationException e1) {
             logger.error("Fail in getting table info from datasource. ", e1);
             return ResourceUtils.getErrorResult("未能从数据库中查到相关表定义信息，原因 " + e1.getLocalizedMessage(), 1);
@@ -164,7 +162,7 @@ public class CubeTableResource extends BaseResource {
         report.setSchema(schema);
         report.setDsId(dsId);
         // report.setDsGroupId(dsGroupId);
-        
+
         reportModelCacheManager.updateReportModelToCache(reportId, report);
         report = reportModelCacheManager.getReportModel(reportId);
         logger.info("put Schema model to cache");
@@ -172,7 +170,7 @@ public class CubeTableResource extends BaseResource {
         logger.info("put operation rs is : " + rs.toString());
         return rs;
     }
-    
+
     /**
      * 
      * @param reportId
@@ -180,8 +178,7 @@ public class CubeTableResource extends BaseResource {
      * @return
      */
     @RequestMapping(value = "/{id}/ds_id", method = { RequestMethod.GET })
-    public ResponseResult getSelectedDS(@PathVariable("id") String reportId,
-            HttpServletRequest request) {
+    public ResponseResult getSelectedDS(@PathVariable("id") String reportId, HttpServletRequest request) {
         ReportDesignModel reportModel = null;
         try {
             reportModel = reportModelCacheManager.getReportModel(reportId);
@@ -193,26 +190,31 @@ public class CubeTableResource extends BaseResource {
         Map<String, Object> data = Maps.newHashMap();
         if (reportModel != null) {
             try {
-            	DataSourceGroupDefine dsG = dsGService.getDataSourceGroupDefine(reportModel.getDsId()); 
-            	if (dsG == null) {
-                	logger.error("can't get ds group with id " + reportModel.getDsId());
-            		rs = ResourceUtils.getErrorResult("failed", 1);
-            	} else {
-            		DataSourceDefine ds = dsG.getActiveDataSource();
-            		if (ds == null) {
-            			logger.error("can't get report id " + reportModel.getId());
-            			rs = ResourceUtils.getErrorResult("failed", 1);
-            		} else {
-            			// 组的id
-            			data.put("selectedGroupId", reportModel.getDsId());
-            			// 数据源id
-            			data.put("selectedDatasourceId", ds.getId());
-            			rs = ResourceUtils.getCorrectResult("Success", data);            		            			
-            		}
-            	}
+                // 兼容前端重构逻辑
+                if (StringUtils.isEmpty(reportModel.getDsId())) {
+                    rs = ResourceUtils.getCorrectResult("Success", null);
+                    return rs;
+                }
+                DataSourceGroupDefine dsG = dsGService.getDataSourceGroupDefine(reportModel.getDsId());
+                if (dsG == null) {
+                    logger.error("can't get ds group with id " + reportModel.getDsId());
+                    rs = ResourceUtils.getErrorResult("failed", 1);
+                } else {
+                    DataSourceDefine ds = dsG.getActiveDataSource();
+                    if (ds == null) {
+                        logger.error("can't get report id " + reportModel.getId());
+                        rs = ResourceUtils.getCorrectResult("failed", 1);
+                    } else {
+                        // 组的id
+                        data.put("selectedGroupId", reportModel.getDsId());
+                        // 数据源id
+                        data.put("selectedDatasourceId", ds.getId());
+                        rs = ResourceUtils.getCorrectResult("Success", data);
+                    }
+                }
             } catch (DataSourceOperationException e) {
-            	logger.error("can't get ds group with id " + reportModel.getDsId());
-            	rs = ResourceUtils.getErrorResult("failed", 1);
+                logger.error("can't get ds group with id " + reportModel.getDsId());
+                rs = ResourceUtils.getErrorResult("failed", 1);
             }
         } else {
             rs = ResourceUtils.getErrorResult("failed", 1);
@@ -220,10 +222,10 @@ public class CubeTableResource extends BaseResource {
         logger.info("put operation rs is : " + rs.toString());
         return rs;
     }
-    
+
     @RequestMapping(value = "/{id}/cube_tables", method = { RequestMethod.GET })
     public ResponseResult getCubeTables(@PathVariable("id") String id) {
-        
+
         ReportDesignModel reportModel = null;
         try {
             reportModel = reportModelCacheManager.getReportModel(id);
@@ -231,7 +233,7 @@ public class CubeTableResource extends BaseResource {
             logger.error("Can not get Report from cache. ", e);
             return ResourceUtils.getErrorResult("未能查到报表定义信息， 由于：" + e.getLocalizedMessage(), 1);
         }
-        
+
         if (reportModel == null) {
             return ResourceUtils.getErrorResult("failed", 1);
         }
@@ -253,5 +255,5 @@ public class CubeTableResource extends BaseResource {
         ResponseResult rs = ResourceUtils.getCorrectResult("success", data);
         return rs;
     }
-    
+
 }

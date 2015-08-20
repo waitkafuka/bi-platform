@@ -42,6 +42,9 @@ define(['url', 'backbone', 'dialog'], function (Url, Backbone, dialog) {
                     return response;
                 }
             }
+            else if (dataType === 'text') {
+                return response;
+            }
         },
         // 如果具体调用时配置了 error，会覆盖此error
         error: function (XMLHttpRequest, textStatus, errorThrown) {

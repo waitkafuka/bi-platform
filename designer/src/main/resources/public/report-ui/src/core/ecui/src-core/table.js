@@ -254,26 +254,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             'ui-table-hcell',
             function (el, options) {
                 this.$$colIndex = options.colIndex;
-                if(ecui.dom.getElementsByClass(el,'span', 'ui-table-head-tips').length) {
-                    var target = ecui.dom.getElementsByClass(el,'span', 'ui-table-head-tips')[0];
-                    // var tip = ecui.create('Tip', {
-                    //     'main': el.children[0].lastChild,
-                    //     'message': el.children[0].lastChild.getAttribute('data-message'),
-                    //     'type': 'ui-tip'
-                    // });
-
-                    var tip = esui.create(
-                        'Tip',{
-                            "type": "ui-tip",
-                            "content": target.getAttribute('data-message'),
-                            "showMode": 'over',
-                            "delayTime": 400,
-                            "showDuration": 400,
-                            "positionOpt": { top: 'bottom', left: 'left' },
-                            "main": target
-                    });
-                    tip.render();
-                }
             }
         )).prototype,
 
@@ -290,27 +270,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 // 单元格控件不能改变大小
                 options.resizable = false;
                 this.$$colIndex = options.colIndex;
-                if (el.getAttribute('data-row-h') || (ec = el.getAttribute('data-e-c'))) {
-                    if(ecui.dom.getElementsByClass(el,'span', 'tip-layer-div').length) {
-                        var target = ecui.dom.getElementsByClass(el,'span', 'tip-layer-div')[0];
-                        
-                        var tipLayer = esui.create('TipLayer', {
-                            arrow: 0,
-                            content: target.getAttribute('data-message')
-                        });
-                        tipLayer.appendTo(document.body);                       
-                        
-                        // tipLayer.render();
-                        //tipLayer.setContent(target.getAttribute('data-message'));
-                        tipLayer.attachTo({
-                            targetDOM: target,
-                            showMode: 'over',
-                            delayTime: 500,
-                            showDuration: 500,
-                            positionOpt: {top: "bottom",left: "left"}
-                        });
-                    }
-                }
             }
         )).prototype,
 

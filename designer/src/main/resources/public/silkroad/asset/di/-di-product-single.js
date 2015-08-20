@@ -1986,6 +1986,7 @@ var xutil = {
     
     var AJAX = xutil.ajax;
     var exRequest = baidu.ejson.request;
+    var dataCache;
         
     /**
      * 外部接口，可以在工程中定义这些方法的实现或变量的赋值（也均可缺省）
@@ -2223,14 +2224,15 @@ var xutil = {
      * @param {Object} options.syncWrap 用于请求的同步，参见createSyncWrap方法
      * @return {string} options.requestId request的标志，用于abort
      */
-    AJAX.request = function (url, options) {
+    AJAX.request = function (url, options, param) {
+
         options = extend(
             extend(
                 {}, AJAX.DEFAULT_OPTIONS || {}
             ), 
             options || {}
         );
-        var requestId = 'AJAX_' + (++uniqueIndex);
+        var requestId = 'AJAX_' + (++ uniqueIndex);
         var businessKey = options.businessKey;
         var defaultFailureHandler = 
                 options.defaultFailureHandler || null;
@@ -2262,11 +2264,25 @@ var xutil = {
 
         options.data = appendDefaultParams(options.data || '');
 
+
         // 构造sucess handler
         options.onsuccess = function (data, obj) {
             if (requestId in xhrSet) { // 判断abort
                 try {
                     if (!oncomplete || oncomplete(obj) !== false) {
+                        // 如果是固定报表，会发一次请求，请求回来就缓存数据
+                        if (param.reportType
+                            && param.reportType === 'REGULAR'
+                            && !dataCache
+                        ) {
+                            dataCache = data;
+                            data = {
+                                statusInfo: '',
+                                status: 0,
+                                data: '',
+                                properties: {}
+                            };
+                        }
                         onsuccess(data, obj);
                     }
                     onfinalize && onfinalize(obj);
@@ -2338,18 +2354,41 @@ var xutil = {
             delete options.timeout;
         }
         
-        handleShowWaiting(requestId, showWaiting);
-        
-        handleBusinessAbort(requestId, businessKey);
+        var resultData = {};
+        // TODO:这块的验证
+        // 如果是固定报表,如果存在固定报表缓存数据
+        if (dataCache) {
+            // 获取组件data
+            if (param.componentId && dataCache[param.componentId]) {
+                resultData = {
+                    statusInfo: '',
+                    status: 0,
+                    data: dataCache[param.componentId]
+                };
+            }
+            // context时，就不发请求，在这里进行模拟
+            else {
+                resultData = {
+                    statusInfo: '',
+                    status: 0,
+                    data: {},
+                    properties: {}
+                };
+            }
+            onsuccess(resultData.data, resultData);
+            return;
+        }
 
-        // 发送请求
+        handleShowWaiting(requestId, showWaiting);
+
+        handleBusinessAbort(requestId, businessKey);
+        // 发送请求(第一次init_params需要发请求)
         xhrSet[requestId] = {
             xhr: exRequest(url, options),
             clear: clear
         };
-        
         return requestId;
-    }
+    };
 
     /**
      * 发送POST请求
@@ -5594,6 +5633,22 @@ var xutil = {
         return paramArr;
     };
 
+    /**
+     * 获取url传参值
+     * @param {string} key url参数
+     * @private
+     * @return {string} 匹配到的参数值
+     */
+    URL.request = function (key) {
+        var reg = new RegExp('(^|&)' + key + '=([^&]*)(&|$)', 'i');
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) {
+            return unescape(r[2]);
+        } else {
+            return null;
+        }
+    };
+
 })();
 
 /**
@@ -6703,7 +6758,7 @@ var xutil = {
             hasValue(
                 url = handleAttr.call(this, datasourceId, 'url', options)
             )
-        ){ 
+        ) {
             requestId = handleSyncRemote.call(
                 this, datasourceId, options, url
             );
@@ -6969,7 +7024,7 @@ var xutil = {
         //FIXME:这里需要把不需要往后端传的参数给干掉
         url = utilString.template(url, paramObj);
         // 发送ajax请求
-        var requestId = xajax.request(url, opt);
+        var requestId = xajax.request(url, opt, paramObj);
         this._oRequestSet[requestId] = 1;
 
         return requestId;
@@ -16798,26 +16853,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
             'ui-table-hcell',
             function (el, options) {
                 this.$$colIndex = options.colIndex;
-                if(ecui.dom.getElementsByClass(el,'span', 'ui-table-head-tips').length) {
-                    var target = ecui.dom.getElementsByClass(el,'span', 'ui-table-head-tips')[0];
-                    // var tip = ecui.create('Tip', {
-                    //     'main': el.children[0].lastChild,
-                    //     'message': el.children[0].lastChild.getAttribute('data-message'),
-                    //     'type': 'ui-tip'
-                    // });
-
-                    var tip = esui.create(
-                        'Tip',{
-                            "type": "ui-tip",
-                            "content": target.getAttribute('data-message'),
-                            "showMode": 'over',
-                            "delayTime": 400,
-                            "showDuration": 400,
-                            "positionOpt": { top: 'bottom', left: 'left' },
-                            "main": target
-                    });
-                    tip.render();
-                }
             }
         )).prototype,
 
@@ -16834,27 +16869,6 @@ _aElements   - 行的列Element对象，如果当前列需要向左合并为null
                 // 单元格控件不能改变大小
                 options.resizable = false;
                 this.$$colIndex = options.colIndex;
-                if (el.getAttribute('data-row-h') || (ec = el.getAttribute('data-e-c'))) {
-                    if(ecui.dom.getElementsByClass(el,'span', 'tip-layer-div').length) {
-                        var target = ecui.dom.getElementsByClass(el,'span', 'tip-layer-div')[0];
-                        
-                        var tipLayer = esui.create('TipLayer', {
-                            arrow: 0,
-                            content: target.getAttribute('data-message')
-                        });
-                        tipLayer.appendTo(document.body);                       
-                        
-                        // tipLayer.render();
-                        //tipLayer.setContent(target.getAttribute('data-message'));
-                        tipLayer.attachTo({
-                            targetDOM: target,
-                            showMode: 'over',
-                            delayTime: 500,
-                            showDuration: 500,
-                            positionOpt: {top: "bottom",left: "left"}
-                        });
-                    }
-                }
             }
         )).prototype,
 
@@ -27320,7 +27334,6 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
     var pushArray = Array.prototype.push;
     // 引用了外部库
     var formatNumber = xutil.number.formatNumber;
-
     var MATH = Math;
     var MIN = MATH.min;
     var WINDOW = window;
@@ -27674,6 +27687,8 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
 
         this.$bindCellLink();
 
+        this.$renderTips();
+
         attachEvent(WINDOW, 'resize', repaint);
 
         // console.log('=================== olap-table setData 6] ' + ((new Date()).getTime() - ddd));
@@ -27913,9 +27928,10 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             attrStr.push('uniqueName="' + colDefItem.uniqueName + '"');
         }
         // 如果是维度列，就不显示tooltip图标
-        if (!wrap.colSpan) {
+        if (!wrap.colspan) {
             //tooltipTag += '<div class="'+ type + '-head-tips" ' + tooltipStr + '">&nbsp;</div>';
-            tooltipTag += '<span class="'+ type + '-head-tips" data-message="' + string.encodeHTML(colDefItem.toolTip) + '"></span>'
+            var toolTipText = colDefItem.toolTip ? string.encodeHTML(colDefItem.toolTip) : '';
+            tooltipTag += '<span class="' + type + '-head-tips" data-message="' + toolTipText + '"></span>';
             //dragStr += '<span class="' + type + '-head-drag"></span>';
         }
         else {
@@ -28545,6 +28561,74 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
                 );
             }
         }
+    };
+
+    /**
+     * 渲染tips
+     *
+     * @public
+     */
+    UI_OLAP_TABLE_CLASS.$renderTips = function () {
+        // var hCells = this._aHCells;
+        var type = this.getType();
+        var hCells;
+        var headTableHead = dom.children(this._uHead._eBody)[0];
+        headTableHead && (hCells = dom.children(headTableHead));
+        if (!hCells) {
+            return;
+        }
+        for (var i = 0; i < hCells.length; i ++) {
+            // var el = hCells[i]._eBody;
+            var el = hCells[i];
+            var tipsEl = dom.getElementsByClass(el, 'span', type + '-head-tips');
+            if (tipsEl.length > 0) {
+                var target = tipsEl[0];
+                /* globals esui */
+                var tip = esui.create(
+                    'Tip',
+                    {
+                        type: 'ui-tip',
+                        content: target.getAttribute('data-message'),
+                        showMode: 'over',
+                        delayTime: 400,
+                        showDuration: 400,
+                        positionOpt: {top: 'bottom', left: 'left'},
+                        main: target
+                    }
+                );
+                tip.render();
+            }
+        }
+
+        var rows = this._aRows;
+        for (var x = 0; x < rows.length; x ++) {
+            var cells = rows[x]._aElements;
+            for (var y = 0; y < cells.length; y ++) {
+                var el = cells[y];
+                var ec;
+                if (el.getAttribute('data-row-h') || (ec = el.getAttribute('data-e-c'))) {
+                    var tipsEl = dom.getElementsByClass(el, 'span', 'tip-layer-div');
+                    if (tipsEl.length > 0) {
+                        var target = tipsEl[0];
+                        /* globals esui */
+                        var tipLayer = esui.create('TipLayer', {
+                            arrow: 0,
+                            content: target.getAttribute('data-message')
+                        });
+
+                        tipLayer.appendTo(document.body);
+                        tipLayer.attachTo({
+                            targetDOM: target,
+                            showMode: 'over',
+                            delayTime: 500,
+                            showDuration: 500,
+                            positionOpt: {top: 'bottom', left: 'left'}
+                        });
+                    }
+                }
+            }
+        }
+
     };
 
     // UI_TABLE_HCELL_CLASS.$mouseover = function (event) {
@@ -33758,6 +33842,7 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
     var getNextSibling = xutil.dom.getNextSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var merge = xutil.object.merge;
+    var clone = xutil.object.clone;
     var formatNumber = xutil.number.formatNumber;
     var isArray = xutil.lang.isArray;
     var attachEvent = xutil.dom.attachEvent;
@@ -34441,22 +34526,34 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
         ) {
             var name = this._aSeries[0].yAxisName;
             axisCaption && (settings.name = axisCaption[name]);
+            settings.format = this._aSeries[0].format;
             yAxis.push(setBasicItems(settings));
         }
 
         // 双刻度轴情况
         if (this._chartType === 'line' && axisCaption) {
+            var series = this._aSeries;
             var leftName = [];
             var rightName = [];
-            var series = this._aSeries;
+            var leftFormat;
+            var rightFormat;
+            var leftCount = 0;
+            var rightCount = 0;
 
             for (var i = 0, iLen = series.length, tSer; i < iLen; i ++) {
                 tSer = series[i];
                 var name = tSer.yAxisName;
-                if (name) {
-                    tSer.yAxisIndex === '0'
-                        ? leftName.push(axisCaption[name])
-                        : rightName.push(axisCaption[name]);
+                if (tSer.yAxisIndex === '0') {
+                    if (name && axisCaption[name]) {
+                        leftName.push(axisCaption[name]);
+                    }
+                    leftFormat = tSer.format;
+                    leftCount ++;
+                }
+                else {
+                    rightName.push(axisCaption[name]);
+                    rightFormat = tSer.format;
+                    rightCount ++;
                 }
 
             }
@@ -34473,15 +34570,18 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
             else if (rightName.length > 1) {
                 rightName = rightName.join(',');
             }
+            if (leftCount) {
+                // 左刻度轴设置
+                var leftSettings = merge(clone(settings), {name: leftName, format: leftFormat});
+                yAxis.push(setBasicItems(leftSettings));
+            }
 
-            // 左刻度轴设置
-            settings = merge(settings, {name: leftName});
-            yAxis.push(setBasicItems(settings));
-            // 右刻度值设置
-            settings = merge(settings, {name: rightName});
-            yAxis.push(setBasicItems(settings));
+            if (rightCount) {
+                // 右刻度值设置
+                var rightSettings = merge(clone(settings), {name: rightName, format: rightFormat});
+                yAxis.push(setBasicItems(rightSettings));
+            }
         }
-
 
         // 数据为空时横轴显示修改 博学
         if (this._chartType === 'bar') {
@@ -34555,7 +34655,10 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                 item.nameLocation = (advOpt.chartType === 'bar')
                     ? 'start' : 'end'
             );
-
+            item.nameTextStyle = {
+                fontFamily: '微软雅黑',
+                fontSize: '12'
+            };
             // 设置y轴网格
             item.splitArea = advOpt.splitArea;
             item.splitLine = advOpt.splitLine;
@@ -34566,22 +34669,36 @@ zlevel:this.getZlevelBase(),z:this.getZBase(),hoverable:s,clickable:!0,style:U.m
                 var result;
                 var w;
                 var y;
-                // 确定可以转换成数字
-                if (!Number.isNaN(value / 1)) {
-                    w = 10000; // 万
-                    y = 100000000; // 亿
-
-                    // Y轴调到右边需要数据翻转
+                if (advOpt.format && advOpt.format.indexOf('%') >= 0) {
                     if (advOpt.chartType === 'bar') {
-                        value *= -1;
+                        value = - value;
                     }
-                    result = value;
+                    result = formatNumber(
+                        value,
+                        advOpt.format,
+                        null,
+                        null,
+                        true
+                    );
+                }
+                else {
+                    // 确定可以转换成数字
+                    if (!Number.isNaN(value / 1)) {
+                        w = 10000; // 万
+                        y = 100000000; // 亿
 
-                    if (value >= w && value <= y) {
-                        result = (value / w).toFixed(0) + '万';
-                    }
-                    else if (value > y) {
-                        result = (value / y).toFixed(0) + '亿';
+                        // Y轴调到右边需要数据翻转
+                        if (advOpt.chartType === 'bar') {
+                            value *= -1;
+                        }
+                        result = value;
+
+                        if (value >= w && value <= y) {
+                            result = (value / w).toFixed(0) + '万';
+                        }
+                        else if (value > y) {
+                            result = (value / y).toFixed(0) + '亿';
+                        }
                     }
                 }
 
@@ -36328,7 +36445,7 @@ $namespace('di.config');
 
     URL_SET.DIM_MULTISELECT_TABLE = '/reports/runtime/extend_area/#{componentId}/dims/#{dimSelectName}/members';
     URL_SET.DIM_MULTISELECT_CHART = '/reportTemplate/chart/getDimMultiSelect.action';
-    
+
 //    URL_SET.DIM_SELECT_SAVE_TABLE = '/reportTemplate/table/updateDimNodes.action';
 //    URL_SET.DIM_SELECT_SAVE_CHART = '/reportTemplate/chart/updateDimNodes.action';
 
@@ -36362,28 +36479,16 @@ $namespace('di.config');
     URL_SET.CONSOLE_CHART_CONFIG_SUBMIT = '/reportTemplate/chart/updateChartSettings.action';
 
     // 表单
-//    URL_SET.FORM_DATA = '/reportTemplate/initParams.action';
     URL_SET.FORM_ASYNC_DATA = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
     URL_SET.FORM_DATA = '/reports/#{reportId}/init_params';
     URL_SET.FORM_UPDATE_CONTEXT = '/reports/#{reportId}/runtime/context';
     URL_SET.FORM_CASCADE_GETLEVEL = '/reports/#{reportId}/members/#{componentId}'; // TODO:维度树获取子节点
-
-    // PIVOIT表（透视表）
-//    URL_SET.OLAP_TABLE_DATA = '/reportTemplate/table/transform.action';
-//    URL_SET.OLAP_TABLE_DRILL = '/reportTemplate/table/drill.action';
-//    URL_SET.OLAP_TABLE_LINK_DRILL = '/reportTemplate/table/drillByLink.action';
-//    URL_SET.OLAP_TABLE_SORT = '/reportTemplate/table/sort.action';
-//    URL_SET.OLAP_TABLE_CHECK = '/reportTemplate/table/checkRow.action';
-//    URL_SET.OLAP_TABLE_SELECT = '/reportTemplate/table/selectRow.action';
-//    URL_SET.OLAP_TABLE_DOWNLOAD = '/reportTemplate/table/download.action';
-//    URL_SET.OLAP_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/table/downloadOffLine.action';
-//    URL_SET.OLAP_TABLE_LINK_BRIDGE = '/reportTemplate/table/linkBridge.action';
+    URL_SET.FORM_REGULAR = '/reports/#{reportId}/regular/#{taskId}';
     URL_SET.OLAP_TABLE_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
     URL_SET.OLAP_TABLE_DRILL =  '/reports/#{reportId}/runtime/extend_area/#{componentId}/drill/#{action}';
     URL_SET.OLAP_TABLE_LINK_DRILL = '/reports/#{reportId}/runtime/extend_area/#{componentId}/drill';
     URL_SET.OLAP_TABLE_SELECT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/selected_row';
     URL_SET.OLAP_TABLE_SORT = '/reports/#{reportId}/runtime/extend_area/#{componentId}/sort';
-    URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
     URL_SET.OLAP_TABLE_DOWNLOAD = '/reports/#{reportId}/download/#{componentId}';
     URL_SET.OLAP_TABLE_RICH_SELECT_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}/changablemeasures';
     URL_SET.OLAP_TABLE_RICH_SELECT_CHANGE = '/reports/#{reportId}/runtime/extend_area/#{componentId}/changedMeasures';
@@ -36396,25 +36501,6 @@ $namespace('di.config');
     URL_SET.PLANE_TABLE_SUBMIT_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/submitSetInfo';
     URL_SET.PLANE_TABLE_DELETE_FIELD_SET_INFO = '/reports/#{reportId}/runtime/extend_area/#{componentId}/item/#{elementId}/removeSetInfo';
     URL_SET.PLANE_TABLE_DOWNLOAD = '/reports/#{reportId}/downloadOnline/#{componentId}';
-//    URL_SET.PLANE_TABLE_CHECK = '/reportTemplate/planeTable/checkRow.action';
-//    URL_SET.PLANE_TABLE_SELECT = '/reportTemplate/planeTable/selectRow.action';
-//    URL_SET.PLANE_TABLE_DOWNLOAD = '/reportTemplate/planeTable/download.action';
-//    URL_SET.PLANE_TABLE_DOWNLOADEXCEL = '/reportTemplate/planeTable/downloadExcel.action';
-//    URL_SET.PLANE_TABLE_OFFLINE_DOWNLOAD = '/reportTemplate/planeTable/downloadOffLine.action';
-//    URL_SET.PLANE_TABLE_LINK_BRIDGE = '/reportTemplate/planeTable/linkBridge.action';
-
-    // 图
-//    URL_SET.OLAP_CHART_DATA = '/reportTemplate/chart/transform.action';
-//    // 根据liteOlap的表格数据和相应条件生成图形数据
-//    URL_SET.LITEOLAP_CHART_DATA = '/reportTemplate/liteolap/generateAnalysisChart.action';
-//    URL_SET.OLAP_CHART_X_DATA = '/reportTemplate/chart/reDraw.action';
-//    URL_SET.OLAP_CHART_S_DATA = '/reportTemplate/chart/reDrawSeries.action'; // 传入维度参数
-//    URL_SET.OLAP_CHART_S_ADD_DATA = '/reportTemplate/chart/addChartSeries.action'; // 传入维度参数，增加趋势线
-//    URL_SET.OLAP_CHART_S_REMOVE_DATA = '/reportTemplate/chart/removeChartSeries.action'; // 传入维度参数，删除趋势线
-//    URL_SET.OLAP_CHART_BASE_CONFIG_INIT = '/reportTemplate/chart/config.action';
-//    URL_SET.OLAP_CHART_BASE_CONFIG_SUBMIT = '/reportTemplate/chart/config.action';
-//    URL_SET.OLAP_CHART_DOWNLOAD = '/reportTemplate/chart/download.action';
-//    URL_SET.OLAP_CHART_OFFLINE_DOWNLOAD = '/reportTemplate/chart/downloadOffLine.action';
 
     // 图-最新路径
     URL_SET.OLAP_CHART_DATA = '/reports/#{reportId}/runtime/extend_area/#{componentId}';
@@ -39883,7 +39969,7 @@ $namespace('di.shared.vui');
 
         me._compId = compId;
         me._curIndex = 0;
-        me._selValue = '';
+        var selectedVal = '';
         me._allSel = def.selectAllDim.length;
         if (data.value && data.value.length > 0) {
             var selArr = data.value[0].split('.');
@@ -39891,16 +39977,17 @@ $namespace('di.shared.vui');
             for (var i = 0; i <= (me._curIndex + 1); i ++) {
                 resArr.push(selArr[i]);
             }
-            me._selValue = resArr.join('.');
+            selectedVal = resArr.join('.');
         }
         else {
-            me._selValue = datasource[0].value;
+            selectedVal = datasource[0].value;
         }
+        me._selValue = selectedVal;
         // 渲染第一个select
         for (var i = 0, len = datasource.length; i < len; i ++) {
             html.push(
                 '<option value="', datasource[i].value, '"',
-                datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                datasource[i].value === selectedVal ? 'selected="selected"' : '',
                 '>', datasource[i].text,
                 '</option>'
             );
@@ -39913,7 +40000,7 @@ $namespace('di.shared.vui');
             mobile: true,
             change: function() {
                 me._curIndex = 0;
-                me._selValue = this.value;
+                // me._selValue = this.value;
                 // 当前下拉框点击时，如果还有子下拉框，就重新去渲染子下拉框
                 if(me._curIndex < me._allSel - 1) {
                     me.getNextLevel(this.value);
@@ -39928,7 +40015,7 @@ $namespace('di.shared.vui');
 
         // 当初始化完第一个下拉框，如果是多级，就去触发第二个
         if(me._curIndex < me._allSel - 1) {
-            me.getNextLevel(me._selValue);
+            me.getNextLevel(selectedVal);
         }
         else {
             me.notify('cascadeSelectChange');
@@ -39966,6 +40053,7 @@ $namespace('di.shared.vui');
         var me = this;
         var compId = me._compId;
         var datasource;
+        var selectedVal = '';
         var dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
 
         if (data && data[compId]) {
@@ -39993,17 +40081,17 @@ $namespace('di.shared.vui');
                 for (var i = 0; i <= (me._curIndex + 1); i ++) {
                     resArr.push(selArr[i]);
                 }
-                me._selValue = resArr.join('.');
+                selectedVal = resArr.join('.');
             }
             else {
-                me._selValue = datasource[0].value;
+                selectedVal = datasource[0].value;
             }
-
+            me._selValue = selectedVal;
             var html = ['<select id="', selElId, '">'];
             for (var i = 0, len = datasource.length; i < len; i ++) {
                 html.push(
                     '<option value="', datasource[i].value, '"',
-                    datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                    datasource[i].value === selectedVal ? 'selected="selected"' : '',
                     '>', datasource[i].text,
                     '</option>'
                 );
@@ -40017,7 +40105,7 @@ $namespace('di.shared.vui');
                     mobile: true,
                     change: function() {
                         me._curIndex = x;
-                        me._selValue = this.value;
+                        // me._selValue = this.value;
                         if (me._curIndex < me._allSel - 1) {
                             me.getNextLevel(this.value);
                         }
@@ -40033,7 +40121,7 @@ $namespace('di.shared.vui');
             isGoToNext = dif > 0 ? true : false;
 
             if (isGoToNext) {
-                me.getNextLevel(me._selValue);
+                me.getNextLevel(selectedVal);
             }
             else {
                 me.notify('cascadeSelectChange');
@@ -60541,8 +60629,8 @@ define('esui/TipLayer',['require','./Button','./Label','./Panel','./lib','./cont
                     }
                 }
                 else if (config.left) {
-                    // properties.left = offset.left - elementWidth;
-                    properties.left = offset.left;
+                    properties.left = offset.left - elementWidth;
+                    // properties.left = offset.left;
                     if (config.top) {
                         arrowClass = 'rt';
                     }
@@ -70318,7 +70406,8 @@ $namespace('di.shared.model');
             DATA: URL.fn('FORM_DATA'),
             ASYNC_DATA: URL.fn('FORM_ASYNC_DATA'),
             UPDATE_CONTEXT: URL.fn('FORM_UPDATE_CONTEXT'),
-            CASCADE_GETLEVEL: URL.fn('FORM_CASCADE_GETLEVEL')
+            CASCADE_GETLEVEL: URL.fn('FORM_CASCADE_GETLEVEL'),
+            REGULAR: URL.fn('FORM_REGULAR')
         }
     );    
 
@@ -70370,6 +70459,9 @@ $namespace('di.shared.model');
             },
             CASCADE_GETLEVEL: function (options) {
                 return this._fCommonParamGetter(options.args.param);
+            },
+            REGULAR: function (options) {
+                return this._fCommonParamGetter(options.args.param);
             }
         }
     );
@@ -70391,6 +70483,9 @@ $namespace('di.shared.model');
                 return (data || {}).params || {};
             },
             CASCADE_GETLEVEL: function (data, ejsonObj, options) {
+                return (data || {}).params || {};
+            },
+            REGULAR: function (data, ejsonObj, options) {
                 return (data || {}).params || {};
             }
         }
@@ -75444,8 +75539,10 @@ $namespace('di.shared.ui');
     var bind = xutil.fn.bind;
     /* globals di */
     var DIALOG = di.helper.Dialog;
+    /* globals xutil */
     var objKey = xutil.object.objKey;
     var isObject = xutil.lang.isObject;
+    var UrlRequest = xutil.url.request;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
     var extend = xutil.object.extend;
 
@@ -75537,9 +75634,15 @@ $namespace('di.shared.ui');
         this.getModel().attach(
             ['sync.preprocess.DATA', this.$syncDisable, this, 'DATA'],
             ['sync.result.DATA', this.$renderMain, this],
-            //['sync.result.DATA', this.$handleDataLoaded, this],
+            // ['sync.result.DATA', this.$handleDataLoaded, this],
             ['sync.error.DATA', this.$handleDataError, this],
             ['sync.complete.DATA', this.$syncEnable, this, 'DATA'],
+
+            ['sync.preprocess.REGULAR', this.$syncDisable, this, 'REGULAR'],
+            ['sync.result.REGULAR', this.$renderMain, this],
+            // ['sync.result.DATA', this.$handleDataLoaded, this],
+            ['sync.error.REGULAR', this.$handleDataError, this],
+            ['sync.complete.REGULAR', this.$syncEnable, this, 'REGULAR'],
 
             // ASYNC不加disable，否则suggest框会在disasble的时候动input框，与输入法冲突。            
             // ['sync.preprocess.ASYNC_DATA', this.disable, this, 'DI_FORM'],
@@ -75622,22 +75725,41 @@ $namespace('di.shared.ui');
          ['sync.preprocess.DATA',  vd.disable],
          ['sync.complete.DATA', vd.enable]
          );*/
-
+        var reportType = this.$di('getDef').reportType;
+        // var taskId = UrlRequest('taskId');
+        var url = window.location.href;
+        var taskId = url.replace(/(^.*regular\/)|(\/report_vm.*$)/g, '');
+        var args = {};
+        if (taskId) {
+            args.taskId = taskId;
+        }
         // 初始化参数
         var paramList = [];
-        for (var i = 0, input; i < this._aInput.length; i ++ ) {
+        for (var i = 0, input; i < this._aInput.length; i ++) {
             input = this._aInput[i];
             paramList.push(input.$di('getDef').name);
         }
-        paramList = paramList.join(',');
+        args.paramList = paramList.join(',');
+        reportType && (args.reportType = reportType);
 
-        this.$sync(
-            this.getModel(),
-            'DATA',
-            { paramList: paramList },
-            null,
-            this.$di('getEvent')
-        );
+        if (reportType && reportType === 'REGULAR') {
+            this.$sync(
+                this.getModel(),
+                'REGULAR',
+                args,
+                null,
+                this.$di('getEvent')
+            );
+        }
+        else {
+            this.$sync(
+                this.getModel(),
+                'DATA',
+                args,
+                null,
+                this.$di('getEvent')
+            );
+        }
     };
 
     /**
@@ -78828,7 +78950,7 @@ $namespace('di.shared.ui');
                 datasourceId, 
                 {
                     uniqueName: rowDefItem.uniqueName,
-                    componentId : this.$di('getId').split('.')[1]
+                    componentId: this.$di('getId').split('.')[1]
                 },
                 null,
                 {

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
@@ -92,28 +93,45 @@ public class PlaneTableUtils {
         if (CollectionUtils.isEmpty(metaMap)) {
             return result;
         }
-        // 获取指标元数据
-        AxisMeta axisMetaMeasures = (AxisMeta) configQuestionModel.getAxisMetas().get(
-                AxisType.COLUMN);
-        axisMetaMeasures.getQueryMeasures().forEach((measureName) -> {
-            result.add("[Measure].[" + measureName + "]");
-        });
+        if (MapUtils.isEmpty(configQuestionModel.getAxisMetas())) {
+            return result;
+        }
         
-        // 获取指标元数据
-        axisMetaMeasures.getCrossjoinDims().forEach((dimName) -> {
-            result.add("[Dimension].[" + dimName + "]");
-        });
-        
-        // 获取维度元数据
-        AxisMeta axisMetaDims = (AxisMeta) configQuestionModel.getAxisMetas().get(AxisType.ROW);
-        axisMetaDims.getCrossjoinDims().forEach((dimName) -> {
-            result.add("[Dimension].[" + dimName + "]");
-        });
-        
-        // 获取维度元数据
-        axisMetaDims.getQueryMeasures().forEach((measureName) -> {
-            result.add("[Measure].[" + measureName + "]");
-        });
+        if (configQuestionModel.getAxisMetas().get(AxisType.COLUMN) != null) {
+            AxisMeta axisMetaMeasures = (AxisMeta) configQuestionModel.getAxisMetas().get(
+                    AxisType.COLUMN);
+            // 获取指标元数据
+            if (axisMetaMeasures.getQueryMeasures() != null) {
+                axisMetaMeasures.getQueryMeasures().forEach((measureName) -> {
+                    result.add("[Measure].[" + measureName + "]");
+                });
+            }
+
+            // 获取指标元数据
+            if (axisMetaMeasures.getCrossjoinDims() != null) {
+                axisMetaMeasures.getCrossjoinDims().forEach((dimName) -> {
+                    result.add("[Dimension].[" + dimName + "]");
+                });
+            }
+        }
+
+        if (configQuestionModel.getAxisMetas().get(AxisType.ROW) != null) {
+            // 获取维度元数据
+            AxisMeta axisMetaDims = (AxisMeta) configQuestionModel.getAxisMetas().get(AxisType.ROW);
+            if (axisMetaDims.getCrossjoinDims() != null) {
+                axisMetaDims.getCrossjoinDims().forEach((dimName) -> {
+                    result.add("[Dimension].[" + dimName + "]");
+                });
+            }
+
+            // 获取维度元数据
+            if (axisMetaDims.getQueryMeasures() != null) {
+                axisMetaDims.getQueryMeasures().forEach((measureName) -> {
+                    result.add("[Measure].[" + measureName + "]");
+                });
+            }
+        }
+
         return result;
     }
     

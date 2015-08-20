@@ -2,6 +2,10 @@ package com.baidu.rigel.biplatform.queryrouter.handle;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * QueryRouterContext记录查询的上下文
  * 
@@ -9,6 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class QueryRouterContext {
+
+    /**
+     * logger
+     */
+    private static Logger logger = LoggerFactory.getLogger(QueryRouterContext.class);
 
 	/**
 	 * queryId的context
@@ -26,13 +35,22 @@ public class QueryRouterContext {
 	 * @param threadId
 	 * @param queryId
 	 */
-	public static void setQueryInfo(String queryId) {
-		String threadId = Long.valueOf(Thread.currentThread().getId()).toString();
-		if (QUERY_REQUEST_CONTEXT.size() > MAX_SIZE) {
-			QUERY_REQUEST_CONTEXT = new ConcurrentHashMap<String, String>();
-		}
-		QUERY_REQUEST_CONTEXT.put(threadId, queryId);
-	}
+    public static void setQueryInfo(String queryId) {
+        try {
+            if (StringUtils.isEmpty(queryId)) {
+                logger.warn("queryId is null.");
+                return;
+            }
+            String threadId = Long.valueOf(Thread.currentThread().getId()).toString();
+            if (QUERY_REQUEST_CONTEXT.size() > MAX_SIZE) {
+                QUERY_REQUEST_CONTEXT = new ConcurrentHashMap<String, String>();
+            }
+            QUERY_REQUEST_CONTEXT.put(threadId, queryId);
+        } catch (Exception e) {
+            logger.warn(e.getCause().getMessage());
+        }
+
+    }
 	
 	/**
 	 * 获取查询的queryId

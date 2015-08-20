@@ -21,8 +21,10 @@ $namespace('di.shared.ui');
     var bind = xutil.fn.bind;
     /* globals di */
     var DIALOG = di.helper.Dialog;
+    /* globals xutil */
     var objKey = xutil.object.objKey;
     var isObject = xutil.lang.isObject;
+    var UrlRequest = xutil.url.request;
     var INTERACT_ENTITY = di.shared.ui.InteractEntity;
     var extend = xutil.object.extend;
 
@@ -114,15 +116,17 @@ $namespace('di.shared.ui');
         this.getModel().attach(
             ['sync.preprocess.DATA', this.$syncDisable, this, 'DATA'],
             ['sync.result.DATA', this.$renderMain, this],
-            //['sync.result.DATA', this.$handleDataLoaded, this],
             ['sync.error.DATA', this.$handleDataError, this],
             ['sync.complete.DATA', this.$syncEnable, this, 'DATA'],
 
+            ['sync.preprocess.REGULAR', this.$syncDisable, this, 'REGULAR'],
+            ['sync.result.REGULAR', this.$renderMain, this],
+            ['sync.error.REGULAR', this.$handleDataError, this],
+            ['sync.complete.REGULAR', this.$syncEnable, this, 'REGULAR'],
+
             // ASYNC不加disable，否则suggest框会在disasble的时候动input框，与输入法冲突。            
-            // ['sync.preprocess.ASYNC_DATA', this.disable, this, 'DI_FORM'],
             ['sync.result.ASYNC_DATA', this.$renderAsync, this],
             ['sync.error.ASYNC_DATA', this.$handleAsyncError, this],
-            // ['sync.complete.ASYNC_DATA', this.enable, this, 'DI_FORM']
 
             ['sync.preprocess.UPDATE_CONTEXT', this.$syncDisable, this, 'UPDATE_CONTEXT'],
             ['sync.result.UPDATE_CONTEXT', this.$renderUpdateContext, this],
@@ -199,22 +203,41 @@ $namespace('di.shared.ui');
          ['sync.preprocess.DATA',  vd.disable],
          ['sync.complete.DATA', vd.enable]
          );*/
-
+        var reportType = this.$di('getDef').reportType;
+        // var taskId = UrlRequest('taskId');
+        var url = window.location.href;
+        var taskId = url.replace(/(^.*regular\/)|(\/report_vm.*$)/g, '');
+        var args = {};
+        if (taskId) {
+            args.taskId = taskId;
+        }
         // 初始化参数
         var paramList = [];
-        for (var i = 0, input; i < this._aInput.length; i ++ ) {
+        for (var i = 0, input; i < this._aInput.length; i ++) {
             input = this._aInput[i];
             paramList.push(input.$di('getDef').name);
         }
-        paramList = paramList.join(',');
+        args.paramList = paramList.join(',');
+        reportType && (args.reportType = reportType);
 
-        this.$sync(
-            this.getModel(),
-            'DATA',
-            { paramList: paramList },
-            null,
-            this.$di('getEvent')
-        );
+        if (reportType && reportType === 'REGULAR') {
+            this.$sync(
+                this.getModel(),
+                'REGULAR',
+                args,
+                null,
+                this.$di('getEvent')
+            );
+        }
+        else {
+            this.$sync(
+                this.getModel(),
+                'DATA',
+                args,
+                null,
+                this.$di('getEvent')
+            );
+        }
     };
 
     /**

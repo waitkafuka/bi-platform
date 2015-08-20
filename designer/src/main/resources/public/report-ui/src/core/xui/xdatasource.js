@@ -611,7 +611,7 @@
             hasValue(
                 url = handleAttr.call(this, datasourceId, 'url', options)
             )
-        ){ 
+        ) {
             requestId = handleSyncRemote.call(
                 this, datasourceId, options, url
             );
@@ -877,7 +877,7 @@
         //FIXME:这里需要把不需要往后端传的参数给干掉
         url = utilString.template(url, paramObj);
         // 发送ajax请求
-        var requestId = xajax.request(url, opt);
+        var requestId = xajax.request(url, opt, paramObj);
         this._oRequestSet[requestId] = 1;
 
         return requestId;

@@ -20,6 +20,8 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -96,7 +98,10 @@ public class QuerySqlPlugin implements QueryPlugin {
         // 检验cube.getSource中的事实表是否在数据库中存在，并过滤不存在的数据表
         String tableNames = tableExistCheckService.getExistTableList(
                 planeTableQuestionModel.getSource(), dataSourceInfo);
-        if (StringUtils.isEmpty(tableNames)) {
+        if (StringUtils.isEmpty(tableNames)
+                || CollectionUtils.isEmpty(planeTableQuestionModel.getSelection())
+                || MapUtils.isEmpty(allColumns)) {
+            // 如果获取的cube的数据为空
             List<SqlColumn> needColums = PlaneTableQuestionModel2SqlColumnUtils
                     .getNeedColumns(allColumns, planeTableQuestionModel.getSelection());
             return jdbcDataModelUtil.getEmptyDataModel(needColums);

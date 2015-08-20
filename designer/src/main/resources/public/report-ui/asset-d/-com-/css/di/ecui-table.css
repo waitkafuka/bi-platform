@@ -309,9 +309,8 @@
     right: 0;
     cursor: col-resize;
 }
-.ui-table-heade-th-content {
+.ui-table-head-th-content {
     position: relative;
-    text-align: center;
     height: 30px;
     margin: 0 auto;
 }
@@ -483,8 +482,8 @@
 }
 
 .ui-tip {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
     background-repeat: no-repeat;
     background-color: transparent;
     overflow: hidden;

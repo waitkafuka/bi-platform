@@ -55,7 +55,6 @@ import com.baidu.rigel.biplatform.tesseract.resultset.isservice.Meta;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.tesseract.resultset.isservice.SearchIndexResultSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 /**
@@ -417,45 +416,78 @@ public class QueryRequestUtil {
                     break;
                 }
         }
-        
+        final boolean hasSameNodeCopy = hasSameNode;
         MemberNodeTree root = getRootMember (rowMemberTrees);
         if (hasSameNode) {
-            Map<String, SearchIndexResultRecord> tmpMap = Maps.newHashMap ();
-            dataSet.getDataList ().forEach (d -> {
-                SearchIndexResultRecord copy = DeepcopyUtils.deepCopy (d);
-                copy.setGroupBy (root.getName ());
-                copy.setField (meta.getFieldIndex (root.getQuerySource ()), root.getName ());
-                tmpMap.put (d.getField (meta.getFieldIndex (root.getQuerySource ())) + "", copy);
-            });
-            dataSet.getDataList ().addAll(tmpMap.values ());
+            for (SearchIndexResultRecord d : dataSet.getDataList ()) {
+                Serializable field = d.getField (meta.getFieldIndex (root.getQuerySource ()));
+                if (CollectionUtils.isNotEmpty (leafValueMap.get (root.getQuerySource ()).get (field + ""))) {
+                    leafValueMap.get (root.getQuerySource ()).get (field + "").add (root.getName ());
+                }
+            }
         }
         
         int dimSize = query.getSelect().getQueryProperties().size();
         if (dataSet != null && dataSet.size() != 0) {
             transList = dataSet.getDataList();
             if (MapUtils.isNotEmpty(leafValueMap)) {
-                // 如果一个叶子对应多个父节点，克隆一个再塞回去
                 List<SearchIndexResultRecord> copyLeafRecords = new ArrayList<SearchIndexResultRecord>();
+//                for (SearchIndexResultRecord record : transList) {
+//                    for (Map.Entry<String, Map<String, Set<String>>> entry : leafValueMap.entrySet ()) {
+//                        String prop = entry.getKey ();
+//                        Map<String, Set<String>> valueMap = entry.getValue ();try {
+//                            String currValue = record.getField(meta
+//                                    .getFieldIndex(prop)) != null ? record
+//                                    .getField(meta.getFieldIndex(prop))
+//                                    .toString() : null;
+//                            Set<String> valueSet = valueMap.get (currValue);
+//                            if (CollectionUtils.isNotEmpty (valueSet)) {
+//                                for (String value : valueSet) {
+//                                        SearchIndexResultRecord newRec = DeepcopyUtils.deepCopy(record);
+//                                        if (StringUtils.isNotEmpty(value)) {
+//                                            newRec.setField(meta.getFieldIndex(prop), value);
+//                                            generateGroupBy(newRec, groupList, meta);
+//                                            copyLeafRecords.add(newRec);
+//                                        }
+//                                }
+//                            }
+//                        } catch (Exception e) {
+//                            throw new RuntimeException(e);
+//                        }
+//                    }
+//                }
                 transList.forEach(record -> {
                     leafValueMap.forEach((prop, valueMap) -> {
                         try {
-                            String currValue = record.getField(meta
-                                    .getFieldIndex(prop)) != null ? record
+                            String currValue = record.getField(meta.getFieldIndex(prop)) != null ? record
                                     .getField(meta.getFieldIndex(prop))
                                     .toString() : null;
+                            
                             Set<String> valueSet = leafValueMap.get(prop).get(currValue);
                             if (valueSet != null) {
                                 int i = 0;
                                 for (String value : valueSet) {
                                     if (i > 0) {
                                         // 如果一个节点有多个父亲，那么在算总的汇总值得时候，会有数据问题。
-                                        SearchIndexResultRecord newRec = DeepcopyUtils.deepCopy(record);
-                                        newRec.setField(meta.getFieldIndex(prop), value);
-                                        generateGroupBy(newRec, groupList, meta);
-                                        copyLeafRecords.add(newRec);
+                                        if (StringUtils.isNotEmpty(value)) {
+                                            SearchIndexResultRecord newRec = record;
+                                            if (hasSameNodeCopy) {
+                                                newRec = DeepcopyUtils.deepCopy (record);
+                                            }
+//                                            newRec.setField(meta.getFieldIndex(prop), value);
+//                                            newRec.setGroupBy (value);
+                                            newRec.setField(meta.getFieldIndex(prop), value);
+                                            generateGroupBy(newRec, groupList, meta);
+                                            copyLeafRecords.add(newRec);
+                                        }
                                     } else {
-                                        record.setField(meta.getFieldIndex(prop), value);
-                                        generateGroupBy(record, groupList, meta);
+                                        if (StringUtils.isNotEmpty(value)) {
+////                                            record.setField(meta.getFieldIndex(prop), value);
+////                                            record.setGroupBy (value);
+                                            record.setField(meta.getFieldIndex(prop), value);
+                                            generateGroupBy(record, groupList, meta);
+//                                            copyLeafRecords.add(newRec);
+                                        }
                                     }
                                     i++;
                                 }
@@ -501,6 +533,7 @@ public class QueryRequestUtil {
                     }
                     SearchIndexResultRecord vRecord = DeepcopyUtils.deepCopy (record);
                     vRecord.setField(meta.getFieldIndex(properties.pullupField), properties.pullupValue);
+//                    vRecord.setGroupBy (properties.pullupValue);
                     generateGroupBy(vRecord, groupList0, meta);
                     summaryCalcList.add(vRecord);
                 }
@@ -516,6 +549,9 @@ public class QueryRequestUtil {
     }
 
     private static boolean hasSameNode(MemberNodeTree member, List<MemberNodeTree> rowMemberTrees) {
+        if (member != null && !member.isCallback ()) {
+            return false;
+        }
         List<MemberNodeTree> tmp = getLeafNodes(rowMemberTrees);
         if (CollectionUtils.isEmpty (tmp)) {
             return false;

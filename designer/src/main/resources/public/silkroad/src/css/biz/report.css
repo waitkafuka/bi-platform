@@ -142,7 +142,7 @@
     right: 9px;
     top: 9px;
     background: #65b0fa;
-    color: #ffffff;
+    color: #fff;
 }
 .con-component-box .icon-letter:hover {
     background: #3e92e5;
@@ -204,7 +204,7 @@
 .report .shell-component {
     position: absolute;
     /*overflow: hidden;*/
-    border: 1px solid #ffffff;
+    border: 1px solid #fff;
 }
 .report .shell-component:hover {
     border: 1px solid rgba(0, 119, 119, 0.168627);
@@ -230,7 +230,7 @@
     background: #777777;
     position: absolute;
     line-height: 12px;
-    color: #ffffff;
+    color: #fff;
     text-align: center;
     width: 12px;
     height: 12px;
@@ -286,7 +286,7 @@
     border-left: 1px dashed #007777;
 }
 .comp-setting > div {
-    background: #ffffff;
+    background: #fff;
     padding: 5px 10px 5px 10px;
     z-index: 2;
 }
@@ -317,7 +317,7 @@
 }
 .comp-setting .item {
     display: inline-block;
-    background: white;
+    background: #fff;
     font-size: 12px;
     padding: 2px 18px 2px 3px;
     margin-left: 3px;
@@ -334,7 +334,7 @@
     padding: 2px 4px;
     border-radius: 3px;
     background: #65b0fa;
-    color: #ffffff;
+    color: #fff;
     font-weight: normal;
     cursor: pointer;
 }
@@ -381,7 +381,7 @@
 }
 /*Y轴图标列表选项*/
 .comp-setting-charticons {
-    background-color: white;
+    background-color: #fff;
     border: 1px solid #e6e3e3;
 }
 .comp-setting-charticons .icon {
@@ -471,7 +471,7 @@
 .con-head div {
     width: 77px;
     height: 20px;
-    background-color: #ffffff;
+    background-color: #fff;
     padding: 0;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -984,7 +984,7 @@
 
 /* 配置端设置背景为白色 */
 #body-white {
-    background-color: #FFF;
+    background-color: #fff;
 }
 .shell-component .con-edit-btns span{
     /*border: 1px solid rgba(0, 119, 119, 0.17);*/
@@ -1097,9 +1097,9 @@
     width: 150px;
     height: 25px;
     line-height: 25px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .silkroad-data-field-filter-set .field-name {
     display: inline-block;
@@ -1176,4 +1176,335 @@
     width: 40%;
 }
 
+
+/**
+ * @name                      :固定报表
+ * @author                    :lizhantong
+ * @version                   :1.0
+ * @type                      :扩展类
+ * @relating                  :暂无
+ * @dependent                 :暂无
+ */
+.fix-report-mgr {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+.fix-report-mgr .operation-btns {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+}
+.fix-report-tab {
+    padding: 6px 0;
+    font-size: 14px;
+    font-weight: 700;
+}
+.fix-report-tab-focus {
+    color: #00a1cb;
+}
+.fix-report-tab span {
+    padding: 10px;
+}
+
+
+.fix-report-content {
+    max-width: 600px;
+    margin: 0 auto;
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.fix-report-task-mgr-list {}
+.fix-report-task-mgr-list table {
+    width: 100%;
+}
+.fix-report-task-mgr-list th {
+    padding: 18px 0 7px 0;
+    text-align: left;
+    border-bottom: 2px solid #4a7eb0;
+}
+.fix-report-task-mgr-list .list-index {
+    width: 150px;
+}
+.fix-report-task-mgr-list .list-name {
+    width: 100px;
+}
+.fix-report-task-mgr-list .list-btns {
+    width: 180px;
+}
+.fix-report-task-mgr-list .list-url {
+    width: 170px;
+}
+
+/* 报表列表与数据源列表公用一套样式 */
+.fix-report-task-mgr-list td {
+    padding: 5px 0;
+    border-bottom: 1px solid #65778b;
+}
+.fix-report-task-mgr-list tbody tr:hover {
+    background: #f6f5f5;
+}
+.fix-report-mgr .radius {
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background-color: #00a1cb;
+    overflow: hidden;
+    position: relative;
+    display: inline-block;
+}
+.fix-report-mgr .radius-red {
+    background-color: #e99586;
+}
+
+.fix-report-mgr .normal {
+    height: 16px;
+    width: 16px;
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+}
+.fix-report-task-mgr-list .task-item .task-start {}
+
+.fix-report-task-mgr-list .task-item .task-start > span {
+    width: 0;
+    height: 0;
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    border-style: solid;
+    border-color: transparent transparent transparent #fff;
+    border-width: 4px 4px 4px 7px;
+}
+.fix-report-task-mgr-list .task-item .list-url {
+    color: #06c;
+}
+.fix-report-task-mgr-list .task-item .task-stop {}
+
+.fix-report-task-mgr-list .task-item .task-stop > span {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    top: 5px;
+    left: 5px;
+    background: #fff;
+}
+
+.fix-report-task-mgr-list .task-item .task-look {}
+
+.fix-report-task-mgr-list .task-item .task-look > span {
+    width: 0;
+    height: 0;
+    position: absolute;
+    left: 6px;
+    top: 4px;
+    border-style: solid;
+    border-color: transparent transparent transparent #fff;
+    border-width: 4px 4px 4px 7px;
+}
+.fix-report-mgr .task-add {}
+
+.fix-report-mgr .task-add > span {
+    position: absolute;
+    width: 12px;
+    height: 4px;
+    background: #fff;
+    left: 2px;
+    top: 6px;
+}
+.fix-report-mgr .task-add > span:after {
+    content: "";
+    width: 4px;
+    height: 12px;
+    background: #fff;
+    position: absolute;
+    left: 4px;
+    top: -4px;
+}
+
+.fix-report-task-mgr-list .task-item .task-del {}
+
+.fix-report-task-mgr-list .task-item .task-del > span {
+    position: absolute;
+    width: 12px;
+    height: 4px;
+    top: 6px;
+    left: 2px;
+    background: #fff;
+    -webkit-transform: rotate(-45deg);
+       -moz-transform: rotate(-45deg);
+        -ms-transform: rotate(-45deg);
+         -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+}
+.fix-report-task-mgr-list .task-item .task-del > span:after {
+    content: "";
+    width: 12px;
+    height: 4px;
+    background: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    -webkit-transform: rotate(90deg);
+       -moz-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+         -o-transform: rotate(90deg);
+            transform: rotate(90deg);
+}
+
+.fix-report-task-mgr-list .task-item .task-look {}
+
+.fix-report-task-mgr-list .task-item .task-look > span {
+    height: 7px;
+    width: 7px;
+    background: transparent;
+    -webkit-border-radius: 50px;
+       -moz-border-radius: 50px;
+            border-radius: 50px;
+    border: 2px solid #00a1cb;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+.fix-report-task-mgr-list .task-item .task-look > span:after {
+    content: "";
+    width: 4px;
+    height: 8px;
+    background: #00a1cb;
+    position: absolute;
+    top: 6px;
+    left: 7px;
+    -webkit-transform: rotate(-45deg);
+       -moz-transform: rotate(-45deg);
+        -ms-transform: rotate(-45deg);
+         -o-transform: rotate(-45deg);
+            transform: rotate(-45deg);
+}
+
+.fix-report-mgr .box-add {
+    margin: 10px 10px 0 0;
+}
+
+
+.fix-report-task-name-set {
+    margin-top: 10px;
+}
+.fix-report-basic-set h2 {
+    color: #00a1cb;
+}
+.fix-report-task-name-set > span {
+    width: 60px;
+    height: 20px;
+    line-height: 20px;
+}
+.fix-report-task-name-set > input {
+    width: 200px;
+    height: 16px;
+    line-height: 16px;
+}
+.fix-report-task-main-set {
+    margin-top: 10px;
+}
+.fix-report-task-main-set .main-set-header {
+    height: 20px;
+    line-height: 20px;
+    border-bottom: 2px solid #4a7eb0;
+}
+.main-set-header > .first {
+    width: 40%;
+}
+.main-set-header > .second {
+    width: 55%;
+}
+.main-set-item {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: dotted 1px #000;
+}
+.main-set-item > span {
+    width: 40%;
+    height: 35px;
+    line-height: 35px;
+}
+.main-set-item > .item-sets {
+    width: 55%;
+}
+.item-sets > li {
+    padding: 5px 0;
+}
+/*.item-sets > li > input{*/
+    /*display: inline-block;*/
+/*}*/
+.item-sets > li > div {
+    display: inline-block;
+}
+
+.fix-report-scheduling {}
+.fix-report-scheduling .item-set-now-execute {
+    height: 30px;
+    line-height: 30px;
+    padding: 5px 0;
+}
+.fix-report-scheduling .item-set-now-execute input {
+    height: 20px;
+    line-height: 20px;
+}
+.fix-report-scheduling .item-set-now-execute span {
+    height: 20px;
+    line-height: 20px;
+    margin-left: 3px;
+}
+.fix-report-scheduling .item-set-execute-time {
+    height: 30px;
+    line-height: 30px;
+    padding: 5px 0;
+}
+.item-set-execute-time > span {
+    height: 20px;
+    line-height: 20px;
+}
+.item-set-execute-time > div {
+    height: 20px;
+    line-height: 20px;
+    margin-left: 5px;
+}
+.item-set-execute-time > div span {
+    height: 20px;
+    line-height: 20px;
+    margin-left: 5px;
+}
+.item-set-execute-time > div input {
+    width: 94px;
+    height: 18px;
+    line-height: 18px;
+    margin-left: 5px;
+}
+
+.fix-report-scheduling .item-set-execute-granular {
+    height: 30px;
+    line-height: 30px;
+    padding: 5px 0;
+}
+.item-set-execute-granular > span {
+    height: 20px;
+    line-height: 20px;
+}
+.item-set-execute-granular > div {
+    height: 20px;
+    line-height: 20px;
+    margin-left: 5px;
+}
+.item-set-execute-granular > div select {
+    width: 100px;
+    height: 20px;
+    line-height: 20px;
+    margin-left: 10px;
+}
+.item-set-execute-granular > div input {
+    width: 80px;
+    height: 18px;
+    line-height: 18px;
+    margin-left: 5px;
+}
 /*@end*/

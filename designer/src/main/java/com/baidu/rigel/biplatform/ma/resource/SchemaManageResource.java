@@ -54,6 +54,7 @@ import com.baidu.rigel.biplatform.ma.model.utils.HttpUrlUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.ElementUtils;
@@ -827,6 +828,9 @@ public class SchemaManageResource {
     private void buildSuccessResponseResult(String reportId, ResponseResult rs, Schema schema) {
         ReportDesignModel model = reportModelCacheManager.getReportModel(reportId);
         model.setSchema((MiniCubeSchema) schema);
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+        runtimeModel.setModel (model);
+        reportModelCacheManager.updateRunTimeModelToCache (reportId, runtimeModel);
         reportModelCacheManager.updateReportModelToCache(reportId, model);
         rs.setStatus(0);
         rs.setStatusInfo("successfully");

@@ -445,7 +445,10 @@ public final class DataModelUtils {
                     if (toolTips != null) {
                         String tips = toolTips.get(name);
                         if (StringUtils.isEmpty(tips)) {
-                            tips = name;
+                            tips = toolTips.get(column.tableName + "_" + column.name);
+                            if (StringUtils.isEmpty(tips)) {
+                                tips = name;
+                            }
                         }
                         colDefine.setToolTip(tips);
                     }
@@ -453,7 +456,10 @@ public final class DataModelUtils {
                     if (textAlignFormat != null) {
                         String align = textAlignFormat.get(name);
                         if (StringUtils.isEmpty(align)) {
-                            align = "left";
+                            align = textAlignFormat.get(column.tableName + "_" + column.name);
+                            if (StringUtils.isEmpty(align)) {
+                                align = "left";
+                            }
                         }
                         colDefine.setAlign(align);
                     }

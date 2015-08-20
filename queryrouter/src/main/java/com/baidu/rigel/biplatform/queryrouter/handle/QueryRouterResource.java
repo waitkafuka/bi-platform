@@ -90,11 +90,11 @@ public class QueryRouterResource {
         ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(questionStr,
                 ConfigQuestionModel.class);
         QueryRouterContext.setQueryInfo(questionModel.getQueryId());
-        logger.info("queryId:{} querycurrent handle size:{} , begin to handle this queryId.",
+        logger.info("queryId:{} query current handle size:{} , begin to handle this queryId.",
                 questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());
         // 限制日志输出
         if (questionStr.length() > MAX_PRINT_LENGTH) {
-            logger.info("queryId:{} querycurrent handle size:{} request questionmodel json:{}",
+            logger.info("queryId:{} request questionmodel json:{}",
                     questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize(),
                     questionStr.substring(0, MAX_PRINT_LENGTH));
             logger.debug("queryId:{} request questionmodel json:{}", questionModel.getQueryId(),
@@ -151,6 +151,8 @@ public class QueryRouterResource {
             return ResponseResultUtils.getErrorResult(
                     "question model exception, questionmodel is incorrect.", 100);
         } finally {
+            logger.info("queryId:{} query current handle size:{} , end to handle this queryId.",
+                    questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());
             QueryRouterContext.removeQueryInfo();
         }
     }

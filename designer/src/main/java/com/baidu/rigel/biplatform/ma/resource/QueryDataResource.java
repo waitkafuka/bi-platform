@@ -2478,8 +2478,12 @@ public class QueryDataResource extends BaseResource {
             }
         }
         // 处理下载请求中对数据的包装
-        dataModel = DataModelUtils.preProcessDataModel4Show(dataModel, targetArea.getOtherSetting());
-        String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel, targetArea.getLogicModel ());
+//        dataModel = DataModelUtils.preProcessDataModel4Show(dataModel, targetArea.getOtherSetting());
+        LogicModel logicModel = targetArea.getLogicModel ();
+        if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
+            logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
+        }
+        String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel, logicModel);
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms");
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");

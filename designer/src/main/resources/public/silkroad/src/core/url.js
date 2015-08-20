@@ -1100,5 +1100,99 @@ define(function () {
             + '/name/' + newReportName;
     };
 
+    //--------------------------------
+    // 固定报表
+    //--------------------------------
+
+    /**
+     * 获取任务管理列表
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.getFixReportTaskMgrList = function (reportId) {
+        return getReportsBaseUrl(reportId)
+            + '/regular/tasks';
+    };
+
+    /**
+     * 启动任务
+     *
+     * @param {string} reportId 报表id
+     * @param {string} taskId 任务id
+     * @param {string} taskStatus 任务状态
+     * @public
+     * @return {string} url
+     */
+    Url.startTask = function (reportId, taskId, taskStatus) {
+        return getReportsBaseUrl(reportId)
+            + '/regular/tasks/' + taskId + '/operation/' + taskStatus;
+    };
+
+    /**
+     * 删除任务
+     *
+     * @param {string} reportId 报表id
+     * @param {string} taskId 任务id
+     * @public
+     * @return {string} url
+     */
+    Url.delTask = function (reportId, taskId) {
+        return getReportsBaseUrl(reportId)
+            + '/regular/tasks/' + taskId;
+    };
+
+    /**
+     * 保存任务
+     *
+     * @param {string} reportId 报表id
+     * @public
+     * @return {string} url
+     */
+    Url.saveTaskInfo = function (reportId) {
+        return getReportsBaseUrl(reportId)
+            + '/regular/task';
+    };
+
+    /**
+     * 获取任务设置信息
+     *
+     * @param {string} reportId 报表id
+     * @param {string} taskId 任务id
+     * @public
+     * @return {string} url
+     */
+    Url.getTaskInfo = function (reportId, taskId) {
+        return getReportsBaseUrl(reportId)
+            + '/regular/tasks/' + taskId;
+    };
+
+    /**
+     * 获取参数
+     *
+     * @param {string} reportId 报表id
+     * @param {string} taskId 任务id
+     * @public
+     * @return {string} url
+     */
+    Url.getParamData = function (reportId) {
+        return getReportsBaseUrl(reportId)
+            + '/allparams';
+    };
+
+    /**
+     * 获取树结构
+     *
+     * @param {string} reportId 报表id
+     * @param {string} paramId 参数id
+     * @public
+     * @return {string} url
+     */
+    Url.getFixReportMgrTree = function (reportId, paramId) {
+        return getReportsBaseUrl(reportId)
+            + '/params/' + paramId + '/tree';
+    };
+
     return Url;
 });

@@ -17163,8 +17163,8 @@ define('esui/TipLayer',['require','./Button','./Label','./Panel','./lib','./cont
                     }
                 }
                 else if (config.left) {
-                    // properties.left = offset.left - elementWidth;
-                    properties.left = offset.left;
+                    properties.left = offset.left - elementWidth;
+                    // properties.left = offset.left;
                     if (config.top) {
                         arrowClass = 'rt';
                     }

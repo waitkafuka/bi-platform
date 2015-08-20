@@ -71,7 +71,7 @@ $namespace('di.shared.vui');
 
         me._compId = compId;
         me._curIndex = 0;
-        me._selValue = '';
+        var selectedVal = '';
         me._allSel = def.selectAllDim.length;
         if (data.value && data.value.length > 0) {
             var selArr = data.value[0].split('.');
@@ -79,16 +79,17 @@ $namespace('di.shared.vui');
             for (var i = 0; i <= (me._curIndex + 1); i ++) {
                 resArr.push(selArr[i]);
             }
-            me._selValue = resArr.join('.');
+            selectedVal = resArr.join('.');
         }
         else {
-            me._selValue = datasource[0].value;
+            selectedVal = datasource[0].value;
         }
+        me._selValue = selectedVal;
         // 渲染第一个select
         for (var i = 0, len = datasource.length; i < len; i ++) {
             html.push(
                 '<option value="', datasource[i].value, '"',
-                datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                datasource[i].value === selectedVal ? 'selected="selected"' : '',
                 '>', datasource[i].text,
                 '</option>'
             );
@@ -101,7 +102,7 @@ $namespace('di.shared.vui');
             mobile: true,
             change: function() {
                 me._curIndex = 0;
-                me._selValue = this.value;
+                // me._selValue = this.value;
                 // 当前下拉框点击时，如果还有子下拉框，就重新去渲染子下拉框
                 if(me._curIndex < me._allSel - 1) {
                     me.getNextLevel(this.value);
@@ -116,7 +117,7 @@ $namespace('di.shared.vui');
 
         // 当初始化完第一个下拉框，如果是多级，就去触发第二个
         if(me._curIndex < me._allSel - 1) {
-            me.getNextLevel(me._selValue);
+            me.getNextLevel(selectedVal);
         }
         else {
             me.notify('cascadeSelectChange');
@@ -154,6 +155,7 @@ $namespace('di.shared.vui');
         var me = this;
         var compId = me._compId;
         var datasource;
+        var selectedVal = '';
         var dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
 
         if (data && data[compId]) {
@@ -181,17 +183,17 @@ $namespace('di.shared.vui');
                 for (var i = 0; i <= (me._curIndex + 1); i ++) {
                     resArr.push(selArr[i]);
                 }
-                me._selValue = resArr.join('.');
+                selectedVal = resArr.join('.');
             }
             else {
-                me._selValue = datasource[0].value;
+                selectedVal = datasource[0].value;
             }
-
+            me._selValue = selectedVal;
             var html = ['<select id="', selElId, '">'];
             for (var i = 0, len = datasource.length; i < len; i ++) {
                 html.push(
                     '<option value="', datasource[i].value, '"',
-                    datasource[i].value === me._selValue ? 'selected="selected"' : '',
+                    datasource[i].value === selectedVal ? 'selected="selected"' : '',
                     '>', datasource[i].text,
                     '</option>'
                 );
@@ -205,7 +207,7 @@ $namespace('di.shared.vui');
                     mobile: true,
                     change: function() {
                         me._curIndex = x;
-                        me._selValue = this.value;
+                        // me._selValue = this.value;
                         if (me._curIndex < me._allSel - 1) {
                             me.getNextLevel(this.value);
                         }
@@ -221,7 +223,7 @@ $namespace('di.shared.vui');
             isGoToNext = dif > 0 ? true : false;
 
             if (isGoToNext) {
-                me.getNextLevel(me._selValue);
+                me.getNextLevel(selectedVal);
             }
             else {
                 me.notify('cascadeSelectChange');

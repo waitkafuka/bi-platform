@@ -161,8 +161,15 @@ define([
                 function isHaveConfirmEntity (clzKey, entitys) {
                     var result = false;
                     for (var i = 0; i < entitys.length; i++) {
-                        if (entitys[i].clzKey === clzKey) {
-                                result = true;
+                        if (
+                            entitys[i].clzKey === clzKey
+                            && (
+                                (entitys[i].dataOpt && entitys[i].dataOpt.text === '查询')
+                                || clzKey === 'DI_REPORTSAVE'
+                            )
+
+                        ) {
+                            result = true;
                         }
                     }
                     return result;

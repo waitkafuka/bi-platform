@@ -75,7 +75,8 @@ $namespace('di.shared.model');
             DATA: URL.fn('FORM_DATA'),
             ASYNC_DATA: URL.fn('FORM_ASYNC_DATA'),
             UPDATE_CONTEXT: URL.fn('FORM_UPDATE_CONTEXT'),
-            CASCADE_GETLEVEL: URL.fn('FORM_CASCADE_GETLEVEL')
+            CASCADE_GETLEVEL: URL.fn('FORM_CASCADE_GETLEVEL'),
+            REGULAR: URL.fn('FORM_REGULAR')
         }
     );    
 
@@ -127,6 +128,9 @@ $namespace('di.shared.model');
             },
             CASCADE_GETLEVEL: function (options) {
                 return this._fCommonParamGetter(options.args.param);
+            },
+            REGULAR: function (options) {
+                return this._fCommonParamGetter(options.args.param);
             }
         }
     );
@@ -148,6 +152,9 @@ $namespace('di.shared.model');
                 return (data || {}).params || {};
             },
             CASCADE_GETLEVEL: function (data, ejsonObj, options) {
+                return (data || {}).params || {};
+            },
+            REGULAR: function (data, ejsonObj, options) {
                 return (data || {}).params || {};
             }
         }

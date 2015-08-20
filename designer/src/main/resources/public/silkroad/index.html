@@ -34,7 +34,9 @@
             'spectrum': '../../dep/spectrum/spectrum',
             'dialog': 'core/dialog',
             'url': 'core/url',
-            'constant': 'core/constant'
+            'constant': 'core/constant',
+            'ztree-core': '../../dep/ztree/jquery.ztree.core-3.5',
+            'ztree-check': '../../dep/ztree/jquery.ztree.excheck-3.5'
         },
         shim: {
             'dialog': {
@@ -63,6 +65,12 @@
 //                    'jquery',
                     'jquerydi',
                     'template'
+                ]
+            },
+            'ztree-check': {
+                'deps': [
+                    'jquery',
+                    'ztree-core'
                 ]
             }
         }

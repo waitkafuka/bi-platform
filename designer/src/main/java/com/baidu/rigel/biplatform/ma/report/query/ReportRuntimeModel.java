@@ -235,7 +235,14 @@ public class ReportRuntimeModel implements Serializable {
 //        if (!force) { 
 //            return;
 //        }
-        context = new QueryContext();
+        if (force) {
+            
+            this.queryActions.clear ();
+            this.datas.clear ();
+            this.drillDownQueryHistory.clear ();
+            this.localContext.clear ();
+            context = new QueryContext();
+        }
         isInited = true;
         this.model =  DeepcopyUtils.deepCopy (model);
         updateLogicModels(this.model);

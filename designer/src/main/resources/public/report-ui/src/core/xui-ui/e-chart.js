@@ -20,6 +20,7 @@
     var getNextSibling = xutil.dom.getNextSibling;
     var inheritsObject = xutil.object.inheritsObject;
     var merge = xutil.object.merge;
+    var clone = xutil.object.clone;
     var formatNumber = xutil.number.formatNumber;
     var isArray = xutil.lang.isArray;
     var attachEvent = xutil.dom.attachEvent;
@@ -703,22 +704,34 @@
         ) {
             var name = this._aSeries[0].yAxisName;
             axisCaption && (settings.name = axisCaption[name]);
+            settings.format = this._aSeries[0].format;
             yAxis.push(setBasicItems(settings));
         }
 
         // 双刻度轴情况
         if (this._chartType === 'line' && axisCaption) {
+            var series = this._aSeries;
             var leftName = [];
             var rightName = [];
-            var series = this._aSeries;
+            var leftFormat;
+            var rightFormat;
+            var leftCount = 0;
+            var rightCount = 0;
 
             for (var i = 0, iLen = series.length, tSer; i < iLen; i ++) {
                 tSer = series[i];
                 var name = tSer.yAxisName;
-                if (name) {
-                    tSer.yAxisIndex === '0'
-                        ? leftName.push(axisCaption[name])
-                        : rightName.push(axisCaption[name]);
+                if (tSer.yAxisIndex === '0') {
+                    if (name && axisCaption[name]) {
+                        leftName.push(axisCaption[name]);
+                    }
+                    leftFormat = tSer.format;
+                    leftCount ++;
+                }
+                else {
+                    rightName.push(axisCaption[name]);
+                    rightFormat = tSer.format;
+                    rightCount ++;
                 }
 
             }
@@ -735,15 +748,18 @@
             else if (rightName.length > 1) {
                 rightName = rightName.join(',');
             }
+            if (leftCount) {
+                // 左刻度轴设置
+                var leftSettings = merge(clone(settings), {name: leftName, format: leftFormat});
+                yAxis.push(setBasicItems(leftSettings));
+            }
 
-            // 左刻度轴设置
-            settings = merge(settings, {name: leftName});
-            yAxis.push(setBasicItems(settings));
-            // 右刻度值设置
-            settings = merge(settings, {name: rightName});
-            yAxis.push(setBasicItems(settings));
+            if (rightCount) {
+                // 右刻度值设置
+                var rightSettings = merge(clone(settings), {name: rightName, format: rightFormat});
+                yAxis.push(setBasicItems(rightSettings));
+            }
         }
-
 
         // 数据为空时横轴显示修改 博学
         if (this._chartType === 'bar') {
@@ -817,7 +833,10 @@
                 item.nameLocation = (advOpt.chartType === 'bar')
                     ? 'start' : 'end'
             );
-
+            item.nameTextStyle = {
+                fontFamily: '微软雅黑',
+                fontSize: '12'
+            };
             // 设置y轴网格
             item.splitArea = advOpt.splitArea;
             item.splitLine = advOpt.splitLine;
@@ -828,22 +847,36 @@
                 var result;
                 var w;
                 var y;
-                // 确定可以转换成数字
-                if (!Number.isNaN(value / 1)) {
-                    w = 10000; // 万
-                    y = 100000000; // 亿
-
-                    // Y轴调到右边需要数据翻转
+                if (advOpt.format && advOpt.format.indexOf('%') >= 0) {
                     if (advOpt.chartType === 'bar') {
-                        value *= -1;
+                        value = - value;
                     }
-                    result = value;
+                    result = formatNumber(
+                        value,
+                        advOpt.format,
+                        null,
+                        null,
+                        true
+                    );
+                }
+                else {
+                    // 确定可以转换成数字
+                    if (!Number.isNaN(value / 1)) {
+                        w = 10000; // 万
+                        y = 100000000; // 亿
 
-                    if (value >= w && value <= y) {
-                        result = (value / w).toFixed(0) + '万';
-                    }
-                    else if (value > y) {
-                        result = (value / y).toFixed(0) + '亿';
+                        // Y轴调到右边需要数据翻转
+                        if (advOpt.chartType === 'bar') {
+                            value *= -1;
+                        }
+                        result = value;
+
+                        if (value >= w && value <= y) {
+                            result = (value / w).toFixed(0) + '万';
+                        }
+                        else if (value > y) {
+                            result = (value / y).toFixed(0) + '亿';
+                        }
                     }
                 }
 

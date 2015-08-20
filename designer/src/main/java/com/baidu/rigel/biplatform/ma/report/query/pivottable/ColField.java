@@ -68,7 +68,7 @@ public class ColField implements Serializable {
     /**
      * @return the colSpan
      */
-    public Integer getColSpan() {
+    public Integer getColspan() {
         return colspan;
     }
     

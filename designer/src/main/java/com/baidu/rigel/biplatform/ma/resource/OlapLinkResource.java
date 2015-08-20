@@ -27,6 +27,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LinkParamMappingVo;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
@@ -230,6 +231,9 @@ public class OlapLinkResource {
             linkInfo.setParamMapping(paramMapping);
             tableArea.getFormatModel().setLinkInfo(linkInfoMap);
             reportModelCacheManager.updateReportModelToCache(reportId, olapTableDesignModel);
+            ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
+            runtimeModel.init (olapTableDesignModel, false, true);
+            reportModelCacheManager.updateRunTimeModelToCache (reportId, runtimeModel);
             rs = ResourceUtils.getResult("success", null, "save mapping success!");
         }
         return rs;
