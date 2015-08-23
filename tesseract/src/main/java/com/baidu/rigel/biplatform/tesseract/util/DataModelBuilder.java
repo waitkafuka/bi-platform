@@ -233,6 +233,9 @@ public class DataModelBuilder {
             Map<String, BigDecimal> colValues = Maps.newHashMap();
             final String oneLineKey = oneLine.toString ();
             for (MiniCubeMeasure measure : queryContext.getQueryMeasures()) {
+                if (measure.getAggregator () == Aggregator.CALCULATED) {
+                    continue;
+                }
                 final BigDecimal currentVal = tesseractResultSet.getBigDecimal(measure.getDefine());
                 StringBuilder columnKey = new StringBuilder();
                 columnKey.append(oneColumn);

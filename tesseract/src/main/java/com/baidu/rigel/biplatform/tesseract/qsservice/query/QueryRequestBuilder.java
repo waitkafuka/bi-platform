@@ -29,7 +29,9 @@ import org.apache.commons.lang.StringUtils;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.model.Cube;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
@@ -175,7 +177,9 @@ public class QueryRequestBuilder {
         Select select = new Select();
         if (CollectionUtils.isNotEmpty(measures)) {
             for (MiniCubeMeasure measure : measures) {
-                select.getQueryMeasures().add(new QueryMeasure(measure.getAggregator(), measure.getDefine()));
+                if (measure.getAggregator () != Aggregator.CALCULATED) {
+                    select.getQueryMeasures().add(new QueryMeasure(measure.getAggregator(), measure.getDefine()));
+                }
             }
         }
         return select;

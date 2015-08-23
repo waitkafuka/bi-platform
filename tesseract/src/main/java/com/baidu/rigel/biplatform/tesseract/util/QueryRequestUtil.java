@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -456,7 +457,12 @@ public class QueryRequestUtil {
 //                        }
 //                    }
 //                }
-                transList.forEach(record -> {
+                Iterator<SearchIndexResultRecord> it = transList.iterator ();
+                while (it.hasNext ()) {
+                    SearchIndexResultRecord record = it.next ();
+                    it.remove ();
+//                }
+//                transList.forEach(record -> {
                     leafValueMap.forEach((prop, valueMap) -> {
                         try {
                             String currValue = record.getField(meta.getFieldIndex(prop)) != null ? record
@@ -486,7 +492,7 @@ public class QueryRequestUtil {
 ////                                            record.setGroupBy (value);
                                             record.setField(meta.getFieldIndex(prop), value);
                                             generateGroupBy(record, groupList, meta);
-//                                            copyLeafRecords.add(newRec);
+                                            copyLeafRecords.add(record);
                                         }
                                     }
                                     i++;
@@ -496,7 +502,7 @@ public class QueryRequestUtil {
                             throw new RuntimeException(e);
                         }
                     });
-                });
+                }
                 if (CollectionUtils.isNotEmpty(copyLeafRecords)) {
                     // 处理汇总节点的时候，得进行下处理和过滤
                     transList.addAll(copyLeafRecords);
