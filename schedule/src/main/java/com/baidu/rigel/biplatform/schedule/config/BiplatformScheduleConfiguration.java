@@ -1,8 +1,10 @@
 package com.baidu.rigel.biplatform.schedule.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.scheduling.quartz.CronTriggerFactoryBean;
 import org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
@@ -17,7 +19,11 @@ import com.baidu.rigel.biplatform.schedule.job.DefaultJob;
  */
 @Configuration
 @EnableConfigurationProperties
+@ConditionalOnProperty(prefix = "", name = "schedule.enable", havingValue = "true")
+@ImportResource({ "conf/schedule.xml" })
 public class BiplatformScheduleConfiguration {
+
+  
 
     @Bean(name = "methodInvokingJobDetailFactoryBean")
     public MethodInvokingJobDetailFactoryBean methodInvokingJobDetailFactoryBean() {

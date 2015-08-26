@@ -138,6 +138,7 @@ public class QueryServiceImpl implements QueryService {
             throw new MiniCubeQueryException(e1);
         }
         logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query context.");
+        current = System.currentTimeMillis();
         // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
         int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
         if (logger.isDebugEnabled ()) {
@@ -153,8 +154,12 @@ public class QueryServiceImpl implements QueryService {
             logger.error(sb.toString());
             throw new OverflowQueryConditionException(sb.toString());
         }
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to stateQueryContextConditionCount.");
+        current = System.currentTimeMillis();
         // 调用拆解自动进行拆解
         QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel, dataSourceInfo, cube, queryContext, preSplitStrategy);
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to split.");
+        current = System.currentTimeMillis();
         DataModel result = null;
         // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
         // TODO 怀疑这里有逻辑错误
@@ -186,6 +191,7 @@ public class QueryServiceImpl implements QueryService {
         } else {
             result = executeQuery(dataSourceInfo, cube, queryContext,questionModel.isUseIndex(), questionModel.getPageInfo());
         }
+        logger.info("cost :" + (System.currentTimeMillis() - current) + " to getdatamodel.");
         return result;
 
     }
@@ -193,6 +199,7 @@ public class QueryServiceImpl implements QueryService {
     private DataModel executeQuery(DataSourceInfo dataSourceInfo, Cube cube,
             QueryContext queryContext,boolean useIndex, PageInfo pageInfo) throws MiniCubeQueryException {
         long current = System.currentTimeMillis();
+        long currentBegin = System.currentTimeMillis();
         QueryRequest queryRequest =
                 QueryRequestBuilder.buildQueryRequest(dataSourceInfo, cube, queryContext, useIndex,pageInfo);
 //        logger.info("transfer queryContext:{} to queryRequest:{} cost:{} ", queryContext, queryRequest, System.currentTimeMillis() - current);
@@ -201,12 +208,13 @@ public class QueryServiceImpl implements QueryService {
                         .isEmpty(queryContext.getQueryMeasures()))) {
             return new DataModelBuilder(null, queryContext).build(false);
         }
-        logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query request.");
+        logger.info("executeQuery cost :" + (System.currentTimeMillis() - current) + " to build query request.");
         current = System.currentTimeMillis();
         DataModel result = null;
         try {
             SearchIndexResultSet resultSet = searchService.query(queryRequest);
-            
+            logger.info("executeQuery cost :" + (System.currentTimeMillis() - current) + " to get query result.");
+            current = System.currentTimeMillis();
             if (queryRequest.getGroupBy() != null && CollectionUtils.isNotEmpty(queryRequest.getGroupBy().getGroups())) {
                 try {
                     resultSet = QueryRequestUtil.processGroupBy(resultSet, queryRequest, queryContext);
@@ -220,16 +228,18 @@ public class QueryServiceImpl implements QueryService {
                 }
 
             }
+            logger.info("executeQuery cost :" + (System.currentTimeMillis() - current) + " to processGroupBy.");
+            
             long beforeBuildCurr=System.currentTimeMillis();
             
             result = new DataModelBuilder(resultSet, queryContext).build(false);
             
-            logger.info("cost :" + (System.currentTimeMillis() - beforeBuildCurr) + " to build DataModel.");
+            logger.info("executeQuery cost :" + (System.currentTimeMillis() - beforeBuildCurr) + " to build DataModel.");
         } catch (IndexAndSearchException e) {
             logger.error("query occur when search queryRequest：" + queryContext, e);
             throw new MiniCubeQueryException(e);
         }
-        logger.info("cost :" + (System.currentTimeMillis() - current) + " to execute query.");
+        logger.info("executeQuery cost :" + (System.currentTimeMillis() - currentBegin) + " to execute query totally.");
         return result;
     }
 

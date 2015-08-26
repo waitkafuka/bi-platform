@@ -439,14 +439,14 @@ public class HttpRequest {
                                 .build();
                         String socketTimeout = "1800000";
                         String connTimeout = "1800000";
-                        if (params != null) {
-                            if (params.containsKey(SOCKET_TIME_OUT)) {
-                                socketTimeout = params.get(SOCKET_TIME_OUT);
-                            }
-                            if (params.containsKey(CONNECTION_TIME_OUT)) {
-                                socketTimeout = params.get(CONNECTION_TIME_OUT);
-                            }
-                        }
+//                        if (params != null) {
+//                            if (params.containsKey(SOCKET_TIME_OUT)) {
+//                                socketTimeout = params.get(SOCKET_TIME_OUT);
+//                            }
+//                            if (params.containsKey(CONNECTION_TIME_OUT)) {
+//                                socketTimeout = params.get(CONNECTION_TIME_OUT);
+//                            }
+//                        }
                         // 设置默认的cookie的安全策略为不校验
                         RequestConfig requestConfigBuilder = RequestConfig.custom()
                                 .setCookieSpec(NO_CHECK_COOKIES)

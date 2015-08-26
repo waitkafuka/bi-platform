@@ -2325,9 +2325,8 @@ div.ui-float-menu-children div.ui-float-menu-children div.ui-float-menu {
     right: 0;
     cursor: col-resize;
 }
-.ui-table-heade-th-content {
+.ui-table-head-th-content {
     position: relative;
-    text-align: center;
     height: 30px;
     margin: 0 auto;
 }

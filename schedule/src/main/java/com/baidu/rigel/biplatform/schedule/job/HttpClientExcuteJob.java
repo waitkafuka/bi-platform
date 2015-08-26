@@ -1,5 +1,6 @@
 package com.baidu.rigel.biplatform.schedule.job;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.quartz.Job;
@@ -60,9 +61,13 @@ public class HttpClientExcuteJob implements Job, BeanFactoryAware {
         }
         sb.append(excuteAction);
         // TODO 联调时需要补充http参数部分逻辑
-
+        Object taskId = jobDataMap.get(ScheduleConstant.TASK_ID);
+        Object productLineName = jobDataMap.get(ScheduleConstant.PRODUCT_LINE_NAME);
+        Map<String, String> params = Maps.newHashMap();
+        params.put(ScheduleConstant.TASK_ID, String.valueOf(taskId));
+        params.put(ScheduleConstant.PRODUCT_LINE_NAME, String.valueOf(productLineName));
         try {
-            HttpRequest.sendGet(sb.toString(), Maps.newHashMap());
+            HttpRequest.sendGet(sb.toString(), params);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
         }

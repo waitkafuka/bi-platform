@@ -34,9 +34,13 @@ public interface IndexMetaService {
     
     /**
      * 
-     * 初始化cube的索引元数据，设置cube的维度、指标、事实表、数据源信息，设置索引元数据状态为UN_INIT;不进行索引分片的分配、元数据在这个方法中不存储
-     * @param cubeList cube数据
-     * @param dataSourceInfo 数据源信息
+     * 初始化cube的索引元数据，设置cube的维度、指标、事实表、数据源信息，设置索引元数据状态为UN_INIT;不进行索引分片的分配、
+     * 元数据在这个方法中不存储
+     * 
+     * @param cubeList
+     *            cube数据
+     * @param dataSourceInfo
+     *            数据源信息
      * @return List<IndexMeta> 初始化后的索引元数据,初始化不成功返回空集，不会返回null
      */
     List<IndexMeta> initMiniCubeIndexMeta(List<Cube> cubeList, DataSourceInfo dataSourceInfo);
@@ -93,27 +97,28 @@ public interface IndexMetaService {
      * 
      * @param idxMeta
      *            元数据
-     * @param clusterName 申请分片所在集群名
+     * @param clusterName
+     *            申请分片所在集群名
      * @return IndexMeta 分配成功则返回更新后的IndexMeta；否则返回原始IndexMeta
      */
     IndexMeta assignIndexShard(IndexMeta idxMeta, String clusterName);
     
     /**
      * 
-     * 合并索引元数据
-     * 合并策略： 
-     *   0.维度、指标完全相同，直接复用，不设置indexMeta的状态 
-     *   1.维度相同，指标不同，合并复用，设置indexMeta的状态
+     * 合并索引元数据 合并策略： 0.维度、指标完全相同，直接复用，不设置indexMeta的状态
+     * 1.维度相同，指标不同，合并复用，设置indexMeta的状态
      * 
-     * @param idxMeta 索引元数据
-     * @return IndexMeta 
+     * @param idxMeta
+     *            索引元数据
+     * @return IndexMeta
      */
-    IndexMeta mergeIndexMeta(IndexMeta idxMeta) ;
+    IndexMeta mergeIndexMeta(IndexMeta idxMeta);
     
     /**
      * 判断当前索引中的索引分片是否全部都满了
      * 
-     * @param idxMeta 索引元数据
+     * @param idxMeta
+     *            索引元数据
      * @return boolean
      */
     boolean isIndexShardFull(IndexMeta idxMeta);
@@ -121,13 +126,16 @@ public interface IndexMetaService {
     /**
      * 
      * getIndexMetasByDataSourceKey
-     * @param dataSourceKey dataSourceKey
+     * 
+     * @param dataSourceKey
+     *            dataSourceKey
      * @return List<IndexMeta>
      */
     List<IndexMeta> getIndexMetasByDataSourceKey(String dataSourceKey);
     
     /**
      * saveIndexMetaLocally 写索引元数据到本地镜像
+     * 
      * @param idxMeta
      * @return
      * @throws Exception
@@ -136,46 +144,48 @@ public interface IndexMetaService {
     
     /**
      * loadIndexMetasLocalImage 从本地镜像中读取索引元数据信息
+     * 
      * @param idxBaseDir
      * @param currNodeKey
      * @param clusterName
      * @return
      */
-    List<IndexMeta> loadIndexMetasLocalImage(String idxBaseDir,String currNodeKey,String clusterName);
+    List<IndexMeta> loadIndexMetasLocalImage(String idxBaseDir, String currNodeKey,
+        String clusterName);
     
     /**
      * recoverLocalIndexMetaWithCluster
-     * @param idxMetaList 待恢复的idxMeta列表
-     * @param clusterName 集群名称
+     * 
+     * @param idxMetaList
+     *            待恢复的idxMeta列表
+     * @param clusterName
+     *            集群名称
      */
-    void recoverLocalIndexMetaWithCluster(List<IndexMeta> idxMetaList,String clusterName);
-    
+    void recoverLocalIndexMetaWithCluster(List<IndexMeta> idxMetaList, String clusterName);
     
     /**
      * getIndexMetaByIndexMetaId
-     * @param idxMetaId idxMetaId
-     * @param storeKey storeKey
+     * 
+     * @param idxMetaId
+     *            idxMetaId
+     * @param storeKey
+     *            storeKey
      * @return IndexMeta
      */
     IndexMeta getIndexMetaByIndexMetaId(String idxMetaId, String storeKey);
     
     /**
      * 判断当前分片是否已满
+     * 
      * @param idxShard
      * @return boolean
      */
     boolean isIndexShardFull(IndexShard idxShard);
     
-    /**
-     * 
-     * getSelectList 抽取索引元数据中的指标与维度字段，生成集合
-     * @param needMerge 是否需要合并
-     * @return Set<String> 如果指标与维度为空，则反回空集，而不是null
-     */
-    Set<String> getSelectList(IndexMeta indexMeta,boolean needMerge) ;
     
     /**
      * 解锁
+     * 
      * @param idxMeta
      */
     void unLockIndexMeta(IndexMeta idxMeta);

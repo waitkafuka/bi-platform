@@ -43,6 +43,14 @@
 		<property name="suffix" value=".vm" />
 		<property name="contentType" value="text/html;charset=UTF-8" />
 	</bean>
+	
+	<!-- 固定报表执行任务队列 -->
+	<bean id="regularReportTaskConsumerMessageListenerContainer"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+		<property name="destination" ref="regularReportTaskQueue" />
+		<property name="connectionFactory" ref="pooledConnectionFactory" />
+		<property name="messageListener" ref="regularReportTaskConsumerMessageListener" />
+	</bean>
 	<!-- Default cache configuration <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager"> 
 		<property name="caches"> <set> <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" 
 		p:name="bi_platform" /> </set> </property> </bean> -->

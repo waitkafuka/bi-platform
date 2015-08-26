@@ -9,11 +9,6 @@
             									http://www.springframework.org/schema/context/spring-context-3.1.xsd"
 	default-autowire="byName">
 
-	<context:component-scan base-package="com.baidu.rigel.biplatform.schedule" />
-	<bean id="scheduleMessageListenerContainer"
-		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
-		<property name="destination" ref="scheduleTaskTopic" />
-		<property name="connectionFactory" ref="pooledConnectionFactory" />
-		<property name="messageListener" ref="scheduleMessageListener" />
-	</bean>
+	<context:component-scan base-package="com.baidu.rigel.biplatform.schedule.config" />
+	
 </beans>

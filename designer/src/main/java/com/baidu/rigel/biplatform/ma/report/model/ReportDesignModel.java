@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ma.model.meta.StarModel;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
+import com.baidu.rigel.biplatform.ma.regular.report.RegularReportTaskInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Maps;
@@ -129,6 +130,10 @@ public class ReportDesignModel implements Serializable {
      */
     private Map<String, PlaneTableCondition> planeTableConditions = Maps.newHashMap();
     
+    /**
+     * 报表对应的固定报表任务
+     */
+    private Map<String, RegularReportTaskInfo> regularTasks = Maps.newHashMap();
     
     public String getId() {
         return id;
@@ -380,6 +385,35 @@ public class ReportDesignModel implements Serializable {
 	public void setPlaneTableConditions(Map<String, PlaneTableCondition> planeTableConditions) {
 		this.planeTableConditions = planeTableConditions;
 	}
+
+	/**
+	 * 获取固定报表任务列表
+	 * @return
+	 */
+    public Map<String, RegularReportTaskInfo> getRegularTasks() {
+        if (this.regularTasks == null) {
+            this.regularTasks = Maps.newHashMap();
+        }
+        return regularTasks;
+    }
+
+    /**
+     * 设置固定报表任务列表
+     * @param regularTasks
+     */
+    public void setRegularTasks(Map<String, RegularReportTaskInfo> regularTasks) {
+        this.regularTasks = regularTasks;
+    }
     
-    
+    /**
+     * 获取任务信息
+     * @param taskId
+     * @return
+     */
+    public RegularReportTaskInfo getRegularReportTaskInfo(String taskId) {
+        if (this.regularTasks == null || this.regularTasks.size() == 0 || !this.regularTasks.containsKey(taskId)) {
+            return null;
+        }
+        return this.regularTasks.get(taskId);
+    }
 }

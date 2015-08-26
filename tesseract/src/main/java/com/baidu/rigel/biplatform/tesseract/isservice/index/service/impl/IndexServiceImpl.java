@@ -1272,7 +1272,7 @@ public class IndexServiceImpl implements IndexService {
 			needMerge = Boolean.TRUE;
 		}
 		//get select 
-		Set<String> selectList = this.indexMetaService.getSelectList(idxMeta, needMerge);	
+		Set<String> selectList = idxMeta.getSelectList(needMerge) ;		
 		
 		for (String tableName : idxMeta.getDataDescInfo().getTableNameList()) {
 			SqlQuery sqlQuery = new SqlQuery();
@@ -1369,7 +1369,7 @@ public class IndexServiceImpl implements IndexService {
 		if (idxAction.equals(IndexAction.INDEX_MERGE)) {
 			needMerge = Boolean.TRUE;
 		}
-		Set<String> selectList = this.indexMetaService.getSelectList(idxMeta, needMerge);
+		Set<String> selectList = idxMeta.getSelectList(needMerge);
 		if (selectList == null) {
 			selectList = new HashSet<String>();
 		}

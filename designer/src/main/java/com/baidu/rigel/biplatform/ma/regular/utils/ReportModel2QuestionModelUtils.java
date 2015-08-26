@@ -216,8 +216,8 @@ public final class ReportModel2QuestionModelUtils {
             rs.getAxisMetas ().put (AxisType.FILTER, filter);
         }
         
+        Cube cube = model.getSchema ().getCubes ().get (area.getCubeId ());
         if (params != null && params.size () > 0 && model.getParams ().size () > 0) {
-            Cube cube = model.getSchema ().getCubes ().get (area.getCubeId ());
             // 设置查询条件
             Map<String, MetaCondition> queryConditions = genQueryConditions (model, area, params, cube);
             rs.setQueryConditions (queryConditions);
@@ -234,6 +234,9 @@ public final class ReportModel2QuestionModelUtils {
                 rs.setFilterBlank (true);
             }
         }
+        // 设置cube
+        rs.setCube(QueryUtils.transformCube(cube));
+        rs.setQuerySource("TESSERACT");
         return rs;
     }
 
@@ -283,10 +286,10 @@ public final class ReportModel2QuestionModelUtils {
                         p.getElementId (), p.getName ());
                     throw new RuntimeException("参数未找到对应维度信息");
                 }
-                if (!isCallbackDim(dim)) {
-                    DimensionCondition condition = genComDimQueryCondition (value, dim);
-                    queryConditions.put (dim.getName (), condition);
-                }
+                // if (!isCallbackDim(dim)) {
+                DimensionCondition condition = genComDimQueryCondition(value, dim);
+                queryConditions.put(dim.getName(), condition);
+                // }
             }
         };
         Map<String, ReportParam> reportParams = model.getParams ();

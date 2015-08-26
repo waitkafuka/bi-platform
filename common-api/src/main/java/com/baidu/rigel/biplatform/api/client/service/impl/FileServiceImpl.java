@@ -60,7 +60,7 @@ public class FileServiceImpl implements FileService {
     /**
      * 响应状态：fail
      */
-    public static final String FAIL = "fail";
+    public static final String FAIL = "FAIL";
     
     /**
      * 响应状态key：result

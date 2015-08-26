@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -628,6 +629,42 @@ public class IndexMeta extends StoreMeta implements Serializable {
 				+ idxState + ", locked=" + locked + ", idxVersion="
 				+ idxVersion + "]";
 	}
+	
+	/**
+	 * getSelectList
+	 * @param needMerge
+	 * @return Set<String>
+	 */
+	public Set<String> getSelectList(boolean needMerge) {
+        Set<String> selectList = new HashSet<String>();
+        if (!CollectionUtils.isEmpty(this.getDimSet())) {
+            for (String dimKey : this.getDimSet()) {
+                selectList.add(dimKey);
+            }
+        }
+        
+        if (!CollectionUtils.isEmpty(this.getMeasureSet())) {
+            for (String measureKey : this.getMeasureSet()) {
+                selectList.add(measureKey);
+            }
+        }
+        
+        if (needMerge) {
+            if (!CollectionUtils.isEmpty(this.getDimInfoMergeSet())) {
+                for (String dimKey : this.getDimInfoMergeSet()) {
+                    selectList.add(dimKey);
+                }
+            }
+            
+            if (!CollectionUtils.isEmpty(this.getMeasureInfoMergeSet())) {
+                for (String measureKey : this.getMeasureInfoMergeSet()) {
+                    selectList.add(measureKey);
+                }
+            }
+        }
+        
+        return selectList;
+    }
     
     
     

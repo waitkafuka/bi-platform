@@ -48,6 +48,9 @@ public class ScheduleServiceImpl implements ScheduleService {
         boolean flag = true;
         JobDataMap newJobDataMap = new JobDataMap();
         newJobDataMap.put(ScheduleConstant.EXCUTE_ACTION_KEY, taskInfo.getExcuteAction());
+        newJobDataMap.put(ScheduleConstant.TASK_ID, taskInfo.getTaskId());
+        newJobDataMap.put(ScheduleConstant.PRODUCT_LINE_NAME, taskInfo.getProductLineName());
+        newJobDataMap.put(ScheduleConstant.SCHEDULE_TASK_OBJ_KEY, taskInfo);
         JobDetail jobDetail =
                 JobBuilder.newJob(HttpClientExcuteJob.class).withIdentity(generateJobKey(taskInfo))
                         .withDescription(taskInfo.getTaskName()).usingJobData(newJobDataMap).build();

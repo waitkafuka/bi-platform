@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
+import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.api.client.service.FileService;
 import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
@@ -106,7 +107,9 @@ public class TaskManagerServiceImpl implements TaskManagerService, ServerStarted
             if (!ArrayUtils.isEmpty(usersStr)) {
                 for (String userStr : usersStr) {
                     String productLineName = ScheduleHelper.parserProductLineNameFromUserDesc(userStr);
-                    productLineNameList.add(productLineName);
+                    if (!StringUtils.isEmpty(productLineName)) {
+                        productLineNameList.add(productLineName);
+                    }
                 }
             }
         } catch (FileServiceException e) {

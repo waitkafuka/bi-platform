@@ -192,6 +192,7 @@ public class QueryRequestUtil {
         }
 
         SqlQuery result = new SqlQuery();
+        result.setDatabase(((SqlDataSourceInfo) query.getDataSourceInfo()).getDataBase());
         // 处理from
         if (query.getGroupBy() != null) {
             result.setGroupBy(query.getGroupBy().getGroups());
@@ -463,14 +464,16 @@ public class QueryRequestUtil {
                     it.remove ();
 //                }
 //                transList.forEach(record -> {
-                    leafValueMap.forEach((prop, valueMap) -> {
+//                    leafValueMap.forEach((prop, valueMap) -> {
+                    for (Map.Entry<String, Map<String, Set<String>>> entry : leafValueMap.entrySet ()) {
+                        String prop = entry.getKey ();
+                        Map<String, Set<String>> valueMap = entry.getValue ();
                         try {
                             String currValue = record.getField(meta.getFieldIndex(prop)) != null ? record
                                     .getField(meta.getFieldIndex(prop))
                                     .toString() : null;
-                            
-                            Set<String> valueSet = leafValueMap.get(prop).get(currValue);
-                            if (valueSet != null) {
+                            Set<String> valueSet = valueMap.get(currValue);
+                            if (valueSet != null && currValue != null) {
                                 int i = 0;
                                 for (String value : valueSet) {
                                     if (i > 0) {
@@ -484,7 +487,9 @@ public class QueryRequestUtil {
 //                                            newRec.setGroupBy (value);
                                             newRec.setField(meta.getFieldIndex(prop), value);
                                             generateGroupBy(newRec, groupList, meta);
-                                            copyLeafRecords.add(newRec);
+                                            if (hasSameNodeCopy) {
+                                                copyLeafRecords.add(newRec);
+                                            }
                                         }
                                     } else {
                                         if (StringUtils.isNotEmpty(value)) {
@@ -492,7 +497,9 @@ public class QueryRequestUtil {
 ////                                            record.setGroupBy (value);
                                             record.setField(meta.getFieldIndex(prop), value);
                                             generateGroupBy(record, groupList, meta);
-                                            copyLeafRecords.add(record);
+                                            if (hasSameNodeCopy) {
+                                                copyLeafRecords.add(record);
+                                            }
                                         }
                                     }
                                     i++;
@@ -501,7 +508,11 @@ public class QueryRequestUtil {
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
-                    });
+                    }
+//                    );
+                    if (!hasSameNodeCopy) {
+                        copyLeafRecords.add(record);
+                    }
                 }
                 if (CollectionUtils.isNotEmpty(copyLeafRecords)) {
                     // 处理汇总节点的时候，得进行下处理和过滤

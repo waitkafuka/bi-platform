@@ -28,6 +28,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.SqlSelectColumn;
 import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.SqlSelectColumnType;
 
@@ -38,6 +39,22 @@ import com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.SqlSelectColumnTy
  *
  */
 public class SqlQuery {
+    
+    /**
+     * 组织sql的数据类型
+     */
+    public DataBase database = DataBase.MYSQL;
+    
+    /**
+     * palo id
+     */
+    private static final String PALO_ID = "id";
+    
+    /**
+     * agg DISTINCT_COUNT 算子
+     */
+    private static final String DISTINCT_COUNT = "DISTINCT_COUNT";
+    
     /**
      * 关联的主表的别名
      */
@@ -322,24 +339,25 @@ public class SqlQuery {
                 String select = selectList.get(i);
                 if (isAggSql && StringUtils.isNotEmpty(selectMap.get(select).getOperator())) {
                 // isAggSql为数据库完成agg的计算，true标示数据完成agg计算，false为数据库不完成agg的计算。
-                    if (AGG_COMMON_OPERATOR.contains(selectMap.get(select).getOperator())) {
-                        needGroupBy = true;
-                        String selectTmp = selectMap.get(select).getOperator()
-                                + "( " + MAIN_TABLE_ALIAS + "." + select
+                    needGroupBy = true;
+                    String selectTmp = selectMap.get(select).getOperator();
+                    if (COUNT.equals(selectTmp) && DataBase.PALO == this.database) {
+                        selectTmp = selectTmp + "( " + MAIN_TABLE_ALIAS + "." + PALO_ID + ") as " + select + ",";
+                        selectExpresstion = selectExpresstion
+                                + (sqlFunction.containsKey(select) ? sqlFunction
+                                        .get(select) : selectTmp);
+                    } else if (DISTINCT_COUNT.equals(selectTmp) && DataBase.PALO == this.database) {
+                        selectTmp = "count( " + MAIN_TABLE_ALIAS + "." + select
                                 + ") as " + select + ",";
                         selectExpresstion = selectExpresstion
                                 + (sqlFunction.containsKey(select) ? sqlFunction
                                         .get(select) : selectTmp);
                     } else {
-                        // 这个地方需要特殊处理
-                        if (selectMap
-                                .get(select)
-                                .getOperator()
-                                .equals(SqlSelectColumnType.OPERATOR_DISTINCT_COUNT
-                                        .getName())) {
-                            sqlDistinctCount.add(this
-                                    .generateDistinctCountJoinSql(select));
-                        }
+                        selectTmp = selectTmp + "( " + MAIN_TABLE_ALIAS + "." + select
+                                + ") as " + select + ",";
+                        selectExpresstion = selectExpresstion
+                                + (sqlFunction.containsKey(select) ? sqlFunction
+                                        .get(select) : selectTmp);
                     }
                 } else {
                     groupByNames.add(select);
@@ -609,6 +627,22 @@ public class SqlQuery {
      */
     public void setInitMaxId(BigDecimal initMaxId) {
         this.initMaxId = initMaxId;
+    }
+    
+    /**
+     * default generate get database
+     * @return the database
+     */
+    public DataBase getDatabase() {
+        return database;
+    }
+
+    /**
+     * default generate set database
+     * @param database the database to set
+     */
+    public void setDatabase(DataBase database) {
+        this.database = database;
     }
 
     /**

@@ -279,27 +279,32 @@ public class MetaQueryAction {
                         AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.SPLITSTRATEGY_PARAM_KEY),
                                 QueryContextSplitStrategy.class);
             }
-            LOG.info("cost:" + (System.currentTimeMillis() - current) + " prepare to execute query.");
+            LOG.info("query cost:" + (System.currentTimeMillis() - current) + " prepare to execute query.");
+            
+            long beforeQuery = System.currentTimeMillis();
             
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
+            
+            LOG.info("query cost:" + (System.currentTimeMillis() - beforeQuery) + " to execute query.");
             
             long curr=System.currentTimeMillis();
             if (dataModel != null) {
                 if (questionModel.isFilterBlank()) {
                     DataModelUtils.filterBlankRow(dataModel);
-                    LOG.info("cost:" + (System.currentTimeMillis() - curr) + " filterBlankRow.");
+                    LOG.info("query cost:" + (System.currentTimeMillis() - curr) + " filterBlankRow.");
                 }
                 curr=System.currentTimeMillis();
                 dataModel = sortAndTrunc(dataModel, questionModel.getSortRecord(), 
                     questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
-                LOG.info("cost:" + (System.currentTimeMillis() - curr) + "ms sortAandTrunc.");
+                LOG.info("query cost:" + (System.currentTimeMillis() - curr) + "ms sortAandTrunc.");
             }
             
-            LOG.info("cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
+            LOG.info("query cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             curr = System.currentTimeMillis();
             ResponseResult rs = ResponseResultUtils.getCorrectResult("query success.",
                     AnswerCoreConstant.GSON.toJson(dataModel));
-            LOG.info("queryId:{} cost:{} ms convert dataModel to json", queryId, System.currentTimeMillis() - curr);
+            LOG.info("query queryId:{} cost:{} ms convert dataModel to json", queryId,
+                    System.currentTimeMillis() - curr);
             return rs;
         } catch (JsonSyntaxException e) {
             e.printStackTrace();

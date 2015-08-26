@@ -295,7 +295,7 @@ public class QueryDataResourceUtils {
      * @param targetArea ExtendArea
      * @return SeriesUnitType
      */
-    protected Map<String, String> getChartTypeWithExtendArea(ReportDesignModel model, ExtendArea targetArea) {
+    public Map<String, String> getChartTypeWithExtendArea(ReportDesignModel model, ExtendArea targetArea) {
         Map<String, String> chartTypes = Maps.newHashMap();
         if (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             chartTypes.put("null", SeriesUnitType.LINE.name());

@@ -66,61 +66,28 @@ $namespace('di.shared.vui');
         var def = me.$di('getDef');
         var compId = def.compId;
         var selElId = compId + '-0';
-        var html = ['<select id="', selElId, '">'];
-        var datasource = data.datasource;
+
+        // 如果是第一次进来，没有点击任何下拉框，那么当级联下拉框初始化完毕，会去updateContext;
+        // 如果已经点击过下拉框，那么接下来展示区域的加载就根据设定的事件出发类型判断了，也就是di-form中的$handleChange方法
+        me._isFirstEnter = true;
 
         me._compId = compId;
         me._curIndex = 0;
-        var selectedVal = '';
         me._allSel = def.selectAllDim.length;
-        if (data.value && data.value.length > 0) {
-            var selArr = data.value[0].split('.');
-            var resArr = [];
-            for (var i = 0; i <= (me._curIndex + 1); i ++) {
-                resArr.push(selArr[i]);
-            }
-            selectedVal = resArr.join('.');
-        }
-        else {
-            selectedVal = datasource[0].value;
-        }
-        me._selValue = selectedVal;
+
+        me.$setSelectedValue(data);
         // 渲染第一个select
-        for (var i = 0, len = datasource.length; i < len; i ++) {
-            html.push(
-                '<option value="', datasource[i].value, '"',
-                datasource[i].value === selectedVal ? 'selected="selected"' : '',
-                '>', datasource[i].text,
-                '</option>'
-            );
-        }
-        html = html.join('') + '</select>';
-        $(this._el).html(html);
+        me.$buildSelectHtml(selElId, data.datasource);
 
         // 初始化第一个下拉框
-        $('#' + selElId, me._el).dropkick({
-            mobile: true,
-            change: function() {
-                me._curIndex = 0;
-                // me._selValue = this.value;
-                // 当前下拉框点击时，如果还有子下拉框，就重新去渲染子下拉框
-                if(me._curIndex < me._allSel - 1) {
-                    me.getNextLevel(this.value);
-                }
-                // 反之，就触发对外的查询事件
-                else {
-                    me.notify('cascadeSelectChange');
-                }
-            }
-        });
-        $('select[id=' + selElId + ']').remove();
+        me.$renderSingleSelect(selElId, 0);
 
         // 当初始化完第一个下拉框，如果是多级，就去触发第二个
         if(me._curIndex < me._allSel - 1) {
-            me.getNextLevel(selectedVal);
+            me.getNextLevel(me._selValue);
         }
         else {
-            me.notify('cascadeSelectChange');
+            me.$cascadeSelectChange();
         }
     };
 
@@ -155,8 +122,7 @@ $namespace('di.shared.vui');
         var me = this;
         var compId = me._compId;
         var datasource;
-        var selectedVal = '';
-        var dif = me._allSel - 1 - me._curIndex; // 用来确定是否当前下拉框还有子下拉框
+        var dif = me._allSel - me._curIndex - 1; // 用来确定是否当前下拉框还有子下拉框
 
         if (data && data[compId]) {
             data = data[compId];
@@ -174,63 +140,26 @@ $namespace('di.shared.vui');
             });
         }
 
-        if (datasource instanceof Array && dif !== 0) {
+        if (datasource.length > 0 && dif !== 0) {
             // 渲染触发者的下一个下拉框
             var selElId = compId + '-' + (++ me._curIndex);
-            if (data.value && data.value.length > 0) {
-                var selArr = data.value[0].split('.');
-                var resArr = [];
-                for (var i = 0; i <= (me._curIndex + 1); i ++) {
-                    resArr.push(selArr[i]);
-                }
-                selectedVal = resArr.join('.');
-            }
-            else {
-                selectedVal = datasource[0].value;
-            }
-            me._selValue = selectedVal;
-            var html = ['<select id="', selElId, '">'];
-            for (var i = 0, len = datasource.length; i < len; i ++) {
-                html.push(
-                    '<option value="', datasource[i].value, '"',
-                    datasource[i].value === selectedVal ? 'selected="selected"' : '',
-                    '>', datasource[i].text,
-                    '</option>'
-                );
-            }
-            html = html.join('') + '</select>';
-            $(this._el).append(html);
+            me.$setSelectedValue(data);
+            me.$buildSelectHtml(selElId, datasource);
 
             // 初始化下拉框,使用闭包主要是为了保存当前下拉框的顺序
             (function (x) {
-                $('#' + selElId).dropkick({
-                    mobile: true,
-                    change: function() {
-                        me._curIndex = x;
-                        // me._selValue = this.value;
-                        if (me._curIndex < me._allSel - 1) {
-                            me.getNextLevel(this.value);
-                        }
-                        else {
-                            me.notify('cascadeSelectChange');
-                        }
-                    }
-                });
-                $('select[id='+ selElId +']').remove();
+                me.$renderSingleSelect(selElId, x);
             })(me._curIndex);
 
-            dif = me._allSel - 1 - me._curIndex;
-            isGoToNext = dif > 0 ? true : false;
-
-            if (isGoToNext) {
-                me.getNextLevel(selectedVal);
+            if (me._curIndex < me._allSel - 1) {
+                me.getNextLevel(me._selValue);
             }
             else {
-                me.notify('cascadeSelectChange');
+                me.$cascadeSelectChange();
             }
         }
         else {
-            me.notify('cascadeSelectChange');
+            me.$cascadeSelectChange();
         }
     };
 
@@ -238,13 +167,95 @@ $namespace('di.shared.vui');
      * 得到当前值
      *
      * @public
-     * @return {*} 当前数据
+     * @return {string} 选中值
      */
     CASCADE_SELECT_CLASS.getValue = function () {
         var me = this;
         return me._selValue;
     };
 
+    /**
+     * 多级下拉框整体选中值改变
+     *
+     * @private
+     */
+    CASCADE_SELECT_CLASS.$cascadeSelectChange = function () {
+        if (this._isFirstEnter) {
+            this.notify('cascadeSelectUpdateContext');
+        }
+        else {
+            this.notify('cascadeSelectChange');
+        }
+    };
+
+    /**
+     * 设置选中值
+     * @param {Object} data 某一个下拉框的数据
+     *
+     * @private
+     */
+    CASCADE_SELECT_CLASS.$setSelectedValue = function (data) {
+        var me = this;
+        if (data.value && data.value.length > 0) {
+            var selArr = data.value[0].split('.');
+            var resArr = [];
+            for (var i = 0; i <= (me._curIndex + 1); i ++) {
+                resArr.push(selArr[i]);
+            }
+            me._selValue  = resArr.join('.');
+        }
+        else {
+            me._selValue  = data.datasource[0].value;
+        }
+    };
+
+    /**
+     * 生成下拉框html
+     * @param {string} selElId 下拉框id
+     * @param {Object} data 某一个下拉框的数据
+     *
+     * @private
+     */
+    CASCADE_SELECT_CLASS.$buildSelectHtml = function (selElId, data) {
+        var html = ['<select id="', selElId, '">'];
+        for (var i = 0, len = data.length; i < len; i ++) {
+            html.push(
+                '<option value="', data[i].value, '"',
+                data[i].value === this._selValue ? 'selected="selected"' : '',
+                '>', data[i].text,
+                '</option>'
+            );
+        }
+        html.push('</select>');
+        $(this._el).append(html.join(''));
+    };
+
+    /**
+     * 渲染下拉框
+     * @param {string} selElId 下拉框id
+     * @param {number} n 下拉框的顺序
+     *
+     * @private
+     */
+    CASCADE_SELECT_CLASS.$renderSingleSelect = function (selElId, n) {
+        var me = this;
+        $('#' + selElId).dropkick({
+            mobile: true,
+            change: function () {
+                me._curIndex = n;
+                me._isFirstEnter = false;
+                me._selValue = this.value;
+
+                if (me._curIndex < me._allSel - 1) {
+                    me.getNextLevel(this.value);
+                }
+                else {
+                    me.$cascadeSelectChange();
+                }
+            }
+        });
+        $('select[id=' + selElId + ']').remove();
+    };
 })();
 
 

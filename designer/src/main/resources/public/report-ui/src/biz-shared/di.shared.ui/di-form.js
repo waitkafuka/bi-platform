@@ -91,7 +91,11 @@ $namespace('di.shared.ui');
             }
             // 级联下拉框
             if (o.$di('getDef').clzKey === 'CASCADE_SELECT'){
+                // 多级下拉框获取下一级内容
                 o.attach('cascadeGetNextLevel', this.$cascadeGetNextLevel, this);
+                // 多级下拉框加载完毕之后，更新context
+                o.attach('cascadeSelectUpdateContext', this.$submit, this);
+                // 多级下拉框改变内容之后
                 o.attach('cascadeSelectChange', this.$handleChange, this);
             }
         }

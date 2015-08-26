@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.SerializationUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -664,23 +665,50 @@ public class QueryDataResource extends BaseResource {
             HttpServletResponse response) {
         long begin = System.currentTimeMillis();
         ReportDesignModel model = null;
+        String json = null;
         try {
             model = this.getDesignModelFromRuntimeModel(reportId);
-        } catch (CacheOperationException e) {
+            if (!CollectionUtils.isEmpty(model.getRegularTasks())) {
+                json = this.setReportJson(model.getJsonContent(), "REGULAR");
+            } else {
+                json = this.setReportJson(model.getJsonContent(), "RTPL_VIRTUAL");
+            }
+        } catch (Exception e) {
             logger.info("[INFO]--- ---There are no such model in cache. Report Id: " + reportId, e);
             throw new IllegalStateException();
         }
-        if (model == null) {
-            logger.info("[INFO]--- --- can't get model form cache, please check it!");
-            return "";
-        }
-        String json = model.getJsonContent();
         logger.info(json);
         response.setCharacterEncoding("utf-8");
         logger.info("[INFO] query json operation successfully, cost {} ms", (System.currentTimeMillis() - begin));
         return json;
     }
 
+    /**
+     * 设置报表的JSON
+     * @param json
+     * @param reportType
+     * @return
+     */
+    private String setReportJson(String json, String reportType) {
+        try {
+            JSONObject jsonObj = new JSONObject(json);
+            if (jsonObj.has("entityDefs")) {
+                JSONArray jsonArrays = jsonObj.getJSONArray("entityDefs");
+                for(int i = 0; i < jsonArrays.length(); i++) {
+                    JSONObject value = jsonArrays.getJSONObject(i);
+                    if (value.has("clzKey") && value.get("clzKey") != null &&
+                            value.get("clzKey").toString().equals("DI_FORM")) {
+                        value.put("reportType", reportType);
+                        break;
+                    }
+                }
+            }
+            return jsonObj.toString();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return json;
+    }
     /**
      * 
      * @param reportId

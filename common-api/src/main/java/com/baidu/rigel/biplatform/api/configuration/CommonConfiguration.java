@@ -116,4 +116,14 @@ public class CommonConfiguration {
         ActiveMQQueue queueDestination = new ActiveMQQueue("publishReportQueue");
         return queueDestination;
     }
+    
+    /**
+     * 固定报表任务接收队列
+     * @return
+     */
+    @Bean(name = "regularReportTaskQueue") 
+    public ActiveMQQueue regularReportTaskQueue() {
+        ActiveMQQueue taskQueue = new ActiveMQQueue("regularReportTaskQueue");
+        return taskQueue;
+    }
 }

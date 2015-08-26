@@ -835,7 +835,8 @@
             );
             item.nameTextStyle = {
                 fontFamily: '微软雅黑',
-                fontSize: '12'
+                fontSize: '12',
+                color: '#000'
             };
             // 设置y轴网格
             item.splitArea = advOpt.splitArea;

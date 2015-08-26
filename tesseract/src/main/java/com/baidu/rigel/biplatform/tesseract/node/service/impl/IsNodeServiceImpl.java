@@ -68,8 +68,11 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
     @Override
     public Map<Node, Integer> assignFreeNode(int blockCount, String clusterName) {
         List<Node> currentNodeList = getNodeListByClusterName(clusterName);
-        Map<Node, Integer> result = assignFreeNodeByNodeList(currentNodeList, blockCount,
-            clusterName);
+        Map<Node, Integer> result = new HashMap<Node, Integer>();
+        if (!CollectionUtils.isEmpty(currentNodeList)) {
+            result = assignFreeNodeByNodeList(currentNodeList, blockCount, clusterName);
+        }
+        
         return result;
     }
     
@@ -163,8 +166,7 @@ public class IsNodeServiceImpl extends AbstractMetaService implements IsNodeServ
                 if (o1 != null && o2 != null) {
                     if (o1.getFreeBlockNum() > o2.getFreeBlockNum()) {
                         return -1;
-                    } else if (o1.getFreeBlockNum() != 0
-                        && o1.getFreeBlockNum() == o2.getFreeBlockNum()) {
+                    } else if (o1.getFreeBlockNum() == o2.getFreeBlockNum()) {
                         return 0;
                     } else {
                         return 1;
