@@ -1,4 +1,3 @@
-
 /**
  * Copyright (c) 2014 Baidu, Inc. All Rights Reserved.
  *
@@ -16,34 +15,60 @@
  */
 package com.baidu.rigel.biplatform.cache.util;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Service;
 
-/** 
- *  
+/**
+ * ApplicationContextHelper，主要负责存储spring的ApplicationContext上下文和beanFactory实例
+ * 
  * @author xiaoming.chen
- * @version  2015年2月27日 
+ * @version 2015年2月27日
  * @since jdk 1.8 or after
  */
-public class ApplicationContextHelper {
+@Service
+public class ApplicationContextHelper implements BeanFactoryAware {
 
     private static ApplicationContext applicationContext;
-    
-    
-    /** 
+    private static BeanFactory beanFactory;
+
+    /**
      * setContext
+     * 
      * @param context
      */
     public static void setContext(ApplicationContext context) {
         applicationContext = context;
     }
-    
-    
-    /** 
+
+    /**
      * getContext
+     * 
      * @return
      */
     public static ApplicationContext getContext() {
         return applicationContext;
     }
-}
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * org.springframework.beans.factory.BeanFactoryAware#setBeanFactory(org.springframework.beans.factory.BeanFactory)
+     */
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        ApplicationContextHelper.beanFactory = beanFactory;
+    }
+
+    /**
+     * getBeanFactory
+     * 
+     * @return beanFactory
+     */
+    public static BeanFactory getBeanFactory() {
+        return beanFactory;
+    }
+}

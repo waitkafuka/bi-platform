@@ -123,9 +123,9 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
                 LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                     "Get Lock", "Success"));
                 try {
-                    lock.lock();
-                    LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
-                            "Locked", "Success"));
+//                    lock.lock();
+//                    LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
+//                            "Locked", "Success"));
                     this.isNodeService.markClusterBadNode();
                     LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_ACTION,
                         "markClusterBadNode", "Success"));

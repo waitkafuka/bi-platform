@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
+import com.baidu.rigel.biplatform.schedule.bo.ScheduleTaskInfo;
 import com.baidu.rigel.biplatform.schedule.constant.ScheduleConstant;
 import com.google.common.collect.Maps;
 
@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
  *
  */
 @Service
-public class HttpClientExcuteJob implements Job, BeanFactoryAware {
+public class HttpClientExcuteJob extends BaseScheduleJob implements Job, BeanFactoryAware {
     /**
      * Logger
      */
@@ -43,10 +43,10 @@ public class HttpClientExcuteJob implements Job, BeanFactoryAware {
     /*
      * (non-Javadoc)
      * 
-     * @see org.quartz.Job#execute(org.quartz.JobExecutionContext)
+     * @see com.baidu.rigel.biplatform.schedule.job.BaseScheduleJob#doExcute(org.quartz.JobExecutionContext)
      */
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void doExcute(JobExecutionContext context) {
         JobDataMap jobDataMap = context.getMergedJobDataMap();
         Object excuteActionObj = jobDataMap.get(ScheduleConstant.EXCUTE_ACTION_KEY);
         String excuteAction = excuteActionObj == null ? "" : String.valueOf(excuteActionObj);
@@ -95,6 +95,18 @@ public class HttpClientExcuteJob implements Job, BeanFactoryAware {
         String excuteActionUrlHostStr = beanFactoryHeld.resolveEmbeddedValue(EXCUTE_ACTION_URLHOST);
         excuteActionUrlHostRef = new AtomicReference<String>(excuteActionUrlHostStr);
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.baidu.rigel.biplatform.schedule.job.BaseScheduleJob#getCacheLockName(org.quartz.JobExecutionContext)
+     */
+    @Override
+    public String getCacheLockName(JobExecutionContext context) {
+        JobDataMap jobDataMap = context.getMergedJobDataMap();
+        ScheduleTaskInfo taskInfo = (ScheduleTaskInfo) jobDataMap.get(ScheduleConstant.SCHEDULE_TASK_OBJ_KEY);
+        return taskInfo.getTaskId();
     }
 
 }

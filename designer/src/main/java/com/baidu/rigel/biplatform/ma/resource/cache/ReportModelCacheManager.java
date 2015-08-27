@@ -268,10 +268,15 @@ public class ReportModelCacheManager {
      */
     public ExtendAreaContext getAreaContext(String reportId, String areaId) {
         int key = genAreaKey(reportId, areaId);
-        if (cacheManagerForReource.getFromCache(String.valueOf(key)) == null) {
+        long curr = System.currentTimeMillis();
+        Object rs = cacheManagerForReource.getFromCache(String.valueOf(key));
+        if (rs == null) {
             return new ExtendAreaContext();
-        }
-        return (ExtendAreaContext) cacheManagerForReource.getFromCache(String.valueOf(key));
+        }       
+        ExtendAreaContext result = (ExtendAreaContext) rs;
+        LOG.info("[INFO]getAreaContext cost:" + (System.currentTimeMillis() - curr)
+                + " ms to get ExtendAreaContext from cache");
+        return result;
     }
 //    
 //    /**

@@ -1061,6 +1061,8 @@ public class QueryDataResource extends BaseResource {
     public ResponseResult queryArea(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId,
             HttpServletRequest request) {
         long begin = System.currentTimeMillis();
+        
+        long curr = System.currentTimeMillis();
         logger.info("[INFO] begin query data");
         /**
          * 1. 获取缓存DesignModel对象
@@ -1072,15 +1074,20 @@ public class QueryDataResource extends BaseResource {
          * 3. 获取运行时对象
          */
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to getRuntimeModel");
+        curr = System.currentTimeMillis();
         try {
             model = getRealModel(reportId, runTimeModel);
+            logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to getRealModel");
+            curr = System.currentTimeMillis();
             oriDesignModel = DeepcopyUtils.deepCopy(model);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             ResponseResult rs = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
             return rs;
         }
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to deepCopy");
+        curr = System.currentTimeMillis();
 
         /**
          * TODO 增加参数信息
@@ -1096,6 +1103,8 @@ public class QueryDataResource extends BaseResource {
                 runTimeModel.getLocalContextByAreaId(areaId).put(k, v);
             }
         });
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to set param info");
+        curr = System.currentTimeMillis();
         /**
          * 2. 获取区域对象
          */
@@ -1103,11 +1112,17 @@ public class QueryDataResource extends BaseResource {
         if (targetArea == null) {
             throw new IllegalStateException("can't get report define");
         }
+        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to get area obj");
+        curr = System.currentTimeMillis();
 
         /**
          * 4. 更新区域本地的上下文
          */
         ExtendAreaContext areaContext = getAreaContext(areaId, request, targetArea, runTimeModel);
+        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to get area context");
+        curr = System.currentTimeMillis();
 
         logger.info("[INFO] --- --- --- --- --- ---params with context is : " + areaContext.getParams());
         
@@ -1122,6 +1137,9 @@ public class QueryDataResource extends BaseResource {
             response.setStatusInfo ("未设置坐标轴内容");
             return response;
         }
+        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to get logicModel");
+        curr = System.currentTimeMillis();
         /**
          * 5. 生成查询动作QueryAction
          */
@@ -1161,6 +1179,9 @@ public class QueryDataResource extends BaseResource {
                 action.setChartQuery(false);
             }
         }
+        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to generate query action");
+        curr = System.currentTimeMillis();
         /**
          * 6. 完成查询
          */
@@ -1218,6 +1239,9 @@ public class QueryDataResource extends BaseResource {
             logger.info("获取数据源失败！", e1);
             return ResourceUtils.getErrorResult("获取数据源失败！", 1);
         }
+        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to query");
+        curr = System.currentTimeMillis();
 
         /**
          * 7. 对返回结果进行处理，用于表、图显示
@@ -1227,6 +1251,9 @@ public class QueryDataResource extends BaseResource {
                 targetArea, result, areaContext,
                 action);
         runTimeModel.setModel(oriDesignModel);
+        
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to parseQueryResultToResponseResult");
+        curr = System.currentTimeMillis();
         // TODO 对于平面表，需要维护分页信息
         if (targetArea.getType() == ExtendAreaType.PLANE_TABLE) {
             if (rs.getStatus() == 0) {
@@ -1250,8 +1277,12 @@ public class QueryDataResource extends BaseResource {
         resetContext(runTimeModel.getLocalContextByAreaId (areaId), request);
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
         
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext)");
+        curr = System.currentTimeMillis();
         runTimeModel.updateDatas(action, result);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
+        logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel)");
+        
         logger.info("[INFO] successfully query data operation. cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
     }
@@ -2717,7 +2748,8 @@ public class QueryDataResource extends BaseResource {
         // || (preview != null && preview.toString().equals("true"))) {
         // model = DeepcopyUtils.deepCopy (reportModelCacheManager.getReportModel(reportId));
         // } else {
-        model = getDesignModelFromRuntimeModel(reportId);
+        //model = getDesignModelFromRuntimeModel(reportId);
+        model = runTimeModel.getModel();
         // }
         return model;
     }
