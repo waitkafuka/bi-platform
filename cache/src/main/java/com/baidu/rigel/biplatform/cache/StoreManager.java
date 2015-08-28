@@ -39,7 +39,10 @@ public interface StoreManager {
      * TOPICS
      */
     public static final String TOPICS = "topics";
+    
+    public static final String LOCK_KEY = "lockName";
 
+    
 
     
     /** 

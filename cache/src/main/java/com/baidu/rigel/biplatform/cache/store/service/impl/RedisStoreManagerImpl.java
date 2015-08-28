@@ -70,7 +70,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
 
     private String queueKey = EVENT_QUEUE;
 
-    // private String lockKey = REDIS_LOCK;
+    private String lockKey = LOCK_KEY;
 
     private String cachePrefix = "";
 
@@ -154,7 +154,7 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
     public Lock getClusterLock() {
         // return new java.util.concurrent.locks.ReentrantLock ();
         // return redisson.getLock(lockKey);
-        return RedisCacheLock.getInstance();
+        return RedisCacheLock.getInstance(lockKey);
     }
 
     @Override
@@ -176,14 +176,14 @@ public class RedisStoreManagerImpl implements StoreManager, InitializingBean {
             log.info("this instance is run with dev mode,current mac :{}", cachePrefix);
             topicKey = cachePrefix + "_" + redisProperties.getTopicName();
             queueKey = cachePrefix + "_" + redisProperties.getEventQueueName();
-            // lockKey = cachePrefix + "_" + redisProperties.getLockName();
+            lockKey = cachePrefix + "_" + redisProperties.getLockName();
         }
         // redisson.getTopic(topicKey).addListener(new RedisTopicListener());
     }
 
     @Override
     public Lock getClusterLock(String lockName) {
-//         return redisson.getLock(lockName);
+        // return redisson.getLock(lockName);
         return RedisCacheLock.getInstance(lockName);
     }
 

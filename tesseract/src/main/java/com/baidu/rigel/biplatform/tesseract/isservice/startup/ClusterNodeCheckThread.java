@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.cache.StoreManager;
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.tesseract.isservice.index.service.IndexMetaService;
 import com.baidu.rigel.biplatform.tesseract.node.meta.Node;
 import com.baidu.rigel.biplatform.tesseract.node.meta.NodeState;
@@ -98,6 +99,7 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
     public void run() {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_THREAD_RUN_START,
             "ClusterNodeCheckThread"));
+        
 //        while (true) {
             // get lock
         try {
@@ -116,7 +118,9 @@ public class ClusterNodeCheckThread implements Runnable, ApplicationContextAware
                 "update self state", "end"));
             
             // check others
-            
+            if(ApplicationContextHelper.getContext()==null){
+                return ; 
+            }
             Lock lock = this.storeManger.getClusterLock();
             
             if (lock.tryLock(this.getLockTimeOut, TimeUnit.SECONDS)) {

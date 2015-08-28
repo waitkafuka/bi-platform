@@ -339,7 +339,11 @@ public class SearchIndexServiceImpl implements SearchService {
         LOGGER.info(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_PROCESS_NO_PARAM, "query", "use database"));
         // index does not exist or unavailable,use db query
         long begin = System.currentTimeMillis ();
+        long curr = System.currentTimeMillis();
         SqlQuery sqlQuery = QueryRequestUtil.transQueryRequest2SqlQuery(query);
+        LOGGER.info("queryWithDatabase cost: " + (System.currentTimeMillis() - curr)
+                + " ms to transQueryRequest2SqlQuery");
+        curr = System.currentTimeMillis();
         SqlDataSourceWrap dataSourceWrape = null;
         try {
             dataSourceWrape =
@@ -355,6 +359,9 @@ public class SearchIndexServiceImpl implements SearchService {
             throw new IllegalArgumentException();
         }
 
+        LOGGER.info("queryWithDatabase cost: " + (System.currentTimeMillis() - curr)
+                + " ms to getDataSource");
+        curr = System.currentTimeMillis();
         long limitStart = 0;
         long limitSize = 0;
         if (query.getLimit() != null) {
@@ -366,6 +373,8 @@ public class SearchIndexServiceImpl implements SearchService {
         SearchIndexResultSet currResult =
                 this.dataQueryService.queryForListWithSQLQueryAndGroupBy(sqlQuery, dataSourceWrape, limitStart,
                         limitSize, query);
+        LOGGER.info("queryWithDatabase cost: " + (System.currentTimeMillis() - curr)
+                + " ms to queryForListWithSQLQueryAndGroupBy");
         LOGGER.info ("current execute sql is : {} cost {} ms", sqlQuery.toSql (), System.currentTimeMillis () - begin);
         LOGGER.info("current execute used db return " + currResult.size() + " records");
         return currResult;
