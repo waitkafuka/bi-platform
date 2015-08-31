@@ -37,6 +37,7 @@ import com.baidu.rigel.biplatform.cache.StoreManager;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.parser.RegisterFunction;
 import com.baidu.rigel.biplatform.parser.exception.RegisterFunctionException;
+import com.baidu.rigel.biplatform.tesseract.dataquery.udf.DateDataFunction;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.RelativeRate;
 import com.baidu.rigel.biplatform.tesseract.dataquery.udf.SimilitudeRate;
 
@@ -66,6 +67,7 @@ public class TesseractApplication {
         
         RegisterFunction.register("rRate", RelativeRate.class);
         RegisterFunction.register("sRate", SimilitudeRate.class);
+        RegisterFunction.register("dateData", DateDataFunction.class);
         
         StoreManager.addUdfDeSerializerSetting (new Function<Object[], Object>() {
             

@@ -44,7 +44,13 @@ public class ListComputeResult extends AbstractResult<List<BigDecimal>> {
     public ListComputeResult() {
     }
     
-    
+    @Override
+    public List<BigDecimal> getData() {
+        if (super.getData () == null) {
+            this.setData (new ArrayList<BigDecimal> ());
+        }
+        return super.getData ();
+    }
     @Override
     public ResultType getResultType() {
         return ResultType.LIST;
