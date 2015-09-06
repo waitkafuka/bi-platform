@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.Http11Nio2Protocol;
+import org.apache.coyote.http11.Http11NioProtocol;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +55,7 @@ import com.baidu.rigel.biplatform.queryrouter.security.SecurityFilter;
 @ComponentScan
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class,
         RedisAutoConfiguration.class })
-@ImportResource({ "conf/applicationContext-cache.xml", "applicationContext-queryrouter.xml" })
+@ImportResource({ "applicationContext-queryrouter.xml"})
 public class QueryRouterApplication4Enterprise extends SpringBootServletInitializer {
     
     /**
@@ -67,24 +67,24 @@ public class QueryRouterApplication4Enterprise extends SpringBootServletInitiali
      * 设置gzip压缩
      */
     @Bean
-    public EmbeddedServletContainerFactory servletContainer () {
-        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory ();
-        tomcat.setProtocol ("org.apache.coyote.http11.Http11Nio2Protocol");
+    public EmbeddedServletContainerFactory servletContainer() {
+        TomcatEmbeddedServletContainerFactory tomcat = new TomcatEmbeddedServletContainerFactory();
         tomcat.addConnectorCustomizers (customizer());
         return tomcat;
     }
-
+    
     @Bean
-    public TomcatConnectorCustomizer customizer () {
+    public TomcatConnectorCustomizer customizer() {
         return new TomcatConnectorCustomizer() {
             
             @Override
             public void customize(Connector connector) {
-                connector.setAttribute ("socket.directBuffer", true);
-                Http11Nio2Protocol protocol = (Http11Nio2Protocol) connector.getProtocolHandler ();
-                protocol.setMaxThreads (1000);
-                protocol.setMinSpareThreads (100);
-                protocol.setMaxConnections (700);
+                connector.setAttribute("socket.directBuffer", true);
+                // nio2在第三方应用中存在问题
+                Http11NioProtocol protocol = (Http11NioProtocol) connector.getProtocolHandler();
+                protocol.setMaxThreads(1000);
+                protocol.setMinSpareThreads(100);
+                protocol.setMaxConnections(700);
             }
         };
     }

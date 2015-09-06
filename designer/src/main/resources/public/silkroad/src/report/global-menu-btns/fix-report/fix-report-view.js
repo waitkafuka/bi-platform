@@ -220,9 +220,9 @@ define(
                 $taskStart.click(function () {
                     var $this = $(this);
                     if ($this.hasClass('j-task-start')) {
-                        var taskId = $this.parent().parent().attr('task-id');
-                        $this.removeClass('j-task-start task-start')
-                            .addClass('j-task-stop task-stop');
+                        var taskId = $this.parents('.task-item').attr('task-id');
+                        $this.removeClass('j-task-start biplt-start')
+                            .addClass('j-task-stop biplt-stop');
                         that.startTask(taskId, 0);
                     }
                     else {
@@ -234,7 +234,7 @@ define(
                 $taskDel.unbind();
                 $taskDel.click(function () {
                     var $this = $(this);
-                    var taskId = $this.parent().parent().attr('task-id');
+                    var taskId = $this.parents('.task-item').attr('task-id');
 
                     dialog.confirm('是否确定删除当前任务', function () {
                         that.delTask(taskId);
@@ -252,7 +252,7 @@ define(
                 $btnLook.unbind();
                 $btnLook.click(function () {
                     var $this = $(this);
-                    var taskId = $this.parent().parent().attr('task-id');
+                    var taskId = $this.parents('.task-item').attr('task-id');
                     that.getTaskInfo(taskId);
                 });
 

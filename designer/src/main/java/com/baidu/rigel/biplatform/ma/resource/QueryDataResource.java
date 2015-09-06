@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -71,6 +72,9 @@ import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.api.client.service.FileService;
 import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
+import com.baidu.rigel.biplatform.asyndownload.AyncAddDownloadTaskServiceFactory;
+import com.baidu.rigel.biplatform.asyndownload.bo.AddTaskParameters;
+import com.baidu.rigel.biplatform.asyndownload.bo.AddTaskStatus;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.ma.comm.util.ParamValidateUtils;
 import com.baidu.rigel.biplatform.ma.download.DownloadType;
@@ -142,7 +146,7 @@ import com.google.common.collect.Sets;
 @RestController
 @RequestMapping("/silkroad/reports")
 public class QueryDataResource extends BaseResource {
-
+    
     /**
      * logger
      */
@@ -210,7 +214,7 @@ public class QueryDataResource extends BaseResource {
      */
     @Resource
     private DataSourceService dsService;
-
+    
     /**
      * queryDataResourceUtils
      */
@@ -1576,7 +1580,7 @@ public class QueryDataResource extends BaseResource {
                 action.getDrillDimValues().put(row, drillTargetUniqueName);
             } else {
                 action.getDrillDimValues().remove(row);
-            }
+            } 
         }
         // runTimeModel.getContext().put(uniqueName, action);
         runTimeModel.setLinkedQueryAction(action);
@@ -2348,7 +2352,7 @@ public class QueryDataResource extends BaseResource {
     }
 
     /**
-     * 平面表下载请求，默认下载全部数据
+     * 平面表下载请求，下载数据，仅6万条，同步下载
      * 
      * @param reportId
      * @param areaId
@@ -2361,6 +2365,7 @@ public class QueryDataResource extends BaseResource {
     public ResponseResult downloadForPlaneTable(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request, HttpServletResponse response)
             throws Exception {
+   
         long begin = System.currentTimeMillis();
         ResponseResult rs = new ResponseResult();
         ReportDesignModel report = this.getDesignModelFromRuntimeModel(reportId);
@@ -2368,51 +2373,16 @@ public class QueryDataResource extends BaseResource {
             throw new IllegalStateException("未知报表定义，请确认下载信息");
         }
         ExtendArea targetArea = report.getExtendById(areaId);
-        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
 
         // 从runtimeModel中取出designModel
         ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
-
-        /**
-         * TODO 增加参数信息
-         */
-        Map<String, Object> tmp = QueryUtils.resetContextParam(request, designModel);
-        tmp.forEach((k, v) -> {
-            runtimeModel.getLocalContextByAreaId(areaId).put(k, v);
-        });
-
-        // 获取查询条件信息
-        ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, runtimeModel);
-        // 设置查询不受限制
-        areaContext.getParams().put(Constants.NEED_LIMITED, false);
-        // 获取查询action
-        // 获取上一次查询的QueryAction
-        QueryAction action = runtimeModel.getPreviousQueryAction(areaId);
-//        QueryAction action =  queryBuildService.generateTableQueryAction(report, areaId, areaContext.getParams());
-        if (action != null) {
-            action.setChartQuery(false);
-        } else {
-            throw new RuntimeException("下载失败");
-        }
-
-        // 构建平面表下载分页信息
-        PageInfo pageInfo = new PageInfo();
-        // 默认设置为100000，这样后端不会对其实施count(*)求总的记录数
-        pageInfo.setTotalRecordCount(100000);
-        pageInfo.setCurrentPage(-1);
-        // 默认设置为10万条记录
-        pageInfo.setPageSize(-1);
-        // 获取数据源信息
-        DataSourceDefine dsDefine = dsService.getDsDefine(designModel.getDsId());
-        // 获取问题模型
-        QuestionModel questionModel =
-                QueryUtils.convert2QuestionModel(dsDefine, designModel, action, areaContext.getParams(), null,
-                        securityKey);
+        // 通过上一次的查询条件按获取Questionmodel
+        QuestionModel questionModel = this.getQuestionModelFromQueryAction(reportId, areaId, request);
         // 下载类型
         // String downloadType = DownloadType.PLANE_TABLE_ONLINE.getName();
         // 获取下载服务
         DownloadType downloadType = DownloadType.PLANE_TABLE_ONLINE;
-        downloadType.setDsType(dsDefine.getDataSourceType().name());
+        downloadType.setDsType(dsService.getDsDefine(designModel.getDsId()).getDataSourceType().name());
         DownloadTableDataService downloadService = DownloadServiceFactory.getDownloadTableDataService(downloadType);
         Map<String, Object> setting = targetArea.getOtherSetting();
         // 获取下载字符串
@@ -2452,7 +2422,145 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO]download data cost : " + (System.currentTimeMillis() - begin) + " ms");
         return rs;
     }
+    
+    /**
+     * 通过上一次查询的QueryAction，获取questionModel
+     *
+     * @param reportId reportId
+     * @param areaId areaId
+     * @param request HttpServletRequest
+     * @return QuestionModel 问题模型
+     */
+    private QuestionModel getQuestionModelFromQueryAction(String reportId, String areaId, HttpServletRequest request) {
+        ReportDesignModel report = this.getDesignModelFromRuntimeModel(reportId);
+        if (report == null) {
+            throw new IllegalStateException("未知报表定义，请确认下载信息");
+        }
+        ExtendArea targetArea = report.getExtendById(areaId);
+        ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
 
+        // 从runtimeModel中取出designModel
+        ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
+
+        /**
+         * TODO 增加参数信息
+         */
+        Map<String, Object> tmp = QueryUtils.resetContextParam(request, designModel);
+        tmp.forEach((k, v) -> {
+            runtimeModel.getLocalContextByAreaId(areaId).put(k, v);
+        });
+
+        // 获取查询条件信息
+        ExtendAreaContext areaContext = this.getAreaContext(areaId, request, targetArea, runtimeModel);
+        // 设置查询不受限制
+        areaContext.getParams().put(Constants.NEED_LIMITED, false);
+        // 获取查询action
+        // 获取上一次查询的QueryAction
+        QueryAction action = runtimeModel.getPreviousQueryAction(areaId);
+        if (action != null) {
+            action.setChartQuery(false);
+        } else {
+            throw new RuntimeException("下载失败");
+        }
+
+        // 构建平面表下载分页信息
+        PageInfo pageInfo = new PageInfo();
+        // 默认设置为100000，这样后端不会对其实施count(*)求总的记录数
+        pageInfo.setTotalRecordCount(100000);
+        pageInfo.setCurrentPage(-1);
+        // 默认设置为10万条记录
+        pageInfo.setPageSize(-1);
+        // 获取数据源信息
+        DataSourceDefine dsDefine;
+        QuestionModel questionModel = null;
+        try {
+            dsDefine = dsService.getDsDefine(designModel.getDsId());
+            questionModel =
+                    QueryUtils.convert2QuestionModel(dsDefine, designModel, action, areaContext.getParams(), null,
+                            securityKey);
+        } catch (DataSourceOperationException e) {
+            logger.error(e.getCause().getMessage());
+        }
+        catch (QueryModelBuildException e) {
+            logger.error(e.getCause().getMessage());
+        }
+        return questionModel;
+    }
+
+    /**
+     * 平面表下载请求，默认下载全部数据，异步下载
+     * 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "/{reportId}/downloadOnline/asyn/{areaId}", method = { RequestMethod.GET, RequestMethod.POST })
+    public ResponseResult downloadAsynForPlaneTable(@PathVariable("reportId") String reportId,
+            @PathVariable("areaId") String areaId,
+            HttpServletRequest request, HttpServletResponse response)
+            throws Exception {
+        ResponseResult rs = new ResponseResult();
+        String receiveMail = request.getParameter("receiveMail");
+        String totalCount = request.getParameter("totalCount");
+        if (StringUtils.isEmpty(receiveMail)) {
+            rs.setStatus(ResponseResult.FAILED);
+            rs.setStatusInfo("输入的邮箱不能为空");
+            return rs;
+        }
+        if (StringUtils.isEmpty(totalCount)) {
+            rs.setStatus(ResponseResult.FAILED);
+            rs.setStatusInfo("下载的数据行数为0");
+            return rs;
+        }
+        long begin = System.currentTimeMillis();
+        // 从runtimeModel中取出designModel
+        ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
+        QuestionModel questionModel = this.getQuestionModelFromQueryAction(reportId, areaId, request);
+
+        // setPageInfo
+        PageInfo pageInfo = new PageInfo();
+        pageInfo.setPageSize(5000);
+        pageInfo.setCurrentPage(-1);
+        pageInfo.setTotalRecordCount(Integer.valueOf(totalCount));
+        questionModel.setPageInfo(pageInfo);
+
+        // 获取cookies信息
+        Cookie[] cookies = request.getCookies();
+        HashMap<String, String> cookiesMap = new HashMap<String, String>(); 
+        for (int i = 0; i < cookies.length; i++) {
+            cookiesMap.put(cookies[i].getName(), cookies[i].getValue());
+        }
+        
+        try {
+            Object obj = AyncAddDownloadTaskServiceFactory
+                    .getAyncAddDownloadTaskService("defaultAyncAddDownloadTaskService");
+            AddTaskParameters addTaskParameters = new AddTaskParameters();
+            addTaskParameters.setQuestionModel(questionModel);
+            addTaskParameters.setRecMail(receiveMail);
+            addTaskParameters.setReportName(designModel.getName());
+            addTaskParameters.setCookies(cookiesMap);
+            addTaskParameters.setRequestUrl(request.getRequestURL().toString());
+            AddTaskStatus result = (AddTaskStatus) obj.getClass()
+                    .getMethod(
+                            "addTask", AddTaskParameters.class).invoke(obj, addTaskParameters);
+            if (result.getStatus() == 0) {
+                rs.setStatus(ResponseResult.SUCCESS);
+                rs.setStatusInfo("successfully");
+            } else {
+                rs.setStatus(ResponseResult.FAILED);
+                rs.setStatusInfo("下载任务添加失败");
+            }
+            logger.info("[INFO]handle download asyn data cost : " + (System.currentTimeMillis() - begin) + " ms");
+        } catch (Exception e) {
+            rs.setStatus(ResponseResult.FAILED);
+            rs.setStatusInfo("此下载服务目前不可用");
+        }
+        return rs;
+    }
+    
     /**
      * 下载请求
      * 

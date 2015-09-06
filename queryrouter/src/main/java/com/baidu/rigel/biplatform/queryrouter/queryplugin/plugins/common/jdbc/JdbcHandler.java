@@ -31,9 +31,9 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
-import com.baidu.rigel.biplatform.tesseract.datasource.DataSourcePoolService;
-import com.baidu.rigel.biplatform.tesseract.datasource.impl.SqlDataSourceWrap;
-import com.baidu.rigel.biplatform.tesseract.exception.DataSourceException;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.connection.DataSourceException;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.connection.DataSourcePoolService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.connection.SqlDataSourceWrap;
 
 /**
  * 
@@ -59,7 +59,7 @@ public class JdbcHandler {
     /**
      * dataSourcePoolService
      */
-    @Resource
+    @Resource(name="localDataSourcePoolServiceImpl")
     private DataSourcePoolService dataSourcePoolService;
 
     /**

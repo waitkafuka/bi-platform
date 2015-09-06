@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -29,7 +30,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
@@ -44,6 +49,7 @@ import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.AnalysisChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
@@ -130,10 +136,31 @@ public class LiteOlapResource {
     private DataSourceService dsService;
     
     /**
+     * 维度轴标识
+     */
+    private static final String ROW = "ROW";
+    
+    /**
+     * 指标轴标识
+     */
+    private static final String COLUMN = "COLUMN";
+    
+    /**
+     * 条件轴标识
+     */
+    private static final String FILTER = "FILTER";
+    /**
      * 
      * @param reportId
      * @param request
      * @return ResponseResult
+     */
+    
+    /** 
+     * @param reportId
+     * @param areaId
+     * @param request
+     * @return
      */
     @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/item", method = { RequestMethod.POST })
     public ResponseResult dragAndDrop(@PathVariable("reportId") String reportId,
@@ -188,14 +215,19 @@ public class LiteOlapResource {
                 targetItem = liteOlapArea.getCandInds().get(targetName);
             }
         } else {
+            // 在from不为空的情况下，先检查是否允许拖拽
+            if (!this.preCheck4Drag(to, targetName, model)) {
+                ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
+                return rs;
+            }
             switch (from) {
-                case "ROW":
+                case ROW:
                     targetItem = logicModel.removeRow(targetName);
                     break;
-                case "COLUMN":
+                case COLUMN:
                     targetItem = logicModel.removeColumn(targetName);
                     break;
-                case "FILTER":
+                case FILTER:
                     targetItem = logicModel.removeSlice(targetName);
                     break;
                 default:
@@ -209,6 +241,7 @@ public class LiteOlapResource {
             throw new RuntimeException("未找到指定的维度或指标信息 : model - [" + model 
                 + "] area - [" + liteOlapArea + "] item - [" + targetItem + "]");
         }
+
         OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
                 liteOlapArea.getCubeId(), targetItem.getOlapElementId());
         if (!StringUtils.hasText(to)) {
@@ -221,16 +254,27 @@ public class LiteOlapResource {
                 liteOlapArea.getCandInds().put(element.getId(), targetItem);
             }
         } else {
+            // TODO 后续考虑优化
+            // 将岗位默认添加到目标轴(指标轴、维度轴）的第一个位置，条件轴除外
+            if (element instanceof Dimension && !FILTER.equals(to)) {
+                MiniCubeDimension dimension = (MiniCubeDimension) element;
+                Level level = dimension.getLevels().values().toArray(new Level[0])[0];
+                if (level.getType() == LevelType.CALL_BACK) {
+                    toPosition = 0;
+                }
+            }
             switch (to) {
-                case "ROW":
+                case ROW:
                     targetItem.setPositionType(PositionType.X);
                     logicModel.addRow(targetItem, toPosition);
                     break;
-                case "COLUMN":
-                    targetItem.setPositionType(PositionType.Y);
-                    logicModel.addColumn(targetItem, toPosition);
+                case COLUMN:
+                    if (element instanceof Measure) {
+                        targetItem.setPositionType(PositionType.Y);
+                        logicModel.addColumn(targetItem, toPosition);
+                    } 
                     break;
-                case "FILTER":
+                case FILTER:
                     targetItem.setPositionType(PositionType.S);
                     logicModel.addSlice(targetItem, toPosition);
                     break;
@@ -245,6 +289,59 @@ public class LiteOlapResource {
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
         return rs;
+    }
+    
+    /**
+     * 在拖拽前校验是否可以拖拽
+     * @param to
+     * @param elementId
+     * @param model
+     * @return true表示可以拖拽；false表示不可以
+     */
+    private boolean preCheck4Drag(String to, String elementId, ReportDesignModel model) {
+        // 1.检查是否可以拖出区域，此时to为空
+        if (StringUtils.isEmpty(to)) {
+            Map<String, ReportParam> reportParams = model.getParams();
+            // 处理从坐标轴删除的情况，此时from非空，to为空；对于P参数设置的条件，在参数必须前提下，不允许删除
+            if (reportParams != null && reportParams.size() != 0) {
+                for (String key : reportParams.keySet()) {
+                    ReportParam param = reportParams.get(key);
+                    if (param.getElementId().equals(elementId) && param.isNeeded()) {
+                        return false;
+                    }
+                }
+            }
+        } else {
+            // 2.检查是否存在非法拖拽情况
+            OlapElement element = this.getOlapElementAccordingName(model, elementId);
+            // 对于指标，不允许移动到维度轴或者条件轴
+            if (element instanceof Measure && (ROW.equals(to) || FILTER.equals(to))) {
+                return false;
+            }
+            // 对于维度，不允许移动到指标轴 
+            if (element instanceof Dimension && COLUMN.equals(to)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    /**
+     * 根据targetName获取维度或者指标，在这里targetName实际为elementId
+     * @param model
+     * @param targetName
+     * @return
+     */
+    private OlapElement getOlapElementAccordingName(ReportDesignModel model, String targetName) {
+        if (!StringUtils.isEmpty(targetName) && model.getSchema() != null 
+                && model.getSchema().getCubes().size() != 0 
+                    && !CollectionUtils.isEmpty(model.getSchema().getCubes().values())) {
+            MiniCube cube = model.getSchema().getCubes().values().toArray( new MiniCube[0])[0];
+            OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(),
+                    cube.getId(), targetName);
+            return element;
+        }
+        return null;
     }
     
     /**

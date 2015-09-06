@@ -32,6 +32,7 @@ import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
+import com.baidu.rigel.biplatform.ma.resource.utils.OlapLinkUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.OlapLinkViewObject;
 import com.fasterxml.jackson.databind.JavaType;
@@ -55,6 +56,7 @@ public class OlapLinkResource {
      * jackson json ObjectMapper
      */
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     /**
      * reportModelCacheManager
      */
@@ -86,11 +88,13 @@ public class OlapLinkResource {
         }
         List<ReportDesignModel> planeTableList = olapLinkService.getDesignModelListContainsPlaneTable();
         OlapLinkViewObject olapLinkViewObj = new OlapLinkViewObject();
+        // 列出所有可跳转的平面表
         if (!CollectionUtils.isEmpty(planeTableList)) {
             for (ReportDesignModel designModel : planeTableList) {
                 olapLinkViewObj.addPlaneTable(designModel.getName(), designModel.getId());
             }
         }
+        // 列出能添加跳转参数的指标列
         if (columns != null && columns.length > 0) {
             for (Item column : columns) {
                 OlapElement olapElement =
@@ -104,7 +108,18 @@ public class OlapLinkResource {
                 olapLinkViewObj.addColunmDefine(olapElement.getCaption(), olapElement.getId(), selectedPlaneTableId);
             }
         }
-
+        // 列出操作列配置
+        List<LinkInfo> savedOperationLinkInfoList = OlapLinkUtils.getOperationColumKeys(linkInfoMap);
+        if (!CollectionUtils.isEmpty(savedOperationLinkInfoList)) {
+            for (LinkInfo linkInfo : savedOperationLinkInfoList) {
+                olapLinkViewObj.addOperationColumn(linkInfo.getColunmSourceCaption(), linkInfo.getColunmSourceId(),
+                        linkInfo.getPlaneTableId());
+            }
+        }
+        // 如果发现是第一次添加操作列，直接进行初始化
+        else {
+            olapLinkViewObj.addOperationColumn("操作列", "operationColumn_1", "");
+        }
         ResponseResult rs = ResourceUtils.getResult("success", null, olapLinkViewObj);
         return rs;
     }
@@ -143,10 +158,37 @@ public class OlapLinkResource {
                 if (linkInfo == null) {
                     linkInfo = new LinkInfo();
                 }
-                String planeTableId = linkInfoVo.getSelectedTable();
-                linkInfo.setPlaneTableId(planeTableId);
+                linkInfo.setPlaneTableId(linkInfoVo.getSelectedTable());
+                linkInfo.setColunmSourceId(colunmId);
+                linkInfo.setColunmSourceCaption(linkInfoVo.getText());
                 linkInfoMap.put(colunmId, linkInfo);
             }
+            tableArea.getFormatModel().setLinkInfo(linkInfoMap);
+            reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
+            rs = ResourceUtils.getResult("success", null, "add link success!");
+        }
+        return rs;
+    }
+
+    /**
+     * 删除制定列（包括操作列）的跳转配置
+     * 
+     * @param reportId 报表id
+     * @param areaId 报表区域id
+     * @return 返回操作结束后的成功与否标识
+     * @throws ReportModelOperationException reportModelOperationException
+     */
+    @RequestMapping(value = "/{reportId}/extend_area/{areaId}/olaplink/{linkId}", method = { RequestMethod.DELETE })
+    public ResponseResult deleteLinkInfo(@PathVariable("reportId") String reportId,
+            @PathVariable("areaId") String areaId, @PathVariable("linkId") String linkId, HttpServletRequest request)
+            throws ReportModelOperationException {
+        // String linkId = request.getParameter("linkId");
+        ResponseResult rs = ResourceUtils.getErrorResult("delete linkInfo failed!", 400);
+        if (!StringUtils.isEmpty(linkId)) {
+            ReportDesignModel reportDesignModel = getReportModel(reportId);
+            ExtendArea tableArea = reportDesignModel.getExtendAreas().get(areaId);
+            Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
+            linkInfoMap.remove(linkId);
             tableArea.getFormatModel().setLinkInfo(linkInfoMap);
             reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
             rs = ResourceUtils.getResult("success", null, "add link success!");
@@ -231,9 +273,9 @@ public class OlapLinkResource {
             linkInfo.setParamMapping(paramMapping);
             tableArea.getFormatModel().setLinkInfo(linkInfoMap);
             reportModelCacheManager.updateReportModelToCache(reportId, olapTableDesignModel);
-            ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
-            runtimeModel.init (olapTableDesignModel, false, true);
-            reportModelCacheManager.updateRunTimeModelToCache (reportId, runtimeModel);
+            ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+            runtimeModel.init(olapTableDesignModel, false, true);
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
             rs = ResourceUtils.getResult("success", null, "save mapping success!");
         }
         return rs;
@@ -269,6 +311,10 @@ public class OlapLinkResource {
          */
         private String id;
         /**
+         * 指标名称
+         */
+        private String text;
+        /**
          * 选中的明细报表id
          */
         private String selectedTable;
@@ -285,6 +331,20 @@ public class OlapLinkResource {
          */
         public void setId(String id) {
             this.id = id;
+        }
+
+        /**
+         * @return the text
+         */
+        public String getText() {
+            return text;
+        }
+
+        /**
+         * @param text the text to set
+         */
+        public void setText(String text) {
+            this.text = text;
         }
 
         /**

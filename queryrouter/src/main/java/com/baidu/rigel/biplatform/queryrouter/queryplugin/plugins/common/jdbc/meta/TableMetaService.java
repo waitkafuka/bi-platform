@@ -99,11 +99,11 @@ public class TableMetaService {
         String dataType = "";
         if (SqlConstants.DRIVER_MYSQL.equals(dataSourceInfo.getDataBase()
                 .getDriver())) {
-            String sql = "select column_name,table_name,data_type from information_schema.`columns` "
-                    + "where table_name in ("
+            String sql = "select COLUMN_NAME,TABLE_NAME,DATA_TYPE from information_schema.`columns` "
+                    + "where TABLE_NAME in ("
                     + tableNameStringIn
                     + ")"
-                    + "and column_name in (" + columnNameStringIn + ")";
+                    + " and COLUMN_NAME in (" + columnNameStringIn + ")";
             List<Map<String, Object>> datas = jdbcHandler.queryForList(sql,
                     new ArrayList<Object>(), dataSourceInfo);
             if (CollectionUtils.isEmpty(datas)) {
@@ -132,9 +132,9 @@ public class TableMetaService {
                             tableNameTmp1.indexOf(","));
                 }
                 for (Map<String, Object> data : datas) {
-                    String tableNameTmp = data.get("table_name").toString();
-                    String columnNameTmp = data.get("column_name").toString();
-                    String dataTypeTmp = data.get("data_type").toString();
+                    String tableNameTmp = data.get("TABLE_NAME").toString();
+                    String columnNameTmp = data.get("COLUMN_NAME").toString();
+                    String dataTypeTmp = data.get("DATA_TYPE").toString();
                     if (tableNameTmp1.equals(tableNameTmp)
                             && columnNameTmp1.equals(columnNameTmp)) {
                         sqlColumn.setDataType(dataTypeTmp);

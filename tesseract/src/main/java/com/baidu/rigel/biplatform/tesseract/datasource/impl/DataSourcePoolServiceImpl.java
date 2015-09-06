@@ -112,11 +112,20 @@ public class DataSourcePoolServiceImpl implements DataSourcePoolService {
 
     @Override
     public DataSourceWrap getDataSourceByKey(DataSourceInfo dataSourceInfo) throws DataSourceException {
+        long curr = System.currentTimeMillis();
         DataSourceManager dataSourceManager = DataSourceManagerFactory.getDataSourceManagerInstance(dataSourceInfo);
+        LOG.info("getDataSource cost:" + (System.currentTimeMillis() - curr)
+                + " to getDataSourceManagerInstance");
+        curr = System.currentTimeMillis();
         // 每次调用init，init自动判断是否初始化过
         dataSourceManager.initDataSource(dataSourceInfo);
-
-        return dataSourceManager.getDataSourceByKey(dataSourceInfo.getDataSourceKey());
+        LOG.info("getDataSource cost:" + (System.currentTimeMillis() - curr)
+                + " to dataSourceManager.initDataSource");
+        curr = System.currentTimeMillis();
+        DataSourceWrap result = dataSourceManager.getDataSourceByKey(dataSourceInfo.getDataSourceKey());
+        LOG.info("getDataSource cost:" + (System.currentTimeMillis() - curr)
+                + " to dataSourceManager.getDataSourceByKey");
+        return result;
     }
 
 }

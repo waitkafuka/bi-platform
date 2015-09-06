@@ -144,7 +144,14 @@ public class RelationDBConnectionServiceImpl implements
         dsInfo.setProductLine(ds.getProductLine());
         dsInfo.setInstanceName(ds.getDbInstance());
 //        dsInfo.setDataSourceKey(dsDefine.getName());
-        dsInfo.setDBProxy(true);
+        if (ds.getDataSourceType() != null
+                && (ds.getDataSourceType().equals(DataSourceType.MYSQL_DBPROXY) || ds
+                    .getDataSourceType().equals(DataSourceType.PALO))) {
+            dsInfo.setDBProxy(true);
+        } else {
+            dsInfo.setDBProxy(false);
+        }
+        
         List<String> urls = Lists.newArrayList();
         urls.add(this.getDataSourceConnUrl(ds));
         dsInfo.setJdbcUrls(urls);

@@ -87,9 +87,9 @@ public class DateDataFunction extends FunctionNode {
         VariableNode variable = (VariableNode) this.getArgs().get(0);
         Condition condition = new DateDataCondition(variable.getVariableExp (), tmp.getData ().intValue ());
         this.result = context.getVariablesResult ().get (condition).get (variable.getVariableExp ());
-        if(this.result == null) {
+        if (this.result == null) {
             this.result = new SingleComputeResult();
-        } else if (this.result instanceof ListComputeResult){
+        } else if (this.result instanceof ListComputeResult) {
             // 进行汇总计算，并放到第一个
             ListComputeResult rs = (ListComputeResult) this.result;
             BigDecimal sum = BigDecimal.ZERO;

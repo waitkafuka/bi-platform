@@ -49,7 +49,7 @@ public class TableExistCheckService {
     /**
      * mysql中tablename的字段标示
      */
-    private static final String META_MYSQL_TABLENAME = "table_name";
+    private static final String META_MYSQL_TABLENAME = "TABLE_NAME";
     /**
      * logger
      */
@@ -75,7 +75,7 @@ public class TableExistCheckService {
                 QueryRouterContext.getQueryId(), cubeSource);
         if (SqlConstants.DRIVER_MYSQL.equals(dataSourceInfo.getDataBase()
                 .getDriver())) {
-            String sql = "select table_name from information_schema.tables where table_schema='"
+            String sql = "select " + META_MYSQL_TABLENAME + " from information_schema.tables where TABLE_SCHEMA='"
                             + dataSourceInfo.getInstanceName() + "'";
             List<Map<String, Object>> datas = jdbcHandler.queryForList(
                     sql, new ArrayList<Object>(), dataSourceInfo);

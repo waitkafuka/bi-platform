@@ -255,16 +255,12 @@ public class RegularReportDataFileServiceImpl implements RegularReportDataFileSe
             // TODO 临时暂定获取发布的报表
             ReportDesignModel reportModel = reportDesignModelService.getModelByIdOrName(reportId, true);
             if (reportModel == null) {
-                LOG.error("can not get report model with id: " + reportId);
-                return false;
+                reportModel = reportDesignModelService.getModelByIdOrName(reportId, false);
+                if (reportModel == null) {
+                    LOG.error("can not get report model with id: " + reportId);
+                    return false;
+                }
             }
-//            if (reportModel == null) {
-//                reportModel = reportDesignModelService.getModelByIdOrName(reportId, false);
-//                if (reportModel == null) {
-//                    LOG.error("can not get report model with id: " + reportId);
-//                    return false;
-//                }
-//            }
             String filePath = this.genFilePath(reportId, taskId, authority, null);
             return fileService.write(filePath, dataJson.getBytes(), true);            
         } catch (FileServiceException e) {
