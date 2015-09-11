@@ -145,8 +145,7 @@ public class RelationDBConnectionServiceImpl implements
         dsInfo.setInstanceName(ds.getDbInstance());
 //        dsInfo.setDataSourceKey(dsDefine.getName());
         if (ds.getDataSourceType() != null
-                && (ds.getDataSourceType().equals(DataSourceType.MYSQL_DBPROXY) || ds
-                    .getDataSourceType().equals(DataSourceType.PALO))) {
+                && ds.getDataSourceType().equals(DataSourceType.MYSQL_DBPROXY)) {
             dsInfo.setDBProxy(true);
         } else {
             dsInfo.setDBProxy(false);

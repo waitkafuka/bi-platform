@@ -1,5 +1,6 @@
 package com.baidu.rigel.biplatform.asyndownload.bo;
 
+import java.util.List;
 import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
@@ -19,6 +20,11 @@ public class AddTaskParameters {
      * recMail
      */
     public String recMail;
+    
+    /**
+     * columns
+     */
+    public List<String> columns;
 
     /**
      * QuestionModel
@@ -35,6 +41,22 @@ public class AddTaskParameters {
      */
     public String requestUrl;
     
+    /**
+     * default generate get columns
+     * @return the columns
+     */
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    /**
+     * default generate set columns
+     * @param columns the columns to set
+     */
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
+    }
+
     /**
      * default generate get recMail
      * @return the recMail

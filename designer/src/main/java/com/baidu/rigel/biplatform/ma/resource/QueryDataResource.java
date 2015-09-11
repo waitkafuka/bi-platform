@@ -63,6 +63,7 @@ import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
@@ -591,6 +592,19 @@ public class QueryDataResource extends BaseResource {
             Cookie cookie = new Cookie (UID_KEY, uid);
             cookie.setPath (Constants.COOKIE_PATH);
             response.addCookie (cookie);
+        }
+        if (request.getParameter ("newPlatform") != null) {
+            return "<!DOCTYPE html><html>"
+                    + "<head><meta charset=\"utf-8\"><title>报表平台-展示端</title>"
+                    + "<meta name=\"description\" content=\"报表平台展示端\">"
+                    + "<meta name=\"viewport\" content=\"width=device-width\">"
+                    + "</head>"
+                    + "<body>"
+                    + "<script type=\"text/javascript\">"
+                    + "var seed = document.createElement('script');"
+                    + "seed.src = '/silkroad/new-biplatform/asset/seed.js?action=display&t=' + (+new Date());"
+                    + "document.getElementsByTagName('head')[0].appendChild(seed);"
+                    + "</script>" + "</body>" + "</html>";
         }
         return builder.toString();
     }
@@ -2534,6 +2548,9 @@ public class QueryDataResource extends BaseResource {
             cookiesMap.put(cookies[i].getName(), cookies[i].getValue());
         }
         
+        // 设置显示列的顺序
+        LogicModel logicModel = designModel.getExtendById(areaId).getLogicModel();
+        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         try {
             Object obj = AyncAddDownloadTaskServiceFactory
                     .getAyncAddDownloadTaskService("defaultAyncAddDownloadTaskService");
@@ -2543,6 +2560,7 @@ public class QueryDataResource extends BaseResource {
             addTaskParameters.setReportName(designModel.getName());
             addTaskParameters.setCookies(cookiesMap);
             addTaskParameters.setRequestUrl(request.getRequestURL().toString());
+            addTaskParameters.setColumns(DataModelUtils.getKeysInOrder(configQuestionModel.getCube(), logicModel));
             AddTaskStatus result = (AddTaskStatus) obj.getClass()
                     .getMethod(
                             "addTask", AddTaskParameters.class).invoke(obj, addTaskParameters);

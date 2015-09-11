@@ -64,6 +64,20 @@ public class PaloSqlExpression extends SqlExpression {
         super.generateCountSql(questionModel, allColums, needColums, whereData);
         this.getCountSqlQuery().getSelect().setSql(" select count(" + ID + ") as totalc ");
     }
+
+    /* (non-Javadoc)
+     * @see com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.SqlExpression#generateOrderByExpression(com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel, java.util.Map)
+     */
+    @Override
+    public String generateOrderByExpression(PlaneTableQuestionModel planeTableQuestionModel,
+            Map<String, SqlColumn> allColums) throws QuestionModelTransformationException {
+        // TODO Auto-generated method stub
+        String orderby = super.generateOrderByExpression(planeTableQuestionModel, allColums);
+        return orderby + SqlConstants.COMMA
+                + SqlConstants.SOURCE_TABLE_ALIAS_NAME+ SqlConstants.DOT + ID
+                + SqlConstants.SPACE;
+    }
+    
     
 
 }

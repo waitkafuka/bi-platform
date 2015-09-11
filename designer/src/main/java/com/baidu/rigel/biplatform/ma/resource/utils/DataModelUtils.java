@@ -622,6 +622,34 @@ public final class DataModelUtils {
         }
         return keys;
     }
+    
+    /**
+     * 获取平面表DataModel中数据的正确的key顺序
+     * 
+     * @param cube
+     * @param logicModel
+     * @param columns
+     * @return
+     */
+    public static List<String> getKeysInOrder(Cube cube, LogicModel logicModel) {
+        // 获取Cube中的维度信息
+        // 纵轴
+        Item[] cols = logicModel.getColumns();
+        // 存储列的key，key = 表明.列名
+        List<String> keys = Lists.newArrayList();
+        for (Item col : cols) {
+            // boolean finished = false;
+            // 处理维度
+            OlapElement ele = ItemUtils.getOlapElementByItem(col, cube.getSchema(), cube.getId());
+            if (ele != null) {
+                keys.add(getRealKey(ele, cube));
+            } else {
+                LOG.debug("can't get olap element with cube id : " + cube.getId());
+                throw new RuntimeException("can't get olap element with cube id : " + cube.getId());
+            }
+        }
+        return keys;
+    }
 
     /**
      * 获取数据存储对应的key值信息 getRealKey
@@ -632,6 +660,18 @@ public final class DataModelUtils {
      * @return
      */
     private static String getRealKey(OlapElement ele, Cube cube, Map<String, String> tmp) {
+        return tmp.get(getRealKey(ele, cube));
+    }
+    
+    /**
+     * 获取数据存储对应的key值信息 getRealKey
+     * 
+     * @param ele olapElement
+     * @param cube 立方体信息
+     * @param tmp key值map
+     * @return
+     */
+    private static String getRealKey(OlapElement ele, Cube cube) {
         String tmpKey = null;
         // 如果是维度
         if (ele instanceof Dimension) {
@@ -639,25 +679,11 @@ public final class DataModelUtils {
             Level level = dim.getLevels().values().toArray(new Level[0])[0];
             // 普通维度
             tmpKey = level.getDimTable() + "." + level.getName();
-            // // 如果是时间维度
-            // if (dim.isTimeDimension()) {
-            // tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
-            // } else {
-            // Level level = dim.getLevels().values().toArray(new Level[0])[0];
-            // // Callback维度
-            // if (level.getType() == LevelType.CALL_BACK) {
-            // tmpKey = ((MiniCube) cube).getSource() + "." + dim.getFacttableColumn();
-            // } else {
-            // // 普通维度
-            // tmpKey = level.getDimTable() + "." + level.getName();
-            // }
-            // }
         } else {
             // 如果是指标
             tmpKey = ((MiniCube) cube).getSource() + "." + ((Measure) ele).getDefine();
         }
-        return tmp.get(tmpKey);
-
+        return tmpKey;
     }
 
     private static boolean hasSumRow(List<List<RowHeadField>> rowFields) {

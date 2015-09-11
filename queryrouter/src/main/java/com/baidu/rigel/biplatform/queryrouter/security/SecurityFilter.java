@@ -88,7 +88,13 @@ public class SecurityFilter implements Filter {
     private boolean isExcludeUrl(String requestURI) {
         Set<String> excludeUrl = Sets.newHashSet ();
         excludeUrl.add ("/alive");
-        return excludeUrl.contains (requestURI);
+        excludeUrl.add ("/tianlurpc/");
+        for (String url : excludeUrl) {
+            if (requestURI.indexOf(url) == 0) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

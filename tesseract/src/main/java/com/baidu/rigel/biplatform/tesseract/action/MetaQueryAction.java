@@ -279,13 +279,13 @@ public class MetaQueryAction {
                         AnswerCoreConstant.GSON.fromJson(requestParams.get(MiniCubeConnection.SPLITSTRATEGY_PARAM_KEY),
                                 QueryContextSplitStrategy.class);
             }
-            LOG.info("query cost:" + (System.currentTimeMillis() - current) + " prepare to execute query.");
+            LOG.info("lijinquery cost:" + (System.currentTimeMillis() - current) + " prepare to execute query.");
             
             long beforeQuery = System.currentTimeMillis();
             
             DataModel dataModel = queryService.query(questionModel, queryContext, preSplitStrategy);
             
-            LOG.info("query cost:" + (System.currentTimeMillis() - beforeQuery) + " to execute query.");
+            LOG.info("lijinquery cost:" + (System.currentTimeMillis() - beforeQuery) + " to execute query.");
             
             long curr=System.currentTimeMillis();
             if (dataModel != null) {
@@ -299,7 +299,7 @@ public class MetaQueryAction {
                 LOG.info("query cost:" + (System.currentTimeMillis() - curr) + "ms sortAandTrunc.");
             }
             
-            LOG.info("query cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
+            LOG.info("lijinquery cost:" + (System.currentTimeMillis() - current) + " success to execute query.");
             curr = System.currentTimeMillis();
             ResponseResult rs = ResponseResultUtils.getCorrectResult("query success.",
                     AnswerCoreConstant.GSON.toJson(dataModel));

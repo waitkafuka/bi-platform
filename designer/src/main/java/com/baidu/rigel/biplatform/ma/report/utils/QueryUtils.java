@@ -486,34 +486,54 @@ public class QueryUtils {
                 dimensions.put(dim.getName(), dim);
             }
         }
-        if (area.getType() == ExtendAreaType.LITEOLAP) {
+        if (area.getType() == ExtendAreaType.LITEOLAP || area.getType() == ExtendAreaType.LITEOLAP_CHART
+                || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             /**
              * TODO 把liteOlap中候选的维度和指标加入到items里面
              */
-            Map<String, Item> candDims = ((LiteOlapExtendArea) area).getCandDims();
+            Map<String, Item> candDims = Maps.newHashMap();
+            if (area.getType() == ExtendAreaType.LITEOLAP) {
+                candDims = ((LiteOlapExtendArea) area).getCandDims();
+            } else {
+                LiteOlapExtendArea liteOlapArea = 
+                        (LiteOlapExtendArea) reportModel.getExtendById(area.getReferenceAreaId());
+                candDims = liteOlapArea.getCandDims();
+            }
+            
             Schema schema = reportModel.getSchema();
             String cubeId = area.getCubeId();
             for (String elementId : candDims.keySet()) {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, elementId);
-                MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
-                dim.setLevels(Maps.newLinkedHashMap());
-                ((Dimension) element).getLevels().values().forEach(level -> {
-                    level.setDimension(dim);
-                    dim.getLevels().put(level.getName(), level);
-                });
-                dimensions.put(element.getName(), (Dimension) element);
+                if (element != null && !dimensions.containsKey(element.getName())) {
+                    MiniCubeDimension dim = (MiniCubeDimension) DeepcopyUtils.deepCopy(element);
+                    dim.setLevels(Maps.newLinkedHashMap());
+                    ((Dimension) element).getLevels().values().forEach(level -> {
+                        level.setDimension(dim);
+                        dim.getLevels().put(level.getName(), level);
+                    });
+                    dimensions.put(element.getName(), (Dimension) element);
+                }
             }
-            Map<String, Item> candInds = ((LiteOlapExtendArea) area).getCandInds();
+            Map<String, Item> candInds = Maps.newHashMap();
+            if (area.getType() == ExtendAreaType.LITEOLAP) {
+                candInds = ((LiteOlapExtendArea) area).getCandInds();
+            } else {
+                LiteOlapExtendArea liteOlapArea = 
+                        (LiteOlapExtendArea) reportModel.getExtendById(area.getReferenceAreaId());
+                candInds = liteOlapArea.getCandInds();
+            }
             for (String elementId : candInds.keySet()) {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, elementId);
-                if (element instanceof CallbackMeasure) {
-                    CallbackMeasure m = DeepcopyUtils.deepCopy((CallbackMeasure) element);
-                    String url = ((CallbackMeasure) element).getCallbackUrl();
-                    m.setCallbackUrl(HttpUrlUtils.getBaseUrl(url));
-                    m.setCallbackParams(HttpUrlUtils.getParams(url));
-                    measures.put(m.getName(), m);
-                } else {
-                    measures.put(element.getName(), (Measure) element);
+                if (element != null && !measures.containsKey(element.getName())) {
+                    if (element instanceof CallbackMeasure) {
+                        CallbackMeasure m = DeepcopyUtils.deepCopy((CallbackMeasure) element);
+                        String url = ((CallbackMeasure) element).getCallbackUrl();
+                        m.setCallbackUrl(HttpUrlUtils.getBaseUrl(url));
+                        m.setCallbackParams(HttpUrlUtils.getParams(url));
+                        measures.put(m.getName(), m);
+                    } else {
+                        measures.put(element.getName(), (Measure) element);
+                    }
                 }
             }
         }
