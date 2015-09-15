@@ -37,7 +37,7 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.Question
 import com.google.gson.JsonSyntaxException;
 
 /**
- * 移动端对外接口
+ * queryrouter对外接口
  *  
  * @author luowenlei
  * 
@@ -92,6 +92,8 @@ public class QueryRouterResource {
         // convert json to QuestionModel
         ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(questionStr,
                 ConfigQuestionModel.class);
+        questionModel.setQueryId(questionModel.getDataSourceInfo().getProductLine()
+                + "-" + questionModel.getQueryId());
         QueryRouterContext.setQueryInfo(questionModel.getQueryId());
         logger.info("queryId:{} query current handle size:{} , begin to handle this queryId.",
                 questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());

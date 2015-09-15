@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
@@ -87,6 +89,14 @@ public class QueryTessractPlugin implements QueryPlugin {
         
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         headerParams.put(BIPLATFORM_PRODUCTLINE_PARAM, configQuestionModel.getDataSourceInfo().getProductLine());
+        /**palo数据源不需要使用索引**/
+        if (configQuestionModel.getDataSourceInfo() != null
+                && configQuestionModel.getDataSourceInfo() instanceof SqlDataSourceInfo) {
+            SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo) configQuestionModel.getDataSourceInfo();
+            if (sqlDataSourceInfo.getDataBase() == DataBase.PALO) {
+                configQuestionModel.setUseIndex(false);
+            }
+        }
         long curr = System.currentTimeMillis();
         logger.info("begin execute query with tesseract ");
         String tesseractHost = "";

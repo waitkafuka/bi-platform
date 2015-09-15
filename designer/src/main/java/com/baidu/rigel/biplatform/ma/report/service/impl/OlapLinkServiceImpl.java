@@ -157,6 +157,13 @@ public class OlapLinkServiceImpl implements OlapLinkService {
                         .forEach(condDim -> { 
                             addDimToMap(condDim, queryContext, olapTableDesignModel, extendArea, conditionMap);
                         });
+            } else if (ExtendAreaType.LITEOLAP_TABLE.equals(extendArea.getType())) {
+                ExtendArea liteOlapExtendArea = olapTableDesignModel.getExtendById(extendArea.getReferenceAreaId());
+                Stream.of(liteOlapExtendArea.getLogicModel().getSlices())
+                        .filter(items -> items != null)
+                        .forEach(condDim -> { 
+                            addDimToMap(condDim, queryContext, olapTableDesignModel, extendArea, conditionMap);
+                });
             }
         }
         return conditionMap;

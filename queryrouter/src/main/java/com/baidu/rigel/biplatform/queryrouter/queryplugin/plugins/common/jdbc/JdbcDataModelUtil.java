@@ -191,7 +191,7 @@ public class JdbcDataModelUtil {
                 if (column.getSqlUniqueColumn() != null && row.get(column.getSqlUniqueColumn()) != null) {
                     Object obj = row.get(column.getSqlUniqueColumn());
                     if (obj instanceof BigDecimal) {
-                        cell = ((BigDecimal) obj).setScale(8).toPlainString();
+                        cell = ((BigDecimal) obj).toPlainString();
                     } else {
                         cell = obj.toString();
                     }

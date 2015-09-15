@@ -40,6 +40,8 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeDriverManager;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.api.client.service.FileService;
 import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
@@ -180,16 +182,23 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 continue;
             }
         }
-        if (cubes.size() == 0) {
-            logger.info("cube is empty, don't need to create index!");
-            return true;
-        }
-        new Thread() {
-            public void run() {
-                MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
-                connection.publishCubes(cubes, dsInfo);
+        /**palo不需要通知tesseract建立索引，与tesseract直接建立接口**/
+        if (dsInfo != null
+                && dsInfo instanceof SqlDataSourceInfo) {
+            SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo) dsInfo;
+            if (sqlDataSourceInfo.getDataBase() != DataBase.PALO) {
+                if (cubes.size() == 0) {
+                    logger.info("cube is empty, don't need to create index!");
+                    return true;
+                }
+                new Thread() {
+                    public void run() {
+                        MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
+                        connection.publishCubes(cubes, dsInfo);
+                    }
+                }.start();
             }
-        }.start();
+        }
         return true;
     }
     

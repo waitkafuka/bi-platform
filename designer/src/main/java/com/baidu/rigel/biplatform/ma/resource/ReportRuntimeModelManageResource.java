@@ -57,6 +57,7 @@ import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.QueryModelBuildException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
@@ -593,7 +594,12 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ReportRuntimeModel reportRuntimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         ReportDesignModel olapTableDesignModel = reportRuntimeModel.getModel();
         ExtendArea tableArea = olapTableDesignModel.getExtendAreas().get(areaId);
-        Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
+        Map<String, LinkInfo> linkInfoMap = null;
+        if (tableArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            linkInfoMap = olapTableDesignModel.getExtendAreas().get(tableArea.getReferenceAreaId()).getFormatModel().getLinkInfo();
+        } else {
+            linkInfoMap = tableArea.getFormatModel().getLinkInfo();
+        }
         LinkInfo linkInfo = linkInfoMap.get(measureId);
         String planeTableId = linkInfo.getPlaneTableId();
 

@@ -2573,8 +2573,12 @@ public class QueryDataResource extends BaseResource {
             }
             logger.info("[INFO]handle download asyn data cost : " + (System.currentTimeMillis() - begin) + " ms");
         } catch (Exception e) {
+            if (e.getMessage().equals("login info is null.")) {
+                rs.setStatusInfo("没有获取到业务系统登录信息");
+            } else {
+                rs.setStatusInfo("此下载服务目前不可用");
+            }
             rs.setStatus(ResponseResult.FAILED);
-            rs.setStatusInfo("此下载服务目前不可用");
         }
         return rs;
     }
