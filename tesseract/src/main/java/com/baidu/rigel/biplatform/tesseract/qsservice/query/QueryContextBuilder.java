@@ -160,7 +160,7 @@ public class QueryContextBuilder {
                             queryContext.getQueryMeasures().add((MiniCubeMeasure) cube.getMeasures().get(measureName));
                         }
                         // 需要判断，如果cube里面不包含的话，那么这个名称可能是个计算公式，需要进行构造一个虚拟的名称扔进去
-                    }
+                    } 
                 }
                 logger.info("cost:{}ms in build axisTye:{},axisMeta:{}",System.currentTimeMillis() - current,axisType,axisMeta);
                 current = System.currentTimeMillis();
@@ -196,7 +196,7 @@ public class QueryContextBuilder {
 //                        }
 //                        queryContext.getFilterExpression().put(measureCon.getMetaName(), expression);
 //                    }
-                    logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current,condition);
+                    logger.info ("cost:{}ms,in build filter conditon:{}",System.currentTimeMillis() - current, condition);
 //                    logger.info("cost:{}ms,in build filter",System.currentTimeMillis() - current);
                     current = System.currentTimeMillis();
                 }
@@ -291,6 +291,19 @@ public class QueryContextBuilder {
                         }
                     });
                     filterValues.put (members.get (0).getLevel ().getFactTableColumn (), queryNodes);
+                } else if (CollectionUtils.isNotEmpty (uniqueNameList)) {
+                    final Set<String> queryNodes = Sets.newHashSet ();
+                    // 退化维度 不存在跨维度层级问题，如存在，会有问题
+                    String name = MetaNameUtil.getDimNameFromUniqueName (uniqueNameList.get (0));
+                    Dimension dim = cube.getDimensions ().get (name);
+                    if (dim != null && ((MiniCube) cube).getSource ().equals (dim.getTableName ())) {
+                        String[] tmpArray = null;
+                        for (int i = 0; i < uniqueNameList.size (); ++i) {
+                            tmpArray = MetaNameUtil.parseUnique2NameArray (uniqueNameList.get (i));
+                            queryNodes.add (tmpArray[1]);
+                        }
+                    }
+                    filterValues.put (dim.getFacttableColumn (), queryNodes);
                 }
                 return filterValues;
             } catch (Exception e) {

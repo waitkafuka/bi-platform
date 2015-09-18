@@ -1713,6 +1713,15 @@ public class QueryDataResource extends BaseResource {
         resetOtherStatus (runTimeModel);
 
         reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
+        if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            for (ExtendArea area : model.getExtendAreaList()) {
+                if (ExtendAreaType.LITEOLAP_CHART == area.getType()) {
+                    runTimeModel.getLocalContext().put(area.getId(), 
+                            runTimeModel.getLocalContext().get(targetArea.getId()));
+                            break;
+                }
+            }
+        }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, 
                 DataModelUtils.isShowZero(targetArea.getOtherSetting()));
@@ -2019,6 +2028,15 @@ public class QueryDataResource extends BaseResource {
             }
             areaContext.getQueryStatus().add(result);
             reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
+            if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+                for (ExtendArea area : model.getExtendAreaList()) {
+                    if (ExtendAreaType.LITEOLAP_CHART == area.getType()) {
+                        QueryContext liteTableContext = runTimeModel.getLocalContextByAreaId(targetArea.getId());
+                        runTimeModel.getLocalContext().put(area.getId(), liteTableContext);
+                        break;
+                    }
+                }
+            }
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

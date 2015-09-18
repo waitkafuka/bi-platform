@@ -213,7 +213,11 @@ public class QueryDataResourceUtils {
                 OlapElement element = ReportDesignModelUtils.getDimOrIndDefineWithId(reportDesignModel.getSchema(),
                         targetArea.getCubeId(), item.getOlapElementId());
                 if (element instanceof TimeDimension) {
-                    chart = chartBuildService.parseToChart(pivotTable, chartType, true);
+                    if (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
+                        chart = chartBuildService.parseToLiteOlapChart(pivotTable, chartType, true, areaContext.getParams());
+                    } else {
+                        chart = chartBuildService.parseToChart(pivotTable, chartType, true);
+                    }
                 } else {
                     chart = chartBuildService.parseToChart(pivotTable, chartType, false);
                 }

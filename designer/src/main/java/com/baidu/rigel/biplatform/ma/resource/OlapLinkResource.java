@@ -84,7 +84,7 @@ public class OlapLinkResource {
         Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
 
         if (linkInfoMap == null) {
-            linkInfoMap = Maps.newHashMap();
+            linkInfoMap = Maps.newLinkedHashMap();
         }
         List<ReportDesignModel> planeTableList = olapLinkService.getDesignModelListContainsPlaneTable();
         OlapLinkViewObject olapLinkViewObj = new OlapLinkViewObject();
@@ -150,7 +150,7 @@ public class OlapLinkResource {
             Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
             // 如果发现是第一次新设置参数映射关系，则需要new出一个linkInfoMap
             if (linkInfoMap == null) {
-                linkInfoMap = new HashMap<String, LinkInfo>();
+                linkInfoMap = Maps.newLinkedHashMap();
             }
             for (LinkVo4Json linkInfoVo : linkInfoList) {
                 String colunmId = linkInfoVo.getId();

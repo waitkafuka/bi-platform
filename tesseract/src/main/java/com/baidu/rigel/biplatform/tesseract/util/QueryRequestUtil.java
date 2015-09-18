@@ -192,6 +192,10 @@ public class QueryRequestUtil {
         }
 
         SqlQuery result = new SqlQuery();
+        SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo)query.getDataSourceInfo();
+        if (sqlDataSourceInfo.getDataBase() == DataBase.PALO) {
+            result.setAggSql(true);
+        }
         result.setDatabase(((SqlDataSourceInfo) query.getDataSourceInfo()).getDataBase());
         // 处理from
         if (query.getGroupBy() != null) {
@@ -210,7 +214,6 @@ public class QueryRequestUtil {
          * 添加distinct 约束
          */
         result.setDistinct(query.isDistinct());
-
         // 处理select
         // getQueryProperties
         Set<String> selectList = Sets.newLinkedHashSet();
@@ -235,7 +238,6 @@ public class QueryRequestUtil {
                 }
             }
         }
-
         // 处理where
         Map<String, List<String>> andCondition = transQueryRequestAndList2Map(query);
         List<String> whereList = new ArrayList<String>();
@@ -258,8 +260,10 @@ public class QueryRequestUtil {
             if (andCondition.get(key) == null || andCondition.get(key).size() == 0) {
                 continue;
             }
-            result.getSqlSelectColumn(key).setSelect(key);
-            selectList.add(key);
+            if (!result.isAggSql()) {
+                result.getSqlSelectColumn(key).setSelect(key);
+                selectList.add(key);
+            }
             StringBuilder sb = new StringBuilder();
             sb.append(key);
             sb.append(" in (");
@@ -269,10 +273,7 @@ public class QueryRequestUtil {
         }
         result.setWhereList(whereList);
         result.getSelectList().addAll(selectList);
-        SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo)query.getDataSourceInfo();
-        if (sqlDataSourceInfo.getDataBase() == DataBase.PALO) {
-            result.setAggSql(true);
-        }
+
         return result;
     }
 

@@ -191,13 +191,30 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                     logger.info("cube is empty, don't need to create index!");
                     return true;
                 }
+                logger.info("report published successfully, begin to request createIndex.. ,"
+                        + "databasetype:{}, productline:{}, reportName:{}.",
+                        sqlDataSourceInfo.getDataBase().name(),
+                        ContextManager.getProductLine(), model.getName());
                 new Thread() {
                     public void run() {
                         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
-                        connection.publishCubes(cubes, dsInfo);
+                        if (connection.publishCubes(cubes, dsInfo)) {
+                            logger.info("request of createIndex successfully, reportName:{}.", model.getName());
+                        } else {
+                            logger.warn("request of createIndex failed!! reportName:{}.", model.getName());
+                        }
                     }
                 }.start();
+            } else {
+                logger.info("report published successfully, databasetype:{},"
+                        + "productline:{}, reportName:{}.",
+                        sqlDataSourceInfo.getDataBase().name(),
+                        ContextManager.getProductLine(), model.getName());
             }
+        } else {
+            logger.warn("report published successfully, can not found SqlDataSourceInfo,"
+                    + "productline:{}, reportName:{}.",
+                    ContextManager.getProductLine(), model.getName());
         }
         return true;
     }

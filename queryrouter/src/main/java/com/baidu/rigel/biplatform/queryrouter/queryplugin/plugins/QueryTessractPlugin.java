@@ -82,13 +82,7 @@ public class QueryTessractPlugin implements QueryPlugin {
     public DataModel query(QuestionModel questionModel) {
         long current = System.currentTimeMillis();
         Map<String, String> params = new HashMap<String, String>();
-        params.put(QUESTIONMODEL_PARAM_KEY,
-                AnswerCoreConstant.GSON.toJson(questionModel));
-        Map<String, String> headerParams = new HashMap<String, String>();
-        headerParams.put(BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM, TESSERACT_TYPE);
-        
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
-        headerParams.put(BIPLATFORM_PRODUCTLINE_PARAM, configQuestionModel.getDataSourceInfo().getProductLine());
         /**palo数据源不需要使用索引**/
         if (configQuestionModel.getDataSourceInfo() != null
                 && configQuestionModel.getDataSourceInfo() instanceof SqlDataSourceInfo) {
@@ -97,6 +91,11 @@ public class QueryTessractPlugin implements QueryPlugin {
                 configQuestionModel.setUseIndex(false);
             }
         }
+        params.put(QUESTIONMODEL_PARAM_KEY,
+                AnswerCoreConstant.GSON.toJson(configQuestionModel));
+        Map<String, String> headerParams = new HashMap<String, String>();
+        headerParams.put(BIPLATFORM_QUERY_ROUTER_SERVER_TARGET_PARAM, TESSERACT_TYPE);
+        headerParams.put(BIPLATFORM_PRODUCTLINE_PARAM, configQuestionModel.getDataSourceInfo().getProductLine());
         long curr = System.currentTimeMillis();
         logger.info("begin execute query with tesseract ");
         String tesseractHost = "";

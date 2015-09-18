@@ -135,7 +135,6 @@ public class SearchIndexServiceImpl implements SearchService {
         // 5. do search
         // 6. merge result
         // 7. return
-
         if (query == null || StringUtils.isEmpty(query.getCubeId())) {
             LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query", "[query:" + query + "]"));
             throw new IndexAndSearchException(getExceptionMessage (),

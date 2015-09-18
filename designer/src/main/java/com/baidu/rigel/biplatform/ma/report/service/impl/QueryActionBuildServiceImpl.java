@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Resource;
 
@@ -33,11 +34,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
@@ -61,6 +64,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.MeasureTopSetting;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
@@ -76,6 +80,7 @@ import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * 
@@ -264,6 +269,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 }
                 rows.add(row);
                 context.put(row.getOlapElementId(), uniqName);
+                Map<String, Object> contextCopy = DeepcopyUtils.deepCopy(context);
+                context.putAll(this.handleUniqueName4Callback(uniqName, row.getOlapElementId(), contextCopy, cubeId, model));
             }
             for (String indName : indNames) {
                 cols.add(liteOlapArea.listAllItems().get(indName));
@@ -304,6 +311,44 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         
     }
     
+    /**
+     * 
+     * @param uniqueName
+     * @param elementId
+     * @param cubeId
+     * @param model
+     * @return
+     */
+    private Map<String, Object> handleUniqueName4Callback(String uniqueName, String elementId, Map<String, Object> context, 
+            String cubeId, ReportDesignModel model) {
+        Map<String, Object> params = Maps.newHashMap();
+        Map<String, ReportParam> modelParams = model.getParams();
+        String paramName = null;
+        if (modelParams != null && modelParams.size() != 0) {
+            for (ReportParam reportParam : modelParams.values()) {
+                if (reportParam.getElementId().equals(elementId)) {
+                    paramName = reportParam.getName();
+                    break;
+                }
+            }
+        }
+        if (MetaNameUtil.isUniqueName(uniqueName)) {
+            String[] values = MetaNameUtil.parseUnique2NameArray(uniqueName);
+            String paramValue = values[values.length - 1];
+            MiniCube cube = (MiniCube) model.getSchema().getCubes().get(cubeId);
+            if (cube != null) {
+                Map<String, Dimension> dims = cube.getDimensions();
+                if (dims != null && dims.size() != 0 && dims.containsKey(elementId) && paramName != null) {
+                    Dimension dimension = dims.get(elementId);
+                    Level level = dimension.getLevels().values().toArray(new Level[0])[0];
+                    if (level.getType() == LevelType.CALL_BACK) {
+                        params.put(paramName, paramValue);
+                    }
+                }
+            }
+        }
+        return params;
+    }
     /**
      * 修正查询条件
      * @param model
@@ -659,7 +704,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 final Date now = new Date();
                 if (value != null && !value.toString().toLowerCase().contains("all")) {
                     
-                    String[] dataRange = getDateRangeCond (item, element, value);
+                    String[] dataRange = getDateRangeCond (item, element, value, timeRange);
                     
                     String start = dataRange[0];
                     String end = dataRange[1];
@@ -680,16 +725,34 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         calendar.add(Calendar.MONTH, -1);
                         range = new TimeRangeDetail(df.format(calendar.getTime()), end);
                     }
-                    String[] days = new String[range.getDays().length];
-                    StringBuilder message = new StringBuilder();
+                    List<String> tmpDays = Lists.newArrayList ();
+//                    String[] days = null; 
+//                    StringBuilder message = new StringBuilder();
                     String[] detailDays = range.getDays();
+                    TimeDimension tmp = (TimeDimension) element;
                     for (int i = 0; i < detailDays.length; i++) {
-                        days[i] = "[" + element.getName() + "].[" + detailDays[i] + "]";
-                        message.append(" " + days[i]);
+                        if (timeRange && tmp.getDataTimeType () == TimeType.TimeWeekly && i % 7 == 0) {
+                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
+                        } else if (timeRange 
+                                && tmp.getDataTimeType () == TimeType.TimeMonth 
+                                && detailDays[i].endsWith ("01")){
+                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
+                        } else if (timeRange 
+                                && tmp.getDataTimeType () == TimeType.TimeQuarter){
+                            Set<String> quarterStart = Sets.newHashSet ("0101", "0401", "0701", "0901");
+                            String endStr = detailDays[i].substring (4);
+                            if (quarterStart.contains (endStr)) {
+                                tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
+                            }
+                        } else if (timeRange && tmp.getDataTimeType () == TimeType.TimeDay) {
+                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
+                        } else if (!timeRange){
+                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
+                        }
                     }
-                    value = days;
+                    value = tmpDays.toArray (new String[0]);
                     itemValues.put(item, value);
-                    logger.debug("[DEBUG] --- ---" + message);
+                    logger.debug("[DEBUG] --- ---" + tmpDays);
                 } else {
                     itemValues.put (item, value);
                 }
@@ -703,7 +766,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         return itemValues;
     }
 
-    private String[] getDateRangeCond(Item item, OlapElement element, Object value) {
+    private String[] getDateRangeCond(Item item, OlapElement element, Object value, boolean timeRange) {
         String[] dataRange = new String[2];
         try {
             if (MetaNameUtil.isUniqueName (value.toString ())) {
@@ -751,6 +814,33 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 dataRange[1] = parseToDate(String.valueOf(value));
             }
             
+        }
+        // TODO 根据时间粒度，动态调整时间范围
+        try {
+            if (timeRange) {
+                TimeDimension tmp = (TimeDimension) element;
+                SimpleDateFormat format = new SimpleDateFormat ("yyyyMMdd");
+                Date start = format.parse (dataRange[0]);
+                Calendar cal = Calendar.getInstance ();
+                cal.setTime (start);
+                switch(tmp.getDataTimeType ()) {
+                    case TimeWeekly :
+                        cal.add (Calendar.DAY_OF_YEAR, -21);
+                        dataRange[0] = format.format (cal.getTime ());
+                        break;
+                    case TimeMonth :  
+                        cal.add (Calendar.MONTH, -11);
+                        dataRange[0] = format.format (cal.getTime ());
+                        break;
+                    case TimeQuarter :
+                        cal.add (Calendar.MONTH, -9);
+                        dataRange[0] = format.format (cal.getTime ());
+                        break;
+                    default:
+                }
+            }
+        } catch (ParseException e) {
+            logger.warn (e.getMessage (), e);
         }
         return dataRange;
     }

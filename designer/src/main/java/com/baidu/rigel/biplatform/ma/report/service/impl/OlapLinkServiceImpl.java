@@ -12,6 +12,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -199,6 +200,9 @@ public class OlapLinkServiceImpl implements OlapLinkService {
             condUniqueName = condDimValue;
         } else {
             condUniqueName = MetaNameUtil.getNameFromMetaName(condDimValue);
+            if (!StringUtils.isEmpty(condUniqueName) && !MetaNameUtil.isUniqueName(condUniqueName)) {
+                condUniqueName = MetaNameUtil.makeUniqueName(dim, condDimValue);
+            }
         }
         Map<String, String> uniqueMap = buildConditionUniqueMap(condDimValue, condUniqueName);
         conditionMap.put(condDimName, uniqueMap);

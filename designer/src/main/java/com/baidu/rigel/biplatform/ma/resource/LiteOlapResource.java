@@ -216,13 +216,15 @@ public class LiteOlapResource {
             }
         } else {
             // 在from不为空的情况下，先检查是否允许拖拽
-            if (!this.preCheck4Drag(to, targetName, model)) {
+            boolean allowDrag = this.preCheck4Drag(from, to, targetName, model);
+            if (!allowDrag) {
                 ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
                 return rs;
             }
             switch (from) {
                 case ROW:
                     targetItem = logicModel.removeRow(targetName);
+                    to = FILTER;
                     break;
                 case COLUMN:
                     targetItem = logicModel.removeColumn(targetName);
@@ -255,8 +257,8 @@ public class LiteOlapResource {
             }
         } else {
             // TODO 后续考虑优化
-            // 将岗位默认添加到目标轴(指标轴、维度轴）的第一个位置，条件轴除外
-            if (element instanceof Dimension && !FILTER.equals(to)) {
+            // 将岗位默认添加到目标轴(维度轴）的第一个位置，条件轴除外
+            if (element instanceof Dimension) {
                 MiniCubeDimension dimension = (MiniCubeDimension) element;
                 Level level = dimension.getLevels().values().toArray(new Level[0])[0];
                 if (level.getType() == LevelType.CALL_BACK) {
@@ -275,8 +277,10 @@ public class LiteOlapResource {
                     } 
                     break;
                 case FILTER:
-                    targetItem.setPositionType(PositionType.S);
-                    logicModel.addSlice(targetItem, toPosition);
+                    if (toPosition != -1) {
+                        targetItem.setPositionType(PositionType.S);
+                        logicModel.addSlice(targetItem, toPosition);
+                    }
                     break;
                 default:
                     return ResourceUtils.getErrorResult("不认识的位置！To: " + to, 1);
@@ -298,7 +302,7 @@ public class LiteOlapResource {
      * @param model
      * @return true表示可以拖拽；false表示不可以
      */
-    private boolean preCheck4Drag(String to, String elementId, ReportDesignModel model) {
+    private boolean preCheck4Drag(String from, String to, String elementId, ReportDesignModel model) {
         // 1.检查是否可以拖出区域，此时to为空
         if (StringUtils.isEmpty(to)) {
             Map<String, ReportParam> reportParams = model.getParams();
@@ -307,7 +311,11 @@ public class LiteOlapResource {
                 for (String key : reportParams.keySet()) {
                     ReportParam param = reportParams.get(key);
                     if (param.getElementId().equals(elementId) && param.isNeeded()) {
-                        return false;
+                        if(ROW.equals(from)) {
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 }
             }

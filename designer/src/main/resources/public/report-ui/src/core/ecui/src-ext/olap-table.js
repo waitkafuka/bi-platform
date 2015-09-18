@@ -861,7 +861,7 @@
         }
         // 增加判断逻辑，如果改行是手动汇总行，那么linkBridge也不能有点击，否则后台没法处理
 //        else if (defItem && defItem.linkBridge && wrap.cellId && wrap.cellId.indexOf('[SUMMARY_NODE].[ALL]') < 0) {
-        else if (value !== '-' && defItem && defItem.linkBridge) {
+        else if ((value + '').indexOf('-') === -1 && defItem && defItem.linkBridge && !defItem.format) {
             attrStr.push('data-cell-link="true"');
             value = value.split(',');
             // value = '<a href="#" class="' + type + '-cell-link" data-cell-link-bridge-a="1">' + value + '</a>';
@@ -876,6 +876,14 @@
                 );
             }
             value = str.join('&nbsp;&nbsp;');
+        }
+        else if ((value + '').indexOf('-') === -1 && defItem && defItem.linkBridge && defItem.format) {
+            attrStr.push('data-cell-link="true"');
+            str.push([
+                '<a href="#" class="', type, '-cell-link" data-cell-link-bridge-a="', i, '">',
+                    value,
+                '</a>'
+            ].join(''));
         }
 
         // 条件格式
