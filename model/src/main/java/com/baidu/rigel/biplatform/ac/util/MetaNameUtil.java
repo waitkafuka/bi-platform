@@ -18,6 +18,8 @@
  */
 package com.baidu.rigel.biplatform.ac.util;
 
+import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,6 +30,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.google.common.collect.Lists;
 
 /**
  * 元数据名称操作的工具类
@@ -130,17 +133,9 @@ public class MetaNameUtil {
         if (!isUniqueName(uniqueName)) {
             throw new IllegalArgumentException("uniqueName is illegal:" + uniqueName);
         }
-        String preSplitUniqueName = uniqueName;
-        if (preSplitUniqueName.startsWith("[")) {
-            preSplitUniqueName = preSplitUniqueName.substring(1);
-        }
-        if (preSplitUniqueName.endsWith("]")) {
-            preSplitUniqueName = preSplitUniqueName.substring(0, preSplitUniqueName.length() - 2);
-        }
-        // 先按照].[去截取，以后考虑更好方法
-        return StringUtils.split(uniqueName, "].[");
+        uniqueName = uniqueName.substring(1, uniqueName.lastIndexOf("]"));
+        return StringUtils.splitByWholeSeparator(uniqueName, "].[");
     }
-    
     
     /** 
      * getNameFromMetaName 从元数据名称中获取名称信息

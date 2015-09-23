@@ -45,23 +45,23 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.co
 @Service("jdbcHandler")
 @Scope("prototype")
 public class JdbcHandler {
-
+    
     /**
      * Logger
      */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    
     /**
      * jdbcTemplate
      */
     private JdbcTemplate jdbcTemplate = null;
-
+    
     /**
      * dataSourcePoolService
      */
-    @Resource(name="localDataSourcePoolServiceImpl")
+    @Resource(name = "localDataSourcePoolServiceImpl")
     private DataSourcePoolService dataSourcePoolService;
-
+    
     /**
      * 
      * initJdbcTemplate
@@ -74,9 +74,8 @@ public class JdbcHandler {
         try {
             DataSource dataSource = (SqlDataSourceWrap) this.dataSourcePoolService
                     .getDataSourceByKey(dataSourceInfo);
-
-            if (jdbcTemplate == null
-                    || !this.jdbcTemplate.getDataSource().equals(dataSource)) {
+            
+            if (jdbcTemplate == null || !this.jdbcTemplate.getDataSource().equals(dataSource)) {
                 this.jdbcTemplate = null;
                 jdbcTemplate = new JdbcTemplate(dataSource);
             }
@@ -84,10 +83,9 @@ public class JdbcHandler {
             e.printStackTrace();
             logger.error("getDataSource error:" + e.getCause().getMessage());
         }
-        logger.info("initJdbcTemplate cost:"
-                + (System.currentTimeMillis() - begin) + "ms");
+        logger.info("initJdbcTemplate cost:" + (System.currentTimeMillis() - begin) + "ms");
     }
-
+    
     /**
      * 通过sql查询数据库中的数据
      * 
@@ -97,26 +95,27 @@ public class JdbcHandler {
      *            dataSourceInfo
      * @return List<Map<String, Object>> formd tableresult data
      */
-    public List<Map<String, Object>> queryForList(String sql,
-            List<Object> whereValues, DataSourceInfo dataSourceInfo) {
+    public List<Map<String, Object>> queryForList(String sql, List<Object> whereValues,
+            DataSourceInfo dataSourceInfo) {
         initJdbcTemplate(dataSourceInfo);
         long begin = System.currentTimeMillis();
         List<Map<String, Object>> result = null;
         try {
-            logger.info("queryId:{} sql: {}", QueryRouterContext
-                    .getQueryId(), this.toPrintString(sql, whereValues));
+            logger.info("queryId:{} sql: {}", QueryRouterContext.getQueryId(),
+                    this.toPrintString(sql, whereValues));
             result = this.jdbcTemplate.queryForList(sql, whereValues.toArray());
         } catch (Exception e) {
-            logger.error("queryId:{} select sql error:{}",
-                    QueryRouterContext.getQueryId(), e.getCause().getMessage());
+            logger.error("queryId:{} select sql error:{}", QueryRouterContext.getQueryId(), e
+                    .getCause().getMessage());
             throw e;
         } finally {
-            logger.info("queryId:{} select sql cost:{} ms",
-                    QueryRouterContext.getQueryId(), System.currentTimeMillis() - begin);
+            logger.info("queryId:{} select sql cost:{} ms resultsize:{}",
+                    QueryRouterContext.getQueryId(), System.currentTimeMillis() - begin,
+                    result == null ? null : result.size());
         }
         return result;
     }
-
+    
     /**
      * queryForInt
      * 
@@ -128,30 +127,27 @@ public class JdbcHandler {
      *            dataSourceInfo
      * @return int count
      */
-    public int queryForInt(String sql, List<Object> whereValues,
-            DataSourceInfo dataSourceInfo) {
+    public int queryForInt(String sql, List<Object> whereValues, DataSourceInfo dataSourceInfo) {
         initJdbcTemplate(dataSourceInfo);
         long begin = System.currentTimeMillis();
         Map<String, Object> result = null;
         int count = 0;
         try {
-            logger.info("queryId:{} count sql: {}", QueryRouterContext
-                    .getQueryId(), this.toPrintString(sql, whereValues));
+            logger.info("queryId:{} count sql: {}", QueryRouterContext.getQueryId(),
+                    this.toPrintString(sql, whereValues));
             result = this.jdbcTemplate.queryForMap(sql, whereValues.toArray());
-            count = Integer.valueOf(result.values().toArray()[0].toString())
-                    .intValue();
+            count = Integer.valueOf(result.values().toArray()[0].toString()).intValue();
         } catch (Exception e) {
-            logger.error("queryId:{} select sql error:{}",
-                    QueryRouterContext.getQueryId(), e.getCause().getMessage());
+            logger.error("queryId:{} select sql error:{}", QueryRouterContext.getQueryId(), e
+                    .getCause().getMessage());
             throw e;
         } finally {
             logger.info("queryId:{} select count sql cost:{} ms, result: {}",
-                    QueryRouterContext.getQueryId(), System.currentTimeMillis()
-                            - begin, count);
+                    QueryRouterContext.getQueryId(), System.currentTimeMillis() - begin, count);
         }
         return count;
     }
-
+    
     /**
      * toPrintString
      * 
@@ -169,13 +165,11 @@ public class JdbcHandler {
         int valuesCount = 0;
         if (!StringUtils.isEmpty(printSql)) {
             for (Object value : objects) {
-                valuesCount ++;
+                valuesCount++;
                 if (value instanceof String) {
-                    printSql = StringUtils.replaceOnce(printSql, "?", "'"
-                            + value.toString() + "'");
+                    printSql = StringUtils.replaceOnce(printSql, "?", "'" + value.toString() + "'");
                 } else {
-                    printSql = StringUtils.replaceOnce(printSql, "?",
-                            value.toString());
+                    printSql = StringUtils.replaceOnce(printSql, "?", value.toString());
                 }
                 if (valuesCount > 2000) {
                     return printSql;

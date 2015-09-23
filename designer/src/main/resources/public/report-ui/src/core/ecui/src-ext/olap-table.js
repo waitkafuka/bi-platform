@@ -852,7 +852,7 @@
         if (wrap.indent) {
             // margin-left会用来判断indent的点击事件，所以结构不能变
             attrStr.push('data-indent="' + wrap.indent + '"');
-            indentStyle = 'margin-left:' + (parseInt(TREE_INDENT * wrap.indent) - 15) + 'px;';
+            indentStyle = 'margin-left:' + parseInt(TREE_INDENT * wrap.indent, 10) + 'px;';
         }
 
         if (wrap.drillByLink) {
@@ -879,11 +879,7 @@
         }
         else if ((value + '').indexOf('-') === -1 && defItem && defItem.linkBridge && defItem.format) {
             attrStr.push('data-cell-link="true"');
-            str.push([
-                '<a href="#" class="', type, '-cell-link" data-cell-link-bridge-a="', i, '">',
-                    value,
-                '</a>'
-            ].join(''));
+            value = '<a href="#" class="' + type + '-cell-link" data-cell-link-bridge-a="0">' + value + '</a>';
         }
 
         // 条件格式

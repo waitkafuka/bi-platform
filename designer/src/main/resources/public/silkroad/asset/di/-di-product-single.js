@@ -28141,7 +28141,7 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
         if (wrap.indent) {
             // margin-left会用来判断indent的点击事件，所以结构不能变
             attrStr.push('data-indent="' + wrap.indent + '"');
-            indentStyle = 'margin-left:' + (parseInt(TREE_INDENT * wrap.indent) - 15) + 'px;';
+            indentStyle = 'margin-left:' + parseInt(TREE_INDENT * wrap.indent, 10) + 'px;';
         }
 
         if (wrap.drillByLink) {
@@ -28156,11 +28156,13 @@ _nDay       - 从本月1号开始计算的天数，如果是上个月，是负�
             // value = '<a href="#" class="' + type + '-cell-link" data-cell-link-bridge-a="1">' + value + '</a>';
             var str = [];
             for (var i = 0; i < value.length; i ++) {
-                str.push([
-                    '<a href="#" class="', type, '-cell-link" data-cell-link-bridge-a="', i, '">',
-                    value[i],
-                    '</a>'
-                ].join(''));
+                str.push(
+                    [
+                        '<a href="#" class="', type, '-cell-link" data-cell-link-bridge-a="', i, '">',
+                        value[i],
+                        '</a>'
+                    ].join('')
+                );
             }
             value = str.join('&nbsp;&nbsp;');
         }

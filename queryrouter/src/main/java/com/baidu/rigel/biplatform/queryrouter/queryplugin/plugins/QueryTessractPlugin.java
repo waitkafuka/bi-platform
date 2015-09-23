@@ -114,7 +114,7 @@ public class QueryTessractPlugin implements QueryPlugin {
             dataModel.setOthers(responseResult.getStatusInfo());
             return dataModel;
         }
-        throw new MiniCubeQueryException("query occur error,msg:"
+        throw new MiniCubeQueryException("queryId:" + questionModel.getQueryId() + " query Tesseract occur error,msg:"
                 + responseResult.getStatusInfo());
 
     }

@@ -68,6 +68,11 @@ define(
              * @public
              */
             getFixReportTaskMgrList: function (event) {
+                var savestate = window.dataInsight.main.canvas.savestate;
+                if (savestate === 0) {
+                    dialog.warning('您未进行保存，请先进行保存。');
+                    return;
+                }
                 var that = this;
 
                 // 如果画布中存在以下组件，就不能建立固定报表
@@ -143,14 +148,20 @@ define(
                     if (!isRunNow) {
                         // TODO:校验
                         var hour = $('.j-fix-report-mgr .j-time-hour').val();
-                        hour && (hour = Number(hour.trim()));
-                        if (hour > 24) {
+                        var numHour;
+                        var numMinute;
+                        if (hour) {
+                            numHour = Number(hour.trim());
+                        }
+                        if (numHour > 24) {
                             dialog.alert('请输入合法的时间');
                             return;
                         }
                         var minute = $('.j-fix-report-mgr .j-time-minute').val();
-                        minute && (minute = Number(minute.trim()));
-                        if (minute > 60) {
+                        if (minute) {
+                            numMinute = Number(minute.trim());
+                        }
+                        if (numMinute > 60) {
                             dialog.alert('请输入合法的时间');
                             return;
                         }

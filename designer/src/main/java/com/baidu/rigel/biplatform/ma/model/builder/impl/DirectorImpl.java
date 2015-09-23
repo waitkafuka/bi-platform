@@ -381,19 +381,20 @@ public class DirectorImpl implements Director {
             });
         // 同环比、计算列处理
         oriCube.getMeasures().forEach((k, v) -> {
-            if (v instanceof CallbackMeasure) {
+            if (v instanceof CallbackMeasure || v.getType() == MeasureType.SR || v.getType() == MeasureType.RR) {
                 newMeasures.put(v.getId(), v);
             }
-            if (v.getType() == MeasureType.CAL || v.getType() == MeasureType.SR || v.getType() == MeasureType.RR) {
-                ExtendMinicubeMeasure m = (ExtendMinicubeMeasure) v;
-                // if (checkRefMeasuer(m.getRefIndNames(), newMeasures)) {
-                // newMeasures.put(v.getId(), v);
-                // }
-                if (checkRefMeasuer(m, newMeasures)) {
-                    newMeasures.put(v.getId(), v);
+            // if (v.getType() == MeasureType.CAL || v.getType() == MeasureType.SR || v.getType() == MeasureType.RR) {
+                if (v.getType() == MeasureType.CAL) {
+                    ExtendMinicubeMeasure m = (ExtendMinicubeMeasure) v;
+                    // if (checkRefMeasuer(m.getRefIndNames(), newMeasures)) {
+                    // newMeasures.put(v.getId(), v);
+                    // }
+                    if (checkRefMeasuer(m, newMeasures)) {
+                        newMeasures.put(v.getId(), v);
+                    }
                 }
-            }
-        });
+            });
 
         return newMeasures;
     }

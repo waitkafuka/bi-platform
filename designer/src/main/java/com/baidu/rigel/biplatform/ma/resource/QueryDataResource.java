@@ -70,6 +70,7 @@ import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.ac.util.ModelConstants;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.api.client.service.FileService;
 import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
@@ -1190,6 +1191,9 @@ public class QueryDataResource extends BaseResource {
                 logger.warn(msg);
                 DIReportChart chart = new DIReportChart();
                 return ResourceUtils.getCorrectResult(msg, chart);
+            }
+            if (targetArea.getType () == ExtendAreaType.LITEOLAP_CHART) {
+                areaContext.getParams().put(ModelConstants.NEED_SPECIAL_TRADE_TIME, "true");
             }
         } else {
             action = queryBuildService.generateTableQueryAction(model, areaId, areaContext.getParams());
