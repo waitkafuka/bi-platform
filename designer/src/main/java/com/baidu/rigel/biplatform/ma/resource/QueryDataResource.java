@@ -18,6 +18,8 @@ package com.baidu.rigel.biplatform.ma.resource;
 import java.io.File;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -793,6 +795,9 @@ public class QueryDataResource extends BaseResource {
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
 
         ReportDesignModel model = runTimeModel.getModel();
+        model.getExtendAreas().forEach((k, v) -> {
+            reportModelCacheManager.updateAreaContext(reportId, k, new ExtendAreaContext());
+        });
         Map<String, String> params = Maps.newHashMap();
         if (model.getParams() != null) {
             model.getParams().forEach((k, v) -> {
@@ -1176,6 +1181,7 @@ public class QueryDataResource extends BaseResource {
                 action =
                         queryBuildService.generateChartQueryAction(model, areaId, areaContext.getParams(), indNames,
                                 runTimeModel);
+                
                 if (action == null) {
                     return ResourceUtils.getErrorResult("该区域未包含任何维度信息", 1);
                 }
@@ -1197,6 +1203,17 @@ public class QueryDataResource extends BaseResource {
             }
         } else {
             action = queryBuildService.generateTableQueryAction(model, areaId, areaContext.getParams());
+            List<Map<String, String>> breadPath = areaContext.getCurBreadCrumPath();
+            if (!CollectionUtils.isEmpty(breadPath)) {
+                String uniqueName = breadPath.get(breadPath.size() - 1).get("uniqName");
+                if (uniqueName.startsWith("@")) {
+                    uniqueName = uniqueName.substring(1, uniqueName.length() - 1);
+                }
+                Cube cube = model.getSchema().getCubes().get(targetArea.getCubeId());
+                Cube transformCube = QueryUtils.transformCube(cube);
+                Dimension dim = transformCube.getDimensions().get(MetaNameUtil.getDimNameFromUniqueName(uniqueName));
+                action.getDrillDimValues().put(logicModel.getItem(dim.getId()), uniqueName);
+            }
             if (action != null) {
                 action.setChartQuery(false);
             }
@@ -2652,8 +2669,22 @@ public class QueryDataResource extends BaseResource {
                             && v.toString().contains("granularity")) {
                         try {
                             JSONObject json = new JSONObject(v.toString());
-                            timeRange.append(json.getString("start") + "至" + json.getString("end"));
+                            String endDay = json.getString("end");
+                            if (v.toString().contains("\"granularity\":\"W\"")) {
+                                // 如果是周，需要显示周一到周末的时间段。
+                                String startDay = json.getString("start");
+                                Calendar calendar = Calendar.getInstance();
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                                calendar.setTime(simpleDateFormat.parse(startDay));
+                                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                                calendar.add(Calendar.WEEK_OF_YEAR, 1);
+                                endDay = simpleDateFormat.format(calendar.getTime());
+                            }
+                            if (!timeRange.toString().contains(json.getString("start"))) {
+                                timeRange.append(json.getString("start") + "至" + endDay);
+                            }
                         } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 });

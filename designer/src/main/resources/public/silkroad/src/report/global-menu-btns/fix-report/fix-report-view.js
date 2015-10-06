@@ -137,7 +137,7 @@ define(
                 $btnOk.unbind();
                 $btnOk.click(function () {
                     var executeStrategy;
-                    var taskId = $('.j-fix-report-mgr .j-tas-id').attr('task-id');
+                    var taskId = $('.j-fix-report-mgr .j-task-id').attr('task-id');
                     var taskName = $('.j-fix-report-mgr .j-task-id').val();
                     taskName && (taskName = taskName.trim());
                     if (!taskName) {
@@ -147,22 +147,31 @@ define(
                     var isRunNow = $('.j-fix-report-mgr .j-isRunNow').is(':checked');
                     if (!isRunNow) {
                         // TODO:校验
-                        var hour = $('.j-fix-report-mgr .j-time-hour').val();
+                        var hour = $('.j-fix-report-mgr .j-time-hour').val().trim();
                         var numHour;
                         var numMinute;
                         if (hour) {
-                            numHour = Number(hour.trim());
+                            numHour = Number(hour);
+                            if (numHour > 24 || numHour < 0) {
+                                dialog.alert('请输入合法的时间');
+                                return;
+                            }
                         }
-                        if (numHour > 24) {
-                            dialog.alert('请输入合法的时间');
+                        else {
+                            dialog.alert('小时不能为空');
                             return;
                         }
-                        var minute = $('.j-fix-report-mgr .j-time-minute').val();
+
+                        var minute = $('.j-fix-report-mgr .j-time-minute').val().trim();
                         if (minute) {
-                            numMinute = Number(minute.trim());
+                            numMinute = Number(minute);
+                            if (numMinute > 60 || numMinute < 0) {
+                                dialog.alert('请输入合法的时间');
+                                return;
+                            }
                         }
-                        if (numMinute > 60) {
-                            dialog.alert('请输入合法的时间');
+                        else {
+                            dialog.alert('分钟不能为空');
                             return;
                         }
                         var granularity = $('.j-fix-report-mgr .j-granularity-parent').val();

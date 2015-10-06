@@ -1,3 +1,6 @@
+
+
+
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.util.ArrayList;
@@ -152,6 +155,7 @@ public class OlapLinkResource {
             if (linkInfoMap == null) {
                 linkInfoMap = Maps.newLinkedHashMap();
             }
+            Map<String, LinkInfo> finalResultMap = Maps.newLinkedHashMap();
             for (LinkVo4Json linkInfoVo : linkInfoList) {
                 String colunmId = linkInfoVo.getId();
                 LinkInfo linkInfo = linkInfoMap.get(colunmId);
@@ -161,9 +165,9 @@ public class OlapLinkResource {
                 linkInfo.setPlaneTableId(linkInfoVo.getSelectedTable());
                 linkInfo.setColunmSourceId(colunmId);
                 linkInfo.setColunmSourceCaption(linkInfoVo.getText());
-                linkInfoMap.put(colunmId, linkInfo);
+                finalResultMap.put(colunmId, linkInfo);
             }
-            tableArea.getFormatModel().setLinkInfo(linkInfoMap);
+            tableArea.getFormatModel().setLinkInfo(finalResultMap);
             reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
             rs = ResourceUtils.getResult("success", null, "add link success!");
         }

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -181,29 +182,31 @@ public class QueryDataResourceUtils {
             if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE) {
                 logicModel = reportDesignModel.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
             }
-            if (logicModel.getRows ().length >= 2) {
-                Map<String, String> root =  genRootDimCaption(pivotTable, logicModel, 
-                        areaContext.getParams(), cube);
-                List<Map<String, String>> tmp = Lists.newArrayList ();
-                tmp.add (root);
+            if (logicModel.getRows().length >= 2) {
+                if (CollectionUtils.isEmpty(areaContext.getCurBreadCrumPath())) {
+                    Map<String, String> root = genRootDimCaption(pivotTable, logicModel, areaContext.getParams(), cube);
+                    List<Map<String, String>> tmp = Lists.newArrayList();
+                    tmp.add(root);
                     areaContext.setCurBreadCrumPath(tmp);
-    //                    resultMap.put("mainDimNodes", dims);
-                        // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
+                    // resultMap.put("mainDimNodes", dims);
+                    // 在运行时上下文保存当前区域的根节点名称 方便面包屑展示路径love
                     if (!root.get("uniqName").toLowerCase().contains("all")) {
-                        root.put("uniqName", this.genRootUniqueName (root.get("uniqName")));
+                        root.put("uniqName", this.genRootUniqueName(root.get("uniqName")));
                         root.put("showName", "全部");
-    //                        runTimeModel.getContext().put(vertualDimKey, action);
+                        // runTimeModel.getContext().put(vertualDimKey, action);
                     }
                     mainDims.add(root);
                     Collections.reverse(mainDims);
                     areaContext.setCurBreadCrumPath(mainDims);
                     resultMap.put("mainDimNodes", mainDims);
                 } else {
-                    areaContext.setCurBreadCrumPath (Lists.newArrayList ());
-                    resultMap.remove ("mainDimNodes");
-//                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
+                    areaContext.setCurBreadCrumPath(areaContext.getCurBreadCrumPath());
+                    resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath());
+//                    resultMap.remove("mainDimNodes");
+                    // resultMap.put("mainDimNodes", areaContext.getCurBreadCrumPath ());
                 }
-//            runTimeModel.getContext().put(areaId, root);
+                // runTimeModel.getContext().put(areaId, root);
+            } 
         } else if (targetArea.getType() == ExtendAreaType.CHART 
                 || targetArea.getType() == ExtendAreaType.LITEOLAP_CHART) {
             DIReportChart chart = null;
@@ -248,7 +251,7 @@ public class QueryDataResourceUtils {
             String uniqueName = params.get (item.getOlapElementId ()).toString ();
             Dimension dim = cube.getDimensions ().get (item.getOlapElementId ());
             // for callback
-            if (!MetaNameUtil.isUniqueName (uniqueName) && dim.getType () == DimensionType.CALLBACK) {
+            if (!MetaNameUtil.isUniqueName (uniqueName)) {
                 uniqueName = "[" + dim.getName () + "].[" + uniqueName + "]";
             }
             root.put("uniqName", genRootUniqueName (uniqueName));

@@ -374,6 +374,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     private QueryAction generateQueryAction(Schema schema, String cubeId,
             LogicModel targetLogicModel, Map<String, Object> context,
             String areaId, boolean needTimeRange, ReportDesignModel reportModel) {
+        
         final Cube cube = schema.getCubes().get(cubeId);
         if (cube == null) {
             return null;
@@ -411,6 +412,20 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube4QuestionModel);
         action.setSlices(slices);
         
+        if (needTimeRange) {
+        // 这里需要将lite-olap中的图的维度修改,将column的item放入到过滤轴上
+            Map<Item, Object> columnsTmp = Maps.newLinkedHashMap();
+            for (Item item : columns.keySet()) {
+                OlapElement element = ItemUtils.getOlapElementByItem(item, schema, cubeId);
+                if (element instanceof Dimension) {
+                    slices.put(item, columns.get(item));
+                } else {
+                    columnsTmp.put(item, columns.get(item));
+                }
+            }
+            action.setColumns(columnsTmp);
+            action.setSlices(slices);
+        }
         fillFilterBlankDesc (areaId, reportModel, action);
         ExtendArea area = reportModel.getExtendById(areaId);
         QueryAction.OrderDesc orderDesc = null;
@@ -434,6 +449,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 it.remove ();
             }
         }
+
         return action;
     }
 

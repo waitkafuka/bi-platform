@@ -1039,7 +1039,7 @@ public final class DataModelUtils {
      * @return
      */
     private static int getIndentOfHeadField(HeadField headField, int indent) {
-        if (headField.getParent() != null) {
+        if (headField != null && (headField.getParent() != null || headField.isHasChildren())) {
             return getIndentOfHeadField(headField.getParent(), indent + 1);
         } else {
             return indent;
