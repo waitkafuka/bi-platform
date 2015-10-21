@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.ResultSet;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
+import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo.SeriesUnitType;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.BaseTable;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
@@ -56,7 +58,7 @@ import com.google.common.collect.Maps;
 public class QueryDataResourceUtils {
 
     /**
-     * 日志对象
+     * 日志对象f
      */
     private static final Logger LOG = LoggerFactory
             .getLogger(QueryDataResourceUtils.class);    
@@ -82,7 +84,7 @@ public class QueryDataResourceUtils {
      * @return
      */
     public ResponseResult parseQueryResultToResponseResult(ReportRuntimeModel runtimeModel, ExtendArea targetArea,
-            ResultSet result, ExtendAreaContext areaContext, QueryAction action ) {
+            ResultSet result, ExtendAreaContext areaContext, QueryAction action) {
         BaseTable baseTable = null;
         ReportDesignModel designModel = runtimeModel.getModel();
 
@@ -151,9 +153,8 @@ public class QueryDataResourceUtils {
         Map<String, Object> resultMap = Maps.newHashMap();
         ReportDesignModel reportDesignModel = runtimeModel.getModel();
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
-            Map<String, Object> otherSetting = targetArea.getOtherSetting();
-            boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
-            DataModelUtils.decorateTable(formatModel, pivotTable, isShowZero);
+
+            DataModelUtils.decorateTable(formatModel, pivotTable, targetArea, reportDesignModel);
             /**
              * 每次查询以后，清除选中行，设置新的
              */
@@ -223,6 +224,15 @@ public class QueryDataResourceUtils {
                     }
                 } else {
                     chart = chartBuildService.parseToChart(pivotTable, chartType, false);
+                }
+                
+                if (CollectionUtils.isNotEmpty(chart.getSeriesData())
+                        && MapUtils.isNotEmpty(areaContext.getParams())
+                        && areaContext.getParams().get("displayName") != null) {
+                    // 如果前端有设置，传入displayName，那么显示前端传入的图例信息
+                    SeriesDataUnit seriesDataUnit = chart.getSeriesData().get(0);
+                    seriesDataUnit.setName(areaContext.getParams().get("displayName").toString()
+                            + "-" + seriesDataUnit.getName());
                 }
             } else {
                 chart = chartBuildService.parseToChart(pivotTable, chartType, false);

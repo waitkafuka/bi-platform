@@ -1744,8 +1744,7 @@ public class QueryDataResource extends BaseResource {
             }
         }
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, 
-                DataModelUtils.isShowZero(targetArea.getOtherSetting()));
+        DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, targetArea, model);
         resultMap.put("pivottable", table);
         setTableResultProperty(reportId, table, resultMap);
         ResponseResult rs =
@@ -2065,8 +2064,7 @@ public class QueryDataResource extends BaseResource {
 
         if (targetArea.getType() == ExtendAreaType.TABLE || targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             // TODO 临时解决方案，此处应将查询条件设置到QuestionModel中
-            DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, 
-                    DataModelUtils.isShowZero(targetArea.getOtherSetting()));
+            DataModelUtils.decorateTable(getFormatModel(model, targetArea), table, targetArea, model);
             // resultMap.put("rowCheckMin", 1);
             // resultMap.put("rowCheckMax", 5);
             if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
@@ -2190,7 +2188,38 @@ public class QueryDataResource extends BaseResource {
             rs.setStatusInfo("OK");
             return rs;
         }
+        
+        // TODO dirty solution 临时展现3级，后续修改此接口 yichao.jiang
         List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
+        List<Member> callbackSecondLevelMembers = Lists.newArrayList();
+        List<Member> callbackThirdLevelMembers = Lists.newArrayList();
+        if (isCallbackDim(newDim) && !CollectionUtils.isEmpty(members)) {
+            for (int i = 0; i < members.size(); i++) {
+                List<Member> firstLevelMembers = members.get(i);
+                if (!CollectionUtils.isEmpty(firstLevelMembers)) {
+                    for (int j = 0; j < firstLevelMembers.size(); j++) {
+                        MiniCubeMember member = (MiniCubeMember) firstLevelMembers.get(j);
+                        List<Member> secondLevelMembers = member.getChildren();
+                        callbackSecondLevelMembers.addAll(secondLevelMembers);
+                        if (!CollectionUtils.isEmpty(secondLevelMembers)) {
+                            for (int k = 0; k< secondLevelMembers.size(); k++) {
+                                MiniCubeMember childMember = (MiniCubeMember) secondLevelMembers.get(k);
+                                List<Member> thirdLevelMembers = childMember.getChildren();
+                                if (!CollectionUtils.isEmpty(thirdLevelMembers)) {
+                                    callbackThirdLevelMembers.addAll(thirdLevelMembers);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(callbackSecondLevelMembers)) {
+            members.add(callbackSecondLevelMembers);
+        }
+        if (!CollectionUtils.isEmpty(callbackThirdLevelMembers)) {
+            members.add(callbackThirdLevelMembers);
+        }
         QueryContext context = runTimeModel.getLocalContextByAreaId(area.getId());
         List<DimensionMemberViewObject> datas = Lists.newArrayList();
         final AtomicInteger i = new AtomicInteger(1);
@@ -2289,8 +2318,7 @@ public class QueryDataResource extends BaseResource {
         if (area.getType () == ExtendAreaType.LITEOLAP_TABLE) {
             area = reportModel.getExtendById (area.getReferenceAreaId ());
         }
-        DataModelUtils.decorateTable(area.getFormatModel(), table, 
-                DataModelUtils.isShowZero(targetArea.getOtherSetting()));
+        DataModelUtils.decorateTable(area.getFormatModel(), table, area, reportModel);
         if (table.getDataSourceColumnBased().size() == 0) {
             ResponseResult tmp = new ResponseResult();
             tmp.setStatus(1);
@@ -2431,6 +2459,12 @@ public class QueryDataResource extends BaseResource {
         ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
         // 通过上一次的查询条件按获取Questionmodel
         QuestionModel questionModel = this.getQuestionModelFromQueryAction(reportId, areaId, request);
+        // 在线下载需要添加6万条限制
+        PageInfo pageInfo = new PageInfo();
+        pageInfo.setCurrentPage(0);
+        pageInfo.setPageSize(60000);
+        pageInfo.setTotalRecordCount(0);
+        questionModel.setPageInfo(pageInfo);
         // 下载类型
         // String downloadType = DownloadType.PLANE_TABLE_ONLINE.getName();
         // 获取下载服务
@@ -2612,11 +2646,7 @@ public class QueryDataResource extends BaseResource {
             }
             logger.info("[INFO]handle download asyn data cost : " + (System.currentTimeMillis() - begin) + " ms");
         } catch (Exception e) {
-            if (e.getMessage().equals("login info is null.")) {
-                rs.setStatusInfo("没有获取到业务系统登录信息");
-            } else {
-                rs.setStatusInfo("此下载服务目前不可用");
-            }
+            rs.setStatusInfo("此下载服务目前不可用");
             rs.setStatus(ResponseResult.FAILED);
         }
         return rs;
@@ -2669,19 +2699,70 @@ public class QueryDataResource extends BaseResource {
                             && v.toString().contains("granularity")) {
                         try {
                             JSONObject json = new JSONObject(v.toString());
+                            String startDay = json.getString("start");
                             String endDay = json.getString("end");
-                            if (v.toString().contains("\"granularity\":\"W\"")) {
-                                // 如果是周，需要显示周一到周末的时间段。
-                                String startDay = json.getString("start");
-                                Calendar calendar = Calendar.getInstance();
-                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                                calendar.setTime(simpleDateFormat.parse(startDay));
-                                calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-                                calendar.add(Calendar.WEEK_OF_YEAR, 1);
-                                endDay = simpleDateFormat.format(calendar.getTime());
+                            String granularity = json.getString("granularity");
+                            Calendar calendarStart = Calendar.getInstance();
+                            Calendar calendarEnd = Calendar.getInstance();
+                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+                            calendarStart.setTime(simpleDateFormat.parse(startDay));
+                            calendarEnd.setTime(simpleDateFormat.parse(endDay));
+                            SimpleDateFormat simpleDateFormatOutput = new SimpleDateFormat("yyyy-MM-dd");
+                            startDay = simpleDateFormatOutput.format(calendarStart.getTime());
+                            endDay = simpleDateFormatOutput.format(calendarEnd.getTime());
+                            int month = calendarStart.get(Calendar.MONTH) + 1;
+                            String appendTmp = "";
+                            switch (granularity) {
+                                case "D":{
+                                    // 如果是日
+                                    if (!startDay.equals(endDay)) {
+                                    // 多选日的情况
+                                        appendTmp = startDay + "至" + endDay;
+                                    } else {
+                                    // 单选日的情况
+                                        appendTmp = startDay;
+                                    }
+                                    break;
+                                }
+                                case "W":{
+                                    // 如果是周，需要显示周一到周末的时间段。
+                                    calendarStart.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                                    calendarStart.add(Calendar.WEEK_OF_YEAR, 1);
+                                    String weekEndDay = simpleDateFormatOutput.format(calendarStart.getTime());
+                                    
+                                    calendarStart.add(Calendar.WEEK_OF_YEAR, -1);
+                                    calendarStart.add(Calendar.DAY_OF_WEEK, 1);
+                                    String weekStartDay = simpleDateFormatOutput.format(calendarStart.getTime());
+                                    appendTmp = weekStartDay + "至" + weekEndDay;
+                                    break;
+                                }
+                                case "M":{
+                                    // 如果是月。
+                                    appendTmp = calendarStart.get(Calendar.YEAR) + "年" + month + "月";
+                                    break;
+                                }
+                                case "Q":{
+                                    // 如果是季度。
+                                    if(month == 1 || month ==2 || month ==3){
+                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q1";
+                                    }
+                                    else if(month == 4 || month ==5 || month ==6){
+                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q2";
+                                    }
+                                    else if(month == 7 || month ==8 || month ==9){
+                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q3";
+                                    }
+                                    else if(month == 10 || month ==11 || month ==12){
+                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q4";
+                                    }
+                                    break;
+                                }
+                                default: {
+                                    appendTmp = json.getString("start") + "至" + json.getString("end");
+                                }
                             }
-                            if (!timeRange.toString().contains(json.getString("start"))) {
-                                timeRange.append(json.getString("start") + "至" + endDay);
+                            if (!timeRange.toString().contains(appendTmp)) {
+                                timeRange.append(appendTmp);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -3088,6 +3169,18 @@ public class QueryDataResource extends BaseResource {
         return level != null && level.getType() == LevelType.CALL_BACK;
     }
 
+    /**
+     * 
+     * @param dim
+     * @return
+     */
+    private static boolean isCallbackDim(Dimension dim) {
+        if (dim == null) {
+            return false;
+        }
+        Level level = dim.getLevels().values().toArray(new Level[0])[0];
+        return isCallbackLevel(level);
+    }
     
     /**
      * 数据查询API，获取基于报表模型的数据

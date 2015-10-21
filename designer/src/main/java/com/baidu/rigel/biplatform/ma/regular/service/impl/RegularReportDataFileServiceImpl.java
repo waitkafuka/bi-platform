@@ -197,13 +197,13 @@ public class RegularReportDataFileServiceImpl implements RegularReportDataFileSe
      */
     private PivotTable getPivotTable(Cube cube, DataModel dataModel, ExtendArea area) {
         LogicModel logicModel = area.getLogicModel();
-        FormatModel formatModel = area.getFormatModel();
+        // FormatModel formatModel = area.getFormatModel();
         // 普通多维表
         PivotTable pivotTable = 
             DataModelUtils.transDataModel2PivotTable(cube, dataModel, false, 0, false, logicModel);
-        Map<String, Object> otherSetting = area.getOtherSetting();
-        boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
-        DataModelUtils.decorateTable(formatModel, pivotTable, isShowZero);
+        // Map<String, Object> otherSetting = area.getOtherSetting();
+        // boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
+        // DataModelUtils.decorateTable(formatModel, pivotTable, isShowZero);
         return pivotTable;
     }
     

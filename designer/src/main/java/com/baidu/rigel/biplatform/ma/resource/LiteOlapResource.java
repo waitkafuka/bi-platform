@@ -204,13 +204,13 @@ public class LiteOlapResource {
         LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) parent;
         LogicModel logicModel = liteOlapArea.getLogicModel();
         Item targetItem = null;
-        // TODO yichao.jiang DirtySolution，后续必须进行修改  
-        // 首先校验是否为callback维度或者时间维度，这两种维度不允许进行拖拽
-        boolean isTimeOrCalback = this.isTimeOrCallbackDim(targetName, model);
-        if (isTimeOrCalback) {
-            ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
-            return rs;
-        }
+//        // TODO yichao.jiang DirtySolution，后续必须进行修改  
+//        // 首先校验是否为callback维度或者时间维度，这两种维度不允许进行拖拽
+//        boolean isTimeOrCalback = this.isTimeOrCallbackDim(targetName, model);
+//        if (isTimeOrCalback) {
+//            ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
+//            return rs;
+//        }
         // 校验是否允许拖拽，此处是对维度只能拖动到维度和条件轴上
         // 指标只能拖动到指标轴上
         boolean allowDrag = this.preCheck4DragValidate(from, to, targetName, model);

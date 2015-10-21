@@ -103,6 +103,8 @@ import com.google.common.collect.Sets;
 public class QueryUtils {
   
     private static final Logger LOG = LoggerFactory.getLogger (QueryUtils.class);
+    
+    private static final String NEED_SUMMARY = "needSummary";
     /**
      * 构造函数
      */
@@ -241,20 +243,28 @@ public class QueryUtils {
             Map<String, MetaCondition> conditionsForPivotTable = 
                 QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction);
             questionModel.setQueryConditions(conditionsForPivotTable);        
-            if (queryAction.getDrillDimValues() == null 
-                    || !queryAction.getDrillDimValues().isEmpty() 
+            if (queryAction.getDrillDimValues() == null || !queryAction.getDrillDimValues().isEmpty()
                     || queryAction.isChartQuery()) {
                 questionModel.setNeedSummary(false);
             } else {
-                ExtendAreaType areaType = reportModel.getExtendById (queryAction.getExtendAreaId ()).getType ();
-                if (areaType != ExtendAreaType.TABLE) {
-                    questionModel.setNeedSummary (false);
+                ExtendAreaType areaType = reportModel.getExtendById(queryAction.getExtendAreaId()).getType();
+                if (areaType != ExtendAreaType.TABLE && areaType != ExtendAreaType.LITEOLAP_TABLE) {
+                    questionModel.setNeedSummary(false);
                 } else {
-                    questionModel.setNeedSummary(needSummary(questionModel));
+                    String needSummaryConfigValue = "";
+                    // 如果是liteolap表格，则需要取到其引用的父model的area区域对象才能取到相关other配置
+                    if (areaType == ExtendAreaType.LITEOLAP_TABLE) {
+                        needSummaryConfigValue =
+                                String.valueOf(reportModel.getExtendById(area.getReferenceAreaId()).getOtherSetting()
+                                        .get(NEED_SUMMARY));
+                    } else {
+                        needSummaryConfigValue = String.valueOf(area.getOtherSetting().get(NEED_SUMMARY));
+                    }
+                    questionModel.setNeedSummary(needSummaryWhitConfigValue(questionModel, needSummaryConfigValue));
                 }
-            } 
+            }
             
-            if (questionModel.isNeedSummary() && "false".equals(area.getOtherSetting().get("needSummary"))) {
+            if (questionModel.isNeedSummary() && "false".equals(area.getOtherSetting().get(NEED_SUMMARY))) {
                 questionModel.setNeedSummary (false);
             }
         }
@@ -266,6 +276,20 @@ public class QueryUtils {
         return questionModel;
     }
 
+    /**
+     * 如果之前存了了有配置信息，则直接取配置的值即可，若无相关配置，则走原来的判断逻辑
+     * 
+     * @param questionModel questionModel
+     * @param needSummaryConfigValue 有关配置的值
+     * @return 返回是否需要合计行标识
+     */
+    private static boolean needSummaryWhitConfigValue(QuestionModel questionModel, String needSummaryConfigValue) {
+        if (StringUtils.hasLength(needSummaryConfigValue)) {
+            return Boolean.valueOf(needSummaryConfigValue);
+        } else {
+            return needSummary(questionModel);
+        }
+    }
     /**
      * 判断是否需要汇总
      * @param questionModel
@@ -395,8 +419,16 @@ public class QueryUtils {
             }
             if (olapElement instanceof Dimension) {
                 meta.getCrossjoinDims().add(olapElement.getName());
+                // 针对列上的各个查询字段，保证其查询顺序，该字段仅供平面表查询使用
+                if (AxisType.COLUMN.equals(axisType)) {
+                    meta.getQueryItemsOrder().add("[Dimension].[" + olapElement.getName() + "]");
+                }
             } else {
                 meta.getQueryMeasures().add(olapElement.getName());
+                // 针对列上的各个查询字段，保证其查询顺序，该字段仅供平面表查询使用
+                if (AxisType.COLUMN.equals(axisType)) {
+                    meta.getQueryItemsOrder().add("[Measure].[" + olapElement.getName() + "]");
+                }
             }
         }
         return meta;

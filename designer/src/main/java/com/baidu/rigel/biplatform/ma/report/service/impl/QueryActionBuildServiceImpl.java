@@ -27,6 +27,7 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -221,8 +222,14 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             /**
              * 按照选中行ID得到行上的维度值
              */
-            String[] uniqNames = com.baidu.rigel.biplatform.ac.util.DataModelUtils
-                .parseNodeUniqueNameToNodeValueArray(selectedRowIds[0]);
+            String[] uniqNames = null;
+            // 当过滤空白行生效时，选中行有可能为null，所以这里需要做判断  update by majun 2015-10-20 
+            if (!ArrayUtils.isEmpty(selectedRowIds)) {
+                uniqNames =
+                        com.baidu.rigel.biplatform.ac.util.DataModelUtils
+                                .parseNodeUniqueNameToNodeValueArray(selectedRowIds[0]);
+            }
+            
             /**
              * 从logicmodel里面找到时间维度
              */
@@ -252,25 +259,34 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     }
                 }
             }
-            for (String uniqName : uniqNames) {
-                String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqName);
-                Map<String, Item> store = runTimeModel.getUniversalItemStore().get(liteOlapArea.getId());
-                if (CollectionUtils.isEmpty(store)) {
-                    String msg = "The item map of area (" + liteOlapArea.getId() + ") is Empty!";
-                    logger.error(msg);
-                    throw new RuntimeException(msg);
+            if (!ArrayUtils.isEmpty(uniqNames)) {
+                for (String uniqName : uniqNames) {
+                    // 当uniqName是无效的，并且当前area不是liteolap的图形或者普通图形是，当前dim才作为条件传入上下文 add by majun 2015-10-20
+                    if (!MetaNameUtil.isUniqueName(uniqName)
+                            && (targetArea.getType() == ExtendAreaType.LITEOLAP_CHART || targetArea.getType() == ExtendAreaType.CHART)) {
+                        continue;
+                    }
+                    String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqName);
+                    Map<String, Item> store = runTimeModel.getUniversalItemStore().get(liteOlapArea.getId());
+                    if (CollectionUtils.isEmpty(store)) {
+                        String msg = "The item map of area (" + liteOlapArea.getId() + ") is Empty!";
+                        logger.error(msg);
+                        throw new RuntimeException(msg);
+                    }
+                    Item row = store.get(dimName);
+                    if (row == null) {
+                        String msg =
+                                String.format("Dimension(%s) Not found in the store of Area(%s)!", dimName,
+                                        liteOlapArea.getId());
+                        logger.error(msg);
+                        throw new RuntimeException(msg);
+                    }
+                    rows.add(row);
+                    context.put(row.getOlapElementId(), uniqName);
+                    Map<String, Object> contextCopy = DeepcopyUtils.deepCopy(context);
+                    context.putAll(this.handleUniqueName4Callback(uniqName, row.getOlapElementId(), contextCopy,
+                            cubeId, model));
                 }
-                Item row = store.get(dimName);
-                if (row == null) {
-                    String msg = String.format("Dimension(%s) Not found in the store of Area(%s)!",
-                        dimName, liteOlapArea.getId());
-                    logger.error(msg);
-                    throw new RuntimeException(msg);
-                }
-                rows.add(row);
-                context.put(row.getOlapElementId(), uniqName);
-                Map<String, Object> contextCopy = DeepcopyUtils.deepCopy(context);
-                context.putAll(this.handleUniqueName4Callback(uniqName, row.getOlapElementId(), contextCopy, cubeId, model));
             }
             for (String indName : indNames) {
                 cols.add(liteOlapArea.listAllItems().get(indName));
@@ -631,6 +647,11 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         ExtendArea area = reportModel.getExtendById(areaId);
         if (area.getType() == ExtendAreaType.TABLE || area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
             Object filterBlank = area.getOtherSetting().get(Constants.FILTER_BLANK);
+            if (area.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+                filterBlank =
+                        reportModel.getExtendById(area.getReferenceAreaId()).getOtherSetting()
+                                .get(Constants.FILTER_BLANK);
+            }
             if (filterBlank == null) {
                 action.setFilterBlank(false);
             } else {

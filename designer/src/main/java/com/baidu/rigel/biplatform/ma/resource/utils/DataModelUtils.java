@@ -47,10 +47,13 @@ import com.baidu.rigel.biplatform.ac.util.UnicodeUtils;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.exception.PivotTableParseException;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
@@ -1386,12 +1389,20 @@ public final class DataModelUtils {
      * 
      * decorateTable
      * 
-     * @param formatModel
-     * @param table
-     * @param isShowZero
+     * @param formatModel formatModel
+     * @param table table
+     * @param targetArea targetArea
+     * @param reportDesignModel reportDesignModel
      */
-    public static void decorateTable(FormatModel formatModel, PivotTable table, boolean isShowZero) {
+    public static void decorateTable(FormatModel formatModel, PivotTable table, ExtendArea targetArea,
+            ReportDesignModel reportDesignModel) {
         decorateTable(formatModel, table);
+        Map<String, Object> otherSetting = targetArea.getOtherSetting();
+        // 当表格为liteolap表时，需要取到ref的area，才能取到正确的otherSetting
+        if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            otherSetting = reportDesignModel.getExtendById(targetArea.getReferenceAreaId()).getOtherSetting();
+        }
+        boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
         if (isShowZero) {
             List<List<CellData>> cellDatas = table.getDataSourceColumnBased();
             int cellDatasIndex = 0;
@@ -1638,7 +1649,7 @@ public final class DataModelUtils {
                 rs.append(str + ",");
             });
             for (int j = 0; j < rowDatas.get(i).size(); ++j) {
-                rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j));
+                rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j).stripTrailingZeros().toPlainString());
                 if (j < rowDatas.get(i).size() - 1) {
                     rs.append(",");
                 } else {
