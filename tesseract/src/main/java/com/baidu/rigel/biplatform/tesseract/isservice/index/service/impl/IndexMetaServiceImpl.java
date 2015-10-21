@@ -625,28 +625,28 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
      *            索引元数据2
      * @return IndexMetaSimilarityScore 相似度
      */
-    private IndexMetaSimilarityScore getSimilarityOfIndexMeta(IndexMeta idxMeta1, IndexMeta idxMeta2) {
+    private IndexMetaSimilarityScore getSimilarityOfIndexMeta(IndexMeta newIdxMeta, IndexMeta oldIdxMeta) {
         int dimScore = 0;
         int measureScore = 0;
-        if (idxMeta1 == null
-            || idxMeta2 == null
-            || !idxMeta1.getDataSourceInfo().getDataSourceKey()
-                .equals(idxMeta2.getDataSourceInfo().getDataSourceKey())) {
+        if (newIdxMeta == null
+            || oldIdxMeta == null
+            || !newIdxMeta.getDataSourceInfo().getDataSourceKey()
+                .equals(oldIdxMeta.getDataSourceInfo().getDataSourceKey())) {
             
             return new IndexMetaSimilarityScore();
         }
         
         // 维度信息
-        Set<String> dimInfoSet1 = idxMeta1.getDimSet();
-        Set<String> dimInfoSet2 = idxMeta2.getDimSet();
+        Set<String> dimInfoSet1 = newIdxMeta.getDimSet();
+        Set<String> dimInfoSet2 = oldIdxMeta.getDimSet();
         if (dimInfoSet2.containsAll(dimInfoSet1)) {
-            dimScore += dimInfoSet2.size();
+            dimScore += dimInfoSet1.size();
         }
         // 指标信息
-        Set<String> measureSet1 = idxMeta1.getMeasureSet();
-        Set<String> measureSet2 = idxMeta2.getMeasureSet();
+        Set<String> measureSet1 = newIdxMeta.getMeasureSet();
+        Set<String> measureSet2 = oldIdxMeta.getMeasureSet();
         if (measureSet2.containsAll(measureSet1)) {
-            measureScore += measureSet2.size();
+            measureScore += measureSet1.size();
         } else {
             Collection<String> measureIntersection = getIntersectionOf2Collection(measureSet1,
                 measureSet2);
@@ -1098,7 +1098,9 @@ public class IndexMetaServiceImpl extends AbstractMetaService implements IndexMe
                     IndexMeta currMeta = AnswerCoreConstant.GSON.fromJson(jr,
                         new TypeToken<IndexMeta>() {
                         }.getType());
-                    
+                    if (CollectionUtils.isEmpty(currMeta.getCubeIdSet())) {
+                        continue;
+                    }
                     // 设置currNodeKey
                     for (IndexShard idxShard : currMeta.getIdxShardList()) {
                         idxShard.setNodeKey(currNodeKey);

@@ -230,21 +230,19 @@ public class SearchIndexServiceImpl implements SearchService {
     }
     
 	private boolean shardFitQuery(IndexShard idxShard, QueryRequest query) {
-		boolean result = false;
-		if (StringUtils.isEmpty(idxShard.getShardDimBase())) {
-			result = true;
-		} else {
+		boolean result = true;
+		if (!StringUtils.isEmpty(idxShard.getShardDimBase())) {			
 			if (query != null && query.getWhere() != null
 					&& !CollectionUtils.isEmpty(query.getWhere().getAndList())) {
 				for (Expression ex : query.getWhere().getAndList()) {
 					if (ex.getProperties().equals(idxShard.getShardDimBase())
 							&& !CollectionUtils.isEmpty(ex.getQueryValues())) {
 						for (QueryObject qo : ex.getQueryValues()) {
-							if (!CollectionUtils.isEmpty(CollectionUtils
+							if (CollectionUtils.isEmpty(CollectionUtils
 									.intersection(
 											idxShard.getShardDimValueSet(),
 											qo.getLeafValues()))) {
-								result = true;
+								result = false;
 								break;
 							}
 						}
@@ -382,7 +380,8 @@ public class SearchIndexServiceImpl implements SearchService {
     private boolean queryUseDatabase(QueryRequest query, IndexMeta idxMeta) {
         return idxMeta == null
                 || idxMeta.getIdxState().equals(IndexState.INDEX_UNAVAILABLE)
-                || idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT)
+                || idxMeta.getIdxState().equals(IndexState.INDEX_UNINIT) 
+                || CollectionUtils.isEmpty(idxMeta.getIdxShardList()) 
                 || !query.isUseIndex()
                 || (query.getFrom() != null && query.getFrom().getFrom() != null && !idxMeta.getDataDescInfo()
                         .getTableNameList().contains(query.getFrom().getFrom()))
