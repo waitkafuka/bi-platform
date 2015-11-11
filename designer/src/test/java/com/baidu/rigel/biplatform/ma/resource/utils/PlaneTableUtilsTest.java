@@ -186,7 +186,7 @@ public class PlaneTableUtilsTest {
         // 获取cube
         Cube cube = PrepareModelObject4Test.getCube();
         // 测试天粒度
-        String dayId = "3da5f26e1ec5244c5b0cdbf4ced9ac73";       
+        String dayId = "dasdkdsjklfjdsakljfd;adlsjfkasldjfk";       
         Map<String, Object> requestParams = Maps.newHashMap();
         String dayValue = "{'start':'2015-06-03','end':'2015-06-03','granularity':'D'}";        
         requestParams.put("testId", dayValue);        
@@ -271,7 +271,7 @@ public class PlaneTableUtilsTest {
         // 获取cube
         Cube cube = PrepareModelObject4Test.getCube();
         // 测试天粒度
-        String dayId = "3da5f26e1ec5244c5b0cdbf4ced9ac73";       
+        String dayId = "dasdkdsjklfjdsakljfd;adlsjfkasldjfk";       
         Map<String, Object> requestParams = Maps.newHashMap();
         String dayValue = "{'start':'2015-06-03','end':'2015-06-03','granularity':'D'}";        
         requestParams.put("testId", dayValue);        
@@ -340,7 +340,7 @@ public class PlaneTableUtilsTest {
      */
     public void testIsTimeDim() {
         Cube cube = PrepareModelObject4Test.getCube();
-        String elementId = "3da5f26e1ec5244c5b0cdbf4ced9ac73";
+        String elementId = "dasdkdsjklfjdsakljfd;adlsjfkasldjfk";
         Assert.assertTrue(PlaneTableUtils.isTimeDim(cube, elementId));
     }
     
