@@ -107,9 +107,9 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
                 instance.checkUnusedDataSourceThread.submit(new Runnable() {
                     public void run() {
                         while (true) {
-                            instance.log.info("check datasource unused begin..");
+                            instance.log.debug("check datasource unused begin..");
                             instance.expireDataSource();
-                            instance.log.info("check datasource unused end..");
+                            instance.log.debug("check datasource unused end..");
                             try {
                                 Thread.sleep(60000);
                             } catch (Exception e) {

@@ -893,7 +893,13 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ResponseResult result = new ResponseResult();
         ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel (reportId);
         String fileList = this.getSavedReportPath (request) + File.separator + runtimeModel.getOriReportId ();
-        String[] files = fileService.ls (fileList);
+        String[] files = null;
+        try {
+           files = fileService.ls (fileList);
+        } catch (Exception e) {
+            // 如果发生异常，则将文件列表设置为null
+            files = null;
+        }
         LinkedHashMap<String, String> rep = Maps.newLinkedHashMap ();
         if (files == null) {
             result.setStatus (0);

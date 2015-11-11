@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
@@ -36,6 +37,8 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPluginConstants;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 
 /**
  * tessract查询插件
@@ -43,7 +46,7 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
  * @author luowenlei
  *
  */
-@Service("queryTessractPlugin")
+@Service("queryTesseractPlugin")
 @Scope("prototype")
 public class QueryTessractPlugin implements QueryPlugin {
 
@@ -117,6 +120,20 @@ public class QueryTessractPlugin implements QueryPlugin {
         throw new MiniCubeQueryException("queryId:" + questionModel.getQueryId() + " query Tesseract occur error,msg:"
                 + responseResult.getStatusInfo());
 
+    }
+    
+    @Override
+    public boolean isSuitable(QuestionModel questionModel)
+            throws QuestionModelTransformationException {
+        if (questionModel instanceof ConfigQuestionModel) {
+            ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+            if (configQuestionModel.getDataSourceInfo().getDataSourceType() == DataSourceType.SQL) {
+                if (TESSERACT_TYPE.equals(configQuestionModel.getQuerySource())) {
+                    return true; 
+                }
+            }
+        }
+        return false;
     }
 
 }

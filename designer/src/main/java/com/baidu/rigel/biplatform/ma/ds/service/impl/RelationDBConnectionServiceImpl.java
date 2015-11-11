@@ -93,7 +93,8 @@ public class RelationDBConnectionServiceImpl implements
         String connUrl = type.getPrefix() + ds.getHostAndPort() + type.getDiv() + ds.getDbInstance();
         if (StringUtils.hasText(ds.getEncoding())) {
             if (type == DataSourceType.MYSQL || type == DataSourceType.MYSQL_DBPROXY) {
-                connUrl = connUrl + "?useUniCode=true&characterEncoding=" + ds.getEncoding();
+                connUrl = connUrl + "?useUniCode=true&characterEncoding=" + ds.getEncoding()
+                        + "&zeroDateTimeBehavior=convertToNull&noAccessToProcedureBodies=true";
             }
         }
         LOG.debug("Conn URL: " + connUrl);

@@ -169,6 +169,10 @@ public class OlapLinkResource {
             }
             tableArea.getFormatModel().setLinkInfo(finalResultMap);
             reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
+            // 做完新增后，需要同步通知RuntimeModel的修改，以便在编辑端看到的model状态是同步的
+            ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+            runTimeModel.init(reportDesignModel, true);
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
             rs = ResourceUtils.getResult("success", null, "add link success!");
         }
         return rs;
@@ -195,6 +199,10 @@ public class OlapLinkResource {
             linkInfoMap.remove(linkId);
             tableArea.getFormatModel().setLinkInfo(linkInfoMap);
             reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
+            // 做完删除后，需要同步通知RuntimeModel的修改，以便在编辑端看到的model状态是同步的
+            ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+            runTimeModel.init(reportDesignModel, true);
+            reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
             rs = ResourceUtils.getResult("success", null, "add link success!");
         }
         return rs;
@@ -272,7 +280,10 @@ public class OlapLinkResource {
                 Cube cube = olapTableDesignModel.getSchema().getCubes().get(tableArea.getCubeId());
                 cube = QueryUtils.transformCube(cube);
                 Dimension dim = cube.getDimensions().get(dimName);
-                paramMapping.put(vo.getParamName(), dim.getName());
+                if (dim != null) {
+                    paramMapping.put(vo.getParamName(), dim.getName());
+                }
+                
             }
             linkInfo.setParamMapping(paramMapping);
             tableArea.getFormatModel().setLinkInfo(linkInfoMap);

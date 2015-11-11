@@ -369,7 +369,7 @@ public class DynamicSqlDataSource {
                     SqlDataSourceWrap ds = next.getValue();
                     String key = next.getKey();
                     if(ds.getFailCount() >= 10) {
-                        LOGGER.warn("Datasource key {} has fail more than 5 time,skip.", key );
+                        dynamicDataSource.failedMap.remove(key);
                         continue;
                     }
                     Connection con = null;

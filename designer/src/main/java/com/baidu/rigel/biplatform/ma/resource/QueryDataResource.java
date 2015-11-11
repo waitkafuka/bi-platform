@@ -16,7 +16,10 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -51,6 +54,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
+import com.baidu.rigel.biplatform.ac.minicube.CallbackMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
@@ -224,6 +228,7 @@ public class QueryDataResource extends BaseResource {
      */
     @Resource
     private QueryDataResourceUtils queryDataResourceUtils;
+    
 
     /**
      * pageSize
@@ -488,8 +493,10 @@ public class QueryDataResource extends BaseResource {
             Cube multiCube = null;
             ExtendArea[] multiExtendAreas = fromRuntimeModel.getModel().getExtendAreaList();
             // 获取多维表对应的因为此处仅考虑一个cube
+            // fix by yichao.jiang 并非每个控件都存在cube，cube可能会取不到，必须保证该extendArea中有cubeId，还不能是查询过滤控件
             for (ExtendArea extendArea : multiExtendAreas) {
-                if (extendArea != null) {
+                if (extendArea != null && !StringUtils.isEmpty(extendArea.getCubeId())
+                        && !QueryUtils.isFilterArea(extendArea.getType())) {
                     multiCube = fromRuntimeModel.getModel().getSchema().getCubes().get(extendArea.getCubeId());                    
                 }
             }
@@ -737,7 +744,8 @@ public class QueryDataResource extends BaseResource {
      * @return ResponseResult
      */
     @RequestMapping(value = "/{reportId}/runtime_model", method = { RequestMethod.POST })
-    public ResponseResult initRunTimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request) {
+    public ResponseResult initRunTimeModel(@PathVariable("reportId") String reportId, HttpServletRequest request,
+            HttpServletResponse response) {
         long begin = System.currentTimeMillis();
         logger.info("[INFO]--- ---begin init runtime env");
         boolean edit = Boolean.valueOf(request.getParameter(Constants.IN_EDITOR));
@@ -1073,6 +1081,37 @@ public class QueryDataResource extends BaseResource {
         return tmp;
     }
 
+    
+    /**
+     * 当在设计端编辑报表的时候，每次设置操作完毕，需要通知后台刷新model里面的无用条件
+     * 
+     * @param reportId reportId
+     * @param areaId areaId
+     * @param request request
+     * @return responseResult
+     */
+    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/refresh4design", method = { RequestMethod.POST })
+    public ResponseResult refresh4design(@PathVariable("reportId") String reportId,
+            @PathVariable("areaId") String areaId, HttpServletRequest request) {
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        ReportDesignModel designModel = getRealModel(reportId, runTimeModel);
+        ExtendArea targetArea = designModel.getExtendById(areaId);
+        // 如果是liteolap报表，需要取其中的table区域对象
+        if (targetArea.getType() == ExtendAreaType.LITEOLAP) {
+            LiteOlapExtendArea liteOlapExtendArea = (LiteOlapExtendArea) targetArea;
+            targetArea = designModel.getExtendById(liteOlapExtendArea.getTableAreaId());
+        }
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportId, targetArea.getId());
+        // 处理上一次查询的遗留脏数据，后续可能还有更多清理动作
+        if (areaContext.getCurBreadCrumPath() != null) {
+            areaContext.getCurBreadCrumPath().clear();
+        }
+        reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext);
+        ResponseResult result = new ResponseResult();
+        result.setStatus(0);
+        return result;
+    }
+    
     /**
      * 
      * @param reportId
@@ -1153,7 +1192,11 @@ public class QueryDataResource extends BaseResource {
         LogicModel logicModel = targetArea.getLogicModel ();
         if (targetArea.getType () == ExtendAreaType.LITEOLAP_TABLE
             || targetArea.getType () == ExtendAreaType.LITEOLAP_CHART) {
-            logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
+            
+            LiteOlapExtendArea extendArea = (LiteOlapExtendArea) model.getExtendAreas ().get (targetArea.getReferenceAreaId ());
+            QueryContext queryContext = runTimeModel.getLocalContextByAreaId(extendArea.getSelectionAreaId());
+            areaContext.getParams().putAll(queryContext.getParams());
+            logicModel = extendArea.getLogicModel ();
         }
         if (logicModel == null) {
             ResponseResult response = new ResponseResult ();
@@ -1319,6 +1362,9 @@ public class QueryDataResource extends BaseResource {
         logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to reportModelCacheManager.updateAreaContext(reportId, targetArea.getId(), areaContext)");
         curr = System.currentTimeMillis();
         runTimeModel.updateDatas(action, result);
+        // 因为本方法是每次新查询的入口，所以需要将之前设置的一些下钻展开收起历史都一并清除掉。   update by majun
+        resetOtherStatus(runTimeModel);
+        runTimeModel.setLinkedQueryAction(null);
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         logger.info("[INFO]lijin queryArea cost:"+(System.currentTimeMillis()-curr)+" ms to reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel)");
         
@@ -1565,8 +1611,19 @@ public class QueryDataResource extends BaseResource {
                 throw new RuntimeException(msg);
             }
             row = store.get(dimName);
-            queryParams.put(row.getOlapElementId(), uniqueNameArray);
 
+            List<String> paramValues = Lists.newArrayList();
+            for (int i = 0; i< uniqueNameArray.length; i++) {
+                String[] tmp = MetaNameUtil.parseUnique2NameArray(uniqueNameArray[i]);
+                paramValues.add(tmp[tmp.length -1]);
+            }
+            for (ReportParam p : model.getParams().values()) {
+                if (p.getElementId().equals(row.getOlapElementId())) {
+                    queryParams.put(row.getOlapElementId(), String.join(",", paramValues));
+                    queryParams.put(p.getName(), String.join(",", paramValues));
+                    break;
+                }
+            };
             // TODO 仔细思考一下逻辑
             action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
         } else {
@@ -1626,15 +1683,17 @@ public class QueryDataResource extends BaseResource {
         /**
          * TODO 针对参数映射修改，将当前下钻条件设置到对应参数上
          */
-        final String[] tmp = MetaNameUtil.parseUnique2NameArray(drillTargetUniqueName);
-        final String elementId = row.getOlapElementId();
-        if (!MetaNameUtil.isAllMemberUniqueName(drillTargetUniqueName)) {
-            for (ReportParam p : model.getParams().values()) {
-                if (p.getElementId().equals(elementId)) {
-                    queryParams.put(p.getName(), tmp[tmp.length - 1]);
-                }
+        String[] tmp = new String[0];
+        String elementId = row.getOlapElementId();;
+        if (!StringUtils.isEmpty(drillTargetUniqueName)) {
+            tmp = MetaNameUtil.parseUnique2NameArray(drillTargetUniqueName);
+            if (!MetaNameUtil.isAllMemberUniqueName(drillTargetUniqueName)) {
+                for (ReportParam p : model.getParams().values()) {
+                    if (p.getElementId().equals(elementId)) {
+                        queryParams.put(p.getName(), tmp[tmp.length - 1]);
+                    }
+                };
             }
-            ;
         }
 
         ResultSet result;
@@ -1755,6 +1814,7 @@ public class QueryDataResource extends BaseResource {
 
     private void resetOtherStatus(ReportRuntimeModel runTimeModel) {
         runTimeModel.getDrillDownQueryHistory().clear();
+//        runTimeModel.setLinkedQueryAction(null);
         runTimeModel.getOrderedStatus ().clear ();
         runTimeModel.setSortRecord (null);
     }
@@ -1875,7 +1935,17 @@ public class QueryDataResource extends BaseResource {
          */
         // QueryAction previousAction = runTimeModel.getPreviousQueryAction(areaId);
         ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportId, targetArea.getId());
-
+        if (targetArea.getLogicModel() != null && targetArea.getLogicModel().getRows() != null) {
+            Item[] itemsOnRow = targetArea.getLogicModel().getRows();
+            for (int i = 0; i < itemsOnRow.length; i++) {
+                String dimParam = String.valueOf(areaContext.getParams().get(itemsOnRow[i].getId()));
+                if (!type.equals("collapse") && StringUtils.hasLength(dimParam) && !dimParam.equals("null")
+                        && condition.split("\\.").length <= dimParam.split("\\.").length) {
+                    condition = dimParam;
+                }
+            }
+        }
+        
         ResultSet previousResult = areaContext.getQueryStatus().getLast();
         LogicModel targetLogicModel = null;
         String logicModelAreaId = areaId;
@@ -1984,8 +2054,21 @@ public class QueryDataResource extends BaseResource {
                 newDrill.put(condition + "_" + rowNum,
                         new ReportRuntimeModel.DrillDownAction(action, rowNum));
                 runTimeModel.setDrillDownQueryHistory(newDrill);
+                
+                DataModel dm4Merage = result.getDataModel();
+                HeadField fisrtHf = result.getDataModel().getRowHeadFields().get(0);
+                // 下钻时，需要考虑级联下拉框用到的维度组组合下钻场景，如果带有父节点，需要截取掉父节点的datamodel数据才能进行merage  update by majun
+                if (MetaNameUtil.isAllMemberUniqueName(fisrtHf.getValue()) && (condition.split("\\}").length == 1)) {
+                    dm4Merage.setRowHeadFields(fisrtHf.getChildren());
+                    dm4Merage.setRecordSize(dm4Merage.getRecordSize() - 1);
+                    // 去掉一层父级，列数据也需要对应去掉一级
+                    for (List<BigDecimal> baseDataList : dm4Merage.getColumnBaseData()) {
+                        baseDataList.remove(0);
+                    }
+                }
+                
                 DataModel newDataModel =
-                        DataModelUtils.merageDataModel(previousResult.getDataModel(), result.getDataModel(), rowNum);
+                        DataModelUtils.merageDataModel(previousResult.getDataModel(), dm4Merage, rowNum);
                 table = DataModelUtils.transDataModel2PivotTable(cube, newDataModel, 
                         false, 0, false, 
                         targetLogicModel);
@@ -2189,36 +2272,20 @@ public class QueryDataResource extends BaseResource {
             return rs;
         }
         
-        // TODO dirty solution 临时展现3级，后续修改此接口 yichao.jiang
-        List<List<Member>> members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
-        List<Member> callbackSecondLevelMembers = Lists.newArrayList();
-        List<Member> callbackThirdLevelMembers = Lists.newArrayList();
-        if (isCallbackDim(newDim) && !CollectionUtils.isEmpty(members)) {
-            for (int i = 0; i < members.size(); i++) {
-                List<Member> firstLevelMembers = members.get(i);
-                if (!CollectionUtils.isEmpty(firstLevelMembers)) {
-                    for (int j = 0; j < firstLevelMembers.size(); j++) {
-                        MiniCubeMember member = (MiniCubeMember) firstLevelMembers.get(j);
-                        List<Member> secondLevelMembers = member.getChildren();
-                        callbackSecondLevelMembers.addAll(secondLevelMembers);
-                        if (!CollectionUtils.isEmpty(secondLevelMembers)) {
-                            for (int k = 0; k< secondLevelMembers.size(); k++) {
-                                MiniCubeMember childMember = (MiniCubeMember) secondLevelMembers.get(k);
-                                List<Member> thirdLevelMembers = childMember.getChildren();
-                                if (!CollectionUtils.isEmpty(thirdLevelMembers)) {
-                                    callbackThirdLevelMembers.addAll(thirdLevelMembers);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (!CollectionUtils.isEmpty(callbackSecondLevelMembers)) {
-            members.add(callbackSecondLevelMembers);
-        }
-        if (!CollectionUtils.isEmpty(callbackThirdLevelMembers)) {
-            members.add(callbackThirdLevelMembers);
+        List<List<Member>> members = Lists.newArrayList();       
+        // TODO 临时展现3级，后续修改此接口 yichao.jiang
+        if (isCallbackDim(newDim)) {
+//            members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
+//            List<List<Member>> tmpMembers = Lists.newArrayList();
+            long callbackBegin = System.currentTimeMillis();
+            members = this.handleCallbackLevel4LiteOlapShow(cube, newDim, params, 3);
+//            this.handleCallbackLevel4LiteOlapShow(tmpMembers, model, cube, newDim, params, members, 1);
+            logger.info("[INFO]query members for lite-olap magnifier cost :" + (System.currentTimeMillis() - callbackBegin) + "ms");
+//            if (!CollectionUtils.isEmpty(tmpMembers)) {
+//                members.addAll(tmpMembers);
+//            }
+        } else {
+            members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
         }
         QueryContext context = runTimeModel.getLocalContextByAreaId(area.getId());
         List<DimensionMemberViewObject> datas = Lists.newArrayList();
@@ -2397,16 +2464,17 @@ public class QueryDataResource extends BaseResource {
         ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
         // reportModelCacheManager.getReportModel(reportId);
         ExtendArea area = designModel.getExtendById(areaId);
+        Cube cube = designModel.getSchema().getCubes().get(area.getCubeId());
 
         String[] selectedDims = request.getParameterValues("selectedNodes");
-        updateLocalContext(dimId, model, selectedDims, areaId);
+        updateLocalContext(dimId, cube, model, selectedDims, areaId);
         if (area.getType() == ExtendAreaType.SELECTION_AREA) {
             areaId = area.getReferenceAreaId();
             LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) designModel.getExtendById(areaId);
             String chartAreaId = liteOlapArea.getChartAreaId();
             String tableAreaId = liteOlapArea.getTableAreaId();
-            updateLocalContext(dimId, model, selectedDims, chartAreaId);
-            updateLocalContext(dimId, model, selectedDims, tableAreaId);
+            updateLocalContext(dimId, cube, model, selectedDims, chartAreaId);
+            updateLocalContext(dimId, cube, model, selectedDims, tableAreaId);
         }
 
         this.reportModelCacheManager.updateRunTimeModelToCache(reportId, model);
@@ -2416,19 +2484,41 @@ public class QueryDataResource extends BaseResource {
 
     /**
      * updateLocalContext
-     * 
      * @param dimId
      * @param model
      * @param selectedDims
      * @param chartAreaId
      * 
      */
-    private void updateLocalContext(String dimId, ReportRuntimeModel model, String[] selectedDims, String areaId) {
+    private void updateLocalContext(String dimId, Cube cube, ReportRuntimeModel model, String[] selectedDims, String areaId) {
         QueryContext localContext = model.getLocalContextByAreaId(areaId);
         localContext.getParams().put(dimId, selectedDims);
         String reportModelId = model.getReportModelId ();
         ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(reportModelId, areaId);
         context.getParams().put(dimId, selectedDims);
+        // 添加callback请求参数
+        if (cube.getDimensions() != null && cube.getDimensions().size() != 0) {
+            Dimension dim = cube.getDimensions().get(dimId);
+            if (this.isCallbackDim(dim)) {
+                String callbackParamName = this.getParamName(dim, model.getModel());
+                if (selectedDims != null && selectedDims.length != 0) {
+                    List<String> tmpList = Lists.newArrayList();
+                    for (int i = 0; i< selectedDims.length; i++) {
+                        String tmp = this.getCallbackParamValue(callbackParamName, selectedDims[i]);
+                        if (tmp.contains("All_")) {
+                            continue;
+                        }
+                        tmpList.add(tmp);
+                    }
+                    String values = String.join(",", tmpList);
+                    // 添加局部参数
+                    model.getLocalContextByAreaId(areaId).getParams().put(callbackParamName, values);
+//                    context.setCurBreadCrumPath(Lists.newArrayList());
+                }
+            } 
+            // 清除面包屑
+            context.setCurBreadCrumPath(Lists.newArrayList());
+        }
         reportModelCacheManager.updateAreaContext(reportModelId, areaId, context);
     }
 
@@ -2632,7 +2722,9 @@ public class QueryDataResource extends BaseResource {
             addTaskParameters.setRecMail(receiveMail);
             addTaskParameters.setReportName(designModel.getName());
             addTaskParameters.setCookies(cookiesMap);
-            addTaskParameters.setRequestUrl(request.getRequestURL().toString());
+            logger.info("download request referer object:{]", request.getHeaders("referer"));
+            logger.info("download request referer value:{]", request.getHeaders("referer").nextElement());
+            addTaskParameters.setRequestUrl(request.getHeaders("referer").nextElement());
             addTaskParameters.setColumns(DataModelUtils.getKeysInOrder(configQuestionModel.getCube(), logicModel));
             AddTaskStatus result = (AddTaskStatus) obj.getClass()
                     .getMethod(
@@ -2692,83 +2784,7 @@ public class QueryDataResource extends BaseResource {
                 new SortRecord (oriSortRecord.getSortType (), oriSortRecord.getSortColumnUniquename (), 100000);
             com.baidu.rigel.biplatform.ac.util.DataModelUtils.sortDataModelBySort(dataModel, sortRecord);
         }
-        final StringBuilder timeRange = new StringBuilder();
-        areaContext.getParams().forEach(
-                (k, v) -> {
-                    if (v instanceof String && v.toString().contains("start") && v.toString().contains("end")
-                            && v.toString().contains("granularity")) {
-                        try {
-                            JSONObject json = new JSONObject(v.toString());
-                            String startDay = json.getString("start");
-                            String endDay = json.getString("end");
-                            String granularity = json.getString("granularity");
-                            Calendar calendarStart = Calendar.getInstance();
-                            Calendar calendarEnd = Calendar.getInstance();
-                            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
-                            calendarStart.setTime(simpleDateFormat.parse(startDay));
-                            calendarEnd.setTime(simpleDateFormat.parse(endDay));
-                            SimpleDateFormat simpleDateFormatOutput = new SimpleDateFormat("yyyy-MM-dd");
-                            startDay = simpleDateFormatOutput.format(calendarStart.getTime());
-                            endDay = simpleDateFormatOutput.format(calendarEnd.getTime());
-                            int month = calendarStart.get(Calendar.MONTH) + 1;
-                            String appendTmp = "";
-                            switch (granularity) {
-                                case "D":{
-                                    // 如果是日
-                                    if (!startDay.equals(endDay)) {
-                                    // 多选日的情况
-                                        appendTmp = startDay + "至" + endDay;
-                                    } else {
-                                    // 单选日的情况
-                                        appendTmp = startDay;
-                                    }
-                                    break;
-                                }
-                                case "W":{
-                                    // 如果是周，需要显示周一到周末的时间段。
-                                    calendarStart.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-                                    calendarStart.add(Calendar.WEEK_OF_YEAR, 1);
-                                    String weekEndDay = simpleDateFormatOutput.format(calendarStart.getTime());
-                                    
-                                    calendarStart.add(Calendar.WEEK_OF_YEAR, -1);
-                                    calendarStart.add(Calendar.DAY_OF_WEEK, 1);
-                                    String weekStartDay = simpleDateFormatOutput.format(calendarStart.getTime());
-                                    appendTmp = weekStartDay + "至" + weekEndDay;
-                                    break;
-                                }
-                                case "M":{
-                                    // 如果是月。
-                                    appendTmp = calendarStart.get(Calendar.YEAR) + "年" + month + "月";
-                                    break;
-                                }
-                                case "Q":{
-                                    // 如果是季度。
-                                    if(month == 1 || month ==2 || month ==3){
-                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q1";
-                                    }
-                                    else if(month == 4 || month ==5 || month ==6){
-                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q2";
-                                    }
-                                    else if(month == 7 || month ==8 || month ==9){
-                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q3";
-                                    }
-                                    else if(month == 10 || month ==11 || month ==12){
-                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年Q4";
-                                    }
-                                    break;
-                                }
-                                default: {
-                                    appendTmp = json.getString("start") + "至" + json.getString("end");
-                                }
-                            }
-                            if (!timeRange.toString().contains(appendTmp)) {
-                                timeRange.append(appendTmp);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+        
         logger.info("[INFO]query data cost : " + (System.currentTimeMillis() - begin) + " ms");
         begin = System.currentTimeMillis();
         ReportDesignModel model = runtimeModel.getModel ();
@@ -2807,23 +2823,126 @@ public class QueryDataResource extends BaseResource {
             logicModel = model.getExtendAreas ().get (targetArea.getReferenceAreaId ()).getLogicModel ();
         }
         String csvString = DataModelUtils.convertDataModel2CsvString(cube, dataModel, logicModel);
+        final String fileName = report.getName() + generateTimeRange(areaContext);
         logger.info("[INFO]convert data cost : " + (System.currentTimeMillis() - begin) + " ms");
+        assembleResponse4Download(response, fileName, csvString);
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(ResponseResult.SUCCESS);
+        rs.setStatusInfo("successfully");
+        return rs;
+    }
+    
+    /**
+     * 组装请求返回的response对象
+     * 
+     * @param response response
+     * @param fileName fileName
+     * @param csvString csvString
+     * @throws IOException IOException
+     */
+    private void assembleResponse4Download(HttpServletResponse response, String fileName, String csvString)
+            throws IOException {
         response.setCharacterEncoding("utf-8");
         response.setContentType("application/vnd.ms-excel;charset=GBK");
         response.setContentType("application/x-msdownload;charset=GBK");
-        final String fileName = report.getName() + timeRange.toString();
         response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, "utf8") + ".csv");
         byte[] content = csvString.getBytes("GBK");
         response.setContentLength(content.length);
         OutputStream os = response.getOutputStream();
         os.write(content);
         os.flush();
-        ResponseResult rs = new ResponseResult();
-        rs.setStatus(ResponseResult.SUCCESS);
-        rs.setStatusInfo("successfully");
-        return rs;
     }
 
+    /**
+     * 为下载文件名生成时间后缀
+     * 
+     * @param areaContext
+     * @return 时间后缀的文件名
+     */
+    private String generateTimeRange(ExtendAreaContext areaContext){
+        final StringBuilder timeRange = new StringBuilder();
+        areaContext.getParams().forEach(
+                (k, v) -> {
+                    if (v instanceof String && v.toString().contains("start") && v.toString().contains("end")
+                            && v.toString().contains("granularity")) {
+                        try {
+                            JSONObject json = new JSONObject(v.toString());
+                            String granularity = json.getString("granularity");
+                            String appendTmp = "";
+                            if (granularity.equals("Q") && json.getString("start").contains("Q")) {
+                                appendTmp = StringUtils.replace(json.getString("start"), "-", "年");
+                            } else {
+                                String startDay = StringUtils.replace(json.getString("start"), "-", "");
+                                String endDay = StringUtils.replace(json.getString("end"), "-", "");
+                                Calendar calendarStart = Calendar.getInstance();
+                                Calendar calendarEnd = Calendar.getInstance();
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd");
+                                calendarStart.setTime(simpleDateFormat.parse(startDay));
+                                calendarEnd.setTime(simpleDateFormat.parse(endDay));
+                                SimpleDateFormat simpleDateFormatOutput = new SimpleDateFormat("yyyy-MM-dd");
+                                startDay = simpleDateFormatOutput.format(calendarStart.getTime());
+                                endDay = simpleDateFormatOutput.format(calendarEnd.getTime());
+                                int month = calendarStart.get(Calendar.MONTH) + 1;
+                                switch (granularity) {
+                                    case "D":{
+                                        // 如果是日
+                                        if (!startDay.equals(endDay)) {
+                                        // 多选日的情况
+                                            appendTmp = startDay + "至" + endDay;
+                                        } else {
+                                        // 单选日的情况
+                                            appendTmp = startDay;
+                                        }
+                                        break;
+                                    }
+                                    case "W":{
+                                        // 如果是周，需要显示周一到周末的时间段。
+                                        calendarStart.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+                                        calendarStart.add(Calendar.WEEK_OF_YEAR, 1);
+                                        String weekEndDay = simpleDateFormatOutput.format(calendarStart.getTime());
+                                        
+                                        calendarStart.add(Calendar.WEEK_OF_YEAR, -1);
+                                        calendarStart.add(Calendar.DAY_OF_WEEK, 1);
+                                        String weekStartDay = simpleDateFormatOutput.format(calendarStart.getTime());
+                                        appendTmp = weekStartDay + "至" + weekEndDay;
+                                        break;
+                                    }
+                                    case "M":{
+                                        // 如果是月。
+                                        appendTmp = calendarStart.get(Calendar.YEAR) + "年" + month + "月";
+                                        break;
+                                    }
+                                    case "Q":{
+                                        // 如果是季度。
+                                        if(month == 1 || month ==2 || month ==3){
+                                            appendTmp = calendarStart.get(Calendar.YEAR) + "年Q1";
+                                        }
+                                        else if(month == 4 || month ==5 || month ==6){
+                                            appendTmp = calendarStart.get(Calendar.YEAR) + "年Q2";
+                                        }
+                                        else if(month == 7 || month ==8 || month ==9){
+                                            appendTmp = calendarStart.get(Calendar.YEAR) + "年Q3";
+                                        }
+                                        else if(month == 10 || month ==11 || month ==12){
+                                            appendTmp = calendarStart.get(Calendar.YEAR) + "年Q4";
+                                        }
+                                        break;
+                                    }
+                                    default: {
+                                        appendTmp = json.getString("start") + "至" + json.getString("end");
+                                    }
+                                }
+                            }
+                            if (!timeRange.toString().contains(appendTmp)) {
+                                timeRange.append(appendTmp);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+        return timeRange.toString();
+    }
     /**
      * 跟进下钻历史纪录，查询增量数据
      * @param areaContext
@@ -3017,6 +3136,7 @@ public class QueryDataResource extends BaseResource {
         // }
         return model;
     }
+    
 
     /**
      * 依据
@@ -3042,6 +3162,12 @@ public class QueryDataResource extends BaseResource {
             Cube tmpCube = QueryUtils.transformCube(cube);
             String dimId = item.getOlapElementId();
             Dimension dim = cube.getDimensions().get(dimId);
+            if(isCallbackDim(dim)){
+                String paramsName = getParamName(dim, model);
+                String paramsValue = getCallbackParamValue(paramsName, currentUniqueName);
+                params.put(paramsName, paramsValue);
+            }            
+         
             if (dim != null) {
                 List<Map<String, String>> values;
                 try {
@@ -3051,9 +3177,16 @@ public class QueryDataResource extends BaseResource {
                             reportModelQueryService.getMembers(tmpCube, currentUniqueName, params, securityKey);
                     members.forEach(m -> {
                         Map<String, String> tmp = Maps.newHashMap();
+                        int curLevel = MetaNameUtil.parseUnique2NameArray(m.getUniqueName()).length - 1;
                         tmp.put("value", m.getUniqueName());
                         tmp.put("text", m.getCaption());
-                        tmp.put("isLeaf", Boolean.toString(level < dim.getLevels().size()));
+                        if (isCallbackDim(dim) && dim instanceof CallbackMember) {
+                            CallbackMember cm=(CallbackMember)m;
+                            tmp.put("isLeaf", Boolean.toString(!cm.isHasChildren()));
+                        }else{
+                            tmp.put("isLeaf", Boolean.toString(curLevel == dim.getLevels().size()));
+                        }                        
+                        
                         values.add(tmp);
                     });
                     Map<String, Object> datasource = Maps.newHashMap();
@@ -3141,16 +3274,19 @@ public class QueryDataResource extends BaseResource {
             // 如果有孩子结点，则要取到孩子结点数值
             if ((dim.getLevels().size() > tmp.length - 1)) {
                 Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - dim.getLevels().size()];
-                List<Member> members = level.getMembers(oriCube, dsInfo, params);
-                
-                for (Member member : members) {
-                    if (member.getUniqueName().equals(uniqueName)) {
-                        List<Member> childMembers = member.getChildMembers(oriCube, dsInfo, params);
-                        return childMembers.stream().map(child -> 
-                            child.getName()
-                        ).collect(Collectors.joining(","));
-                    }
+                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, uniqueName);
+            }
+            // 如果当前维度是个维度组，并且传入参数为形如[行业维度].[交通运输].[All_交通运输s]，
+            // 那么其实需要取一级行业对应的全部二级行业节点，主要用于级联下拉框控件 update by majun
+            else if (dim.getType() == DimensionType.GROUP_DIMENSION && (dim.getLevels().size() == tmp.length - 1)
+                    && MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
+                // 这里需要注意，传入的level应该是指定层级的上一级
+                Level level = dim.getLevels().values().toArray(new Level[0])[dim.getLevels().size() - 2];
+                if (MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
+                    uniqueName = uniqueName.substring(0, uniqueName.lastIndexOf("."));
                 }
+                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, uniqueName);
+
             } else {
                 // 如果没有孩子，则直接返回
                 return tmp[tmp.length - 1];
@@ -3160,12 +3296,34 @@ public class QueryDataResource extends BaseResource {
     }
 
     /**
+     * 根据给定的level和uniqueName，查找指定条件下对应的child成员，并以以“,”连接返回
+     * 
+     * @param level level
+     * @param oriCube oriCube
+     * @param dsInfo dsInfo
+     * @param params params
+     * @param uniqueName uniqueName
+     * @return 子member拼成的字符串，以“,”连接
+     */
+    private String getChildMembersStrByParentAndUniqueName(Level level, Cube oriCube, DataSourceInfo dsInfo,
+            Map<String, String> params, String uniqueName) {
+        List<Member> members = level.getMembers(oriCube, dsInfo, params);
+        for (Member member : members) {
+            if (member.getUniqueName().equals(uniqueName)) {
+                List<Member> childMembers = member.getChildMembers(oriCube, dsInfo, params);
+                return childMembers.stream().map(child -> child.getName()).collect(Collectors.joining(","));
+            }
+        }
+        return null;
+    }
+    
+    /**
      * 判断某个level是否为callback isCallbackLevel
      * 
      * @param level
      * @return
      */
-    private static boolean isCallbackLevel(Level level) {
+    private boolean isCallbackLevel(Level level) {
         return level != null && level.getType() == LevelType.CALL_BACK;
     }
 
@@ -3174,12 +3332,165 @@ public class QueryDataResource extends BaseResource {
      * @param dim
      * @return
      */
-    private static boolean isCallbackDim(Dimension dim) {
+    private boolean isCallbackDim(Dimension dim) {
         if (dim == null) {
             return false;
         }
         Level level = dim.getLevels().values().toArray(new Level[0])[0];
         return isCallbackLevel(level);
+    }
+    
+    /**
+     * 获取某个维度对应的"参数设置"部分的名称
+     * @param dim
+     * @param model
+     * @return
+     */
+    private String getParamName(Dimension dim, ReportDesignModel model) {
+        String value = null;
+        Map<String, ReportParam> params = model.getParams();
+        if (params != null && params.size() != 0) {
+            for (ReportParam param : params.values()) {
+                if (param.getElementId().equals(dim.getId())) {
+                    return param.getName();
+                }
+            }
+        }
+        return value;
+    }
+    
+    /**
+     * 根据uniqueName解析出最后一个value的值
+     * @param callbackParamName
+     * @param uniqueName
+     * @return
+     */
+    private String getCallbackParamValue(String callbackParamName, String uniqueName) {
+        if (!StringUtils.isEmpty(callbackParamName) && MetaNameUtil.isUniqueName(uniqueName)) {
+            String nameArray[] = MetaNameUtil.parseUnique2NameArray(uniqueName);
+            return nameArray[nameArray.length - 1];
+        }
+        return null;
+    }
+    
+    /**
+     * 根据root的member求出callback维度的层级关系
+     * @param allMembers
+     * @param cube
+     * @param dim
+     * @param params
+     * @param levelToRoot
+     */
+    private List<List<Member>> handleCallbackLevel4LiteOlapShow(Cube cube, Dimension dim, Map<String, String> params,
+            int levelToRoot) throws Exception {
+        Map<String, String> newParams = Maps.newHashMap(params);
+        // 添加levelToRoot参数，请求多个层级的岗位
+        newParams.put("levelToRoot", String.valueOf(levelToRoot));
+        List<List<Member>> members = reportModelQueryService.getMembers(cube, dim, newParams, securityKey);   
+        List<Member> secondCallbackLevelMembers = Lists.newArrayList();
+        List<Member> thirdCallbackLevelMembers = Lists.newArrayList();
+        // 比较dirty的解决方法，后续需要考虑写成递归调用,yichao.jiang
+//        members.forEach( rootMembers -> {
+//            rootMembers.forEach(rootMember -> {
+//                MiniCubeMember miniCubeRootMember = (MiniCubeMember) rootMember;
+//                List<Member> secondChildMembers = miniCubeRootMember.getChildren();
+//                if (!CollectionUtils.isEmpty(secondChildMembers)) {
+//                    secondCallbackLevelMembers.addAll(secondChildMembers);
+//                    secondChildMembers.forEach(secondChildMember -> {
+//                        MiniCubeMember miniCubeSecondChildMember = (MiniCubeMember) secondChildMember;
+//                        if (!CollectionUtils.isEmpty(miniCubeSecondChildMember.getChildren())) {
+//                            thirdCallbackLevelMembers.addAll(miniCubeSecondChildMember.getChildren());
+//                        }
+//                    });
+//                }
+//            });
+//        });
+        if (!CollectionUtils.isEmpty(members)) {
+            for (int i = 0; i < members.size(); i++) {
+                List<Member> firstLevelMembers = members.get(i);
+                if (!CollectionUtils.isEmpty(firstLevelMembers)) {
+                    for (int j = 0; j< firstLevelMembers.size(); j++) {
+                        MiniCubeMember member = (MiniCubeMember) firstLevelMembers.get(j);
+                        List<Member> secondChildMembers = member.getChildren();
+                        if (!CollectionUtils.isEmpty(secondChildMembers)) {
+                            secondCallbackLevelMembers.addAll(secondChildMembers);
+                            for (int k = 0; k < secondChildMembers.size(); k++ ) {
+                                member = (MiniCubeMember) secondChildMembers.get(k);
+                                List<Member> thirdChildMembers = member.getChildren();
+                                if (!CollectionUtils.isEmpty(thirdChildMembers)) {
+                                    thirdCallbackLevelMembers.addAll(thirdChildMembers);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(secondCallbackLevelMembers)) {
+            members.add(secondCallbackLevelMembers);
+        }
+        if (!CollectionUtils.isEmpty(thirdCallbackLevelMembers)) {
+            members.add(thirdCallbackLevelMembers);
+        }
+        return members;
+    }
+    /**
+     * 由root的member求出callback维度的层级关系
+     * @param rootMembers
+     * @param level 需要求的级别，默认设置为2，此时会展现3级，也就是展现级别为level + 1级
+     * @return
+     */
+    private void handleCallbackLevel4LiteOlapShow(List<List<Member>> allMembers, ReportDesignModel model, Cube cube, 
+            Dimension dim, Map<String, String> params, List<List<Member>> rootMembers, int level) {
+        List<Member> childMembers = Lists.newArrayList();
+        String callbackParamName = getParamName(dim, model);
+        Map<String, String> newParams = Maps.newHashMap();
+        newParams.putAll(params);
+        for (int i = 0; i < rootMembers.size(); i++) {
+            List<Member> firstLevelMembers = rootMembers.get(i);
+            if (!CollectionUtils.isEmpty(firstLevelMembers)) {
+                for (int j = 0; j < firstLevelMembers.size(); j++) {
+                    // 先直接取其孩子节点(children)属性
+                    MiniCubeMember member = (MiniCubeMember) firstLevelMembers.get(j);
+                    List<Member> secondLevelMembers = member.getChildren();
+                    // 如果children为空，但是本节点其实是有孩子的，只不过在前一次callback没有取回，则需要重新请求一次callback
+                    // step1：先获取本节点的callback value值
+                    String callbackParamValue = getCallbackParamValue(callbackParamName, member.getUniqueName());
+                    // step2: 判断本节点对应的queryNodes里面是否仅包含这一个值（即该节点为叶子节点）
+                    boolean executeCallback = true;
+                    if (!CollectionUtils.isEmpty(secondLevelMembers)) {
+                        // 如果已经取得了children，不需要执行callback
+                        executeCallback = false;
+                    } else if (CollectionUtils.isEmpty(member.getQueryNodes())) {
+                        // 如果没有queryNodes，表示没有children，也不需要执行callback
+                        executeCallback = false;
+                    } else if (member.getQueryNodes().size() == 1 && member.getQueryNodes().contains(callbackParamValue)) {
+                        // 如果仅有一个queryNodes，并且与本节点的value值相等，则表明此节点为叶子节点，同样不需要执行callback
+                        executeCallback = false;
+                    }
+                    // 如果需要执行callback，则先将参数进行替换，之后请求callback即可
+                    if (executeCallback) {
+                        if (!StringUtils.isEmpty(callbackParamValue) && !StringUtils.isEmpty(callbackParamName)) {
+                            newParams.put(callbackParamName, callbackParamValue);
+                        }
+                        secondLevelMembers = reportModelQueryService.getMembers(cube, member.getUniqueName(), newParams, securityKey);
+                    }
+                    if (!CollectionUtils.isEmpty(secondLevelMembers)) {
+                        childMembers.addAll(secondLevelMembers);
+                    }
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(childMembers)) {
+            allMembers.add(childMembers);
+        }
+        if (level > 0 ) {
+            List<List<Member>> newMembers = Lists.newArrayList();
+            childMembers.forEach(k -> {
+                newMembers.add(Lists.newArrayList(k));
+            });
+            handleCallbackLevel4LiteOlapShow(allMembers, model, cube, dim, params, newMembers, level -1 );
+        }
     }
     
     /**

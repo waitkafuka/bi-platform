@@ -15,39 +15,24 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin;
 
-import com.baidu.rigel.biplatform.ac.query.data.DataModel;
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 
 /**
  *
- * 查询接口
+ * 查询接口常量类
  * 
  * Created by luowenlei.
  *
  */
-public interface QueryPlugin {
+public class QueryPluginConstants {
     
     /**
-     *
-     * 查询接口
-     * 
-     * @param QuestionModel
-     *            问题模型
-     * @return DataModel 数据模型
-     *
+     * 异步查询
      */
-    DataModel query(QuestionModel questionModel) throws QuestionModelTransformationException;
+    public static final String QUERY_TYPE_ASYN = "ASYN";
     
     /**
-     *
-     * 判断是否匹配
-     * 
-     * @param QuestionModel
-     *            问题模型
-     * @return boolean true匹配成功，false不匹配
-     *
+     * 同步查询
      */
-    boolean isSuitable(QuestionModel questionModel) throws QuestionModelTransformationException;
+    public static final String QUERY_TYPE_SYNC = "SYNC";
     
 }

@@ -8,7 +8,6 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTab
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlConstants;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.SqlQuery;
 
 public class PaloSqlExpression extends SqlExpression {
     
@@ -38,23 +37,9 @@ public class PaloSqlExpression extends SqlExpression {
      * @see
      * com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc
      * .SqlExpression
-     * #generateSelectExpression(com.baidu.rigel.biplatform.queryrouter
-     * .queryplugin.plugins.model.SqlQuery, java.util.List, boolean)
-     */
-    @Override
-    public String generateSelectExpression(SqlQuery sqlQuery, List<SqlColumn> needColums,
-            boolean contentJoinSelect) throws QuestionModelTransformationException {
-        String selectSql = super.generateSelectExpression(sqlQuery, needColums, contentJoinSelect);
-        String idSql = SqlConstants.SPACE + SqlConstants.SOURCE_TABLE_ALIAS_NAME + SqlConstants.DOT
-                + ID + SqlConstants.SPACE;
-        if (selectSql.indexOf(idSql) < 0) {
-            selectSql = selectSql + SqlConstants.COMMA + idSql;
-        }
-        return selectSql;
-    }
-
-    /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.SqlExpression#generateCountSql(com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel, java.util.Map, java.util.List, java.util.Map)
+     * #generateCountSql(com.baidu.rigel.biplatform.queryrouter.queryplugin
+     * .plugins.model.PlaneTableQuestionModel, java.util.Map, java.util.List,
+     * java.util.Map)
      */
     @Override
     public void generateCountSql(PlaneTableQuestionModel questionModel,
@@ -64,20 +49,25 @@ public class PaloSqlExpression extends SqlExpression {
         super.generateCountSql(questionModel, allColums, needColums, whereData);
         this.getCountSqlQuery().getSelect().setSql(" select count(" + ID + ") as totalc ");
     }
-
-    /* (non-Javadoc)
-     * @see com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.SqlExpression#generateOrderByExpression(com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel, java.util.Map)
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc
+     * .SqlExpression
+     * #generateOrderByExpression(com.baidu.rigel.biplatform.queryrouter
+     * .queryplugin.plugins.model.PlaneTableQuestionModel, java.util.Map)
      */
     @Override
     public String generateOrderByExpression(PlaneTableQuestionModel planeTableQuestionModel,
             Map<String, SqlColumn> allColums) throws QuestionModelTransformationException {
         // TODO Auto-generated method stub
         String orderby = super.generateOrderByExpression(planeTableQuestionModel, allColums);
-        return orderby + SqlConstants.COMMA
-                + SqlConstants.SOURCE_TABLE_ALIAS_NAME+ SqlConstants.DOT + ID
-                + SqlConstants.SPACE;
+        if (!orderby.contains(SqlConstants.SOURCE_TABLE_ALIAS_NAME + SqlConstants.DOT + ID)) {
+            return orderby + SqlConstants.COMMA + SqlConstants.SOURCE_TABLE_ALIAS_NAME
+                    + SqlConstants.DOT + ID + SqlConstants.SPACE;
+        }
+        return orderby;
     }
-    
-    
-
 }

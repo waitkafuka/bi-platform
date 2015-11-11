@@ -20,6 +20,7 @@ package com.baidu.rigel.biplatform.tesseract.isservice.search.service.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -234,20 +235,20 @@ public class SearchIndexServiceImpl implements SearchService {
 		if (!StringUtils.isEmpty(idxShard.getShardDimBase())) {			
 			if (query != null && query.getWhere() != null
 					&& !CollectionUtils.isEmpty(query.getWhere().getAndList())) {
-				for (Expression ex : query.getWhere().getAndList()) {
-					if (ex.getProperties().equals(idxShard.getShardDimBase())
-							&& !CollectionUtils.isEmpty(ex.getQueryValues())) {
-						for (QueryObject qo : ex.getQueryValues()) {
-							if (CollectionUtils.isEmpty(CollectionUtils
-									.intersection(
-											idxShard.getShardDimValueSet(),
-											qo.getLeafValues()))) {
-								result = false;
-								break;
-							}
-						}
-					}
-				}
+                for (Expression ex : query.getWhere().getAndList()) {
+                    if (ex.getProperties().equals(idxShard.getShardDimBase())
+                        && !CollectionUtils.isEmpty(ex.getQueryValues())) {
+                        Set<String> currLeafValues = new HashSet<String>();                        
+                        for (QueryObject qo : ex.getQueryValues()) {
+                            currLeafValues.addAll(qo.getLeafValues());
+                        }
+                        if (CollectionUtils.isEmpty(CollectionUtils.intersection(
+                            idxShard.getShardDimValueSet(), currLeafValues))) {
+                            result = false;
+                            break;
+                        }
+                    }
+                }
 			}
 		}
 		return result;

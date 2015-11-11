@@ -53,9 +53,9 @@ public class PlaneTableQuestionModel2SqlColumnUtils {
             return needColumns;
         }
         // 获取列元数据
-        selections.forEach((selectName) -> {
+        for (String selectName : selections) {
             needColumns.add(allColums.get(selectName));
-        });
+        }
         return needColumns;
     }
 

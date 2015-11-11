@@ -26,11 +26,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPluginConstants;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.PlaneTableQuestionModel2SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcDataModelUtil;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.JdbcQuestionModelUtil;
@@ -110,6 +112,20 @@ public class QuerySqlPlugin implements QueryPlugin {
                 .convertQuestionModel2Sql(planeTableQuestionModel, allColumns, tableNames);
         DataModel dataModel = jdbcDataModelUtil.executeSql(planeTableQuestionModel, allColumns, sqlCause);
         return dataModel;
+    }
+
+    @Override
+    public boolean isSuitable(QuestionModel questionModel)
+            throws QuestionModelTransformationException {
+        if (questionModel instanceof ConfigQuestionModel) {
+            ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+            if (configQuestionModel.getDataSourceInfo().getDataSourceType() == DataSourceType.SQL) {
+                if ("SQL".equals(configQuestionModel.getQuerySource())) {
+                    return true; 
+                }
+            }
+        }
+        return false;
     }
 
 }

@@ -126,15 +126,16 @@ public class QueryRouterResource {
                     System.currentTimeMillis() - begin);
             return ResponseResultUtils.getCorrectResult(SUCCESS, dataModelJson);
         } catch (JsonSyntaxException e) {
-            logger.error(e.getMessage());
+            logger.error("queryId:{} error msg:{}", questionModel.getQueryId(), e.getMessage());
             // 说明模型参数传入有问题
             return ResponseResultUtils.getErrorResult(
                     "json syntax exception,json is not well formed.", 100);
         } catch (QuestionModelTransformationException e) {
-            logger.error(e.getMessage());
+            logger.error("queryId:{} error msg:{}", questionModel.getQueryId(), e.getMessage());
             // 说明模型参数传入有问题
             return ResponseResultUtils.getErrorResult(
-                    "question model exception, questionmodel is incorrect.", 100);
+                    "question model exception, questionmodel is incorrect."
+                    + "reason:" + e.getMessage(), 100);
         } finally {
             logger.info("queryId:{} query current handle size:{} , end to handle this queryId.",
                     questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());

@@ -195,8 +195,8 @@ public class OlapLinkServiceImpl implements OlapLinkService {
         Dimension dim = cube.getDimensions().get(olapElementId);
         String condDimName = dim.getName();
         String condUniqueName = "";
-        // 如果发现是时间条件，则uniqueName直接等于condDimValue
-        if (extendArea.getType() == ExtendAreaType.TIME_COMP) {
+        // 如果发现是时间条件或者本来传过来的就是uniqueName，则uniqueName直接等于condDimValue
+        if (extendArea.getType() == ExtendAreaType.TIME_COMP || MetaNameUtil.isUniqueName(condDimValue)) {
             condUniqueName = condDimValue;
         } else {
             condUniqueName = MetaNameUtil.getNameFromMetaName(condDimValue);
@@ -345,6 +345,9 @@ public class OlapLinkServiceImpl implements OlapLinkService {
         for (Item dimItem : items) {
             String dimId = dimItem.getOlapElementId();
             Dimension dim = cube.getDimensions().get(dimId);
+            if (dim == null) {
+                continue;
+            }
             addDimToList(dimList, dim, countedSet);
         }
         return dimList;

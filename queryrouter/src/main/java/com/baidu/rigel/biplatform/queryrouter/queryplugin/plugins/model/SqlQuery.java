@@ -261,23 +261,18 @@ public class SqlQuery implements Serializable {
      * 
      */
     public String generatePageInfo(String finallySql) {
+        if (pageInfo == null) {
+            return finallySql;
+        }
         StringBuffer limitStringBuffer = new StringBuffer();
         int start = 0;
         int size = -1;
 
-        if (pageInfo == null) {
-            // 临时方案，目前下载数据超过6万时，需要修改显示为6万数据下载
-            pageInfo = new PageInfo();
+        if (pageInfo.getCurrentPage() < 0) {
             pageInfo.setCurrentPage(0);
-            pageInfo.setPageSize(60000);
-            // return finallySql;
-        } else {
-            if (pageInfo.getCurrentPage() < 0) {
-                pageInfo.setCurrentPage(0);
-            }
-            if (pageInfo.getPageSize() < 0) {
-                pageInfo.setPageSize(0);
-            }
+        }
+        if (pageInfo.getPageSize() < 0) {
+            pageInfo.setPageSize(0);
         }
         start = pageInfo.getCurrentPage() * pageInfo.getPageSize();
         size = pageInfo.getPageSize();

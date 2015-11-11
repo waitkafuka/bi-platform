@@ -370,8 +370,11 @@ public class QueryRequestUtil {
         if (StringUtils.isNotBlank(memberNodeTree.getName())
                 && memberNodeTree.getChildren().size() >= 1) {
             // Fixed by Me David.wang 解决callback维度下钻返回多层，汇总数据计算错误问题
-            if (memberNodeTree.getChildren().size() == 1
-                    && memberNodeTree.getChildren().get(0).getChildren().size() > 1) {
+            // update by majun  当维度为非callback维度时，获取all成员时，只需当children个数大于0即可
+            if ((memberNodeTree.isCallback() && memberNodeTree.getChildren().size() == 1 && memberNodeTree
+                    .getChildren().get(0).getChildren().size() > 1)
+                    || memberNodeTree.getChildren().size() == 1
+                    && memberNodeTree.getChildren().get(0).getChildren().size() > 0) {
                 return coolectAllMem(memberNodeTree.getChildren().get(0));
             }
             result = new PullUpProperties(memberNodeTree.getQuerySource(),

@@ -147,10 +147,23 @@ public class DataModelBuilder {
                     for (String rowName : rowAxisKeys) {
                         if (parseData.containsKey(rowName) && parseData.get(rowName).containsKey(columnName)) {
                             columnBaseDatas.get(i).add(parseData.get(rowName).get(columnName));
+                        } 
+                        // 因为维度组的一级汇总层级是拼装出来的，为简单处理，这里做一步直接向上汇总，注：只测试了维度组有两层的情况，如果超过两层，可能会有问题！！！
+                        // TODO 后续需要将这一步汇总放到后面的汇总逻辑里去做，不能这样简单将二级汇总直接复制到一级汇总 update by majun
+                        else if (rowAxisKeys.size() > 1
+                                && queryContext.getRowMemberTrees().get(0).getChildren().size() == 1
+                                && rowName.split("\\^_\\^")[1].equals(queryContext.getRowMemberTrees().get(0)
+                                        .getChildren().get(0).getName())) {
+                            rowName = rowAxisKeys.get(1);
+                            if (parseData.get(rowName) != null && parseData.get(rowName).get(columnName) != null) {
+                                columnBaseDatas.get(i).add(parseData.get(rowName).get(columnName));
+                            } else {
+                                columnBaseDatas.get(i).add(null);
+                            }
                         } else {
                             // 填充一个null对象
-                            columnBaseDatas.get (i).add (null);
-//                            columnBaseDatas.get(i).add(BigDecimal.ZERO);
+                            columnBaseDatas.get(i).add(null);
+                            // columnBaseDatas.get(i).add(BigDecimal.ZERO);
                         }
                     }
                 }

@@ -145,21 +145,22 @@ public class JdbcDataModelUtil {
         if (needColums == null || needColums.isEmpty()) {
             return dataModel;
         }
-        needColums.forEach((colDefine) -> {
+        // 必须为有序的column
+        for (SqlColumn colDefine : needColums) {
             String tableName = "";
             tableName = colDefine.getTableName();
             if (ColumnType.COMMON == colDefine.getType()) {
                 tableName = colDefine.getSourceTableName();
             }
             Column colum = new Column(colDefine.getColumnKey(),
-                    colDefine.getTableFieldName(), colDefine.getCaption(), tableName);
+                    colDefine.getTableFieldName(), colDefine.getCaption(), colDefine.getDataType(), tableName);
             dataModel.getTableData().getColumns().add(colum);
             dataModel
                     .getTableData()
                     .getColBaseDatas()
                     .put(colDefine.getColumnKey(),
                             new ArrayList<String>());
-        });
+        }
         return dataModel;
     }
 
@@ -180,14 +181,9 @@ public class JdbcDataModelUtil {
         Map<String, List<String>> rowBaseData = dataModel.getTableData()
                 .getColBaseDatas();
         rowBasedList.forEach((row) -> {
-            needColums.forEach((column) -> {
+            for (SqlColumn column : needColums) {
                 String tableDataColumnKey = column.getColumnKey();
                 String cell = "";
-                if (rowBaseData.get(tableDataColumnKey) == null) {
-                    // init TableData Column List
-                    rowBaseData
-                            .put(tableDataColumnKey, new ArrayList<String>());
-                }
                 if (column.getSqlUniqueColumn() != null && row.get(column.getSqlUniqueColumn()) != null) {
                     Object obj = row.get(column.getSqlUniqueColumn());
                     if (obj instanceof BigDecimal) {
@@ -199,7 +195,7 @@ public class JdbcDataModelUtil {
                 // get Data from
                 List<String> oneColData = rowBaseData.get(tableDataColumnKey);
                 oneColData.add(UnicodeUtils.string2Unicode(cell));
-            });
+            }
         });
     }
 }

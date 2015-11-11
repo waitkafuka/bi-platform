@@ -123,6 +123,20 @@ public class MetaNameUtil {
     }
 
     /**
+     * 用中括号将Member列表的name包住
+     * 
+     * @param metaNames member的name
+     * @return @return 封装好的UniqueName列表
+     */
+    public static List<String> makeUniqueNameList(String[] metaNames) {
+        List<String> makeUniqueNameList = Lists.newArrayList();
+        for (String metaName : metaNames) {
+            makeUniqueNameList.add(makeUniqueName(metaName));
+        }
+        return makeUniqueNameList;
+    }
+
+    /**
      * 将一个UniqueName转换成字符串数组
      * 
      * @param uniqueName 一个UniqueName

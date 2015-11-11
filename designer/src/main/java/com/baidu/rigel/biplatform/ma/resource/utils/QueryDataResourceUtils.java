@@ -8,6 +8,7 @@ import javax.annotation.Resource;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -258,11 +259,26 @@ public class QueryDataResourceUtils {
         Item item = logicModel.getRows ()[0];
         Map<String, String> root = Maps.newHashMap();
         if (params.containsKey (item.getOlapElementId ())) {
-            String uniqueName = params.get (item.getOlapElementId ()).toString ();
             Dimension dim = cube.getDimensions ().get (item.getOlapElementId ());
-            // for callback
-            if (!MetaNameUtil.isUniqueName (uniqueName)) {
-                uniqueName = "[" + dim.getName () + "].[" + uniqueName + "]";
+            Object obj = params.get(item.getOlapElementId());
+            String uniqueName = "";
+            if (obj instanceof String[]) {
+                // 如果是多选
+                String[] uniqueNames = (String[]) obj;
+                for (int i = 0; i < uniqueNames.length; i++) {
+                    // for callback
+                    if (!MetaNameUtil.isUniqueName(uniqueNames[i])) {
+                        uniqueNames[i] = "[" + dim.getName() + "].[" + uniqueNames[i] + "]";
+                    }
+                }
+                uniqueName = StringUtils.join(uniqueNames, ",");
+            } else {
+                // 如果是单选
+                uniqueName = (String) obj;
+                // for callback
+                if (!MetaNameUtil.isUniqueName(uniqueName)) {
+                    uniqueName = "[" + dim.getName() + "].[" + uniqueName + "]";
+                }
             }
             root.put("uniqName", genRootUniqueName (uniqueName));
         } else {

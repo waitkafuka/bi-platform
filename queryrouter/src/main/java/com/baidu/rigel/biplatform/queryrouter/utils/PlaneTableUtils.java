@@ -79,7 +79,7 @@ public class PlaneTableUtils {
     }
     
     /**
-     * 设置选择查询的列
+     * 设置有序的选择查询的列
      * 
      * @param configQuestionModel
      *            configQuestionModel
@@ -96,22 +96,47 @@ public class PlaneTableUtils {
         if (MapUtils.isEmpty(configQuestionModel.getAxisMetas())) {
             return result;
         }
-        
+        // 如果axisMetaMeasures.getQueryItemsOrder()没有值，那么返回无序的List
+        if (configQuestionModel.getAxisMetas().get(AxisType.COLUMN) != null) {
+            AxisMeta axisMetaMeasures = (AxisMeta) configQuestionModel.getAxisMetas().get(
+                    AxisType.COLUMN);
+            if (CollectionUtils.isEmpty(axisMetaMeasures.getQueryItemsOrder())) {
+                return getSelectionNotOrdered(configQuestionModel, metaMap);
+            } else {
+                return axisMetaMeasures.getQueryItemsOrder();
+            }
+        } else {
+            return getSelectionNotOrdered(configQuestionModel, metaMap);
+        }
+    }
+    
+    /**
+     * 设置无序的选择查询的列
+     * 
+     * @param configQuestionModel
+     *            configQuestionModel
+     * @param metaMap
+     *            metaMap
+     * @return List<String> SelectionList
+     */
+    public static List<String> getSelectionNotOrdered(ConfigQuestionModel configQuestionModel,
+            Map<String, Column> metaMap) {
+        List<String> result = new ArrayList<String>();
         if (configQuestionModel.getAxisMetas().get(AxisType.COLUMN) != null) {
             AxisMeta axisMetaMeasures = (AxisMeta) configQuestionModel.getAxisMetas().get(
                     AxisType.COLUMN);
             // 获取指标元数据
             if (axisMetaMeasures.getQueryMeasures() != null) {
-                axisMetaMeasures.getQueryMeasures().forEach((measureName) -> {
+                for (String measureName : axisMetaMeasures.getQueryMeasures()) {
                     result.add("[Measure].[" + measureName + "]");
-                });
+                }
             }
 
             // 获取指标元数据
             if (axisMetaMeasures.getCrossjoinDims() != null) {
-                axisMetaMeasures.getCrossjoinDims().forEach((dimName) -> {
+                for (String dimName : axisMetaMeasures.getCrossjoinDims()) {
                     result.add("[Dimension].[" + dimName + "]");
-                });
+                }
             }
         }
 
@@ -119,19 +144,18 @@ public class PlaneTableUtils {
             // 获取维度元数据
             AxisMeta axisMetaDims = (AxisMeta) configQuestionModel.getAxisMetas().get(AxisType.ROW);
             if (axisMetaDims.getCrossjoinDims() != null) {
-                axisMetaDims.getCrossjoinDims().forEach((dimName) -> {
+                for (String dimName : axisMetaDims.getCrossjoinDims()) {
                     result.add("[Dimension].[" + dimName + "]");
-                });
+                }
             }
 
             // 获取维度元数据
             if (axisMetaDims.getQueryMeasures() != null) {
-                axisMetaDims.getQueryMeasures().forEach((measureName) -> {
+                for (String measureName : axisMetaDims.getQueryMeasures()) {
                     result.add("[Measure].[" + measureName + "]");
-                });
+                }
             }
         }
-
         return result;
     }
     

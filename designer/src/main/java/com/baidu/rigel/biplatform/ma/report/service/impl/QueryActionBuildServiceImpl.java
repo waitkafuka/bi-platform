@@ -450,10 +450,6 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             if (orderDesc == null) {
                 orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
             }
-        } else {
-            // 平面表排序信息
-            orderDesc =
-                    this.genFirstOrderDescForPlaneTable(targetLogicModel, action, oriCube4QuestionModel);
         }
         logger.info ("[INFO] -------- order desc = " + orderDesc);
         action.setOrderDesc(orderDesc);            

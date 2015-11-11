@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -31,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -965,7 +968,8 @@ public final class DataModelUtils {
                     Dimension dim = getDimByName(cube, dimNameFromUniqueName);
                     final int length = MetaNameUtil.parseUnique2NameArray(rowField.getUniqueName()).length;
                     final boolean lastLevel = dim.getLevels().size() >= length;
-                    if (dim != null && lastLevel) {
+                    Level level = dim.getLevels().values().toArray(new Level[0])[0];
+                    if (dim != null && (lastLevel || (level instanceof CallbackLevel))) {
                         rowField.setExpand(true);
                     } else {
                         rowField.setExpand(null);
@@ -1523,7 +1527,7 @@ public final class DataModelUtils {
      */
     public static String convertDataModel2CsvStringForPlaneTable(Cube cube, DataModel dataModel, LogicModel logicModel,
             Map<String, Object> setting) {
-        long begin = System.currentTimeMillis();
+         long begin = System.currentTimeMillis();
         StringBuilder rs = new StringBuilder();
         if (dataModel == null) {
             return rs.toString();
@@ -1538,10 +1542,16 @@ public final class DataModelUtils {
         List<Column> columns = tableData.getColumns();
         // 获取正确的下载顺序
         List<String> keys = getKeysInOrder(cube, logicModel, columns);
+        List<TableData.Column> columnsInOrder = new ArrayList<TableData.Column>();
         for (String key : keys) {
             for (Column column : columns) {
                 if (column.key.equals(key)) {
-                    rs.append(column.caption + ",");
+                    columnsInOrder.add(column);
+                    if (com.baidu.rigel.biplatform.ac.util.DataModelUtils.isChar(column.dataType)) {
+                        rs.append("\t" + column.caption + ",");
+                    } else {
+                        rs.append(column.caption + ",");
+                    }
                     break;
                 }
             }
@@ -1559,13 +1569,18 @@ public final class DataModelUtils {
         // 构建数据
         for (int i = 0; i < totalRecordSize; i++) {
             Map<String, String> rowBasedData = rowBasedDatas.get(i);
-            for (String key : keys) {
-                if (!isShowZero(setting) && StringUtils.isEmpty(rowBasedData.get(key))) {
+            for (Column column : columnsInOrder) {
+                if (!isShowZero(setting) && StringUtils.isEmpty(rowBasedData.get(column.key))) {
                     rs.append("-" + ",");
-                } else if (isShowZero(setting) && StringUtils.isEmpty(rowBasedData.get(key))) {
+                } else if (isShowZero(setting) && StringUtils.isEmpty(rowBasedData.get(column.key))) {
                     rs.append("0" + ",");
                 } else {
-                    rs.append(rowBasedData.get(key) + ",");
+                    String dataCell = rowBasedData.get(column.key);
+                    if (DataModelUtils.isNumeric(dataCell)) {
+                        rs.append(dataCell + ",");
+                    } else {
+                        rs.append("\t" + dataCell + ",");
+                    }
                 }
             }
             rs.replace(rs.length() - 1, rs.length(), "");
@@ -1574,7 +1589,16 @@ public final class DataModelUtils {
         LOG.info("transfer datamodel 2 csv string cost:" + (System.currentTimeMillis() - begin) + "ms!");
         return rs.toString();
     }
-
+    
+    public static boolean isNumeric(String str){ 
+        Pattern pattern = Pattern.compile("(-?[0-9]+.?[0-9]+)|[0-9]|-[0-9]"); 
+        Matcher isNum = pattern.matcher(str);
+        if( !isNum.matches() ){
+            return false; 
+        } 
+        return true; 
+    }
+    
     /**
      * 在显示前对DataModel的数据进行处理，该方法主要针对下载而言 preProcessDataModel4Show
      * 
@@ -1649,7 +1673,7 @@ public final class DataModelUtils {
                 rs.append(str + ",");
             });
             for (int j = 0; j < rowDatas.get(i).size(); ++j) {
-                rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j).stripTrailingZeros().toPlainString());
+                rs.append(rowDatas.get(i).get(j) == null ? "-" : rowDatas.get(i).get(j));
                 if (j < rowDatas.get(i).size() - 1) {
                     rs.append(",");
                 } else {

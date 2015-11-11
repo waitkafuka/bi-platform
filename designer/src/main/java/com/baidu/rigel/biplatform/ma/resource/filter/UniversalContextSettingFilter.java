@@ -36,11 +36,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.util.CookieGenerator;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.utils.UuidGeneratorUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
+import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.google.common.collect.Lists;
 
 /**
@@ -210,7 +212,19 @@ public class UniversalContextSettingFilter implements Filter {
         try {
             if (!StringUtils.isEmpty(sessionId)) {
                 ContextManager.setSessionId(sessionId);
+            } else {
+                // 如果发现当前sessionId为空，那么可能是在编辑端进行操作，这时直接取每个客户端的标识uniqueFlag即可 update by majun
+                String fakeSessionId = ResourceUtils.getCookieValueFromRequest(request, "uniqueFlag");
+                if (StringUtils.isEmpty(fakeSessionId)) {
+                    fakeSessionId = UuidGeneratorUtils.generate();
+                }
+                ContextManager.setSessionId(fakeSessionId);
+                
+                CookieGenerator cookieGenerator = new CookieGenerator();
+                cookieGenerator.setCookieName("uniqueFlag");
+                cookieGenerator.addCookie(response, fakeSessionId);
             }
+            
             if (!StringUtils.isEmpty(productLine)) {
                 ContextManager.setProductLine(productLine);
             }

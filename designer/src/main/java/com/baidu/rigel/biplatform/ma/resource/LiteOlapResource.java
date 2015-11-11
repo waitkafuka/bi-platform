@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
@@ -257,6 +258,7 @@ public class LiteOlapResource {
         OlapElement element =
                 ReportDesignModelUtils.getDimOrIndDefineWithId(model.getSchema(), liteOlapArea.getCubeId(),
                         targetItem.getOlapElementId());
+        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         if (!StringUtils.hasText(to)) {
             // // 如果from不为空，to为空，则表示要将条件拖走，则需要校验该条件是否为必须
             // boolean isNeed = this.checkIsNeed(targetName, model);
@@ -270,23 +272,36 @@ public class LiteOlapResource {
              */
             if (element instanceof Dimension) {
                 liteOlapArea.getCandDims().put(element.getId(), targetItem);
+                // 如果to为空，并且from不为空，则需要将对应的维度参数从查询上下文中删除
+                if (StringUtils.hasText(from)) {
+                    // 先删除id对应的参数
+                    runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(element.getId());
+                    // 获取该id对应的参数维度中的参数名称
+                    String paramName = this.getParamDimension(element.getId(), model);
+                    // 如果参数名称不为空，则同样将其移除
+                    if (StringUtils.hasText(paramName)) {
+                        runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(paramName);
+                    }
+                }
             } else if (element instanceof Measure) {
                 liteOlapArea.getCandInds().put(element.getId(), targetItem);
             }
+            
+            
             // }
         } else {
-            // // TODO 后续考虑优化
-            // if (element instanceof Dimension) {
-            // MiniCubeDimension dimension = (MiniCubeDimension) element;
-            // Level level = dimension.getLevels().values().toArray(new Level[0])[0];
-            // // 如果拖动的是岗位条件，则将其放置到第一个位置
-            // if (level.getType() == LevelType.CALL_BACK) {
-            // toPosition = 0;
-            // } else {
-            // // TODO如果拖动的是其他维度，则需要保证岗位在第一个位置
-            // toPosition = toPosition + 1;
-            // }
-            // }
+            // TODO 后续考虑优化
+            if (element instanceof Dimension) {
+                MiniCubeDimension dimension = (MiniCubeDimension) element;
+                Level level = dimension.getLevels().values().toArray(new Level[0])[0];
+                // 如果拖动的是岗位条件，则将其放置到第一个位置
+                if (level.getType() == LevelType.CALL_BACK) {
+                    toPosition = 0;
+                } else {
+                    // TODO如果拖动的是其他维度，则需要保证岗位在第一个位置
+                    toPosition = toPosition + 1;
+                }
+            }
             switch (to) {
                 case ROW:
                     targetItem.setPositionType(PositionType.X);
@@ -307,7 +322,6 @@ public class LiteOlapResource {
             }
         }
         // reportModelCacheManager.updateReportModelToCache(reportId, model);
-        ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         ExtendAreaContext extendContext = reportModelCacheManager.getAreaContext(reportId,
                 liteOlapArea.getTableAreaId());
         if (extendContext.getCurBreadCrumPath() != null) {
@@ -342,24 +356,23 @@ public class LiteOlapResource {
     }
 
     /**
-     * 判断某个维度或者指标是否配置成必须的 注：必须是指在P参数勾选了必须
-     * 
+     * 判断某个维度是否设置了参数维度
      * @param elementId 维度或者指标id
      * @param model 报表模型
-     * @return 如果是，返回true；否则，返回false
+     * @return 返回该维度对应的参数名称
      */
-    private boolean checkIsNeed(String elementId, ReportDesignModel model) {
+    private String getParamDimension(String elementId, ReportDesignModel model) {
         Map<String, ReportParam> reportParams = model.getParams();
         // 对于必须的参数
         if (reportParams != null && reportParams.size() != 0) {
             for (String key : reportParams.keySet()) {
                 ReportParam param = reportParams.get(key);
-                if (param.getElementId().equals(elementId) && param.isNeeded()) {
-                    return true;
+                if (param.getElementId().equals(elementId)) {
+                    return param.getName();
                 }
             }
         }
-        return false;
+        return "";
     }
 
     /**
