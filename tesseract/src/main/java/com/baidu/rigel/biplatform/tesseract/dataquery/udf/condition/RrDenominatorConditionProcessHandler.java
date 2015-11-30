@@ -82,7 +82,7 @@ class RrDenominatorConditionProcessHandler  extends RateConditionProcessHandler 
                     size = dimCondition.getQueryDataNodes().size();
                 }
                 // 取昨天
-                timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);
+                timeRange = TimeUtils.getDays(cal.getTime(), 0, size - 1);  
                 break;
             case TimeWeekly:
                 cal.add (Calendar.WEEK_OF_YEAR, -1);

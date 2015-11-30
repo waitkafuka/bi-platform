@@ -147,11 +147,21 @@ public class QueryContextBuilder {
                         if (dimCondition == null) {
                             dimCondition = new DimensionCondition(dimName);
                         }
+                        Dimension dim = cube.getDimensions().get(dimCondition.getMetaName());
+                        boolean isCallBackDimOnRows = false;
+                        if (dim != null && dim.getType() == DimensionType.CALLBACK) {
+                            isCallBackDimOnRows = true;
+                        }
                         String lineUniqueName = cloneQuestionModel.getRequestParams().get("lineUniqueName");
-                        // 如果发现当前查询是多维度交叉，那么构建MemberNodeTree的逻辑还是走原来的分支，
+                        boolean isChartQuery =
+                                Boolean.valueOf(cloneQuestionModel.getRequestParams().get("isChartQuery"));
+                        // 如果发现当前查询是多维度交叉，或者是图查询，或者是岗位查询，那么构建MemberNodeTree的逻辑还是走原来的分支，
                         // 否则走buildQueryMemberTreeAsNormal分支以应对需要单独构建一级层级的场景 update by majun
-                        if (axisMeta.getAxisType() == AxisType.ROW
-                                && axisMeta.getCrossjoinDims().size() > 1
+                        if (isCallBackDimOnRows
+                                || isChartQuery
+                                || (axisMeta.getAxisType() == AxisType.ROW && axisMeta.getCrossjoinDims().size() > 1)
+                                || (axisMeta.getAxisType() == AxisType.ROW && (axisMeta.getCrossjoinDims().size() == 1 && dim
+                                        .getType() == DimensionType.STANDARD_DIMENSION))
                                 || (org.springframework.util.StringUtils.hasLength(lineUniqueName) && lineUniqueName
                                         .split("\\}").length > 1)) {
                             queryContext.addMemberNodeTreeByAxisType(
@@ -162,7 +172,7 @@ public class QueryContextBuilder {
                             queryContext.addMemberNodeTreeByAxisType(
                                     axisType,
                                     buildQueryMemberTreeAsNormal(dsInfo, cube, dimCondition, i == 0,
-                                            questionModel.getRequestParams()));
+                                            questionModel.getRequestParams(), queryContext));
                         }
                         i++;
                     }
@@ -393,136 +403,191 @@ public class QueryContextBuilder {
         return filterValues;
     }
     
-    /**
-     * 根据给定的字符串和匹配字符串以及传入的序号，截取出符合序号描述的子字符串
-     * 
-     * @param str 待截取的字符串
-     * @param sub 要匹配的规则字符串
-     * @param index 截取第几位符合规则的字符串
-     * @return 截取完成的子字符串
-     */
-    private String subStringOfIndexFlag(String str, String sub, int index) {
-        if (str == null || sub == null || str.length() == 0 || sub.length() == 0) {
-            return null;
-        }
-        int pos = 0;
-        int idx = 0;
-        for (int i = 0; i < index; i++) {
-            idx = str.indexOf(sub, pos);
-            pos = idx + sub.length();
-        }
-        return str.substring(0, idx);
-    }
     
     /**
      * 根据维值选中条件构造维值查询的树
-     *  
+     * 
      * 
      * @param dataSourceInfo 数据源信息
      * @param cube cube模型
      * @param dimCondition 维值查询条件
      * @param isFirstInRow 是否是行上的第一个维度
+     * @param params params
+     * @param queryContext queryContext
      * @return 维值树
      * @throws MiniCubeQueryException 查询维值异常
      * @throws MetaException
      */
-    public MemberNodeTree buildQueryMemberTreeAsNormal(DataSourceInfo dataSourceInfo, Cube cube,
-            DimensionCondition dimCondition, boolean isFirstInRow, Map<String, String> params)
-            throws MiniCubeQueryException, MetaException {
-        //TODO 该方法后续需要重点重构，去掉多余逻辑  update by majun  
+    public MemberNodeTree
+            buildQueryMemberTreeAsNormal(DataSourceInfo dataSourceInfo, Cube cube, DimensionCondition dimCondition,
+                    boolean isFirstInRow, Map<String, String> params, QueryContext queryContext)
+                    throws MiniCubeQueryException, MetaException {
+        // TODO 该方法后续需要重点重构，去掉多余逻辑 update by majun
         if (dimCondition == null) {
             throw new IllegalArgumentException("dimension condition is null");
         }
-        long current = System.currentTimeMillis();
-        boolean hasMoreDimLevel = false;
-        int levelNum = 0;
-        MemberNodeTree nodeTree = new MemberNodeTree(null);
-        Dimension dimension = cube.getDimensions().get(dimCondition.getMetaName());
+        String dimParam = params.get("dimParam");
         if (dimCondition.getQueryDataNodes().isEmpty()) {
             String uniqueName = cube.getDimensions().get(dimCondition.getMetaName()).getAllMember().getUniqueName();
             String lineUniqueName = params.get("lineUniqueName");
             // 需要处理维度组选“全部”时，下钻的情况，这时候的uniqueName应该从传入的下钻uniqueName中取
-            if (!StringUtils.isEmpty(lineUniqueName)) {
+            if (StringUtils.isNotEmpty(lineUniqueName)) {
                 uniqueName = params.get("uniqueName");
+                // if(uniqueName.contains(",")){
+
             }
             QueryData queryData = new QueryData(uniqueName);
             queryData.setExpand(isFirstInRow);
             queryData.setShow(true);
             dimCondition.getQueryDataNodes().add(queryData);
-            logger.info("cost:{}ms,in build default member:{}", System.currentTimeMillis() - current, dimCondition);
-            current = System.currentTimeMillis();
-        } else if ((levelNum =
-                MetaNameUtil.parseUnique2NameArray(dimCondition.getQueryDataNodes().get(0).getUniqueName()).length) > 2
-                && dimension.getLevels().size() < levelNum) {
-            hasMoreDimLevel = true;
-            String dimConditionUniqueName = dimCondition.getQueryDataNodes().get(0).getUniqueName();
-            String[] uniqueNames = MetaNameUtil.parseUnique2NameArray(dimConditionUniqueName);
-            dimCondition = new DimensionCondition(uniqueNames[0]);
-            int index = 0;
-            for (String name : uniqueNames) {
-                index++;
-                String uniqueName = MetaNameUtil.makeUniqueName(name);
-                if (index == 1) {
-                    String allMemberUniqueName =
-                            cube.getDimensions().get(dimCondition.getMetaName()).getAllMember().getUniqueName();
-                    uniqueName = allMemberUniqueName;
-                } else if (index == uniqueNames.length) {
-                    uniqueName = dimConditionUniqueName;
-                } else {
-                    uniqueName = subStringOfIndexFlag(dimConditionUniqueName, ".", index);
+        } 
+        // 这里要注意下转liteolap报表在打开放大镜的情况下，下钻的维值有多选的情况
+        else if (StringUtils.isNotEmpty(params.get("lineUniqueName")) && StringUtils.isNotEmpty(dimParam)
+                && dimParam.contains(",")) {
+            dimCondition.getQueryDataNodes().clear();
+            String uniqueName = params.get("uniqueName");
+            if (!MetaNameUtil.isUniqueName(uniqueName) && uniqueName.contains("{") && uniqueName.contains("}")) {
+                uniqueName = uniqueName.replace("{", "").replace("}", "");
+            }
+            for (String singleUniqueName : dimParam.split(",")) {
+                if (singleUniqueName.startsWith(uniqueName)) {
+                    QueryData queryData = new QueryData(singleUniqueName);
+                    queryData.setExpand(isFirstInRow);
+                    queryData.setShow(true);
+                    dimCondition.getQueryDataNodes().add(queryData);
                 }
-                QueryData queryData = new QueryData(uniqueName);
-                if (index != uniqueNames.length) {
-                }
-                queryData.setExpand(true);
-                queryData.setShow(true);
-                dimCondition.getQueryDataNodes().add(queryData);
             }
         }
-        
-        boolean hasCallbackLevel = false;
-        int callbackLevelIndex = 0;
-        List<String> callbackParams = null;
+        long current = System.currentTimeMillis();
+        MemberNodeTree nodeTree = new MemberNodeTree(null);
+        MemberNodeTree subNodeTreeAsNormal =null;
+        int index = 1;
+        for (QueryData queryData : dimCondition.getQueryDataNodes()) {
+            String dimConditionUniqueName = queryData.getUniqueName();
+            String[] dimConditionUniqueNameArray= MetaNameUtil.parseUnique2NameArray(dimConditionUniqueName);
+            boolean needExpand = dimCondition.getQueryDataNodes().size()==1;
+            subNodeTreeAsNormal =
+                    buildSubNodeTreeAsNormal(dataSourceInfo, cube, dimCondition, needExpand, params, queryContext,
+                            dimConditionUniqueName);
+            if (index == 1) {
+                nodeTree = subNodeTreeAsNormal;
+            } else {
+                // 处理多维值选中情况的MemberNodeTree拼接，其中两个分支是为了处理跨维度组层级的多选所做
+                MemberNodeTree orgiNodeTree = nodeTree.getChildren().get(0);
+                MemberNodeTree needMergeNodeTree = subNodeTreeAsNormal.getChildren().get(0);
+                for (int i = 0; i < (dimConditionUniqueNameArray.length); i++) {
+                    if (orgiNodeTree.getName().equals(needMergeNodeTree.getName())) {
+                        orgiNodeTree = orgiNodeTree.getChildren().get(0);
+                        needMergeNodeTree = needMergeNodeTree.getChildren().get(0);
+                    }
+                    else if (nodeTree.getMemberNodeTreeByUniqueName(needMergeNodeTree.getUniqueName()) != null) {
+                        orgiNodeTree = nodeTree.getMemberNodeTreeByUniqueName(needMergeNodeTree.getUniqueName());
+                        orgiNodeTree.getChildren().addAll(needMergeNodeTree.getChildren());
+                        break;
+                    }
+                    else {
+                        MemberNodeTree parentNode =
+                                nodeTree.getMemberNodeTreeByUniqueName(orgiNodeTree.getParent().getUniqueName());
+                        parentNode.getChildren().add(needMergeNodeTree);
+                        break;
+                    }
+                }
+            }
+            index++;
+        }
+        logger.info("cost:{}ms,in build dimCondition:{}", System.currentTimeMillis() - current, dimCondition);
+        return nodeTree;
+    }
+
+    /**
+     * 根据维值选中条件构造维值查询的树
+     * 
+     * 
+     * @param dataSourceInfo 数据源信息
+     * @param cube cube模型
+     * @param dimCondition 维值查询条件
+     * @param needExpand 是否需要将当前维度展开
+     * @param params params
+     * @param queryContext queryContext
+     * @param dimConditionUniqueName dimConditionUniqueName
+     * @return 维值树
+     * @throws MiniCubeQueryException 查询维值异常
+     * @throws MetaException
+     */
+    private MemberNodeTree buildSubNodeTreeAsNormal(DataSourceInfo dataSourceInfo, Cube cube,
+            DimensionCondition dimCondition, boolean needExpand, Map<String, String> params,
+            QueryContext queryContext, String dimConditionUniqueName) throws MiniCubeQueryException, MetaException {
+        Dimension dimension = cube.getDimensions().get(dimCondition.getMetaName());
+
+        MemberNodeTree nodeTree = new MemberNodeTree(null);
+        String lineUniqueName = params.get("lineUniqueName");
+        String dimParam = params.get("dimParam");
+        // 需要处理维度组选“全部”时，下钻的情况，这时候的uniqueName应该从传入的下钻uniqueName中取
+        if (StringUtils.isNotEmpty(params.get("lineUniqueName")) && StringUtils.isNotEmpty(dimParam)
+                && dimParam.contains(",")) {
+            // dimConditionUniqueName =dimConditionUniqueName;
+        } else if (StringUtils.isNotEmpty(lineUniqueName)) {
+            dimConditionUniqueName = params.get("uniqueName");
+        }
+        // modify by yichao.jiang，针对下钻或者展开的值到此处时uniqueName形式为{[一级行业].[交通运输]}，将{}去除
+        if (!MetaNameUtil.isUniqueName(dimConditionUniqueName)) {
+            dimConditionUniqueName = dimConditionUniqueName.replace("{", "");
+            dimConditionUniqueName = dimConditionUniqueName.replace("}", "");
+        }
+        String[] uniqueNames = MetaNameUtil.parseUnique2NameArray(dimConditionUniqueName);
+        dimCondition = new DimensionCondition(uniqueNames[0]);
+        int index = 0;
+        for (String name : uniqueNames) {
+            index++;
+            String uniqueName = MetaNameUtil.makeUniqueName(name);
+            if (index == 1) {
+                String allMemberUniqueName =
+                        cube.getDimensions().get(dimCondition.getMetaName()).getAllMember().getUniqueName();
+                uniqueName = allMemberUniqueName;
+                queryContext.getDimsNeedSumBySubLevel().add(String.format("All_%ss", name));
+            } else if (index == uniqueNames.length) {
+                uniqueName = dimConditionUniqueName;
+            } else {
+                uniqueName = MetaNameUtil.subUniqueNameOfIndexFlag(dimConditionUniqueName, index);
+                // 将自己拼凑的维度层级存到queryContext中，以便在构建dm的时候进行上移汇总
+                if (index <= uniqueNames.length - 2) {
+                    queryContext.getDimsNeedSumBySubLevel().add(name);
+                }
+            }
+
+            QueryData queryData = new QueryData(uniqueName);
+            queryData.setExpand(needExpand);
+            queryData.setShow(true);
+            dimCondition.getQueryDataNodes().add(queryData);
+        }
+
         List<Level> levels = Lists.newArrayList(dimension.getLevels().values());
-        for(int i = 0; i < levels.size(); i++) {
-            if(levels.get(i).getType().equals(LevelType.CALL_BACK)) {
-                hasCallbackLevel = true;
-                callbackLevelIndex = i;
-                callbackParams = new ArrayList<>();
-                break;
-            }
-        }
-        
-        Map<Level, List<String>> tmp = Maps.newConcurrentMap ();
+
+        Map<Level, List<String>> tmp = Maps.newConcurrentMap();
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
-            if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
-                callbackParams.add(names[names.length - 1]);
-                continue;
+            Level level = levels.get(names.length - 2);
+            if (tmp.containsKey(level)) {
+                tmp.get(level).add(queryData.getUniqueName());
             } else {
-                Level level = levels.get (names.length - 2);
-                if (tmp.containsKey (level)) {
-                    tmp.get (level).add (queryData.getUniqueName ());
-                } else {
-                    List<String> list = Lists.newArrayList ();
-                    list.add (queryData.getUniqueName ());
-                    tmp.put (level, list);
-                }
+                List<String> list = Lists.newArrayList();
+                list.add(queryData.getUniqueName());
+                tmp.put(level, list);
             }
-        }    
-        
-        Map<String, MiniCubeMember> memberRepository = Maps.newConcurrentMap ();
-        for (Level level : tmp.keySet ()) {
-            List<String> datas = tmp.get (level);
+        }
+
+        Map<String, MiniCubeMember> memberRepository = Maps.newConcurrentMap();
+        for (Level level : tmp.keySet()) {
+            List<String> datas = tmp.get(level);
             try {
-                List<MiniCubeMember> rs = metaDataService.lookUp (dataSourceInfo, cube, datas, params);
+                List<MiniCubeMember> rs = metaDataService.lookUp(dataSourceInfo, cube, datas, params);
                 if (rs != null) {
                     for (MiniCubeMember m : rs) {
-                        memberRepository.put (m.getUniqueName (), m);
+                        memberRepository.put(m.getUniqueName(), m);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace ();
+                e.printStackTrace();
             }
         }
         MemberNodeTree parentNodeTree = nodeTree;
@@ -530,121 +595,46 @@ public class QueryContextBuilder {
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             queryDimIndex++;
             String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
-            if (hasCallbackLevel && (names.length - 2 == callbackLevelIndex)) {
-                callbackParams.add(names[names.length - 1]);
-                continue;
-            } else if (hasMoreDimLevel) {
-                MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-                MemberNodeTree memberNode = new MemberNodeTree(parentNodeTree);
-                List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
-                if (queryData.isExpand() && queryDimIndex == dimCondition.getQueryDataNodes().size()) {
-                    List<MiniCubeMember> children = Lists.newArrayList();
-                    try {
-                        children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
-                    } catch (Exception e) {
-                    }
-                    if (CollectionUtils.isNotEmpty(children)) {
-                        memberNode.setSummary(true);
-                        for (MiniCubeMember child : children) {
-                            MemberNodeTree childNode = new MemberNodeTree(parentNodeTree);
-                            childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
-                            childNodes.add(childNode);
-                        }
-
-                    }
+            MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
+            MemberNodeTree memberNode = new MemberNodeTree(parentNodeTree);
+            List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
+            if (queryData.isExpand() && queryDimIndex == dimCondition.getQueryDataNodes().size()) {
+                List<MiniCubeMember> children = Lists.newArrayList();
+                try {
+                    children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
+                } catch (Exception e) {
                 }
-                
-                if (queryDimIndex == dimCondition.getQueryDataNodes().size()
-                        && MetaNameUtil.isAllMemberName(names[queryDimIndex - 1])) {
-                    parentNodeTree.getChildren().addAll(childNodes);
-                }
-                // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
-                else if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                    memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
-                    memberNode.setChildren(childNodes);
-                    parentNodeTree.getChildren().add(memberNode);
-                    parentNodeTree = memberNode;
-                    // return memberNode;
-                } else {
-                    parentNodeTree.getChildren().addAll(childNodes);
-                }
-            }
-            else {
-                MiniCubeMember member = memberRepository.get (queryData.getUniqueName ());
-                if (member == null) {
-                    member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-                }
-                MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
-                List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
-                // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点,
-                // FIXME  需要考虑展开的下层是一个Callback层级的情况，这里未测试
-                if (queryData.isExpand()) {
-                    List<MiniCubeMember> children = Lists.newArrayList();
-                    try {
-                        children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
-                    } catch (Exception e) {
-                        // TODO NONE 需要确认是否有问题 目前测试没有看出问题
-                    }
-                    if (CollectionUtils.isNotEmpty(children)) {
-                        memberNode.setSummary(true);
-                        children.forEach((child) -> {
-                            MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                            childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
-                            childNodes.add(childNode);
-//                        memberNode.getQueryNodes().addAll(child.getQueryNodes());
-                        });
-                    }
-                }
-                // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
-                if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                    memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
-                    memberNode.setChildren(childNodes);
-                    nodeTree.getChildren().add(memberNode);
-//                return memberNode;
-                } else {
-                    nodeTree.getChildren().addAll(childNodes);
-                }
-            }
-            
-        } 
-        if(hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
-            Map<String, String> newParams = new HashMap<>(params);
-            newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
-            Level callbackLevel = levels.get(callbackLevelIndex);
-            List<MiniCubeMember> callbackMembers = 
-                callbackDimensionService.getMembers(cube, callbackLevel, dataSourceInfo, null, newParams);
-            if(CollectionUtils.isNotEmpty(callbackMembers)) {
-                if(callbackMembers.size() == 1) { 
-                    List<Member> children = callbackMembers.get(0).getChildren();
-                    MemberNodeTree parentNode = new MemberNodeTree(nodeTree);  
-                    parentNode.setCallback (true);
-                    parentNode.setSummaryIds (callbackMembers.get (0).getQueryNodes ());
-                    buildMemberNodeByMember(dataSourceInfo, cube, parentNode, callbackMembers.get(0), params);
-                    if (CollectionUtils.isNotEmpty (children)) { 
-                        children.forEach((child) -> {
-                            MemberNodeTree childNode = new MemberNodeTree(nodeTree);
-                            MiniCubeMember child2 = (MiniCubeMember) child;
-                            childNode = 
-                                buildMemberNodeByMember(dataSourceInfo, cube, childNode, child2, params);
-                            parentNode.getChildren().add(childNode);
-                        });
-                    }
-                    nodeTree.getChildren().add(parentNode);
-                } else {
-                    callbackMembers.forEach((child) -> {
-                        MemberNodeTree childNode = new MemberNodeTree(nodeTree);
+                if (CollectionUtils.isNotEmpty(children)) {
+                    memberNode.setSummary(true);
+                    for (MiniCubeMember child : children) {
+                        MemberNodeTree childNode = new MemberNodeTree(parentNodeTree);
                         childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
-                        nodeTree.getChildren().add(childNode);
-                    });
+                        childNodes.add(childNode);
+                    }
+
                 }
             }
+
+            if (queryDimIndex == dimCondition.getQueryDataNodes().size()
+                    && MetaNameUtil.isAllMemberName(names[queryDimIndex - 1])) {
+                parentNodeTree.getChildren().addAll(childNodes);
+            }
+            // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
+            else if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
+                memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
+                memberNode.setChildren(childNodes);
+                parentNodeTree.getChildren().add(memberNode);
+                parentNodeTree = memberNode;
+                // return memberNode;
+            } else {
+                parentNodeTree.getChildren().addAll(childNodes);
+            }
+
         }
         // 非DESC的都按ASC排序。
         nodeTree.sort(dimCondition.getMemberSortType());
-        logger.info("cost:{}ms,in build dimCondition:{}",System.currentTimeMillis() - current, dimCondition);
         return nodeTree;
     }
-    
     
     /**
      * 根据维值选中条件构造维值查询的树

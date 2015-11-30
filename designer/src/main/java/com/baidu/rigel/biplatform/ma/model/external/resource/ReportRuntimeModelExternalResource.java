@@ -137,7 +137,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         MiniCube cube = (MiniCube) model.getSchema ().getCubes ().get (extendArea.getCubeId ());
         LogicModel logicModel = extendArea.getLogicModel ();
         DataSourceDefine ds = dsService.getDsDefine (model.getDsId ());
-        List<MeasureClassfyObject> rs = getMeasureclassfyDefine(cube.getSource (), ds, logicModel, cube, securityKey);
+        List<MeasureClassfyObject> rs = getMeasureclassfyDefine(cube.getSource (), ds, logicModel, cube, securityKey,areaId);
         changeMeasureDesc (extendArea, rs);
         reportModelCacheManager.updateRunTimeModelToCache (reportId, runTimeModel);
         result.setStatus (0);
@@ -227,7 +227,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         LogicModel logicModel = extendArea.getLogicModel ();
         MiniCube cube = (MiniCube) model.getSchema ().getCubes ().get (extendArea.getCubeId ());
         DataSourceDefine ds = dsService.getDsDefine (model.getDsId ());
-        List<MeasureClassfyObject> rs = getMeasureclassfyDefine(cube.getSource (), ds, logicModel, cube, securityKey);
+        List<MeasureClassfyObject> rs = getMeasureclassfyDefine(cube.getSource (), ds, logicModel, cube, securityKey,areaId);
         changeMeasureDesc (extendArea, rs);
         result.setStatus (0);
         result.setData (rs);
@@ -276,9 +276,9 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
      */
     private List<MeasureClassfyObject> getMeasureclassfyDefine(String source, 
             DataSourceDefine ds, LogicModel logicModel, Cube cube,
-            String securityKey) throws Exception {
+            String securityKey, String areaId) throws Exception {
         List<MeasureClassfyObject> measureClassfyMetas = 
-            measureClassfyService.getChangableMeasureClassfyMeta (source, ds, securityKey);
+            measureClassfyService.getChangableMeasureClassfyMeta (source, ds, securityKey,areaId);
         measureClassfyMetas = 
             MeasureClassfyMetaUtils.changeIndMetaSelectStatus (source, logicModel, cube, measureClassfyMetas);
         return measureClassfyMetas;

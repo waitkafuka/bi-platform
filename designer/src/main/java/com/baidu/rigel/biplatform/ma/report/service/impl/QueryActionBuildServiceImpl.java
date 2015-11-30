@@ -40,6 +40,7 @@ import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
@@ -170,6 +171,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         ExtendArea targetArea = DeepcopyUtils.deepCopy(model).getExtendById(areaId);
         LogicModel targetLogicModel = null;
         String cubeId = targetArea.getCubeId();
+        Cube cube = QueryUtils.transformCube(model.getSchema().getCubes().get(cubeId));
         /**
          * generateQueryAction方法中需要指定logicModel所在的区域id，
          * logicModelAreaId即该区域id
@@ -282,7 +284,35 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         throw new RuntimeException(msg);
                     }
                     rows.add(row);
-                    context.put(row.getOlapElementId(), uniqName);
+                    
+                    Dimension dim = cube.getDimensions().get(dimName);
+                    boolean isCallBackDim = dim.getType() == DimensionType.CALLBACK;
+                    Object paramObj = context.get(row.getOlapElementId());
+                    boolean isParamArray = false;
+                    if (paramObj != null && paramObj instanceof String[]) {
+                        isParamArray = true;
+                    }
+                    // 如果传过来的uniqName是个all节点，并且上下文参数里面有条件值，那么在查询的时候，需要把上下文的条件塞进queryaction里去 update by majun 2015-11-26
+                    if (!isCallBackDim && isParamArray && !MetaNameUtil.isAllMemberUniqueName(uniqName)) {
+                        String[] paramObjArray = (String[]) paramObj;
+                        List<String> rsList = new ArrayList<String>();
+                        for (String paramStr : paramObjArray) {
+                            // 如果发现传入的uniqName要比条件上下文里的paramStr层级多，那么当前条件直接取uniqName即可
+                            if (MetaNameUtil.parseUnique2NameArray(uniqName).length > MetaNameUtil
+                                    .parseUnique2NameArray(paramStr).length) {
+                                rsList.add(uniqName);
+                                break;
+                            } else if (paramStr.startsWith(uniqName)) {
+                                rsList.add(paramStr);
+                            }
+                        }
+                        context.put(row.getOlapElementId(), rsList.toArray(new String[0]));
+                    } else if (!isCallBackDim && MetaNameUtil.isAllMemberUniqueName(uniqName) && isParamArray) {
+                        // do nothing
+                    } else {
+                        context.put(row.getOlapElementId(), uniqName);
+                    }
+
                     Map<String, Object> contextCopy = DeepcopyUtils.deepCopy(context);
                     context.putAll(this.handleUniqueName4Callback(uniqName, row.getOlapElementId(), contextCopy,
                             cubeId, model));
@@ -307,11 +337,13 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                     break;
                 }
             }
+            boolean isTimeTrend=false;
             if (timeDimItem != null && timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
                 Map<String, Object> params = timeDimItem.getParams();
                 params.put("range", true);
                 timeDimItem.setParams(params);
                 context.put("time_line", timeDimItem);
+                isTimeTrend = true;
             }
             if (cpModel != null && !CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
                 cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
@@ -322,7 +354,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 modifyModel(cpModel, Integer.valueOf(index.toString()));
             }
            return generateQueryAction(model.getSchema(),
-               cubeId, cpModel, context, logicModelAreaId, false, model);
+               cubeId, cpModel, context, logicModelAreaId, isTimeTrend, model);
         }
         
     }
@@ -461,6 +493,8 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 it.remove ();
             }
         }
+        
+        action.setTrendQuery(needTimeRange);
 
         return action;
     }
@@ -772,7 +806,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                             tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
                         } else if (timeRange 
                                 && tmp.getDataTimeType () == TimeType.TimeQuarter){
-                            Set<String> quarterStart = Sets.newHashSet ("0101", "0401", "0701", "0901");
+                            Set<String> quarterStart = Sets.newHashSet ("0101", "0401", "0701", "1001");
                             String endStr = detailDays[i].substring (4);
                             if (quarterStart.contains (endStr)) {
                                 tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");

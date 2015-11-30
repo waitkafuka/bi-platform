@@ -353,8 +353,10 @@ public class MetaQueryAction {
             String dataSourceJson = requestParams.get(MiniCubeConnection.DATASOURCEINFO_PARAM_KEY);
             List<Cube> cubes = AnswerCoreConstant.GSON.fromJson(listCubeJson, new TypeToken<List<Cube>>() {
                 }.getType());
-            DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
-            metaDataService.publish(cubes, dataSourceInfo);
+            List<DataSourceInfo> dataSourceInfoList = AnswerCoreConstant.GSON.fromJson(
+                    dataSourceJson, new TypeToken<List<DataSourceInfo>>() {
+                    }.getType());
+            metaDataService.publish(cubes, dataSourceInfoList);
             return ResponseResultUtils.getCorrectResult("success", "public cubes success.");
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
@@ -435,9 +437,12 @@ public class MetaQueryAction {
             String paramsJason=requestParams.get(MiniCubeConnection.PARAMS);
             
             Map<String,Map<String,BigDecimal>> params=AnswerCoreConstant.GSON.fromJson(paramsJason,new TypeToken<Map<String,Map<String,BigDecimal>>>() {}.getType());
-            DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
+//            DataSourceInfo dataSourceInfo = AnswerCoreConstant.GSON.fromJson(dataSourceJson, DataSourceInfo.class);
+            List<DataSourceInfo> dataSourceInfoList = AnswerCoreConstant.GSON.fromJson(
+                    dataSourceJson, new TypeToken<List<DataSourceInfo>>() {
+                    }.getType());
             
-            metaDataService.refresh(dataSourceInfo, dataSetString,params);
+            metaDataService.refresh(dataSourceInfoList, dataSetString, params);
             
             return ResponseResultUtils.getCorrectResult("success", "refresh success.");
         } catch (JsonSyntaxException e) {

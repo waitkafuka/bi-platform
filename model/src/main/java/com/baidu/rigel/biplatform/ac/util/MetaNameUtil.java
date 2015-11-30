@@ -19,7 +19,6 @@
 package com.baidu.rigel.biplatform.ac.util;
 
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -151,6 +150,29 @@ public class MetaNameUtil {
         return StringUtils.splitByWholeSeparator(uniqueName, "].[");
     }
     
+    /**
+     * 根据给定的uniqueName以及传入的序号，截取出符合序号描述的子uniqueName
+     * 
+     * @param uniqueName 待截取的uniqueName
+     * @param index 截取第几位符合规则的字符串
+     * @return 截取完成的子字符串
+     */
+    public static String subUniqueNameOfIndexFlag(String uniqueName, int index) {
+        if (uniqueName == null || uniqueName.length() == 0) {
+            return null;
+        }
+        String[] nameArray = parseUnique2NameArray(uniqueName);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < index; i++) {
+            String singleName = nameArray[i];
+            sb.append(makeUniqueName(singleName));
+            if (i < index - 1) {
+                sb.append(".");
+            }
+        }
+        return sb.toString();
+    }
+    
     /** 
      * getNameFromMetaName 从元数据名称中获取名称信息
      * @param metaName
@@ -180,6 +202,33 @@ public class MetaNameUtil {
         String[] names = parseUnique2NameArray(uniqueName);
         if (names.length == 2 && isAllMemberName(names[1])) {
             return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 判断一个UniqueName是否是一个all节点的UniqueName,用户多级的查询
+     * 
+     * @param uniqueName 节点的UniqueName
+     * @param 取index的值 至少2级，index从0开始
+     * @return 是否是all节点
+     * @throws IllegalArgumentException unique格式不正确
+     */
+    public static boolean isAllMemberUniqueName(String uniqueName, int index) {
+        if (!isUniqueName(uniqueName)) {
+            LOGGER.warn("uniqueName is illegal:" + uniqueName);
+            return false;
+        }
+
+        String[] names = parseUnique2NameArray(uniqueName);
+        if (index < 1 ||  index >= names.length) {
+        // 至少2级，index从0开始
+            index = names.length - 1;
+        }
+        if (names.length == 2 && isAllMemberName(names[1])) {
+            return true;
+        } else if (names.length > 2) {
+            return isAllMemberName(names[index]);
         }
         return false;
     }

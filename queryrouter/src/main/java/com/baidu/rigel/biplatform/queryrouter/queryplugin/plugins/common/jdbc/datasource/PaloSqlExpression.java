@@ -3,6 +3,8 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.d
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.StringUtils;
+
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.common.jdbc.SqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.model.QuestionModelTransformationException;
@@ -65,8 +67,13 @@ public class PaloSqlExpression extends SqlExpression {
         // TODO Auto-generated method stub
         String orderby = super.generateOrderByExpression(planeTableQuestionModel, allColums);
         if (!orderby.contains(SqlConstants.SOURCE_TABLE_ALIAS_NAME + SqlConstants.DOT + ID)) {
-            return orderby + SqlConstants.COMMA + SqlConstants.SOURCE_TABLE_ALIAS_NAME
-                    + SqlConstants.DOT + ID + SqlConstants.SPACE;
+            if (StringUtils.isEmpty(orderby)) {
+                return " order by " + SqlConstants.SOURCE_TABLE_ALIAS_NAME
+                        + SqlConstants.DOT + ID + SqlConstants.SPACE;
+            } else {
+                return orderby + SqlConstants.COMMA + SqlConstants.SOURCE_TABLE_ALIAS_NAME
+                        + SqlConstants.DOT + ID + SqlConstants.SPACE;
+            }
         }
         return orderby;
     }

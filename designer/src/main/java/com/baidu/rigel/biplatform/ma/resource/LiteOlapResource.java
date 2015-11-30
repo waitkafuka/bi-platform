@@ -272,17 +272,6 @@ public class LiteOlapResource {
              */
             if (element instanceof Dimension) {
                 liteOlapArea.getCandDims().put(element.getId(), targetItem);
-                // 如果to为空，并且from不为空，则需要将对应的维度参数从查询上下文中删除
-                if (StringUtils.hasText(from)) {
-                    // 先删除id对应的参数
-                    runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(element.getId());
-                    // 获取该id对应的参数维度中的参数名称
-                    String paramName = this.getParamDimension(element.getId(), model);
-                    // 如果参数名称不为空，则同样将其移除
-                    if (StringUtils.hasText(paramName)) {
-                        runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(paramName);
-                    }
-                }
             } else if (element instanceof Measure) {
                 liteOlapArea.getCandInds().put(element.getId(), targetItem);
             }
@@ -298,8 +287,16 @@ public class LiteOlapResource {
                 if (level.getType() == LevelType.CALL_BACK) {
                     toPosition = 0;
                 } else {
-                    // TODO如果拖动的是其他维度，则需要保证岗位在第一个位置
-                    toPosition = toPosition + 1;
+                    // TODO 如果拖动的是其他维度，则需要保证岗位在第一个位置
+                    // 如果目标轴是横轴，需要保证岗位在第一个位置
+                    if (ROW.equals(to)) {
+                        // 横轴上至少有一个维度，所以无需判定非空
+                        Item[] items = logicModel.getRows();
+                        // 如果维度轴上的第一个位置是岗位
+                        if (this.isTimeOrCallbackDim(items[0].getId(), model)) {
+                            toPosition = toPosition + 1;
+                        }
+                    }
                 }
             }
             switch (to) {
@@ -324,27 +321,115 @@ public class LiteOlapResource {
         // reportModelCacheManager.updateReportModelToCache(reportId, model);
         ExtendAreaContext extendContext = reportModelCacheManager.getAreaContext(reportId,
                 liteOlapArea.getTableAreaId());
-        if (extendContext.getCurBreadCrumPath() != null) {
-            List<Map<String, String>> breadPath = extendContext.getCurBreadCrumPath();
-            String uniqueName = breadPath.get(breadPath.size() - 1).get("uniqName");
-            if (uniqueName.startsWith("@")) {
-                uniqueName = uniqueName.substring(1, uniqueName.length() - 1);
+        // 获取对应项的elementId
+        String olapElementId = targetItem.getOlapElementId();
+        // 仅在维度轴上拖拽，此时需要清理图形上的面包屑和uniqueName信息，无需清理候选区域上的参数
+        if ((!StringUtils.isEmpty(to) && !StringUtils.isEmpty(from))
+                && ((ROW.equals(to) && to.equals(from)) || (ROW.equals(from) && FILTER.equals(to)))) {
+            String liteOlapTableId = liteOlapArea.getTableAreaId();
+            // 如果面包屑上对应的维度和本次移动的维度不相等，则需要从面包屑中找到对应的维度，将其条件清除
+            String uniqueName = (String) extendContext.getParams().get("uniqueName");
+            String dimElementId = "";
+            if (!StringUtils.isEmpty(uniqueName)) {
+                // 如果有@符号，先替换掉
+                if (uniqueName.startsWith("@")) {
+                    uniqueName = uniqueName.substring(1, uniqueName.length() - 1);
+                }
+                String dimName = "";
+                // 先处理uniqueName为数组的情况
+                if (uniqueName.contains(",")) {
+                    String[] uniqueNameArray = uniqueName.split(",");
+                    dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueNameArray[0]);
+                } else {
+                    // 根据uniqueName获取维度名称
+                    dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
+                }
+                // 定义一个变量，方便在java 8中使用
+                final String finalDimName = dimName;
+                // 从cube中读取对应的维度信息，进而获取dimId
+                Cube cube = model.getSchema().getCubes().get(sourceArea.getCubeId());
+                if (cube.getDimensions() != null && cube.getDimensions().size() != 0) {
+                    Object[] tmp =  cube.getDimensions().values().stream().filter (dim -> dim != null).filter(dim -> {
+                        return finalDimName.equals(dim.getName());
+                    }).toArray();
+                    if (tmp != null && tmp.length == 1) {
+                        dimElementId = ((OlapElement) tmp[0]).getId();
+                    }
+                }
             }
-            Cube cube = model.getSchema().getCubes().get(sourceArea.getCubeId());
-            Dimension dim = cube.getDimensions().get(logicModel.getRows()[0].getId());
-            if (dim != null && !dim.getName().equals(MetaNameUtil.getDimNameFromUniqueName(uniqueName))) {
-                runTimeModel.getLocalContext().clear();
-                reportModelCacheManager.updateAreaContext(reportId, 
-                        liteOlapArea.getTableAreaId(), new ExtendAreaContext());
-                
+            // 移除对应的参数
+            if (dimElementId != null) {
+                runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove(dimElementId);
+                extendContext.getParams().remove(dimElementId);
+            }
+            // 清除表上同面包屑、参数有关的信息
+            runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove(olapElementId);
+            runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove("uniqueName");
+            runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove("bread_key");
+            
+            // 清除图形上同面包屑、参数有关的信息
+            String liteOlapChartId = liteOlapArea.getChartAreaId();
+            runTimeModel.getLocalContextByAreaId(liteOlapChartId).getParams().remove(olapElementId);
+            runTimeModel.getLocalContextByAreaId(liteOlapChartId).getParams().remove("uniqueName");
+            runTimeModel.getLocalContextByAreaId(liteOlapChartId).getParams().remove("bread_key");
+            // 清除参数信息
+            extendContext.getParams().remove(olapElementId);
+            extendContext.getParams().remove("uniqueName");
+            extendContext.getParams().remove("bread_key");
+        }
+        // 如果from不为空，但是to为空，则需要根据情况将该项对应的条件从lite-olap选择区域清除，同时需要清除面包屑
+        if (StringUtils.isEmpty(to) && !StringUtils.isEmpty(from)) {
+            // step1. 清除局部extendAreaContext
+            extendContext.getParams().remove(olapElementId);
+            extendContext.getParams().remove("uniqueName");
+            extendContext.getParams().remove("bread_key");
+            // step2. 清除selection-area中的参数
+            runTimeModel.getLocalContextByAreaId(liteOlapArea.getSelectionAreaId()).getParams().remove(olapElementId);
+            runTimeModel.getLocalContextByAreaId(liteOlapArea.getSelectionAreaId()).getParams().remove("uniqueName");
+            runTimeModel.getLocalContextByAreaId(liteOlapArea.getSelectionAreaId()).getParams().remove("bread_key");
+            
+            // step3. 从表区域中删除
+            runTimeModel.getLocalContextByAreaId(liteOlapArea.getTableAreaId()).getParams().remove(element.getId());
+            // step4. 从图区域中删除
+            runTimeModel.getLocalContextByAreaId(liteOlapArea.getChartAreaId()).getParams().remove(element.getId());
+            // step5. 获取该id对应的参数维度p中的参数名称
+            String paramName = this.getParamDimension(element.getId(), model);
+            // 如果参数名称不为空，则同样将其移除
+            if (StringUtils.hasText(paramName)) {
+                extendContext.getParams().remove(paramName);
+                runTimeModel.getLocalContextByAreaId(areaId).getParams().remove(paramName);
+                runTimeModel.getLocalContextByAreaId(liteOlapArea.getTableAreaId()).getParams().remove(paramName);
+                runTimeModel.getLocalContextByAreaId(liteOlapArea.getChartAreaId()).getParams().remove(paramName);
             }
         }
-        if ((StringUtils.isEmpty(to) && ROW.equals(from)) 
-                || (StringUtils.isEmpty(from) && ROW.equals(to))) {
-            runTimeModel.getLocalContext().clear();
-            reportModelCacheManager.updateAreaContext(reportId, 
-                    liteOlapArea.getTableAreaId(), new ExtendAreaContext());
-        }
+        // 统一清理面包屑问题
+        extendContext.setCurBreadCrumPath(null);
+        // 更新context
+        reportModelCacheManager.updateAreaContext(reportId, 
+              liteOlapArea.getTableAreaId(), extendContext);
+//        if (extendContext.getCurBreadCrumPath() != null) {
+//            List<Map<String, String>> breadPath = extendContext.getCurBreadCrumPath();
+//            String uniqueName = breadPath.get(breadPath.size() - 1).get("uniqName");
+//            if (uniqueName.startsWith("@")) {
+//                uniqueName = uniqueName.substring(1, uniqueName.length() - 1);
+//            }
+//            Cube cube = model.getSchema().getCubes().get(sourceArea.getCubeId());
+//            Dimension dim = cube.getDimensions().get(logicModel.getRows()[0].getId());
+//            if (dim != null && !dim.getName().equals(MetaNameUtil.getDimNameFromUniqueName(uniqueName))) {
+//                runTimeModel.getLocalContext().clear();
+//                reportModelCacheManager.updateAreaContext(reportId, 
+//                        liteOlapArea.getTableAreaId(), new ExtendAreaContext());
+//                
+//            }
+//        }
+//        // 移除或移入维度轴清理面包屑
+//        if ((StringUtils.isEmpty(to) && ROW.equals(from)) 
+//                || (StringUtils.isEmpty(from) && ROW.equals(to))) {
+////            runTimeModel.getLocalContext().clear();
+//            runTimeModel.getLocalContext().remove("bread_key");
+//            reportModelCacheManager.updateAreaContext(reportId, 
+//                    liteOlapArea.getTableAreaId(), new ExtendAreaContext());
+//        }
         runTimeModel.getDrillDownQueryHistory().clear();
         runTimeModel.setLinkedQueryAction(null);
         runTimeModel.getDatas().clear();
@@ -372,7 +457,7 @@ public class LiteOlapResource {
                 }
             }
         }
-        return "";
+        return null;
     }
 
     /**
@@ -517,32 +602,4 @@ public class LiteOlapResource {
         return ResourceUtils.getCorrectResult("OK", resultMap);
     }
 
-    /**
-     * 选中表上的行
-     */
-    @RequestMapping(value = "/{reportId}/runtime/extend_area/{areaId}/selected_row", method = { RequestMethod.POST })
-    public ResponseResult selectRow(@PathVariable("reportId") String reportId, @PathVariable("areaId") String areaId,
-            HttpServletRequest request) {
-        String rowId = request.getParameter("uniqueName");
-        if (!StringUtils.hasText(rowId)) {
-            logger.error("Empty Row Id when Select! ");
-            return ResourceUtils.getErrorResult("Empty Row Id when Select! ", 1);
-        }
-        ReportRuntimeModel runTimeModel = null;
-        try {
-            runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-        } catch (CacheOperationException e) {
-            logger.error("There are no such model in cache. Report Id: " + reportId, e);
-            return ResourceUtils.getErrorResult("没有运行时的报表实例！报表ID：" + reportId, 1);
-        }
-        /**
-         * 清楚当前选中行，增加一行
-         */
-        runTimeModel.getSelectedRowIds().clear();
-        runTimeModel.getSelectedRowIds().add(rowId);
-        reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
-        Map<String, Object> resultMap = Maps.newHashMap();
-        resultMap.put("selected", true);
-        return ResourceUtils.getCorrectResult("OK", resultMap);
-    }
 }

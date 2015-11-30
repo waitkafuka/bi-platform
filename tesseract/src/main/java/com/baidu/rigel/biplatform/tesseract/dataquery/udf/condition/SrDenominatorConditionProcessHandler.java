@@ -98,7 +98,7 @@ class SrDenominatorConditionProcessHandler extends RateConditionProcessHandler {
                 break;
             case TimeMonth:
                 cal.add (Calendar.YEAR, -1);
-                timeRange = TimeUtils.getMonthDays(cal.getTime());
+                timeRange = TimeUtils.getMonthDays(cal.getTime());  
                 if ("true".equals (needSpecialTradeTime)) {
                     String[] days = new String[12];
                     for (int i = 0; i < days.length; ++i) {

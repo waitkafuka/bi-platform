@@ -160,7 +160,37 @@ public final class DataModelUtils {
     private DataModelUtils() {
 
     }
+    
 
+    /**
+     * 下钻时，需要考虑级联下拉框用到的维度组组合下钻场景，如果带有父节点，需要截取掉父节点的datamodel数据才能进行merage update by majun
+     * 
+     * @param dm4Merage dm4Merage
+     * @param uniqueName uniqueName
+     * @param condition condition
+     * @return 返回merge完的 DataModel
+     */
+    public static DataModel truncationDataModel(DataModel dm4Merage, String uniqueName, String condition) {
+        HeadField fisrtHf = dm4Merage.getRowHeadFields().get(0);
+
+        if (MetaNameUtil.isAllMemberUniqueName(fisrtHf.getValue()) && (condition.split("\\}").length == 1)) {
+            // String uniqueName4split = String.valueOf(queryParams.get("uniqueName"));
+            int subCount = MetaNameUtil.parseUnique2NameArray(uniqueName).length - 1;
+            for (int i = 0; i < subCount - 1; i++) {
+                HeadField df = fisrtHf.getChildren().get(0);
+                fisrtHf = df;
+            }
+            dm4Merage.setRowHeadFields(fisrtHf.getChildren());
+            dm4Merage.setRecordSize(dm4Merage.getRecordSize() - subCount);
+            // 去掉一层父级，列数据也需要对应去掉一级
+            for (List<BigDecimal> baseDataList : dm4Merage.getColumnBaseData()) {
+                for (int i = 0; i < subCount; i++) {
+                    baseDataList.remove(0);
+                }
+            }
+        }
+        return dm4Merage;
+    }
     /**
      * 将DataModel转换成前端展现需要的PivotTable
      * 
@@ -1298,7 +1328,7 @@ public final class DataModelUtils {
      * @param rowHeadFields
      * @return
      */
-    private static HeadField getRealRowHeadByRowNum(int rowNum, List<HeadField> rowHeadFields) {
+    public static HeadField getRealRowHeadByRowNum(int rowNum, List<HeadField> rowHeadFields) {
         List<HeadField> tmp = com.baidu.rigel.biplatform.ac.util.DataModelUtils.getLeafNodeList(rowHeadFields);
         return tmp.get(rowNum);
     }

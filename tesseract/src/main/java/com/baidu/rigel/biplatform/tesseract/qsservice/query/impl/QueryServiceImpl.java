@@ -175,7 +175,7 @@ public class QueryServiceImpl implements QueryService {
                                 SearchIndexResultSet resultSet = callbackSearchService
                                         .query(context, QueryRequestBuilder.buildQueryRequest(dsInfo, finalCube, 
                                         context, questionModel.isUseIndex(), null));
-                                dm = new DataModelBuilder(resultSet, context).build(true);
+                                dm = new DataModelBuilder(resultSet, context).build(true, finalCube);
                             } catch (Exception e) {
                                 logger.error("catch error when process callback measure {}",e.getMessage());
                                 throw new RuntimeException(e);
@@ -206,7 +206,7 @@ public class QueryServiceImpl implements QueryService {
         if (statDimensionNode(queryContext.getRowMemberTrees(), false, false) == 0
                 || (statDimensionNode(queryContext.getColumnMemberTrees(), false, false) == 0 && CollectionUtils
                         .isEmpty(queryContext.getQueryMeasures()))) {
-            return new DataModelBuilder(null, queryContext).build(false);
+            return new DataModelBuilder(null, queryContext).build(false, cube);
         }
         logger.info("executeQuery cost :" + (System.currentTimeMillis() - current) + " to build query request.");
         current = System.currentTimeMillis();
@@ -232,7 +232,7 @@ public class QueryServiceImpl implements QueryService {
             
             long beforeBuildCurr=System.currentTimeMillis();
             
-            result = new DataModelBuilder(resultSet, queryContext).build(false);
+            result = new DataModelBuilder(resultSet, queryContext).build(false, cube);
             
             logger.info("executeQuery cost :" + (System.currentTimeMillis() - beforeBuildCurr) + " to build DataModel.");
         } catch (IndexAndSearchException e) {

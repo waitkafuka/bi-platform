@@ -213,6 +213,9 @@ public class QueryUtils {
             // TODO 需要开发通用工具包 将常量定义到通用工具包中
             questionModel.getRequestParams().put("NEED_OTHERS", "1");
         }
+        if(queryAction.isChartQuery()){
+            questionModel.getRequestParams().put("isChartQuery", "true");
+        }
      // 设置请求参数信息
         if (requestParams != null) {
             for (String key : requestParams.keySet()) {

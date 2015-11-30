@@ -15,6 +15,7 @@
  */
 package com.baidu.rigel.biplatform.ma.resource;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
@@ -33,8 +34,10 @@ import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceGroupService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 //import com.baidu.rigel.biplatform.ma.report.service.ReportNoticeByJmsService;
 import com.google.common.collect.Maps;
@@ -61,6 +64,18 @@ public class UpdateDataResource extends BaseResource {
     @Resource
     private DataSourceService dsService;
     
+    /**
+     * dsService
+     */
+    @Resource
+    private DataSourceGroupService dsgService;
+    
+    /**
+     * dsgService
+     */
+    @Resource
+    private DataSourceGroupService dataSourceGroupService;
+    
     
 //    @Resource
 //    private ReportNoticeByJmsService reportNoticeByJmsService;
@@ -86,10 +101,12 @@ public class UpdateDataResource extends BaseResource {
         }
         String[] factTableArray = factTables.split(",");
         ResponseResult rs = new ResponseResult();
-        DataSourceDefine ds = dsService.getDsDefine(Integer.toString(dsName.hashCode()));
+        DataSourceGroupDefine dsgDefine = dsgService.getDataSourceGroupDefine(Integer.toString(dsName.hashCode()));
+        DataSourceDefine dsDefault = dsgDefine.getActiveDataSource();
         DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-            getDataSourceConnectionServiceInstance(ds.getDataSourceType().toString ());
-        DataSourceInfo dsInfo = dsConnService.parseToDataSourceInfo(ds, securityKey);
+                getDataSourceConnectionServiceInstance(dsDefault.getDataSourceType().toString ());
+        List<DataSourceInfo> dsInfoList = dsConnService.getActivedDataSourceInfoList(dsgDefine, securityKey);
+
         Map<String, Map<String, String>> conds = Maps.newHashMap();
         for (String factTable : factTableArray) {
             String str = request.getParameter(factTable);
@@ -108,7 +125,7 @@ public class UpdateDataResource extends BaseResource {
         LOG.info("[INFO] --- --- factTables = {}", factTables);
         LOG.info("[INFO] --- --- conds = {}", condsStr);
         LOG.info("[INFO] --- --- --- ---- ---- end pring param list --- --- --- --- ---- ");
-        boolean result = MiniCubeConnection.ConnectionUtil.refresh(dsInfo, factTableArray, condsStr);
+        boolean result = MiniCubeConnection.ConnectionUtil.refresh(dsInfoList, factTableArray, condsStr);
 //        reportNoticeByJmsService.refreshIndex(dsInfo, factTableArray, condsStr);
         if (result) {
             rs.setStatus(0);
