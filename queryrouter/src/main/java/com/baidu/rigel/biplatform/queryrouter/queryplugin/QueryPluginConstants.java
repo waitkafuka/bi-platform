@@ -15,7 +15,6 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin;
 
-
 /**
  *
  * 查询接口常量类

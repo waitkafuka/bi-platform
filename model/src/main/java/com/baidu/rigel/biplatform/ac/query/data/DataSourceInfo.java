@@ -88,7 +88,7 @@ public interface DataSourceInfo extends Serializable {
     /**
      * DRUID_DRIVERMANAGER
      */
-    public static final String DRUID_DRIVERMANAGER = "com.druid.jdbc.driver.DruidDriver";
+    public static final String DRUID_DRIVERMANAGER = "com.baidu.rigel.druid.sql.jdbc.DruidDriver";
     
     /**
      * JDBC_CHECKTIMEOUT default

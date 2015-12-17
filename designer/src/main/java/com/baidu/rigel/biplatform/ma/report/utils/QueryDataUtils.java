@@ -1,5 +1,6 @@
 package com.baidu.rigel.biplatform.ma.report.utils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -10,20 +11,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
-import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableFormat.PaginationSetting;
+import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesInputInfo.SeriesUnitType;
+import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -246,7 +255,7 @@ public class QueryDataUtils {
         return key;
     }
 
-    private static String getParamRealValue(String realValue) {
+    public static String getParamRealValue(String realValue) {
         // modify by yichao.jiang 接收url传递过来的时间参数，并进行转换
         if (realValue.contains("start") && realValue.contains("end")) {
             return genNewStartAndEnd(realValue);
@@ -378,7 +387,6 @@ public class QueryDataUtils {
         return pageInfo;
     }
 
-    
     /**
      * 获取扩展区域中定义的chartType
      * 
@@ -411,5 +419,99 @@ public class QueryDataUtils {
                             }
                         });
         return chartTypes;
+    }
+
+    /**
+     * 
+     * @param dim
+     * @return
+     */
+    public static boolean isCallbackDim(Dimension dim) {
+        if (dim == null) {
+            return false;
+        }
+        Level level = dim.getLevels().values().toArray(new Level[0])[0];
+        return isCallbackLevel(level);
+    }
+
+    /**
+     * 判断某个level是否为callback isCallbackLevel
+     * 
+     * @param level
+     * @return
+     */
+    public static boolean isCallbackLevel(Level level) {
+        return level != null && level.getType() == LevelType.CALL_BACK;
+    }
+
+    /**
+     * 获取本次查询对应的参数信息
+     * 
+     * @param areaId
+     * @param request
+     * @param targetArea
+     * @param runTimeModel
+     * @return ExtendAreaContext
+     */
+    public static ExtendAreaContext getAreaContext(String areaId, HttpServletRequest request, ExtendArea targetArea,
+            ReportRuntimeModel runTimeModel) {
+        Map<String, Object> queryParams =
+                QueryDataUtils.updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
+        runTimeModel.getLocalContextByAreaId(areaId).getParams().putAll(queryParams);
+        String reportModelId = runTimeModel.getReportModelId();
+        ReportModelCacheManager reportModelCacheManager =
+                (ReportModelCacheManager) ApplicationContextHelper.getContext().getBean("reportModelCacheManager");
+        ExtendAreaContext areaContext = reportModelCacheManager.getAreaContext(reportModelId, targetArea.getId());
+        areaContext.getParams().clear();
+        areaContext.getParams().putAll(queryParams);
+        return areaContext;
+    }
+
+    public static void fillBackParamValues(final ReportRuntimeModel runtimeModel, Dimension dim,
+            Map<String, Object> datasource) {
+        runtimeModel.getLocalContext().forEach((k, v) -> {
+            if (v.getParams().containsKey(dim.getId())) {
+                Object value = v.getParams().get(dim.getId());
+                if (value != null && value instanceof String) {
+                    List<String> lists = Lists.newArrayList(((String) value).split(","));
+                    datasource.put("value", lists);
+                }
+            }
+        });
+    }
+
+    /**
+     * 获取某个维度对应的"参数设置"部分的名称
+     * 
+     * @param dim
+     * @param model
+     * @return
+     */
+    public static String getParamName(Dimension dim, ReportDesignModel model) {
+        String value = null;
+        Map<String, ReportParam> params = model.getParams();
+        if (params != null && params.size() != 0) {
+            for (ReportParam param : params.values()) {
+                if (param.getElementId().equals(dim.getId())) {
+                    return param.getName();
+                }
+            }
+        }
+        return value;
+    }
+
+    /**
+     * 根据uniqueName解析出最后一个value的值
+     * 
+     * @param callbackParamName
+     * @param uniqueName
+     * @return
+     */
+    public static String getCallbackParamValue(String callbackParamName, String uniqueName) {
+        if (!StringUtils.isEmpty(callbackParamName) && MetaNameUtil.isUniqueName(uniqueName)) {
+            String nameArray[] = MetaNameUtil.parseUnique2NameArray(uniqueName);
+            return nameArray[nameArray.length - 1];
+        }
+        return null;
     }
 }

@@ -99,14 +99,16 @@ public class UniversalContextSettingFilter implements Filter {
             if (httpRequest.getCookies() != null && httpRequest.getCookies().length > 0) {
                 List<Cookie> cookies = Lists.newArrayList();
                 Collections.addAll(cookies, httpRequest.getCookies());
-                productLine = getProductLine(cookies);
+                productLine = getProductLine(cookies);                
                 sessionId = getSessionId(cookies);
             }
             LOG.info("productLine in cookie is " + productLine + " and sessionId is " + sessionId);
             if (StringUtils.isEmpty(productLine) 
                 && !StringUtils.isEmpty(request.getParameter(Constants.TOKEN))) {
                 productLine = decryptProductLine(httpRequest, httpResponse);
-                sessionId = generateSessionId(httpResponse);
+                if (StringUtils.isEmpty(sessionId)) {
+                    sessionId = generateSessionId(httpResponse);
+                }
             }
             LOG.info("productLine in token is " + productLine + " and sessionId is " + sessionId);
             if ((httpRequest.getRequestURI().endsWith("index.html") 

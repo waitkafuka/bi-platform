@@ -133,7 +133,7 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         }
         modifyLogicModel (areaId, selectedMeasures, model, extendArea);
         // 已经重置了LogicModel，需要清除操作纪录
-        restOtherStatus (runTimeModel);
+        // restOtherStatus (runTimeModel);
         MiniCube cube = (MiniCube) model.getSchema ().getCubes ().get (extendArea.getCubeId ());
         LogicModel logicModel = extendArea.getLogicModel ();
         DataSourceDefine ds = dsService.getDsDefine (model.getDsId ());
@@ -145,11 +145,6 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
         return result;
     }
 
-    private void restOtherStatus(ReportRuntimeModel runTimeModel) {
-        runTimeModel.getDrillDownQueryHistory ().clear ();
-        runTimeModel.getOrderedStatus ().clear ();
-        runTimeModel.setSortRecord (null);
-    }
 
     /**
      * 根据选择的指标修改动态逻辑模型
@@ -183,11 +178,11 @@ public class ReportRuntimeModelExternalResource extends BaseResource {
                 if (columns.contains (item)) {
                     columns.remove (item);
                     tmp.add (item);
-                } else {
-                    Measure m = cube.getMeasures ().get (item.getOlapElementId ());
-                    if (m.getType () == MeasureType.CAL || m.getType () == MeasureType.CALLBACK) {
-                        columns.add (item);
-                    }
+//                } else {
+//                    Measure m = cube.getMeasures ().get (item.getOlapElementId ());
+//                    if (m.getType () == MeasureType.CAL || m.getType () == MeasureType.CALLBACK) {
+//                        columns.add (item);
+//                    }
                 }
             }
             columns.addAll (0, tmp);

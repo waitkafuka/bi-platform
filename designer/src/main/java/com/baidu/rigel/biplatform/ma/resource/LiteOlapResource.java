@@ -17,6 +17,8 @@ package com.baidu.rigel.biplatform.ma.resource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -32,15 +34,18 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Measure;
+import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.builder.Director;
+import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.service.CubeMetaBuildService;
 import com.baidu.rigel.biplatform.ma.model.service.PositionType;
 import com.baidu.rigel.biplatform.ma.model.service.StarModelBuildService;
@@ -53,11 +58,14 @@ import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
+import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.service.AnalysisChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.ChartBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.QueryBuildService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportModelQueryService;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryDataUtils;
+import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
 import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.cache.ReportModelCacheManager;
 import com.baidu.rigel.biplatform.ma.resource.utils.LiteOlapViewUtils;
@@ -65,11 +73,13 @@ import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.liteolap.IndCandicateForChart;
 import com.baidu.rigel.biplatform.ma.resource.view.liteolap.MetaData;
 import com.baidu.rigel.biplatform.ma.resource.view.liteolap.MetaStatusData;
+import com.baidu.rigel.biplatform.ma.resource.view.vo.DimensionMemberViewObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
- * CubeTable的页面交互
+ * 此接口提供liteolap特有的一些数据返回接口和数据查询服务
  * 
  * @author zhongyi
  * 
@@ -77,7 +87,7 @@ import com.google.common.collect.Maps;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
-public class LiteOlapResource {
+public class LiteOlapResource extends BaseResource {
 
     /**
      * logger
@@ -205,13 +215,13 @@ public class LiteOlapResource {
         LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) parent;
         LogicModel logicModel = liteOlapArea.getLogicModel();
         Item targetItem = null;
-//        // TODO yichao.jiang DirtySolution，后续必须进行修改  
-//        // 首先校验是否为callback维度或者时间维度，这两种维度不允许进行拖拽
-//        boolean isTimeOrCalback = this.isTimeOrCallbackDim(targetName, model);
-//        if (isTimeOrCalback) {
-//            ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
-//            return rs;
-//        }
+        // // TODO yichao.jiang DirtySolution，后续必须进行修改
+        // // 首先校验是否为callback维度或者时间维度，这两种维度不允许进行拖拽
+        // boolean isTimeOrCalback = this.isTimeOrCallbackDim(targetName, model);
+        // if (isTimeOrCalback) {
+        // ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
+        // return rs;
+        // }
         // 校验是否允许拖拽，此处是对维度只能拖动到维度和条件轴上
         // 指标只能拖动到指标轴上
         boolean allowDrag = this.preCheck4DragValidate(from, to, targetName, model);
@@ -219,7 +229,7 @@ public class LiteOlapResource {
             ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
             return rs;
         }
-        
+
         if (StringUtils.isEmpty(from)) {
             if (liteOlapArea.getCandDims().containsKey(targetName)) {
                 /**
@@ -275,8 +285,7 @@ public class LiteOlapResource {
             } else if (element instanceof Measure) {
                 liteOlapArea.getCandInds().put(element.getId(), targetItem);
             }
-            
-            
+
             // }
         } else {
             // TODO 后续考虑优化
@@ -319,8 +328,8 @@ public class LiteOlapResource {
             }
         }
         // reportModelCacheManager.updateReportModelToCache(reportId, model);
-        ExtendAreaContext extendContext = reportModelCacheManager.getAreaContext(reportId,
-                liteOlapArea.getTableAreaId());
+        ExtendAreaContext extendContext =
+                reportModelCacheManager.getAreaContext(reportId, liteOlapArea.getTableAreaId());
         // 获取对应项的elementId
         String olapElementId = targetItem.getOlapElementId();
         // 仅在维度轴上拖拽，此时需要清理图形上的面包屑和uniqueName信息，无需清理候选区域上的参数
@@ -349,7 +358,7 @@ public class LiteOlapResource {
                 // 从cube中读取对应的维度信息，进而获取dimId
                 Cube cube = model.getSchema().getCubes().get(sourceArea.getCubeId());
                 if (cube.getDimensions() != null && cube.getDimensions().size() != 0) {
-                    Object[] tmp =  cube.getDimensions().values().stream().filter (dim -> dim != null).filter(dim -> {
+                    Object[] tmp = cube.getDimensions().values().stream().filter(dim -> dim != null).filter(dim -> {
                         return finalDimName.equals(dim.getName());
                     }).toArray();
                     if (tmp != null && tmp.length == 1) {
@@ -366,7 +375,7 @@ public class LiteOlapResource {
             runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove(olapElementId);
             runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove("uniqueName");
             runTimeModel.getLocalContextByAreaId(liteOlapTableId).getParams().remove("bread_key");
-            
+
             // 清除图形上同面包屑、参数有关的信息
             String liteOlapChartId = liteOlapArea.getChartAreaId();
             runTimeModel.getLocalContextByAreaId(liteOlapChartId).getParams().remove(olapElementId);
@@ -387,7 +396,7 @@ public class LiteOlapResource {
             runTimeModel.getLocalContextByAreaId(liteOlapArea.getSelectionAreaId()).getParams().remove(olapElementId);
             runTimeModel.getLocalContextByAreaId(liteOlapArea.getSelectionAreaId()).getParams().remove("uniqueName");
             runTimeModel.getLocalContextByAreaId(liteOlapArea.getSelectionAreaId()).getParams().remove("bread_key");
-            
+
             // step3. 从表区域中删除
             runTimeModel.getLocalContextByAreaId(liteOlapArea.getTableAreaId()).getParams().remove(element.getId());
             // step4. 从图区域中删除
@@ -405,32 +414,30 @@ public class LiteOlapResource {
         // 统一清理面包屑问题
         extendContext.setCurBreadCrumPath(null);
         // 更新context
-        reportModelCacheManager.updateAreaContext(reportId, 
-              liteOlapArea.getTableAreaId(), extendContext);
-//        if (extendContext.getCurBreadCrumPath() != null) {
-//            List<Map<String, String>> breadPath = extendContext.getCurBreadCrumPath();
-//            String uniqueName = breadPath.get(breadPath.size() - 1).get("uniqName");
-//            if (uniqueName.startsWith("@")) {
-//                uniqueName = uniqueName.substring(1, uniqueName.length() - 1);
-//            }
-//            Cube cube = model.getSchema().getCubes().get(sourceArea.getCubeId());
-//            Dimension dim = cube.getDimensions().get(logicModel.getRows()[0].getId());
-//            if (dim != null && !dim.getName().equals(MetaNameUtil.getDimNameFromUniqueName(uniqueName))) {
-//                runTimeModel.getLocalContext().clear();
-//                reportModelCacheManager.updateAreaContext(reportId, 
-//                        liteOlapArea.getTableAreaId(), new ExtendAreaContext());
-//                
-//            }
-//        }
-//        // 移除或移入维度轴清理面包屑
-//        if ((StringUtils.isEmpty(to) && ROW.equals(from)) 
-//                || (StringUtils.isEmpty(from) && ROW.equals(to))) {
-////            runTimeModel.getLocalContext().clear();
-//            runTimeModel.getLocalContext().remove("bread_key");
-//            reportModelCacheManager.updateAreaContext(reportId, 
-//                    liteOlapArea.getTableAreaId(), new ExtendAreaContext());
-//        }
-        runTimeModel.getDrillDownQueryHistory().clear();
+        reportModelCacheManager.updateAreaContext(reportId, liteOlapArea.getTableAreaId(), extendContext);
+        // if (extendContext.getCurBreadCrumPath() != null) {
+        // List<Map<String, String>> breadPath = extendContext.getCurBreadCrumPath();
+        // String uniqueName = breadPath.get(breadPath.size() - 1).get("uniqName");
+        // if (uniqueName.startsWith("@")) {
+        // uniqueName = uniqueName.substring(1, uniqueName.length() - 1);
+        // }
+        // Cube cube = model.getSchema().getCubes().get(sourceArea.getCubeId());
+        // Dimension dim = cube.getDimensions().get(logicModel.getRows()[0].getId());
+        // if (dim != null && !dim.getName().equals(MetaNameUtil.getDimNameFromUniqueName(uniqueName))) {
+        // runTimeModel.getLocalContext().clear();
+        // reportModelCacheManager.updateAreaContext(reportId,
+        // liteOlapArea.getTableAreaId(), new ExtendAreaContext());
+        //
+        // }
+        // }
+        // // 移除或移入维度轴清理面包屑
+        // if ((StringUtils.isEmpty(to) && ROW.equals(from))
+        // || (StringUtils.isEmpty(from) && ROW.equals(to))) {
+        // // runTimeModel.getLocalContext().clear();
+        // runTimeModel.getLocalContext().remove("bread_key");
+        // reportModelCacheManager.updateAreaContext(reportId,
+        // liteOlapArea.getTableAreaId(), new ExtendAreaContext());
+        // }
         runTimeModel.setLinkedQueryAction(null);
         runTimeModel.getDatas().clear();
         // runTimeModel.setModel (model);
@@ -442,6 +449,7 @@ public class LiteOlapResource {
 
     /**
      * 判断某个维度是否设置了参数维度
+     * 
      * @param elementId 维度或者指标id
      * @param model 报表模型
      * @return 返回该维度对应的参数名称
@@ -462,6 +470,7 @@ public class LiteOlapResource {
 
     /**
      * 校验是否为时间维度或者callback维度
+     * 
      * @param elemengId
      * @param model
      * @return
@@ -479,7 +488,7 @@ public class LiteOlapResource {
         }
         return false;
     }
-    
+
     /**
      * 在拖拽前校验是否可以拖拽 校验规则：1.维度仅能拖动到维度轴或者条件轴上；2.指标仅能拖动到指标轴
      * 
@@ -602,4 +611,292 @@ public class LiteOlapResource {
         return ResourceUtils.getCorrectResult("OK", resultMap);
     }
 
+    /**
+     * 获取维度成员
+     * 
+     * @return
+     */
+    @RequestMapping(value = "/runtime/extend_area/{areaId}/dims/{dimId}/members", method = { RequestMethod.POST })
+    public ResponseResult queryMembers(@PathVariable("areaId") String areaId, @PathVariable("dimId") String dimId,
+            HttpServletRequest request) throws Exception {
+        long begin = System.currentTimeMillis();
+        logger.info("[INFO] begin query member operation");
+        String reportId = request.getParameter("reportId");
+        if (StringUtils.isEmpty(reportId)) {
+            ResponseResult rs = new ResponseResult();
+            rs.setStatus(1);
+            rs.setStatusInfo("reportId为空，请检查输入");
+            return rs;
+        }
+        ReportDesignModel model = null;
+        try {
+            model = this.getDesignModelFromRuntimeModel(reportId);
+            // reportModelCacheManager.getReportModel(reportId);
+        } catch (CacheOperationException e) {
+            logger.error(e.getMessage(), e);
+            ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+            return rs;
+        }
+        ReportRuntimeModel runTimeModel = null;
+        try {
+            runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+        } catch (CacheOperationException e) {
+            logger.error(e.getMessage(), e);
+            ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+            return rs;
+        }
+        if (model == null) {
+            ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+            return rs;
+        }
+
+        ExtendArea area = model.getExtendById(areaId);
+        String cubeId = area.getCubeId();
+        Cube cube = model.getSchema().getCubes().get(cubeId);
+        Dimension dim = cube.getDimensions().get(dimId);
+        /**
+         * 通过全局的上下文作为members的参数
+         */
+        QueryContext queryContext = runTimeModel.getContext();
+        Map<String, String> params = Maps.newHashMap();
+        for (String key : queryContext.getParams().keySet()) {
+            Object value = queryContext.get(key);
+            if (value != null) {
+                params.put(key, value.toString());
+            }
+        }
+        cube = QueryUtils.getCubeWithExtendArea(model, area);
+        ((MiniCube) cube).setSchema(model.getSchema());
+        final Dimension newDim = QueryUtils.convertDim2Dim(dim);
+        if (params.containsKey(Constants.ORG_NAME) || params.containsKey(Constants.APP_NAME)) {
+            ResponseResult rs = new ResponseResult();
+            rs.setStatus(0);
+            rs.setStatusInfo("OK");
+            return rs;
+        }
+
+        List<List<Member>> members = Lists.newArrayList();
+        // TODO 临时展现3级，后续修改此接口 yichao.jiang
+        if (QueryDataUtils.isCallbackDim(newDim)) {
+            // members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
+            // List<List<Member>> tmpMembers = Lists.newArrayList();
+            long callbackBegin = System.currentTimeMillis();
+            members = this.handleCallbackLevel4LiteOlapShow(cube, newDim, params, 3);
+            // this.handleCallbackLevel4LiteOlapShow(tmpMembers, model, cube, newDim, params, members, 1);
+            logger.info("[INFO]query members for lite-olap magnifier cost :"
+                    + (System.currentTimeMillis() - callbackBegin) + "ms");
+            // if (!CollectionUtils.isEmpty(tmpMembers)) {
+            // members.addAll(tmpMembers);
+            // }
+        } else {
+            members = reportModelQueryService.getMembers(cube, newDim, params, securityKey);
+        }
+        QueryContext context = runTimeModel.getLocalContextByAreaId(area.getId());
+        List<DimensionMemberViewObject> datas = Lists.newArrayList();
+        final AtomicInteger i = new AtomicInteger(1);
+        members.forEach(tmpMembers -> {
+            DimensionMemberViewObject viewObject = new DimensionMemberViewObject();
+            String caption = "第" + i.getAndAdd(1) + "级";
+            viewObject.setCaption(caption);
+            String name = "[" + newDim.getName() + "]";
+            name += ".[All_" + newDim.getName() + "s]";
+            viewObject.setName(name);
+            viewObject.setNeedLimit(false);
+            viewObject.setSelected(i.get() == 2);
+            viewObject.setChildren(genChildren(newDim, tmpMembers, context));
+            datas.add(viewObject);
+        });
+        ResponseResult rs = new ResponseResult();
+        rs.setStatus(0);
+        rs.setStatusInfo("successfully");
+        Map<String, List<DimensionMemberViewObject>> dimValue = Maps.newHashMap();
+        dimValue.put("dimValue", datas);
+        rs.setData(dimValue);
+        logger.info("[INFO] query member operation successfull, cost {} ms", (System.currentTimeMillis() - begin));
+        return rs;
+    }
+
+    /**
+     * 更新维度成员
+     * 
+     * @return ResponseResult
+     */
+    @RequestMapping(value = "/runtime/extend_area/{areaId}/dims/{dimId}/members/1", method = { RequestMethod.POST })
+    public ResponseResult updateMembers(@PathVariable("areaId") String areaId, @PathVariable("dimId") String dimId,
+            HttpServletRequest request) throws Exception {
+        String reportId = request.getParameter("reportId");
+        if (StringUtils.isEmpty(reportId)) {
+            ResponseResult rs = new ResponseResult();
+            rs.setStatus(1);
+            rs.setStatusInfo("reportId为空，请检查输入");
+            return rs;
+        }
+        ReportRuntimeModel model = null;
+        try {
+            model = reportModelCacheManager.getRuntimeModel(reportId);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            ResponseResult rs = ResourceUtils.getErrorResult("不存在的报表，ID " + reportId, 1);
+            return rs;
+        }
+        ReportDesignModel designModel = this.getDesignModelFromRuntimeModel(reportId);
+        // reportModelCacheManager.getReportModel(reportId);
+        ExtendArea area = designModel.getExtendById(areaId);
+        Cube cube = designModel.getSchema().getCubes().get(area.getCubeId());
+
+        String[] selectedDims = request.getParameterValues("selectedNodes");
+        updateLocalContext(dimId, cube, model, selectedDims, areaId);
+        if (area.getType() == ExtendAreaType.SELECTION_AREA) {
+            // 针对lite-olap，无需将参数放入到图、表对应的参数中，因为在queryArea中会自动将
+            // selection_area中的参数塞入到图、表区域中
+            areaId = area.getReferenceAreaId();
+            LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) designModel.getExtendById(areaId);
+            // String chartAreaId = liteOlapArea.getChartAreaId();
+            String tableAreaId = liteOlapArea.getTableAreaId();
+            // 清除表格上的lite-olap面包屑
+            ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(reportId, tableAreaId);
+            context.setCurBreadCrumPath(null);
+            reportModelCacheManager.updateAreaContext(reportId, tableAreaId, context);
+            // updateLocalContext(dimId, cube, model, selectedDims, chartAreaId);
+            // updateLocalContext(dimId, cube, model, selectedDims, tableAreaId);
+        }
+
+        this.reportModelCacheManager.updateRunTimeModelToCache(reportId, model);
+        ResponseResult rs = ResourceUtils.getCorrectResult("successfully", null);
+        return rs;
+    }
+
+    /**
+     * updateLocalContext
+     * 
+     * @param dimId
+     * @param model
+     * @param selectedDims
+     * @param chartAreaId
+     * 
+     */
+    private void updateLocalContext(String dimId, Cube cube, ReportRuntimeModel model, String[] selectedDims,
+            String areaId) {
+        QueryContext localContext = model.getLocalContextByAreaId(areaId);
+        localContext.getParams().put(dimId, selectedDims);
+        String reportModelId = model.getReportModelId();
+        ExtendAreaContext context = this.reportModelCacheManager.getAreaContext(reportModelId, areaId);
+        // 添加局部参数key:elementId
+        context.getParams().put(dimId, selectedDims);
+        // 添加callback请求参数
+        if (cube.getDimensions() != null && cube.getDimensions().size() != 0) {
+            Dimension dim = cube.getDimensions().get(dimId);
+            if (QueryDataUtils.isCallbackDim(dim)) {
+                String callbackParamName = QueryDataUtils.getParamName(dim, model.getModel());
+                if (selectedDims != null && selectedDims.length != 0) {
+                    List<String> tmpList = Lists.newArrayList();
+                    for (int i = 0; i < selectedDims.length; i++) {
+                        String tmp = QueryDataUtils.getCallbackParamValue(callbackParamName, selectedDims[i]);
+                        if (tmp.contains("All_")) {
+                            continue;
+                        }
+                        tmpList.add(tmp);
+                    }
+                    String values = String.join(",", tmpList);
+                    // 添加局部参数
+                    model.getLocalContextByAreaId(areaId).getParams().put(callbackParamName, values);
+                }
+            }
+            // 清除面包屑，因为后续判断为!=null，此处设置为null即可，modify by yichao.jiang
+            context.setCurBreadCrumPath(null);
+        }
+        reportModelCacheManager.updateAreaContext(reportModelId, areaId, context);
+    }
+
+    /**
+     * @param reportId
+     * @return ReportDesignModel
+     */
+    ReportDesignModel getDesignModelFromRuntimeModel(String reportId) {
+        return reportModelCacheManager.getRuntimeModel(reportId).getModel();
+    }
+
+    /**
+     * 
+     * @param tmpMembers
+     * @param context
+     * @return List<DimensionMemberViewObject>
+     */
+    private List<DimensionMemberViewObject> genChildren(Dimension dim, List<Member> tmpMembers, QueryContext context) {
+        final List<DimensionMemberViewObject> rs = Lists.newArrayList();
+        DimensionMemberViewObject all = new DimensionMemberViewObject();
+        Map<String, Object> params = context.getParams();
+        Set<String> tmpKey = Sets.newHashSet();
+        params.values().forEach(strArray -> {
+            if (strArray instanceof String[]) {
+                String[] tmpArray = (String[]) strArray;
+                for (String tmpStr : tmpArray) {
+                    tmpKey.add(tmpStr);
+                }
+            }
+        });
+        all.setCaption("全部");
+        all.setNeedLimit(false);
+        String name = "[" + dim.getName() + "]";
+        name += ".[All_" + dim.getName() + "s]";
+        all.setName(name);
+        all.setSelected(tmpKey.contains(name));
+        rs.add(all);
+        tmpMembers.forEach(m -> {
+            DimensionMemberViewObject child = new DimensionMemberViewObject();
+            child.setCaption(m.getCaption());
+            child.setSelected(tmpKey.contains(m.getUniqueName()));
+            child.setNeedLimit(false);
+            child.setName(m.getUniqueName());
+            rs.add(child);
+        });
+        return rs;
+    }
+
+    /**
+     * 根据root的member求出callback维度的层级关系
+     * 
+     * @param allMembers
+     * @param cube
+     * @param dim
+     * @param params
+     * @param levelToRoot
+     */
+    private List<List<Member>> handleCallbackLevel4LiteOlapShow(Cube cube, Dimension dim, Map<String, String> params,
+            int levelToRoot) throws Exception {
+        Map<String, String> newParams = Maps.newHashMap(params);
+        // 添加levelToRoot参数，请求多个层级的岗位
+        newParams.put("levelToRoot", String.valueOf(levelToRoot));
+        List<List<Member>> members = reportModelQueryService.getMembers(cube, dim, newParams, securityKey);
+        List<Member> secondCallbackLevelMembers = Lists.newArrayList();
+        List<Member> thirdCallbackLevelMembers = Lists.newArrayList();
+        if (!CollectionUtils.isEmpty(members)) {
+            for (int i = 0; i < members.size(); i++) {
+                List<Member> firstLevelMembers = members.get(i);
+                if (!CollectionUtils.isEmpty(firstLevelMembers)) {
+                    for (int j = 0; j < firstLevelMembers.size(); j++) {
+                        MiniCubeMember member = (MiniCubeMember) firstLevelMembers.get(j);
+                        List<Member> secondChildMembers = member.getChildren();
+                        if (!CollectionUtils.isEmpty(secondChildMembers)) {
+                            secondCallbackLevelMembers.addAll(secondChildMembers);
+                            for (int k = 0; k < secondChildMembers.size(); k++) {
+                                member = (MiniCubeMember) secondChildMembers.get(k);
+                                List<Member> thirdChildMembers = member.getChildren();
+                                if (!CollectionUtils.isEmpty(thirdChildMembers)) {
+                                    thirdCallbackLevelMembers.addAll(thirdChildMembers);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(secondCallbackLevelMembers)) {
+            members.add(secondCallbackLevelMembers);
+        }
+        if (!CollectionUtils.isEmpty(thirdCallbackLevelMembers)) {
+            members.add(thirdCallbackLevelMembers);
+        }
+        return members;
+    }
 }

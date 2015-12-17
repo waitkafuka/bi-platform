@@ -60,6 +60,11 @@ public interface MiniCubeConnection {
      * QUESTIONMODEL_PARAM_KEY
      */
     String QUESTIONMODEL_PARAM_KEY = "question";
+    
+    /**
+     * QUERYREQUEST_PARAM_KEY
+     */
+    String QUERYREQUEST_PARAM_KEY="query";
 
     /**
      * QUERYCONTEXT_PARAM_KEY
@@ -84,8 +89,7 @@ public interface MiniCubeConnection {
     /**
      * CUBE_PARAM_KEY
      */
-    String CUBE_PARAM_KEY = "cube";
-    
+    String CUBE_PARAM_KEY = "cube";    
     
     /** 
      * DATASET_PARAM_KEY
@@ -144,7 +148,8 @@ public interface MiniCubeConnection {
         FILE(2), // not implement
         HIVE(4),
         CUSTOM(3), // user custom datasource,support user custom data process
-        PALO(6); // palo
+        PALO(6), // palo
+        DRUID(7); // Druid
         /**
          * id ID
          */

@@ -191,41 +191,6 @@ public class ReportDesignModelServiceImpl implements ReportDesignModelService {
                 continue;
             }
         }
-        /**palo不需要通知tesseract建立索引，与tesseract直接建立接口**/
-        if (CollectionUtils.isNotEmpty(dsInfoList)
-                && dsInfoList.get(0) != null
-                && dsInfoList.get(0) instanceof SqlDataSourceInfo) {
-            SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo) dsInfoList.get(0);
-            if (sqlDataSourceInfo.getDataBase() != DataBase.PALO) {
-                if (cubes.size() == 0) {
-                    logger.info("cube is empty, don't need to create index!");
-                    return true;
-                }
-                logger.info("report published successfully, begin to request createIndex.. ,"
-                        + "databasetype:{}, productline:{}, reportName:{}.",
-                        sqlDataSourceInfo.getDataBase().name(),
-                        ContextManager.getProductLine(), model.getName());
-                new Thread() {
-                    public void run() {
-                        MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfoList.get(0));
-                        if (connection.publishCubes(cubes, dsInfoList)) {
-                            logger.info("request of createIndex successfully, reportName:{}.", model.getName());
-                        } else {
-                            logger.warn("request of createIndex failed!! reportName:{}.", model.getName());
-                        }
-                    }
-                }.start();
-            } else {
-                logger.info("report published successfully, databasetype:{},"
-                        + "productline:{}, reportName:{}.",
-                        sqlDataSourceInfo.getDataBase().name(),
-                        ContextManager.getProductLine(), model.getName());
-            }
-        } else {
-            logger.warn("report published successfully, can not found SqlDataSourceInfo,"
-                    + "productline:{}, reportName:{}.",
-                    ContextManager.getProductLine(), model.getName());
-        }
         return true;
     }
     

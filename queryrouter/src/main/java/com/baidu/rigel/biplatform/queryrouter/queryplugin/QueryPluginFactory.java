@@ -18,8 +18,6 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.util.StringUtils;
-
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 
 /**
@@ -29,7 +27,7 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
  *
  */
 public class QueryPluginFactory {
-
+    
     private List<QueryPlugin> activePluginList;
     
     /**
@@ -52,18 +50,11 @@ public class QueryPluginFactory {
         }
     }
     
-    
-    /**
-     * default generate get activePluginList
-     * @return the activePluginList
-     */
-    public List<QueryPlugin> getActivePluginList() {
-        return activePluginList;
-    }
-
     /**
      * default generate set activePluginList
-     * @param activePluginList the activePluginList to set
+     * 
+     * @param activePluginList
+     *            the activePluginList to set
      */
     public void setActivePluginList(List<QueryPlugin> activePluginList) {
         this.activePluginList = activePluginList;

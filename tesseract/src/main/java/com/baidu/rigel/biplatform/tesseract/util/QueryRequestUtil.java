@@ -85,7 +85,7 @@ public class QueryRequestUtil {
      * @return Map<String,List<String>> the result map,whose key is property and
      *         value is leafvalues
      */
-    private static Map<String, List<String>> transQueryRequestAndList2Map(
+    public static Map<String, List<String>> transQueryRequestAndList2Map(
             QueryRequest query) {
         Map<String, List<String>> resultMap = new HashMap<String, List<String>>();
         for (Expression expression : query.getWhere().getAndList()) {

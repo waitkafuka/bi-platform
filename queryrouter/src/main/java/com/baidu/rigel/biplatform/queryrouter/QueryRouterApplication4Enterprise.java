@@ -42,7 +42,12 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
-import com.baidu.rigel.biplatform.queryrouter.security.SecurityFilter;
+import com.baidu.rigel.biplatform.parser.RegisterFunction;
+import com.baidu.rigel.biplatform.parser.exception.RegisterFunctionException;
+import com.baidu.rigel.biplatform.queryrouter.handle.security.SecurityFilter;
+import com.baidu.rigel.biplatform.queryrouter.query.udf.DateDataFunction;
+import com.baidu.rigel.biplatform.queryrouter.query.udf.RelativeRate;
+import com.baidu.rigel.biplatform.queryrouter.query.udf.SimilitudeRate;
 
 /**
  * 
@@ -117,6 +122,14 @@ public class QueryRouterApplication4Enterprise extends SpringBootServletInitiali
         initAuthStrategyRepositry();
         ConfigurableApplicationContext context = SpringApplication.run(
                 QueryRouterApplication4Enterprise.class, args);
+        try {
+            RegisterFunction.register("rRate", RelativeRate.class);
+            RegisterFunction.register("sRate", SimilitudeRate.class);
+            RegisterFunction.register("dateData", DateDataFunction.class);
+        } catch (RegisterFunctionException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         ApplicationContextHelper.setContext(context);
     }
     

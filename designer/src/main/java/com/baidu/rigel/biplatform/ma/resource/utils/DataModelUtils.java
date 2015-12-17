@@ -364,7 +364,7 @@ public final class DataModelUtils {
         return pTable;
     }
 
-    protected static String[] getDimCaptions(Cube cube, LogicModel logicModel) {
+    public static String[] getDimCaptions(Cube cube, LogicModel logicModel) {
         if (cube == null || logicModel == null) {
             return new String[0];
         }

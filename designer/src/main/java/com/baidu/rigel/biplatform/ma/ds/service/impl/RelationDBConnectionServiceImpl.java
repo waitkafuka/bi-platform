@@ -179,6 +179,8 @@ public class RelationDBConnectionServiceImpl implements
                 return DataBase.MYSQL;
             case PALO:
                 return DataBase.PALO;
+            case DRUID:
+                return DataBase.DRUID;
             case ORACLE:
                 return DataBase.ORACLE;
             case H2:

@@ -119,6 +119,26 @@ public class SearchIndexServiceImpl implements SearchService {
         super();
         this.isClient = IndexAndSearchClient.getNodeClient();
     }
+    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see
+     * com.baidu.rigel.biplatform.tesseract.isservice.search.service.SearchService
+     * #hasIndexMeta(com.baidu.rigel.biplatform.tesseract.qsservice.query.vo.
+     * QueryRequest)
+     */
+    public boolean hasIndexMeta(QueryRequest query) {
+        if (query == null || StringUtils.isEmpty(query.getCubeId())) {
+            LOGGER.error(String.format(LogInfoConstants.INFO_PATTERN_FUNCTION_EXCEPTION, "query",
+                    "[query:" + query + "]"));
+            throw new IllegalArgumentException();
+        }
+        IndexMeta idxMeta = idxMetaService.getIndexMetaByCubeId(query.getCubeId(), query
+                .getDataSourceInfo().getDataSourceKey());
+        
+        return !this.queryUseDatabase(query, idxMeta);
+    }
 
     /*
      * (non-Javadoc)

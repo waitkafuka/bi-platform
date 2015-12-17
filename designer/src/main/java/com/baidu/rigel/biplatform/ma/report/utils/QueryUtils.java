@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.http.Cookie;
@@ -35,6 +36,7 @@ import com.baidu.rigel.biplatform.ac.minicube.DivideTableStrategyVo;
 import com.baidu.rigel.biplatform.ac.minicube.ExtendMinicubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMeasure;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeSchema;
 import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
@@ -146,6 +148,10 @@ public class QueryUtils {
         if (area.getType() == ExtendAreaType.PLANE_TABLE) {
             cube = transformCube(cube);          
             MiniCube miniCube = (MiniCube) cube;
+            for (Entry<String, Measure> entry : miniCube.getMeasures().entrySet()) {
+                MiniCubeMeasure m = (MiniCubeMeasure) entry.getValue();
+                m.setAggregator(Aggregator.NONE);
+            }
             DivideTableStrategyVo divideVo = miniCube.getDivideTableStrategyVo();
             DivideTableContext divideContext = new DivideTableContext();
             DivideTableService divideTableService = null;
