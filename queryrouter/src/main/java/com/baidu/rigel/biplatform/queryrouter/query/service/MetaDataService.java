@@ -38,41 +38,6 @@ import com.baidu.rigel.biplatform.queryrouter.query.exception.MetaException;
 public interface MetaDataService {
 
     /**
-     * CUBE_CACHE_NAME cube对象的缓存
-     */
-    String CUBE_CACHE_NAME = "cubePool";
-
-    /**
-     * 从缓存中获取立方体
-     * 
-     * @param cubeId 立方体的ID
-     * @return 立方体对象
-     */
-    Cube getCube(String cubeId) throws MiniCubeQueryException;
-
-    /**
-     * 缓存cube模型
-     * 
-     * @param dataSourceInfoKey cube对应的是那个数据源的KEY
-     * @param cube cube模型
-     */
-    void cacheCube(Cube cube);
-
-    /**
-     * 获取level的members
-     * 
-     * @param dataSourceKey 数据源的KEY
-     * @param cubeId cubeId
-     * @param dimensionName 维度名称
-     * @param levelName 层级的名称
-     * @return 返回members
-     * @throws MiniCubeQueryException 查询异常
-     * @throws MetaException cube is illegal
-     */
-    List<MiniCubeMember> getMembers(String dataSourceKey, String cubeId, String dimensionName, String levelName,
-            Map<String, String> params) throws MiniCubeQueryException, MetaException;
-
-    /**
      * @param dataSource
      * @param cube
      * @param dimensionName
@@ -83,32 +48,6 @@ public interface MetaDataService {
      * @throws MetaException
      */
     List<MiniCubeMember> getMembers(DataSourceInfo dataSource, Cube cube, String dimensionName, String levelName,
-            Map<String, String> params) throws MiniCubeQueryException, MetaException;
-
-    /**
-     * 获取指定UniqueName的children
-     * 
-     * @param dataSourceKey 数据源的KEY
-     * @param cubeId 数据模型ID
-     * @param uniqueName 维值的UniqueName
-     * @param params Callback的参数（Callback维度需要提供）
-     * @return 指定维值的孩子
-     * @throws MiniCubeQueryException 查询节点异常
-     * @throws MetaException 获取元数据信息异常
-     */
-    List<MiniCubeMember> getChildren(String dataSourceKey, String cubeId, String uniqueName, Map<String, String> params)
-            throws MiniCubeQueryException, MetaException;
-
-    /**
-     * @param dataSourceKey
-     * @param cubeId
-     * @param member
-     * @param params
-     * @return
-     * @throws MiniCubeQueryException
-     * @throws MetaException
-     */
-    List<MiniCubeMember> getChildren(String dataSourceKey, String cubeId, MiniCubeMember member,
             Map<String, String> params) throws MiniCubeQueryException, MetaException;
 
     /**
@@ -135,18 +74,6 @@ public interface MetaDataService {
     List<MiniCubeMember> getChildren(DataSourceInfo dataSource, Cube cube, MiniCubeMember member,
             Map<String, String> params) throws MiniCubeQueryException, MetaException;
 
-    /**
-     * @param dataSourceKey
-     * @param cubeId
-     * @param uniqueName
-     * @param params
-     * @return
-     * @throws MiniCubeQueryException
-     * @throws MetaException
-     */
-    MiniCubeMember lookUp(String dataSourceKey, String cubeId, String uniqueName, Map<String, String> params)
-            throws MiniCubeQueryException, MetaException;
-    
     /**
      * lookUp
      *

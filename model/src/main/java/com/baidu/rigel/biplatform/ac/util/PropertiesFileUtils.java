@@ -45,21 +45,24 @@ public class PropertiesFileUtils {
         String propertiesFileName = System.getProperty("properties");
         if (!StringUtils.isEmpty(propertiesFileName)) {
             String[] propFileArray = propertiesFileName.split(",");
-            for (String fileNames : propFileArray) {
+            for (String fileName : propFileArray) {
                 Properties properties = new Properties();
                 FileInputStream inStream;
                 try {
-                    inStream = new FileInputStream(fileNames);
+                    inStream = new FileInputStream(fileName);
                     properties.load(inStream);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
                 // map中的key为文件名去掉后缀
-                String key = fileNames.substring(fileNames.lastIndexOf("/") + 1,
-                        fileNames.lastIndexOf("."));
+                int idx = fileName.lastIndexOf("/");
+                if (idx < 0) {
+                    idx = fileName.lastIndexOf("\\");
+                }
+                String key = fileName.substring(idx + 1,
+                        fileName.lastIndexOf("."));
                 propertiesMap.put(key, properties);
             }
-            
         }
     }
     

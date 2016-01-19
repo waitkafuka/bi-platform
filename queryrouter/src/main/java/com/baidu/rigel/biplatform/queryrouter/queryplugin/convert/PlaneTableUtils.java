@@ -277,6 +277,7 @@ public class PlaneTableUtils {
                 Column c = buildMeasureColumn(
                         miniCube.getSource(), column.getFacttableColumnName(),
                         column.getFacttableColumnName(), Aggregator.NONE, "", true);
+                c.setTableFieldName(column.getFacttableColumnName());
                 c.setJoinTable(null);
                 c.setSortRecord(null);
                 c.setOperator(null);
@@ -330,8 +331,16 @@ public class PlaneTableUtils {
         Level oneDimensionSource = null;
         Level[] levels = v.getLevels().values().toArray(new Level[0]);
         oneDimensionSource = levels[levels.length - 1];
+        column.setName(oneDimensionSource.getName());
+        column.setTableFieldName(oneDimensionSource.getName());
+        column.setRelatedColumn(false);
+        column.setCaption(v.getCaption());
+        column.setFacttableName(source);
+        column.setFacttableColumnName(oneDimensionSource.getFactTableColumn());
+        column.setFacttableColumnName(v.getFacttableColumn());
         if (PlaneTableUtils.isTimeDimension(v)) {
             // 如果为时间维度，转换成事实表的时间字段
+            column.setTableFieldName(column.getFacttableColumnName());
             column.setColumnType(ColumnType.TIME);
             column.setTableName(oneDimensionSource.getDimTable());
         } else if (PlaneTableUtils.isCallbackDimension(v)) {
@@ -342,12 +351,6 @@ public class PlaneTableUtils {
             column.setTableName(oneDimensionSource.getDimTable());
             column.setJoinTable(convertLevels2JoinList(levels[0]));
         }
-        column.setName(oneDimensionSource.getName());
-        column.setRelatedColumn(false);
-        column.setCaption(v.getCaption());
-        column.setFacttableName(source);
-        column.setFacttableColumnName(oneDimensionSource.getFactTableColumn());
-        column.setFacttableColumnName(v.getFacttableColumn());
     }
     
     /**
@@ -367,6 +370,7 @@ public class PlaneTableUtils {
         column.setJoinTable(null);
         column.setRelatedColumn(true);
         column.setName(dimPk);
+        column.setTableFieldName(dimPk);
         column.setCaption(dimPk);
         column.setFacttableName(source);
         column.setFacttableColumnName(columnOri.getFacttableColumnName());
@@ -377,6 +381,7 @@ public class PlaneTableUtils {
             String caption, Aggregator aggregator, String formula, boolean isRelatedColumn){
         Column oneMeasure = new Column();
         oneMeasure.setName(define);
+        oneMeasure.setTableFieldName(define);
         oneMeasure.setColumnType(ColumnType.COMMON);
         oneMeasure.setTableName(sourceTableName);
         oneMeasure.setFacttableName(sourceTableName);
@@ -408,6 +413,7 @@ public class PlaneTableUtils {
         column.setTableName(oneDimensionSource.getDimTable());
         column.setJoinTable(convertLevels2JoinList(v));
         column.setName(oneDimensionSource.getName());
+        column.setTableFieldName(oneDimensionSource.getName());
         column.setCaption(v.getCaption());
         column.setFacttableName(source);
         column.setFacttableColumnName(oneDimensionSource.getFactTableColumn());

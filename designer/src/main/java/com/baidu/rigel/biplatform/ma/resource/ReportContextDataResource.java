@@ -1,11 +1,13 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
@@ -69,6 +71,7 @@ import com.baidu.rigel.biplatform.ma.resource.utils.PlaneTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * 此接口提供与报表查询上下文交互相关的数据查询服务
@@ -133,7 +136,7 @@ public class ReportContextDataResource extends BaseResource {
         runtimeModel.getContext().getParams().forEach((k, v) -> {
             params.put(k, v == null ? "" : v.toString());
         });
-
+        params.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("cookie"));
         for (final String areaId : areaIds) {
             ExtendArea area = model.getExtendById(areaId);
             Cube cube = null;
@@ -176,7 +179,8 @@ public class ReportContextDataResource extends BaseResource {
                             }
                         });
                         // List<Map<String, String>> values =
-                        // QueryUtils.getMembersWithChildrenValue(members, tmpCube, dsInfo, Maps.newHashMap());
+                        // QueryUtils.getMembersWithChildrenValue(members,
+                        // tmpCube, dsInfo, Maps.newHashMap());
                         Map<String, Object> datasource = Maps.newHashMap();
                         datasource.put("datasource", values);
                         QueryDataUtils.fillBackParamValues(runtimeModel, dim, datasource);
@@ -204,7 +208,8 @@ public class ReportContextDataResource extends BaseResource {
         long begin = System.currentTimeMillis();
         logger.info("[INFO]--- ---begin init params with report id {}", reportId);
         String currentUniqueName = request.getParameter("uniqueName");
-        // int level = MetaNameUtil.parseUnique2NameArray(currentUniqueName).length - 1;
+        // int level =
+        // MetaNameUtil.parseUnique2NameArray(currentUniqueName).length - 1;
         final ReportDesignModel model = getDesignModelFromRuntimeModel(reportId);
         final ReportRuntimeModel runtimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         Map<String, Object> datas = Maps.newConcurrentMap();
@@ -342,6 +347,16 @@ public class ReportContextDataResource extends BaseResource {
         String reportPreview = request.getParameter("reportPreview");
         String imageId = request.getParameter("reportImageId");
         ReportRuntimeModel runtimeModel = null;
+        String activedsName = null;
+        // 先将动态数据源参数保存下来，以在后续初始化完毕之后再将数据源名称设置回context中
+        try {
+            ReportRuntimeModel planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+            if (planeTableRuntimeModel != null) {
+                activedsName = (String) planeTableRuntimeModel.getContext().getParams().get("activeds");
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
         try {
             if (StringUtils.isEmpty(imageId) || reportId.equals(imageId)) {
                 if (!StringUtils.isEmpty(reportPreview) && Boolean.valueOf(reportPreview)) {
@@ -349,7 +364,9 @@ public class ReportContextDataResource extends BaseResource {
                     if (model != null) {
                         model = DeepcopyUtils.deepCopy(model);
                     }
-                } else if ((runtimeModel = reportModelCacheManager.getRuntimeModelUnsafety(reportId)) == null) {
+                } else {// if ((runtimeModel =
+                        // reportModelCacheManager.getRuntimeModelUnsafety(reportId))
+                        // == null) {
                     model = reportDesignModelService.getModelByIdOrName(reportId, true);
                 }
             }
@@ -361,6 +378,10 @@ public class ReportContextDataResource extends BaseResource {
         if (model != null) {
             runtimeModel = new ReportRuntimeModel(reportId);
             runtimeModel.init(model, true);
+            // 这里需要把动态数据源的参数加入初始化完毕的全局上下文中 以免初始化的时候参数丢失 update by majun
+            if (!StringUtils.isEmpty(activedsName)) {
+                runtimeModel.getContext().getParams().put("activeds", activedsName);
+            }
         } else if (runtimeModel == null) {
             try {
                 String path = getSavedReportPath(request);
@@ -408,16 +429,40 @@ public class ReportContextDataResource extends BaseResource {
 
             // 多维表cube
             Cube multiCube = null;
+            // 多维表查询参数
+            Map<String, Object> queryParams = Maps.newHashMap();
             ExtendArea[] multiExtendAreas = fromRuntimeModel.getModel().getExtendAreaList();
             // 获取多维表对应的因为此处仅考虑一个cube
-            // fix by yichao.jiang 并非每个控件都存在cube，cube可能会取不到，必须保证该extendArea中有cubeId，还不能是查询过滤控件
+            // fix by yichao.jiang
+            // 并非每个控件都存在cube，cube可能会取不到，必须保证该extendArea中有cubeId，还不能是查询过滤控件
+            // 是否为lite-olap报表
+            boolean isLiteOlap = false;
+            // lite-olap选择区域的id
+            String liteOlapSelectAreaId = "";
             for (ExtendArea extendArea : multiExtendAreas) {
                 if (extendArea != null && !StringUtils.isEmpty(extendArea.getCubeId())
                         && !QueryUtils.isFilterArea(extendArea.getType())) {
                     multiCube = fromRuntimeModel.getModel().getSchema().getCubes().get(extendArea.getCubeId());
                 }
+                // 分别对应普通多维表、lite-olap报表的候选区域以及下拉选择控件
+                if (extendArea.getType() == ExtendAreaType.TABLE || extendArea.getType() == ExtendAreaType.SELECTION_AREA
+                        || QueryUtils.isFilterArea(extendArea.getType()))
+                    // 如果为lite-olap报表
+                    if (extendArea.getType() == ExtendAreaType.SELECTION_AREA) {
+                        isLiteOlap = true;
+                        liteOlapSelectAreaId = extendArea.getId();
+                    }
+                    queryParams.putAll(fromRuntimeModel.getLocalContextByAreaId(extendArea.getId()).getParams());
             }
-
+            // TODO 此处参数处理上，存在全局和局部的矛盾问题，后续应考虑将全局和局部参数问题处理
+            // 问题描述：对于下拉框或者级联下拉框，参数作为全局条件，此时应该以全局条件为主，否则下拉框切换条件无效
+            // 对于lite-olap报表，条件存在选择区域select_area上，为局部条件，此时应该以局部条件为主，否则lite-olap报表上的
+            // 放大镜功能在切换后不生效
+            if (!isLiteOlap) {
+                queryParams.putAll(fromRuntimeModel.getContext().getParams());
+            } else {
+                queryParams.putAll(fromRuntimeModel.getLocalContextByAreaId(liteOlapSelectAreaId).getParams());
+            }
             // 平面表cube
             Cube planeCube = null;
             ExtendArea[] planeExtendAreas = model.getExtendAreaList();
@@ -443,7 +488,8 @@ public class ReportContextDataResource extends BaseResource {
                     // if (StringUtils.isEmpty(linkParam) ||
                     // StringUtils.isEmpty(linkParam.getOriginalDimValue()) ||
                     // StringUtils.isEmpty(linkParam.getUniqueName())) {
-                    // throw new RuntimeException("the need params { " + v.getName() + " } is empty, please check!");
+                    // throw new RuntimeException("the need params { " +
+                    // v.getName() + " } is empty, please check!");
                     // }
                         planeTableCond.put(v.getName(), v.getElementId());
                         planeTableCond.put(v.getElementId(), v.getName());
@@ -459,7 +505,8 @@ public class ReportContextDataResource extends BaseResource {
                     String planeTableConditionKey = null;
                     try {
                         planeTableConditionKey = planeTableCond.get(linkParam.getParamName());
-                        // for (String conditionKey : planeTableConditions.keySet()) {
+                        // for (String conditionKey :
+                        // planeTableConditions.keySet()) {
                         // if (planeTableConditions.get(conditionKey).getName().
                         // equals(linkParam.getParamName())) {
                         // planeTableConditionKey = conditionKey;
@@ -476,19 +523,46 @@ public class ReportContextDataResource extends BaseResource {
                                         PlaneTableUtils.convert2TimeJson(linkParam.getOriginalDimValue(), fromParams);
                             }
                         } else {
+                            // 获取维度名称
+                            String dimName = linkParam.getDimName();
+                            // 从cube中获取该维度
+                            Dimension[] dim =
+                                    multiCube.getDimensions().values().stream()
+                                            .filter(v -> v.getName().equals(dimName)).toArray(Dimension[]::new);
+                            if (dim == null || dim.length != 1) {
+                                throw new Exception("获取维度数据出错");
+                            }
+                            // 利用维度信息从上下文中获取是否有参数
+                            Object filterValue = null;
+                            Set<String> filterValueSet = Sets.newHashSet();
+                            if (queryParams.containsKey(dim[0].getId())) {
+                                filterValue = queryParams.get(dim[0].getId());
+                                filterValueSet = this.covObject2Set(filterValue);
+                            } else if (dim[0].getType() == DimensionType.GROUP_DIMENSION) {
+                                Set<String> totalFilterValueSet = Sets.newHashSet();
+                                dim[0].getLevels().forEach((k, v) -> {
+                                    if (queryParams.containsKey(k)) {
+                                        totalFilterValueSet.addAll(this.covObject2Set(queryParams.get(k)));
+                                    }
+                                });
+                                filterValueSet = totalFilterValueSet;
+                            }
                             if (MetaNameUtil.isUniqueName(linkParam.getUniqueName())) {
                                 requestParams.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
                                 newValue =
                                         this.handleReqParams4PlaneTable(multiCube, planeTableCond,
-                                                linkParam.getUniqueName(), requestParams, securityKey);
+                                                linkParam.getUniqueName(), requestParams, filterValueSet, securityKey);
                             } else {
                                 newValue = linkParam.getOriginalDimValue();
                             }
                         }
+                        if (StringUtils.isEmpty(newValue)) {
+                            throw new Exception("处理后的参数值为空");
+                        }
                         logger.debug("the linkParam {" + linkParam.getParamName() + "}, and it's origin value is ["
                                 + linkParam.getOriginalDimValue() + "], and it's new value are [" + newValue + "]");
                     } catch (Exception e) {
-                        logger.error("处理平面表参数出错，请检查!");
+                        logger.error("处理平面表参数出错，请检查!", e);
                         throw new RuntimeException("处理平面表参数出错，请检查!");
                     }
                     if (newValue != null) {
@@ -533,6 +607,49 @@ public class ReportContextDataResource extends BaseResource {
     }
 
     /**
+     * 将Object类型的value转为Set类型
+     * 
+     * @param paramValue
+     * @return
+     */
+    private Set<String> covObject2Set(Object paramValue) {
+        Set<String> sets = Sets.newHashSet();
+        if (paramValue == null) {
+            return sets;
+        }
+        // 此处处理时，需要对条件做一步处理
+        // 如[纬度组].[All_维度组]的情况，此时是没有过滤条件的
+        // 而对于[维度组].[交通运输].[All_交通运输]的情况，相当于过滤条件仅在第一级上，需要处理
+        if (paramValue instanceof String[]) {
+            String[] paramValueArray = (String[]) paramValue;
+            Stream.of(paramValueArray).forEach(value -> {
+                sets.add(value);
+            });
+        }
+        if (paramValue instanceof String) {
+            if (MetaNameUtil.isUniqueName((String) paramValue)) {
+                String[] uniqueNameValue = MetaNameUtil.parseUnique2NameArray((String) paramValue);
+                List<String> newUniqueNameValueList = Lists.newArrayList();
+                for (int i = uniqueNameValue.length - 1; i >= 0; i--) {
+                    if (uniqueNameValue[i].contains("All_")) {
+                        continue;
+                    }
+                    newUniqueNameValueList.add(uniqueNameValue[i]);
+                }
+                Collections.reverse(newUniqueNameValueList);
+                String[] newUniqueNameValue = newUniqueNameValueList.toArray(new String[0]);
+                if (newUniqueNameValue.length > 1) {
+                    String value = Stream.of(newUniqueNameValue).map((val -> {
+                        return MetaNameUtil.makeUniqueName(val);
+                    })).collect(Collectors.joining("."));
+                    sets.add(value);
+                }
+            }
+        }
+        return sets;
+    }
+
+    /**
      * 处理平面表跳转时的参数问题 handleReqParams4PlaneTable
      * 
      * @param cube
@@ -541,7 +658,8 @@ public class ReportContextDataResource extends BaseResource {
      * @return
      */
     private String handleReqParams4PlaneTable(Cube cube, Map<String, String> planeTableCond, String uniqueName,
-            Map<String, String> params, String securityKey) throws DataSourceOperationException {
+            Map<String, String> params, Set<String> filterValues, String securityKey)
+            throws DataSourceOperationException {
 
         if (!ParamValidateUtils.check("cube", cube)) {
             return null;
@@ -580,7 +698,7 @@ public class ReportContextDataResource extends BaseResource {
             CallbackLevel callbackLevel = (CallbackLevel) tmpLevel;
             Map<String, String> callbackParams = callbackLevel.getCallbackParams();
             String callbackParam = null;
-            // TODO是否考虑多个参数问题
+            // TODO 是否考虑多个参数问题
             for (String key : callbackParams.keySet()) {
                 if (planeTableCond.containsKey(key)) {
                     callbackParam = key;
@@ -591,19 +709,55 @@ public class ReportContextDataResource extends BaseResource {
             List<Member> members = callbackLevel.getMembers(oriCube, dsInfo, params);
             for (Member member : members) {
                 if (member.getUniqueName().equals(uniqueName)) {
+                    if (!CollectionUtils.isEmpty(filterValues) && !filterValues.contains(uniqueName)) {
+                        continue;
+                    }
                     MiniCubeMember miniCubeMember = (MiniCubeMember) member;
+                    // 传入的uniqueName下的所有的节点信息
                     Set<String> queryNodes = miniCubeMember.getQueryNodes();
+                    // 获取过滤条件中的所有节点信息，因为过滤条件中存储的为[post_id].[34378]，需要将其转为34378
+                    Set<String> newFilterValues = filterValues.stream().map(value -> {
+                        String[] tmpValue = MetaNameUtil.parseUnique2NameArray(value);
+                        return tmpValue[tmpValue.length - 1];
+                    }).collect(Collectors.toSet());
+                    final String finalCallbackParam = callbackParam;
+                    final DataSourceInfo finalDsInfo = dsInfo;
+                    Set<String> newQueryNodes = Sets.newHashSet();
+                    // 对每一个过滤条件遍历，如果该过滤条件属于该uniqueName下的节点
+                    // 则应该以该过滤条件信息为主
+                    newFilterValues.forEach(value -> {
+                        // 如果该值在queryNodes中出现过
+                            if (queryNodes.contains(value)) {
+                                // 更改callbackLevel
+                                callbackLevel.getCallbackParams().put(finalCallbackParam, value);
+                                // 获取新的member信息
+                                List<Member> tmpMembers = callbackLevel.getMembers(oriCube, finalDsInfo, params);
+                                Set<String> tmpQueryNodes = Sets.newHashSet();
+                                // 获取新的member信息下的queryNodes信息
+                                tmpMembers.stream().forEach(tmpVal -> {
+                                    MiniCubeMember tmpMiniCubeMember = (MiniCubeMember) tmpVal;
+                                    tmpQueryNodes.addAll(tmpMiniCubeMember.getQueryNodes());
+                                });
+                                // 最终新的queryNodes信息
+                                newQueryNodes.addAll(tmpQueryNodes);
+                            }
+                        });
+                    if (!CollectionUtils.isEmpty(newQueryNodes)) {
+                        return newQueryNodes.stream().collect(Collectors.joining(","));
+                    }
                     return queryNodes.stream().collect(Collectors.joining(","));
                 }
             }
         } else {
             // 如果有孩子结点，则要取到孩子结点数值
             if ((dim.getLevels().size() > tmp.length - 1)) {
-                Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - dim.getLevels().size()];
+                Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - 2];
                 if (MetaNameUtil.isAllMemberUniqueName(uniqueName)) {
                     level = dim.getLevels().values().toArray(new Level[0])[dim.getLevels().size() - 1];
                 }
-                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, uniqueName);
+                // 产生新的过滤条件，过滤条件应该作用在对应的level上
+                filterValues = this.generateNewFilterValues(dim, filterValues, oriCube, dsInfo, params);
+                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, filterValues, uniqueName);
             }
             // 如果当前维度是个维度组，并且传入参数为形如[行业维度].[交通运输].[All_交通运输s]，
             // 那么其实需要取一级行业对应的全部二级行业节点，主要用于级联下拉框控件 update by majun
@@ -614,7 +768,7 @@ public class ReportContextDataResource extends BaseResource {
                 if (MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
                     uniqueName = uniqueName.substring(0, uniqueName.lastIndexOf("."));
                 }
-                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, uniqueName);
+                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, filterValues, uniqueName);
 
             } else {
                 // 如果没有孩子，则直接返回
@@ -623,6 +777,162 @@ public class ReportContextDataResource extends BaseResource {
         }
         return null;
     }
+
+    /**
+     * 根据需要，产生新的过滤条件
+     * 
+     * @param dim
+     * @param filterValues
+     * @param oriCube
+     * @param dsInfo
+     * @param params
+     * @return
+     */
+    private Set<String> generateNewFilterValues(Dimension dim, Set<String> filterValues, Cube oriCube,
+            DataSourceInfo dsInfo, Map<String, String> params) {
+        // 如果没有条件，则返回空
+        if (CollectionUtils.isEmpty(filterValues)) {
+            return Sets.newHashSet();
+        }
+        // 获取过滤条件对应的level
+        Level filterLevel = this.getLevelFromFilterValue(filterValues, dim);
+        // 总的level层级数目
+        int totalLevelIndex = filterLevel.getDimension().getLevels().size();
+        int currentLevelIndex = this.getLevelIndex(filterValues);
+        // 新的过滤条件
+        Set<String> newFilterValues = Sets.newHashSet();
+        if (currentLevelIndex < totalLevelIndex) {
+            filterValues.forEach(value -> {
+                // 获取该uniqueName下的所有孩子节点
+                    List<Member> childMembersTmp =
+                            reportModelQueryService.getMembers(oriCube, value, params, securityKey);
+                    Set<Member> tmpTotalMembers = Sets.newHashSet();
+                    childMembersTmp.stream().forEach(member -> {
+                        MiniCubeMember realMember = (MiniCubeMember) member;
+                        String[] realMemberUniqueName = MetaNameUtil.parseUnique2NameArray(realMember.getUniqueName());
+                        // 未到最底层级
+                            if (realMemberUniqueName.length - 1 < totalLevelIndex) {
+                                List<Member> children =
+                                        getChildrenMember(realMember, oriCube, dsInfo, params, totalLevelIndex);
+                                if (!CollectionUtils.isEmpty(children)) {
+                                    tmpTotalMembers.addAll(children);
+                                }
+                            } else if (realMemberUniqueName.length - 1 == totalLevelIndex) {
+                                // 已经到了最底层级
+                                tmpTotalMembers.add(realMember);
+                            }
+                        });
+                    Set<String> tmpFilterValues =
+                            tmpTotalMembers.stream().map(tmpFilter -> tmpFilter.getUniqueName())
+                                    .collect(Collectors.toSet());
+                    newFilterValues.addAll(tmpFilterValues);
+                });
+            if (!CollectionUtils.isEmpty(newFilterValues)) {
+                return newFilterValues;
+            }
+        }
+        // int levelIndex = this.getLevelIndex(filterValues);
+        // // 如果条件所在的level已经在最底层(LevelIndex == dim.getLevels().size())，则无需进一步获取
+        // // 如果该level不属于最底层级，则需要将过滤条件转为最底层级
+        // if (filterLevel != null && levelIndex < dim.getLevels().size()) {
+        // // 获取过滤条件下的member
+        // List<Member> tmpFilterMembers = filterLevel.getMembers(oriCube, dsInfo, params);
+        // List<Member> filterMembers = Lists.newArrayList();
+        // final DataSourceInfo finalDsInfo = dsInfo;
+        // // 过滤条件，并重新调整
+        // tmpFilterMembers
+        // .stream()
+        // // 仅取在过滤条件中出现的值
+        // .filter(val -> this.isContainsInFilterValues(val.getUniqueName(), filterValues))
+        // .forEach(
+        // val -> {
+        // filterMembers.addAll(this.getMembersByLevel(val, this.getLevelIndex(filterValues), dim
+        // .getLevels().size(), oriCube, finalDsInfo, params));
+        // });
+        // // 清除过滤条件
+        // filterValues.clear();
+        // // 添加新的过滤条件
+        // filterMembers.stream().forEach(value -> {
+        // filterValues.add(value.getUniqueName());
+        // });
+        // return filterValues;
+        // }
+        return Sets.newHashSet(filterValues);
+    }
+
+    /**
+     * 获取过滤条件对应的level层级位置 [一级行业名称].[交通运输]，则返回level为1 如果没有过滤条件，则返回-1
+     * 
+     * @param filterValues
+     * @return
+     */
+    private int getLevelIndex(Set<String> filterValues) {
+        // 如果已经有需要过滤的条件存在
+        if (!CollectionUtils.isEmpty(filterValues)) {
+            String tmpValue = filterValues.toArray(new String[0])[0];
+            return this.getLevelIndex(tmpValue);
+        }
+        return -1;
+    }
+
+    /**
+     * 获取该uniqueName下的层级
+     * 
+     * @param uniqueName
+     * @return
+     */
+    private int getLevelIndex(String uniqueName) {
+        if (MetaNameUtil.isUniqueName(uniqueName)) {
+            String[] tmpValueArray = MetaNameUtil.parseUnique2NameArray(uniqueName);
+            return tmpValueArray.length - 1;
+        }
+        return -1;
+    }
+
+    /**
+     * 根据上下文中的查询条件，获取该查询条件对应的维度层级 如果没有过滤条件，则返回null 应该返回一级行业所在的level
+     * 
+     * @param filterValues
+     * @param dim
+     * @return
+     */
+    private Level getLevelFromFilterValue(Set<String> filterValues, Dimension dim) {
+        // 如果已经有需要过滤的条件存在
+        if (!CollectionUtils.isEmpty(filterValues)) {
+            String tmpValue = filterValues.toArray(new String[0])[0];
+            String[] tmpValueArray = MetaNameUtil.parseUnique2NameArray(tmpValue);
+            // 取该条件对应的层级
+            // 如果过滤条件为[一级行业].[交通运输]，转为数组，长度为2
+            // 而维度中有两个level，一级行业和二级行业，转为数组，一级行业下标为0
+            // 也就是tmpValueArray.length - 2
+            return dim.getLevels().values().toArray(new Level[0])[tmpValueArray.length - 2];
+        }
+        return null;
+    }
+
+    // /**
+    // * 获取某个member下的某一层的所有元素
+    // *
+    // * @param member
+    // * @param levelIndex
+    // * @param targetLevelIndex
+    // * @param cube
+    // * @param dataSourceInfo
+    // * @param params
+    // * @return
+    // */
+    // private List<Member> getMembersByLevel(Member member, int levelIndex, int targetLevelIndex, Cube cube,
+    // DataSourceInfo dataSourceInfo, Map<String, String> params) {
+    // if (levelIndex == targetLevelIndex) {
+    // return member.getChildMembers(cube, dataSourceInfo, params);
+    // }
+    // // 获取孩子member
+    // List<Member> result = Lists.newArrayList();
+    // List<Member> childMember =
+    // this.getMembersByLevel(member, levelIndex + 1, targetLevelIndex, cube, dataSourceInfo, params);
+    // result.addAll(childMember);
+    // return result;
+    // }
 
     /**
      * 根据给定的level和uniqueName，查找指定条件下对应的child成员，并以以“,”连接返回
@@ -635,20 +945,165 @@ public class ReportContextDataResource extends BaseResource {
      * @return 子member拼成的字符串，以“,”连接
      */
     private String getChildMembersStrByParentAndUniqueName(Level level, Cube oriCube, DataSourceInfo dsInfo,
-            Map<String, String> params, String uniqueName) {
+            Map<String, String> params, Set<String> filterValues, String uniqueName) {
+        // 获取当前level下的所有成员
         List<Member> members = level.getMembers(oriCube, dsInfo, params);
         // 如果uniqueName是all节点，直接返回最底层节点的孩子成员即可 update by majun04
         if (!CollectionUtils.isEmpty(members) && MetaNameUtil.isAllMemberUniqueName(uniqueName)) {
-            return members.stream().map(child -> child.getName()).collect(Collectors.joining(","));
-        }
-        for (Member member : members) {
-            if (member.getUniqueName().equals(uniqueName)) {
-                List<Member> childMembers = member.getChildMembers(oriCube, dsInfo, params);
-                return childMembers.stream().map(child -> child.getName()).collect(Collectors.joining(","));
+            // 此时传过来的过滤值已经是作用到最底层的条件值了
+            if (!CollectionUtils.isEmpty(filterValues)) {
+                // 拿过滤条件过滤值
+                return members.stream()
+                        .filter(value -> this.isContainsInFilterValues(value.getUniqueName(), filterValues))
+                        .map(child -> child.getName()).collect(Collectors.joining(","));
+            } else {
+                return members.stream().map(child -> child.getName()).collect(Collectors.joining(","));
             }
         }
+
+        // 获取该uniqueName下的所有孩子节点
+        List<Member> childMembersTmp = reportModelQueryService.getMembers(oriCube, uniqueName, params, securityKey);
+        List<Member> totalMembers = Lists.newArrayList();
+        // 总的level层级数目
+        int totalLevelIndex = level.getDimension().getLevels().size();
+        childMembersTmp.stream().forEach(member -> {
+
+            MiniCubeMember realMember = (MiniCubeMember) member;
+            String[] realMemberUniqueName = MetaNameUtil.parseUnique2NameArray(realMember.getUniqueName());
+            // 未到最底层级
+                if (realMemberUniqueName.length - 1 < totalLevelIndex) {
+                    List<Member> children = getChildrenMember(realMember, oriCube, dsInfo, params, totalLevelIndex);
+                    if (!CollectionUtils.isEmpty(children)) {
+                        totalMembers.addAll(children);
+                    }
+                } else if (realMemberUniqueName.length - 1 == totalLevelIndex) {
+                    // 已经到了最底层级
+                    totalMembers.add(realMember);
+                }
+            });
+        if (!CollectionUtils.isEmpty(totalMembers)) {
+            if (CollectionUtils.isEmpty(filterValues)) {
+                return totalMembers.stream().map(child -> child.getName()).collect(Collectors.joining(","));
+            }
+            return totalMembers.stream()
+                    .filter(value -> this.isContainsInFilterValues(value.getUniqueName(), filterValues))
+                    .map(child -> child.getName()).collect(Collectors.joining(","));
+
+        }
+        // // 获取当前的level层级
+        // int currentLevelIndex = this.getLevelIndex(uniqueName);
+        // for (Member member : members) {
+        // if (this.isPartial(member.getUniqueName(), uniqueName)) {
+        // List<Member> childMember =
+        // this.getMembersByLevel(member, currentLevelIndex, totalLevelIndex, oriCube, dsInfo, params);
+        // childMember.stream().forEach(val -> System.out.println(val.getUniqueName()));
+        // String[] uniqueNameArray = MetaNameUtil.parseUnique2NameArray(uniqueName);
+        // String[] filterUniqueNameArray = null;
+        // if (!CollectionUtils.isEmpty(filterValues)) {
+        // filterUniqueNameArray = this.getUniqueNameArrayFromFilterSet(filterValues);
+        // if (!filterValues.contains(member.getUniqueName()) && filterUniqueNameArray != null
+        // && filterUniqueNameArray.length == uniqueNameArray.length)
+        // continue;
+        // }
+        // List<Member> childMembers = member.getChildMembers(oriCube, dsInfo, params);
+        // if (filterUniqueNameArray != null && filterUniqueNameArray.length > uniqueNameArray.length) {
+        // return childMembers.stream().filter(v -> filterValues.contains(v.getUniqueName()))
+        // .map(child -> child.getName()).collect(Collectors.joining(","));
+        // } else {
+        // return childMembers.stream().map(child -> child.getName()).collect(Collectors.joining(","));
+        // }
+        // }
+        // }
         return null;
     }
+
+    /**
+     * 递归获取孩子节点
+     * 
+     * @param parent
+     * @param children
+     * @return
+     */
+    private List<Member> getChildrenMember(MiniCubeMember parent, Cube oriCube, DataSourceInfo dsInfo,
+            Map<String, String> params, int totalLevelIndex) {
+        List<Member> rs = Lists.newArrayList();
+        MiniCubeMember tmp = null;
+        List<Member> childMembersTmp =
+                reportModelQueryService.getMembers(oriCube, parent.getUniqueName(), params, securityKey);
+        if (CollectionUtils.isEmpty(childMembersTmp)) {
+            return null;
+        }
+        Member member = childMembersTmp.get(0);
+        String[] uniqueNameArray = MetaNameUtil.parseUnique2NameArray(member.getUniqueName());
+        if (uniqueNameArray.length - 1 == totalLevelIndex) {
+            rs.addAll(childMembersTmp);
+        }
+        for (Member m : childMembersTmp) {
+            tmp = (MiniCubeMember) m;
+            String[] tmpUniqueName = MetaNameUtil.parseUnique2NameArray(tmp.getUniqueName());
+            if (tmpUniqueName.length - 1 < totalLevelIndex) {
+                rs.addAll(getChildrenMember(tmp, oriCube, dsInfo, params, totalLevelIndex));
+            }
+        }
+        return rs;
+    }
+
+    /**
+     * 判断某个值是否在过滤条件中出现过
+     * 
+     * @param uniqueName
+     * @param filterValues
+     * @return
+     */
+    private boolean isContainsInFilterValues(String uniqueName, Set<String> filterValues) {
+        String[] tmpValueArray = MetaNameUtil.parseUnique2NameArray(uniqueName);
+        long count = filterValues.stream().filter(tmpVal -> {
+            String[] tmpValArray = MetaNameUtil.parseUnique2NameArray(tmpVal);
+            Set<String> tmpValSets = Sets.newHashSet(tmpValArray);
+            boolean isContain = true;
+            for (String tmpValue : tmpValueArray) {
+                isContain = isContain && tmpValSets.contains(tmpValue);
+            }
+            return isContain;
+        }).count();
+        if (count >= 1) {
+            return true;
+        }
+        return false;
+    }
+
+//    /**
+//     * 判断某个局部uniqueName是否在全量uniqueName当中 TODO 此问题是由于queryRouter返回的member的uniqueName是[维度组].[中医]类似的
+//     * 缺少父级别信息的uniqueName，所以暂时提供该方法
+//     * 
+//     * @param partialUniqueName
+//     * @param fullUniqueName
+//     * @return
+//     */
+//    private boolean isPartial(String partialUniqueName, String fullUniqueName) {
+//        String[] fullUnqiueNameArray = MetaNameUtil.parseUnique2NameArray(fullUniqueName);
+//        Set<String> set = Sets.newHashSet(fullUnqiueNameArray);
+//        String[] partialUniqueNameArray = MetaNameUtil.parseUnique2NameArray(partialUniqueName);
+//        boolean result = true;
+//        for (String tmp : partialUniqueNameArray) {
+//            result = result && set.contains(tmp);
+//        }
+//        return result;
+//    }
+//
+//    /**
+//     * 根据查询条件，获取uniqueName
+//     * 
+//     * @param filterValues
+//     * @return
+//     */
+//    private String[] getUniqueNameArrayFromFilterSet(Set<String> filterValues) {
+//        String value = filterValues.toArray(new String[0])[0];
+//        if (MetaNameUtil.isUniqueName(value)) {
+//            return MetaNameUtil.parseUnique2NameArray(value);
+//        }
+//        return null;
+//    }
 
     /**
      * @param reportId

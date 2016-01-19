@@ -298,7 +298,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                         List<String> rsList = new ArrayList<String>();
                         for (String paramStr : paramObjArray) {
                             // 如果发现传入的uniqName要比条件上下文里的paramStr层级多，那么当前条件直接取uniqName即可
-                            if (MetaNameUtil.parseUnique2NameArray(uniqName).length > MetaNameUtil
+                            if (MetaNameUtil.parseUnique2NameArray(uniqName).length >= MetaNameUtil
                                     .parseUnique2NameArray(paramStr).length) {
                                 rsList.add(uniqName);
                                 break;

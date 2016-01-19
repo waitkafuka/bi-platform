@@ -225,7 +225,7 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
                     Md5Util.encode(dataSourceInfo.toString()))
                     .replace(":", DATASOURCEKEY_SEPRATE);
             if (dataSourceInfo.isDBProxy() || dataSourceInfo.getDataBase() == DataBase.DRUID) {
-                // dbproxy需要直连
+                // dbproxy 或 druid 需要直连
                 DriverManagerDataSource dataSource = new DriverManagerDataSource();
                 dataSource.setDriverClassName(dataSourceInfo.getDataBase().getDriver());
                 dataSource.setUrl(dataSourceInfo.getJdbcUrls().get(i));
@@ -234,8 +234,7 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
                     dataSource.setPassword(dataSourceInfo.getPassword());
                 } catch (Exception e) {
                     log.error("set dataSource password error," + dataSourceInfo, e);
-                    throw new DataSourceException(
-                            "set dataSource password error," + dataSourceInfo, e);
+                    throw new DataSourceException("set dataSource password error," + dataSourceInfo, e);
                 }
                 dataSources.put(dataSourceKey, new SqlDataSourceWrap(dataSource));
             } else {
@@ -246,9 +245,8 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
                 } catch (PropertyVetoException e) {
                     log.error("set dataSource driverclass error," + dataSourceInfo, e);
                     // 不知道为啥会抛异常，包装一下，扔出去
-                    throw new DataSourceException(
-                            "set c3p0 driverclass error when create datasource with:"
-                                    + dataSourceInfo, e);
+                    throw new DataSourceException("set c3p0 driverclass error when create datasource with:"
+                            + dataSourceInfo, e);
                 }
                 dataSource.setJdbcUrl(dataSourceInfo.getJdbcUrls().get(i));
                 dataSource.setUser(dataSourceInfo.getUsername());
@@ -256,31 +254,28 @@ public class SqlDataSourceManagerImpl implements DataSourceManager {
                     dataSource.setPassword(dataSourceInfo.getPassword());
                 } catch (Exception e) {
                     log.error("set dataSource password error," + dataSourceInfo, e);
-                    throw new DataSourceException(
-                            "set dataSource password error," + dataSourceInfo, e);
+                    throw new DataSourceException("set dataSource password error," + dataSourceInfo, e);
                 }
                 
-                dataSource.setInitialPoolSize(Integer.valueOf(dataSourceInfo
-                        .getConnectionProperties(DataSourceInfo.JDBC_INITIALPOOLSIZE_KEY,
-                                DataSourceInfo.JDBC_INITIALPOOLSIZE)));
+                dataSource.setInitialPoolSize(Integer.valueOf(dataSourceInfo.getConnectionProperties(
+                        DataSourceInfo.JDBC_INITIALPOOLSIZE_KEY, DataSourceInfo.JDBC_INITIALPOOLSIZE)));
                 dataSource.setMaxPoolSize(Integer.valueOf(dataSourceInfo.getConnectionProperties(
                         DataSourceInfo.JDBC_MAXPOOLSIZE_KEY, DataSourceInfo.JDBC_MAXPOOLSIZE)));
                 dataSource.setMinPoolSize(Integer.valueOf(dataSourceInfo.getConnectionProperties(
                         DataSourceInfo.JDBC_MINPOOLSIZE_KEY, DataSourceInfo.JDBC_MINPOOLSIZE)));
-                
-                dataSource.setIdleConnectionTestPeriod(Integer.valueOf(dataSourceInfo
-                        .getConnectionProperties(DataSourceInfo.JDBC_IDLECONNECTIONTESTPERIOD_KEY,
+             
+                dataSource
+                        .setIdleConnectionTestPeriod(Integer.valueOf(dataSourceInfo.getConnectionProperties(
+                                DataSourceInfo.JDBC_IDLECONNECTIONTESTPERIOD_KEY,
                                 DataSourceInfo.JDBC_IDLECONNECTIONTESTPERIOD)));
                 dataSource.setMaxIdleTime(Integer.valueOf(dataSourceInfo.getConnectionProperties(
                         DataSourceInfo.JDBC_MAXIDLETIME_KEY, DataSourceInfo.JDBC_MAXIDLETIME)));
-                dataSource.setCheckoutTimeout(Integer.valueOf(dataSourceInfo
-                        .getConnectionProperties(DataSourceInfo.JDBC_CHECKTIMEOUT_KEY,
-                                DataSourceInfo.JDBC_CHECKTIMEOUT)));
+                dataSource.setCheckoutTimeout(Integer.valueOf(dataSourceInfo.getConnectionProperties(
+                        DataSourceInfo.JDBC_CHECKTIMEOUT_KEY, DataSourceInfo.JDBC_CHECKTIMEOUT)));
                 log.info("add datasource info into c3p0 pool success:" + dataSourceInfo);
-                
+
                 dataSources.put(dataSourceKey, new SqlDataSourceWrap(dataSource));
             }
-            
         }
         return new DynamicSqlDataSource(dataSources);
     }

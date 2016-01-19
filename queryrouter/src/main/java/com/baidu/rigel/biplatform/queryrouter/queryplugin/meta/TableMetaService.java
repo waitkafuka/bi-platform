@@ -15,11 +15,9 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.meta;
 
-import java.util.Collection;
-
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.service.JdbcHandler;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.QueryMeta;
 
 /**
  * 
@@ -39,13 +37,7 @@ public interface TableMetaService {
      *            dataSourceInfo
      * @return List<String> 存在的表
      */
-    public void generateColumnDataType(
-            Collection<SqlColumn> sqlColumns,
+    public void generateColumnMeta(
+            QueryMeta queryMeta,
             DataSourceInfo dataSourceInfo, JdbcHandler queryHandler);
-    
-    /**
-     * 设置table meta的信息
-     *
-     */
-    public void setTableMetaServiceInfo();
 }

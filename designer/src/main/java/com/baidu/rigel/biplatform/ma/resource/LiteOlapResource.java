@@ -442,6 +442,9 @@ public class LiteOlapResource extends BaseResource {
         runTimeModel.getDatas().clear();
         // runTimeModel.setModel (model);
         runTimeModel.updateDimStores(model);
+        // 拖拽完之后，没必要再保留下钻以及展开的相关参数：lineUniqueName和uniqueName了，应该从全局参数中清除  update by majun
+        runTimeModel.getContext().removeParam("lineUniqueName");
+        runTimeModel.getContext().removeParam("uniqueName");
         reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
         ResponseResult rs = ResourceUtils.getCorrectResult("OK", "");
         return rs;

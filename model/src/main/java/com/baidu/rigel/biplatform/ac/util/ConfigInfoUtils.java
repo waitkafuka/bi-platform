@@ -68,7 +68,7 @@ public class ConfigInfoUtils {
             QUERY_ROUTER_SYSTEM_KEY = properties.getProperty ("server.queryrouter.systemkey");
             LOG.info ("load serveraddress from properties:{}, {}", SERVERADDRESS, QUERY_ROUTER_ADDRESS);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.warn(e.getMessage());
             // throw new IllegalStateException("不能获取ac配置文件");
         } finally {
             if (inStream != null) {

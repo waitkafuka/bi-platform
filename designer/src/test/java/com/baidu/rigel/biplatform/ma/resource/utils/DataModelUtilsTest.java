@@ -312,7 +312,7 @@ public class DataModelUtilsTest {
         try {
             DataModelUtils.decorateTable(formatModel, table, targetArea, reportDesignModel);
             BigDecimal actual = table.getDataSourceColumnBased().get(0).get(0).getV();
-            Assert.assertEquals(BigDecimal.ZERO, actual);
+            Assert.assertEquals(null, actual);
         } catch (Exception e) {
             Assert.fail();
         }

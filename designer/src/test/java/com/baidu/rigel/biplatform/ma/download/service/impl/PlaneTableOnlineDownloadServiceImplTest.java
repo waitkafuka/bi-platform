@@ -74,7 +74,7 @@ public class PlaneTableOnlineDownloadServiceImplTest {
         csvString = downService.downloadTableData(questionModel, logicModel);
 
         String expectCsvString = "\tcaptionDim,\tcaptionMeasure\r\n";
-        expectCsvString = expectCsvString + "0,0\r\n";
+        expectCsvString = expectCsvString + "-,0\r\n";
         Assert.assertEquals(expectCsvString, csvString);
         Assert.assertNotNull(csvString);
         

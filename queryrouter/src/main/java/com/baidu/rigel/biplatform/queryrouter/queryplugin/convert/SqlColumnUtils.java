@@ -31,6 +31,7 @@ import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition;
 import com.baidu.rigel.biplatform.ac.query.model.SQLCondition.SQLConditionType;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.sql.QueryMeasure;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.sql.Select;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.Column;
@@ -73,22 +74,23 @@ public class SqlColumnUtils {
         // 获取列元数据
         for (String selectName : selections) {
             SqlColumn sqlColumn = queryMeta.getSqlColumnByCubeKey(selectName);
-            if (sqlColumn.getType() == ColumnType.GROUP
-                    && !CollectionUtils.isEmpty(sqlColumn.getKeys())) {
+            if (sqlColumn.getType() == ColumnType.GROUP && !CollectionUtils.isEmpty(sqlColumn.getKeys())) {
                 for (String key : sqlColumn.getKeys()) {
                     needColumns.add(queryMeta.getSqlColumnByCubeKey(key));
                 }
             } else if (sqlColumn.getOperator() != null
                     && sqlColumn.getOperator().getAggregator() == Aggregator.CALCULATED) {
-                calKeys = getRealMeasureKey(sqlColumn.getOperator().getFormula(), calKeys);
+                calKeys = getRealMeasureKey(sqlColumn.getOperator().getFormula(), 
+                        sqlColumn.getTableName(), calKeys);
             } else {
                 needColumns.add(queryMeta.getSqlColumnByCubeKey(selectName));
             }
         }
         // 添加计算列的指标数据
         for (String key : calKeys) {
-            SqlColumn sqlColumn = queryMeta.getSqlColumnByCubeKey(key);
+            SqlColumn sqlColumn = queryMeta.getSqlColumn(key);
             if (sqlColumn != null
+                    
                     && !needColumns.contains(sqlColumn)) {
                 needColumns.add(sqlColumn);
             }
@@ -101,7 +103,7 @@ public class SqlColumnUtils {
      *
      * @return
      */
-    public static List<String> getRealMeasureKey(String cal, List<String> keyList) {
+    public static List<String> getRealMeasureKey(String cal, String tableName, List<String> keyList) {
         if (StringUtils.isEmpty(cal)) {
             return keyList;
         }
@@ -116,7 +118,7 @@ public class SqlColumnUtils {
         for (String m : keys) {
             String key = m.substring(0, m.indexOf("}"));
             if (!keyList.contains(key)) {
-                keyList.add(key);
+                keyList.add(QueryMeta.getSqlColumnKey(tableName, key));
             }
         }
         return keyList;
@@ -153,7 +155,7 @@ public class SqlColumnUtils {
             SqlColumn sqlColumn = new SqlColumn();
             sqlColumn.setName(v.getName());
             sqlColumn.setOperator(v.getOperator());
-            sqlColumn.setTableFieldName(v.getName());
+            sqlColumn.setTableFieldName(v.getTableFieldName());
             sqlColumn.setTableName(v.getTableName());
             sqlColumn.setSourceTableName(source);
             sqlColumn.setFactTableFieldName(v.getFacttableColumnName());
@@ -215,8 +217,8 @@ public class SqlColumnUtils {
     public static void setSqlColumnsSqlUniqueName(String source,
             Collection<SqlColumn> sqlColumns, boolean hasAlias, String aliasPlus) {
         if (!hasAlias) {
-            logger.info("checked in needColumns has no JoinTables and multiFacttables,"
-                    + "so set properties of 'sqlUniqueColumn' to FactTableFieldName");
+            logger.info("queryId:{} set properties of 'sqlUniqueColumn' to FactTableFieldName",
+                    QueryRouterContext.getQueryId());
         }
         if (aliasPlus == null) {
             aliasPlus = "";
@@ -245,7 +247,7 @@ public class SqlColumnUtils {
                     sqlColumn.setSqlUniqueColumn(SqlConstants.SOURCE_TABLE_ALIAS_NAME
                             + sqlColumn.getName());
                 } else {
-                    sqlColumn.setSqlUniqueColumn(sqlColumn.getName() + aliasPlus);
+                    sqlColumn.setSqlUniqueColumn(sqlColumn.getTableFieldName() + aliasPlus);
                 }
             }
         }
@@ -307,6 +309,52 @@ public class SqlColumnUtils {
     public static boolean isFacttableColumn(SqlColumn sqlColumn) {
         return sqlColumn.getSourceTableName().equals(sqlColumn.getTableName())
                 || sqlColumn.getType() == ColumnType.CALLBACK;
+    }
+    
+    /**
+     * getNeedSqlColumns
+     *
+     * @param sql
+     * @return
+     */
+    public static List<SqlColumn> getNeedSqlColumns(String sql) {
+        List<SqlColumn> list = Lists.newArrayList();
+        List<String> selectList = getColumnsFromSql(sql);
+        for (String select : selectList) {
+            SqlColumn sqlColumn = new SqlColumn();
+            sqlColumn.setColumnKey(select);
+            sqlColumn.setName(select);
+            sqlColumn.setDataType("");
+            sqlColumn.setSqlUniqueColumn(select);
+            sqlColumn.setType(ColumnType.COMMON);
+            sqlColumn.setTableName("");
+            sqlColumn.setCaption(select);
+            list.add(sqlColumn);
+        }
+        return list;
+    }
+    
+    /**
+     * getColumnsFromSql
+     *
+     * @param sql
+     * @return
+     */
+    public static List<String> getColumnsFromSql(String sql) {
+        List<String> columns = Lists.newArrayList();
+        sql = sql.toLowerCase();
+        String select = StringUtils.substring(sql, sql.indexOf("select") + 6, sql.indexOf("from"));
+        String[] selects = StringUtils.split(select, SqlConstants.COMMA);
+        for (String s : selects) {
+            int start = s.indexOf(" as ");
+            if (start < 0) {
+                start = 0;
+            } else {
+                start = start + 4;
+            }
+            columns.add(StringUtils.trim(StringUtils.substring(s, start, s.length())));
+        }
+        return columns;
     }
     
     /*

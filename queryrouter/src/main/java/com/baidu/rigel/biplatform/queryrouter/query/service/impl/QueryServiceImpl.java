@@ -140,7 +140,8 @@ public class QueryServiceImpl implements QueryService {
         if (dataSourceInfo == null) {
             dataSourceInfo = dataSourcePoolService.getDataSourceInfo(questionModel.getDataSourceInfoKey());
         }
-        logger.info("cost :" + (System.currentTimeMillis() - current) + " to get datasource and other data");
+        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to get datasource and other data",
+                QueryRouterContext.getQueryId());
         current = System.currentTimeMillis();
         try {
             queryContext =
@@ -149,7 +150,8 @@ public class QueryServiceImpl implements QueryService {
             e1.printStackTrace();
             throw new MiniCubeQueryException(e1);
         }
-        logger.info("cost :" + (System.currentTimeMillis() - current) + " to build query context.");
+        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to build query context.",
+                QueryRouterContext.getQueryId());
         current = System.currentTimeMillis();
         // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
         int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
@@ -166,11 +168,13 @@ public class QueryServiceImpl implements QueryService {
             logger.error(sb.toString());
             throw new OverflowQueryConditionException(sb.toString());
         }
-        logger.info("cost :" + (System.currentTimeMillis() - current) + " to stateQueryContextConditionCount.");
+        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to stateQueryContextConditionCount.",
+                QueryRouterContext.getQueryId());
         current = System.currentTimeMillis();
         // 调用拆解自动进行拆解
         QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel, dataSourceInfo, cube, queryContext, null);
-        logger.info("cost :" + (System.currentTimeMillis() - current) + " to split.");
+        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to split.",
+                QueryRouterContext.getQueryId());
         current = System.currentTimeMillis();
         DataModel result = null;
         // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
@@ -197,12 +201,14 @@ public class QueryServiceImpl implements QueryService {
                             } catch (Exception e) {
                                 logger.error("queryId:{} catch error when process callback measure {}",
                                         QueryRouterContext.getQueryId(), e.getMessage());
+                                QueryRouterContext.removeQueryInfo();
                                 throw new RuntimeException(e);
                             }
                         } else {
                             dm = executeQuery(questionModel, context, newQueryRequest);
                         }
                         splitResult.getDataModels().put(con, dm);
+                        QueryRouterContext.removeQueryInfo();
                     });
             result = queryContextSplitService.mergeDataModel(splitResult);
         } else {
@@ -310,14 +316,15 @@ public class QueryServiceImpl implements QueryService {
             List<SqlColumn> noJoinGroupByColumns = sqlExpression.getQueryMeta()
                     .findSqlColumns(sqlExpression.getTableName(), queryRequest.getSelect().getQueryProperties());
             SearchIndexResultSet resultSet = 
-                    newQueryRequest.getJdbcHandler().querySqlList(
-                            newQueryRequest.getSqlExpression().getSqlQuery(), noJoinGroupByColumns);
-
+                    newQueryRequest.getJdbcHandler().querySqlListWithAgg(
+                            newQueryRequest.getSqlExpression().getSqlQuery(),
+                            noJoinGroupByColumns, queryRequest.getSelect().getQueryMeasures());
             if (!OperatorUtils.isAggQuery(needColumns)) {
                 resultSet.setDataList(AggregateCompute.aggregate(resultSet.getDataList(), queryRequest));
             }
             // 生成汇总数据
-            logger.info("executeQuery cost :" + (System.currentTimeMillis() - current) + " to get query result.");
+            logger.info("queryId:{} executeQuery cost :" + (System.currentTimeMillis() - current) + " to get query result.",
+                    QueryRouterContext.getQueryId());
             current = System.currentTimeMillis();
             if (queryRequest.getGroupBy() != null && CollectionUtils.isNotEmpty(queryRequest.getGroupBy().getGroups())) {
                 try {
@@ -332,18 +339,23 @@ public class QueryServiceImpl implements QueryService {
                 }
 
             }
-            logger.info("executeQuery cost :" + (System.currentTimeMillis() - current) + " to processGroupBy.");
+            logger.info("queryId:{} executeQuery cost :" + (System.currentTimeMillis() - current) + " to processGroupBy.",
+                    QueryRouterContext.getQueryId());
             
             long beforeBuildCurr=System.currentTimeMillis();
             
             result = new DataModelBuilder(resultSet, queryContext).build(false, cube);
             
-            logger.info("executeQuery cost :" + (System.currentTimeMillis() - beforeBuildCurr) + " to build DataModel.");
+            logger.info("queryId:{} executeQuery cost :"
+                    + "" + (System.currentTimeMillis() - beforeBuildCurr) + " to build DataModel.",
+                    QueryRouterContext.getQueryId());
         } catch (IndexAndSearchException e) {
-            logger.error("query occur when search queryRequest：" + queryContext, e);
+            logger.error("queryId:{} query occur when search queryRequest:{},e:{}",
+                    QueryRouterContext.getQueryId(), queryContext, e);
             throw new MiniCubeQueryException(e);
         }
-        logger.info("executeQuery cost :" + (System.currentTimeMillis() - currentBegin) + " to execute query totally.");
+        logger.info("queryId:{} executeQuery cost :"+ (System.currentTimeMillis() - currentBegin)
+                + " to execute query totally.", QueryRouterContext.getQueryId());
         return result;
     }
     

@@ -166,7 +166,12 @@ public class SqlDataSourceInfo implements DataSourceInfo {
         /**
          * HIVE
          */
-        HIVE(5, null);
+        HIVE(5, null),
+        
+        /**
+         * SPARK
+         */
+        SPARK(8, null);
 
         /**
          * id 数据库ID

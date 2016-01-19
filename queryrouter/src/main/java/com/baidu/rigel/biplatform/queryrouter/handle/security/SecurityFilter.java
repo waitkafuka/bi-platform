@@ -89,6 +89,7 @@ public class SecurityFilter implements Filter {
         Set<String> excludeUrl = Sets.newHashSet ();
         excludeUrl.add ("/alive");
         excludeUrl.add ("/tianlurpc/");
+        excludeUrl.add ("/properties/refresh");
         for (String url : excludeUrl) {
             if (requestURI.indexOf(url) == 0) {
                 return true;

@@ -100,7 +100,7 @@ public final class CallbackServiceInvoker {
             LOG.info ("[INFO] --- --- --- --- --- --- --- --- --- --- ---- ---- ---- -- --- --- -- - -- -  - -- - - ");
             LOG.info ("[INFO] --- --- request params : \n {}", logStr.toString ());
             LOG.info ("[INFO] --- --- --- --- --- --- --- --- --- --- ---- ---- ---- -- --- --- -- - -- -  - -- - - ");
-            String responseStr = HttpRequest.sendPost1(url, params);
+            String responseStr = HttpRequest.sendPostWithoutRoutee(url, params);
             CallbackResponse response = convertStrToResponse(responseStr, type); 
             if (LOG.isDebugEnabled ()) {
                 LOG.debug("[INFO] --- --- resposne : {}", response);

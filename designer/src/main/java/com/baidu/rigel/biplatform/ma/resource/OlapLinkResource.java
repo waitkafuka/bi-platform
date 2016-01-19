@@ -171,7 +171,7 @@ public class OlapLinkResource {
             reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
             // 做完新增后，需要同步通知RuntimeModel的修改，以便在编辑端看到的model状态是同步的
             ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-            runTimeModel.init(reportDesignModel, true);
+            runTimeModel.init(reportDesignModel, false);
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
             rs = ResourceUtils.getResult("success", null, "add link success!");
         }
@@ -201,7 +201,7 @@ public class OlapLinkResource {
             reportModelCacheManager.updateReportModelToCache(reportId, reportDesignModel);
             // 做完删除后，需要同步通知RuntimeModel的修改，以便在编辑端看到的model状态是同步的
             ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-            runTimeModel.init(reportDesignModel, true);
+            runTimeModel.init(reportDesignModel, false);
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runTimeModel);
             rs = ResourceUtils.getResult("success", null, "add link success!");
         }

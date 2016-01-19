@@ -81,7 +81,8 @@ public class DataModelConvertService {
                 tableName = colDefine.getSourceTableName();
             }
             Column colum = new Column(colDefine.getColumnKey(),
-                    colDefine.getTableFieldName(), colDefine.getCaption(), colDefine.getDataType(), tableName);
+                    colDefine.getName(), colDefine.getCaption(),
+                    colDefine.getDataType(), tableName);
             dataModel.getTableData().getColumns().add(colum);
             dataModel
                     .getTableData()

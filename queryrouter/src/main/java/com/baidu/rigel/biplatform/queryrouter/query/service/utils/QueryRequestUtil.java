@@ -35,8 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.MemberNodeTree;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.Meta;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
@@ -153,10 +153,6 @@ public class QueryRequestUtil {
         }
 
         SqlQuery result = new SqlQuery();
-        SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo)query.getDataSourceInfo();
-        if (sqlDataSourceInfo.getDataBase() == DataBase.PALO) {
-            result.setAggSql(true);
-        }
         result.setDatabase(((SqlDataSourceInfo) query.getDataSourceInfo()).getDataBase());
         // 处理from
         if (query.getGroupBy() != null) {
@@ -203,16 +199,6 @@ public class QueryRequestUtil {
         Map<String, List<String>> andCondition = transQueryRequestAndList2Map(query);
         List<String> whereList = new ArrayList<String>();
         String betweenStr = null;
-//        if (query.getWhere().getBetween() != null) {
-//            betweenStr = query.getWhere().getBetween().getProperties();
-//            selectList.add(betweenStr);
-//            result.getSqlSelectColumn(betweenStr).setSelect(betweenStr);
-//            result.getSqlFunction().put(
-//                    betweenStr,
-//                    "DATE_FORMAT(" + betweenStr + ", \"%Y%m%d\") as "
-//                            + betweenStr + ", ");
-//            whereList.add(query.getWhere().getBetween().toString());
-//        }
 
         for (String key : andCondition.keySet()) {
             if (key.equals(betweenStr)) {
@@ -361,7 +347,8 @@ public class QueryRequestUtil {
         Map<String, Map<String, Set<String>>> leafValueMap = QueryRequestUtil.transQueryRequest2LeafMap(query);
         List<PullUpProperties> allDimVal = collectAllMem(queryContext);
         
-        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.");
+        LOGGER.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to collect leaf map.",
+                QueryRouterContext.getQueryId());
         current = System.currentTimeMillis();
         List<String> groupList = Lists.newArrayList(query.getGroupBy().getGroups());
         List<QueryMeasure> queryMeasures = query.getSelect().getQueryMeasures();
@@ -402,7 +389,8 @@ public class QueryRequestUtil {
         } else {
             return dataSet;
         }
-        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " to map leaf.");
+        LOGGER.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to map leaf.",
+                QueryRouterContext.getQueryId());
         current = System.currentTimeMillis();
 
         if (CollectionUtils.isEmpty(queryMeasures)) {
@@ -414,7 +402,8 @@ public class QueryRequestUtil {
                 aggNodeOfAllLevel(transList, allDimVal, root, meta, hasSameNodeCopy, groupList, dimSize, queryMeasures);
         transList = aggSubLevelNode(queryContext, transList, meta, groupList, dimSize, queryMeasures);
         dataSet.setDataList(transList);
-        LOGGER.info("cost :" + (System.currentTimeMillis() - current) + " aggregator leaf.");
+        LOGGER.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " aggregator leaf.",
+                QueryRouterContext.getQueryId());
         return dataSet;
     }
 

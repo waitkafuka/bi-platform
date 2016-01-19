@@ -15,14 +15,10 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.meta.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +26,12 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.meta.TableMetaService;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.service.JdbcHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.ColumnType;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.QueryMeta;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
+import com.google.common.collect.Maps;
 
 /**
  * 
@@ -46,11 +43,12 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
 @Service("tableMetaServiceImpl")
 @Scope("prototype")
 public class TableMetaServiceImpl implements TableMetaService {
+ 
     /**
      * logger
      */
     private Logger logger = LoggerFactory.getLogger(this.getClass());
-    
+
     /**
      * meta sql tablename
      */
@@ -90,12 +88,11 @@ public class TableMetaServiceImpl implements TableMetaService {
      *            dataSourceInfo
      * @return List<String> 存在的表
      */
-    public void generateColumnDataType(Collection<SqlColumn> sqlColumns,
+    public void generateColumnMeta(QueryMeta queryMeta,
             DataSourceInfo dataSourceInfo, JdbcHandler queryHandler) {
         setTableMetaServiceInfo();
-        Set<String> tableNameSet = new HashSet<String>();
-        Set<String> columnNameSet = new HashSet<String>();
-        for (SqlColumn sqlColumn : sqlColumns) {
+        Map<String, Map<String, String>> map = Maps.newConcurrentMap();
+        for (SqlColumn sqlColumn : queryMeta.getAllColumns()) {
             String tableNameTmp = "";
             String columnNameTmp = "";
             if (sqlColumn.getType() == ColumnType.GROUP
@@ -118,65 +115,47 @@ public class TableMetaServiceImpl implements TableMetaService {
             }
             if (StringUtils.isNotEmpty(tableNameTmp)
                     && StringUtils.isNotEmpty(columnNameTmp)) {
-                tableNameSet.add(tableNameTmp);
-                columnNameSet.add(columnNameTmp);
+                if (map.get(tableNameTmp) == null) {
+                    map.put(tableNameTmp, Maps.newHashMap());
+                    
+                }
             }
         }
-        String tableNameStrs = convertSet2InString(tableNameSet);
-        String columnNameStrs = convertSet2InString(columnNameSet);
-        
-        this.setQuerySql(tableNameSet, columnNameSet);
-        
-        List<Map<String, Object>> datas = queryHandler.queryForMeta(this.getSql(),
-                new ArrayList<Object>());
-        if (CollectionUtils.isEmpty(datas)) {
-            logger.warn("queryId:{} can not found tablenames:" + tableNameStrs
-                    + " and columnNames:" + columnNameStrs + " in database.",
-                    QueryRouterContext.getQueryId());
+
+        if (MapUtils.isEmpty(map)) {
             return;
         }
-        for (SqlColumn sqlColumn : sqlColumns) {
-            String tableNameTmp1 = "";
-            String columnNameTmp1 = "";
+        
+        for (String tableName : map.keySet()) {
+            Map<String, String> tableMeta = queryHandler.queryForMeta(tableName);
+            map.put(tableName, tableMeta);
+        }
+
+        for (SqlColumn sqlColumn : queryMeta.getAllColumns()) {
+            String colTableName = "";
+            String columnName = "";
             if (sqlColumn.getType() == ColumnType.GROUP
                     || sqlColumn.getType() == ColumnType.CAL) {
                 continue;
             }
             if (sqlColumn.getType() == ColumnType.TIME) {
-                tableNameTmp1 = sqlColumn.getSourceTableName();
-                columnNameTmp1 = sqlColumn.getFactTableFieldName();
+                colTableName = sqlColumn.getSourceTableName();
+                columnName = sqlColumn.getFactTableFieldName();
             } else if (sqlColumn.getType() == ColumnType.CALLBACK) {
-                tableNameTmp1 = sqlColumn.getSourceTableName();
-                columnNameTmp1 = sqlColumn.getFactTableFieldName();
+                colTableName = sqlColumn.getSourceTableName();
+                columnName = sqlColumn.getFactTableFieldName();
             } else {
-                tableNameTmp1 = sqlColumn.getTableName();
-                columnNameTmp1 = sqlColumn.getTableFieldName();
+                colTableName = sqlColumn.getTableName();
+                columnName = sqlColumn.getTableFieldName();
             }
-            if (StringUtils.isNotEmpty(tableNameTmp1) && tableNameTmp1.indexOf(",") >= 0) {
+            if (StringUtils.isNotEmpty(colTableName) && colTableName.indexOf(",") >= 0) {
                 // 为多事实表的情况
-                tableNameTmp1 = tableNameTmp1.substring(0, tableNameTmp1.indexOf(","));
+                colTableName = colTableName.substring(0, colTableName.indexOf(","));
             }
-            for (Map<String, Object> data : datas) {
-                String columnNameTmp = data.get(this.getColumnName()).toString();
-                String dataTypeTmp = data.get(this.getDataType()).toString();
-                if (tableNameSet.size() == 1) {
-                // 如果只有一个表名，不需要check 表名相等
-                    if (columnNameTmp.equals(columnNameTmp1)) {
-                        sqlColumn.setDataType(dataTypeTmp);
-                        break;
-                    }
-                } else {
-                    String tableNameTmp = data.get(this.getTableName()).toString();
-                    if (tableNameTmp1.equals(tableNameTmp) && columnNameTmp1.equals(columnNameTmp)) {
-                        sqlColumn.setDataType(dataTypeTmp);
-                        break;
-                    }
-                }
+            if (map.get(colTableName) != null) {
+                sqlColumn.setDataType(map.get(colTableName).get(columnName));
             }
         }
-        logger.info(
-                "queryId:{} found table column datatype is:{} in tablenames:{} and columnNames:{}",
-                QueryRouterContext.getQueryId(), dataType, tableNameStrs, columnNameStrs);
     }
 
     /**
@@ -199,11 +178,10 @@ public class TableMetaServiceImpl implements TableMetaService {
      * @param tableNameSet
      * @param columnNameSet
      */
-    public void setQuerySql(Set<String> tableNameSet, Set<String> columnNameSet) {
-        String tableNameStrs = convertSet2InString(tableNameSet);
+    public void setQuerySql(String tableName, Set<String> columnNameSet) {
         String columnNameStrs = convertSet2InString(columnNameSet);
         if (this.getSql().contains(TABLE_NAME)) {
-            this.setSql(StringUtils.replace(this.getSql(), TABLE_NAME, tableNameStrs));
+            this.setSql(StringUtils.replace(this.getSql(), TABLE_NAME, tableName));
         }
         if (this.getSql().contains(COLUMN_NAME)) {
             this.setSql(StringUtils.replace(this.getSql(), COLUMN_NAME, columnNameStrs));

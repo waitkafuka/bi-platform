@@ -74,7 +74,7 @@ public class RelationDBInfoReaderServiceImpl implements
                 try {
                     rs = dbMetaData.getColumns(null, null, tableId, allTable);
                 } catch (Exception e) {
-                    LOG.warn("get Column info warning:" + e);
+                    LOG.warn("get Column info warning");
                 }
                 while (rs != null && rs.next()) {
                     String colName = null;
@@ -83,7 +83,7 @@ public class RelationDBInfoReaderServiceImpl implements
                         colName = rs.getString("COLUMN_NAME");
                         comment = rs.getString("REMARKS");
                     } catch (Exception e) {
-                        LOG.warn("get Column info warning:" + e);
+                        LOG.warn("get Column info warning");
                     }
                     ColumnInfo info = new ColumnInfo();
                     info.setId(colName);
@@ -103,7 +103,7 @@ public class RelationDBInfoReaderServiceImpl implements
                         tableName = rs.getString("TABLE_NAME");
                         comment = rs.getString("REMARKS");
                     } catch (Exception e) {
-                        LOG.warn("get Tables info warning:" + e);
+                        LOG.warn("get Tables info warning");
                     }
                     info.setId(tableName);
                     info.setName(tableName);

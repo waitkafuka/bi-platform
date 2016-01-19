@@ -81,6 +81,21 @@ public interface DimensionMemberService extends BeanFactoryAware {
      */
     List<MiniCubeMember> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, Member parentMember,
             Map<String, String> params) throws MiniCubeQueryException, MetaException;
+    
+//    /**
+//     * 查询维值
+//     * 
+//     * @param cube 立方体
+//     * @param level 维值所在的层级
+//     * @param dataSourceInfo 数据源信息
+//     * @param parentMember 父节点
+//     * @param params Callback参数，Callback维度需要
+//     * @return 层级的members
+//     * @throws MiniCubeQueryException 查询异常
+//     * @throws MetaException cube is illegal
+//     */
+//    Map<MiniCubeMember, List<MiniCubeMember>> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, List<Member> parentMember,
+//            Map<String, String> params) throws MiniCubeQueryException, MetaException;
 
     /**
      * 根据name获取指定level下的member

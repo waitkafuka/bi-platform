@@ -57,6 +57,7 @@ import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.exception.MetaException;
 import com.baidu.rigel.biplatform.queryrouter.query.service.impl.CallbackDimensionMemberServiceImpl;
+import com.baidu.rigel.biplatform.queryrouter.query.service.impl.LevelTypeContants;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.MemberNodeTree;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
 import com.google.common.collect.Lists;
@@ -201,12 +202,14 @@ public class QueryContextBuilder {
             if (!cloneQuestionModel.getQueryConditions().isEmpty()) {
                 for (MetaCondition condition : cloneQuestionModel.getQueryConditions().values()) {
                     if (condition == null) {
-                        logger.warn("meta condition is null,skip.");
+                        logger.warn("queryId:{} meta condition is null,skip.",
+                                QueryRouterContext.getQueryId());
                         continue;
                     }
                     if (condition instanceof DimensionCondition) {
                         DimensionCondition dimCondition = (DimensionCondition) condition;
-                        Map<String, Set<String>> filterCondition = buildFilterCondition(dsInfo, cube, dimCondition, requestParams);
+                        Map<String, Set<String>> filterCondition = 
+                                buildFilterCondition(dsInfo, cube, dimCondition, requestParams);
                         if (MapUtils.isNotEmpty(filterCondition)) {
                             queryContext.getFilterMemberValues().putAll(filterCondition);
                         }
@@ -237,7 +240,8 @@ public class QueryContextBuilder {
             throw new IllegalArgumentException("dimension condition is null");
         }
         if (dimCondition.getQueryDataNodes().isEmpty()) {
-            logger.info("queryId:{} filter axises ignore all member filter", QueryRouterContext.getQueryId());
+            logger.info("queryId:{} filter axises ignore all member filter",
+                    QueryRouterContext.getQueryId());
             return null;
         }
         Map<String, Set<String>> filterValues = new HashMap<>();
@@ -280,7 +284,8 @@ public class QueryContextBuilder {
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             if (MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName()) 
                 && !dimension.isTimeDimension ()) {
-                logger.info("queryId:{} filter axises ignore all member filter", QueryRouterContext.getQueryId());
+                logger.info("queryId:{} filter axises ignore all member filter",
+                        QueryRouterContext.getQueryId());
                 return null;
             }
         }
@@ -423,9 +428,10 @@ public class QueryContextBuilder {
             String lineUniqueName = params.get("lineUniqueName");
             // 需要处理维度组选“全部”时，下钻的情况，这时候的uniqueName应该从传入的下钻uniqueName中取
             if (StringUtils.isNotEmpty(lineUniqueName)) {
-                uniqueName = params.get("uniqueName");
-                // if(uniqueName.contains(",")){
-
+                String uniqueNameFromParams = params.get("uniqueName");
+                if (StringUtils.isNotEmpty(uniqueNameFromParams)) {
+                    uniqueName = uniqueNameFromParams;
+                }
             }
             QueryData queryData = new QueryData(uniqueName);
             queryData.setExpand(isFirstInRow);
@@ -513,13 +519,13 @@ public class QueryContextBuilder {
 
         MemberNodeTree nodeTree = new MemberNodeTree(null);
         String lineUniqueName = params.get("lineUniqueName");
-        String dimParam = params.get("dimParam");
+        String uniqueNameFromParams = params.get("dimParam");
         // 需要处理维度组选“全部”时，下钻的情况，这时候的uniqueName应该从传入的下钻uniqueName中取
-        if (StringUtils.isNotEmpty(params.get("lineUniqueName")) && StringUtils.isNotEmpty(dimParam)
-                && dimParam.contains(",")) {
+        if (StringUtils.isNotEmpty(params.get("lineUniqueName")) && StringUtils.isNotEmpty(uniqueNameFromParams)
+                && uniqueNameFromParams.contains(",")) {
             // dimConditionUniqueName =dimConditionUniqueName;
-        } else if (StringUtils.isNotEmpty(lineUniqueName)) {
-            dimConditionUniqueName = params.get("uniqueName");
+        } else if (StringUtils.isNotEmpty(lineUniqueName) && StringUtils.isNotEmpty(uniqueNameFromParams)) {
+            dimConditionUniqueName = uniqueNameFromParams;
         }
         // modify by yichao.jiang，针对下钻或者展开的值到此处时uniqueName形式为{[一级行业].[交通运输]}，将{}去除
         if (!MetaNameUtil.isUniqueName(dimConditionUniqueName)) {
@@ -593,6 +599,7 @@ public class QueryContextBuilder {
             if (queryData.isExpand() && queryDimIndex == dimCondition.getQueryDataNodes().size()) {
                 List<MiniCubeMember> children = Lists.newArrayList();
                 try {
+                    params.put(LevelTypeContants.PARAM_LEVEL, LevelTypeContants.PARAM_LEVEL_ALL);
                     children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
                 } catch (Exception e) {
                 }
@@ -600,7 +607,8 @@ public class QueryContextBuilder {
                     memberNode.setSummary(true);
                     for (MiniCubeMember child : children) {
                         MemberNodeTree childNode = new MemberNodeTree(parentNodeTree);
-                        childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
+                        childNode = buildMemberNodeByMember(CollectionUtils.isNotEmpty(child.getChildren()), childNode, child, params);
+                        // childNode = buildMemberNodeByMember(dataSourceInfo, cube, childNode, child, params);
                         childNodes.add(childNode);
                     }
 
@@ -654,7 +662,10 @@ public class QueryContextBuilder {
             queryData.setExpand(isFirstInRow);
             queryData.setShow(true);
             dimCondition.getQueryDataNodes().add(queryData);
-            logger.info("cost:{}ms,in build default member:{}",System.currentTimeMillis() - current, dimCondition);
+            logger.info("queryId:{} cost:{}ms,in build default member:{}",
+                    QueryRouterContext.getQueryId(),
+                    System.currentTimeMillis() - current,
+                    dimCondition);
             current = System.currentTimeMillis();
         }
         Dimension dimension = cube.getDimensions().get(dimCondition.getMetaName());
@@ -787,14 +798,69 @@ public class QueryContextBuilder {
         return nodeTree;
     }
     
+    /**
+     * 根据维值创建查询树的节点
+     * @param node 查询节点
+     * @param member 维值
+     */
+    private MemberNodeTree buildMemberNodeByMember(boolean hasChildren, MemberNodeTree node,
+            MiniCubeMember member, Map<String, String> params) {
+        node.setCaption(member.getCaption());
+        node.setTime(member.getLevel().getDimension().isTimeDimension());
+        if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
+            node.setLeafIds(member.getQueryNodes());
+        } else {
+            node.getLeafIds().add(member.getName());
+        }
+        node.setName(member.getName());
+        node.setUniqueName(member.getUniqueName());
+        node.setOrdinal(member.getName());
+        // 设置查询的来源，如事实表的字段
+        node.setQuerySource(member.getLevel().getFactTableColumn());
+
+        // 后续需要对孩子节点进行下查询，本次对是否有孩子的判断只是按照是否有下一个层级
+        if (member.isAll()) {
+            node.setHasChildren(true);
+        } else if (member.getLevel() instanceof CallbackLevel) {
+            CallbackMember m = (CallbackMember) member;
+            if (CollectionUtils.isNotEmpty(member.getQueryNodes()) ) {
+                if (member.getQueryNodes ().size () == 1 && member.getQueryNodes ().contains (member.getName ())) {
+                    node.setHasChildren (false);
+                } else {
+                    node.setHasChildren(true);
+                }
+                node.setCallback (true);
+                node.setSummaryIds (node.getLeafIds ());
+            } else {
+                node.setHasChildren (m.isHasChildren ());
+            }
+        } else {
+            node.setHasChildren(hasChildren);
+        }
+        final MiniCubeMember memberParent = (MiniCubeMember) member.getParent ();
+        if (memberParent != null) {
+            
+            MemberNodeTree parent = new MemberNodeTree (node.getParent ());
+            parent.setCaption (memberParent.getCaption ());
+            parent.setUniqueName (memberParent.getUniqueName ());
+            parent.setName (memberParent.getName ());
+            parent.setLeafIds (memberParent.getQueryNodes ());
+            parent.setSummaryIds (memberParent.getQueryNodes ());
+            parent.setCallback (memberParent.getLevel () instanceof CallbackLevel);
+            parent.setQuerySource (memberParent.getLevel ().getFactTableColumn ());
+            node.setParent (parent);
+            parent.getChildren ().add (node);
+        }
+        return node;
+    }
 
     /**
      * 根据维值创建查询树的节点
      * @param node 查询节点
      * @param member 维值
      */
-    private MemberNodeTree buildMemberNodeByMember(DataSourceInfo dataSource, 
-            Cube cube, MemberNodeTree node, MiniCubeMember member, Map<String, String> params) {
+    private MemberNodeTree buildMemberNodeByMember(DataSourceInfo dataSource, Cube cube, MemberNodeTree node,
+            MiniCubeMember member, Map<String, String> params) {
         node.setCaption(member.getCaption());
         node.setTime(member.getLevel().getDimension().isTimeDimension());
         if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {
@@ -830,7 +896,8 @@ public class QueryContextBuilder {
             try {
                 children = metaDataService.getChildren(dataSource, cube, member, params);
             } catch (Exception e) {
-                logger.warn(e.getMessage(), e);
+                logger.warn("queryId:{}, {}, e:{}", QueryRouterContext.getQueryId(),
+                        e.getMessage(), e);
             }
             if (CollectionUtils.isNotEmpty(children)) {
                 node.setHasChildren(true);

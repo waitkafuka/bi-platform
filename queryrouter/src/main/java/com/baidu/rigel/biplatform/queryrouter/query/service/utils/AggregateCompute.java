@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.SearchIndexResultRecord;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.sql.QueryMeasure;
@@ -71,7 +72,7 @@ public class AggregateCompute {
         int dimSize, List<QueryMeasure> queryMeasures) {
         
         if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList)) { 
-            LOGGER.info("no need to group.");
+            LOGGER.info("queryId:{} no need to group.", QueryRouterContext.getQueryId());
             return dataList;
         }
         
@@ -79,10 +80,12 @@ public class AggregateCompute {
         for (int i = 0 ; i < queryMeasures.size() ; i++) {
             if (queryMeasures.get(i).getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
                 if (LOGGER.isDebugEnabled ()) {
-                    LOGGER.info ( queryMeasures.get(i) + " ============= begin print values ===== ===="); 
+                    LOGGER.info ("queryId:{} "+ queryMeasures.get(i) + " ============= begin print values ===== ====",
+                            QueryRouterContext.getQueryId()); 
                     final int tmp = i;
                     dataList.forEach (rs -> LOGGER.info (rs.getField (tmp) + ""));
-                    LOGGER.info ( " ============= end print measure values =============="); 
+                    LOGGER.info ("queryId:{} ============= end print measure values ==============",
+                            QueryRouterContext.getQueryId()); 
                 }
                 countIndex.add(i);
             }
@@ -143,7 +146,9 @@ public class AggregateCompute {
                 }
             });
         }
-        LOGGER.info("group agg(sum) cost: {}ms, size:{}!", (System.currentTimeMillis() - current), groupResult.size());
+        LOGGER.info("queryId:{} group agg(sum) cost: {}ms, beforeAggsize:{} afterAggsize:{}",
+                QueryRouterContext.getQueryId(),
+                (System.currentTimeMillis() - current), dataList.size(), groupResult.size());
         return new ArrayList<>(groupResult.values());
     }
     

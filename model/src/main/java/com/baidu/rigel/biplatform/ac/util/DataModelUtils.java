@@ -18,6 +18,7 @@ package com.baidu.rigel.biplatform.ac.util;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -293,6 +294,16 @@ public class DataModelUtils {
                     blankRowCount++;
                     removeField(field, dataModel.getRowHeadFields());
                 }
+            }
+        }
+        List<HeadField> summaryHeadFields = dataModel.getRowHeadFields();
+        Iterator<HeadField> iterator = summaryHeadFields.iterator();
+        while (iterator.hasNext()) {
+            HeadField summaryHead = iterator.next();
+            // 如果去除空白行之后，发现还剩下一个无意义的汇总节点，那么也需要将这个汇总节点remove掉   update by  majun
+            if (CollectionUtils.isEmpty(summaryHead.getChildren())
+                    && CollectionUtils.isEmpty(summaryHead.getNodeList())) {
+                iterator.remove();
             }
         }
         fillColumnData(dataModel, FillDataType.ROW);

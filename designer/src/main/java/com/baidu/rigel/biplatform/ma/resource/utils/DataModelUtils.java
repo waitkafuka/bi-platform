@@ -1501,6 +1501,11 @@ public final class DataModelUtils {
         Map<String, String> toolTips = formatModel.getToolTips();
         Map<String, String> textAlignFormat = formatModel.getTextAlignFormat();
         Map<String, LinkInfo> linkInfoMap = formatModel.getLinkInfo();
+        
+        String defaultTextAlign = Constants.DEFALUT_ALIGN_FORMAT;
+        if (textAlignFormat.containsKey(Constants.DEFAULT_ALIGN_FORMAT_KEY)) {
+            defaultTextAlign = textAlignFormat.get(Constants.DEFAULT_ALIGN_FORMAT_KEY);
+        }
 
         List<ColDefine> colDefineList = table.getColDefine();
         for (ColDefine define : colDefineList) {
@@ -1536,7 +1541,7 @@ public final class DataModelUtils {
             if (textAlignFormat != null) {
                 String align = textAlignFormat.get(uniqueName);
                 if (StringUtils.isEmpty(align)) {
-                    align = "left";
+                    align = defaultTextAlign;
                 }
                 define.setAlign(align);
             }
@@ -1666,7 +1671,8 @@ public final class DataModelUtils {
      * @return
      */
     public static boolean isShowZero(Map<String, Object> setting) {
-        boolean isShowZero = true;
+        // 默认不做非0处理
+        boolean isShowZero = false;
         if (setting != null && setting.containsKey(Constants.IS_SHOW_ZERO)) {
             isShowZero = Boolean.valueOf((String) setting.get(Constants.IS_SHOW_ZERO));
         }

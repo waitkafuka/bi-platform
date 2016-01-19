@@ -43,6 +43,7 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
+import com.baidu.rigel.biplatform.ac.util.ServerUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.gson.reflect.TypeToken;
@@ -104,6 +105,12 @@ public class MiniCubeMember extends OlapElementDef implements Member {
     private String uniqueName;
 
     /**
+     * 上一级的memberName
+     */
+    @JsonIgnore
+    private String parentMemberName;
+    
+    /**
      * queryNodes 实际用于查询的节点
      */
     private Set<String> queryNodes;
@@ -133,13 +140,18 @@ public class MiniCubeMember extends OlapElementDef implements Member {
                 DimensionCondition dimCondition = new DimensionCondition(this.getLevel().getDimension().getName());
                 dimCondition.getQueryDataNodes().add(new QueryData(getUniqueName()));
                 questionModel.getQueryConditions().put(dimCondition.getMetaName(), dimCondition);
-
+                Map<String, String> headerParams = new HashMap<String, String>();
                 Map<String, String> requestParams = new HashMap<String, String>();
+                String questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
                 requestParams.put(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY,
-                        AnswerCoreConstant.GSON.toJson(questionModel));
-
+                        questionModelJson);
+                
+                ServerUtils.setServerProperties(questionModelJson,
+                        ((ConfigQuestionModel) questionModel).getDataSourceInfo().getProductLine(),
+                        requestParams, headerParams);
                 String response =
-                        HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/meta/getChildren", requestParams);
+                        HttpRequest.sendPost(ConfigInfoUtils.getServerAddress()
+                                + "/meta/getChildren", requestParams, headerParams);
                 ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
                 if (StringUtils.isNotBlank(responseResult.getData())) {
                     String memberListJson = responseResult.getData().replace("\\", "");
@@ -167,6 +179,7 @@ public class MiniCubeMember extends OlapElementDef implements Member {
                 // 取parentMember的时候重新发起查询请求
                     MiniCubeMember miniCubeMember = (MiniCubeMember) member;
                     miniCubeMember.setParent(this);
+                    miniCubeMember.generateUniqueName(null);
                 });
         }
         if (this.children == null) {
@@ -316,6 +329,22 @@ public class MiniCubeMember extends OlapElementDef implements Member {
      */
     public List<Member> getChildren() {
         return this.children;
+    }
+
+    /**
+     * default generate get parentMemberName
+     * @return the parentMemberName
+     */
+    public String getParentMemberName() {
+        return parentMemberName;
+    }
+
+    /**
+     * default generate set parentMemberName
+     * @param parentMemberName the parentMemberName to set
+     */
+    public void setParentMemberName(String parentMemberName) {
+        this.parentMemberName = parentMemberName;
     }
 
 }

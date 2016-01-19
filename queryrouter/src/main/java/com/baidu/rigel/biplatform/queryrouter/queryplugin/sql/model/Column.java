@@ -26,6 +26,11 @@ public class Column implements Serializable {
     private String name;
     
     /**
+     * tableFieldName
+     */
+    public String tableFieldName;
+    
+    /**
      * joinTableFieldName
      */
     private String joinTableFieldName;
@@ -84,6 +89,23 @@ public class Column implements Serializable {
      * isRelatedColumn
      */
     private boolean isRelatedColumn = false;
+
+    
+    /**
+     * default generate get tableFieldName
+     * @return the tableFieldName
+     */
+    public String getTableFieldName() {
+        return tableFieldName;
+    }
+
+    /**
+     * default generate set tableFieldName
+     * @param tableFieldName the tableFieldName to set
+     */
+    public void setTableFieldName(String tableFieldName) {
+        this.tableFieldName = tableFieldName;
+    }
 
     /**
      * sortRecord

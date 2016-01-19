@@ -65,8 +65,8 @@ public class MutilDimTableBuilder {
      * 
      * @param dataModel
      */
-    private MutilDimTableBuilder(DataModel dataModel, Cube cube, List<String> dimCaptions, 
-            String lineUniqueNamePrefix) {
+    private MutilDimTableBuilder(DataModel dataModel, Cube cube,
+            List<String> dimCaptions, String lineUniqueNamePrefix) {
         this.dataModel = dataModel;
         this.dimsDesc = dimCaptions;
         this.lineUniqueNamePrefix = lineUniqueNamePrefix;
@@ -156,7 +156,8 @@ public class MutilDimTableBuilder {
      */
     private String getDetailUniqueName(HeadField headField) {
         String nodeUniqueName = headField.getNodeUniqueName();
-        if (StringUtils.hasLength(lineUniqueNamePrefix)) {
+        // 这里拼接data数据的id属性时候，需要考虑只有在交叉维度查询的时候，还需要拼接lineUniqueNamePrefix，单维度查询时候不需要添加，不然展开的lineUniqueName就不对了
+        if (StringUtils.hasLength(lineUniqueNamePrefix) && dimsDesc.size() > 1) {
             nodeUniqueName = lineUniqueNamePrefix + "." + nodeUniqueName;
         }
         return nodeUniqueName;

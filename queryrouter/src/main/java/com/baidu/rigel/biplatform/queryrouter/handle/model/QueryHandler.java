@@ -12,12 +12,12 @@ public class QueryHandler {
     /**
      * sqlExpression
      */
-    private SqlExpression sqlExpression;
+    public SqlExpression sqlExpression;
     
     /**
      * queryHandler
      */
-    private JdbcHandler jdbcHandler;
+    public JdbcHandler jdbcHandler;
 
     public QueryHandler(SqlExpression sqlExpression, JdbcHandler jdbcHandler) {
         this.sqlExpression = sqlExpression;

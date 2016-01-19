@@ -1,11 +1,13 @@
 package com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.SqlExpression;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 /**
  * OrderBy
@@ -35,8 +37,10 @@ public class OrderBy extends SqlSegment {
             return "";
         }
         String sql = "";
+        Set<String> added = Sets.newHashSet();
         for (SqlColumn sqlColumn : orderByList) {
-            if (sqlColumn.getSortRecord() == null) {
+            if (sqlColumn.getSortRecord() == null 
+                    || added.contains(sqlColumn.getColumnKey())) {
                 continue;
             }
             String orderByType = "";
@@ -48,6 +52,7 @@ public class OrderBy extends SqlSegment {
             }
             sql = sql + SqlExpression.getSqlColumnName(sqlColumn, this.isHasAlias()) + SqlConstants.SPACE
                     + orderByType + SqlConstants.SPACE + SqlConstants.COMMA;
+            added.add(sqlColumn.getColumnKey());
         }
         if (StringUtils.isEmpty(sql)) {
             return "";

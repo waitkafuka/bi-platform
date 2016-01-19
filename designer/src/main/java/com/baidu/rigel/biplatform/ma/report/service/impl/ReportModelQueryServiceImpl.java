@@ -143,6 +143,9 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         List<Member> rootMembers = null;
         try {
             parentLevels[0].setDimension (dim);
+            if (params.get(Constants.LEVEL_KEY) == null) {
+                params.put(Constants.LEVEL_KEY, "ALL");
+            }
             rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
             logger.error("Exception happened when getMemebers of dim " + dim.getName(), e);
@@ -150,11 +153,12 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         }
         members.add(rootMembers);
         // 1.equeals(params.get(level)) 只取当前层级
-        if (parentLevels.length > 1 && !"1".equals (params.get (Constants.LEVEL_KEY))) {
+        if (parentLevels.length > 1 && !"1".equals (params.get(Constants.LEVEL_KEY))) {
             for (int i = 1; i < parentLevels.length; ++i) {
                 List<Member> tmpMember = Lists.newArrayList();
                 for (Member m : rootMembers) {
-                    tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params, securityKey));
+                    // tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params, securityKey));
+                    tmpMember.addAll(((MiniCubeMember) m).getChildren());
                 }
                 members.add(tmpMember);
                 rootMembers = tmpMember;

@@ -13,6 +13,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.IndDataDefine;
 import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.MutilDimTable;
 import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.OperationColumnDefine;
+import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.OlapLinkUtils;
 import com.google.common.collect.Lists;
 
@@ -22,8 +23,9 @@ public class MutilDimTableUtils {
      * 
      * @param formatModel
      * @param table
+     * @param otherSetting
      */
-    public static void decorateTable(FormatModel formatModel, MutilDimTable table) {
+    public static void decorateTable(FormatModel formatModel, MutilDimTable table, Map<String, Object> otherSetting) {
         if (formatModel == null) {
             return;
         }
@@ -71,6 +73,17 @@ public class MutilDimTableUtils {
                     align = "left";
                 }
                 define.setAlign(align);
+            }
+
+        }
+        boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
+        if (isShowZero) {
+            for (Map<String, String> dataMap : table.getData()) {
+                for (Map.Entry<String, String> dataValue : dataMap.entrySet()) {
+                    if (StringUtils.isEmpty(dataValue.getValue())) {
+                        dataValue.setValue("0");
+                    }
+                }
             }
 
         }

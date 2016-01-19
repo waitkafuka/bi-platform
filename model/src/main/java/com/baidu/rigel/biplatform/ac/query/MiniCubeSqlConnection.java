@@ -25,14 +25,14 @@ import org.slf4j.LoggerFactory;
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.ConfigInfoUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
-import com.baidu.rigel.biplatform.ac.util.Md5Util;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
+import com.baidu.rigel.biplatform.ac.util.ServerUtils;
 
 /**
  * minicube sql 连接
@@ -65,35 +65,22 @@ public class MiniCubeSqlConnection implements MiniCubeConnection {
             throws MiniCubeQueryException {
         long current = System.currentTimeMillis();
         Map<String, String> params = new HashMap<String, String>();
+        Map<String, String> headerParams = new HashMap<String, String>();
         long curr = System.currentTimeMillis();
         String response = null;
         String questionModelJson = null;
         questionModel.setQueryId(Long.valueOf(System.nanoTime()).toString());
         if (ConfigInfoUtils.getServerAddress() != null) {
-            String systemCode = ConfigInfoUtils.getServerSystemCode();
-            String systemkey = ConfigInfoUtils.getServerSystemKey();
-            if (systemCode == null || systemkey == null) {
-                log.error("properties conf at : \"server.queryrouter.systemcode\" "
-                        + "or \"server.queryrouter.systemkey\"   is null");
-                throw new MiniCubeQueryException(
-                        "properties conf at : \"server.queryrouter.systemcode\" "
-                                + "or \"server.queryrouter.systemkey\"   is null");
-            }
             questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
             log.info("begin execute query with queryrouter ");
             log.info(questionModelJson);
             params.put(QUESTIONMODEL_PARAM_KEY, questionModelJson);
-            try {
-                params.put("token", AesUtil.getInstance()
-                        .encryptAndUrlEncoding(systemCode));
-            } catch (Exception e) {
-                log.info("params token encrypt error, systemCode:" + systemCode);
-                throw new MiniCubeQueryException(e.getMessage());
-            }
-            params.put("signature", Md5Util.encode(questionModelJson, systemkey));
-            response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/queryrouter/query", params);
+            ServerUtils.setServerProperties(questionModelJson,
+                    ((ConfigQuestionModel) questionModel).getDataSourceInfo().getProductLine(),
+                    params, headerParams);
+            response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/query", params,
+                    headerParams);
         }
-        
         log.info("execute query with queryrouter cost {} ms",
                 (System.currentTimeMillis() - curr));
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(

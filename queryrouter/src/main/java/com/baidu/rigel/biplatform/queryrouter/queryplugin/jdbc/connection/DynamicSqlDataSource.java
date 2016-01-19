@@ -39,7 +39,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo.DataBase;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
@@ -201,9 +200,7 @@ public class DynamicSqlDataSource {
         Connection connection = null;
         try {
             connection = result.getConnection();
-            LOGGER.info("validate datasource by key:" + key);
             validateConnection(connection, result.getDataSourceType());
-            LOGGER.info("return datasource by key:" + key);
             // 先移除，在放进去才会在第一个
             accessValidDataSourceKeys.remove(key);
             accessValidDataSourceKeys.add(key);

@@ -160,12 +160,34 @@ public class QueryDataResource extends BaseResource {
         ReportDesignModel oriDesignModel = DeepcopyUtils.deepCopy(model);
         // 处理真实请求参数
         handleLocalContextParams(request, model, runTimeModel, areaId);
-        ExtendArea targetArea = model.getExtendById(areaId);
+        ExtendArea targetArea = model.getExtendById(areaId);  
+        
+        /**
+         * add by Jin. Dirty solution:
+         * 注意：
+         *    1、该方案目前只针对iManager的业绩监控报表，不是通用方案
+         *    2、参数中closeDownload=true，则识别为iManager的业绩监控报表来源，统一将表格的对齐方向设置为“right”
+         * TODO 报表设计器指标对齐方式增加全局设置功能后，如下代码需要被清理。
+         * 
+         */
+        if (runTimeModel.getContext().getParams().containsKey("closeDownload")) {
+            String closeDownload = (String) runTimeModel.getContext().getParams()
+                .get("closeDownload");
+            if (!StringUtils.isEmpty(closeDownload) && closeDownload.equals("true")) {
+                String iManagerTextAlign = "right";
+                targetArea.getFormatModel().getTextAlignFormat()
+                    .put(Constants.DEFAULT_ALIGN_FORMAT_KEY, iManagerTextAlign);
+                logger.info("[INFO]set defaultTextAlign=right ,after :", targetArea
+                    .getFormatModel().getTextAlignFormat().get(Constants.DEFAULT_ALIGN_FORMAT_KEY));
+            }
+        }
+        
         // 更新区域本地的上下文
         ExtendAreaContext areaContext = QueryDataUtils.getAreaContext(areaId, request, targetArea, runTimeModel);
         logger.info("[INFO] --- --- --- --- --- ---params with context is : " + areaContext.getParams());
         LogicModel logicModel = targetArea.getLogicModel();
         if (targetArea.isLiteOlapType()) {
+            
             LiteOlapExtendArea extendArea =
                     (LiteOlapExtendArea) model.getExtendAreas().get(targetArea.getReferenceAreaId());
             // 将lite-olap选择区域的context取出，放入到本次查询的上下文中
@@ -362,7 +384,8 @@ public class QueryDataResource extends BaseResource {
     private MutilDimTable transNewTable(ResponseResult rs, ReportDesignModel model, ExtendArea targetArea,
             DataModel dataModel, Cube cube, LogicModel logicModel, String lineUniqueNamePrefix) {
         MutilDimTable mutilDimTable = null;
-        if (rs.getData() instanceof Map) {
+        // 只有当该查询区域是多维表格的情况下，才进行mutilDimTable的结构封装，后续对图和平面表会有自己对应的格式
+        if (rs.getData() instanceof Map && targetArea.isMutiDimTableType()) {
             String[] dimCaptionArray = DataModelUtils.getDimCaptions(cube, logicModel);
             MutilDimTableBuilder mutilDimTableBuilder =
                     MutilDimTableBuilder.getInstance(dataModel, cube, Arrays.asList(dimCaptionArray),
@@ -370,7 +393,11 @@ public class QueryDataResource extends BaseResource {
             mutilDimTable =
                     mutilDimTableBuilder.buildIndsDefine().buildDimsDefine().buildTableData().buildMutilDimTable();
             FormatModel formatModel = getFormatModel(model, targetArea);
-            MutilDimTableUtils.decorateTable(formatModel, mutilDimTable);
+            Map<String, Object> otherSetting = targetArea.getOtherSetting();
+            if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+                otherSetting = model.getExtendById(targetArea.getReferenceAreaId()).getOtherSetting();
+            }
+            MutilDimTableUtils.decorateTable(formatModel, mutilDimTable, otherSetting);
             Map<String, Object> resultMap = (Map<String, Object>) rs.getData();
             resultMap.put("mutilDimTable", mutilDimTable);
         }

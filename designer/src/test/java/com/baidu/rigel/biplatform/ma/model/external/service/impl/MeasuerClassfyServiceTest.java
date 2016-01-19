@@ -89,7 +89,7 @@ public class MeasuerClassfyServiceTest {
         Mockito.doReturn ("mem:sample").when (ds).getDbInstance ();
         String secKey = "0000000000000000";
         List<MeasureClassfyObject> rs = 
-            new MeasureClassfyServiceImpl ().getChangableMeasureClassfyMeta ("test", ds, secKey);
+            new MeasureClassfyServiceImpl ().getChangableMeasureClassfyMeta ("test", ds, secKey, "");
         Assert.assertEquals (2, rs.size ());
         Assert.assertEquals (2, rs.get (0).getChildren ().size ());
         Assert.assertEquals(1, rs.get (1).getChildren ().size ());
@@ -104,20 +104,20 @@ public class MeasuerClassfyServiceTest {
         MeasureClassfyServiceImpl service = Mockito.mock (MeasureClassfyServiceImpl.class);
         DataSourceDefine ds = Mockito.mock (DataSourceDefine.class);
         try {
-            service.getChangalbeMeasuerMeta (null, ds, null);
+            service.getChangalbeMeasuerMeta (null, ds, null, "");
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
         try {
-            service.getChangalbeMeasuerMeta ("", ds, null);
+            service.getChangalbeMeasuerMeta ("", ds, null, "");
         } catch (Exception e) {
             Assert.assertNotNull(e);
         }
         String factTable = "test";
         List<MeasureClassfyObject> tmp = genTestObjInst ();
-        Mockito.doReturn (tmp).when (service).getChangableMeasureClassfyMeta (factTable, ds, null);
-        Mockito.doCallRealMethod ().when (service).getChangalbeMeasuerMeta (factTable, ds, null);
-        List<String> rs = service.getChangalbeMeasuerMeta (factTable, ds, null);
+        Mockito.doReturn (tmp).when (service).getChangableMeasureClassfyMeta (factTable, ds, null, "");
+        Mockito.doCallRealMethod ().when (service).getChangalbeMeasuerMeta (factTable, ds, null, "");
+        List<String> rs = service.getChangalbeMeasuerMeta (factTable, ds, null, "");
         Assert.assertNotNull (rs);
         Assert.assertEquals (2, rs.size ());
         Assert.assertTrue (!rs.contains ("col3"));

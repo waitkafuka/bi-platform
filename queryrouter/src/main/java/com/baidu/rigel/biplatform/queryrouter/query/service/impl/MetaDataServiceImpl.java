@@ -21,11 +21,9 @@ package com.baidu.rigel.biplatform.queryrouter.query.service.impl;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -62,48 +60,11 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
      */
     @Resource
     private DataSourcePoolService dataSourcePoolService;
-
-    private static Map<String, Cube> storeManager = new ConcurrentHashMap<String, Cube>();
-
+    
     /**
      * dimensionMemberServiceMap 获取维值的所有实现
      */
     private Map<String, DimensionMemberService> dimensionMemberServiceMap;
-
-    @Override
-    public Cube getCube(String cubeId) throws MiniCubeQueryException {
-        if (StringUtils.isBlank(cubeId)) {
-            throw new IllegalArgumentException("can not get cube by empty cube id.");
-        }
-        Cube result = storeManager.get(cubeId);
-        if (result == null) {
-            throw new MiniCubeQueryException("can not get cube by cackeKey:" + cubeId);
-        }
-        return result;
-    }
-
-    @Override
-    public void cacheCube(Cube cube) {
-        if (cube == null) {
-            throw new IllegalArgumentException("cube is null");
-        }
-        storeManager.put(cube.getId(), cube);
-    }
-
-    @Override
-    public List<MiniCubeMember> getMembers(String dataSourceInfoKey, String cubeId, String dimensionName,
-            String levelName, Map<String, String> params) throws MiniCubeQueryException, MetaException {
-        DataSourceInfo dataSourceInfo = dataSourcePoolService.getDataSourceInfo(dataSourceInfoKey);
-        if (dataSourceInfo == null || !dataSourceInfo.validate()) {
-            throw new MiniCubeQueryException("dataSourceInfo is null or invalidate :" + dataSourceInfo);
-        }
-        Cube cube = getCube(cubeId);
-        if (cube == null) {
-            throw new MiniCubeQueryException("can not get cube by cubeId:" + cubeId);
-        }
-        return getMembers(dataSourceInfo, cube, dimensionName, levelName, params);
-
-    }
 
     @Override
     public List<MiniCubeMember> getMembers(DataSourceInfo dataSource, Cube cube, String dimensionName,
@@ -129,30 +90,12 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
     }
 
     @Override
-    public List<MiniCubeMember> getChildren(String dataSourceInfoKey, String cubeId, String uniqueName,
-            Map<String, String> params) throws MiniCubeQueryException, MetaException {
-
-        DataSourceInfo dataSourceInfo = dataSourcePoolService.getDataSourceInfo(dataSourceInfoKey);
-        Cube cube = getCube(cubeId);
-        return getChildren(dataSourceInfo, cube, uniqueName, params);
-
-    }
-
-    @Override
     public List<MiniCubeMember> getChildren(DataSourceInfo dataSource, Cube cube, String uniqueName,
             Map<String, String> params) throws MiniCubeQueryException, MetaException {
 
         DimensionMemberService memberService = dimensionMemberServiceMap.get(DimensionMemberService.SQL_MEMBER_SERVICE);
         MiniCubeMember member = memberService.lookUp(dataSource, cube, uniqueName, params);
         return getChildren(dataSource, cube, member, params);
-    }
-
-    @Override
-    public List<MiniCubeMember> getChildren(String dataSourceInfoKey, String cubeId, MiniCubeMember member,
-            Map<String, String> params) throws MiniCubeQueryException, MetaException {
-        DataSourceInfo dataSourceInfo = dataSourcePoolService.getDataSourceInfo(dataSourceInfoKey);
-        Cube cube = getCube(cubeId);
-        return getChildren(dataSourceInfo, cube, member, params);
     }
 
     @Override
@@ -175,9 +118,6 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
                 level = levels.get(levelIndex);
             } else if (levelIndex == -1 || (levelIndex + 1) >= levels.size()) {
                 return Lists.newArrayList();
-                // LOG.error("can not get level :" + member.getLevel().getName() + " in dimension:" + dimension);
-                // throw new MetaException("can not get level :" + member.getLevel().getName() + " in dimension:" +
-                // dimension);
             } else {
                 // 取当前层级的下一层级
                 level = levels.get(levelIndex + 1);
@@ -186,16 +126,6 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
 
         return DimensionMemberService.getDimensionMemberServiceByLevelType(level.getType()).getMembers(cube, level,
                 dataSource, member, params);
-    }
-
-    @Override
-    public MiniCubeMember lookUp(String dataSourceKey, String cubeId, String uniqueName, Map<String, String> params)
-            throws MiniCubeQueryException, MetaException {
-        DataSourceInfo dataSourceInfo = dataSourcePoolService.getDataSourceInfo(dataSourceKey);
-        MetaDataService.checkDataSourceInfo(dataSourceInfo);
-        Cube cube = getCube(cubeId);
-        MetaDataService.checkCube(cube);
-        return lookUp(dataSourceInfo, cube, uniqueName, params);
     }
 
     @Override
@@ -257,8 +187,6 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
         if (!uniqueNameList.isEmpty ()) {
             members.addAll (memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params));
         }
-//        List<MiniCubeMember> members = memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params);
-        
         return members;
     }
 }

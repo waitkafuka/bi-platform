@@ -20,6 +20,7 @@ import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.SearchIndexResultSet;
+import com.baidu.rigel.biplatform.queryrouter.query.vo.sql.QueryMeasure;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlQuery;
 
@@ -66,7 +67,7 @@ public interface JdbcHandler {
      *            dataSourceInfo
      * @return List<Map<String, Object>> formd tableresult data
      */
-    public List<Map<String, Object>> queryForMeta(String sql, List<Object> whereValues);
+    public Map<String, String> queryForMeta(String tableName);
     
     /**
      * queryForInt
@@ -90,6 +91,17 @@ public interface JdbcHandler {
      * @return
      */
     public SearchIndexResultSet querySqlList(SqlQuery sqlQuery, List<SqlColumn> groupByList);
+    
+    /**
+     * 生成可汇总的数据类型
+     *
+     * @param sqlQuery
+     * @param groupByList
+     * @param DataSourceInfo dataSourceInfo
+     * @return
+     */
+    public SearchIndexResultSet querySqlListWithAgg(SqlQuery sqlQuery,
+            List<SqlColumn> groupByList, List<QueryMeasure> queryMeasures);
 
 
 }

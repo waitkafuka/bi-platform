@@ -1,5 +1,6 @@
 package com.baidu.rigel.biplatform.queryrouter.handle;
 
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -38,8 +39,7 @@ public class QueryRouterContext {
     public static void setQueryInfo(String queryId) {
         try {
             if (StringUtils.isEmpty(queryId)) {
-                logger.warn("queryId is null.");
-                return;
+                queryId = UUID.randomUUID().toString();
             }
             String threadId = Long.valueOf(Thread.currentThread().getId()).toString();
             if (QUERY_REQUEST_CONTEXT.size() > MAX_SIZE) {

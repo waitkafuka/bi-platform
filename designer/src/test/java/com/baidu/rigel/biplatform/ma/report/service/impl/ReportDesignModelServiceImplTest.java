@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import javax.annotation.Resource;
 
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -24,13 +26,16 @@ import org.springframework.util.SerializationUtils;
 
 import com.baidu.rigel.biplatform.ac.util.AesUtil;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
+import com.baidu.rigel.biplatform.ac.util.PropertiesFileUtils;
 import com.baidu.rigel.biplatform.api.client.service.FileService;
 import com.baidu.rigel.biplatform.api.client.service.FileServiceException;
 import com.baidu.rigel.biplatform.ma.PrepareMemDb4Test;
 import com.baidu.rigel.biplatform.ma.PrepareModelObject4Test;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceGroupService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
+import com.baidu.rigel.biplatform.ma.model.ds.DataSourceGroupDefine;
 import com.baidu.rigel.biplatform.ma.model.utils.GsonUtils;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
@@ -41,6 +46,9 @@ import com.baidu.rigel.biplatform.ma.report.model.PlaneTableFormat.PaginationSet
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.ContextManager;
+import com.baidu.rigel.biplatform.ma.report.utils.ReportDesignModelUtils;
+import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
+import com.baidu.rigel.biplatform.ma.utils.ThreadLocalResourceHolder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -70,6 +78,12 @@ public class ReportDesignModelServiceImplTest {
      */
     @Mock
     private DataSourceService dsService;
+    
+    /**
+     * dsgService
+     */
+    @Mock
+    private DataSourceGroupService dsgService;
 
     /**
      * 报表基地址
@@ -610,6 +624,7 @@ public class ReportDesignModelServiceImplTest {
     @Test
     public void testPublishRep() throws Exception {
         String name = "a_for_test^_^" + reportDesignModel.getId();
+        
         Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(new String[] { name });
         Mockito.when(fileService.read(ContextManager.getProductLine()
                 + File.separator + this.reportBaseDir + File.separator
@@ -626,6 +641,11 @@ public class ReportDesignModelServiceImplTest {
         Mockito.when(fileService.copy(devReportLocation, realeaseLocation)).thenReturn(true);
 
         Mockito.when(dsService.getDsDefine(Mockito.anyString())).thenReturn(dsDefine);
+        DataSourceGroupDefine dataSourceGroupDefine = new DataSourceGroupDefine();
+        dataSourceGroupDefine.setName("test");
+        dataSourceGroupDefine.setActiveDataSource(dsDefine);
+        dataSourceGroupDefine.addDataSourceDefine(dsDefine);
+        Mockito.when(dsgService.getDataSourceGroupDefine(Mockito.anyString())).thenReturn(dataSourceGroupDefine);
 
         // 创建数据库
         PrepareMemDb4Test.createMemDb();
@@ -647,7 +667,7 @@ public class ReportDesignModelServiceImplTest {
     @Test
     public void testPublishRepNull() throws Exception {
         String name = "a_for_test^_^" + reportDesignModel.getId();
-        Mockito.when(fileService.ls(Mockito.anyString())).thenReturn(new String[] { name });
+        
         Mockito.when(fileService.read(ContextManager.getProductLine()
                 + File.separator + this.reportBaseDir + File.separator
                     + "release" + File.separator + name)).thenReturn(

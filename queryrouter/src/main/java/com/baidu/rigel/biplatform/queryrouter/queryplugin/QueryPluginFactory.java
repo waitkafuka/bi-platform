@@ -15,10 +15,13 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.queryplugin;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
+import com.google.common.collect.Maps;
 
 /**
  * 查询插件获取类
@@ -26,9 +29,10 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
  * @author luowenlei
  *
  */
+@Service
 public class QueryPluginFactory {
     
-    private List<QueryPlugin> activePluginList;
+    private Map<String, QueryPlugin> activePluginMap = Maps.newConcurrentMap();
     
     /**
      * 获取查询插件
@@ -37,26 +41,24 @@ public class QueryPluginFactory {
      * @return QueryPlugin 查询插件
      */
     public QueryPlugin getPlugin(QuestionModel questionModel) {
-        List<QueryPlugin> suitablePlugins = new ArrayList<QueryPlugin>();
-        activePluginList.forEach((queryPlugin) -> {
+        
+        Map<String, QueryPlugin> map = ApplicationContextHelper.getContext().getBeansOfType(QueryPlugin.class);
+        activePluginMap.putAll(map);
+
+        for (QueryPlugin queryPlugin : activePluginMap.values()) {
             if (queryPlugin.isSuitable(questionModel)) {
-                suitablePlugins.add(queryPlugin);
+                return queryPlugin;
             }
-        });
-        if (suitablePlugins.isEmpty()) {
-            return null;
-        } else {
-            return suitablePlugins.get(0);
         }
+        return null;
     }
     
     /**
-     * default generate set activePluginList
-     * 
-     * @param activePluginList
-     *            the activePluginList to set
+     * setActivePluginMap
+     *
+     * @param activePluginMap
      */
-    public void setActivePluginList(List<QueryPlugin> activePluginList) {
-        this.activePluginList = activePluginList;
+    public void setActivePluginMap(Map<String, QueryPlugin> activePluginMap) {
+        this.activePluginMap = activePluginMap;
     }
 }

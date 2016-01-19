@@ -230,11 +230,12 @@ public class QueryUtils {
                     questionModel.getRequestParams().put(key, (String) value);
                 }
             } 
+            // 暂时将设计器状态下的limit 100的条件限制去掉，这样保证在编辑器状态下也能看到全量数据，并且预览和发布不会受limit条件的影响 update by majun
             // 设计器中, 设置分页信息
-            if (requestParams.get(Constants.IN_EDITOR) != 
-                    null && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
-                questionModel.setPageInfo(pageInfo);
-            }
+            // if (requestParams.get(Constants.IN_EDITOR) != null
+            // && Boolean.valueOf(requestParams.get(Constants.IN_EDITOR).toString())) {
+            // questionModel.setPageInfo(pageInfo);
+            // }
         }
         if (area.getType() == ExtendAreaType.PLANE_TABLE) {
             questionModel.setQuerySource("SQL");

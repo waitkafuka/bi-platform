@@ -2,20 +2,23 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.utils;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.MetaCondition;
-import com.baidu.rigel.biplatform.ac.query.model.PageInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.queryrouter.handle.model.QueryHandler;
+import com.baidu.rigel.biplatform.queryrouter.handle.model.SqlQueryHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.PlaneTableUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.meta.TableMetaService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.druid.sql.DruidSqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.palo.sql.PaloSqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.service.JdbcHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.SqlExpression;
@@ -41,20 +44,19 @@ public class QueryHandlerBuilder {
      * @return
      * @throws QuestionModelTransformationException
      */
-    public static QueryHandler buildQueryHandler(QuestionModel questionModel,
-            TableMetaService tableMetaService, JdbcHandler queryHandler)
+    public static QueryHandler buildQueryHandler(QuestionModel questionModel)
             throws QuestionModelTransformationException {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
         PlaneTableQuestionModel planeTableQuestionModel = PlaneTableUtils
                 .convertConfigQuestionModel2PtQuestionModel(configQuestionModel);
-        QueryHandler newQueryRequest = buildQueryHandler(configQuestionModel.getCube(),
+        QueryHandler queryHandler = buildQueryHandler(configQuestionModel.getCube(),
                 configQuestionModel.getDataSourceInfo(),
-                planeTableQuestionModel.getQueryConditions(), configQuestionModel.getPageInfo(),
-                configQuestionModel.getSortRecord(), tableMetaService, queryHandler);
-        newQueryRequest.getSqlExpression().setNeedColums(
-                SqlColumnUtils.getNeedColumns(newQueryRequest.getSqlExpression().getQueryMeta(),
+                planeTableQuestionModel.getQueryConditions(),
+                configQuestionModel.getSortRecord());
+        queryHandler.getSqlExpression().setNeedColums(
+                SqlColumnUtils.getNeedColumns(queryHandler.getSqlExpression().getQueryMeta(),
                         planeTableQuestionModel.getSelection()));
-        return newQueryRequest;
+        return queryHandler;
     }
     
     /**
@@ -69,7 +71,26 @@ public class QueryHandlerBuilder {
      */
     public static QueryHandler buildQueryHandler(Cube cube, DataSourceInfo dataSourceInfo)
             throws QuestionModelTransformationException {
-        return buildQueryHandler(cube, dataSourceInfo, null, null, null, null, null);
+        return buildQueryHandler(cube, dataSourceInfo, null, null);
+    }
+    
+    /**
+     * 通过QuestionModel构建QueryHandler
+     *
+     * @param cube
+     *            minicube
+     * @param dataSourceInfo
+     *            不能为空
+     * @return
+     * @throws QuestionModelTransformationException
+     */
+    public static QueryHandler buildQueryHandler(String sql, DataSourceInfo dataSourceInfo)
+            throws QuestionModelTransformationException {
+        if (dataSourceInfo == null || StringUtils.isEmpty(sql)) {
+            throw new QuestionModelTransformationException(
+                    "dataSourceInfo or sql can not be empty.");
+        }
+        return new SqlQueryHandler(sql, buildJdbcHandler(dataSourceInfo));
     }
     
     /**
@@ -93,13 +114,63 @@ public class QueryHandlerBuilder {
      * @throws QuestionModelTransformationException
      */
     public static QueryHandler buildQueryHandler(Cube cube, DataSourceInfo dataSourceInfo,
-            Map<String, MetaCondition> queryConditions, PageInfo pageInfo, SortRecord sortRecord,
-            TableMetaService tableMetaService, JdbcHandler jdbcHandler)
+            Map<String, MetaCondition> queryConditions, SortRecord sortRecord)
             throws QuestionModelTransformationException {
         if (dataSourceInfo == null || cube == null) {
             throw new QuestionModelTransformationException(
                     "dataSourceInfo or cube can not be null.");
         }
+        JdbcHandler jdbcHandler = buildJdbcHandler(dataSourceInfo);
+        return new QueryHandler(
+                buildSqlExpressionWithCube(cube, dataSourceInfo, queryConditions,
+                        sortRecord, jdbcHandler),
+                        jdbcHandler);
+    }
+    
+    /**
+     * buildJdbcHandler
+     *
+     * @param dataSourceInfo
+     * @param jdbcHandler
+     * @return
+     */
+    public static JdbcHandler buildJdbcHandler(DataSourceInfo dataSourceInfo) {
+        if (dataSourceInfo == null) {
+            throw new QuestionModelTransformationException(
+                    "dataSourceInfo can not be null.");
+        }
+        SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo) dataSourceInfo;
+        JdbcHandler jdbcHandler = null;
+        try {
+            switch (sqlDataSourceInfo.getDataBase()) {
+                case DRUID:
+                    jdbcHandler = (JdbcHandler) ApplicationContextHelper.getContext().getBean(
+                            "druidJdbcHandlerImpl");
+                    break;
+                default:
+                    jdbcHandler = (JdbcHandler) ApplicationContextHelper.getContext().getBean(
+                            "jdbcHandlerImpl");
+            }
+            jdbcHandler.initJdbcTemplate(dataSourceInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jdbcHandler;
+    }
+    
+    /**
+     * createCubeSqlExpression
+     *
+     * @param cube
+     * @param dataSourceInfo
+     * @param queryConditions
+     * @param pageInfo
+     * @param sortRecord
+     * @param tableMetaService
+     * @param jdbcHandler
+     */
+    public static SqlExpression buildSqlExpressionWithCube(Cube cube, DataSourceInfo dataSourceInfo,
+            Map<String, MetaCondition> queryConditions, SortRecord sortRecord, JdbcHandler jdbcHandler) {
         String source = ((MiniCube) cube).getSource();
         QueryMeta queryMeta = SqlColumnUtils.getAllColumns(
                 PlaneTableUtils.getAllColumns(cube, sortRecord), source, queryConditions);
@@ -108,53 +179,26 @@ public class QueryHandlerBuilder {
         switch (sqlDataSourceInfo.getDataBase()) {
             case MYSQL:
                 sqlExpression = new SqlExpression(sqlDataSourceInfo.getDataBase().getDriver());
-                if (jdbcHandler == null) {
-                    jdbcHandler = (JdbcHandler) ApplicationContextHelper.getContext().getBean(
-                            "jdbcHandlerImpl");
-                }
-                if (tableMetaService == null) {
-                    tableMetaService = (TableMetaService) ApplicationContextHelper.getContext()
-                            .getBean("tableMetaServiceImpl");
-                }
                 break;
             case PALO:
                 sqlExpression = new PaloSqlExpression(sqlDataSourceInfo.getDataBase().getDriver());
-                if (jdbcHandler == null) {
-                    jdbcHandler = (JdbcHandler) ApplicationContextHelper.getContext().getBean(
-                            "jdbcHandlerImpl");
-                }
-                if (tableMetaService == null) {
-                    tableMetaService = (TableMetaService) ApplicationContextHelper.getContext()
-                            .getBean("tableMetaServiceImpl");
-                }
                 break;
-//            case DRUID:
-//                sqlExpression = new DruidSqlExpression(sqlDataSourceInfo.getDataBase().getDriver());
-//                if (jdbcHandler == null) {
-//                    jdbcHandler = (JdbcHandler) ApplicationContextHelper.getContext().getBean(
-//                            "druidJdbcHandlerImpl");
-//                }
-//                if (tableMetaService == null) {
-//                    tableMetaService = (TableMetaService) ApplicationContextHelper.getContext()
-//                            .getBean("druidTableMetaServiceImpl");
-//                }
-//                break;
+            case DRUID:
+                sqlExpression = new DruidSqlExpression(sqlDataSourceInfo.getDataBase().getDriver());
+                break;
             default:
                 throw new QuestionModelTransformationException(sqlDataSourceInfo.getDataBase()
                         .getDriver() + " can not handle.");
         }
-        jdbcHandler.initJdbcTemplate(dataSourceInfo);
-        
-        if (tableMetaService != null) {
+        if (jdbcHandler != null) {
+            TableMetaService tableMetaService = (TableMetaService) ApplicationContextHelper.getContext()
+                    .getBean("tableMetaServiceImpl");
             // 1.设置mysql表 meta的信息，生成allColumns里面的dataType
-            tableMetaService.generateColumnDataType(queryMeta.getAllColumns(), dataSourceInfo,
-                    jdbcHandler);
+            tableMetaService.generateColumnMeta(queryMeta, dataSourceInfo, jdbcHandler);
         }
         sqlExpression.setQueryMeta(queryMeta);
         sqlExpression.setNeedColums(null);
         sqlExpression.setTableName(source);
-        QueryHandler queryHandler = new QueryHandler(sqlExpression, jdbcHandler);
-        
-        return queryHandler;
+        return sqlExpression;
     }
 }

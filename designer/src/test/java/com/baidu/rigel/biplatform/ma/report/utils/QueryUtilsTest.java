@@ -73,6 +73,7 @@ public class QueryUtilsTest {
     private Map<String, Object> requestParams;
     private PageInfo pageInfo;
     private String securityKey = "securityKey";
+    private String timeCondition = "{'start':'2015-06-10','end':'2015-06-12','granularity':'D'}";
 
     @Before
     public void init() {

@@ -38,6 +38,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.data.HeadField;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.MemberNodeTree;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.SearchIndexResultRecord;
@@ -92,7 +93,7 @@ public class DataModelBuilder {
      */
     public DataModelBuilder(TesseractResultSet<SearchIndexResultRecord> tesseractResultSet, QueryContext queryContext) {
         if (tesseractResultSet == null) {
-            log.warn("tesseractResultSet is null,return table head");
+            log.warn("queryId:{} ResultSet is null,return table head", QueryRouterContext.getQueryId());
             // throw new IllegalArgumentException("tesseractResultSet is null");
         }
         if (queryContext == null) {
@@ -331,7 +332,7 @@ public class DataModelBuilder {
             MemberTreePropResult treeProp = new MemberTreePropResult();
             rowNodeName.add(getNodeName(nodeTree, null, treeProp, isContainsCallbackMeasure));
             if (MapUtils.isEmpty(treeProp.getQueryPropers())) {
-                log.warn("query proper:{} is null,skip", nodeTree);
+                log.warn("queryId:{} query proper:{} is null,skip", QueryRouterContext.getQueryId(), nodeTree);
                 continue;
             }
             headNames.add(treeProp);
