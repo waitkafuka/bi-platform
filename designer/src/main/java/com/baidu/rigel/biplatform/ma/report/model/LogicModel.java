@@ -310,10 +310,53 @@ public class LogicModel implements Serializable {
         return null;
     }
     
+    /**
+     * getItem
+     * @param itemId
+     * @param reload
+     * @return
+     */
+    public Item getItem(String itemId, boolean reload) {
+        Map<String, Item> allItems = Maps.newHashMap();
+        if (!reload) {
+            allItems.putAll(this.columns);
+            allItems.putAll(this.rows);
+            allItems.putAll(this.slices);
+        } else {
+            allItems.putAll(this.getSelectionDims());
+            allItems.putAll(this.getSelectionMeasures());
+        }
+        for (Item item : allItems.values()) {
+            if (item.getOlapElementId().equals(itemId)) {
+                return item;
+            }
+        }
+        if (!reload) {
+            reload = true;
+            return getItem(itemId, reload);
+        }
+        return null;
+    }
+    
     public Item getItemByOlapElementId(String olapElementId) {
 //        Map<String, Item> allItems = collectItems();
 //        return allItems.get(olapElementId);
             return this.getItem(olapElementId);
+    }
+    
+    /**
+     * getItemByOlapElementId
+     * @param olapElementId
+     * @param posType
+     * @return
+     */
+    public Item getItemByOlapElementId(String olapElementId,
+                    PositionType posType) {
+        Item result = this.getItem(olapElementId, false);
+        if (result.getPositionType().equals(posType)) {
+            return result;
+        }
+        return null;
     }
     
     public boolean containsOlapElement(String olapElementId) {

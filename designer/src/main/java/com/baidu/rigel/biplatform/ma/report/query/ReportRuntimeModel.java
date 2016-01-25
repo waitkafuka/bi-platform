@@ -233,6 +233,7 @@ public class ReportRuntimeModel implements Serializable {
             context = new QueryContext();
         }
         isInited = true;
+     
         this.model = DeepcopyUtils.deepCopy(model);
         updateLogicModels(this.model);
         updateDimStores(this.model);
@@ -390,6 +391,13 @@ public class ReportRuntimeModel implements Serializable {
      */
     private Map<String, Item> getItemStoreWithDimNameKey(LogicModel logicModel, Schema schema, String cubeId) {
         Map<String, Item> store = Maps.newHashMap();
+        /**
+         * add by Jin
+         * getItemStoreWithDimNameKey的作用是将logicModel中的item进行遍历，存到store中
+         * 所以，在这里进行timeDimItemIds.clear操作是安全的
+         */
+        
+        this.timeDimItemIds.clear();
         for (Item item : logicModel.getItems()) {
             OlapElement element =
                     ReportDesignModelUtils.getDimOrIndDefineWithId(schema, cubeId, item.getOlapElementId());

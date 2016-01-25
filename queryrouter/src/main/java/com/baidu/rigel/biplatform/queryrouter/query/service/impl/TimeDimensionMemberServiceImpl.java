@@ -377,7 +377,7 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
         calEnd.add(Calendar.DATE, calEnd.getActualMaximum(Calendar.DATE) - 1); // 截止日期
         String day = sf.format(cal.getTime());
         String year = day.substring(0, 4);
-        String caption = year + "年第" + quarterIndex + "季度";
+        String caption = year + "年第" + (quarterIndex + 1) + "季度";
         MiniCubeMember firstDayOfQuarter = new MiniCubeMember(day);
         firstDayOfQuarter.setCaption(caption);
         firstDayOfQuarter.setLevel(level);

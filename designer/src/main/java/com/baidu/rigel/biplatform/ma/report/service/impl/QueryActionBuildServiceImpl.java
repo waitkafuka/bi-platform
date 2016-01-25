@@ -48,6 +48,7 @@ import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ac.model.Schema;
 import com.baidu.rigel.biplatform.ac.model.TimeType;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
+import com.baidu.rigel.biplatform.ac.util.AnswerCoreConstant;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
@@ -168,6 +169,7 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     public QueryAction generateChartQueryAction(ReportDesignModel model, String areaId,
             Map<String, Object> context, String[] indNames, ReportRuntimeModel runTimeModel)
             throws QueryModelBuildException {
+
         ExtendArea targetArea = DeepcopyUtils.deepCopy(model).getExtendById(areaId);
         LogicModel targetLogicModel = null;
         String cubeId = targetArea.getCubeId();
@@ -331,20 +333,38 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             LogicModel cpModel = DeepcopyUtils.deepCopy(targetArea.getLogicModel());
             List<String> timeItemIds = runTimeModel.getTimeDimItemIds();
             Item timeDimItem = null;
+            /**
+             *  cpModel.getItemByOlapElementId(timeItemId);需要增加一个按所在轴取item的方法
+             */
+//            for (String timeItemId : timeItemIds) {
+//                timeDimItem = cpModel.getItemByOlapElementId(timeItemId);
+//                if (timeDimItem != null) {
+//                    break;
+//                }
+//            }
+            
+//            if (timeDimItem != null && timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
+//                Map<String, Object> params = timeDimItem.getParams();
+//                params.put("range", true);
+//                timeDimItem.setParams(params);
+//                context.put("time_line", timeDimItem);
+//                isTimeTrend = true;
+//            }
+            boolean isTimeTrend=false;
             for (String timeItemId : timeItemIds) {
-                timeDimItem = cpModel.getItemByOlapElementId(timeItemId);
+                timeDimItem = cpModel.getItemByOlapElementId(timeItemId , PositionType.X);
                 if (timeDimItem != null) {
+                    Map<String, Object> params = timeDimItem.getParams();
+                    params.put("range", true);
+                    timeDimItem.setParams(params);
+                    context.put("time_line", timeDimItem);
+                    isTimeTrend = true;
                     break;
                 }
-            }
-            boolean isTimeTrend=false;
-            if (timeDimItem != null && timeDimItem.getPositionType() == PositionType.X) { // 时间序列图
-                Map<String, Object> params = timeDimItem.getParams();
-                params.put("range", true);
-                timeDimItem.setParams(params);
-                context.put("time_line", timeDimItem);
-                isTimeTrend = true;
-            }
+            }       
+            
+            
+            
             if (cpModel != null && !CollectionUtils.isEmpty(cpModel.getSelectionMeasures())) {
                 cpModel.addColumns(cpModel.getSelectionMeasures().values().toArray(new Item[0]));
             }
@@ -459,6 +479,24 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         Map<Item, Object> slices = genereateItemValues(schema,
             cubeId, targetLogicModel.getSlices(), context, needTimeRange, oriCube4QuestionModel);
         action.setSlices(slices);
+        
+        
+        
+        //V2
+//        Map<Item, Object> columns2 = genereateItemValuesV2(schema, cubeId,
+//                targetLogicModel.getColumns(), context, needTimeRange,
+//                oriCube4QuestionModel);
+//        action.setColumns(columns);
+//
+//        Map<Item, Object> rows2 = genereateItemValuesV2(schema, cubeId,
+//                targetLogicModel.getRows(), context, needTimeRange,
+//                oriCube4QuestionModel);
+//        action.setRows(rows);
+//
+//        Map<Item, Object> slices2 = genereateItemValuesV2(schema, cubeId,
+//                targetLogicModel.getSlices(), context, needTimeRange,
+//                oriCube4QuestionModel);
+//        action.setSlices(slices);
         
         if (needTimeRange) {
         // 这里需要将lite-olap中的图的维度修改,将column的item放入到过滤轴上
@@ -768,62 +806,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
                 
             // 时间维度特殊处理
             if (element instanceof TimeDimension) {
-                final Date now = new Date();
-                if (value != null && !value.toString().toLowerCase().contains("all")) {
-                    
-                    String[] dataRange = getDateRangeCond (item, element, value, timeRange);
-                    
-                    String start = dataRange[0];
-                    String end = dataRange[1];
-                    TimeRangeDetail range = new TimeRangeDetail(dataRange[0] , dataRange[1]);
-                    if (timeRange && start.equals(end)) {
-                        /**
-                         * 如果是时间区域，并且时间参数中起始和结束相同，把时间扩展为start过去一个月以来的数据
-                         */
-                        SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-                        Date startDate = now;
-                        try {
-                            startDate = df.parse(start);
-                        } catch (ParseException e) {
-                            logger.error("Date Format Error. Use current date instead. ", e);
-                        }
-                        Calendar calendar = Calendar.getInstance();
-                        calendar.setTime(startDate);
-                        calendar.add(Calendar.MONTH, -1);
-                        range = new TimeRangeDetail(df.format(calendar.getTime()), end);
-                    }
-                    List<String> tmpDays = Lists.newArrayList ();
-//                    String[] days = null; 
-//                    StringBuilder message = new StringBuilder();
-                    String[] detailDays = range.getDays();
-                    TimeDimension tmp = (TimeDimension) element;
-                    for (int i = 0; i < detailDays.length; i++) {
-                        if (timeRange && tmp.getDataTimeType () == TimeType.TimeWeekly && i % 7 == 0) {
-                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
-                        } else if (timeRange 
-                                && tmp.getDataTimeType () == TimeType.TimeMonth 
-                                && detailDays[i].endsWith ("01")){
-                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
-                        } else if (timeRange 
-                                && tmp.getDataTimeType () == TimeType.TimeQuarter){
-                            Set<String> quarterStart = Sets.newHashSet ("0101", "0401", "0701", "1001");
-                            String endStr = detailDays[i].substring (4);
-                            if (quarterStart.contains (endStr)) {
-                                tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
-                            }
-                        } else if (timeRange && tmp.getDataTimeType () == TimeType.TimeDay) {
-                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
-                        } else if (!timeRange){
-                            tmpDays.add ("[" + element.getName() + "].[" + detailDays[i] + "]");
-                        }
-                    }
-                    value = tmpDays.toArray (new String[0]);
-                    itemValues.put(item, value);
-                    logger.debug("[DEBUG] --- ---" + tmpDays);
-                } else {
-                    itemValues.put (item, value);
-                }
-                
+                List<String> timeDimItemValue = generateTimeDimensionItemValues(
+                        value != null ? value.toString() : null, element, timeRange);
+                itemValues.put(item,
+                        !CollectionUtils.isEmpty(timeDimItemValue) ? timeDimItemValue.toArray(new String[0]) : null);
             } else if (value instanceof String && !StringUtils.isEmpty(value)) {
                 itemValues.put(item, value.toString().split(","));
             } else {
@@ -832,45 +818,133 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         }
         return itemValues;
     }
-
-    private String[] getDateRangeCond(Item item, OlapElement element, Object value, boolean timeRange) {
+    
+    /**
+     * 获取时间维度参数解析结果
+     * 
+     * @param value
+     *            element(时间维度)的参数
+     * @param element
+     *            （时间维度）
+     * @param timeRange
+     *            是否是时间趋势图
+     * @return List<String>
+     */
+    private List<String> generateTimeDimensionItemValues(String value, OlapElement element,
+        boolean timeRange) {
+        List<String> result = null;
+        if (value != null && !value.toString().toLowerCase().contains("all")) {
+            
+            String[] dataRange = getDateRangeCondition(element, value, timeRange);
+            TimeRangeDetail range = new TimeRangeDetail(dataRange[0], dataRange[1]);
+            
+            List<String> tmpDays = Lists.newArrayList();
+            String[] detailDays = range.getDays();
+            TimeDimension tmp = (TimeDimension) element;
+            for (int i = 0; i < detailDays.length; i++) {
+                if (timeRange && tmp.getDataTimeType() == TimeType.TimeWeekly && i % 7 == 0) {
+                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeMonth
+                        && detailDays[i].endsWith("01")) {
+                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeQuarter) {
+                    Set<String> quarterStart = Sets.newHashSet("0101", "0401", "0701", "1001");
+                    String endStr = detailDays[i].substring(4);
+                    if (quarterStart.contains(endStr)) {
+                        tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                    }
+                } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeDay) {
+                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                } else if (!timeRange) {
+                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                }
+            }
+            result = tmpDays;
+            logger.debug("[DEBUG] --- ---" + tmpDays);
+        } else {
+            result = Lists.newArrayList();
+            if (value != null) {
+                result.add(value);
+            }
+            
+        }
+        return result;
+    }
+    
+    /**
+     * 获取时间范围条件
+     * @param element （时间维度）
+     * @param value element(时间维度)的参数
+     * @param timeRange 是否是时间趋势图
+     * @return String[]
+     */
+    private String[] getDateRangeCondition(OlapElement element, Object value, boolean timeRange) {
         String[] dataRange = new String[2];
+        
         try {
-            if (MetaNameUtil.isUniqueName (value.toString ())) {
-                String[] tmp = MetaNameUtil.parseUnique2NameArray (value.toString ());
+            // 解析传入参数,拿到 start & end
+            if (MetaNameUtil.isUniqueName(value.toString())) {
+                // uniqueName格式
+                String[] tmp = MetaNameUtil.parseUnique2NameArray(value.toString());
                 dataRange = getDataRangeWithValue((TimeDimension) element, tmp[tmp.length - 1]);
             } else {
+                // json串格式
                 JSONObject json = new JSONObject(String.valueOf(value));
-                /**
-                 * TODO 考虑月/周/年等
-                 */
                 dataRange[0] = json.getString("start");
                 dataRange[1] = json.getString("end");
+                TimeType timeType = TimeUtils.getTimeTypeWithGranularitySymbol(json
+                    .getString("granularity"));
+                
+                if (dataRange[0].contains("-") && dataRange[1].contains("-")) {
+                    dataRange[0] = dataRange[0].replace("-", "");
+                    dataRange[1] = dataRange[1].replace("-", "");
+                    Map<String, String> time = TimeUtils.getTimeCondition(dataRange[0],
+                            dataRange[1], timeType);
+                    dataRange[0] = time.get("start");
+                    dataRange[1] = time.get("end");
+                }
+                
             }
-            if (item.getParams().get("range") != null && dataRange[0].equals(dataRange[1] )) {
-                TimeRangeDetail tail = TimeUtils.getDays (TimeRangeDetail.getTime(dataRange[0] ), 30, 0);
-                dataRange[0]  = tail.getStart();
-                dataRange[1]  = tail.getEnd();
-            } else {
-                  if (dataRange[0] .contains("-") && dataRange[1] .contains("-")) { 
-                      dataRange[0]  = dataRange[0] .replace("-", "");
-                      dataRange[1]  = dataRange[1] .replace("-", ""); 
-                      JSONObject json = new JSONObject(String.valueOf(value)); 
-                      Map<String, TimeType> tmp = Maps.newHashMap ();
-                      tmp.put ("M", TimeType.TimeMonth);
-                      tmp.put ("D", TimeType.TimeDay);
-                      tmp.put ("Y", TimeType.TimeYear);
-                      tmp.put ("Q", TimeType.TimeQuarter);
-                      tmp.put("W", TimeType.TimeWeekly);
-//                      TimeDimension timeDim = (TimeDimension) element;
-                      Map<String, String> time = 
-                          TimeUtils.getTimeCondition(dataRange[0] , dataRange[1] , tmp.get (json.get ("granularity")));
-                      dataRange[0] = time.get("start");
-                      dataRange[1] = time.get("end");
-                  }
+            
+            // 处理时间参数
+            /**
+             * 如果是时间趋势图（ range=true, timeRange =true） 理想情况下遵守以下规则： 1）日粒度:
+             * 当start=end时，取最近30天；否则取指定start-end范围
+             * 2）周粒度：当start=end时，取最近4周；否则取指定start-end范围
+             * 3）月粒度：当start=end时，取最近12个月；否则取指定start-end范围
+             * 4）季粒度：当start=end时，取最近4个季 实际情况下，如果是时间趋势图（ range=true, timeRange
+             * =true） 1）日粒度: 取最近30天； 2）周粒度：取最近4周； 3）月粒度：取最近12个月； 4）季粒度：取最近4个季
+             * 
+             */
+            if (timeRange) {
+                TimeDimension timeDim = (TimeDimension) element;
+                SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+                Date start = format.parse(dataRange[0]);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(start);
+                switch (timeDim.getDataTimeType()) {
+                    case TimeDay:
+                        cal.add(Calendar.DAY_OF_YEAR, -30);
+                        dataRange[0] = format.format(cal.getTime());
+                        
+                        break;
+                    case TimeWeekly:
+                        cal.add(Calendar.DAY_OF_YEAR, -21);
+                        dataRange[0] = format.format(cal.getTime());
+                        break;
+                    case TimeMonth:
+                        cal.add(Calendar.MONTH, -11);
+                        dataRange[0] = format.format(cal.getTime());
+                        break;
+                    case TimeQuarter:
+                        cal.add(Calendar.MONTH, -9);
+                        dataRange[0] = format.format(cal.getTime());
+                        break;
+                    default:
+                }
             }
         } catch (Exception e) {
-            logger.warn("Time Condition not Correct. Maybe from row." 
+            logger.warn("Time Condition not Correct. Maybe from row."
                 + " Try to use it as UniqueName. Time: " + value, e);
             if (value instanceof String[]) {
                 String[] dates = (String[]) value;
@@ -882,35 +956,10 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             }
             
         }
-        // TODO 根据时间粒度，动态调整时间范围
-        try {
-            if (timeRange) {
-                TimeDimension tmp = (TimeDimension) element;
-                SimpleDateFormat format = new SimpleDateFormat ("yyyyMMdd");
-                Date start = format.parse (dataRange[0]);
-                Calendar cal = Calendar.getInstance ();
-                cal.setTime (start);
-                switch(tmp.getDataTimeType ()) {
-                    case TimeWeekly :
-                        cal.add (Calendar.DAY_OF_YEAR, -21);
-                        dataRange[0] = format.format (cal.getTime ());
-                        break;
-                    case TimeMonth :  
-                        cal.add (Calendar.MONTH, -11);
-                        dataRange[0] = format.format (cal.getTime ());
-                        break;
-                    case TimeQuarter :
-                        cal.add (Calendar.MONTH, -9);
-                        dataRange[0] = format.format (cal.getTime ());
-                        break;
-                    default:
-                }
-            }
-        } catch (ParseException e) {
-            logger.warn (e.getMessage (), e);
-        }
+        
         return dataRange;
     }
+
 
     /**
      * 
