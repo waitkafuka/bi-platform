@@ -45,12 +45,12 @@
 	</bean>
 	
 	<!-- 固定报表执行任务队列 -->
-	<bean id="regularReportTaskConsumerMessageListenerContainer"
+	<!-- <bean id="regularReportTaskConsumerMessageListenerContainer"
 		class="org.springframework.jms.listener.DefaultMessageListenerContainer">
 		<property name="destination" ref="regularReportTaskQueue" />
 		<property name="connectionFactory" ref="pooledConnectionFactory" />
 		<property name="messageListener" ref="regularReportTaskConsumerMessageListener" />
-	</bean>
+	</bean> -->
 	<!-- Default cache configuration <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager"> 
 		<property name="caches"> <set> <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" 
 		p:name="bi_platform" /> </set> </property> </bean> -->
