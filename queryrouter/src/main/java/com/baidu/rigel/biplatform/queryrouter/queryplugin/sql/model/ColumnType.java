@@ -46,4 +46,9 @@ public enum ColumnType {
      * 回调维度
      */
     CALLBACK,
+    
+    /**
+     * 回调指标
+     */
+    MEASURE_CALLBACK
 }

@@ -56,6 +56,19 @@ public class SearchIndexResultSet implements TesseractResultSet<SearchIndexResul
     }
     
     /**
+     * 构造函数
+     * 
+     * @param meta
+     *            元数据
+     * @param size
+     *            长度
+     */
+    public synchronized void clear(Meta meta, Integer size) {
+        this.meta = meta;
+        this.dataList = Collections.synchronizedList(new ArrayList<SearchIndexResultRecord>(size));
+    }
+    
+    /**
      * 增加记录
      * 
      * @param sr
@@ -398,4 +411,12 @@ public class SearchIndexResultSet implements TesseractResultSet<SearchIndexResul
         Collections.addAll(this.dataList, indexResultRecords);
     }
     
+    /**
+     * 批量增加结果
+     * 
+     * @param indexResultRecords
+     */
+    public synchronized void addAll(List<SearchIndexResultRecord> dataList) {
+        this.dataList.addAll(dataList);
+    }
 }

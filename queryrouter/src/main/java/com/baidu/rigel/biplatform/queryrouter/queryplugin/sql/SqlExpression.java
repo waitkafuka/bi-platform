@@ -277,7 +277,7 @@ public class SqlExpression implements Serializable {
         }
         String[] tableNames = tableName.split(",");
         if (isGenNoJoinSql) {
-            this.hasAlias = false;
+            this.setHasAlias(false);
         } else {
             if (tableNames.length > 1) {
                 // 为多事实表，如果是，hasAlias需要变为true
@@ -286,7 +286,7 @@ public class SqlExpression implements Serializable {
                             + "can not be set hasAlias = false, System change back to 'True'",
                             tableName);
                 }
-                this.hasAlias = true;
+                this.setHasAlias(true);
             } else {
                 // 判断是否有join，如果有，hasAlias需要变为true
                 Join join = generateLeftOuterJoinExpression(queryConditions, sqlColumns);
@@ -294,7 +294,7 @@ public class SqlExpression implements Serializable {
                     logger.warn("sql has Join table:{},"
                             + "can not be set hasAlias = false, System change back to 'True'", join
                             .getJoinTables().get(0));
-                    this.hasAlias = true;
+                    this.setHasAlias(true);
                 }
             }
         }

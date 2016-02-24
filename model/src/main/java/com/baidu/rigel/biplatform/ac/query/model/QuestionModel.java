@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.google.common.collect.Maps;
 
@@ -29,62 +30,67 @@ import com.google.common.collect.Maps;
  *
  */
 public class QuestionModel implements Serializable {
-
+    
     /**
      * default generate id
      */
     private static final long serialVersionUID = 1576666141762101245L;
-
+    
     /**
      * axisMetas 轴上的元数据信息
      */
     private Map<AxisType, AxisMeta> axisMetas;
-
+    
     /**
      * queryConditions 查询的条件信息
      */
     private Map<String, MetaCondition> queryConditions;
-
+    
     /**
      * callback 维度的参数
      */
     private Map<String, String> requestParams;
-
+    
     /**
      * sortRecord 排序信息
      */
     private SortRecord sortRecord;
-
+    
     /**
      * 查询的cube的Id
      */
     private String cubeId;
-
+    
     /**
      * dataSourceInfoKey 问题模型对应的数据源信息的key
      */
     private String dataSourceInfoKey;
-
+    
+    /**
+     * dataSourceInfo 问题模型对应的数据源信息（有数据源的key优先从缓存取）
+     */
+    private DataSourceInfo dataSourceInfo;
+    
     /**
      * useCache 默认使用缓存
      */
     private boolean useCache = true;
-
+    
     /**
      * queryConditionLimit 条件超限异常
      */
     private QueryConditionLimit queryConditionLimit;
-
+    
     /**
      * pageInfo 分页信息
      */
     private PageInfo pageInfo;
-
+    
     /**
      * needSummary 是否需要汇总
      */
     private boolean needSummary = false;
-
+    
     /**
      * isUseIndex 是否使用索引，默认为true
      */
@@ -94,7 +100,7 @@ public class QuestionModel implements Serializable {
      * 是否过滤空白行
      */
     private boolean filterBlank = false;
-
+    
     /**
      * 查询对象
      */
@@ -108,39 +114,40 @@ public class QuestionModel implements Serializable {
     /**
      * getQueryId
      * 
-	 * @return the queryId
-	 */
-	public String getQueryId() {
-		return queryId;
-	}
-
-	/**
-	 * setQueryId
-	 * 
-	 * @param queryId the queryId to set
-	 */
-	public void setQueryId(String queryId) {
-		this.queryId = queryId;
-	}
-
-	/**
+     * @return the queryId
+     */
+    public String getQueryId() {
+        return queryId;
+    }
+    
+    /**
+     * setQueryId
+     * 
+     * @param queryId
+     *            the queryId to set
+     */
+    public void setQueryId(String queryId) {
+        this.queryId = queryId;
+    }
+    
+    /**
      * getter method for property querySource
      * 
      * @return querySource
      */
     public String getQuerySource() {
-		return querySource;
-	}
-
-	/**
-	 * setter method for property querySource
-	 * 
-	 * @param querySource
-	 */
-	public void setQuerySource(String querySource) {
-		this.querySource = querySource;
-	}
-	
+        return querySource;
+    }
+    
+    /**
+     * setter method for property querySource
+     * 
+     * @param querySource
+     */
+    public void setQuerySource(String querySource) {
+        this.querySource = querySource;
+    }
+    
     /**
      * getter method for property axisMetas
      * 
@@ -148,20 +155,21 @@ public class QuestionModel implements Serializable {
      */
     public Map<AxisType, AxisMeta> getAxisMetas() {
         if (axisMetas == null) {
-            this.axisMetas = Maps.newHashMap ();
+            this.axisMetas = Maps.newHashMap();
         }
         return axisMetas;
     }
-
+    
     /**
      * setter method for property axisMetas
      * 
-     * @param axisMetas the axisMetas to set
+     * @param axisMetas
+     *            the axisMetas to set
      */
     public void setAxisMetas(Map<AxisType, AxisMeta> axisMetas) {
         this.axisMetas = axisMetas;
     }
-
+    
     /**
      * getter method for property queryConditions
      * 
@@ -173,16 +181,17 @@ public class QuestionModel implements Serializable {
         }
         return queryConditions;
     }
-
+    
     /**
      * setter method for property queryConditions
      * 
-     * @param queryConditions the queryConditions to set
+     * @param queryConditions
+     *            the queryConditions to set
      */
     public void setQueryConditions(Map<String, MetaCondition> queryConditions) {
         this.queryConditions = queryConditions;
     }
-
+    
     /**
      * getter method for property sortRecord
      * 
@@ -191,16 +200,17 @@ public class QuestionModel implements Serializable {
     public SortRecord getSortRecord() {
         return sortRecord;
     }
-
+    
     /**
      * setter method for property sortRecord
      * 
-     * @param sortRecord the sortRecord to set
+     * @param sortRecord
+     *            the sortRecord to set
      */
     public void setSortRecord(SortRecord sortRecord) {
         this.sortRecord = sortRecord;
     }
-
+    
     /**
      * getter method for property useCache
      * 
@@ -209,16 +219,17 @@ public class QuestionModel implements Serializable {
     public boolean isUseCache() {
         return useCache;
     }
-
+    
     /**
      * setter method for property useCache
      * 
-     * @param useCache the useCache to set
+     * @param useCache
+     *            the useCache to set
      */
     public void setUseCache(boolean useCache) {
         this.useCache = useCache;
     }
-
+    
     /**
      * getter method for property queryConditionLimit
      * 
@@ -230,16 +241,17 @@ public class QuestionModel implements Serializable {
         }
         return queryConditionLimit;
     }
-
+    
     /**
      * setter method for property queryConditionLimit
      * 
-     * @param queryConditionLimit the queryConditionLimit to set
+     * @param queryConditionLimit
+     *            the queryConditionLimit to set
      */
     public void setQueryConditionLimit(QueryConditionLimit queryConditionLimit) {
         this.queryConditionLimit = queryConditionLimit;
     }
-
+    
     /**
      * getter method for property pageInfo
      * 
@@ -248,16 +260,17 @@ public class QuestionModel implements Serializable {
     public PageInfo getPageInfo() {
         return pageInfo;
     }
-
+    
     /**
      * setter method for property pageInfo
      * 
-     * @param pageInfo the pageInfo to set
+     * @param pageInfo
+     *            the pageInfo to set
      */
     public void setPageInfo(PageInfo pageInfo) {
         this.pageInfo = pageInfo;
     }
-
+    
     /**
      * getter method for property needSummary
      * 
@@ -266,16 +279,17 @@ public class QuestionModel implements Serializable {
     public boolean isNeedSummary() {
         return needSummary;
     }
-
+    
     /**
      * setter method for property needSummary
      * 
-     * @param needSummary the needSummary to set
+     * @param needSummary
+     *            the needSummary to set
      */
     public void setNeedSummary(boolean needSummary) {
         this.needSummary = needSummary;
     }
-
+    
     /**
      * get requestParams
      * 
@@ -287,16 +301,17 @@ public class QuestionModel implements Serializable {
         }
         return requestParams;
     }
-
+    
     /**
      * set requestParams with requestParams
      * 
-     * @param requestParams the requestParams to set
+     * @param requestParams
+     *            the requestParams to set
      */
     public void setRequestParams(Map<String, String> requestParams) {
         this.requestParams = requestParams;
     }
-
+    
     /**
      * get cubeId
      * 
@@ -305,16 +320,17 @@ public class QuestionModel implements Serializable {
     public String getCubeId() {
         return cubeId;
     }
-
+    
     /**
      * set cubeId with cubeId
      * 
-     * @param cubeId the cubeId to set
+     * @param cubeId
+     *            the cubeId to set
      */
     public void setCubeId(String cubeId) {
         this.cubeId = cubeId;
     }
-
+    
     /**
      * get dataSourceInfoKey
      * 
@@ -323,16 +339,17 @@ public class QuestionModel implements Serializable {
     public String getDataSourceInfoKey() {
         return dataSourceInfoKey;
     }
-
+    
     /**
      * set dataSourceInfoKey with dataSourceInfoKey
      * 
-     * @param dataSourceInfoKey the dataSourceInfoKey to set
+     * @param dataSourceInfoKey
+     *            the dataSourceInfoKey to set
      */
     public void setDataSourceInfoKey(String dataSourceInfoKey) {
         this.dataSourceInfoKey = dataSourceInfoKey;
     }
-
+    
     /**
      * get isUseIndex
      * 
@@ -341,37 +358,59 @@ public class QuestionModel implements Serializable {
     public boolean isUseIndex() {
         return isUseIndex;
     }
-
+    
     /**
      * set isUseIndex with isUseIndex
      * 
-     * @param isUseIndex the isUseIndex to set
+     * @param isUseIndex
+     *            the isUseIndex to set
      */
     public void setUseIndex(boolean isUseIndex) {
         this.isUseIndex = isUseIndex;
     }
-
+    
     /**
      * @return the filterBlank
      */
     public boolean isFilterBlank() {
         return filterBlank;
     }
-
+    
     /**
-     * @param filterBlank the filterBlank to set
+     * @param filterBlank
+     *            the filterBlank to set
      */
     public void setFilterBlank(boolean filterBlank) {
         this.filterBlank = filterBlank;
     }
-
+    
+    /**
+     * default generate get dataSourceInfo
+     * 
+     * @return the dataSourceInfo
+     */
+    public DataSourceInfo getDataSourceInfo() {
+        return dataSourceInfo;
+    }
+    
+    /**
+     * default generate set dataSourceInfo
+     * 
+     * @param dataSourceInfo
+     *            the dataSourceInfo to set
+     */
+    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
+        this.dataSourceInfo = dataSourceInfo;
+    }
+    
     // /**
     // * 针对在行或者列上有的维度，如果没有在条件中的话，那么需要在条件中添加一个默认条件的维值
     // */
     // public void completeQueryCondition() {
     // AxisMeta axisMeta = null;
     // AxisType axisType = AxisType.COLUMN;
-    // while (axisType != null && (axisMeta = getAxisMetas().get(axisType)) != null) {
+    // while (axisType != null && (axisMeta = getAxisMetas().get(axisType)) !=
+    // null) {
     // if (CollectionUtils.isNotEmpty(axisMeta.getCrossjoinDims())) {
     // for (String dimName : axisMeta.getCrossjoinDims()) {
     // // 如果没有设置条件的话，添加一个默认的空条件进去，防止丢失
@@ -387,5 +426,5 @@ public class QuestionModel implements Serializable {
     // }
     // }
     // }
-
+    
 }

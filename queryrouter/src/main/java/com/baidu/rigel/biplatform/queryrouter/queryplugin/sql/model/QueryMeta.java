@@ -121,13 +121,13 @@ public class QueryMeta implements Serializable {
      */
     public void addSqlColumn(String cubeKey, SqlColumn sqlColumn) {
         if (cubeColumns.get(cubeKey) != null) {
-            logger.warn("cubeColumns contents this sqlcolumn, cubekey:{}", cubeKey);
+            logger.warn("cubeColumns contents cubekey:{}", cubeKey);
         }
         cubeColumns.put(cubeKey, sqlColumn);
         if (sqlColumn.getType() == ColumnType.COMMON || sqlColumn.getType() == ColumnType.JOIN) {
             String sqlKey = getSqlColumnKey(sqlColumn.getTableName(), sqlColumn.getTableFieldName());
             if (sqlColumns.get(sqlKey) != null) {
-                logger.warn("cubeColumns contents this sqlcolumn, sqlkey:{}", sqlKey);
+                logger.warn("cubeColumns contents sqlkey:{}", sqlKey);
             }
             sqlColumns.put(sqlKey, sqlColumn);
         }

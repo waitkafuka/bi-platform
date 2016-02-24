@@ -17,35 +17,36 @@ package com.baidu.rigel.biplatform.ac.util.deserialize;
 
 import java.lang.reflect.Type;
 
-import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection.DataSourceType;
-import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.data.impl.SqlDataSourceInfo;
+import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
+import com.baidu.rigel.biplatform.ac.query.model.SqlQuestionModel;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 /**
- * 数据源信息接口反序列化
+ * questionModel对象反序列
  * 
- * @author xiaoming.chen
+ * @author luowenlei
  *
  */
-public class DataSourceInfoDeserialize implements JsonDeserializer<DataSourceInfo> {
-
+public class QuestionModelDeserialize implements JsonDeserializer<QuestionModel> {
+    
     @Override
-    public DataSourceInfo deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-            throws JsonParseException {
+    public QuestionModel deserialize(JsonElement json, Type typeOfT,
+            JsonDeserializationContext context) throws JsonParseException {
         if (json.isJsonObject()) {
-            DataSourceType dataSourceType =
-                    context.deserialize(json.getAsJsonObject().get("dataSourceType"), DataSourceType.class);
-            if (dataSourceType.equals(DataSourceType.SQL)
-                    || dataSourceType.equals(DataSourceType.ASYN)) {
-                return context.deserialize(json, SqlDataSourceInfo.class);
+            JsonObject questionModelJsonObj = json.getAsJsonObject();
+            
+            if (questionModelJsonObj.get("sql") != null) {
+                return context.deserialize(questionModelJsonObj, SqlQuestionModel.class);
+            } else if (questionModelJsonObj.get("cube") != null) {
+                return context.deserialize(questionModelJsonObj, ConfigQuestionModel.class);
             }
-
         }
         return null;
     }
-
+    
 }

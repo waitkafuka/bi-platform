@@ -7,13 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
+import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryObject;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.sql.Expression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.QueryMeta;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
+import com.google.common.collect.Lists;
 
 
 /**
@@ -23,6 +27,11 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
  *
  */
 public class WhereDataUtils {
+    
+    /**
+     * logger
+     */
+    private static Logger logger = LoggerFactory.getLogger(WhereDataUtils.class);
     
     /**
      * 
@@ -49,14 +58,28 @@ public class WhereDataUtils {
             }
             List<Object> valueList = new ArrayList<Object>();
             for (QueryObject qo : expression.getQueryValues()) {
+                if (qo == null) {
+                    break;
+                }
                 for (String value : qo.getLeafValues()) {
                     if (StringUtils.isEmpty(sqlColumn.getDataType())) {
-                    // by default
+                        // by default
                         valueList.add(value);
                     } else if (isChar) {
                         valueList.add(value);
                     } else {
-                        valueList.add(new BigDecimal(value));
+                        try {
+                            valueList.add(new BigDecimal(value));
+                        } catch (Exception e) {
+                            logger.error(
+                                    "queryId:{} sqlColumnName:{},sqlColumnDataType:{},"
+                                            + " DataModelUtils.isChar(sqlColumn.getDataType()) == false,"
+                                            + "but value is:{} ,can't convert BigDecimal, system will add where 1=2",
+                                    QueryRouterContext.getQueryId(), sqlColumn.getName(),
+                                    sqlColumn.getDataType(), value);
+                            valueList = Lists.newArrayList();
+                            break;
+                        }
                     }
                 }
             }

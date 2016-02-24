@@ -61,6 +61,10 @@ public class JdbcTableExistCheckServiceImpl implements TableExistCheckService {
      * @return List<String> 存在的表
      */
     public String getExistTableList(String cubeSource, JdbcHandler queryHandler) {
+        if (cubeSource.indexOf(",") < 0) {
+        // 只有一个事实表的情况不需要检查
+            return cubeSource;
+        }
         SqlDataSourceInfo sqlDataSourceInfo = (SqlDataSourceInfo) queryHandler.getDataSourceInfo();
         // 多事实表的情况
         List<String> result = new ArrayList<String>();

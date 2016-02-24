@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
+import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.DimDataDefine;
 import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.IndDataDefine;
 import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.MutilDimTable;
 import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.OperationColumnDefine;
@@ -18,9 +19,20 @@ import com.baidu.rigel.biplatform.ma.resource.utils.OlapLinkUtils;
 import com.google.common.collect.Lists;
 
 public class MutilDimTableUtils {
+
+    private static final String PERSONALITY_SUMMARY_CAPTION = "summaryCaption";
+
+    private static final String DEFAULT_SUMMARY_CAPTION = "汇总";
+    private static final String DEFAULT_SUMMARY_CAPTION2 = "合计";
+
     /**
      * 包装新的MutilDimTable
      * 
+     * @param formatModel
+     * @param table
+     * @param otherSetting
+     */
+    /**
      * @param formatModel
      * @param table
      * @param otherSetting
@@ -76,6 +88,25 @@ public class MutilDimTableUtils {
             }
 
         }
+
+        // 针对每个报表都可分别设置维度“汇总”的展示文案，然后在此逐一进行替换
+        Object summaryCaptionObj = otherSetting.get(PERSONALITY_SUMMARY_CAPTION);
+        String summaryCaptionStr = "";
+        if (summaryCaptionObj != null && StringUtils.isNotEmpty(summaryCaptionObj.toString())) {
+            summaryCaptionStr = summaryCaptionObj.toString();
+        }
+        if (StringUtils.isNotEmpty(summaryCaptionStr)) {
+            for (DimDataDefine dimDataDefine : table.getDims()) {
+                String origName = dimDataDefine.getName();
+                // 当发现caption的最后文案是“汇总”或者“合计”的时候，才拿个性化的汇总文案进行替换
+                if (origName.lastIndexOf(DEFAULT_SUMMARY_CAPTION) == origName.length() - 2
+                        || origName.lastIndexOf(DEFAULT_SUMMARY_CAPTION2) == origName.length() - 2) {
+                    // String newName = origName.replaceAll(DEFAULT_SUMMARY_CAPTION, summaryCaptionStr);
+                    dimDataDefine.setName(summaryCaptionStr);
+                }
+            }
+        }
+
         boolean isShowZero = DataModelUtils.isShowZero(otherSetting);
         if (isShowZero) {
             for (Map<String, String> dataMap : table.getData()) {
@@ -87,6 +118,7 @@ public class MutilDimTableUtils {
             }
 
         }
+
         /**
          * 为table增加操作列属性, add by majun
          */

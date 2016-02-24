@@ -15,10 +15,8 @@
  */
 package com.baidu.rigel.biplatform.queryrouter.query.service;
 
-import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
-import com.baidu.rigel.biplatform.queryrouter.handle.model.QueryHandler;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
 
 /**
@@ -38,6 +36,6 @@ public interface QueryService {
      * @return 结果
      */
     public DataModel query(QuestionModel questionModel,
-            QueryContext queryContext, QueryHandler newQueryRequest) throws MiniCubeQueryException;
+            QueryContext queryContext) throws Exception, RuntimeException;
 
 }

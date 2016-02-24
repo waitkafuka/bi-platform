@@ -16,7 +16,7 @@
 package com.baidu.rigel.biplatform.queryrouter.query.service.utils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,8 +69,36 @@ public class AggregateCompute {
      * @return LinkedList<ResultRecord> 计算后的数据
      */
     public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> dataList,
-        int dimSize, List<QueryMeasure> queryMeasures) {
-        
+            int dimSize, List<QueryMeasure> queryMeasures) {
+        return AggregateCompute.aggregate(dataList, dimSize, queryMeasures, true);
+    }
+    
+    
+    /**
+     * 聚集计算
+     * 
+     * @param dataList
+     *            待计算的数据
+     * @param query
+     *            原始查询请求
+     * @return LinkedList<ResultRecord> 计算后的数据
+     */
+    public static List<SearchIndexResultRecord> aggregateWithoutDc(List<SearchIndexResultRecord> dataList,
+            int dimSize, List<QueryMeasure> queryMeasures) {
+        return AggregateCompute.aggregate(dataList, dimSize, queryMeasures, false);
+    }
+    
+    /**
+     * 聚集计算
+     * 
+     * @param dataList
+     *            待计算的数据
+     * @param query
+     *            原始查询请求
+     * @return LinkedList<ResultRecord> 计算后的数据
+     */
+    public static List<SearchIndexResultRecord> aggregate(List<SearchIndexResultRecord> dataList,
+        int dimSize, List<QueryMeasure> queryMeasures, boolean convertDistinctSize) {
         if (CollectionUtils.isEmpty(queryMeasures) || CollectionUtils.isEmpty(dataList)) { 
             LOGGER.info("queryId:{} no need to group.", QueryRouterContext.getQueryId());
             return dataList;
@@ -114,7 +142,7 @@ public class AggregateCompute {
                     index = i + dimSize;
                     if (measure.getAggregator().equals(Aggregator.DISTINCT_COUNT)) {
                         if(!x.getDistinctMeasures().containsKey(i)) {
-                            x.getDistinctMeasures().put(i, new HashSet<>(defaultSize));
+                            x.getDistinctMeasures().put(i, new LinkedHashSet<>(defaultSize));
                         }
                         
                         if(y.getDistinctMeasures().containsKey(i)) {
@@ -141,7 +169,12 @@ public class AggregateCompute {
             groupResult.values().forEach(record -> {
                 for (int index : countIndex) {
                     if(record.getDistinctMeasures() != null && record.getDistinctMeasures().containsKey(index)) {
-                        record.setField(dimSize + index, record.getDistinctMeasures().get(index).size());
+                        if (convertDistinctSize) {
+                            record.setField(dimSize + index, record.getDistinctMeasures().get(index).size());
+                        } else {
+                            record.setField(dimSize + index, record.getDistinctMeasures().get(index));
+                        }
+                        
                     }
                 }
             });

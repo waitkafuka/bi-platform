@@ -64,7 +64,7 @@ public class SqlColumnUtils {
      * 
      * @return List needcolumns hashmap
      */
-    public static List<SqlColumn> getNeedColumns(
+    public static List<SqlColumn> getSqlNeedColumns(
             QueryMeta queryMeta, List<String> selections) {
         List<SqlColumn> needColumns = Lists.newArrayList();
         List<String> calKeys = Lists.newArrayList();
@@ -80,6 +80,49 @@ public class SqlColumnUtils {
                 }
             } else if (sqlColumn.getOperator() != null
                     && sqlColumn.getOperator().getAggregator() == Aggregator.CALCULATED) {
+                calKeys = getRealMeasureKey(sqlColumn.getOperator().getFormula(), 
+                        sqlColumn.getTableName(), calKeys);
+            } else {
+                needColumns.add(queryMeta.getSqlColumnByCubeKey(selectName));
+            }
+        }
+        // 添加计算列的指标数据
+        for (String key : calKeys) {
+            SqlColumn sqlColumn = queryMeta.getSqlColumn(key);
+            if (sqlColumn != null
+                    
+                    && !needColumns.contains(sqlColumn)) {
+                needColumns.add(sqlColumn);
+            }
+        }
+        return needColumns;
+    }
+    
+    /**
+     * 获取questionModel中需要查询的Columns
+     * 
+     * @param Map<String, SqlColumn> allColums 元数据信息
+     * @param List<String> selecions 选取的字符串信息
+     * 
+     * @return List needcolumns hashmap
+     */
+    public static List<SqlColumn> getAllNeedColumns(
+            QueryMeta queryMeta, List<String> selections) {
+        List<SqlColumn> needColumns = Lists.newArrayList();
+        List<String> calKeys = Lists.newArrayList();
+        if (CollectionUtils.isEmpty(queryMeta.getAllColumns())) {
+            return needColumns;
+        }
+        // 获取列元数据
+        for (String selectName : selections) {
+            SqlColumn sqlColumn = queryMeta.getSqlColumnByCubeKey(selectName);
+            if (sqlColumn.getType() == ColumnType.GROUP && !CollectionUtils.isEmpty(sqlColumn.getKeys())) {
+                for (String key : sqlColumn.getKeys()) {
+                    needColumns.add(queryMeta.getSqlColumnByCubeKey(key));
+                }
+            } else if (sqlColumn.getOperator() != null
+                    && sqlColumn.getOperator().getAggregator() == Aggregator.CALCULATED
+                    && sqlColumn.getType() != ColumnType.MEASURE_CALLBACK) {
                 calKeys = getRealMeasureKey(sqlColumn.getOperator().getFormula(), 
                         sqlColumn.getTableName(), calKeys);
             } else {

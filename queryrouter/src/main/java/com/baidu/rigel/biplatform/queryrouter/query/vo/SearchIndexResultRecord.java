@@ -18,8 +18,8 @@ package com.baidu.rigel.biplatform.queryrouter.query.vo;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -47,7 +47,7 @@ public class SearchIndexResultRecord implements Serializable, TesseractResultRec
     /**
      * distinctMeasures
      */
-    private ConcurrentHashMap<Integer, Set<Serializable>> distinctMeasures = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, LinkedHashSet<Serializable>> distinctMeasures = new ConcurrentHashMap<>();
     
     /**
      * 构造方法
@@ -230,7 +230,7 @@ public class SearchIndexResultRecord implements Serializable, TesseractResultRec
      * 
      * @return the distinctMeasures
      */
-    public ConcurrentHashMap<Integer, Set<Serializable>> getDistinctMeasures() {
+    public ConcurrentHashMap<Integer, LinkedHashSet<Serializable>> getDistinctMeasures() {
         
         return distinctMeasures;
     }
@@ -241,7 +241,7 @@ public class SearchIndexResultRecord implements Serializable, TesseractResultRec
      * @param distinctMeasures
      *            the distinctMeasures to set
      */
-    public void setDistinctMeasures(ConcurrentHashMap<Integer, Set<Serializable>> distinctMeasures) {
+    public void setDistinctMeasures(ConcurrentHashMap<Integer, LinkedHashSet<Serializable>> distinctMeasures) {
         
         this.distinctMeasures = distinctMeasures;
     }

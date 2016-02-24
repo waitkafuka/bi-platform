@@ -39,7 +39,9 @@ import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.stereotype.Service;
 
+import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
+import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.PropertiesFileUtils;
 import com.baidu.rigel.biplatform.queryrouter.handle.QueryRouterContext;
 import com.baidu.rigel.biplatform.queryrouter.query.service.utils.AggregateCompute;
@@ -328,6 +330,7 @@ public class JdbcHandlerImpl implements JdbcHandler {
         }
         Meta meta = new Meta(selectListOrder.toArray(new String[0]));
         SearchIndexResultSet resultSet = new SearchIndexResultSet(meta, 1000000);
+        SearchIndexResultSet resultSetTemp = new SearchIndexResultSet(meta, 1000000);
         final List<Integer> aggInfo = Lists.newArrayList();
         jdbcTemplate.query(new PreparedStatementCreator() {
             
@@ -356,20 +359,60 @@ public class JdbcHandlerImpl implements JdbcHandler {
                 
                 SearchIndexResultRecord record = new SearchIndexResultRecord(fieldValues
                         .toArray(new Serializable[0]), groupBy);
-                resultSet.addRecord(record);
-                if (resultSet.getDataList().size() > memoryMaxSize) {
-                    resultSet.setDataList(
-                            AggregateCompute.aggregate(
-                                    resultSet.getDataList(), groupByListStr.size(), queryMeasures));
+                resultSetTemp.addRecord(record);
+                if (resultSetTemp.getDataList().size() > memoryMaxSize) {
+                    // 第一次计算：sum  count 聚集计算，distinct count 行值分堆
+                    resultSet.addAll(
+                            AggregateCompute.aggregateWithoutDc(
+                                    resultSetTemp.getDataList(), groupByListStr.size(), queryMeasures));
                     aggInfo.add(resultSet.size());
+                    resultSetTemp.clear(meta, 1000000);
                     System.gc();
                 }
             }
         });
+        
+        // 计算剩余数据
+        resultSet.addAll(
+                AggregateCompute.aggregateWithoutDc(
+                        resultSetTemp.getDataList(), groupByListStr.size(), queryMeasures));
+        aggInfo.add(resultSet.size());
+        System.gc();
+        
+        // 计算distinct count || count hashSet size
+        List<QueryMeasure> queryMeasuresDp = DeepcopyUtils.deepCopy(queryMeasures);
+        if (this.contentsCountOperator(queryMeasures)) {
+            queryMeasuresDp.forEach(measure -> {
+                if (measure.getAggregator().equals(Aggregator.COUNT)) {
+                    measure.setAggregator(Aggregator.SUM);
+                }
+            });
+        }
+        
+        // 最终计算
+        resultSet.setDataList(AggregateCompute.aggregate(
+                resultSet.getDataList(), groupByListStr.size(), queryMeasuresDp));
+        
         logger.info("queryId:{} select sql cost:{} ms resultsize:{} aggTimes:{} afterMemSizePerAgg:{}",
                 QueryRouterContext.getQueryId(), System.currentTimeMillis() - begin,
                 resultSet == null ? null : resultSet.size(), aggInfo.size(), this.convertListToString(aggInfo));
         return resultSet;
+    }
+    
+    /**
+     * contentsDistinctOperator
+     *
+     * @param queryMeasures
+     * @return
+     */
+    private boolean contentsCountOperator(List<QueryMeasure> queryMeasures) {
+        for (QueryMeasure queryMeasure : queryMeasures) {
+            if (queryMeasure.getAggregator() == Aggregator.DISTINCT_COUNT
+                    || queryMeasure.getAggregator() == Aggregator.COUNT) {
+                return true;
+            }
+        }
+        return false;
     }
     
     /**

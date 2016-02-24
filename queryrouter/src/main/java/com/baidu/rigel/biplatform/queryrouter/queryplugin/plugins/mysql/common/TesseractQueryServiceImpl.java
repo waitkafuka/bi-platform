@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
 import com.baidu.rigel.biplatform.ac.query.MiniCubeConnection;
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
@@ -34,7 +33,6 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.PropertiesFileUtils;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
-import com.baidu.rigel.biplatform.queryrouter.handle.model.QueryHandler;
 import com.baidu.rigel.biplatform.queryrouter.query.service.QueryService;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
 
@@ -62,8 +60,7 @@ public class TesseractQueryServiceImpl implements QueryService {
      * com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext)
      */
     @Override
-    public DataModel query(QuestionModel questionModel, QueryContext queryContext,
-            QueryHandler newQueryRequest) throws MiniCubeQueryException {
+    public DataModel query(QuestionModel questionModel, QueryContext queryContext) throws Exception {
         // TODO Auto-generated method stub
         long current = System.currentTimeMillis();
         Map<String, String> params = new HashMap<String, String>();
@@ -104,7 +101,7 @@ public class TesseractQueryServiceImpl implements QueryService {
                 logger.error("queryId:{} execute query with tesseract occur an Error!"
                         + "pls check tesseract log; tesseract msg:{}", questionModel.getQueryId(),
                         responseResult.getStatusInfo());
-                throw new MiniCubeQueryException("execute query with tesseract occur an Error");
+                throw new Exception("execute query with tesseract occur an Error");
             } else {
                 String dataModelJson = responseResult.getData();
                 DataModel dataModel = JsonUnSeriallizableUtils.dataModelFromJson(dataModelJson);
@@ -118,7 +115,7 @@ public class TesseractQueryServiceImpl implements QueryService {
                     + "pls check tesseract log; tesseract msg:{}", questionModel.getQueryId(),
                     e.getMessage());
             e.printStackTrace();
-            throw new MiniCubeQueryException(e);
+            throw e;
         }
     }
     

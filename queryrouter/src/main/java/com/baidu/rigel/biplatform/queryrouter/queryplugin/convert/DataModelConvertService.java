@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.baidu.rigel.biplatform.ac.query.data.DataModel;
@@ -54,8 +55,12 @@ public class DataModelConvertService {
         // init DataModel
         DataModel dataModel = getEmptyDataModel(needColums);
         // 设置DataModel的ColBased Data
-        fillModelTableData(dataModel, needColums, rowBasedList);
-        return dataModel;
+        if (CollectionUtils.isEmpty(rowBasedList)) {
+            return dataModel;
+        } else {
+            fillModelTableData(dataModel, needColums, rowBasedList);
+            return dataModel;
+        }
     }
     
     /**

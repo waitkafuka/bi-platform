@@ -13,12 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model;
+package com.baidu.rigel.biplatform.ac.query.model;
 
 import java.io.Serializable;
-
-import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
-import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 
 /**
  * 平面表问题模型
@@ -27,51 +24,54 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
  *
  */
 public class SqlQuestionModel extends QuestionModel implements Serializable {
-
+    
     /**
      * default generate id
      */
     private static final long serialVersionUID = 1576666141762101245L;
     
     /**
-     * dataSourceInfo 问题模型对应的数据源信息（有数据源的key优先从缓存取）
-     */
-    private DataSourceInfo dataSourceInfo;
-    
-    /**
      * sql,查询 sql
      */
     private String sql;
-
+    
     /**
-     * default generate get dataSourceInfo
-     * @return the dataSourceInfo
+     * 是否是异步查询
      */
-    public DataSourceInfo getDataSourceInfo() {
-        return dataSourceInfo;
-    }
-
-    /**
-     * default generate set dataSourceInfo
-     * @param dataSourceInfo the dataSourceInfo to set
-     */
-    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
-        this.dataSourceInfo = dataSourceInfo;
-    }
-
+    private boolean isAsyn = false;
+    
     /**
      * default generate get sql
+     * 
      * @return the sql
      */
     public String getSql() {
         return sql;
     }
-
+    
     /**
      * default generate set sql
-     * @param sql the sql to set
+     * 
+     * @param sql
+     *            the sql to set
      */
     public void setSql(String sql) {
         this.sql = sql;
+    }
+
+    /**
+     * default generate get isAsyn
+     * @return the isAsyn
+     */
+    public boolean isAsyn() {
+        return isAsyn;
+    }
+
+    /**
+     * default generate set isAsyn
+     * @param isAsyn the isAsyn to set
+     */
+    public void setAsyn(boolean isAsyn) {
+        this.isAsyn = isAsyn;
     }
 }

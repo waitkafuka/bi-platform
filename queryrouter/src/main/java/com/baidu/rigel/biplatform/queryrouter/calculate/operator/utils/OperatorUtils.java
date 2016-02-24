@@ -10,6 +10,7 @@ import org.apache.commons.collections.CollectionUtils;
 import com.baidu.rigel.biplatform.ac.model.Aggregator;
 import com.baidu.rigel.biplatform.queryrouter.calculate.operator.model.OperatorType;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.Column;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.ColumnType;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
 import com.google.common.collect.Lists;
 
@@ -63,7 +64,7 @@ public class OperatorUtils {
         }
         return false;
     }
-    
+
     /**
      * 获取判断此查询是否有AGG计算
      * 
@@ -78,6 +79,23 @@ public class OperatorUtils {
                 isAggsql = isAggSqlColumn((SqlColumn) column);
             }
             if (isAggsql) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取判断此查询是为callback 指标
+     * 
+     * @return OperatorType
+     */
+    public static boolean isMeasureCallBackQuery(List<SqlColumn> needColumns) {
+        if (CollectionUtils.isEmpty(needColumns)) {
+            return false;
+        }
+        for (SqlColumn sqlColumn : needColumns) {
+            if (sqlColumn.getType() == ColumnType.MEASURE_CALLBACK) {
                 return true;
             }
         }

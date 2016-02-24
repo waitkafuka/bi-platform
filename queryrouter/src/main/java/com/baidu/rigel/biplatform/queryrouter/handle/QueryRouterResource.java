@@ -57,9 +57,7 @@ import com.baidu.rigel.biplatform.ac.util.ResponseResultUtils;
 import com.baidu.rigel.biplatform.queryrouter.query.exception.MetaException;
 import com.baidu.rigel.biplatform.queryrouter.query.service.MetaDataService;
 import com.baidu.rigel.biplatform.queryrouter.query.service.QueryContextBuilder;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPlugin;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.QueryPluginFactory;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.QuestionModelTransformationException;
+import com.baidu.rigel.biplatform.queryrouter.query.service.QueryService;
 import com.google.gson.JsonSyntaxException;
 
 /**
@@ -70,7 +68,8 @@ import com.google.gson.JsonSyntaxException;
  *         2015-05-07
  */
 /**
- * 类QueryRouterResource.java的实现描述：TODO 类实现描述 
+ * 类QueryRouterResource.java的实现描述：TODO 类实现描述
+ * 
  * @author luowenlei 2015年12月28日 下午3:41:04
  */
 @RestController
@@ -97,12 +96,6 @@ public class QueryRouterResource {
      * 入参参的参数“问题模型参数”
      */
     private static final String PRAMA_QUESTION = "question";
-    
-    /**
-     * queryPluginFactory
-     */
-    @Resource
-    private QueryPluginFactory queryPluginFactory;
     
     /**
      * metaDataService
@@ -132,11 +125,13 @@ public class QueryRouterResource {
                 + questionModel.getQueryId());
         QueryRouterContext.setQueryInfo(questionModel.getQueryId());
         logger.info("queryId:{} query current handle size:{}, begin handle questionmodel json:{}",
-                questionModel.getQueryId(), 
-                QueryRouterContext.getQueryCurrentHandleSize(), questionStr);
+                questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize(),
+                questionStr);
         // get DataModel
         try {
-            DataModel dataModel = this.query(questionModel);
+            QueryService queryService = QueryServiceFactory.getQueryService(questionModel
+                    .getClass());
+            DataModel dataModel = queryService.query(questionModel, null);
             if (dataModel == null) {
                 return ResponseResultUtils.getErrorResult("tesseract occur an error", 1);
             }
@@ -152,12 +147,7 @@ public class QueryRouterResource {
             logger.info("queryId:{} response query toal cost:{} ms", questionModel.getQueryId(),
                     System.currentTimeMillis() - begin);
             return ResponseResultUtils.getCorrectResult(SUCCESS, dataModelJson);
-        } catch (JsonSyntaxException e) {
-            logger.error("queryId:{} error msg:{}", questionModel.getQueryId(), e.getMessage());
-            // 说明模型参数传入有问题
-            return ResponseResultUtils.getErrorResult(
-                    "json syntax exception,json is not well formed.", 100);
-        } catch (QuestionModelTransformationException e) {
+        } catch (Exception e) {
             logger.error("queryId:{} error msg:{}", questionModel.getQueryId(), e.getMessage());
             // 说明模型参数传入有问题
             return ResponseResultUtils.getErrorResult(
@@ -168,22 +158,6 @@ public class QueryRouterResource {
                     questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());
             QueryRouterContext.removeQueryInfo();
         }
-    }
-    
-    
-    /**
-     * 将传入的questionModel通过dispatch后分发到相应的Plugin，然后转换成DataModel对象
-     * 
-     * @param questionStr
-     *            request questionStr
-     * @return DataModel DataModel
-     */
-    private DataModel query(QuestionModel questionModel) {
-        long begin = System.currentTimeMillis();
-        QueryPlugin queryPlugin = queryPluginFactory.getPlugin(questionModel);
-        logger.info("queryId:{} getQueryPlugin cost:{}", questionModel.getQueryId(),
-                System.currentTimeMillis() - begin);
-        return queryPlugin.query(questionModel);
     }
     
     @RequestMapping(value = "/meta/getMembers", method = { RequestMethod.POST })
@@ -234,8 +208,9 @@ public class QueryRouterResource {
                 StringBuilder sb = new StringBuilder();
                 sb.append("get ").append(members.size()).append(" members from dimension:")
                         .append(dimName).append(" in level:").append(levelName);
-                logger.info("queryId:{} cost:{}ms get members finished. data:{}", QueryRouterContext.getQueryId(),
-                        System.currentTimeMillis() - start, sb.toString());
+                logger.info("queryId:{} cost:{}ms get members finished. data:{}",
+                        QueryRouterContext.getQueryId(), System.currentTimeMillis() - start,
+                        sb.toString());
                 return ResponseResultUtils.getCorrectResult("query success.",
                         AnswerCoreConstant.GSON.toJson(metaJsons));
             }
@@ -251,8 +226,8 @@ public class QueryRouterResource {
             errorMsg = "meta is illegal," + e.getMessage();
         }
         // 走到这里说明已经出错了，状态码暂时设为100，后续加个状态码表
-        logger.info("queryId:{} cost:{}ms get members finished. errorMsg:{}", QueryRouterContext.getQueryId(),
-                System.currentTimeMillis() - start, errorMsg);
+        logger.info("queryId:{} cost:{}ms get members finished. errorMsg:{}",
+                QueryRouterContext.getQueryId(), System.currentTimeMillis() - start, errorMsg);
         return ResponseResultUtils.getErrorResult(errorMsg, 100);
     }
     
@@ -304,8 +279,9 @@ public class QueryRouterResource {
                     StringBuilder sb = new StringBuilder();
                     sb.append("get ").append(children.size()).append(" children from dimension:")
                             .append(metaName).append(" by uniqueName:").append(uniqueName);
-                    logger.info("queryId:{} cost:{}ms get children finished. data:{}", QueryRouterContext.getQueryId(),
-                            System.currentTimeMillis() - start, sb.toString());
+                    logger.info("queryId:{} cost:{}ms get children finished. data:{}",
+                            QueryRouterContext.getQueryId(), System.currentTimeMillis() - start,
+                            sb.toString());
                     return ResponseResultUtils.getCorrectResult("query success.",
                             AnswerCoreConstant.GSON.toJson(metaJsons));
                 }
@@ -325,8 +301,8 @@ public class QueryRouterResource {
             errorMsg = "server error,msg" + e.getMessage();
         }
         // 走到这里说明已经出错了，状态码暂时设为100，后续加个状态码表
-        logger.info("queryId:{} cost:{}ms get children finished. errorMsg:{}", QueryRouterContext.getQueryId(),
-                System.currentTimeMillis() - start, errorMsg);
+        logger.info("queryId:{} cost:{}ms get children finished. errorMsg:{}",
+                QueryRouterContext.getQueryId(), System.currentTimeMillis() - start, errorMsg);
         return ResponseResultUtils.getErrorResult(errorMsg, 100);
     }
     
@@ -352,14 +328,16 @@ public class QueryRouterResource {
             
             if (uniqueNameCondition != null && uniqueNameCondition instanceof DimensionCondition) {
                 DimensionCondition dimCondition = (DimensionCondition) uniqueNameCondition;
-                String uniqueName = CollectionUtils.isNotEmpty(dimCondition.getQueryDataNodes()) ? dimCondition
-                        .getQueryDataNodes().get(0).getUniqueName() : null;
+                String nodeUniqueName = dimCondition.getQueryDataNodes().get(0).getUniqueName();
+                String uniqueName = CollectionUtils
+                        .isNotEmpty(dimCondition.getQueryDataNodes()) ? nodeUniqueName : null;
                 Cube cube = questionModel.getCube();
                 MiniCubeMember member = metaDataService
                         .lookUp(questionModel.getDataSourceInfo(), cube, uniqueName,
                                 QueryContextBuilder.getRequestParams(questionModel, cube));
-                logger.info("queryId:{} cost:{}ms lookUp finished. return member name:{}", QueryRouterContext.getQueryId(),
-                        System.currentTimeMillis() - start, member.getName());
+                logger.info("queryId:{} cost:{}ms lookUp finished. return member name:{}",
+                        QueryRouterContext.getQueryId(), System.currentTimeMillis() - start,
+                        member.getName());
                 return ResponseResultUtils.getCorrectResult("return member:" + member.getName(),
                         JsonUnSeriallizableUtils.parseMember2MetaJson(member));
             }
@@ -373,8 +351,8 @@ public class QueryRouterResource {
             e.printStackTrace();
             errorMsg = "unexpected error:" + e.getMessage();
         }
-        logger.info("queryId:{} cost:{}ms lookUp finished. errorMsg:{}", QueryRouterContext.getQueryId(),
-                System.currentTimeMillis() - start, errorMsg);
+        logger.info("queryId:{} cost:{}ms lookUp finished. errorMsg:{}",
+                QueryRouterContext.getQueryId(), System.currentTimeMillis() - start, errorMsg);
         // 走到这里说明已经出错了，状态码暂时设为100，后续加个状态码表
         return ResponseResultUtils.getErrorResult(errorMsg, 100);
     }
@@ -393,10 +371,11 @@ public class QueryRouterResource {
                 questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize());
         try {
             long beginGet = System.currentTimeMillis();
-            QueryPlugin queryPlugin = queryPluginFactory.getPlugin(questionModel);
+            QueryService queryService = QueryServiceFactory.getQueryService(questionModel
+                    .getClass());
+            DataModel dataModel = queryService.query(questionModel, null);
             logger.info("queryId:{} getQueryPlugin cost:{}", questionModel.getQueryId(),
                     System.currentTimeMillis() - beginGet);
-            DataModel dataModel = queryPlugin.query(questionModel);
             logger.info("queryId:{} response query toal cost:{} ms", questionModel.getQueryId(),
                     System.currentTimeMillis() - begin);
             return dataModel;
@@ -410,7 +389,7 @@ public class QueryRouterResource {
             QueryRouterContext.removeQueryInfo();
         }
     }
-
+    
     /**
      * 判断服务是否存活
      * 
@@ -437,7 +416,8 @@ public class QueryRouterResource {
             try {
                 value = URLDecoder.decode(value, "utf-8");
             } catch (UnsupportedEncodingException e) {
-                logger.warn("queryId:{} decode value:" + value + " error:{}", QueryRouterContext.getQueryId(), e);
+                logger.warn("queryId:{} decode value:" + value + " error:{}",
+                        QueryRouterContext.getQueryId(), e);
             }
             requestParams.put(keyValue[0], value);
         }

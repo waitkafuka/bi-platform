@@ -2,8 +2,6 @@ package com.baidu.rigel.biplatform.queryrouter.queryplugin.utils;
 
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
-
 import com.baidu.rigel.biplatform.ac.minicube.MiniCube;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -14,7 +12,6 @@ import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.ac.query.model.SortRecord;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.queryrouter.handle.model.QueryHandler;
-import com.baidu.rigel.biplatform.queryrouter.handle.model.SqlQueryHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.PlaneTableUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.meta.TableMetaService;
@@ -54,7 +51,7 @@ public class QueryHandlerBuilder {
                 planeTableQuestionModel.getQueryConditions(),
                 configQuestionModel.getSortRecord());
         queryHandler.getSqlExpression().setNeedColums(
-                SqlColumnUtils.getNeedColumns(queryHandler.getSqlExpression().getQueryMeta(),
+                SqlColumnUtils.getSqlNeedColumns(queryHandler.getSqlExpression().getQueryMeta(),
                         planeTableQuestionModel.getSelection()));
         return queryHandler;
     }
@@ -72,25 +69,6 @@ public class QueryHandlerBuilder {
     public static QueryHandler buildQueryHandler(Cube cube, DataSourceInfo dataSourceInfo)
             throws QuestionModelTransformationException {
         return buildQueryHandler(cube, dataSourceInfo, null, null);
-    }
-    
-    /**
-     * 通过QuestionModel构建QueryHandler
-     *
-     * @param cube
-     *            minicube
-     * @param dataSourceInfo
-     *            不能为空
-     * @return
-     * @throws QuestionModelTransformationException
-     */
-    public static QueryHandler buildQueryHandler(String sql, DataSourceInfo dataSourceInfo)
-            throws QuestionModelTransformationException {
-        if (dataSourceInfo == null || StringUtils.isEmpty(sql)) {
-            throw new QuestionModelTransformationException(
-                    "dataSourceInfo or sql can not be empty.");
-        }
-        return new SqlQueryHandler(sql, buildJdbcHandler(dataSourceInfo));
     }
     
     /**

@@ -19,6 +19,7 @@ import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.MeasureType;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
 import com.baidu.rigel.biplatform.ac.query.model.ConfigQuestionModel;
@@ -206,8 +207,9 @@ public class PlaneTableUtils {
                     && v instanceof ExtendMinicubeMeasure) {
                 formula = ((ExtendMinicubeMeasure) v).getFormula();
             }
+            boolean isCB = v.getType() == MeasureType.CALLBACK ? true : false;
             Column c = buildMeasureColumn(
-                    miniCube.getSource(), v.getDefine(), v.getCaption(), v.getAggregator(), formula, false);
+                    miniCube.getSource(), v.getDefine(), v.getCaption(), v.getAggregator(), formula, false, isCB);
             String measureKey = "[Measure].[" + k + "]";
             allColumns.put(measureKey, c);
         });
@@ -260,7 +262,7 @@ public class PlaneTableUtils {
                 String sourcefk = "[Measure].[" + column.getFacttableColumnName() + "]";
                 Column c = buildMeasureColumn(
                         miniCube.getSource(), column.getFacttableColumnName(),
-                        column.getFacttableColumnName(), Aggregator.NONE, "", true);
+                        column.getFacttableColumnName(), Aggregator.NONE, "", true, false);
                 allColumns.put(sourcefk, c);
             } else if (column.getColumnType() == ColumnType.JOIN
                     && column.getTableName().equals(column.getFacttableName())){
@@ -276,7 +278,7 @@ public class PlaneTableUtils {
                 String sourcefk = "[Measure].[" + column.getFacttableColumnName() + "]";
                 Column c = buildMeasureColumn(
                         miniCube.getSource(), column.getFacttableColumnName(),
-                        column.getFacttableColumnName(), Aggregator.NONE, "", true);
+                        column.getFacttableColumnName(), Aggregator.NONE, "", true, false);
                 c.setTableFieldName(column.getFacttableColumnName());
                 c.setJoinTable(null);
                 c.setSortRecord(null);
@@ -287,7 +289,7 @@ public class PlaneTableUtils {
                 String sourcefk = "[Measure].[" + column.getFacttableColumnName() + "]";
                 Column c = buildMeasureColumn(
                         miniCube.getSource(), column.getFacttableColumnName(),
-                        column.getFacttableColumnName(), Aggregator.NONE, "", true);
+                        column.getFacttableColumnName(), Aggregator.NONE, "", true, false);
                 allColumns.put(sourcefk, c);
             }
         }
@@ -378,11 +380,15 @@ public class PlaneTableUtils {
     
     
     protected static Column buildMeasureColumn(String sourceTableName, String define,
-            String caption, Aggregator aggregator, String formula, boolean isRelatedColumn){
+            String caption, Aggregator aggregator, String formula, boolean isRelatedColumn, boolean isCB){
         Column oneMeasure = new Column();
         oneMeasure.setName(define);
         oneMeasure.setTableFieldName(define);
-        oneMeasure.setColumnType(ColumnType.COMMON);
+        if (isCB) {
+            oneMeasure.setColumnType(ColumnType.MEASURE_CALLBACK);
+        } else {
+            oneMeasure.setColumnType(ColumnType.COMMON);
+        }
         oneMeasure.setTableName(sourceTableName);
         oneMeasure.setFacttableName(sourceTableName);
         oneMeasure.setFacttableColumnName(define);
@@ -391,7 +397,7 @@ public class PlaneTableUtils {
         Operator operator = new Operator();
         oneMeasure.setOperator(operator);
         operator.setAggregator(aggregator);
-        if (aggregator == Aggregator.CALCULATED) {
+        if (aggregator == Aggregator.CALCULATED && !isCB) {
             oneMeasure.setColumnType(ColumnType.CAL);
             operator.setFormula(formula);
         }

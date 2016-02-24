@@ -27,7 +27,6 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -69,22 +68,28 @@ import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContextSplitResult;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryRequest;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.SearchIndexResultSet;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.DataModelConvertService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.PlaneTableUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.WhereDataUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.jdbc.connection.DataSourcePoolService;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.jdbc.service.impl.JdbcCountNumServiceImpl;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.meta.TableExistCheckService;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.mysql.common.TesseractHttpUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.SqlExpression;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.PlaneTableQuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.model.SqlColumn;
+import com.baidu.rigel.biplatform.queryrouter.queryplugin.utils.QueryHandlerBuilder;
 
 /**
  * 查询接口实现
  * 
- * @author xiaoming.chen
+ * @author luowenlei
  *
  */
-@Service("queryService")
+@Service("qmQueryService")
 @Scope("prototype")
-public class QueryServiceImpl implements QueryService {
+public class ConfigQMQueryServiceImpl implements QueryService {
 
     /**
      * Logger
@@ -95,7 +100,7 @@ public class QueryServiceImpl implements QueryService {
      * searchService
      */
     @Resource(name="queryTesseractService")
-    private QueryService queryService;
+    private QueryService tesseractQueryService;
 
     /**
      * dataSourcePoolService
@@ -113,6 +118,24 @@ public class QueryServiceImpl implements QueryService {
     
     @Autowired
     private CallbackSearchServiceImpl callbackSearchService;
+
+    /**
+     * dataModelConvertService
+     */
+    @Resource(name = "dataModelConvertService")
+    private DataModelConvertService dataModelConvertService;
+    
+    /**
+     * jdbcCountNumServiceImpl
+     */
+    @Resource(name = "jdbcCountNumServiceImpl")
+    private JdbcCountNumServiceImpl jdbcCountNumService;
+    
+    /**
+     * TableExistCheck
+     */
+    @Resource(name = "jdbcTableExistCheckServiceImpl")
+    private TableExistCheckService tableExistCheckService;
     
     /**
      * 是否使用Tesseract,默认不使用
@@ -121,118 +144,168 @@ public class QueryServiceImpl implements QueryService {
 
     @Override
     public DataModel query(QuestionModel questionModel,
-            QueryContext queryContext, QueryHandler newQueryRequest) throws MiniCubeQueryException {
+            QueryContext queryContext) throws Exception, RuntimeException {
+        
         long current = System.currentTimeMillis();
-        if (questionModel == null) {
-            throw new IllegalArgumentException("questionModel is null");
-        }
-        Cube cube = null;
-        DataSourceInfo dataSourceInfo = null;
-        ConfigQuestionModel configQuestionModel = null;
-        if (questionModel instanceof ConfigQuestionModel) {
-            configQuestionModel = (ConfigQuestionModel) questionModel;
-            dataSourceInfo = configQuestionModel.getDataSourceInfo();
-            cube = configQuestionModel.getCube();
-        }
-        setMDCContext(questionModel.getRequestParams().get("_flag"));
-        JsonUnSeriallizableUtils.fillCubeInfo(cube);
-        configQuestionModel.setCube(cube);
-        if (dataSourceInfo == null) {
-            dataSourceInfo = dataSourcePoolService.getDataSourceInfo(questionModel.getDataSourceInfoKey());
-        }
-        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to get datasource and other data",
-                QueryRouterContext.getQueryId());
-        current = System.currentTimeMillis();
-        try {
-            queryContext =
-                    queryContextBuilder.buildQueryContext(questionModel, dataSourceInfo, cube, queryContext);
-        } catch (MetaException e1) {
-            e1.printStackTrace();
-            throw new MiniCubeQueryException(e1);
-        }
-        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to build query context.",
-                QueryRouterContext.getQueryId());
-        current = System.currentTimeMillis();
-        // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
-        int conditionDescartes = stateQueryContextConditionCount(queryContext, questionModel.isNeedSummary());
-        if (logger.isDebugEnabled ()) {
-            logger.debug("query condition descarte:" + conditionDescartes);
-            logger.debug("question model:{}", questionModel);
-        }
-        
-        if (questionModel.getQueryConditionLimit().isWarningAtOverFlow()
-                && conditionDescartes > questionModel.getQueryConditionLimit().getWarnningConditionSize()) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("condition descartes :").append(conditionDescartes).append(" over :")
-                    .append(questionModel.getQueryConditionLimit()).append("");
-            logger.error(sb.toString());
-            throw new OverflowQueryConditionException(sb.toString());
-        }
-        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to stateQueryContextConditionCount.",
-                QueryRouterContext.getQueryId());
-        current = System.currentTimeMillis();
-        // 调用拆解自动进行拆解
-        QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel, dataSourceInfo, cube, queryContext, null);
-        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to split.",
-                QueryRouterContext.getQueryId());
-        current = System.currentTimeMillis();
-        DataModel result = null;
-        // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
+        // 拆分查询元数据
+        ConfigQuestionModel configQuestionModel = (ConfigQuestionModel) questionModel;
+        PlaneTableQuestionModel planeTableQuestionModel = PlaneTableUtils
+                .convertConfigQuestionModel2PtQuestionModel(configQuestionModel);
+        QueryHandler queryHandler = QueryHandlerBuilder.buildQueryHandler(questionModel);
+        SqlExpression sqlExpression = queryHandler.getSqlExpression();
+        List<SqlColumn> allNeedColumns = SqlColumnUtils.getAllNeedColumns(sqlExpression.getQueryMeta(),
+                planeTableQuestionModel.getSelection());
+        if (OperatorUtils.isAggQuery(allNeedColumns)
+                || OperatorUtils.isMeasureCallBackQuery(allNeedColumns)) {
+            // 多维查询
+            Cube cube = null;
+            DataSourceInfo dataSourceInfo = null;
+                configQuestionModel = (ConfigQuestionModel) questionModel;
+                dataSourceInfo = configQuestionModel.getDataSourceInfo();
+                cube = configQuestionModel.getCube();
 
-        // TODO 怀疑这里有逻辑错误
-        if (splitResult != null 
-            && (!splitResult.getCompileContexts().isEmpty() || !splitResult.getConditionQueryContext().isEmpty())) {
-            DataSourceInfo dsInfo = dataSourceInfo;
-            Cube finalCube = cube;
-            String queryId = configQuestionModel.getQueryId();
-            // TODO 抛出到其它节点去,后续需要修改成调用其它节点的方法
-            splitResult.getConditionQueryContext().forEach(
-                    (con, context) -> {
-                        QueryRouterContext.setQueryInfo(queryId);
-                        DataModel dm = null;
-                        if (con instanceof CallbackCondition) {
-                            try {
-                                SearchIndexResultSet resultSet = callbackSearchService.query(
-                                        context, QueryRequestBuilder.buildQueryRequest(dsInfo,
-                                                finalCube, context, questionModel.isUseIndex(),
-                                                null));
-                                dm = new DataModelBuilder(resultSet, context)
-                                        .build(true, finalCube);
-                            } catch (Exception e) {
-                                logger.error("queryId:{} catch error when process callback measure {}",
-                                        QueryRouterContext.getQueryId(), e.getMessage());
-                                QueryRouterContext.removeQueryInfo();
-                                throw new RuntimeException(e);
-                            }
-                        } else {
-                            dm = executeQuery(questionModel, context, newQueryRequest);
-                        }
-                        splitResult.getDataModels().put(con, dm);
-                        QueryRouterContext.removeQueryInfo();
-                    });
-            result = queryContextSplitService.mergeDataModel(splitResult);
-        } else {
-            result = executeQuery(questionModel, queryContext, newQueryRequest);
-        }
-        logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current) + " to getdatamodel.",
-                QueryRouterContext.getQueryId());
-        
-        // sort and filterblank
-        if (result != null) {
-            long curr = System.currentTimeMillis();
-            if (questionModel.isFilterBlank()) {
-                DataModelUtils.filterBlankRow(result);
-                logger.info("queryId:{} query cost:" + (System.currentTimeMillis() - curr) + " filterBlankRow.",
-                        QueryRouterContext.getQueryId());
+            JsonUnSeriallizableUtils.fillCubeInfo(cube);
+            configQuestionModel.setCube(cube);
+            logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current)
+                    + " to get datasource and other data", QueryRouterContext.getQueryId());
+            current = System.currentTimeMillis();
+            try {
+                queryContext = queryContextBuilder.buildQueryContext(questionModel, dataSourceInfo,
+                        cube, queryContext);
+            } catch (MetaException e1) {
+                e1.printStackTrace();
+                throw new MiniCubeQueryException(e1);
             }
-            curr=System.currentTimeMillis();
-            result = sortAndTrunc(result, questionModel.getSortRecord(), 
-                    questionModel.getRequestParams().get(TesseractConstant.NEED_OTHERS));
-            logger.info("queryId:{} query cost:" + (System.currentTimeMillis() - curr) + "ms sortAandTrunc.",
+            logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current)
+                    + " to build query context.", QueryRouterContext.getQueryId());
+            current = System.currentTimeMillis();
+            // 条件笛卡尔积，计算查询中条件数和根据汇总条件填充汇总条件
+            int conditionDescartes = stateQueryContextConditionCount(queryContext,
+                    questionModel.isNeedSummary());
+            if (logger.isDebugEnabled()) {
+                logger.debug("query condition descarte:" + conditionDescartes);
+                logger.debug("question model:{}", questionModel);
+            }
+            
+            if (questionModel.getQueryConditionLimit().isWarningAtOverFlow()
+                    && conditionDescartes > questionModel.getQueryConditionLimit()
+                            .getWarnningConditionSize()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("condition descartes :").append(conditionDescartes).append(" over :")
+                        .append(questionModel.getQueryConditionLimit()).append("");
+                logger.error(sb.toString());
+                throw new OverflowQueryConditionException(sb.toString());
+            }
+            logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current)
+                    + " to stateQueryContextConditionCount.", QueryRouterContext.getQueryId());
+            current = System.currentTimeMillis();
+            // 调用拆解自动进行拆解
+            QueryContextSplitResult splitResult = queryContextSplitService.split(questionModel,
+                    dataSourceInfo, cube, queryContext, null);
+            logger.info(
+                    "queryId:{} cost :" + (System.currentTimeMillis() - current) + " to split.",
                     QueryRouterContext.getQueryId());
+            current = System.currentTimeMillis();
+            DataModel result = null;
+            // 无法拆分或者 拆分出的结果为空，说明直接处理本地就行
+            
+            // TODO 怀疑这里有逻辑错误
+            if (splitResult != null
+                    && (!splitResult.getCompileContexts().isEmpty() || !splitResult
+                            .getConditionQueryContext().isEmpty())) {
+                DataSourceInfo dsInfo = dataSourceInfo;
+                Cube finalCube = cube;
+                String queryId = configQuestionModel.getQueryId();
+                // TODO 抛出到其它节点去,后续需要修改成调用其它节点的方法
+                splitResult
+                        .getConditionQueryContext()
+                        .forEach(
+                                (con, context) -> {
+                                    QueryRouterContext.setQueryInfo(queryId);
+                                    DataModel dm = null;
+                                    if (con instanceof CallbackCondition) {
+                                        try {
+                                            SearchIndexResultSet resultSet = callbackSearchService
+                                                    .query(context, QueryRequestBuilder
+                                                            .buildQueryRequest(dsInfo, finalCube,
+                                                                    context,
+                                                                    questionModel.isUseIndex(),
+                                                                    null));
+                                            dm = new DataModelBuilder(resultSet, context).build(
+                                                    true, finalCube);
+                                        } catch (Exception e) {
+                                            logger.error(
+                                                    "queryId:{} catch error when process callback measure {}",
+                                                    QueryRouterContext.getQueryId(), e.getMessage());
+                                            QueryRouterContext.removeQueryInfo();
+                                            throw new RuntimeException(e);
+                                        }
+                                    } else {
+                                        try {
+                                            dm = executeQuery(questionModel, context);
+                                        } catch (Exception e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    }
+                                    splitResult.getDataModels().put(con, dm);
+                                    QueryRouterContext.removeQueryInfo();
+                                });
+                result = queryContextSplitService.mergeDataModel(splitResult);
+            } else {
+                result = executeQuery(questionModel, queryContext);
+            }
+            logger.info("queryId:{} cost :" + (System.currentTimeMillis() - current)
+                    + " to getdatamodel.", QueryRouterContext.getQueryId());
+            
+            // sort and filterblank
+            if (result != null) {
+                long curr = System.currentTimeMillis();
+                if (questionModel.isFilterBlank()) {
+                    DataModelUtils.filterBlankRow(result);
+                    logger.info("queryId:{} query cost:" + (System.currentTimeMillis() - curr)
+                            + " filterBlankRow.", QueryRouterContext.getQueryId());
+                }
+                curr = System.currentTimeMillis();
+                result = sortAndTrunc(result, questionModel.getSortRecord(), questionModel
+                        .getRequestParams().get(TesseractConstant.NEED_OTHERS));
+                logger.info("queryId:{} query cost:" + (System.currentTimeMillis() - curr)
+                        + "ms sortAandTrunc.", QueryRouterContext.getQueryId());
+            }
+            
+            return result;
+        } else {
+            // 平面表
+            // 1.检验cube.getSource中的事实表是否在数据库中存在，并过滤不存在的数据表
+            List<SqlColumn> needColumns = SqlColumnUtils.getSqlNeedColumns(sqlExpression.getQueryMeta(),
+                    planeTableQuestionModel.getSelection());
+            String tableNames = tableExistCheckService.getExistTableList(
+                    sqlExpression.getTableName(), queryHandler.getJdbcHandler());
+            if (StringUtils.isEmpty(tableNames) || CollectionUtils.isEmpty(needColumns)) {
+                // 如果获取的cube的数据为空
+                logger.info("queryId:{} QuerySqlPlugin find no tables in Db.",
+                        questionModel.getQueryId());
+                return dataModelConvertService.getEmptyDataModel(needColumns);
+            }
+            // 2.生成sql
+            queryHandler.getSqlExpression().setTableName(tableNames);
+            queryHandler.getSqlExpression().generateSql(questionModel);
+            
+            // 3.execute sql
+            String sql = queryHandler.getSqlExpression().getSqlQuery().toSql();
+            List<Object> values = queryHandler.getSqlExpression().getSqlQuery().getWhere()
+                    .getValues();
+            List<Map<String, Object>> rowBasedList = queryHandler.getJdbcHandler().queryForList(
+                    sql, values);
+            // 4.convert data to datamodel
+            DataModel dataModel = dataModelConvertService.convert(needColumns, rowBasedList);
+            
+            // 5.生成pageSize
+            if (planeTableQuestionModel.isGenerateTotalSize()) {
+                dataModel.setRecordSize(jdbcCountNumService.getTotalRecordSize(
+                        planeTableQuestionModel, queryHandler));
+            }
+            return dataModel;
         }
-        
-        return result;
 
     }
     
@@ -241,10 +314,11 @@ public class QueryServiceImpl implements QueryService {
      *
      * @param questionModel
      * @return
+     * @throws Exception 
      * @throws MiniCubeQueryException
      */
-    public DataModel executeQuery(QuestionModel questionModel, QueryContext queryContext,
-            QueryHandler newQueryRequest) throws MiniCubeQueryException {
+    public DataModel executeQuery(QuestionModel questionModel, QueryContext queryContext
+            ) throws RuntimeException, Exception {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel)questionModel;
         Cube cube = configQuestionModel.getCube();
         DataSourceInfo dataSourceInfo = configQuestionModel.getDataSourceInfo();
@@ -257,9 +331,9 @@ public class QueryServiceImpl implements QueryService {
             return new DataModelBuilder(null, queryContext).build(false, cube);
         }
         if (TesseractHttpUtils.isQueryIndex(questionModel, queryRequest)) {
-            return queryService.query(questionModel, queryContext, newQueryRequest);
+            return tesseractQueryService.query(questionModel, queryContext);
         } else {
-            return this.queryAndAggregate(questionModel, queryRequest, queryContext, newQueryRequest);
+            return this.queryAndAggregate(questionModel, queryRequest, queryContext);
         }
     }
     
@@ -272,8 +346,7 @@ public class QueryServiceImpl implements QueryService {
      * @throws MiniCubeQueryException
      */
     public DataModel queryAndAggregate(QuestionModel questionModel,QueryRequest queryRequest,
-            QueryContext queryContext,
-            QueryHandler newQueryRequest) throws MiniCubeQueryException {
+            QueryContext queryContext) throws MiniCubeQueryException {
         ConfigQuestionModel configQuestionModel = (ConfigQuestionModel)questionModel;
         Cube cube = configQuestionModel.getCube();
         long current = System.currentTimeMillis();
@@ -289,38 +362,44 @@ public class QueryServiceImpl implements QueryService {
         current = System.currentTimeMillis();
         DataModel result = null;
         try {
+            QueryHandler queryHandler = QueryHandlerBuilder.buildQueryHandler(questionModel);
+            queryHandler.getSqlExpression().getSqlQuery().getWhere().setGeneratePrepareSql(false);
             // 通过QueryReqest中的where转换成 SqlExpression能识别的whereCondition
             Map<String, List<Object>> andCondition = WhereDataUtils.transQueryRequestAndWhereList2Map(
                     queryRequest, ((MiniCube) cube).getSource(),
-                    newQueryRequest.getSqlExpression().getQueryMeta());
-            SqlExpression sqlExpression = newQueryRequest.getSqlExpression();
+                    queryHandler.getSqlExpression().getQueryMeta());
+            SqlExpression sqlExpression = queryHandler.getSqlExpression();
             List<SqlColumn> needColumns = null;
             if (SqlExpression.class.getSimpleName()
-                    .equals(newQueryRequest.getSqlExpression().getClass().getSimpleName())) {
+                    .equals(queryHandler.getSqlExpression().getClass().getSimpleName())) {
             // 如果为mysql，不需要agg计算
                 needColumns = SqlColumnUtils
                         .getFacttableColumns(sqlExpression.getQueryMeta(), queryRequest.getSelect(),
                                 sqlExpression.getTableName(), false, false);
-                newQueryRequest.getSqlExpression().generateNoJoinSql(
+                queryHandler.getSqlExpression().generateNoJoinSql(
                         configQuestionModel, needColumns, andCondition, false);
             } else {
             // 如果不为mysql，需要agg计算
                 needColumns = SqlColumnUtils
                         .getFacttableColumns(sqlExpression.getQueryMeta(), queryRequest.getSelect(),
                                 sqlExpression.getTableName(), true, false);
-                newQueryRequest.getSqlExpression().generateNoJoinSql(
+                queryHandler.getSqlExpression().generateNoJoinSql(
                         configQuestionModel, needColumns, andCondition, false);
             }
             SqlColumnUtils.setSqlColumnsSqlUniqueName(sqlExpression.getTableName(), needColumns, false, "");
             // 生成事实表gourpby的字段
             List<SqlColumn> noJoinGroupByColumns = sqlExpression.getQueryMeta()
                     .findSqlColumns(sqlExpression.getTableName(), queryRequest.getSelect().getQueryProperties());
-            SearchIndexResultSet resultSet = 
-                    newQueryRequest.getJdbcHandler().querySqlListWithAgg(
-                            newQueryRequest.getSqlExpression().getSqlQuery(),
-                            noJoinGroupByColumns, queryRequest.getSelect().getQueryMeasures());
+            SearchIndexResultSet resultSet = null;
             if (!OperatorUtils.isAggQuery(needColumns)) {
-                resultSet.setDataList(AggregateCompute.aggregate(resultSet.getDataList(), queryRequest));
+                resultSet = 
+                        queryHandler.getJdbcHandler().querySqlListWithAgg(
+                                queryHandler.getSqlExpression().getSqlQuery(),
+                                noJoinGroupByColumns, queryRequest.getSelect().getQueryMeasures());
+            } else {
+                resultSet = 
+                        queryHandler.getJdbcHandler().querySqlList(
+                                queryHandler.getSqlExpression().getSqlQuery(), noJoinGroupByColumns);
             }
             // 生成汇总数据
             logger.info("queryId:{} executeQuery cost :" + (System.currentTimeMillis() - current) + " to get query result.",
@@ -496,12 +575,6 @@ public class QueryServiceImpl implements QueryService {
             }
         }
         return rowConditionCount;
-    }
-
-    private void setMDCContext(String value) {
-        if(StringUtils.isNotBlank(value)) {
-            MDC.put("REQUESTFLAG", value);
-        }
     }
 
     /**

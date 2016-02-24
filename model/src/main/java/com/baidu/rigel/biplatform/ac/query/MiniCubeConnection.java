@@ -149,7 +149,8 @@ public interface MiniCubeConnection {
         HIVE(4),
         CUSTOM(3), // user custom datasource,support user custom data process
         PALO(6), // palo
-        DRUID(7); // Druid
+        DRUID(7), // Druid
+        ASYN(8); // ASYN 异步数据源
         /**
          * id ID
          */
