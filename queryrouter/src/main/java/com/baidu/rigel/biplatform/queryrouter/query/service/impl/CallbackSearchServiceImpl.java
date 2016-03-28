@@ -230,13 +230,21 @@ public class CallbackSearchServiceImpl {
         for (Expression e : query.getWhere().getAndList()) {
             List<String> l = e.getQueryValues().stream().filter(v -> !StringUtils.isEmpty(v.getValue()))
                 .map(v -> v.getValue() ).collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(l)) {
+                continue;
+            }
             if (groupbyParams.containsKey(e.getProperties())) {
                 // if not contains SUMMARY_KEY, add it into group by list
                 if (!l.contains(TesseractConstant.SUMMARY_KEY)) {
                     l.add(TesseractConstant.SUMMARY_KEY);
                 }
                 // Put it into group by field
-                groupbyParams.get(e.getProperties()).addAll(l);
+                if (!groupbyParams.get(e.getProperties()).isEmpty()) {
+                // 如果有相同时间Expression，求交集
+                    groupbyParams.get(e.getProperties()).retainAll(l);
+                } else {
+                    groupbyParams.get(e.getProperties()).addAll(l);
+                }
             } else {
                 // Put it into filter field
                 if (CollectionUtils.isEmpty(l)) {

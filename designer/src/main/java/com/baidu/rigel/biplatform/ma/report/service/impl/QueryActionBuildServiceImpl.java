@@ -516,7 +516,11 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
         ExtendArea area = reportModel.getExtendById(areaId);
         QueryAction.OrderDesc orderDesc = null;
         if (area.getType() != ExtendAreaType.PLANE_TABLE) {
-            orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+            if (area.getType() != ExtendAreaType.CHART
+                    || (targetLogicModel.getTopSetting() != null 
+                    && !StringUtils.isEmpty(targetLogicModel.getTopSetting().getMeasureId()))) {
+                orderDesc = genMeasureOrderDesc (targetLogicModel, context, action, cube);
+            }
             if (orderDesc == null) {
                 orderDesc = genDimensionOrderDesc(targetLogicModel, action, cube);
             }
@@ -750,6 +754,9 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
             String elementId = item.getOlapElementId();
             if (StringUtils.isEmpty(elementId)) {
                 continue;
+            }
+            if ("519caaf2452c579c6f4e72cfdb65d247".equals(elementId)) {
+                System.out.println("");
             }
             // 是否会影响其他值
             Object showLevel = values.get(item.getOlapElementId() + "_level");

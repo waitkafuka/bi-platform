@@ -25,6 +25,11 @@ public class PlaneTableColDefine implements Serializable{
 	private String title;
 	
 	/**
+	 * 跳转超链接报表id
+	 */
+	private String linkBridge;
+	
+	/**
 	 * 排序字段
 	 */
 	private String orderby = "none";
@@ -178,6 +183,22 @@ public class PlaneTableColDefine implements Serializable{
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * default generate get linkBridge
+     * @return the linkBridge
+     */
+    public String getLinkBridge() {
+        return linkBridge;
+    }
+
+    /**
+     * default generate set linkBridge
+     * @param linkBridge the linkBridge to set
+     */
+    public void setLinkBridge(String linkBridge) {
+        this.linkBridge = linkBridge;
     }
 	
 	

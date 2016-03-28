@@ -148,6 +148,7 @@ public class QueryRouterResource {
                     System.currentTimeMillis() - begin);
             return ResponseResultUtils.getCorrectResult(SUCCESS, dataModelJson);
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("queryId:{} error msg:{}", questionModel.getQueryId(), e.getMessage());
             // 说明模型参数传入有问题
             return ResponseResultUtils.getErrorResult(

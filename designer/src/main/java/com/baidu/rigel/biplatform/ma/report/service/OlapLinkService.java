@@ -1,10 +1,12 @@
 package com.baidu.rigel.biplatform.ma.report.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
@@ -18,19 +20,21 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
  */
 public interface OlapLinkService {
     /**
-     * 得到所有本产品线下所有包含平面报表组件的ReportDesignModel列表
+     * 根据条件得到所有本产品线下所有包含报表组件的ReportDesignModel列表
      * 
      * @return 符合条件的ReportDesignModel列表
      */
-    public List<ReportDesignModel> getDesignModelListContainsPlaneTable();
+    public HashMap<ReportDesignModel, ExtendAreaType> getDesignModelListByTypeMap(
+            List<ExtendAreaType> typeList);
 
     /**
-     * 从平面报表设计模型中，得到所有平面报表设计用参数
+     * 从报表设计模型中，得到所有报表设计用所有维度
      * 
-     * @param planeTableDesignModel 平面报表设计模型
-     * @return 得到平面报表参数列表
+     * @param tableDesignModel 报表设计模型
+     * @param tableType 报表组件类型
+     * @return 得到报表参数列表
      */
-    public List<String> getPlaneTableConditionList(ReportDesignModel planeTableDesignModel);
+    public List<Dimension> getTargetTableDimList(ReportDesignModel tableDesignModel, String tableType);
 
     /**
      * 根据多维报表模型和table对应的区域，得到所有table中要有的维度对象

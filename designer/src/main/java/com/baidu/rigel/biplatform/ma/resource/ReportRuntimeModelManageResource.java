@@ -331,7 +331,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         try {
             // 根据运行态取得设计模型
-            model = getRealModel(reportId, runTimeModel);
+            model = getDesignModelFromRuntimeModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -426,7 +426,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
         try {
             // 根据运行态取得设计模型
-            model = getRealModel(reportId, runTimeModel);
+            model = getDesignModelFromRuntimeModel(reportId);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
             result = ResourceUtils.getErrorResult("缓存中不存在的报表，ID " + reportId, 1);
@@ -502,7 +502,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         ReportDesignModel oriModel;
         try {
             // 根据运行态取得设计模型
-            model = getRealModel(reportId, runTimeModel);
+            model = getDesignModelFromRuntimeModel(reportId);
             oriModel = DeepcopyUtils.deepCopy(model);
         } catch (CacheOperationException e) {
             logger.info("[INFO]Report model is not in cache! ", e);
@@ -603,7 +603,8 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             linkInfoMap = tableArea.getFormatModel().getLinkInfo();
         }
         LinkInfo linkInfo = linkInfoMap.get(measureId);
-        String planeTableId = linkInfo.getPlaneTableId();
+        // 跳转到的reportId
+        String toTableId = linkInfo.getTargetTableId();
 
         Map<String, Object> params = reportRuntimeModel.getContext().getParams();
         reportRuntimeModel.getLocalContext().forEach((k, v) -> {
@@ -617,7 +618,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
         reportRuntimeModel.getContext().getParams().put("linkBridgeParams", linkBridgeParams);
 
         attr.addAttribute("fromReportId", reportId);
-        attr.addAttribute("toReportId", planeTableId);
+        attr.addAttribute("toReportId", toTableId);
 
         /**
          * 因为在redirect的时候，浏览器会将请求地址重置为designer服务器自身的host+port，使得bfe设置的反向代理失效， 故这里需要将redirect的地址拼接为全路径，以避免换域问题
@@ -628,7 +629,7 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             int index = referer.indexOf("/silkroad");
             realmName = referer.substring(0, index);
         }
-        String redirectUrl = "redirect:" + realmName + "/silkroad/reports/" + planeTableId + "/report_vm";
+        String redirectUrl = "redirect:" + realmName + "/silkroad/reports/" + toTableId + "/report_vm";
         ModelAndView mav = new ModelAndView(redirectUrl);
         ReportDesignModel planeTableModel = null;
         try {
@@ -636,14 +637,14 @@ public class ReportRuntimeModelManageResource extends BaseResource {
                     AesUtil.getInstance().encryptAndUrlEncoding(ContextManager.getProductLine(), securityKey));
             attr.addAttribute("_rbk", ContextManager.getProductLine());
             // 先从已发布的报表中寻找
-            planeTableModel = reportDesignModelService.getModelByIdOrName(planeTableId, true);
+            planeTableModel = reportDesignModelService.getModelByIdOrName(toTableId, true);
             // 如果从已发布当中找不到，则直接报错
             if (planeTableModel == null) {
-                throw new RuntimeException("no planetable exist the report id is : " + planeTableId);
+                throw new RuntimeException("no planetable exist the report id is : " + toTableId);
             }
-            // 将平面表的设计态模型放入cache中
-            reportModelCacheManager.updateReportModelToCache(planeTableId, planeTableModel);
-            // 将多维表的运行态模型放入cache中
+            // 将跳转到的表的设计态模型放入cache中
+            reportModelCacheManager.updateReportModelToCache(toTableId, planeTableModel);
+            // 将跳转表的运行态模型放入cache中
             reportModelCacheManager.updateRunTimeModelToCache(reportId, reportRuntimeModel);
 
             // 添加对动态数据源的处理逻辑
@@ -652,16 +653,16 @@ public class ReportRuntimeModelManageResource extends BaseResource {
                 String activedsName = activedsObj.toString();
                 ReportRuntimeModel planeTableRuntimeModel = null;
                 try {
-                    planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(planeTableId);
+                    planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(toTableId);
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
                 }
                 if (planeTableRuntimeModel == null) {
-                    planeTableRuntimeModel = new ReportRuntimeModel(planeTableId);
+                    planeTableRuntimeModel = new ReportRuntimeModel(toTableId);
                     planeTableRuntimeModel.init(planeTableModel, true);
                 }
                 planeTableRuntimeModel.getContext().getParams().put("activeds", activedsName);
-                reportModelCacheManager.updateRunTimeModelToCache(planeTableId, planeTableRuntimeModel);
+                reportModelCacheManager.updateRunTimeModelToCache(toTableId, planeTableRuntimeModel);
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
@@ -670,24 +671,6 @@ public class ReportRuntimeModelManageResource extends BaseResource {
 
         return mav;
     }
-
-    // /**
-    // * 根据reportId得到ReportModel
-    // *
-    // * @param reportId 报表id
-    // * @return 返回reportId对应的ReportDesignModel对象实例
-    // */
-    // private ReportDesignModel getReportModel(String reportId) {
-    // ReportDesignModel reportModel = null;
-    // try {
-    // reportModel = reportModelCacheManager.getReportModel(reportId);
-    // return reportModel;
-    // } catch (CacheOperationException e) {
-    // logger.warn("There is no such report model in cache. ", e);
-    // logger.info("Add report model into cache. ");
-    // }
-    // return reportModelCacheManager.loadReportModelToCache(reportId);
-    // }
 
     /**
      * 产生新的排序信息
@@ -746,25 +729,6 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             pageInfo.setTotalRecordCount(-1);
         }
         return pageInfo;
-    }
-
-    /**
-     * 
-     * @param reportId
-     * @param runTimeModel
-     * @return ReportDesignModel
-     */
-    private ReportDesignModel getRealModel(String reportId, ReportRuntimeModel runTimeModel) {
-        ReportDesignModel model;
-        // Object isEditor = runTimeModel.getContext().get(Constants.IN_EDITOR);
-        // Object preview = runTimeModel.getContext().get("reportPreview");
-        // if ((isEditor != null && isEditor.toString().equals("true"))
-        // || (preview != null && preview.toString().equals("true"))) {
-        // model = DeepcopyUtils.deepCopy (reportModelCacheManager.getReportModel(reportId));
-        // } else {
-        model = getDesignModelFromRuntimeModel(reportId);
-        // }
-        return model;
     }
 
     /**

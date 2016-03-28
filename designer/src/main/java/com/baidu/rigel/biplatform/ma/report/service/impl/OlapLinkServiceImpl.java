@@ -14,8 +14,10 @@ import org.apache.commons.collections.MapUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.util.DataModelUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
@@ -30,6 +32,8 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryContext;
 import com.baidu.rigel.biplatform.ma.report.service.OlapLinkService;
 import com.baidu.rigel.biplatform.ma.report.service.ReportDesignModelService;
 import com.baidu.rigel.biplatform.ma.report.utils.QueryUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * olapLinkService实现
@@ -58,38 +62,42 @@ public class OlapLinkServiceImpl implements OlapLinkService {
      * 
      * @see com.baidu.rigel.biplatform.ma.report.service.OlapLinkService#getDesignModelListContainsPlaneTable()
      */
-    public List<ReportDesignModel> getDesignModelListContainsPlaneTable() {
+    public HashMap<ReportDesignModel, ExtendAreaType> getDesignModelListByTypeMap(List<ExtendAreaType> typeList) {
         ReportDesignModel[] allList = reportDesignModelService.queryAllModels(true);
-        List<ReportDesignModel> forReturnList = new ArrayList<ReportDesignModel>();
+        HashMap<ReportDesignModel, ExtendAreaType> map = Maps.newHashMap();
         if (allList != null && allList.length > 0) {
             for (ReportDesignModel reportDesignModel : allList) {
                 ExtendArea[] extendAreaList = reportDesignModel.getExtendAreaList();
                 for (ExtendArea extendArea : extendAreaList) {
-                    if (extendArea.getType().equals(ExtendAreaType.PLANE_TABLE)) {
-                        forReturnList.add(reportDesignModel);
+                    if (typeList.contains(extendArea.getType())) {
+                        map.put(reportDesignModel, extendArea.getType());
                         break;
                     }
                 }
             }
         }
-        return forReturnList;
+        return map;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * com.baidu.rigel.biplatform.ma.report.service.OlapLinkService#getPlaneTableConditionList(com.baidu.rigel.biplatform
-     * .ma.report.model.ReportDesignModel)
+
+    /**
+     * getTargetTableDimList
+     *
+     * @param tableDesignModel
+     * @return
      */
-    public List<String> getPlaneTableConditionList(ReportDesignModel planeTableDesignModel) {
-        Map<String, PlaneTableCondition> conditionMap = planeTableDesignModel.getPlaneTableConditions();
-        List<String> planeTableParamNameList = new ArrayList<String>();
-        for (String key : conditionMap.keySet()) {
-            PlaneTableCondition condition = conditionMap.get(key);
-            planeTableParamNameList.add(condition.getName());
+    public List<Dimension> getTargetTableDimList(ReportDesignModel tableDesignModel, String tableType) {
+        // 获取当前表的ExtendArea的类型，目前不支持多个 table，plane_talbe,olap_table在一个报表上面
+        List<Dimension> result = new ArrayList<Dimension>();
+        if (tableDesignModel != null) {
+            ExtendArea[] extendAreaList = tableDesignModel.getExtendAreaList();
+            for (ExtendArea extendArea : extendAreaList) {
+                if (tableType.equals(extendArea.getType().toString())) {
+                    return this.getOlapDims(tableDesignModel, extendArea);
+                }
+            }
         }
-        return planeTableParamNameList;
+        return result;
     }
 
     /*
@@ -102,13 +110,18 @@ public class OlapLinkServiceImpl implements OlapLinkService {
     public List<Dimension> getOlapDims(ReportDesignModel olapTableDesignModel, ExtendArea olapTableArea) {
         List<Dimension> dimList = new ArrayList<Dimension>();
         Set<String> countedSet = new HashSet<String>();
-        List<Dimension> conditionDims = this.getOlapTableConditionDims(olapTableDesignModel, countedSet);
-        List<Dimension> rowDims = this.getOlapTableRowDims(olapTableDesignModel, olapTableArea, countedSet);
-        List<Dimension> filterDims = this.getOlapTableFilterDims(olapTableDesignModel, olapTableArea, countedSet);
-
-        dimList.addAll(conditionDims);
-        dimList.addAll(filterDims);
-        dimList.addAll(rowDims);
+        if (olapTableArea.getType() == ExtendAreaType.TABLE
+                || olapTableArea.getType() == ExtendAreaType.LITEOLAP){
+     
+            List<Dimension> conditionDims = this.getOlapTableConditionDims(olapTableDesignModel, countedSet);
+            List<Dimension> rowDims = this.getOlapTableRowDims(olapTableDesignModel, olapTableArea, countedSet);
+            List<Dimension> filterDims = this.getOlapTableFilterDims(olapTableDesignModel, olapTableArea, countedSet);
+            dimList.addAll(conditionDims);
+            dimList.addAll(filterDims);
+            dimList.addAll(rowDims);
+        } else if (olapTableArea.getType() == ExtendAreaType.PLANE_TABLE){
+            dimList.addAll(this.getTableSelectionDims(olapTableDesignModel, olapTableArea, countedSet));
+        }
         return dimList;
     }
 
@@ -349,6 +362,49 @@ public class OlapLinkServiceImpl implements OlapLinkService {
                 continue;
             }
             addDimToList(dimList, dim, countedSet);
+        }
+        return dimList;
+    }
+    
+    /**
+     * 根据报表设计模型和table所在区域对象，得到放到table列上的维度集合
+     * 
+     * @param olapTableDesignModel 多维报表设计模型
+     * @param olapTableArea 多维报表area区域对象
+     * @return 返回放到table列上的维度集合
+     */
+    private List<Dimension> getTableSelectionDims(ReportDesignModel olapTableDesignModel, ExtendArea olapTableArea,
+            Set<String> countedSet) {
+        LogicModel olapTableLogicModel = olapTableArea.getLogicModel();
+        Cube cube = olapTableDesignModel.getSchema().getCubes().get(olapTableArea.getCubeId());
+        // add dim
+        List<Dimension> dimList = new ArrayList<Dimension>();
+        for (Item dimItem : olapTableLogicModel.getColumns()) {
+            String id = dimItem.getOlapElementId();
+            Dimension dim = cube.getDimensions().get(id);
+            Measure measure = cube.getMeasures().get(id);
+            if (dim != null) {
+                addDimToList(dimList, dim, countedSet);
+            } else if (measure != null) {
+                StandardDimension standardDimension = new StandardDimension(measure.getName());
+                standardDimension.setId(id);
+                standardDimension.setCaption(measure.getCaption());
+                addDimToList(dimList, standardDimension, countedSet);
+            }
+        }
+        
+        for (PlaneTableCondition planeTableCondition : olapTableDesignModel.getPlaneTableConditions().values()) {
+            String id = planeTableCondition.getElementId();
+            Dimension dim = cube.getDimensions().get(id);
+            Measure measure = cube.getMeasures().get(id);
+            if (dim != null) {
+                addDimToList(dimList, dim, countedSet);
+            } else if (measure != null) {
+                StandardDimension standardDimension = new StandardDimension(measure.getName());
+                standardDimension.setCaption(measure.getCaption());
+                standardDimension.setId(id);
+                addDimToList(dimList, standardDimension, countedSet);
+            }
         }
         return dimList;
     }

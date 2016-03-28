@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -231,8 +232,11 @@ public interface DimensionMemberService extends BeanFactoryAware {
 
         // 如果是Time开头的，默认就是时间维度
         // TODO 不能这么判断，需要根据UniqueName中的维度名称获取到维度
-        List<Level> levels = Lists.newArrayList(targetDim.getLevels().values());
-        Level level = levels.get (names.length - 2);
+//        List<Level> levels = Lists.newArrayList(targetDim.getLevels().values());
+//        Level level = levels.get (names.length - 2);
+        int currentSearchLevelIndex = MetaNameUtil
+                .getSearchLevelIndexByUniqueName(StringUtils.replace(uniqueNameList.get(0), ",", ""));
+        Level level = targetDim.getLevels().values().toArray(new Level[0])[currentSearchLevelIndex];
          if(targetDim.isTimeDimension ()){
              return dimensionMemberServiceMap
                      .get(TIME_MEMBER_SERVICE)

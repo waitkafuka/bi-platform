@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
+import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
@@ -69,8 +70,38 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
     public List<MiniCubeMember> getMembers(Cube cube, Level level, DataSourceInfo dataSourceInfo, Member parentMember,
             Map<String, String> params) throws MetaException {
         List<MiniCubeMember> members = Lists.newArrayList();
+        // 如果params里面有限制时间那么取params里面的filter的时间，
+        // TODO 此方案只针对level为day的情况，不支持时间维度组及其他时间维度
+        Set<String> values = Sets.newHashSet();
+        for (Dimension dim : cube.getDimensions().values()) {
+            String filterValue = params.get (dim.getId());
+            if (dim.getType() == DimensionType.TIME_DIMENSION
+                    && filterValue != null
+                    && !MetaNameUtil.isAllMemberUniqueName(StringUtils.split(filterValue, ",")[0])) {
+                Set<String> uniquesValues = Sets.newHashSet();
+                String[] uniquesNames = StringUtils.split(filterValue, ",");
+                for (String uniqueName : uniquesNames) {
+                    uniquesValues.add(MetaNameUtil.getNameFromMetaName(uniqueName));
+                }
+                // 每一个维度的查询值求交集
+                if (values.isEmpty()) {
+                    values.addAll(uniquesValues);
+                } else {
+                    values.retainAll(uniquesValues);
+                }
+            }
+        }
+        if (!values.isEmpty()) {
+            try {
+                return this.genDayMembersWithParent(level, parentMember, values.toArray());
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                throw new MetaException(e);
+            }
+        }
+        
         // 判断是否依据父节点获取成员信息
-
         if (parentMember != null) {
             switch (parentMember.getLevel().getType()) {
                 case TIME_YEARS:
@@ -404,20 +435,35 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
      */
     private List<MiniCubeMember> genDayMembersWithParent(Level level, Member parentMember, TimeRangeDetail range)
             throws Exception {
-        String[] days = range.getDays();
+        return this.genDayMembersWithParent(level, parentMember, range.getDays());
+    }
+    
+    /**
+     * 获取天成员信息
+     * 
+     * @param level
+     * @param parentMember
+     * @param time
+     * @return
+     * @throws Exception
+     * 
+     */
+    private List<MiniCubeMember> genDayMembersWithParent(Level level, Member parentMember, Object[] days)
+            throws Exception {
         List<MiniCubeMember> members = Lists.newArrayList();
-        for (String day : days) {
-            MiniCubeMember dayMember = new MiniCubeMember(day);
-            dayMember.setCaption(day);
+        for (Object day : days) {
+            String dayStr = day.toString();
+            MiniCubeMember dayMember = new MiniCubeMember(dayStr);
+            dayMember.setCaption(dayStr);
             dayMember.setLevel(level);
             dayMember.setParent(parentMember);
-            dayMember.setName(day);
+            dayMember.setName(dayStr);
             dayMember.setVisible(true);
-            dayMember.getQueryNodes().add(day);
+            dayMember.getQueryNodes().add(dayStr);
             members.add(dayMember);
         }
         return members;
-    }
+    } 
 
     /**
      * 通过父成员获取月成员信息（父成员为季度）
@@ -682,9 +728,22 @@ public class TimeDimensionMemberServiceImpl implements DimensionMemberService {
                     }
                 }
             }
-            if (CollectionUtils.isEmpty (dayMember.getQueryNodes ())) {
+            // 判断是否需要默认的组织时间,判断是否有其他时间维度条件
+            boolean isGenDefaultTime = true;
+            for (Dimension dim : cube.getDimensions().values()) {
+                String filterValue = params.get (dim.getId());
+                if (dim.getType() == DimensionType.TIME_DIMENSION
+                        && filterValue != null
+                        && !dim.getId().equals(level.getDimension().getId())
+                        && !MetaNameUtil.isAllMemberUniqueName(filterValue)) {
+                    // 忽略当前查询的层级
+                    isGenDefaultTime = false;
+                    break;
+                }
+            }
+            if (CollectionUtils.isEmpty (dayMember.getQueryNodes ()) && isGenDefaultTime) {
                 Set<String> queryNodes = Sets.newHashSet ();
-                for (String day : TimeUtils.getYearDays (Calendar.getInstance ().getTime ()).getDays ()) {
+                for (String day : TimeUtils.getMonthDays (Calendar.getInstance ().getTime ()).getDays ()) {
                     queryNodes.add (day);
                 }
                 dayMember.setQueryNodes (queryNodes);

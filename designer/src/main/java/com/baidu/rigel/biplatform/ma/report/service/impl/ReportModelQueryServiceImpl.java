@@ -158,7 +158,9 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
                 List<Member> tmpMember = Lists.newArrayList();
                 for (Member m : rootMembers) {
                     // tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params, securityKey));
-                    tmpMember.addAll(((MiniCubeMember) m).getChildren());
+                    if (((MiniCubeMember) m).getChildren() != null) {
+                        tmpMember.addAll(((MiniCubeMember) m).getChildren());
+                    }
                 }
                 members.add(tmpMember);
                 rootMembers = tmpMember;

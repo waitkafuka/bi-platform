@@ -372,7 +372,7 @@ public class QueryRequestUtil {
         }
         final boolean hasSameNodeCopy = hasSameNode;
         MemberNodeTree root = getRootMember (rowMemberTrees);
-        if (hasSameNode) {
+        if (hasSameNode && !MapUtils.isEmpty(leafValueMap)) {
             for (SearchIndexResultRecord d : dataSet.getDataList ()) {
                 Serializable field = d.getField (meta.getFieldIndex (root.getQuerySource ()));
                 if (CollectionUtils.isNotEmpty (leafValueMap.get (root.getQuerySource ()).get (field + ""))) {

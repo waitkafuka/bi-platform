@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -102,6 +103,7 @@ import com.google.common.collect.Maps;
  */
 @RestController
 @RequestMapping("/silkroad/reports")
+@Component("queryDataResource")
 public class QueryDataResource extends BaseResource {
 
     /**
@@ -251,7 +253,7 @@ public class QueryDataResource extends BaseResource {
                 queryDataResourceUtils.parseQueryResultToResponseResult(runTimeModel, targetArea, result, areaContext,
                         action);
         rs = generatePageInfo(pageInfo, targetArea, rs);
-        this.transNewTable(rs, model, targetArea, result.getDataModel(), cube, logicModel, null);
+        this.transNewTable(rs, model, targetArea, result.getDataModel(), cube, logicModel, null, true);
         // 完成查询，再将之前深拷贝的designModel对象设置回去保存一次，update by majun
         runTimeModel.setModel(oriDesignModel);
         // 清除当前request中的请求参数，保证areaContext的参数正确
@@ -382,7 +384,8 @@ public class QueryDataResource extends BaseResource {
      */
     @SuppressWarnings("unchecked")
     private MutilDimTable transNewTable(ResponseResult rs, ReportDesignModel model, ExtendArea targetArea,
-            DataModel dataModel, Cube cube, LogicModel logicModel, String lineUniqueNamePrefix) {
+            DataModel dataModel, Cube cube, LogicModel logicModel,
+            String lineUniqueNamePrefix, boolean isDrillOption) {
         MutilDimTable mutilDimTable = null;
         // 只有当该查询区域是多维表格的情况下，才进行mutilDimTable的结构封装，后续对图和平面表会有自己对应的格式
         if (rs.getData() instanceof Map && targetArea.isMutiDimTableType()) {
@@ -391,7 +394,8 @@ public class QueryDataResource extends BaseResource {
                     MutilDimTableBuilder.getInstance(dataModel, cube, Arrays.asList(dimCaptionArray),
                             lineUniqueNamePrefix);
             mutilDimTable =
-                    mutilDimTableBuilder.buildIndsDefine().buildDimsDefine().buildTableData().buildMutilDimTable();
+                    mutilDimTableBuilder.buildIndsDefine()
+                    .buildDimsDefine(isDrillOption).buildTableData().buildMutilDimTable();
             FormatModel formatModel = getFormatModel(model, targetArea);
             Map<String, Object> otherSetting = targetArea.getOtherSetting();
             if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
@@ -671,19 +675,7 @@ public class QueryDataResource extends BaseResource {
         /**
          * 如果是lite-olap表格，还需要将selection-area中的参数取出，放入到表或者图的area中，modify by yichao.jiang
          */
-        if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
-            LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) model.getExtendById(targetArea.getReferenceAreaId());
-            // 取得lite-olap select id
-            String liteOlapSelectAreaId = liteOlapArea.getSelectionAreaId();
-            for (String key : runTimeModel.getLocalContextByAreaId(liteOlapSelectAreaId).getParams().keySet()) {
-                // 将不属于下钻维度的参数替换
-                if (!row.getOlapElementId().equals(key)) {
-                    // TODO 考虑参数维度特殊处理
-                    queryParams.put(key, runTimeModel.getLocalContextByAreaId(liteOlapSelectAreaId).getParams()
-                            .get(key));
-                }
-            }
-        }
+        this.getLiteOlapParams(targetArea, runTimeModel, queryParams, row.getOlapElementId());
         action = queryBuildService.generateTableQueryAction(model, areaId, queryParams);
         /**
          * 把下钻的值存下来 TODO 临时放在这里，需要重新考虑
@@ -754,9 +746,37 @@ public class QueryDataResource extends BaseResource {
         ResponseResult rs =
                 ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", resultMap);
         // for test
-        transNewTable(rs, model, targetArea, result.getDataModel(), cube, targetLogicModel, null);
+        transNewTable(rs, model, targetArea, result.getDataModel(), cube, targetLogicModel, null, true);
         logger.info("[INFO]Successfully execute drill operation. cost {} ms", (System.currentTimeMillis() - begin));
         return rs;
+    }
+    
+    
+    /**
+     * getLiteOlapParams
+     *
+     * @param targetArea
+     * @param runTimeModel
+     * @param queryParams
+     */
+    private void getLiteOlapParams(ExtendArea targetArea,
+            ReportRuntimeModel runTimeModel, Map<String, Object> queryParams,
+            String optionOlapElementId) {
+
+        if (targetArea.getType() == ExtendAreaType.LITEOLAP_TABLE) {
+            LiteOlapExtendArea liteOlapArea = (LiteOlapExtendArea) runTimeModel.getModel()
+                    .getExtendById(targetArea.getReferenceAreaId());
+            // 取得lite-olap select id
+            String liteOlapSelectAreaId = liteOlapArea.getSelectionAreaId();
+            for (String key : runTimeModel.getLocalContextByAreaId(liteOlapSelectAreaId).getParams().keySet()) {
+                // 将不属于下钻或展开维度的参数替换
+                if (optionOlapElementId == null || !key.equals(optionOlapElementId)) {
+                    // TODO 考虑参数维度特殊处理
+                    queryParams.put(key, runTimeModel.getLocalContextByAreaId(liteOlapSelectAreaId).getParams()
+                            .get(key));
+                }
+            }
+        }
     }
 
     /**
@@ -899,6 +919,8 @@ public class QueryDataResource extends BaseResource {
         String logicModelAreaId = ReportRunTimeModelUtils.getAreaId4AnyType(targetArea, model, areaId);
         Map<String, Object> queryParams =
                 QueryDataUtils.updateLocalContextAndReturn(runTimeModel, areaId, request.getParameterMap());
+        // 添加liteolap放大镜的情况
+        this.getLiteOlapParams(targetArea, runTimeModel, queryParams, null);
         // 为维度组下钻和展示处理参数中的uniqueName和lineUniqueName，具体原理为：收起和展开时，需要考虑到查询条件当前所选维度值，否则收起再展开后，子层级有可能会多出 updata by majun
         if (targetLogicModel != null && targetLogicModel.getRows() != null) {
             Item[] itemsOnRow = targetLogicModel.getRows();
@@ -929,6 +951,10 @@ public class QueryDataResource extends BaseResource {
         queryParams = QueryDataParamBuilder.buildDillDownParams(queryParams, uniqNames, targetIndex, store, model);
         QueryAction action =
                 queryBuildService.generateTableQueryActionForDrill(model, areaId, queryParams, targetIndex);
+        
+        
+        
+        
         ResultSet result;
         try {
             result = reportModelQueryService.queryDatas(model, action, true, false, queryParams, securityKey);
@@ -977,7 +1003,12 @@ public class QueryDataResource extends BaseResource {
                 ResourceUtils.getResult("Success Getting VM of Report", "Fail Getting VM of Report", resultMap);
         String uniqueName = request.getParameter("uniqueName");
         DataModel dm4Merage = sectionDataModel4Expand(result, uniqueName, lineUniqueName);
-        this.transNewTable(rs, model, targetArea, dm4Merage, cube, targetLogicModel, prefix);
+        // 判断操作是否为展开操作
+        boolean isDrill = true;
+        if ("expand".equals(type)) {
+            isDrill = false;
+        }
+        this.transNewTable(rs, model, targetArea, dm4Merage, cube, targetLogicModel, prefix, isDrill);
         return rs;
     }
 
@@ -997,13 +1028,17 @@ public class QueryDataResource extends BaseResource {
         if (uniqueName.equals(summayHeadField.getValue())) {
             List<HeadField> subHeads = summayHeadField.getChildren();
             dm4Merage.setRowHeadFields(subHeads);
-            dm4Merage.setRecordSize(dm4Merage.getRecordSize() - 1);
-            // 去掉一层父级，列数据也需要对应去掉一级
+            int removeTimes = summayHeadField.getNodeList().size() == 0 ? 1 : summayHeadField.getNodeList().size();
+            dm4Merage.setRecordSize(dm4Merage.getRecordSize() - removeTimes);
+            // 去掉一层父级，列数据也需要对应去掉removeTimes级
             for (List<BigDecimal> baseDataList : dm4Merage.getColumnBaseData()) {
-                baseDataList.remove(0);
+                for (int i = 0 ; i < removeTimes; i ++) {
+                    baseDataList.remove(0);
+                }
             }
         }
         return dm4Merage;
+        
     }
 
     /**

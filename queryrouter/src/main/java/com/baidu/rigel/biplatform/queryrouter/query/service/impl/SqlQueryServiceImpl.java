@@ -38,7 +38,7 @@ import com.baidu.rigel.biplatform.queryrouter.queryplugin.utils.QueryHandlerBuil
 import com.google.common.collect.Lists;
 
 /**
- * sql查询的插件
+ * sql鏌ヨ鐨勬彃浠�
  * 
  * @author luowenlei
  *
@@ -77,7 +77,7 @@ public class SqlQueryServiceImpl implements QueryService {
             DataModel dataModel = null;
             SqlQuestionModel sqlQuestionModel = (SqlQuestionModel) questionModel;
             if (sqlQuestionModel.getDataSourceInfo().getDataSourceType() == DataSourceType.ASYN) {
-            // 异步数据源
+            // 寮傛鏁版嵁婧�
                 
 //                AsynQuery asynQuery = new AsynQuery(sqlQuestionModel.getSql(), sqlQuestionModel.getDataSourceInfo());
 //                Object asynQueryCache = cacheManagerService.getFromCache(asynQuery.getKey());
@@ -91,7 +91,7 @@ public class SqlQueryServiceImpl implements QueryService {
 //                            + asynQuery.getKey() + "\"}";
 //                    SubmitResult submitResult = dc.submitWithOrigMeta("com.baidu.rigel.drun.scheduleframework.example.DummyLeader",
 //                            "dispatch-pool-test", config, new LeaderResourceReq(null, null, null), origMetaJson);
-//                    // 将sql + ds key 中存放queryUUID，存放leaderId。
+//                    // 灏唖ql + ds key 涓瓨鏀緌ueryUUID锛屽瓨鏀緇eaderId銆�
 //                    if (submitResult.isSuccess()) {
 //                        // asynQuery.setDrunTaskId(submitResult.getLeaderId());
 //                        // cacheManagerService.setToCache(asynQuery.getKey(), asynQuery);

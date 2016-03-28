@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 
 public class MutilDimTableUtils {
 
-    private static final String PERSONALITY_SUMMARY_CAPTION = "summaryCaption";
+    public static final String PERSONALITY_SUMMARY_CAPTION = "summaryCaption";
 
     private static final String DEFAULT_SUMMARY_CAPTION = "汇总";
     private static final String DEFAULT_SUMMARY_CAPTION2 = "合计";
@@ -53,7 +53,7 @@ public class MutilDimTableUtils {
             if (!StringUtils.isEmpty(linkBridgeId)) {
                 LinkInfo linkInfo = linkInfoMap.get(linkBridgeId);
                 // 这里严格判断，只有当设置了明细跳转表，并且参数映射也已经设置完成，才在多维报表处展示超链接
-                if (linkInfo != null && !StringUtils.isEmpty(linkInfo.getPlaneTableId())
+                if (linkInfo != null && !StringUtils.isEmpty(linkInfo.getTargetTableId())
                         && !MapUtils.isEmpty(linkInfo.getParamMapping())) {
                     define.setLinkBridge(linkBridgeId);
                 }
@@ -122,28 +122,7 @@ public class MutilDimTableUtils {
         /**
          * 为table增加操作列属性, add by majun
          */
-        table.setOperationColumns(generateOperationColumnList(linkInfoMap));
+        table.setOperationColumns(DataModelUtils.generateOperationColumnList(linkInfoMap));
 
     }
-
-    /**
-     * 返回新多维表需要的操作列对象集合
-     * 
-     * @param linkInfoMap linkInfoMap
-     * @return 返回新多维表需要的操作列对象集合
-     */
-    private static List<OperationColumnDefine> generateOperationColumnList(Map<String, LinkInfo> linkInfoMap) {
-        List<OperationColumnDefine> operationColumns = Lists.newArrayList();
-        List<LinkInfo> savedOperationLinkInfoList = OlapLinkUtils.getOperationColumKeys(linkInfoMap);
-        if (!CollectionUtils.isEmpty(savedOperationLinkInfoList)) {
-            for (LinkInfo linkInfo : savedOperationLinkInfoList) {
-                OperationColumnDefine operationColumn = new OperationColumnDefine();
-                operationColumn.setLinkBridge(linkInfo.getColunmSourceId());
-                operationColumn.setName(linkInfo.getColunmSourceCaption());
-                operationColumns.add(operationColumn);
-            }
-        }
-        return operationColumns;
-    }
-
 }

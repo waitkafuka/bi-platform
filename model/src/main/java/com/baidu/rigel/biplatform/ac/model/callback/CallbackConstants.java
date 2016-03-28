@@ -13,21 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.baidu.rigel.biplatform.ma.model.utils;
-
-import org.junit.Assert;
-import org.junit.Test;
+package com.baidu.rigel.biplatform.ac.model.callback;
 
 /**
- *Description:
- * @author david.wang
+ * Description: 回调纬度常量
+ * 
+ * @author luowenlei
  *
  */
-public class UuidGeneratatorUtilsTest {
+public final class CallbackConstants {
     
-    @Test
-    public void testGenerate () {
-        String rs = UuidGeneratorUtils.generate ();
-        Assert.assertTrue (!rs.contains ("-"));
-    }
+    /**
+     * 是否需要汇总格式返回
+     */
+    public static final String CB_NEED_SUMMARY = "NEED_SUMMARY";
+    
+    /**
+     * 需要汇总格式返回
+     */
+    public static final String CB_NEED_SUMMARY_TRUE = "CB_NEED_SUMMARY_TRUE";
+    
+    /**
+     * 不需要汇总格式返回
+     */
+    public static final String CB_NEED_SUMMARY_FALSE = "CB_NEED_SUMMARY_FALSE";
 }

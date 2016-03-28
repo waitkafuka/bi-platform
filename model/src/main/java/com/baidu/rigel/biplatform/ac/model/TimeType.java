@@ -26,39 +26,39 @@ public enum TimeType {
     /**
      * TimeYear
      */
-    TimeYear("yyyy", 1), // 年时间粒度
+    TimeYear("yyyy", 1, "Y"), // 年时间粒度
     /**
      * TimeHalfYear
      */
-    TimeHalfYear(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 2), // 半年时间粒度
+    TimeHalfYear(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 2, "HY"), // 半年时间粒度
     /**
      * TimeQuarter
      */
-    TimeQuarter(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 3), // 季度时间粒度
+    TimeQuarter(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 3, "Q"), // 季度时间粒度
     /**
      * TimeMonth
      */
-    TimeMonth(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 4), // 月时间粒度
+    TimeMonth(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 4, "M"), // 月时间粒度
     /**
      * TimeWeekly
      */
-    TimeWeekly(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 5), // 周时间粒度
+    TimeWeekly(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 5, "W"), // 周时间粒度
     /**
      * TimeDay
      */
-    TimeDay(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 6), // 日时间粒度
+    TimeDay(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 6, "D"), // 日时间粒度
     /**
      * TimeHour
      */
-    TimeHour(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 7), // 小时时间粒度
+    TimeHour(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 7, "H"), // 小时时间粒度
     /**
      * TimeMinute
      */
-    TimeMinute(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 8), // 分钟时间粒度
+    TimeMinute(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 8, "Mi"), // 分钟时间粒度
     /**
      * TimeSecond
      */
-    TimeSecond(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 9); // 秒时间粒度
+    TimeSecond(TimeDimCommonKeystore.DEFAULT_TIME_FORMAT, 9, "S"); // 秒时间粒度
     
     /**
      * format 时间默认格式
@@ -70,13 +70,20 @@ public enum TimeType {
     private int id;
     
     /**
+     * 时间粒度标示
+     */
+    private String granularity;
+    
+    /**
      * construct with format and type id
      * @param format time format
      * @param id time enum id
+     * @param granularity time enum granularity
      */
-    private TimeType(String format, int id) {
+    private TimeType(String format, int id, String granularity) {
         this.format = format;
         this.id = id;
+        this.granularity = granularity;
     }
     
     /**
@@ -97,4 +104,12 @@ public enum TimeType {
         return id;
     }
     
+    /**
+     * getter method for property Granularity
+     * 
+     * @return the id
+     */
+    public String getGranularity() {
+        return granularity;
+    }
 }

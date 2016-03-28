@@ -43,7 +43,12 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
      * serialVersionUID
      */
     private static final long serialVersionUID = 8511984568585171226L;
-
+    
+    /**
+     * id 维值id
+     */    
+    private String id;
+    
     /**
      * name 维值name
      */
@@ -128,6 +133,21 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
         this.isTime = isTime;
     }
 
+    /**
+     * default generate get id
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * default generate set id
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
 
     /**
      * construct with
@@ -458,7 +478,12 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
                         } else if(o2.getCaption().equals("百度")) {
                             return -1;
                         }
-                    return o2.getName().compareTo(o1.getName());
+                        if (!StringUtils.isEmpty(o2.getId()) && !StringUtils.isEmpty(o1.getId())) {
+                            return o2.getId().compareTo(o1.getId());
+                        } else {
+                            return o2.getName().compareTo(o1.getName());
+                        }
+                    
                 });
             } else {
                 Collections.sort(this.children, (o1, o2) -> {
@@ -467,7 +492,11 @@ public class MemberNodeTree implements Serializable, Comparable<MemberNodeTree> 
                     } else if(o2.getCaption().equals("百度")) {
                         return 1;
                     }
-                    return o1.getName().compareTo(o2.getName());
+                    if (!StringUtils.isEmpty(o2.getId()) && !StringUtils.isEmpty(o1.getId())) {
+                        return o1.getId().compareTo(o2.getId());
+                    } else {
+                        return o1.getName().compareTo(o2.getName());
+                    }
                 });
             }
             this.children.forEach(o -> {

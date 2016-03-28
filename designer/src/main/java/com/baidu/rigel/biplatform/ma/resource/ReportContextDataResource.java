@@ -1,10 +1,13 @@
 package com.baidu.rigel.biplatform.ma.resource;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -14,6 +17,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.SerializationUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,11 +34,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackLevel;
 import com.baidu.rigel.biplatform.ac.minicube.CallbackMember;
 import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
+import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
+import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackConstants;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.DeepcopyUtils;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
@@ -58,6 +66,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LinkParams;
 import com.baidu.rigel.biplatform.ma.report.model.LiteOlapExtendArea;
 import com.baidu.rigel.biplatform.ma.report.model.PlaneTableCondition;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
+import com.baidu.rigel.biplatform.ma.report.model.ReportParam;
 import com.baidu.rigel.biplatform.ma.report.query.ReportRuntimeModel;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.PivotTable;
@@ -152,10 +161,19 @@ public class ReportContextDataResource extends BaseResource {
                 Dimension dim = cube.getDimensions().get(dimId);
                 if (dim != null) {
                     List<Map<String, String>> values;
+                    final List<String> defaultValues = Lists.newArrayList();
                     try {
                         values = Lists.newArrayList();
+                        //Jin. 当外部传参时，控件的默认值按传参设定                        
+                        //Jin. 取得http请求传参的值
+                        final List<String> defaultValueList=new ArrayList<String>();
+                        if(params.containsKey(dim.getId())){
+                            defaultValueList.addAll(Arrays.asList(params.get(dim.getId()).split(",")));
+                        }
+                        
                         params.remove(dim.getId());
                         params.put(Constants.LEVEL_KEY, "1");
+                        params.put(CallbackConstants.CB_NEED_SUMMARY, CallbackConstants.CB_NEED_SUMMARY_FALSE);
                         List<Member> members =
                                 reportModelQueryService.getMembers(tmpCube, tmpCube.getDimensions().get(dim.getName()),
                                         params, securityKey).get(0);
@@ -163,6 +181,11 @@ public class ReportContextDataResource extends BaseResource {
                             Map<String, String> tmp = Maps.newHashMap();
                             tmp.put("value", m.getUniqueName());
                             tmp.put("text", m.getCaption());
+                            //Jin. 如果当前的member的caption存在于http传参中，取得对应的uniqueName放到defaultValues中
+                            if(!CollectionUtils.isEmpty(defaultValueList) && defaultValueList.remove(m.getCaption())){
+                                defaultValues.add(m.getUniqueName());
+                            }                            
+                            
                             if (dim.getLevels().size() <= 1) {
                                 tmp.put("isLeaf", "1");
                             }
@@ -183,6 +206,8 @@ public class ReportContextDataResource extends BaseResource {
                         // tmpCube, dsInfo, Maps.newHashMap());
                         Map<String, Object> datasource = Maps.newHashMap();
                         datasource.put("datasource", values);
+                        //Jin. 把默认选中的值填到返回结果里
+                        datasource.put("defaultValue", defaultValues);
                         QueryDataUtils.fillBackParamValues(runtimeModel, dim, datasource);
                         datas.put(areaId, datasource);
                     } catch (Exception e) {
@@ -346,6 +371,11 @@ public class ReportContextDataResource extends BaseResource {
         ReportDesignModel model = null;
         String reportPreview = request.getParameter("reportPreview");
         String imageId = request.getParameter("reportImageId");
+        
+        //Jin.reload参数,对于请求中增加reload参数的请求，直接从cache中取前一次的runtimemodel进行查询
+        //TODO 后续需要提供reload接口，而不是这种参数形式
+        String reload = request.getParameter("reload");
+        
         ReportRuntimeModel runtimeModel = null;
         String activedsName = null;
         // 先将动态数据源参数保存下来，以在后续初始化完毕之后再将数据源名称设置回context中
@@ -367,7 +397,15 @@ public class ReportContextDataResource extends BaseResource {
                 } else {// if ((runtimeModel =
                         // reportModelCacheManager.getRuntimeModelUnsafety(reportId))
                         // == null) {
-                    model = reportDesignModelService.getModelByIdOrName(reportId, true);
+                    if(!StringUtils.isEmpty(reload)){
+                        runtimeModel = reportModelCacheManager.getRuntimeModelUnsafety(reportId);                        
+                    }
+                    
+                    if(StringUtils.isEmpty(reload) || runtimeModel == null ){
+                        model = reportDesignModelService.getModelByIdOrName(reportId, true);
+                    }
+                
+                    
                 }
             }
         } catch (CacheOperationException e1) {
@@ -463,38 +501,62 @@ public class ReportContextDataResource extends BaseResource {
             } else {
                 queryParams.putAll(fromRuntimeModel.getLocalContextByAreaId(liteOlapSelectAreaId).getParams());
             }
-            // 平面表cube
-            Cube planeCube = null;
+            // targetReport Cube
+            Cube targetCube = null;
             ExtendArea[] planeExtendAreas = model.getExtendAreaList();
             for (ExtendArea extendArea : planeExtendAreas) {
-                if (extendArea != null && extendArea.getType() == ExtendAreaType.PLANE_TABLE) {
-                    planeCube = model.getSchema().getCubes().get(extendArea.getCubeId());
-                }
+                targetCube = model.getSchema().getCubes().get(extendArea.getCubeId());
             }
 
-            Map<String, PlaneTableCondition> planeTableConditions = model.getPlaneTableConditions();
             Map<String, Object> fromParams = fromRuntimeModel.getContext().getParams();
-            // runtimeModel.getContext().getParams().putAll(
-            // PlaneTableUtils.handelTimeCondition(cube, fromParams));
             // 如果包含跳转参数
             if (fromParams != null && fromParams.containsKey("linkBridgeParams")) {
                 Map<String, LinkParams> linkParams = (Map<String, LinkParams>) fromParams.get("linkBridgeParams");
-                Map<String, String> planeTableCond = Maps.newHashMap();
-                if (planeTableConditions == null || planeTableConditions.size() == 0) {
-                    throw new RuntimeException("the plane table conditions is empty, its id is : " + toReportId);
+                Map<String, String> targetTableCond = Maps.newHashMap();
+                
+                
+                // 添加指标
+                for (Entry<String, Measure> entry : targetCube.getMeasures().entrySet()) {
+                    // 添加callback p参数对应的情况
+                    for (ReportParam reportParam : model.getParams().values()) {
+                        Dimension dim = targetCube.getDimensions().get(reportParam.getElementId());
+                        if (dim != null && dim.getType() == DimensionType.CALLBACK) {
+                            targetTableCond.put(reportParam.getName(), entry.getValue().getName());
+                            targetTableCond.put(entry.getValue().getName(), reportParam.getName());
+                        }
+                    }
+                    targetTableCond.put(entry.getKey(), entry.getValue().getName());
+                    targetTableCond.put(entry.getValue().getName(), entry.getKey());
                 }
-                planeTableConditions.forEach((k, v) -> {
-                    // LinkParams linkParam = linkParams.get(v.getName());
-                    // if (StringUtils.isEmpty(linkParam) ||
-                    // StringUtils.isEmpty(linkParam.getOriginalDimValue()) ||
-                    // StringUtils.isEmpty(linkParam.getUniqueName())) {
-                    // throw new RuntimeException("the need params { " +
-                    // v.getName() + " } is empty, please check!");
-                    // }
-                        planeTableCond.put(v.getName(), v.getElementId());
-                        planeTableCond.put(v.getElementId(), v.getName());
-                    });
-
+                
+                // 添加维度
+                for (Entry<String, Dimension> entry : targetCube.getDimensions().entrySet()) {
+                    // 添加callback p参数对应的情况
+                    for (ReportParam reportParam : model.getParams().values()) {
+                        Dimension dim = targetCube.getDimensions().get(reportParam.getElementId());
+                        if (dim != null && dim.getType() == DimensionType.CALLBACK) {
+                            targetTableCond.put(reportParam.getName(), entry.getValue().getName());
+                            targetTableCond.put(entry.getValue().getName(), reportParam.getName());
+                        }
+                    }
+                    targetTableCond.put(entry.getKey(), entry.getValue().getName());
+                    targetTableCond.put(entry.getValue().getName(), entry.getKey());
+                }
+                
+                // 添加平面表条件
+                if (!MapUtils.isEmpty(runtimeModel.getModel().getPlaneTableConditions())) {
+                    for (PlaneTableCondition planeTableCondition : runtimeModel.getModel()
+                            .getPlaneTableConditions().values()) {
+                        if (linkParams.get(planeTableCondition.getName()) != null) {
+                            String dimName = linkParams.get(planeTableCondition.getName()).getDimName();
+                            targetTableCond.put(dimName, planeTableCondition.getElementId());
+                            targetTableCond.put(planeTableCondition.getElementId(), dimName);
+                        }
+                        
+                        targetTableCond.put(planeTableCondition.getName(), planeTableCondition.getElementId());
+                        targetTableCond.put(planeTableCondition.getElementId(), planeTableCondition.getName());
+                    }
+                }
                 for (String key : linkParams.keySet()) {
                     LinkParams linkParam = linkParams.get(key);
                     if (StringUtils.isEmpty(linkParam.getOriginalDimValue())
@@ -504,41 +566,70 @@ public class ReportContextDataResource extends BaseResource {
                     String newValue = null;
                     String planeTableConditionKey = null;
                     try {
-                        planeTableConditionKey = planeTableCond.get(linkParam.getParamName());
-                        // for (String conditionKey :
-                        // planeTableConditions.keySet()) {
-                        // if (planeTableConditions.get(conditionKey).getName().
-                        // equals(linkParam.getParamName())) {
-                        // planeTableConditionKey = conditionKey;
-                        // }
-                        // }
+                        // TODO 兼容老的跳转配置
+                        planeTableConditionKey = targetTableCond.get(linkParam.getParamName());
+                        if (planeTableConditionKey == null) {
+                            planeTableConditionKey = targetTableCond.get(linkParam.getDimName());
+                        }
                         if (linkParam.getOriginalDimValue() != null
-                                && PlaneTableUtils.isTimeDim(planeCube, planeTableConditionKey)) {
+                                && PlaneTableUtils.isTimeDim(targetCube, planeTableConditionKey)) {
+                            TimeDimension timeDim = (TimeDimension) targetCube.getDimensions().get(
+                                    planeTableConditionKey);
                             // 如果是普通时间JSON字符串
                             if (PlaneTableUtils.isTimeJson(linkParam.getOriginalDimValue())) {
                                 newValue = linkParam.getOriginalDimValue();
                             } else {
                                 // 如果不是规范的时间JSON字符串，则需特殊处理
-                                newValue =
-                                        PlaneTableUtils.convert2TimeJson(linkParam.getOriginalDimValue(), fromParams);
+                                newValue = PlaneTableUtils.convert2TimeJson(
+                                        linkParam.getOriginalDimValue(), fromParams, timeDim);
                             }
                         } else {
-                            // 获取维度名称
-                            String dimName = linkParam.getDimName();
-                            // 从cube中获取该维度
+                            // 从form表cube中获取该维度
                             Dimension[] dim =
                                     multiCube.getDimensions().values().stream()
-                                            .filter(v -> v.getName().equals(dimName)).toArray(Dimension[]::new);
-                            if (dim == null || dim.length != 1) {
-                                throw new Exception("获取维度数据出错");
+                                            .filter(v -> v.getName().equals(linkParam.getParamName())).toArray(Dimension[]::new);
+                            // TODO 兼容老版本跳转配置
+                            if (ArrayUtils.isEmpty(dim)) {
+                                dim = multiCube.getDimensions().values().stream()
+                                        .filter(v -> v.getName().equals(linkParam.getDimName()))
+                                        .toArray(Dimension[]::new);
                             }
+                            
+                            String name = null;
+                            String id = null;
+                            DimensionType type = null;
+                            boolean isMeasureParam = false;
+                            // 添加跳转为指标的情况,平面表跳多维的情况
+                            if (ArrayUtils.isEmpty(dim)) {
+                                Measure[] measures = multiCube.getMeasures().values().stream()
+                                        .filter(v -> v.getName().equals(linkParam.getDimName()))
+                                        .toArray(Measure[]::new);
+                                if (!ArrayUtils.isEmpty(measures)) {
+                                    isMeasureParam = true;
+                                    name = linkParam.getDimName();
+                                }
+                                id =  measures[0].getId();
+                            } else {
+                                name = dim[0].getName();
+                                id = dim[0].getId();
+                                type = dim[0].getType();
+                            }
+                            
+                            if (name == null) {
+                                throw new Exception("获取维度或指标数据出错");
+                            }
+                            // 处理查询的uniquename
+                            String[] uniqueNames = MetaNameUtil.parseUnique2NameArray(linkParam.getUniqueName());
+                            uniqueNames[0] = name;
+                            linkParam.setUniqueName(MetaNameUtil.makeUniqueNamesArray(uniqueNames));
+
                             // 利用维度信息从上下文中获取是否有参数
                             Object filterValue = null;
                             Set<String> filterValueSet = Sets.newHashSet();
-                            if (queryParams.containsKey(dim[0].getId())) {
-                                filterValue = queryParams.get(dim[0].getId());
+                            if (queryParams.containsKey(id)) {
+                                filterValue = queryParams.get(id);
                                 filterValueSet = this.covObject2Set(filterValue);
-                            } else if (dim[0].getType() == DimensionType.GROUP_DIMENSION) {
+                            } else if (type == DimensionType.GROUP_DIMENSION) {
                                 Set<String> totalFilterValueSet = Sets.newHashSet();
                                 dim[0].getLevels().forEach((k, v) -> {
                                     if (queryParams.containsKey(k)) {
@@ -550,8 +641,9 @@ public class ReportContextDataResource extends BaseResource {
                             if (MetaNameUtil.isUniqueName(linkParam.getUniqueName())) {
                                 requestParams.put(HttpRequest.COOKIE_PARAM_NAME, request.getHeader("Cookie"));
                                 newValue =
-                                        this.handleReqParams4PlaneTable(multiCube, planeTableCond,
-                                                linkParam.getUniqueName(), requestParams, filterValueSet, securityKey);
+                                        this.handleReqParams4Table(multiCube, targetTableCond,
+                                                linkParam.getUniqueName(), requestParams,
+                                                filterValueSet, securityKey, isMeasureParam);
                             } else {
                                 newValue = linkParam.getOriginalDimValue();
                             }
@@ -657,8 +749,8 @@ public class ReportContextDataResource extends BaseResource {
      * @param params
      * @return
      */
-    private String handleReqParams4PlaneTable(Cube cube, Map<String, String> planeTableCond, String uniqueName,
-            Map<String, String> params, Set<String> filterValues, String securityKey)
+    private String handleReqParams4Table(Cube cube, Map<String, String> planeTableCond, String uniqueName,
+            Map<String, String> params, Set<String> filterValues, String securityKey, boolean isMeasureParam)
             throws DataSourceOperationException {
 
         if (!ParamValidateUtils.check("cube", cube)) {
@@ -672,13 +764,7 @@ public class ReportContextDataResource extends BaseResource {
         }
         String dimName = MetaNameUtil.getDimNameFromUniqueName(uniqueName);
         Cube oriCube = QueryUtils.transformCube(cube);
-        Dimension dim = oriCube.getDimensions().get(dimName);
-        String[] tmp = MetaNameUtil.parseUnique2NameArray(uniqueName);
-        Level tmpLevel = null;
-        if (dim != null && dim.getLevels() != null) {
-            tmpLevel = dim.getLevels().values().toArray(new Level[0])[0];
-        }
-
+        
         DataSourceDefine dsDefine = null;
         DataSourceInfo dsInfo = null;
         DataSourceService dataSourceService =
@@ -693,86 +779,98 @@ public class ReportContextDataResource extends BaseResource {
             logger.error("Fail in parse datasource to datasourceInfo.", e);
             throw new DataSourceOperationException(e);
         }
-        if (QueryDataUtils.isCallbackLevel(tmpLevel)) {
-            // 处理callback
-            CallbackLevel callbackLevel = (CallbackLevel) tmpLevel;
-            Map<String, String> callbackParams = callbackLevel.getCallbackParams();
-            String callbackParam = null;
-            // TODO 是否考虑多个参数问题
-            for (String key : callbackParams.keySet()) {
-                if (planeTableCond.containsKey(key)) {
-                    callbackParam = key;
-                    break;
-                }
-            }
-            callbackLevel.getCallbackParams().put(callbackParam, tmp[tmp.length - 1]);
-            List<Member> members = callbackLevel.getMembers(oriCube, dsInfo, params);
-            for (Member member : members) {
-                if (member.getUniqueName().equals(uniqueName)) {
-                    if (!CollectionUtils.isEmpty(filterValues) && !filterValues.contains(uniqueName)) {
-                        continue;
-                    }
-                    MiniCubeMember miniCubeMember = (MiniCubeMember) member;
-                    // 传入的uniqueName下的所有的节点信息
-                    Set<String> queryNodes = miniCubeMember.getQueryNodes();
-                    // 获取过滤条件中的所有节点信息，因为过滤条件中存储的为[post_id].[34378]，需要将其转为34378
-                    Set<String> newFilterValues = filterValues.stream().map(value -> {
-                        String[] tmpValue = MetaNameUtil.parseUnique2NameArray(value);
-                        return tmpValue[tmpValue.length - 1];
-                    }).collect(Collectors.toSet());
-                    final String finalCallbackParam = callbackParam;
-                    final DataSourceInfo finalDsInfo = dsInfo;
-                    Set<String> newQueryNodes = Sets.newHashSet();
-                    // 对每一个过滤条件遍历，如果该过滤条件属于该uniqueName下的节点
-                    // 则应该以该过滤条件信息为主
-                    newFilterValues.forEach(value -> {
-                        // 如果该值在queryNodes中出现过
-                            if (queryNodes.contains(value)) {
-                                // 更改callbackLevel
-                                callbackLevel.getCallbackParams().put(finalCallbackParam, value);
-                                // 获取新的member信息
-                                List<Member> tmpMembers = callbackLevel.getMembers(oriCube, finalDsInfo, params);
-                                Set<String> tmpQueryNodes = Sets.newHashSet();
-                                // 获取新的member信息下的queryNodes信息
-                                tmpMembers.stream().forEach(tmpVal -> {
-                                    MiniCubeMember tmpMiniCubeMember = (MiniCubeMember) tmpVal;
-                                    tmpQueryNodes.addAll(tmpMiniCubeMember.getQueryNodes());
-                                });
-                                // 最终新的queryNodes信息
-                                newQueryNodes.addAll(tmpQueryNodes);
-                            }
-                        });
-                    if (!CollectionUtils.isEmpty(newQueryNodes)) {
-                        return newQueryNodes.stream().collect(Collectors.joining(","));
-                    }
-                    return queryNodes.stream().collect(Collectors.joining(","));
-                }
-            }
+        
+        Level tmpLevel = null;
+        String[] tmp = MetaNameUtil.parseUnique2NameArray(uniqueName);
+        if (isMeasureParam) {
+            return tmp[tmp.length - 1];
         } else {
-            // 如果有孩子结点，则要取到孩子结点数值
-            if ((dim.getLevels().size() > tmp.length - 1)) {
-                Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - 2];
-                if (MetaNameUtil.isAllMemberUniqueName(uniqueName)) {
-                    level = dim.getLevels().values().toArray(new Level[0])[dim.getLevels().size() - 1];
-                }
-                // 产生新的过滤条件，过滤条件应该作用在对应的level上
-                filterValues = this.generateNewFilterValues(dim, filterValues, oriCube, dsInfo, params);
-                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, filterValues, uniqueName);
+            Dimension dim = oriCube.getDimensions().get(dimName);
+            if (dim != null && dim.getLevels() != null) {
+                tmpLevel = dim.getLevels().values().toArray(new Level[0])[0];
             }
-            // 如果当前维度是个维度组，并且传入参数为形如[行业维度].[交通运输].[All_交通运输s]，
-            // 那么其实需要取一级行业对应的全部二级行业节点，主要用于级联下拉框控件 update by majun
-            else if (dim.getType() == DimensionType.GROUP_DIMENSION && (dim.getLevels().size() == tmp.length - 1)
-                    && MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
-                // 这里需要注意，传入的level应该是指定层级的上一级
-                Level level = dim.getLevels().values().toArray(new Level[0])[dim.getLevels().size() - 2];
-                if (MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
-                    uniqueName = uniqueName.substring(0, uniqueName.lastIndexOf("."));
+            
+            if (QueryDataUtils.isCallbackLevel(tmpLevel)) {
+                // 处理callback
+                CallbackLevel callbackLevel = (CallbackLevel) tmpLevel;
+                Map<String, String> callbackParams = callbackLevel.getCallbackParams();
+                String callbackParam = null;
+                // TODO 是否考虑多个参数问题
+                for (String key : callbackParams.keySet()) {
+                    if (planeTableCond.containsKey(key)) {
+                        callbackParam = key;
+                        break;
+                    }
                 }
-                return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, filterValues, uniqueName);
-
+                callbackLevel.getCallbackParams().put(callbackParam, tmp[tmp.length - 1]);
+                List<Member> members = callbackLevel.getMembers(oriCube, dsInfo, params);
+                for (Member member : members) {
+                    if (member.getUniqueName().equals(uniqueName)) {
+                        if (!CollectionUtils.isEmpty(filterValues) && !filterValues.contains(uniqueName)) {
+                            continue;
+                        }
+                        MiniCubeMember miniCubeMember = (MiniCubeMember) member;
+                        // 传入的uniqueName下的所有的节点信息
+                        Set<String> queryNodes = miniCubeMember.getQueryNodes();
+                        // 获取过滤条件中的所有节点信息，因为过滤条件中存储的为[post_id].[34378]，需要将其转为34378
+                        Set<String> newFilterValues = filterValues.stream().map(value -> {
+                            String[] tmpValue = MetaNameUtil.parseUnique2NameArray(value);
+                            return tmpValue[tmpValue.length - 1];
+                        }).collect(Collectors.toSet());
+                        final String finalCallbackParam = callbackParam;
+                        final DataSourceInfo finalDsInfo = dsInfo;
+                        Set<String> newQueryNodes = Sets.newHashSet();
+                        // 对每一个过滤条件遍历，如果该过滤条件属于该uniqueName下的节点
+                        // 则应该以该过滤条件信息为主
+                        newFilterValues.forEach(value -> {
+                            // 如果该值在queryNodes中出现过
+                                if (queryNodes.contains(value)) {
+                                    // 更改callbackLevel
+                                    callbackLevel.getCallbackParams().put(finalCallbackParam, value);
+                                    // 获取新的member信息
+                                    List<Member> tmpMembers = callbackLevel.getMembers(oriCube, finalDsInfo, params);
+                                    Set<String> tmpQueryNodes = Sets.newHashSet();
+                                    // 获取新的member信息下的queryNodes信息
+                                    tmpMembers.stream().forEach(tmpVal -> {
+                                        MiniCubeMember tmpMiniCubeMember = (MiniCubeMember) tmpVal;
+                                        tmpQueryNodes.addAll(tmpMiniCubeMember.getQueryNodes());
+                                    });
+                                    // 最终新的queryNodes信息
+                                    newQueryNodes.addAll(tmpQueryNodes);
+                                }
+                            });
+                        if (!CollectionUtils.isEmpty(newQueryNodes)) {
+                            return newQueryNodes.stream().collect(Collectors.joining(","));
+                        }
+                        return queryNodes.stream().collect(Collectors.joining(","));
+                    }
+                }
             } else {
-                // 如果没有孩子，则直接返回
-                return tmp[tmp.length - 1];
+                // 如果有孩子结点，则要取到孩子结点数值
+                if ((dim.getLevels().size() > tmp.length - 1)) {
+                    Level level = dim.getLevels().values().toArray(new Level[0])[tmp.length - 2];
+                    if (MetaNameUtil.isAllMemberUniqueName(uniqueName)) {
+                        level = dim.getLevels().values().toArray(new Level[0])[dim.getLevels().size() - 1];
+                    }
+                    // 产生新的过滤条件，过滤条件应该作用在对应的level上
+                    filterValues = this.generateNewFilterValues(dim, filterValues, oriCube, dsInfo, params);
+                    return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, filterValues, uniqueName);
+                }
+                // 如果当前维度是个维度组，并且传入参数为形如[行业维度].[交通运输].[All_交通运输s]，
+                // 那么其实需要取一级行业对应的全部二级行业节点，主要用于级联下拉框控件 update by majun
+                else if (dim.getType() == DimensionType.GROUP_DIMENSION && (dim.getLevels().size() == tmp.length - 1)
+                        && MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
+                    // 这里需要注意，传入的level应该是指定层级的上一级
+                    Level level = dim.getLevels().values().toArray(new Level[0])[dim.getLevels().size() - 2];
+                    if (MetaNameUtil.isAllMemberName(tmp[tmp.length - 1])) {
+                        uniqueName = uniqueName.substring(0, uniqueName.lastIndexOf("."));
+                    }
+                    return getChildMembersStrByParentAndUniqueName(level, oriCube, dsInfo, params, filterValues, uniqueName);
+
+                } else {
+                    // 如果没有孩子，则直接返回
+                    return tmp[tmp.length - 1];
+                }
             }
         }
         return null;
@@ -1390,7 +1488,7 @@ public class ReportContextDataResource extends BaseResource {
         } else {
             ExtendArea area = model.getExtendAreaList()[0];
             QueryDataResource queryDataResource =
-                    (QueryDataResource) ApplicationContextHelper.getContext().getBean("QueryDataResource");
+                    (QueryDataResource) ApplicationContextHelper.getContext().getBean("queryDataResource");
             // 通过action调用数据查询action的入口方法
             rs = queryDataResource.queryArea(reportId, area.getId(), request);
             if (rs.getStatus() != 0) {
@@ -1430,7 +1528,8 @@ public class ReportContextDataResource extends BaseResource {
                     }
                     List<CellData> v = pivotTable.getDataSourceColumnBased().get(i);
                     List<String> tmpV =
-                            v.stream().map(cellData -> cellData.getV().toString()).collect(Collectors.toList());
+                            v.stream().map(cellData -> (cellData.getV() == null ? "-" : cellData.getV().toString()))
+                                .collect(Collectors.toList());
                     datas.put(key, tmpV);
                 }
             } else {

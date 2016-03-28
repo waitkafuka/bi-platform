@@ -31,6 +31,7 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.Member;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackConstants;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackDimTreeNode;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackResponse;
 import com.baidu.rigel.biplatform.ac.model.callback.CallbackServiceInvoker;
@@ -38,8 +39,10 @@ import com.baidu.rigel.biplatform.ac.model.callback.CallbackType;
 import com.baidu.rigel.biplatform.ac.model.callback.ResponseStatus;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.util.HttpRequest;
+import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.queryrouter.query.exception.MetaException;
 import com.baidu.rigel.biplatform.queryrouter.query.service.DimensionMemberService;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
@@ -71,14 +74,12 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
         Map<String, String> callbackParams = Maps.newHashMap(callbackLevel.getCallbackParams());
         if (MapUtils.isNotEmpty(params)) {
             params.forEach((k, v) -> {
-                if (callbackParams.containsKey(k)) {
+                if (callbackParams.containsKey(k) || callbackParams.containsKey(CallbackConstants.CB_NEED_SUMMARY)) {
                     callbackParams.put(k, v);
                 }
             }); 
             callbackParams.put (HttpRequest.COOKIE_PARAM_NAME, params.get (HttpRequest.COOKIE_PARAM_NAME));
-//            callbackParams.putAll(params);
         }
-        
         CallbackResponse response = 
                 CallbackServiceInvoker.invokeCallback(callbackLevel.getCallbackUrl(), 
                 callbackParams, CallbackType.DIM);
@@ -87,7 +88,41 @@ public class CallbackDimensionMemberServiceImpl implements DimensionMemberServic
             List<CallbackDimTreeNode> posTree = (List<CallbackDimTreeNode>) response.getData();
             List<MiniCubeMember> result = createMembersByPosTreeNode(posTree, level, null);
             if (parentMember == null) {
-                return result;
+                // 如果根节点的children有值，那么,目前cb有两个类型，一个为扁平结构，一个问题汇总树节点，
+                if (CallbackConstants.CB_NEED_SUMMARY_FALSE.equals(params
+                        .get(CallbackConstants.CB_NEED_SUMMARY))
+                        && CollectionUtils.isNotEmpty(result.get(0).getChildren())) {
+                    // 如果CB_NEED_SUMMARY为空，返回扁平结构。
+                    List<MiniCubeMember> resultList = Lists.newArrayList();
+                    for (Member Member : result.get(0).getChildren()) {
+                        resultList.add((MiniCubeMember) Member);
+                    }
+                    return resultList;
+                } else if (CallbackConstants.CB_NEED_SUMMARY_FALSE.equals(params
+                        .get(CallbackConstants.CB_NEED_SUMMARY))
+                        && (result.size() == 1 && result.get(0).getCaption().indexOf("全部") == 0)) {
+                    // 此种情况为临时方案，就是判断如果为size为1，caption为全部开头的抓取children
+                    return Lists.newArrayList();
+                } else if (CollectionUtils.isEmpty(result.get(0).getChildren())
+                        && result.size() > 1 
+                        && CallbackConstants.CB_NEED_SUMMARY_TRUE
+                        .equals(params.get(CallbackConstants.CB_NEED_SUMMARY))) {
+                    // 如果CB_NEED_SUMMARY有值，返回带汇总节点的结构。
+                    CallbackMember member = new CallbackMember(MetaNameUtil.SUMMARY_MEMBER_NAME_PRE
+                            + level.getName());
+                    member.setLevel(level);
+                    member.setCaption(CallbackMember.SUMMARY_NODE_CAPTION);
+                    member.setHasChildren(true);
+                    member.generateUniqueName(null);
+                    member.setParent(parentMember);
+                    member.setChildren(result);
+                    List<MiniCubeMember> miniCubeMemberList = Lists.newArrayList();
+                    miniCubeMemberList.add(member);
+                    return miniCubeMemberList;
+                } else {
+                    // 如果没有显式设置CB_NEED_SUMMARY，走cb默认返回值结构，
+                    return result;
+                }
             } else {
                 return createMembersByPosTreeNode(posTree.get(0).getChildren(), level, null);
             }

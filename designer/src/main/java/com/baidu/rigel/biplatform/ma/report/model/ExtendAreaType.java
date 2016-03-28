@@ -27,85 +27,103 @@ public enum ExtendAreaType {
     /**
      * 表格
      */
-    TABLE,
+    TABLE("多维表格"),
     
     /**
      * 图表
      */
-    CHART,
+    CHART("图表"),
     
     /**
      * 平面表
      */
-    PLANE_TABLE,
+    PLANE_TABLE("平面表"),
     
     /**
      * LITEOLAP中的图
      */
-    LITEOLAP_CHART,
+    LITEOLAP_CHART("透视表图"),
     
     /**
      * LITEOLAP中的表
      */
-    LITEOLAP_TABLE,
+    LITEOLAP_TABLE("透视表"),
     
     /**
      * 时间控件
      */
-    TIME_COMP,
+    TIME_COMP("时间控件"),
     
     /**
      * 查询控件
      */
-    QUERY_COMP,
+    QUERY_COMP("查询控件"),
     
     /**
      * 功能按钮控件
      */
-    FUNC_COMP,
+    FUNC_COMP("功能按钮控件"),
     
     /**
      * 待选区域控件
      */
-    SELECTION_AREA,
+    SELECTION_AREA("待选区域控件"),
     
     /**
      * 下拉列表
      */
-    SELECT,
+    SELECT("下拉列表"),
     
     /**
      * 多选下拉列表
      */
-    MULTISELECT,
+    MULTISELECT("多选下拉列表"),
     
     /**
      * 文本框
      */
-    TEXT,
+    TEXT("文本框"),
     
     /**
      * 
      */
-    H_BUTTON,
+    H_BUTTON("按钮"),
     
     /**
      * 单选下拉树
      */
-    SINGLE_DROP_DOWN_TREE,
+    SINGLE_DROP_DOWN_TREE("单选下拉树"),
     
     /**
      * LiteOlap组件
      */
-    LITEOLAP,
+    LITEOLAP("LiteOlap组件"),
     
     /**
      * 报表保存保存
      */
-    REPORT_SAVE_COMP,
+    REPORT_SAVE_COMP("报表保存保存"),
     
     /**
      * 联动部件
      */
-    CASCADE_SELECT;
+    CASCADE_SELECT("联动部件");
+    
+    /**
+     * 中文名称
+     */
+    private String name;
+
+    /**
+     * getName
+     * 
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    private ExtendAreaType(String name) {
+        this.name = name;
+    }
 }

@@ -83,6 +83,10 @@ public class WhereDataUtils {
                     }
                 }
             }
+            if (resultMap.get(QueryMeta.getSqlColumnKey(tableName, fieldName)) != null) {
+            // 如果有重复的条件选项，那么求 原先的where value与现有的valueList的where value的交集
+                valueList.retainAll(resultMap.get(QueryMeta.getSqlColumnKey(tableName, fieldName)));
+            }
             resultMap.put(QueryMeta.getSqlColumnKey(tableName, fieldName), valueList);
         }
         return resultMap;

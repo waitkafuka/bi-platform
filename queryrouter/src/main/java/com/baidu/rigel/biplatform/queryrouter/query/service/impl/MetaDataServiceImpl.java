@@ -144,45 +144,39 @@ public class MetaDataServiceImpl implements MetaDataService, BeanFactoryAware {
         MetaDataService.checkCube(cube);
         MetaDataService.checkDataSourceInfo(dataSourceInfo);
         DimensionMemberService memberService = dimensionMemberServiceMap.get(DimensionMemberService.SQL_MEMBER_SERVICE);
-        Dimension dim = null;
         Level level = null;
-        String dimName = null;
         String[] dimNameArray = null;
         Iterator<Level> it = null;
-        Iterator<String> unqNameIt = uniqueNameList.iterator ();
-        String uniqueName = null;
-        List<String> oldNames = DeepcopyUtils.deepCopy (uniqueNameList);
+        String uniqueName = uniqueNameList.get(0);
         List<String> queryUniqueName = Lists.newArrayList ();
-        while (unqNameIt.hasNext ()) {
-            uniqueName = unqNameIt.next ();
-            dimName = MetaNameUtil.getDimNameFromUniqueName (uniqueName);
-            dim = cube.getDimensions ().get (dimName);
-            if (dim.getLevels ().size () > 1) {
-                dimNameArray = MetaNameUtil.parseUnique2NameArray (uniqueName);
-                it = dim.getLevels ().values ().iterator ();
-                for (int i = 0; i < dimNameArray.length - 2; ++i) {
-                    it.next ();
-                }
-                level = it.next ();
-                if (level.getDimTable ().equals (((MiniCube) cube).getSource())) {
-                    unqNameIt.remove ();
-                    queryUniqueName.add(uniqueName.substring (0, uniqueName.lastIndexOf (".")));
-                }
+        Dimension dim = cube.getDimensions().get(MetaNameUtil.getDimNameFromUniqueName (uniqueName));
+        
+        
+        if (dim.getLevels ().size () > 1) {
+            dimNameArray = MetaNameUtil.parseUnique2NameArray (uniqueName);
+            it = dim.getLevels ().values ().iterator ();
+            for (int i = 0; i < dimNameArray.length - 2; ++i) {
+                it.next ();
+            }
+            level = it.next ();
+            if (level.getDimTable ().equals (((MiniCube) cube).getSource())) {
+                queryUniqueName.add(uniqueName);
+                
             }
         }
-        Iterator<MiniCubeMember> memberIt = null;
         List<MiniCubeMember> members = Lists.newArrayList ();
         if (!queryUniqueName.isEmpty ()) {
             List<MiniCubeMember> parents = memberService.lookUpByNames(dataSourceInfo, cube, queryUniqueName, params);
             for (MiniCubeMember parent : parents) {
                 members.addAll (memberService.getMembers (cube, level, dataSourceInfo, parent, params));
             }
-            memberIt = members.iterator ();
-            while (memberIt.hasNext ()) {
-                if (!oldNames.contains (memberIt.next ().getUniqueName ())) {
-                    memberIt.remove ();
-                }
-            }
+           // memberIt = members.iterator ();
+//            while (memberIt.hasNext ()) {
+//                
+//                if (!oldNames.contains (memberIt.next ().getUniqueName ())) {
+//                    memberIt.remove ();
+//                }
+//            }
         }
         if (!uniqueNameList.isEmpty ()) {
             members.addAll (memberService.lookUpByNames(dataSourceInfo, cube, uniqueNameList, params));

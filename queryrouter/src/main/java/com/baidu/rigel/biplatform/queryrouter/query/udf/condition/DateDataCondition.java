@@ -29,6 +29,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import com.baidu.rigel.biplatform.ac.exception.MiniCubeQueryException;
+import com.baidu.rigel.biplatform.ac.minicube.MiniCubeMember;
 import com.baidu.rigel.biplatform.ac.minicube.TimeDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
@@ -46,9 +47,11 @@ import com.baidu.rigel.biplatform.ac.util.TimeRangeDetail;
 import com.baidu.rigel.biplatform.ac.util.TimeUtils;
 import com.baidu.rigel.biplatform.parser.context.Condition;
 import com.baidu.rigel.biplatform.queryrouter.query.exception.MetaException;
+import com.baidu.rigel.biplatform.queryrouter.query.service.DimensionMemberService;
 import com.baidu.rigel.biplatform.queryrouter.query.service.QueryContextBuilder;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.MemberNodeTree;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
+import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContextAdapter;
 import com.google.common.collect.Lists;
 
 /**
@@ -156,11 +159,12 @@ public class DateDataCondition implements Condition {
      * @return Date
      * @throws MiniCubeQueryException 
      * @throws ParseException 
+     * @throws MetaException 
      */
     Date getFirstDayOfTimeDim(TimeDimension dimension, QueryContextAdapter adapter) 
-            throws MiniCubeQueryException, ParseException {
+            throws MiniCubeQueryException, ParseException, MetaException {
         SimpleDateFormat format = new SimpleDateFormat(TimeRangeDetail.FORMAT_STRING);
-        List<Member> members = getMembers(dimension, adapter);
+        List<MiniCubeMember> members = getMembers(dimension, adapter);
         MetaCondition condition = adapter.getQuestionModel().getQueryConditions().get(dimension.getName());
         String value = null;
         if (condition != null) {
@@ -249,16 +253,17 @@ public class DateDataCondition implements Condition {
      * @param adapter
      * @return List<Member>
      * @throws MiniCubeQueryException
+     * @throws MetaException 
      */
-    private List<Member> getMembers(TimeDimension dimension,
-            QueryContextAdapter adapter) throws MiniCubeQueryException {
+    private List<MiniCubeMember> getMembers(TimeDimension dimension,
+            QueryContextAdapter adapter) throws MiniCubeQueryException, MetaException {
         if (dimension.getLevels() == null || dimension.getLevels().size() == 0) {
             throw new IllegalArgumentException("非法参数，时间维度至少包含一个Level");
         }
         Level[] levels = dimension.getLevels().values().toArray(new Level[0]);
-        List<Member> members = levels[0].getMembers(adapter.getCube(), 
-                adapter.getDataSoruceInfo(), adapter.getQuestionModel().getRequestParams());
-        return members;
+        
+        return DimensionMemberService.getDimensionMemberServiceByLevelType(levels[0].getType()).getMembers(adapter.getCube(), levels[0],
+        		adapter.getDataSoruceInfo(), null, adapter.getQuestionModel().getRequestParams());
     }
 
     /* (non-Javadoc)

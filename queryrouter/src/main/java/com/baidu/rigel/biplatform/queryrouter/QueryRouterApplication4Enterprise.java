@@ -44,7 +44,7 @@ import org.springframework.util.StringUtils;
 import com.baidu.rigel.biplatform.cache.util.ApplicationContextHelper;
 import com.baidu.rigel.biplatform.parser.RegisterFunction;
 import com.baidu.rigel.biplatform.parser.exception.RegisterFunctionException;
-import com.baidu.rigel.biplatform.queryrouter.handle.security.SecurityFilter;
+import com.baidu.rigel.biplatform.queryrouter.handle.manager.security.SecurityFilter;
 import com.baidu.rigel.biplatform.queryrouter.query.udf.DateDataFunction;
 import com.baidu.rigel.biplatform.queryrouter.query.udf.RelativeRate;
 import com.baidu.rigel.biplatform.queryrouter.query.udf.SimilitudeRate;

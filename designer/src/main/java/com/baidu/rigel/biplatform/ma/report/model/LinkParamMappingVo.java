@@ -22,14 +22,15 @@ public class LinkParamMappingVo {
     private List<Map<String, String>> olapTableDimList = new ArrayList<Map<String, String>>();
 
     /**
-     * 添加平面报表参数映射内容
+     * 添加目标跳转报表参数映射内容
      * 
      * @param name 平面报表参数名称
      * @param selectedDim 多维报表维度名称
      */
-    public void addPlaneTableParam(String name, String selectedDim) {
+    public void addTargetTableParam(String name, String caption, String selectedDim) {
         Map<String, String> planeTableParamMap = new HashMap<String, String>();
         planeTableParamMap.put("name", name);
+        planeTableParamMap.put("caption", caption);
         planeTableParamMap.put("selectedDim", selectedDim);
         planeTableParamList.add(planeTableParamMap);
     }

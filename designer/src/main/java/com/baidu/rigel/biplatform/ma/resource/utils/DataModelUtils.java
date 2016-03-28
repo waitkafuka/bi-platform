@@ -59,6 +59,7 @@ import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
+import com.baidu.rigel.biplatform.ma.report.query.newtable.bo.OperationColumnDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.CellData;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColDefine;
 import com.baidu.rigel.biplatform.ma.report.query.pivottable.ColField;
@@ -412,7 +413,7 @@ public final class DataModelUtils {
         List<Column> columns = tableData.getColumns();
         // 设置平面表列属性信息
         planeTable.setColDefines(getColDefinesInOrder(cube, logicModel, columns, formatModel, queryAction));
-
+        planeTable.setOperationColumnDefine(generateOperationColumnList(formatModel.getLinkInfo()));
         // 表的数据定义
         Map<String, List<String>> data = tableData.getColBaseDatas();
         List<Map<String, String>> planeTableData = Lists.newArrayList();
@@ -473,7 +474,21 @@ public final class DataModelUtils {
                     // 设置表头
                     colDefine.setTitle(column.caption);
                     // 设置表域名称
+//                    String displayKey = StringUtils.replace(StringUtils
+//                            .replace(column.key, "[Dimension].", ""), "[Measure].", "");
                     colDefine.setField(column.key);
+                    // 设置linkBridge
+                    Map<String, LinkInfo> linkInfoMap = formatModel.getLinkInfo();
+                    String linkBridgeId = items[itemIndex].getOlapElementId();
+                    if (!StringUtils.isEmpty(linkBridgeId)) {
+                        LinkInfo linkInfo = linkInfoMap.get(linkBridgeId);
+                        // 这里严格判断，只有当设置了明细跳转表，并且参数映射也已经设置完成，才在多维报表处展示超链接
+                        if (linkInfo != null && !StringUtils.isEmpty(linkInfo.getTargetTableId())
+                                && !MapUtils.isEmpty(linkInfo.getParamMapping())) {
+                            colDefine.setLinkBridge(linkBridgeId);
+                        }
+
+                    }
                     String name = column.name;
 
                     // 设置提示信息
@@ -590,6 +605,8 @@ public final class DataModelUtils {
             Map<String, String> value = Maps.newLinkedHashMap();
             for (String key : keys) {
                 try {
+//                    String displayKey = StringUtils.replace(StringUtils
+//                            .replace(key, "[Dimension].", ""), "[Measure].", "");
                     value.put(key, UnicodeUtils.unicode2String(data.get(key).get(i)));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -1513,8 +1530,8 @@ public final class DataModelUtils {
             String olapElementId = define.getOlapElementId();
             if (!StringUtils.isEmpty(olapElementId)) {
                 LinkInfo linkInfo = linkInfoMap.get(olapElementId);
-                // 这里严格判断，只有当设置了明细跳转表，并且参数映射也已经设置完成，才在多维报表处展示超链接
-                if (linkInfo != null && !StringUtils.isEmpty(linkInfo.getPlaneTableId())
+                // 这里严格判断，只有当设置了跳转表，并且参数映射也已经设置完成，才在多维报表处展示超链接
+                if (linkInfo != null && !StringUtils.isEmpty(linkInfo.getTargetTableId())
                         && !MapUtils.isEmpty(linkInfo.getParamMapping())) {
                     define.setLinkBridge(olapElementId);
                 }
@@ -1766,6 +1783,26 @@ public final class DataModelUtils {
             }
         });
         return tmp;
+    }
+    
+    /**
+     * 返回新多维表需要的操作列对象集合
+     * 
+     * @param linkInfoMap linkInfoMap
+     * @return 返回新多维表需要的操作列对象集合
+     */
+    public static List<OperationColumnDefine> generateOperationColumnList(Map<String, LinkInfo> linkInfoMap) {
+        List<OperationColumnDefine> operationColumns = Lists.newArrayList();
+        List<LinkInfo> savedOperationLinkInfoList = OlapLinkUtils.getOperationColumKeys(linkInfoMap);
+        if (!CollectionUtils.isEmpty(savedOperationLinkInfoList)) {
+            for (LinkInfo linkInfo : savedOperationLinkInfoList) {
+                OperationColumnDefine operationColumn = new OperationColumnDefine();
+                operationColumn.setLinkBridge(linkInfo.getColunmSourceId());
+                operationColumn.setName(linkInfo.getColunmSourceCaption());
+                operationColumns.add(operationColumn);
+            }
+        }
+        return operationColumns;
     }
 
 }

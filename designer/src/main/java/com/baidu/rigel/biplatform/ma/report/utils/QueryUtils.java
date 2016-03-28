@@ -89,6 +89,7 @@ import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction.OrderDesc;
 import com.baidu.rigel.biplatform.ma.report.query.chart.DIReportChart;
 import com.baidu.rigel.biplatform.ma.report.query.chart.SeriesDataUnit;
+import com.baidu.rigel.biplatform.ma.report.query.newtable.utils.MutilDimTableUtils;
 import com.baidu.rigel.biplatform.ma.resource.utils.DataModelUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -248,7 +249,6 @@ public class QueryUtils {
                 QueryConditionUtils.buildQueryConditionsForPlaneTable(reportModel, area, queryAction);
             questionModel.setQueryConditions(conditionsForPlaneTable);            
         } else {
-            questionModel.setQuerySource("TESSERACT");
             // 针对其他情况构建查询条件
             Map<String, MetaCondition> conditionsForPivotTable = 
                 QueryConditionUtils.buildQueryConditionsForPivotTable(reportModel, area, queryAction);
@@ -261,26 +261,24 @@ public class QueryUtils {
                 if (areaType != ExtendAreaType.TABLE && areaType != ExtendAreaType.LITEOLAP_TABLE) {
                     questionModel.setNeedSummary(false);
                 } else {
-                    String needSummaryConfigValue = "";
+//                    Object newNeedSummaryConfigValue = "";
+//                    Object oldneedSummaryConfigValue = "";
                     // 如果是liteolap表格，则需要取到其引用的父model的area区域对象才能取到相关other配置
-                    if (areaType == ExtendAreaType.LITEOLAP_TABLE) {
-                        needSummaryConfigValue =
-                                String.valueOf(reportModel.getExtendById(area.getReferenceAreaId()).getOtherSetting()
-                                        .get(NEED_SUMMARY));
-                    } else {
-                        needSummaryConfigValue = String.valueOf(area.getOtherSetting().get(NEED_SUMMARY));
-                    }
-                    questionModel.setNeedSummary(needSummaryWhitConfigValue(questionModel, needSummaryConfigValue));
+//                    if (areaType == ExtendAreaType.LITEOLAP_TABLE) {
+//                        newNeedSummaryConfigValue = reportModel.getExtendById(area.getReferenceAreaId()).getOtherSetting()
+//                                        .get(MutilDimTableUtils.PERSONALITY_SUMMARY_CAPTION);
+//                        oldneedSummaryConfigValue = reportModel.getExtendById(area.getReferenceAreaId()).getOtherSetting()
+//                                .get(NEED_SUMMARY);
+//                    } else {
+//                        newNeedSummaryConfigValue = area.getOtherSetting().get(MutilDimTableUtils.PERSONALITY_SUMMARY_CAPTION);
+//                        oldneedSummaryConfigValue = area.getOtherSetting().get(NEED_SUMMARY);
+//                    }
+                    questionModel.setNeedSummary(false);
                 }
             }
             
-            if (questionModel.isNeedSummary() && "false".equals(area.getOtherSetting().get(NEED_SUMMARY))) {
-                questionModel.setNeedSummary (false);
-            }
         }
         questionModel.setUseIndex(true);
-        
-        
         putSliceConditionIntoParams (queryAction, questionModel);
         questionModel.setFilterBlank(queryAction.isFilterBlank());
         return questionModel;
@@ -290,12 +288,18 @@ public class QueryUtils {
      * 如果之前存了了有配置信息，则直接取配置的值即可，若无相关配置，则走原来的判断逻辑
      * 
      * @param questionModel questionModel
-     * @param needSummaryConfigValue 有关配置的值
+     * @param oldNeedSummaryConfigValue 有关配置的值,旧配置，向下兼容
+     * @param newNeedSummaryConfigValue 有关配置的值
      * @return 返回是否需要合计行标识
      */
-    private static boolean needSummaryWhitConfigValue(QuestionModel questionModel, String needSummaryConfigValue) {
-        if (StringUtils.hasLength(needSummaryConfigValue)) {
-            return Boolean.valueOf(needSummaryConfigValue);
+    private static boolean needSummaryWhitConfigValue(QuestionModel questionModel,
+            Object oldNeedSummaryConfigValue, Object newNeedSummaryConfigValue) {
+        if (!StringUtils.isEmpty(newNeedSummaryConfigValue)
+                || (oldNeedSummaryConfigValue != null 
+                && "true".equals(oldNeedSummaryConfigValue.toString()))) {
+            return true;
+        } else if (oldNeedSummaryConfigValue != null && "false".equals(oldNeedSummaryConfigValue.toString())) {
+            return false;
         } else {
             return needSummary(questionModel);
         }
@@ -901,18 +905,20 @@ public class QueryUtils {
      */
     public static Map<String, Object> resetContextParam(final HttpServletRequest request, ReportDesignModel model) {
         Map<String, Object> rs = Maps.newHashMap();
+        
+        LOG.info ("context params ============== " + ContextManager.getParams ());
+        // 当前请求参数
+        Map<String, String> requestParams = collectRequestParams(request);
+        rs.putAll(requestParams);
+        LOG.info ("current request params ============== " + requestParams);
+        //处理报表参数
         Collection<ReportParam> params = DeepcopyUtils.deepCopy(model.getParams()).values();
         // modify by jiangyichao at 2015-05-19
         Collection<PlaneTableCondition> planeTableConditions = 
             DeepcopyUtils.deepCopy(model.getPlaneTableConditions()).values();
         if (params.size() == 0 && planeTableConditions.size() == 0) {
             return rs;
-        }
-        LOG.info ("context params ============== " + ContextManager.getParams ());
-        // 当前请求参数
-        Map<String, String> requestParams = collectRequestParams(params, request);
-        rs.putAll(requestParams);
-        LOG.info ("current request params ============== " + requestParams);
+        }        
         
         // TODO 先处理P功能对应的参数
         if (params.size() != 0) {
@@ -964,8 +970,7 @@ public class QueryUtils {
      * @param request
      * @return Map<String, String>
      */
-    private static Map<String, String> collectRequestParams(Collection<ReportParam> params, 
-        HttpServletRequest request) {
+    private static Map<String, String> collectRequestParams(HttpServletRequest request) {
         Map<String, String> rs = Maps.newHashMap();
         request.getParameterMap().forEach((k, v) -> {
             rs.put(k, v[0]);

@@ -258,6 +258,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         QueryRequest queryRequest = buildQueryRequest(cube, levels, parentMember, dataSourceInfo);
         if (isFromFactTable(cube, queryLevel)) {
             queryRequest.setDistinct(true);
+        } else {
+            // 如果不是退化维，则设置id信息
+            queryRequest.selectAndGroupBy(queryLevel.getPrimaryKey());
         }
         String filterDimKey = params.get(QueryContextBuilder.FILTER_DIM_KEY);
         if (StringUtils.isNotEmpty(filterDimKey)) {
@@ -428,7 +431,14 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             MiniCubeLevel queryLevel, Member parentMember, DataSourceInfo dataSourceInfo,
             QueryMeta queryMeta, boolean isBuildParentValue) throws MiniCubeQueryException {
         try {
-            
+            // 判断如果是获取当前level，并且parentMember为当前level的某值，并不是allmembers则返回自己
+            if (parentMember != null
+                    && parentMember.getLevel().equals(queryLevel)
+                    && !MetaNameUtil.isLastAllMemberUniqueName(parentMember.getUniqueName())) {
+                List<MiniCubeMember> list = Lists.newArrayList();
+                list.add((MiniCubeMember) parentMember);
+                return list;
+            }
             long current = System.currentTimeMillis();
             Map<String, MiniCubeMember> members = new TreeMap<String, MiniCubeMember>();
             SqlColumn queryLevelSqlColumn = queryMeta.getSqlColumn(queryLevel.getDimTable(),
@@ -456,6 +466,17 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 if (member == null) {
                     member = new MiniCubeMember(value);
                     members.put(member.getName(), member);
+                }
+                // 设置ID信息
+                if (queryLevelSqlColumn.getJoinTable() != null
+                        && !CollectionUtils.isEmpty(queryLevelSqlColumn.getJoinTable().getJoinOnList())
+                        && !StringUtils.isEmpty(queryLevelSqlColumn.getJoinTable().getJoinOnList().get(0)
+                                .getJoinTableFieldName())) {
+                    String dimPk = queryLevelSqlColumn.getJoinTable().getJoinOnList().get(0)
+                            .getJoinTableFieldName();
+                    if (row.get(dimPk) != null && !StringUtils.isEmpty(row.get(dimPk).toString())) {
+                        member.setId(row.get(dimPk).toString());
+                    }
                 }
                 
                 member.setParentMemberName(previousValue);
@@ -707,7 +728,9 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
             if (MetaNameUtil.isAllMemberUniqueName(filterValue.split(",")[0])) {
                 continue;
             }
-            Level dimLevel = dim.getLevels().values().toArray(new Level[0])[0];
+            int currentSearchLevelIndex = MetaNameUtil
+                    .getSearchLevelIndexByUniqueName(StringUtils.split(filterValue, ",")[0]);
+            Level dimLevel = dim.getLevels().values().toArray(new Level[0])[currentSearchLevelIndex];
             boolean fromFactable = dimTable.equals(((MiniCube) cube).getSource());
             if ((fromFactable && !(dim instanceof TimeDimension) && !dim.getId().equals(
                     level.getDimension().getId()))
@@ -716,8 +739,11 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 // filterValue 格式为{uniqueNameList }
                 // 此处需要解析filterValue生成QueryObject
                 try {
-                    String[] filterValueArray = genFilterValue(filterValue);
+                    // 此时的 currentSearchLevelIndex + 1 是取filterValue 的值，因为filterValue的index与levels的index多一个维度层
+                    String[] filterValueArray = genFilterValue(filterValue, currentSearchLevelIndex + 1);
+                    
                     if (dimLevel.getDimTable().equals(dimTable)) {
+                     // 退化维的情况
                         Set<String> leafNodes = Sets.newHashSet();
                         for (String tmp : filterValueArray) {
                             leafNodes.add(tmp);
@@ -725,6 +751,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                         QueryObject queryObject = new QueryObject(null, leafNodes);
                         expression.getQueryValues().add(queryObject);
                     } else {
+                     // 正常维度
                         for (String tmp : filterValueArray) {
                             MiniCubeMember member = getMemberFromLevelByName(ds, cube, dimLevel,
                                     tmp, null, params);
@@ -735,7 +762,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
-                    String[] filterValueArray = genFilterValue(filterValue);
+                    String[] filterValueArray = genFilterValue(filterValue, 0);
                     for (String tmp : filterValueArray) {
                         Set<String> leafNodes = Sets.newHashSet();
                         leafNodes.add(tmp);
@@ -806,7 +833,7 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
                 }
             } else if ((dimTable.equals(dim.getTableName()) && !dim.getId().equals(
                     level.getDimension().getId()))) {
-                String[] filterValueArray = genFilterValue(filterValue);
+                String[] filterValueArray = genFilterValue(filterValue, 0);
                 Expression expression = new Expression(((MiniCubeLevel) dimLevel).getSource());
                 // filterValue 格式为{uniqueNameList }
                 // 此处需要解析filterValue生成QueryObject
@@ -823,7 +850,14 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         return expressionList;
     }
     
-    private String[] genFilterValue(String filterValue) {
+    /**
+     * 根据
+     *
+     * @param filterValue
+     * @param currentSearchLevelIndex
+     * @return
+     */
+    private String[] genFilterValue(String filterValue, int currentSearchLevelIndex) {
         if (filterValue.contains("{")) {
             filterValue = filterValue.substring(1, filterValue.length() - 1);
         }
@@ -833,7 +867,10 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         for (int index = 0; index < rs.length; ++index) {
             if (MetaNameUtil.isUniqueName(uniqueNameList[index])) {
                 tmp = MetaNameUtil.parseUnique2NameArray(uniqueNameList[index]);
-                rs[index] = tmp[tmp.length - 1];
+                if (currentSearchLevelIndex <= 0) {
+                    currentSearchLevelIndex = tmp.length - 1;
+                }
+                rs[index] = tmp[currentSearchLevelIndex];
             } else if (!StringUtils.isBlank(uniqueNameList[index])) {
                 rs[index] = uniqueNameList[index];
             }
@@ -861,18 +898,22 @@ public class SqlDimensionMemberServiceImpl implements DimensionMemberService {
         Expression expression = new Expression(queryLevel.getSource());
         for (String uniqueName : uniqueNameList) {
             String[] tmp = MetaNameUtil.parseUnique2NameArray(uniqueName);
-            if (MetaNameUtil.isAllMemberUniqueName(uniqueName, 0)) {
+            // 如果tmp的节点大于等于3个是需要建立查询条件的
+            if (tmp.length < 3 && MetaNameUtil.isAllMemberUniqueName(uniqueName, 0)) {
                 continue;
             }
-            expression.getQueryValues().add(new QueryObject(tmp[tmp.length - 1]));
+            int index = MetaNameUtil.getSearchLevelIndexByUniqueName(uniqueName);
+            expression.getQueryValues().add(new QueryObject(tmp[index + 1]));
         }
         queryRequest.getWhere().getAndList().add(expression);
-        log.info("queryId:{} query members,queryRequest:" + queryRequest,
-                QueryRouterContext.getQueryId());
         List<Expression> whereCondition = genWhereCondition(cube, level, params, dataSourceInfo);
         if (!whereCondition.isEmpty()) {
             for (Expression exp : whereCondition) {
-                queryRequest.getWhere().getAndList().add(exp);
+                
+                if (exp.getQueryValues().size() == 1 
+                        && CollectionUtils.isNotEmpty(exp.getQueryValues().iterator().next().getLeafValues())) {
+                    queryRequest.getWhere().getAndList().add(exp);
+                }
             }
         }
         

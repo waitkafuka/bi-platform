@@ -28,6 +28,7 @@ import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaContext;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.FormatModel;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
+import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LogicModel;
 import com.baidu.rigel.biplatform.ma.report.model.ReportDesignModel;
 import com.baidu.rigel.biplatform.ma.report.query.QueryAction;
@@ -96,7 +97,6 @@ public class QueryDataResourceUtils {
             try {
                 baseTable = queryBuildService.parseToPlaneTable(cube, result.getDataModel(), targetArea.getLogicModel(),
                                 targetArea.getFormatModel(), action);
-                
                 Map<String, Object> resultMap = Maps.newHashMap();
                 PlaneTable planeTable = (PlaneTable) baseTable;
                 Map<String, Object> otherSetting = targetArea.getOtherSetting();
@@ -106,6 +106,7 @@ public class QueryDataResourceUtils {
                     resultMap.put("head", planeTable.getColDefines());
                     resultMap.put("data", planeTable.getData());
                     resultMap.put("pageInfo", planeTable.getPageInfo());
+                    resultMap.put("operationColumns", planeTable.getOperationColumnDefine());
                 }
                 return ResourceUtils.getResult("Success", "Fail", resultMap);
             } catch (PlaneTableParseException e) {

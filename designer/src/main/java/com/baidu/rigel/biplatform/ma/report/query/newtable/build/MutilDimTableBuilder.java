@@ -92,11 +92,11 @@ public class MutilDimTableBuilder {
      * 
      * @return MutilDimTableBuilder
      */
-    public MutilDimTableBuilder buildDimsDefine() {
+    public MutilDimTableBuilder buildDimsDefine(boolean isDrillOption) {
         List<HeadField> rowHeadFieldTree = dataModel.getRowHeadFields();
         for (HeadField headField : rowHeadFieldTree) {
             DimDataDefine firstDimDataDefine = generateBaseDimDataByHeadField(headField);
-            fillChildDimData(headField, firstDimDataDefine, true);
+            fillChildDimData(headField, firstDimDataDefine, isDrillOption);
             dims.add(firstDimDataDefine);
         }
         return this;
@@ -112,8 +112,11 @@ public class MutilDimTableBuilder {
     private DimDataDefine fillChildDimData(HeadField headField, DimDataDefine dimDataDefine, boolean isFirstDim) {
         // 当当前查询是多维度交叉场景，并且自己有孩子节点，并且当前处理的维度排在第一位,并且自己不是汇总节点时，才将下钻标识置为true
         boolean hasChildMember = headField.getChildren().size() > 0;
-        if (headField.getNodeList().size() > 0 && headField.isHasChildren() && isFirstDim
-                && !MetaNameUtil.isAllMemberUniqueName(headField.getValue()) && !hasChildMember) {
+        if (headField.getNodeList().size() > 0 
+                && headField.isHasChildren() 
+                && isFirstDim
+                && !MetaNameUtil.isAllMemberUniqueName(headField.getValue()) 
+                && !hasChildMember) {
             dimDataDefine.setCanDrill(true);
         } else if (headField.isHasChildren()) {
             dimDataDefine.setHasExpandChildren(true);

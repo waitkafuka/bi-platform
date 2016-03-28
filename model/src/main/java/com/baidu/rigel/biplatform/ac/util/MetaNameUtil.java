@@ -37,6 +37,10 @@ import com.google.common.collect.Lists;
  * @author xiaoming.chen
  * 
  */
+/**
+ * 类MetaNameUtil.java的实现描述：TODO 类实现描述 
+ * @author luowenlei 2016年3月24日 下午2:46:40
+ */
 public class MetaNameUtil {
 
     /**
@@ -207,6 +211,25 @@ public class MetaNameUtil {
     }
     
     /**
+     * 判断一个UniqueName的最后一个节点是否是一个all节点的UniqueName
+     * 
+     * @param uniqueName 节点的UniqueName
+     * @return 是否是all节点
+     * @throws IllegalArgumentException unique格式不正确
+     */
+    public static boolean isLastAllMemberUniqueName(String uniqueName) {
+        if (!isUniqueName(uniqueName)) {
+            LOGGER.warn("uniqueName is illegal:" + uniqueName);
+            return false;
+        }
+        String[] names = parseUnique2NameArray(uniqueName);
+        if (isAllMemberName(names[names.length - 1])) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
      * 判断一个UniqueName是否是一个all节点的UniqueName,用户多级的查询
      * 
      * @param uniqueName 节点的UniqueName
@@ -276,13 +299,49 @@ public class MetaNameUtil {
         String[] metaNames = parseUnique2NameArray(uniqueName);
         return metaNames[0];
     }
-
-    // public static void main(String[] args) {
-    // String unique = "[trade].[1]";
-    //
-    // System.out.println(Pattern.matches("^\\[[^\\]\\[]+\\](\\.\\[[^\\]\\[]+\\])*$", unique));
-    // System.out.println(getParentUniqueName(unique));
-    //
-    // }
+    
+    /**
+     * 根据当前查询的level index，如果为2级，则返回0.
+     *
+     * @param levels 所有的层级元数据
+     * @param uniqueName
+     * @return index 为levels里面的index层，如果配合使用parseUnique2NameArray方法 index需要+1
+     */
+    public static int getSearchLevelIndexByUniqueName(String uniqueName) {
+        if (!isUniqueName(uniqueName)) {
+            return 0;
+        }
+        String[] names = MetaNameUtil.parseUnique2NameArray(uniqueName);
+        if (names.length <= 2) {
+        // 为两级的情况,[行业]。[All_行业s]
+            return 0;
+        }
+        // 此为3级的情况
+        if (MetaNameUtil.isAllMemberName(names[names.length - 1])) {
+        // 如果最后一个为all s 那么返回最后一个值的后面的index [行业]。[AA]。[All_AAs]，返回AA
+            return names.length - 3;
+        } else {
+         // 如果最后一个不为all s 那么返回最后一个值的index [行业]。[AA]。[AAA]，返回AAA
+            return names.length - 2;
+        }
+    }
+    
+    /**
+     * makeUniqueNamesArray
+     *
+     * @param array
+     * @return
+     */
+    public static String makeUniqueNamesArray(String[] array) {
+        StringBuffer sb = new StringBuffer();
+        for (String value : array) {
+            if (StringUtils.isEmpty(sb.toString())) {
+                sb.append("[" + value + "]");
+            } else {
+                sb.append(".[" + value + "]");
+            }
+        }
+        return sb.toString();
+    }
 
 }

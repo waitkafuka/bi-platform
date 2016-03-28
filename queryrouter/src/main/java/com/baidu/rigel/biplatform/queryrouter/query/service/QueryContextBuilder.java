@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ import com.baidu.rigel.biplatform.ac.model.DimensionType;
 import com.baidu.rigel.biplatform.ac.model.Level;
 import com.baidu.rigel.biplatform.ac.model.LevelType;
 import com.baidu.rigel.biplatform.ac.model.Member;
+import com.baidu.rigel.biplatform.ac.model.callback.CallbackConstants;
 import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta;
 import com.baidu.rigel.biplatform.ac.query.model.AxisMeta.AxisType;
@@ -207,6 +209,13 @@ public class QueryContextBuilder {
                         Map<String, Set<String>> filterCondition =
                                 buildFilterCondition(dsInfo, cube, dimCondition, requestParams);
                         if (MapUtils.isNotEmpty(filterCondition)) {
+                            for (Entry<String, Set<String>> entry : filterCondition.entrySet()) {
+                                if (queryContext.getFilterMemberValues().containsKey(entry.getKey())) {
+                                // 如果queryContext.getFilterMemberValues()有维度项的where值，则求交集放入到filterCondition中
+                                    Set<String> totalValues = queryContext.getFilterMemberValues().get(entry.getKey());
+                                    entry.getValue().retainAll(totalValues);
+                                }
+                            }
                             queryContext.getFilterMemberValues().putAll(filterCondition);
                         }
                     }
@@ -484,6 +493,12 @@ public class QueryContextBuilder {
         }
         logger.info("queryId:{} cost:{}ms,in build dimCondition:{}", QueryRouterContext.getQueryId(),
                 System.currentTimeMillis() - current, dimCondition);
+        // 非DESC的都按ASC排序。
+        if (dimCondition.getMetaName().indexOf("ownertable_Time") == 0) {
+        // 如果是时间维度按DESC排序
+            dimCondition.setMemberSortType(SortType.DESC);
+        }
+        nodeTree.sort(dimCondition.getMemberSortType());
         return nodeTree;
     }
 
@@ -623,12 +638,11 @@ public class QueryContextBuilder {
             }
 
         }
-        // 非DESC的都按ASC排序。
         if (dimCondition.getMetaName().indexOf("ownertable_Time") == 0) {
-        // 如果是时间维度按DESC排序
+            // 如果是时间维度按DESC排序
             dimCondition.setMemberSortType(SortType.DESC);
+            nodeTree.sort(dimCondition.getMemberSortType());
         }
-        nodeTree.sort(dimCondition.getMemberSortType());
         return nodeTree;
     }
 
@@ -694,21 +708,7 @@ public class QueryContextBuilder {
             }
         }
 
-        Map<String, MiniCubeMember> memberRepository = Maps.newConcurrentMap();
-        for (Level level : tmp.keySet()) {
-            List<String> datas = tmp.get(level);
-            try {
-                List<MiniCubeMember> rs = metaDataService.lookUp(dataSourceInfo, cube, datas, params);
-                if (rs != null) {
-                    for (MiniCubeMember m : rs) {
-                        memberRepository.put(m.getUniqueName(), m);
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
+        // 组织子节点tree
         for (QueryData queryData : dimCondition.getQueryDataNodes()) {
             String[] names = MetaNameUtil.parseUnique2NameArray(queryData.getUniqueName());
 
@@ -716,10 +716,8 @@ public class QueryContextBuilder {
                 callbackParams.add(names[names.length - 1]);
                 continue;
             } else {
-                MiniCubeMember member = memberRepository.get(queryData.getUniqueName());
-                if (member == null) {
-                    member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
-                }
+                // 获取根节点
+                MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
                 MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
                 List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
                 // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点,
@@ -727,6 +725,7 @@ public class QueryContextBuilder {
                 if (queryData.isExpand()) {
                     List<MiniCubeMember> children = Lists.newArrayList();
                     try {
+                        // 获取根节点下面的子节点
                         children = metaDataService.getChildren(dataSourceInfo, cube, member, params);
                     } catch (Exception e) {
                         // TODO NONE 需要确认是否有问题 目前测试没有看出问题
@@ -753,10 +752,12 @@ public class QueryContextBuilder {
             }
 
         }
+        // callback的情况
         if (hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
             Map<String, String> newParams = new HashMap<>(params);
             newParams.put(dimCondition.getMetaName(), StringUtils.join(callbackParams, ","));
             Level callbackLevel = levels.get(callbackLevelIndex);
+            newParams.put(CallbackConstants.CB_NEED_SUMMARY, CallbackConstants.CB_NEED_SUMMARY_TRUE);
             List<MiniCubeMember> callbackMembers =
                     callbackDimensionService.getMembers(cube, callbackLevel, dataSourceInfo, null, newParams);
             if (CollectionUtils.isNotEmpty(callbackMembers)) {
@@ -857,6 +858,7 @@ public class QueryContextBuilder {
      */
     private MemberNodeTree buildMemberNodeByMember(DataSourceInfo dataSource, Cube cube, MemberNodeTree node,
             MiniCubeMember member, Map<String, String> params) {
+        node.setId(member.getId());
         node.setCaption(member.getCaption());
         node.setTime(member.getLevel().getDimension().isTimeDimension());
         if (CollectionUtils.isNotEmpty(member.getQueryNodes())) {

@@ -83,7 +83,11 @@ public class QueryRequestBuilder {
         if (MapUtils.isNotEmpty(queryContext.getFilterMemberValues())) {
             queryContext.getFilterMemberValues().forEach((properties, values) -> {
                 Expression expression = new Expression(properties);
-                expression.getQueryValues().add(new QueryObject(null, values));
+                for (String value : values) {
+                    Set<String> setValue = Sets.newHashSet();
+                    setValue.add(value);
+                    expression.getQueryValues().add(new QueryObject(value, setValue));
+                }
                 addExpressionIntoAndList (request, expression);
             });
         }
@@ -138,7 +142,9 @@ public class QueryRequestBuilder {
                             addExpressionIntoAndList (request, e);
                         }
                     }
-                } else if (MetaNameUtil.isAllMemberName(node.getName()) && node.isTime ()) {
+                } else if (MetaNameUtil.isAllMemberName(node.getName()) 
+                        && node.isTime () 
+                        && CollectionUtils.isEmpty(node.getChildren())) {
                     // 查询条件为时间条件，并且查询节点为all节点，此处默认取一个整月的数据，需要测试是否影响趋势图
                     Expression e = new Expression (node.getQuerySource ());
                     Calendar cal = Calendar.getInstance ();

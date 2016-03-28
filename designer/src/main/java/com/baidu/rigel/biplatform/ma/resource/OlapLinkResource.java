@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -20,12 +22,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baidu.rigel.biplatform.ac.minicube.StandardDimension;
 import com.baidu.rigel.biplatform.ac.model.Cube;
 import com.baidu.rigel.biplatform.ac.model.Dimension;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
 import com.baidu.rigel.biplatform.ma.report.exception.CacheOperationException;
 import com.baidu.rigel.biplatform.ma.report.exception.ReportModelOperationException;
 import com.baidu.rigel.biplatform.ma.report.model.ExtendArea;
+import com.baidu.rigel.biplatform.ma.report.model.ExtendAreaType;
 import com.baidu.rigel.biplatform.ma.report.model.Item;
 import com.baidu.rigel.biplatform.ma.report.model.LinkInfo;
 import com.baidu.rigel.biplatform.ma.report.model.LinkParamMappingVo;
@@ -40,6 +44,7 @@ import com.baidu.rigel.biplatform.ma.resource.utils.ResourceUtils;
 import com.baidu.rigel.biplatform.ma.resource.view.vo.OlapLinkViewObject;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -72,7 +77,7 @@ public class OlapLinkResource {
     private OlapLinkService olapLinkService = null;
 
     /**
-     * 列出可添加跳转链接的指标信息以及可被跳转的平面报表列表
+     * 列出可添加跳转链接的指标信息以及可被跳转的平面报表列表,目前前端只支持此接口，待前端支持通用查询接口后，此接口废弃。
      * 
      * @param reportId 报表id
      * @param areaId 区域id
@@ -81,20 +86,37 @@ public class OlapLinkResource {
     @RequestMapping(value = "/{reportId}/extend_area/{areaId}/olaplink", method = { RequestMethod.GET })
     public ResponseResult getLinkInfo(@PathVariable("reportId") String reportId, 
             @PathVariable("areaId") String areaId) {
+        List<ExtendAreaType> list = Lists.newArrayList();
+        list.add(ExtendAreaType.TABLE);
+        list.add(ExtendAreaType.PLANE_TABLE);
+        list.add(ExtendAreaType.LITEOLAP_TABLE);
+        return this.getLinkInfoByType(reportId, areaId, list);
+    }
+
+    /**
+     * getLinkInfoByType
+     *
+     * @param reportId
+     * @param areaId
+     * @param type
+     * @return
+     */
+    private ResponseResult getLinkInfoByType(String reportId, String areaId, List<ExtendAreaType> extendAreaTypeList) {
         ReportDesignModel reportDesignModel = getReportModel(reportId);
         ExtendArea tableArea = reportDesignModel.getExtendAreas().get(areaId);
         Item[] columns = tableArea.getLogicModel().getColumns();
         Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
-
+        OlapLinkViewObject olapLinkViewObj = new OlapLinkViewObject();
         if (linkInfoMap == null) {
             linkInfoMap = Maps.newLinkedHashMap();
         }
-        List<ReportDesignModel> planeTableList = olapLinkService.getDesignModelListContainsPlaneTable();
-        OlapLinkViewObject olapLinkViewObj = new OlapLinkViewObject();
-        // 列出所有可跳转的平面表
-        if (!CollectionUtils.isEmpty(planeTableList)) {
-            for (ReportDesignModel designModel : planeTableList) {
-                olapLinkViewObj.addPlaneTable(designModel.getName(), designModel.getId());
+        // 列出所有可跳转的表
+        HashMap<ReportDesignModel, ExtendAreaType> tableMap = olapLinkService
+                .getDesignModelListByTypeMap(extendAreaTypeList);
+        if (!MapUtils.isEmpty(tableMap)) {
+            for (Entry<ReportDesignModel, ExtendAreaType> entry : tableMap.entrySet()) {
+                olapLinkViewObj.addTable(entry.getValue(), entry.getKey().getName(), entry.getKey()
+                        .getId());
             }
         }
         // 列出能添加跳转参数的指标列
@@ -104,24 +126,44 @@ public class OlapLinkResource {
                         ReportDesignModelUtils.getDimOrIndDefineWithId(reportDesignModel.getSchema(),
                                 tableArea.getCubeId(), column.getOlapElementId());
                 LinkInfo linkInfo = linkInfoMap.get(olapElement.getId());
-                String selectedPlaneTableId = "";
+                String selectedTableId = "";
+                ExtendAreaType extendAreaType = null;
                 if (linkInfo != null) {
-                    selectedPlaneTableId = linkInfo.getPlaneTableId();
+                    selectedTableId = linkInfo.getTargetTableId();
+                    if (!StringUtils.isEmpty(selectedTableId)) {
+                     // 获取当前表的ExtendArea的类型，目前不支持多个 table，plane_talbe,olap_table在一个报表上面
+                        ReportDesignModel targetDesignModel = getReportModel(selectedTableId);
+                        if (targetDesignModel != null) {
+                            ExtendArea[] extendAreaList = targetDesignModel.getExtendAreaList();
+                            for (ExtendArea extendArea : extendAreaList) {
+                                if (extendAreaTypeList.contains(extendArea.getType())) {
+                                    extendAreaType = extendArea.getType();
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
-                olapLinkViewObj.addColunmDefine(olapElement.getCaption(), olapElement.getId(), selectedPlaneTableId);
+                olapLinkViewObj.addColunmDefine(extendAreaType, 
+                        olapElement.getCaption(), olapElement.getId(), selectedTableId);
             }
         }
         // 列出操作列配置
         List<LinkInfo> savedOperationLinkInfoList = OlapLinkUtils.getOperationColumKeys(linkInfoMap);
         if (!CollectionUtils.isEmpty(savedOperationLinkInfoList)) {
             for (LinkInfo linkInfo : savedOperationLinkInfoList) {
-                olapLinkViewObj.addOperationColumn(linkInfo.getColunmSourceCaption(), linkInfo.getColunmSourceId(),
-                        linkInfo.getPlaneTableId());
+                // 设置回显的操作列vo对象
+                if (linkInfo.getTableType() == null) {
+                    linkInfo.setTableType("PLANE_TABLE");
+                }
+                olapLinkViewObj.addOperationColumn(ExtendAreaType.valueOf(linkInfo.getTableType()), 
+                        linkInfo.getColunmSourceCaption(), linkInfo.getColunmSourceId(),
+                        linkInfo.getTargetTableId());
             }
         }
         // 如果发现是第一次添加操作列，直接进行初始化
         else {
-            olapLinkViewObj.addOperationColumn("操作列", "operationColumn_1", "");
+            olapLinkViewObj.addOperationColumn(null, "操作列", "operationColumn_1", "");
         }
         ResponseResult rs = ResourceUtils.getResult("success", null, olapLinkViewObj);
         return rs;
@@ -162,7 +204,8 @@ public class OlapLinkResource {
                 if (linkInfo == null) {
                     linkInfo = new LinkInfo();
                 }
-                linkInfo.setPlaneTableId(linkInfoVo.getSelectedTable());
+                linkInfo.setTargetTableId(linkInfoVo.getSelectedTable());
+                linkInfo.setTableType(linkInfoVo.getSelectedType());
                 linkInfo.setColunmSourceId(colunmId);
                 linkInfo.setColunmSourceCaption(linkInfoVo.getText());
                 finalResultMap.put(colunmId, linkInfo);
@@ -218,28 +261,31 @@ public class OlapLinkResource {
     @RequestMapping(value = "/{reportId}/extend_area/{areaId}/olaplink/paramMapping", method = { RequestMethod.GET })
     public ResponseResult getLinkInfoParamMapping(@PathVariable("reportId") String reportId,
             @PathVariable("areaId") String areaId, HttpServletRequest request) throws ReportModelOperationException {
-        ReportDesignModel olapTabelDesignModel = getReportModel(reportId);
-        ExtendArea tableArea = olapTabelDesignModel.getExtendAreas().get(areaId);
-        String planeTableId = request.getParameter("planeTableId");
+        ReportDesignModel fromTableDesignModel = getReportModel(reportId);
+        ExtendArea fromTableArea = fromTableDesignModel.getExtendAreas().get(areaId);
+        String targetTableId = request.getParameter("tableId");
 
         // 这里的olapElementId其实就是要添加链接的指标id
         String olapElementId = request.getParameter("olapElementId");
-        ReportDesignModel planeTabelDesignModel = getReportModel(planeTableId);
-        Map<String, LinkInfo> linkInfoMap = tableArea.getFormatModel().getLinkInfo();
+        ReportDesignModel targetTableDesignModel = getReportModel(targetTableId);
+        Map<String, LinkInfo> linkInfoMap = fromTableArea.getFormatModel().getLinkInfo();
         LinkInfo linkInfo = linkInfoMap.get(olapElementId);
 
         // 每次保存都是新new一个LinkParamMappingVo，全量保存以替换掉之前存储的旧数据
         LinkParamMappingVo paramMappingVo = new LinkParamMappingVo();
-        List<String> planeTableParamList = olapLinkService.getPlaneTableConditionList(planeTabelDesignModel);
-        for (String paramName : planeTableParamList) {
-            String savedDimName = linkInfo.getParamMapping().get(paramName);
+        List<Dimension> targetTableParamList = olapLinkService
+                .getTargetTableDimList(targetTableDesignModel, linkInfo.getTableType());
+        for (Dimension targetDim : targetTableParamList) {
+            String targetParamName = targetDim.getName();
+            // 如果有设置值，则设置selectedDim值。
+            String savedDimName = linkInfo.getParamMapping().get(targetParamName);
             String selectedDim = "";
             if (!StringUtils.isEmpty(savedDimName)) {
                 selectedDim = savedDimName;
             }
-            paramMappingVo.addPlaneTableParam(paramName, selectedDim);
+            paramMappingVo.addTargetTableParam(targetDim.getName(), targetDim.getCaption(), selectedDim);
         }
-        List<Dimension> dimList = olapLinkService.getOlapDims(olapTabelDesignModel, tableArea);
+        List<Dimension> dimList = olapLinkService.getOlapDims(fromTableDesignModel, fromTableArea);
         for (Dimension dim : dimList) {
             paramMappingVo.addOlapTableDim(dim.getCaption(), dim.getName());
         }
@@ -277,9 +323,20 @@ public class OlapLinkResource {
             Map<String, String> paramMapping = new HashMap<String, String>();
             for (SavedMappingVo4Json vo : mappingVoList) {
                 String dimName = vo.getSelectedDim();
+                if (StringUtils.isEmpty(dimName)) {
+                // 过滤没有设置的dim
+                    continue;    
+                }
                 Cube cube = olapTableDesignModel.getSchema().getCubes().get(tableArea.getCubeId());
                 cube = QueryUtils.transformCube(cube);
                 Dimension dim = cube.getDimensions().get(dimName);
+                if (tableArea.getType() == ExtendAreaType.PLANE_TABLE
+                        && dim == null
+                        && cube.getMeasures().get(dimName) != null) {
+                    StandardDimension dimTmp = new StandardDimension();
+                    dimTmp.setName(cube.getMeasures().get(dimName).getName());
+                    dim = dimTmp;
+                }
                 if (dim != null) {
                     paramMapping.put(vo.getParamName(), dim.getName());
                 }
@@ -333,6 +390,11 @@ public class OlapLinkResource {
          * 选中的明细报表id
          */
         private String selectedTable;
+        
+        /**
+         * 选中的明细报表类型
+         */
+        private String selectedType;
 
         /**
          * @return the id
@@ -376,6 +438,21 @@ public class OlapLinkResource {
             this.selectedTable = selectedTable;
         }
 
+        /**
+         * default generate get selectedType
+         * @return the selectedType
+         */
+        public String getSelectedType() {
+            return selectedType;
+        }
+
+        /**
+         * default generate set selectedType
+         * @param selectedType the selectedType to set
+         */
+        public void setSelectedType(String selectedType) {
+            this.selectedType = selectedType;
+        }
     }
 
     /**
@@ -389,6 +466,12 @@ public class OlapLinkResource {
          * 平面报表参数名称
          */
         private String paramName = null;
+        
+        /**
+         * 平面报表参数显示名称
+         */
+        private String paramCaption = null;
+        
         /**
          * 选中的多维报表维度名称
          */
@@ -420,6 +503,22 @@ public class OlapLinkResource {
          */
         public void setSelectedDim(String selectedDim) {
             this.selectedDim = selectedDim;
+        }
+
+        /**
+         * default generate get paramCaption
+         * @return the paramCaption
+         */
+        public String getParamCaption() {
+            return paramCaption;
+        }
+
+        /**
+         * default generate set paramCaption
+         * @param paramCaption the paramCaption to set
+         */
+        public void setParamCaption(String paramCaption) {
+            this.paramCaption = paramCaption;
         }
 
     }

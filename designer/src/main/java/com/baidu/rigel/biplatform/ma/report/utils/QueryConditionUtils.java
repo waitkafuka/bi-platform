@@ -67,7 +67,11 @@ public class QueryConditionUtils {
             // 获取OlapElement定义
             OlapElement olapElement = getOlapElement(reportModel, area, item, true);
             // 如果在维度和指标中都不存在，则跳出
-            if (olapElement == null) {
+            if (olapElement == null
+            // 如果entry.getValue为all membername则不组织questionmodel的querycondition条件
+                    || (entry != null && entry.getValue() != null
+                            && entry.getValue() instanceof String[] && MetaNameUtil
+                                .isAllMemberName(((String[]) entry.getValue())[0]))) {
                 continue;
             }
             // 如果为维度，则构建维度条件

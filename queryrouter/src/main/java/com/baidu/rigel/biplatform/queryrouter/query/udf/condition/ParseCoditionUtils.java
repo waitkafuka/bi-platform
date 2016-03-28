@@ -20,6 +20,7 @@ import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 import com.baidu.rigel.biplatform.ac.query.model.QuestionModel;
 import com.baidu.rigel.biplatform.queryrouter.query.service.QueryContextBuilder;
 import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContext;
+import com.baidu.rigel.biplatform.queryrouter.query.vo.QueryContextAdapter;
 
 /**
  * 

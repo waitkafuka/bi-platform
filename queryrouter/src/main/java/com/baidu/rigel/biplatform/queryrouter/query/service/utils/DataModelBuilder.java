@@ -129,6 +129,7 @@ public class DataModelBuilder {
             try {
                 parseData = parseResultSet(rowHeadNames, colHeadNames);
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new MiniCubeQueryException("get data from resultset error.", e);
             }
 
