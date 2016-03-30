@@ -10,6 +10,8 @@ import java.util.Map;
 import org.springframework.util.StringUtils;
 
 import com.baidu.rigel.biplatform.ac.model.TimeType;
+import com.google.common.collect.Maps;
+
 /**
  * 
  * 时间计算工具类
@@ -29,6 +31,28 @@ public class TimeUtils {
      */
     private static final String[] QUARTER_END = {"0331", "0630", "0930", "1231"};
     
+    private static final Map<String, TimeType> TIME_TYPE_MAP = Maps.newHashMap();
+    
+    static {
+        TIME_TYPE_MAP.put("M", TimeType.TimeMonth);
+        TIME_TYPE_MAP.put("D", TimeType.TimeDay);
+        TIME_TYPE_MAP.put("Y", TimeType.TimeYear);
+        TIME_TYPE_MAP.put("Q", TimeType.TimeQuarter);
+        TIME_TYPE_MAP.put("W", TimeType.TimeWeekly);
+    }
+    
+    /**
+     * 跟据传入的粒度获取对应的时间类型
+     * @param gSymbol
+     * @return TimeType
+     */
+    public static TimeType getTimeTypeWithGranularitySymbol(String gSymbol) {
+        if (!StringUtils.isEmpty(gSymbol)) {
+            return TIME_TYPE_MAP.get(gSymbol);
+        }
+        return null;
+    }
+
     /**
      * 获取before ＋ after ＋ 1 天的时间范围
      * @param before 之前多少天 ，如果表示当前时间，before为0
@@ -330,8 +354,7 @@ public class TimeUtils {
         }
         String timeStr = TimeRangeDetail.toTime(day);
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.YEAR, Integer.parseInt(timeStr.substring(0, 4)));
-        calendar.set(Calendar.MONTH, Integer.parseInt(timeStr.substring(4, 6)) - 1);
+        calendar.setTime(day);        
         int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
         return timeStr.substring(0, 6) + String.valueOf(maxDay);
     }
@@ -428,10 +451,11 @@ public class TimeUtils {
      * @param timeType 时间维度类型
      * @return 返回具体以日为粒度的时间格式 20141107
      */
-    protected static Map<String, String> singleTimeContidion(String start, String end, TimeType timeType) {
+    protected static Map<String, String> singleTimeContidion(String start,
+            String end, TimeType timeType) {
         Map<String, String> result = new HashMap<String, String>();
-        String startYear = start.substring(0,4);// 起始年份
-        String endYear = end.substring(0,4); // 截止年份
+        String startYear = start.substring(0, 4); // 起始年份
+        String endYear = end.substring(0, 4); // 截止年份
         Calendar cal = Calendar.getInstance();
         switch (timeType) {
             case TimeYear:
@@ -441,27 +465,35 @@ public class TimeUtils {
             case TimeHalfYear:
                 break;
             case TimeQuarter:
+                // 处理YYYYQ1,YYYYQ2,YYYYQ3,YYYYQ4场景
+                // 将这类格式数据转换成具体的日期
                 String startQuarter = start.substring(5);
-                String startDate = QUARTER_BEGIN[Integer.valueOf(startQuarter)-1];
+                String startDate = QUARTER_BEGIN[Integer.valueOf(startQuarter) - 1];
                 start = startYear + startDate;
                 String endQuarter = end.substring(5);
-                String endDate = QUARTER_END[Integer.valueOf(endQuarter)-1];
+                  // 取end的那个季的最后一天
+                String endDate = QUARTER_END[Integer.valueOf(endQuarter) - 1];
                 end = endYear + endDate;
                 break;
             case TimeMonth:
+                // 处理YYYYMM场景
                 cal.clear();
                 String startMonth = start.substring(4);
                 start = startYear + startMonth + "01";
                 String endMonth = end.substring(4);
                 cal.set(Calendar.YEAR, Integer.valueOf(endYear));
-                cal.set(Calendar.MONTH, Integer.valueOf(endMonth)-1);
-                end = endYear + endMonth + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+                cal.set(Calendar.MONTH, Integer.valueOf(endMonth) - 1); 
+                // 取end的那个月的最后一天
+                end = endYear + endMonth
+                                 + cal.getActualMaximum(Calendar.DAY_OF_MONTH);
                 break;
             case TimeWeekly:
+                // 处理YYYYMMDD场景
                 cal.clear();
-                cal.set(Calendar.YEAR, Integer.valueOf(endYear));
-                cal.set(Calendar.MONTH, Integer.valueOf(end.substring(4,6))-1);
-                cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(end.substring(6)));
+                cal.set(Calendar.YEAR, Integer.valueOf(startYear));
+                cal.set(Calendar.MONTH, Integer.valueOf(start.substring(4, 6)) - 1);
+                // end 为什么+6天？
+                cal.set(Calendar.DAY_OF_MONTH, Integer.valueOf(start.substring(6)));
                 cal.add(Calendar.DAY_OF_MONTH, 6);
                 int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
                 String day = "" + dayOfMonth;
@@ -469,10 +501,10 @@ public class TimeUtils {
                     day = "0" + day;
                 }
                 int month = cal.get(Calendar.MONTH) + 1;
-                if (month < 10 ) {
-                	end = cal.get(Calendar.YEAR) + "0" + month + day;
+                if (month < 10) {
+                    end = cal.get(Calendar.YEAR) + "0" + month + day;
                 } else {
-                	end = cal.get(Calendar.YEAR) + "" + month + day;
+                    end = cal.get(Calendar.YEAR) + "" + month + day;
                 }
                 break;
             case TimeDay:
@@ -484,7 +516,7 @@ public class TimeUtils {
             case TimeSecond:
                 break;
             default:
-                break;                        
+                break;
         }
         end = checkEndDateAfterNow(end);
         result.put("start", start);
@@ -512,9 +544,9 @@ public class TimeUtils {
             }
             int month = calNow.get(Calendar.MONTH) + 1;
             if (month < 10 ) {
-            	end = "" + calNow.get(Calendar.YEAR) + "0" + month + day;         	
+                end = "" + calNow.get(Calendar.YEAR) + "0" + month + day;             
             } else {
-            	end = "" + calNow.get(Calendar.YEAR) + month + day; 
+                end = "" + calNow.get(Calendar.YEAR) + month + day; 
             }
         }
         return end;

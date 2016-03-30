@@ -42,7 +42,7 @@ import com.baidu.rigel.biplatform.ma.resource.filter.UniversalContextSettingFilt
 @ComponentScan
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class, RedisAutoConfiguration.class })
 @ImportResource({ "conf/applicationContext-cache.xml", "conf/applicationContext-common-api.xml",
-        "conf/applicationContext-schedule.xml", "applicationContext.xml" })
+         "applicationContext.xml" })
 public class BiPlatformApplication extends SpringBootServletInitializer {
 
     @Bean

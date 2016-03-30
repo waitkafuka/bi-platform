@@ -144,6 +144,12 @@ public class SqlDataSourceInfo implements DataSourceInfo {
          * PALO
          */
         PALO(6, DataSourceInfo.MYSQL_DRIVERMANAGER),
+        
+        /**
+         * DRUID
+         */
+        DRUID(7, DataSourceInfo.DRUID_DRIVERMANAGER),
+        
         /**
          * H2
          */
@@ -160,7 +166,12 @@ public class SqlDataSourceInfo implements DataSourceInfo {
         /**
          * HIVE
          */
-        HIVE(5, null);
+        HIVE(5, null),
+        
+        /**
+         * SPARK
+         */
+        SPARK(8, null);
 
         /**
          * id 数据库ID

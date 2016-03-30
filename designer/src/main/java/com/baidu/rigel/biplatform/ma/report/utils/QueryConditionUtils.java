@@ -67,7 +67,11 @@ public class QueryConditionUtils {
             // 获取OlapElement定义
             OlapElement olapElement = getOlapElement(reportModel, area, item, true);
             // 如果在维度和指标中都不存在，则跳出
-            if (olapElement == null) {
+            if (olapElement == null
+            // 如果entry.getValue为all membername则不组织questionmodel的querycondition条件
+                    || (entry != null && entry.getValue() != null
+                            && entry.getValue() instanceof String[] && MetaNameUtil
+                                .isAllMemberName(((String[]) entry.getValue())[0]))) {
                 continue;
             }
             // 如果为维度，则构建维度条件
@@ -268,6 +272,10 @@ public class QueryConditionUtils {
                                 data.setShow(false);
                             }
                         }
+                        
+//                        if (queryAction.getRows().size() == 1) {
+//                            data.setExpand(true);
+//                        }
                         datas.add(data);
                     }
                     if (values.isEmpty() && queryAction.isChartQuery()) {
@@ -281,7 +289,7 @@ public class QueryConditionUtils {
                     List<QueryData> datas = new ArrayList<QueryData>();
                     Dimension dim = (Dimension) olapElement;
                     if ((item.getPositionType() == PositionType.X || item.getPositionType() == PositionType.S)
-                        && queryAction.isChartQuery()) {
+                            && queryAction.isChartQuery()) {
                         QueryData data = new QueryData(dim.getAllMember().getUniqueName());
                         data.setExpand(true);
                         data.setShow(false);

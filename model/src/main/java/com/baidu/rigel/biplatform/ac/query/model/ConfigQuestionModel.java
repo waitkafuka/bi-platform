@@ -18,7 +18,6 @@ package com.baidu.rigel.biplatform.ac.query.model;
 import java.io.Serializable;
 
 import com.baidu.rigel.biplatform.ac.model.Cube;
-import com.baidu.rigel.biplatform.ac.query.data.DataSourceInfo;
 
 /**
  * 问题模型(配置端专用，临时传递一个未发布的cube和数据源)
@@ -37,11 +36,6 @@ public class ConfigQuestionModel extends QuestionModel implements Serializable {
      * 查询的cube （如果有cubeID优先使用cubeId去查）
      */
     private Cube cube;
-
-    /**
-     * dataSourceInfo 问题模型对应的数据源信息（有数据源的key优先从缓存取）
-     */
-    private DataSourceInfo dataSourceInfo;
 
 
     /**
@@ -62,23 +56,6 @@ public class ConfigQuestionModel extends QuestionModel implements Serializable {
         this.cube = cube;
     }
 
-    /**
-     * get dataSourceInfo
-     * 
-     * @return the dataSourceInfo
-     */
-    public DataSourceInfo getDataSourceInfo() {
-        return dataSourceInfo;
-    }
-
-    /**
-     * set dataSourceInfo with dataSourceInfo
-     * 
-     * @param dataSourceInfo the dataSourceInfo to set
-     */
-    public void setDataSourceInfo(DataSourceInfo dataSourceInfo) {
-        this.dataSourceInfo = dataSourceInfo;
-    }
 
     /*
      * (non-Javadoc)
@@ -87,7 +64,7 @@ public class ConfigQuestionModel extends QuestionModel implements Serializable {
      */
     @Override
     public String toString() {
-        return "ConfigQuestionModel [cube=" + cube + ", dataSourceInfo=" + dataSourceInfo + "]";
+        return "ConfigQuestionModel [cube=" + cube + ", dataSourceInfo=" + this.getDataSourceInfo() + "]";
     }
 
 }

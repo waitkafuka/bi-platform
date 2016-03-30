@@ -3,7 +3,7 @@
   <parent>
 		<groupId>com.baidu.rigel</groupId>
 		<artifactId>biplatform</artifactId>
-		<version>1.6.1-RELEASE</version>
+		<version>1.7.0-RELEASE</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
   <groupId>com.baidu.rigel.biplatform</groupId>

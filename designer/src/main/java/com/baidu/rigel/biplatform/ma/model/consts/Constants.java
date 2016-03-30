@@ -111,6 +111,17 @@ public interface Constants {
     String ALIGN_FORMAT = "textFormat";
     
     /**
+     * 默认文本对齐样式key 
+     */
+    String DEFAULT_ALIGN_FORMAT_KEY = "defaultTextAlign";
+    
+    /**
+     * 默认文本对齐样式 
+     */
+    String DEFALUT_ALIGN_FORMAT = "left";
+        
+    
+    /**
      * 是否能够动态切换指标
      */
     String CAN_CHANGED_MEASURE = "canChangedMeasure";

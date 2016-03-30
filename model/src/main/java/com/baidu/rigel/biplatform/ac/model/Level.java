@@ -39,6 +39,7 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
+import com.baidu.rigel.biplatform.ac.util.ServerUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.reflect.TypeToken;
 
@@ -97,11 +98,17 @@ public interface Level extends OlapElement, Cloneable {
         DimensionCondition dimCondition = new DimensionCondition(this.getDimension().getName());
         dimCondition.getQueryDataNodes().add(new QueryData(getUniqueName()));
         questionModel.getQueryConditions().put(dimCondition.getMetaName(), dimCondition);
-        
+        String questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
         Map<String,String> requestParams = new HashMap<String, String>();
-        requestParams.put(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY, AnswerCoreConstant.GSON.toJson(questionModel));
+        Map<String, String> headerParams = new HashMap<String, String>();
+        requestParams.put(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY, questionModelJson);
         
-        String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/meta/getMembers", requestParams);
+        ServerUtils.setServerProperties(questionModelJson,
+                ((ConfigQuestionModel) questionModel).getDataSourceInfo().getProductLine(),
+                requestParams, headerParams);
+        
+        String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/meta/getMembers",
+                requestParams, headerParams);
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
         if (StringUtils.isNotBlank(responseResult.getData())) {
             String memberListJson = responseResult.getData();

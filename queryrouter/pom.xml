@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.baidu.rigel</groupId>
 		<artifactId>biplatform</artifactId>
-		<version>1.6.1-RELEASE</version>
+		<version>1.7.0-RELEASE</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<groupId>com.baidu.rigel.biplatform</groupId>
@@ -27,7 +27,6 @@
 	</build>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>com.baidu.rigel.biplatform</groupId>
 			<artifactId>cache</artifactId>
@@ -39,7 +38,7 @@
 		 <dependency>
             <groupId>com.baidu.rigel.biplatform</groupId>
             <artifactId>tesseract</artifactId>
-            <version>1.6.1-RELEASE</version>
+            <version>1.7.0-RELEASE</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -47,6 +46,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+		
+		<dependency>
+			<groupId>com.baidu.rigel.biplatform</groupId>
+			<artifactId>parser</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -132,6 +138,6 @@
 			<type>jar</type>
 			<scope>test</scope>
 		</dependency>
-
+        
 	</dependencies>
 </project>

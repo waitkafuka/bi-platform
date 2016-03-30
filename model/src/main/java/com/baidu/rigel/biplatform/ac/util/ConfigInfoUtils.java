@@ -37,7 +37,7 @@ public class ConfigInfoUtils {
      */
     private static Logger LOG = LoggerFactory.getLogger(ConfigInfoUtils.class);
 
-    private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8080";
+    private static final String DEFAULT_SERVER_ADDRESS = "http://127.0.0.1:8020";
     
     private static String DEFAULT_AC_CONFIG_FILENAME = "ac.properties";
 
@@ -63,13 +63,12 @@ public class ConfigInfoUtils {
             properties = new Properties ();
             inStream = new FileInputStream (answerCoreConfFile);
             properties.load (inStream);
-            SERVERADDRESS = properties.getProperty ("server.tesseract.address", DEFAULT_SERVER_ADDRESS);
-            QUERY_ROUTER_ADDRESS = properties.getProperty ("server.queryrouter.address");
+            SERVERADDRESS = properties.getProperty ("server.queryrouter.address", DEFAULT_SERVER_ADDRESS);
             QUERY_ROUTER_SYSTEM_CODE = properties.getProperty ("server.queryrouter.systemcode");
             QUERY_ROUTER_SYSTEM_KEY = properties.getProperty ("server.queryrouter.systemkey");
             LOG.info ("load serveraddress from properties:{}, {}", SERVERADDRESS, QUERY_ROUTER_ADDRESS);
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.warn(e.getMessage());
             // throw new IllegalStateException("不能获取ac配置文件");
         } finally {
             if (inStream != null) {
@@ -89,16 +88,6 @@ public class ConfigInfoUtils {
     public static void setServerAddress(String serverAddress) {
         ConfigInfoUtils.SERVERADDRESS = serverAddress;
     }
-
-    /**
-     * get ServerAddressByProperty
-     * 
-     * @return the sERVERADDRESS
-     */
-    public static String getQueryRouterAddress() {
-        return QUERY_ROUTER_ADDRESS;
-    }
-
     /**
      * get sERVERADDRESS
      * 
@@ -108,11 +97,11 @@ public class ConfigInfoUtils {
         return SERVERADDRESS;
     }
 
-    public static String getQueryRouterSystemCode() {
+    public static String getServerSystemCode() {
         return QUERY_ROUTER_SYSTEM_CODE;
     }
 
-    public static String getQueryRouterSystemKey() {
+    public static String getServerSystemKey() {
         return QUERY_ROUTER_SYSTEM_KEY;
     }
 

@@ -35,6 +35,7 @@ import com.baidu.rigel.biplatform.ac.util.HttpRequest;
 import com.baidu.rigel.biplatform.ac.util.JsonUnSeriallizableUtils;
 import com.baidu.rigel.biplatform.ac.util.MetaNameUtil;
 import com.baidu.rigel.biplatform.ac.util.ResponseResult;
+import com.baidu.rigel.biplatform.ac.util.ServerUtils;
 
 /**
  * 
@@ -111,10 +112,17 @@ public interface Cube extends OlapElement {
         questionModel.getQueryConditions().put(MiniCubeConnection.UNIQUENAME_PARAM_KEY, dimCondition);
 
         Map<String, String> requestParams = new HashMap<String, String>();
-        requestParams.put(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY, AnswerCoreConstant.GSON.toJson(questionModel));
+        Map<String, String> headerParams = new HashMap<String, String>();
+        String questionModelJson = AnswerCoreConstant.GSON.toJson(questionModel);
+        requestParams.put(MiniCubeConnection.QUESTIONMODEL_PARAM_KEY,
+                questionModelJson);
 
         long current = System.currentTimeMillis();
-        String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/lookUp", requestParams);
+        ServerUtils.setServerProperties(questionModelJson,
+                ((ConfigQuestionModel) questionModel).getDataSourceInfo().getProductLine(),
+                requestParams, headerParams);
+        String response = HttpRequest.sendPost(ConfigInfoUtils.getServerAddress() + "/lookUp",
+                requestParams, headerParams);
         ResponseResult responseResult = AnswerCoreConstant.GSON.fromJson(response, ResponseResult.class);
 
         if (StringUtils.isNotBlank(responseResult.getData())) {

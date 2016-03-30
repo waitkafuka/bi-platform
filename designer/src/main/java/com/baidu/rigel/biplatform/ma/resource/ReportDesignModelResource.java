@@ -1562,10 +1562,11 @@ public class ReportDesignModelResource extends BaseResource {
             condition.setSQLCondition(SQLConditionType.valueOf(sqlCondition));
             condition.setDefaultValue(defaultValue);
             // 获取原有报表的平面表条件信息
-            Map<String, PlaneTableCondition> conditions = model.getPlaneTableConditions();
-            // 替换原有条件
-            conditions.put(elementId, condition);
-            model.setPlaneTableConditions(conditions);
+            model.getPlaneTableConditions().put(elementId, condition);
+//            Map<String, PlaneTableCondition> conditions = model.getPlaneTableConditions();
+//            // 替换原有条件
+//            conditions.put(elementId, condition);
+//            model.setPlaneTableConditions(conditions);
         } else {
             result.setStatus(1);
             result.setStatusInfo("部分参数为空，请补充完整");
@@ -1705,7 +1706,8 @@ public class ReportDesignModelResource extends BaseResource {
              * 配置端，在修改Item以后，需要重新初始化上下文
              */
             ReportRuntimeModel runTimeModel = reportModelCacheManager.getRuntimeModel(reportId);
-            runTimeModel.init(model, true, true);
+            // 这一步没必要去清除全局上下文的条件  update by majun
+            runTimeModel.init(model, false, true);
             if (model.getExtendById(areaId) instanceof LiteOlapExtendArea) {
                 LiteOlapExtendArea area = (LiteOlapExtendArea) model.getExtendById(areaId);
                 runTimeModel.getLocalContextByAreaId(area.getChartAreaId()).reset();

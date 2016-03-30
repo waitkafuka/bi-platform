@@ -100,7 +100,7 @@ public final class CallbackServiceInvoker {
             LOG.info ("[INFO] --- --- --- --- --- --- --- --- --- --- ---- ---- ---- -- --- --- -- - -- -  - -- - - ");
             LOG.info ("[INFO] --- --- request params : \n {}", logStr.toString ());
             LOG.info ("[INFO] --- --- --- --- --- --- --- --- --- --- ---- ---- ---- -- --- --- -- - -- -  - -- - - ");
-            String responseStr = HttpRequest.sendPost1(url, params);
+            String responseStr = HttpRequest.sendPostWithoutRoutee(url, params);
             CallbackResponse response = convertStrToResponse(responseStr, type); 
             if (LOG.isDebugEnabled ()) {
                 LOG.debug("[INFO] --- --- resposne : {}", response);
@@ -131,7 +131,13 @@ public final class CallbackServiceInvoker {
         if (StringUtils.isEmpty(responseStr)) {
             throw new RuntimeException("请求响应未满足协议规范");
         }
-        JsonObject json = new JsonParser().parse(responseStr).getAsJsonObject();
+        JsonObject json = null;
+        try {
+            json = new JsonParser().parse(responseStr).getAsJsonObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("请求响应未满足协议规范,json格式不正确");
+        }
         int status = json.get("status").getAsInt();
         String message = json.get("message") == null || json.get("message") == JsonNull.INSTANCE ? 
                 "unknown" : json.get("message").getAsString();

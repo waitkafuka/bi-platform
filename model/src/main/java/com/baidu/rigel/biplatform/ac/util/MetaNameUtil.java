@@ -18,6 +18,7 @@
  */
 package com.baidu.rigel.biplatform.ac.util;
 
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringUtils;
@@ -28,12 +29,17 @@ import com.baidu.rigel.biplatform.ac.minicube.MiniCubeDimension;
 import com.baidu.rigel.biplatform.ac.model.Measure;
 import com.baidu.rigel.biplatform.ac.model.Member;
 import com.baidu.rigel.biplatform.ac.model.OlapElement;
+import com.google.common.collect.Lists;
 
 /**
  * 元数据名称操作的工具类
  * 
  * @author xiaoming.chen
  * 
+ */
+/**
+ * 类MetaNameUtil.java的实现描述：TODO 类实现描述 
+ * @author luowenlei 2016年3月24日 下午2:46:40
  */
 public class MetaNameUtil {
 
@@ -120,6 +126,20 @@ public class MetaNameUtil {
     }
 
     /**
+     * 用中括号将Member列表的name包住
+     * 
+     * @param metaNames member的name
+     * @return @return 封装好的UniqueName列表
+     */
+    public static List<String> makeUniqueNameList(String[] metaNames) {
+        List<String> makeUniqueNameList = Lists.newArrayList();
+        for (String metaName : metaNames) {
+            makeUniqueNameList.add(makeUniqueName(metaName));
+        }
+        return makeUniqueNameList;
+    }
+
+    /**
      * 将一个UniqueName转换成字符串数组
      * 
      * @param uniqueName 一个UniqueName
@@ -130,17 +150,32 @@ public class MetaNameUtil {
         if (!isUniqueName(uniqueName)) {
             throw new IllegalArgumentException("uniqueName is illegal:" + uniqueName);
         }
-        String preSplitUniqueName = uniqueName;
-        if (preSplitUniqueName.startsWith("[")) {
-            preSplitUniqueName = preSplitUniqueName.substring(1);
-        }
-        if (preSplitUniqueName.endsWith("]")) {
-            preSplitUniqueName = preSplitUniqueName.substring(0, preSplitUniqueName.length() - 2);
-        }
-        // 先按照].[去截取，以后考虑更好方法
-        return StringUtils.split(uniqueName, "].[");
+        uniqueName = uniqueName.substring(1, uniqueName.lastIndexOf("]"));
+        return StringUtils.splitByWholeSeparator(uniqueName, "].[");
     }
     
+    /**
+     * 根据给定的uniqueName以及传入的序号，截取出符合序号描述的子uniqueName
+     * 
+     * @param uniqueName 待截取的uniqueName
+     * @param index 截取第几位符合规则的字符串
+     * @return 截取完成的子字符串
+     */
+    public static String subUniqueNameOfIndexFlag(String uniqueName, int index) {
+        if (uniqueName == null || uniqueName.length() == 0) {
+            return null;
+        }
+        String[] nameArray = parseUnique2NameArray(uniqueName);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < index; i++) {
+            String singleName = nameArray[i];
+            sb.append(makeUniqueName(singleName));
+            if (i < index - 1) {
+                sb.append(".");
+            }
+        }
+        return sb.toString();
+    }
     
     /** 
      * getNameFromMetaName 从元数据名称中获取名称信息
@@ -171,6 +206,52 @@ public class MetaNameUtil {
         String[] names = parseUnique2NameArray(uniqueName);
         if (names.length == 2 && isAllMemberName(names[1])) {
             return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 判断一个UniqueName的最后一个节点是否是一个all节点的UniqueName
+     * 
+     * @param uniqueName 节点的UniqueName
+     * @return 是否是all节点
+     * @throws IllegalArgumentException unique格式不正确
+     */
+    public static boolean isLastAllMemberUniqueName(String uniqueName) {
+        if (!isUniqueName(uniqueName)) {
+            LOGGER.warn("uniqueName is illegal:" + uniqueName);
+            return false;
+        }
+        String[] names = parseUnique2NameArray(uniqueName);
+        if (isAllMemberName(names[names.length - 1])) {
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * 判断一个UniqueName是否是一个all节点的UniqueName,用户多级的查询
+     * 
+     * @param uniqueName 节点的UniqueName
+     * @param 取index的值 至少2级，index从0开始
+     * @return 是否是all节点
+     * @throws IllegalArgumentException unique格式不正确
+     */
+    public static boolean isAllMemberUniqueName(String uniqueName, int index) {
+        if (!isUniqueName(uniqueName)) {
+            LOGGER.warn("uniqueName is illegal:" + uniqueName);
+            return false;
+        }
+
+        String[] names = parseUnique2NameArray(uniqueName);
+        if (index < 1 ||  index >= names.length) {
+        // 至少2级，index从0开始
+            index = names.length - 1;
+        }
+        if (names.length == 2 && isAllMemberName(names[1])) {
+            return true;
+        } else if (names.length > 2) {
+            return isAllMemberName(names[index]);
         }
         return false;
     }
@@ -218,13 +299,49 @@ public class MetaNameUtil {
         String[] metaNames = parseUnique2NameArray(uniqueName);
         return metaNames[0];
     }
-
-    // public static void main(String[] args) {
-    // String unique = "[trade].[1]";
-    //
-    // System.out.println(Pattern.matches("^\\[[^\\]\\[]+\\](\\.\\[[^\\]\\[]+\\])*$", unique));
-    // System.out.println(getParentUniqueName(unique));
-    //
-    // }
+    
+    /**
+     * 根据当前查询的level index，如果为2级，则返回0.
+     *
+     * @param levels 所有的层级元数据
+     * @param uniqueName
+     * @return index 为levels里面的index层，如果配合使用parseUnique2NameArray方法 index需要+1
+     */
+    public static int getSearchLevelIndexByUniqueName(String uniqueName) {
+        if (!isUniqueName(uniqueName)) {
+            return 0;
+        }
+        String[] names = MetaNameUtil.parseUnique2NameArray(uniqueName);
+        if (names.length <= 2) {
+        // 为两级的情况,[行业]。[All_行业s]
+            return 0;
+        }
+        // 此为3级的情况
+        if (MetaNameUtil.isAllMemberName(names[names.length - 1])) {
+        // 如果最后一个为all s 那么返回最后一个值的后面的index [行业]。[AA]。[All_AAs]，返回AA
+            return names.length - 3;
+        } else {
+         // 如果最后一个不为all s 那么返回最后一个值的index [行业]。[AA]。[AAA]，返回AAA
+            return names.length - 2;
+        }
+    }
+    
+    /**
+     * makeUniqueNamesArray
+     *
+     * @param array
+     * @return
+     */
+    public static String makeUniqueNamesArray(String[] array) {
+        StringBuffer sb = new StringBuffer();
+        for (String value : array) {
+            if (StringUtils.isEmpty(sb.toString())) {
+                sb.append("[" + value + "]");
+            } else {
+                sb.append(".[" + value + "]");
+            }
+        }
+        return sb.toString();
+    }
 
 }

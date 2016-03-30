@@ -182,7 +182,8 @@ public class PlaneTableUtils {
      * @param requestParams
      * @return
      */
-    public static String convert2TimeJson(String value, Map<String, Object> requestParams) {
+    public static String convert2TimeJson(String value, Map<String, Object> requestParams, TimeDimension timeDim) {
+        
         if (!ParamValidateUtils.check("value", value)) {
             return null;
         }
@@ -190,16 +191,13 @@ public class PlaneTableUtils {
             return null;
         }
         if (!requestParams.containsKey(GRANULARITY)) {
-            return null;
+            if (timeDim == null) {
+                return null;
+            }
+            requestParams.put(GRANULARITY, timeDim.getDataTimeType().getGranularity());
         }
-
         // 获取时间粒度参数
         String granularity = (String) requestParams.get(GRANULARITY);
-
-        // 如果有不是标准时间维度
-        if (!isStandardTime(value, granularity)) {
-            return null;
-        }
         return cov2StandTime(value, granularity);
     }
 

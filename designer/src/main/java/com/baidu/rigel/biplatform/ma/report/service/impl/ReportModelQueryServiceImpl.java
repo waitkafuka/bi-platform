@@ -42,6 +42,7 @@ import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceConnectionException;
 import com.baidu.rigel.biplatform.ma.ds.exception.DataSourceOperationException;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceConnectionServiceFactory;
+import com.baidu.rigel.biplatform.ma.ds.service.DataSourceGroupService;
 import com.baidu.rigel.biplatform.ma.ds.service.DataSourceService;
 import com.baidu.rigel.biplatform.ma.model.consts.Constants;
 import com.baidu.rigel.biplatform.ma.model.ds.DataSourceDefine;
@@ -72,6 +73,9 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
     @Resource
     private DataSourceService dataSourceService;
     
+    @Resource
+    private DataSourceGroupService dataSourceGroupService;
+    
     /**
      * 
      * {@inheritDoc}
@@ -93,7 +97,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         DataSourceDefine dsDefine = null;
         DataSourceInfo dsInfo = null;
         try {
-            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource(), params);
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
             		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
@@ -139,6 +143,9 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         List<Member> rootMembers = null;
         try {
             parentLevels[0].setDimension (dim);
+            if (params.get(Constants.LEVEL_KEY) == null) {
+                params.put(Constants.LEVEL_KEY, "ALL");
+            }
             rootMembers = getMembers(cube, dim, parentLevels[0], params, securityKey);
         } catch (MiniCubeQueryException | DataSourceOperationException e) {
             logger.error("Exception happened when getMemebers of dim " + dim.getName(), e);
@@ -146,11 +153,14 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         }
         members.add(rootMembers);
         // 1.equeals(params.get(level)) 只取当前层级
-        if (parentLevels.length > 1 && !"1".equals (params.get (Constants.LEVEL_KEY))) {
+        if (parentLevels.length > 1 && !"1".equals (params.get(Constants.LEVEL_KEY))) {
             for (int i = 1; i < parentLevels.length; ++i) {
                 List<Member> tmpMember = Lists.newArrayList();
                 for (Member m : rootMembers) {
-                    tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params, securityKey));
+                    // tmpMember.addAll(getMembers(cube, dim, m, parentLevels[i], params, securityKey));
+                    if (((MiniCubeMember) m).getChildren() != null) {
+                        tmpMember.addAll(((MiniCubeMember) m).getChildren());
+                    }
                 }
                 members.add(tmpMember);
                 rootMembers = tmpMember;
@@ -174,7 +184,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         DataSourceDefine dsDefine = null;
         DataSourceInfo dsInfo = null;
         try {
-            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource(), params);
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
             		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
@@ -237,19 +247,17 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
     		throws DataSourceOperationException, QueryModelBuildException, MiniCubeQueryException {
         ResultSet rs = new ResultSet();
         DataSourceDefine dsDefine;
-        DataSourceInfo dsInfo;
+        DataSourceInfo dsInfo = null;
         // 获取数据源连接信息
+        String queryDsId = model.getDsId();
+        dsDefine = dataSourceService.getDsDefine(queryDsId, requestParams);
+        DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory
+                .getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name());
         try {
-            dsDefine = dataSourceService.getDsDefine(model.getDsId());
-            DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
-                getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);
-        } catch (DataSourceOperationException e) {
-            logger.error("Fail in Finding datasource define. ", e);
-            throw e;
-        } catch (DataSourceConnectionException e) {
-            logger.error("Fail in parse datasource to datasourceInfo. ", e);
-            throw new DataSourceOperationException(e);
+        } catch (DataSourceConnectionException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
         MiniCubeConnection connection = MiniCubeDriverManager.getConnection(dsInfo);
         QuestionModel questionModel;
@@ -290,7 +298,7 @@ public class ReportModelQueryServiceImpl implements ReportModelQueryService {
         DataSourceDefine dsDefine = null;
         DataSourceInfo dsInfo = null;
         try {
-            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource());
+            dsDefine = dataSourceService.getDsDefine(cube.getSchema().getDatasource(), params);
             DataSourceConnectionService<?> dsConnService = DataSourceConnectionServiceFactory.
             		getDataSourceConnectionServiceInstance(dsDefine.getDataSourceType().name ());
             dsInfo = dsConnService.parseToDataSourceInfo(dsDefine, securityKey);

@@ -39,7 +39,8 @@ public class DataSourceInfoDeserialize implements JsonDeserializer<DataSourceInf
         if (json.isJsonObject()) {
             DataSourceType dataSourceType =
                     context.deserialize(json.getAsJsonObject().get("dataSourceType"), DataSourceType.class);
-            if (dataSourceType.equals(DataSourceType.SQL)) {
+            if (dataSourceType.equals(DataSourceType.SQL)
+                    || dataSourceType.equals(DataSourceType.ASYN)) {
                 return context.deserialize(json, SqlDataSourceInfo.class);
             }
 

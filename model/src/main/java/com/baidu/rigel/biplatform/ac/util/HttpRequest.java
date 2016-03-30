@@ -83,12 +83,12 @@ public class HttpRequest {
      * COOKIE_PARAM_NAME cookie参数的名称，参数如果是这个名称，自动放到请求的头信息中
      */
     public static final String COOKIE_PARAM_NAME = "Cookie";
-    
+
     /**
-     * socket timeout 
+     * socket timeout
      */
     public static final String SOCKET_TIME_OUT = "timeOut";
-    
+
     /**
      * connTimeOut;
      */
@@ -105,9 +105,18 @@ public class HttpRequest {
      * @return 默认的HttpClient
      */
     private static HttpClient getDefaultHttpClient(Map<String, String> params) {
-        return ClientInstance.getClientInstance (params);
+        return ClientInstance.getClientInstance(params);
     }
-    
+
+    /**
+     * 获取一个默认的HttpClient，默认的是指了默认返回结果的head为application/json
+     * 
+     * @return 默认的HttpClient
+     */
+    private static HttpClient getHttpClient(Map<String, String> params) {
+        return ClientInstance.getClientInstanceWithoutRoutee(params);
+    }
+
     /**
      * 将url中的占位符用传过来的参数进行替换 需要预先解析好占位符信息，把参数封装好。推荐在传到工具类前处理好占位符。
      * 
@@ -124,8 +133,8 @@ public class HttpRequest {
             String newUrl = url;
             for (String placeHolder : placeHolders) {
                 String key =
-                        params.containsKey(placeHolder) ? placeHolder 
-                        : PlaceHolderUtils.getKeyFromPlaceHolder(placeHolder);
+                        params.containsKey(placeHolder) ? placeHolder : PlaceHolderUtils
+                                .getKeyFromPlaceHolder(placeHolder);
                 if (params.containsKey(key)) {
                     newUrl = PlaceHolderUtils.replacePlaceHolderWithValue(newUrl, placeHolder, params.get(key));
                 }
@@ -145,13 +154,13 @@ public class HttpRequest {
      * @return URL 所代表远程资源的响应结果
      */
     private static String sendGet(HttpClient client, String url, Map<String, String> params) {
-        if(client == null || StringUtils.isBlank(url)) {
+        if (client == null || StringUtils.isBlank(url)) {
             throw new IllegalArgumentException("client is null");
         }
-        if(params == null) {
+        if (params == null) {
             params = new HashMap<String, String>(1);
         }
-        
+
         String newUrl = processPlaceHolder(url, params);
         String cookie = params.remove(COOKIE_PARAM_NAME);
 
@@ -167,8 +176,7 @@ public class HttpRequest {
         String prefix = "", suffix = "";
         String[] addresses = new String[] { urlNameString };
         if (urlNameString.contains("[") && urlNameString.contains("]")) {
-            addresses = urlNameString
-                .substring(urlNameString.indexOf("[") + 1, urlNameString.indexOf("]")).split(" ");
+            addresses = urlNameString.substring(urlNameString.indexOf("[") + 1, urlNameString.indexOf("]")).split(" ");
             prefix = urlNameString.substring(0, urlNameString.indexOf("["));
             suffix = urlNameString.substring(urlNameString.indexOf("]") + 1);
         }
@@ -177,7 +185,7 @@ public class HttpRequest {
             String requestUrl = prefix + address + suffix;
             try {
                 HttpUriRequest request = RequestBuilder.get().setUri(requestUrl).build();
-                
+
                 if (StringUtils.isNotBlank(cookie)) {
                     // 需要将cookie添加进去
                     request.addHeader(new BasicHeader(COOKIE_PARAM_NAME, cookie));
@@ -212,16 +220,17 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
-    private static String sendPost(HttpClient client, String url, Map<String, String> params, Map<String, String> headerParams) {
-        if(client == null) {
+    private static String sendPost(HttpClient client, String url, Map<String, String> params,
+            Map<String, String> headerParams) {
+        if (client == null) {
             throw new IllegalArgumentException("client is null");
         }
-        
-        if(params == null) {
+
+        if (params == null) {
             params = new HashMap<String, String>(1);
         }
         String requestUrl = processPlaceHolder(url, params);
-        
+
         String cookie = params.remove(COOKIE_PARAM_NAME);
         if (requestUrl.contains("\\?")) {
             String[] urls = requestUrl.split("\\?");
@@ -229,7 +238,7 @@ public class HttpRequest {
             String[] urlParams = urls[1].split("&");
             for (String param : urlParams) {
                 String[] paramSplit = param.split("=");
-                if (StringUtils.isNotEmpty (paramSplit[1]) && paramSplit[1].getBytes ().length > 1024 * 1024) {
+                if (StringUtils.isNotEmpty(paramSplit[1]) && paramSplit[1].getBytes().length > 1024 * 1024) {
                     params.put(paramSplit[0], "");
                 } else {
                     params.put(paramSplit[0], paramSplit[1]);
@@ -240,15 +249,14 @@ public class HttpRequest {
         List<NameValuePair> nameValues = new ArrayList<NameValuePair>();
         params.forEach((k, v) -> {
             NameValuePair nameValuePair = null;
-            if (!MiniCubeConnection.QUESTIONMODEL_PARAM_KEY.endsWith (k) 
-                    && StringUtils.isNotEmpty (v)) {
+            if (!MiniCubeConnection.QUESTIONMODEL_PARAM_KEY.endsWith(k) && StringUtils.isNotEmpty(v)) {
                 String tmp = null;
                 try {
-                    tmp = URLEncoder.encode (v == null ? "" : v, "utf-8");
+                    tmp = URLEncoder.encode(v == null ? "" : v, "utf-8");
                 } catch (Exception e) {
-                    throw new RuntimeException ("不支持utf字符编码");
+                    throw new RuntimeException("不支持utf字符编码");
                 }
-                if (tmp.getBytes ().length > 1024 * 1024) {
+                if (tmp.getBytes().length > 1024 * 1024) {
                     nameValuePair = new BasicNameValuePair(k, "");
                 } else {
                     nameValuePair = new BasicNameValuePair(k, v);
@@ -272,10 +280,7 @@ public class HttpRequest {
             LOGGER.info("post url is : " + postUrl);
             try {
                 UrlEncodedFormEntity entity = new UrlEncodedFormEntity(nameValues, "utf-8");
-                HttpUriRequest request = RequestBuilder.post()
-                        .setUri(postUrl)
-                        .setEntity(entity)
-                        .build();
+                HttpUriRequest request = RequestBuilder.post().setUri(postUrl).setEntity(entity).build();
                 // 添加必要的Header属性
                 request.addHeader(new BasicHeader("Accept", "*/*"));
                 request.addHeader(new BasicHeader("Cache-Control", "no-cache"));
@@ -289,9 +294,9 @@ public class HttpRequest {
                         request.addHeader(new BasicHeader(key, value));
                     }
                 }
-                LOGGER.info ("[INFO] --- --- execute query with client {}", client);
+                LOGGER.info("[INFO] --- --- execute query with client {}", client);
                 HttpResponse response = client.execute(request);
-                LOGGER.info ("[INFO] response --- --- " + response);
+                LOGGER.info("[INFO] response --- --- " + response);
                 String content = processHttpResponse(client, response, params, false);
                 return content;
             } catch (Exception e) {
@@ -312,7 +317,7 @@ public class HttpRequest {
     public static String sendPost(String url, Map<String, String> params) {
         return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, null);
     }
-    
+
     /**
      * 向指定URL发送POST方法的请求，支持header
      * 
@@ -321,10 +326,10 @@ public class HttpRequest {
      * @param handerParams header请求参数。
      * @return URL 所代表远程资源的响应结果
      */
-    public static String sendPost(String url, Map<String, String> params,  Map<String, String> handerParams) {
+    public static String sendPost(String url, Map<String, String> params, Map<String, String> handerParams) {
         return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, handerParams);
     }
-    
+
     /**
      * 向指定URL发送POST方法的请求
      * 
@@ -332,12 +337,13 @@ public class HttpRequest {
      * @param param 请求参数，请求参数应该是 name1=value1&name2=value2 的形式。
      * @return URL 所代表远程资源的响应结果
      */
-    public static String sendPost1(String url, Map<String, String> params) {
-        return sendPost(getDefaultHttpClient(Collections.unmodifiableMap(params)), url, params, null);
+    public static String sendPostWithoutRoutee(String url, Map<String, String> params) {
+        return sendPost(getHttpClient(Collections.unmodifiableMap(params)), url, params, null);
     }
 
     /**
      * 处理HttpClient返回的结果
+     * 
      * @param client HttpClient实例，为了30X状态码调用
      * @param response 返回结果
      * @param params 调用参数
@@ -351,8 +357,7 @@ public class HttpRequest {
         try {
             StatusLine statusLine = response.getStatusLine();
             // 301 ，302 重定向支持
-            if (statusLine.getStatusCode() == 301
-                    || statusLine.getStatusCode() == 302) {
+            if (statusLine.getStatusCode() == 301 || statusLine.getStatusCode() == 302) {
                 Header header = response.getFirstHeader(HttpHeaders.LOCATION);
                 LOGGER.info("get status code:" + statusLine.getStatusCode() + " redirect:" + header.getValue());
                 if (isGet) {
@@ -389,10 +394,10 @@ public class HttpRequest {
         }
         List<String> paramList = new ArrayList<String>();
         if (MapUtils.isNotEmpty(params)) {
-            for(Map.Entry<String, String> entry : params.entrySet()){
-                if(StringUtils.isBlank(entry.getKey()) || StringUtils.isBlank(entry.getValue())){
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                if (StringUtils.isBlank(entry.getKey()) || StringUtils.isBlank(entry.getValue())) {
                     continue;
-                }else{
+                } else {
                     String value = entry.getValue();
                     if (uriEncoder) {
                         try {
@@ -402,120 +407,161 @@ public class HttpRequest {
                             e.printStackTrace();
                         }
                     }
-                    
+
                     paramList.add(entry.getKey() + "=" + value);
                 }
             }
-            
+
         }
         return paramList;
     }
 
     private static final class ClientInstance {
-        
+
         private static HttpClient INSTANCE;
-        
+
         private static final Object LOCK_OBJ = new Object();
-        
+
         private static final CookieSpecProvider cookieSpecProvider = new CookieSpecProvider() {
-            
+
             @Override
             public CookieSpec create(HttpContext context) {
                 return new BrowserCompatSpec() {
-                    
+
                     @Override
-                    public void validate(Cookie cookie, CookieOrigin origin) throws MalformedCookieException{
-                        //no check cookie
+                    public void validate(Cookie cookie, CookieOrigin origin) throws MalformedCookieException {
+                        // no check cookie
                     }
                 };
             }
         };
-        public static HttpClient getClientInstance (Map<String, String> params) {
+
+        public static HttpClient getClientInstance(Map<String, String> params) {
             if (INSTANCE == null) {
                 synchronized (LOCK_OBJ) {
                     if (INSTANCE == null) {
-                        Lookup<CookieSpecProvider> cookieSpecRegistry = RegistryBuilder.<CookieSpecProvider>create()
-                                .register(NO_CHECK_COOKIES, cookieSpecProvider)
-                                .build();
+                        Lookup<CookieSpecProvider> cookieSpecRegistry =
+                                RegistryBuilder.<CookieSpecProvider> create()
+                                        .register(NO_CHECK_COOKIES, cookieSpecProvider).build();
                         String socketTimeout = "1800000";
                         String connTimeout = "1800000";
-//                        if (params != null) {
-//                            if (params.containsKey(SOCKET_TIME_OUT)) {
-//                                socketTimeout = params.get(SOCKET_TIME_OUT);
-//                            }
-//                            if (params.containsKey(CONNECTION_TIME_OUT)) {
-//                                socketTimeout = params.get(CONNECTION_TIME_OUT);
-//                            }
-//                        }
+                        // if (params != null) {
+                        // if (params.containsKey(SOCKET_TIME_OUT)) {
+                        // socketTimeout = params.get(SOCKET_TIME_OUT);
+                        // }
+                        // if (params.containsKey(CONNECTION_TIME_OUT)) {
+                        // socketTimeout = params.get(CONNECTION_TIME_OUT);
+                        // }
+                        // }
                         // 设置默认的cookie的安全策略为不校验
-                        RequestConfig requestConfigBuilder = RequestConfig.custom()
-                                .setCookieSpec(NO_CHECK_COOKIES)
-                                .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
-                                .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
-                                .build();
-                        PoolingHttpClientConnectionManager connectionManager = 
-                            new PoolingHttpClientConnectionManager ();
+                        RequestConfig requestConfigBuilder =
+                                RequestConfig.custom().setCookieSpec(NO_CHECK_COOKIES)
+                                        .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
+                                        .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
+                                        .build();
+                        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
                         connectionManager.setDefaultMaxPerRoute(100);
-                        connectionManager.setMaxTotal (100);
-                        List<HttpRoute> routee = getRoutee ();
+                        connectionManager.setMaxTotal(100);
+                        List<HttpRoute> routee = getRoutee();
                         for (HttpRoute route : routee) {
-                            connectionManager.setMaxPerRoute (route, 100);
+                            connectionManager.setMaxPerRoute(route, 100);
                         }
-                        INSTANCE = HttpClients.custom()
-                                .setDefaultCookieSpecRegistry(cookieSpecRegistry)
-                                .setDefaultRequestConfig(requestConfigBuilder)
-                                .setConnectionManager (connectionManager)
-                                .build();
+                        INSTANCE =
+                                HttpClients.custom().setDefaultCookieSpecRegistry(cookieSpecRegistry)
+                                        .setDefaultRequestConfig(requestConfigBuilder)
+                                        .setConnectionManager(connectionManager).build();
                     }
                 }
             }
-            
+
             return INSTANCE;
         }
-        
+
+        public static HttpClient getClientInstanceWithoutRoutee(Map<String, String> params) {
+            if (INSTANCE == null) {
+                synchronized (LOCK_OBJ) {
+                    if (INSTANCE == null) {
+                        Lookup<CookieSpecProvider> cookieSpecRegistry =
+                                RegistryBuilder.<CookieSpecProvider> create()
+                                        .register(NO_CHECK_COOKIES, cookieSpecProvider).build();
+                        String socketTimeout = "1800000";
+                        String connTimeout = "1800000";
+                        // 设置默认的cookie的安全策略为不校验
+                        RequestConfig requestConfigBuilder =
+                                RequestConfig.custom().setCookieSpec(NO_CHECK_COOKIES)
+                                        .setSocketTimeout(Integer.valueOf(socketTimeout)) // ms ???
+                                        .setConnectTimeout(Integer.valueOf(connTimeout)) // ms???
+                                        .build();
+                        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
+                        connectionManager.setDefaultMaxPerRoute(100);
+                        connectionManager.setMaxTotal(100);
+                        INSTANCE =
+                                HttpClients.custom().setDefaultCookieSpecRegistry(cookieSpecRegistry)
+                                        .setDefaultRequestConfig(requestConfigBuilder)
+                                        .setConnectionManager(connectionManager).build();
+                    }
+                }
+            }
+            return INSTANCE;
+        }
+
         private static List<HttpRoute> getRoutee() {
-            String addresses = ConfigInfoUtils.getServerAddress ();
-            List<HttpRoute> routee = Lists.newArrayList ();
-            String addressConf = addresses.substring (addresses.indexOf ("[") + 1, addresses.lastIndexOf("]"));
-            String[] addressArray = addressConf.split (" ");
+            String addresses = null;
+            try {
+                addresses = ConfigInfoUtils.getServerAddress();
+            } catch (Exception e) {
+                LOGGER.error("");
+            }
+            List<HttpRoute> routee = Lists.newArrayList();
+            if (addresses == null) {
+                return routee;
+            }
+            String[] addressArray = null;
+            if (addresses.indexOf("[") < 0 || addresses.indexOf("]") < 0) {
+                addressArray = new String[1];
+                addressArray[0] = StringUtils.replace(addresses.split("http:")[1], "/", "");
+            } else {
+                String addressConf = addresses.substring(addresses.indexOf("[") + 1, addresses.lastIndexOf("]"));
+                addressArray = addressConf.split(" ");
+            }
             try {
                 for (String addr : addressArray) {
-                    int port = Integer.valueOf (addr.split (":")[1]);
-                    String host = addr.split (":")[0];
-                    HttpHost httpHost = new HttpHost (InetAddress.getByName (host), port);
-                    HttpRoute route = new HttpRoute (httpHost);
-                    routee.add (route);
-                    LOGGER.info ("generate route : {}", route);
+                    int port = Integer.valueOf(addr.split(":")[1]);
+                    String host = addr.split(":")[0];
+                    HttpHost httpHost = new HttpHost(InetAddress.getByName(host), port);
+                    HttpRoute route = new HttpRoute(httpHost);
+                    routee.add(route);
+                    LOGGER.info("generate route : {}", route);
                 }
             } catch (UnknownHostException e) {
-                LOGGER.error (e.getMessage (), e);
+                LOGGER.error(e.getMessage(), e);
             }
             return routee;
         }
-        
+
     }
 
-    public static String sendPost(String url, String hql) {
+    public static String sendPost(String url, String bodyStr, String acceptHeader,String contentType) {
         try {
-            long current = System.currentTimeMillis ();
-            Map<String, String> params = Maps.newConcurrentMap ();
+            long current = System.currentTimeMillis();
+            Map<String, String> params = Maps.newConcurrentMap();
             params.put(SOCKET_TIME_OUT, "1800000");
             params.put(CONNECTION_TIME_OUT, "1800000");
             HttpClient client = getDefaultHttpClient(params);
-            HttpUriRequest request = RequestBuilder.post()
-                    .setUri(url) 
-                    .setEntity (new StringEntity (hql))
-                    .build();
-            LOGGER.info ("[INFO] --- --- execute query with client {}, hql: {}, url :{}", client, hql, url);
+            HttpUriRequest request = RequestBuilder.post().setUri(url).setEntity(new StringEntity(bodyStr)).build();
+            request.addHeader(new BasicHeader("Accept", acceptHeader));
+            request.addHeader(new BasicHeader("Content-Type", contentType));
+            request.addHeader(new BasicHeader("Cache-Control", "no-cache"));
+            LOGGER.info("[INFO] --- --- execute query with client {}, bodyStr: {}, url :{}", client, bodyStr, url);
             HttpResponse response = client.execute(request);
-            String content = processHttpResponse(client, response, Maps.newHashMap (), false);
+            String content = processHttpResponse(client, response, Maps.newHashMap(), false);
             StringBuilder sb = new StringBuilder();
-            sb.append("end send post :").append(url).append(" hql:").append(hql).append(" cost:")
+            sb.append("end send post :").append(url).append(" bodyStr:").append(bodyStr).append(" cost:")
                     .append(System.currentTimeMillis() - current);
             LOGGER.info(sb.toString());
             return content;
         } catch (ParseException | IOException e) {
-            throw new RuntimeException (e);
+            throw new RuntimeException(e);
         }
     }
 
