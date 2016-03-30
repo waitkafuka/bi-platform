@@ -337,11 +337,10 @@ public class SqlExpression implements Serializable {
                             || sqlColumn.getType() == ColumnType.COMMON) {
                         singleWhere = new SourceSingleWhere(sqlColumn, false);
                         sqlQuery.getWhere().addWhere(singleWhere);
+                        tmpSqlFrom.append(SqlConstants.AND + singleWhere.getSql());
                     }
                 }
             }
-            
-            tmpSqlFrom.append(SqlConstants.AND + singleWhere.getSql());
             if (i == 0) {
                 sqlFrom.append(tmpSqlFrom.toString());
             } else {

@@ -840,33 +840,41 @@ public class QueryActionBuildServiceImpl implements QueryBuildService {
     private List<String> generateTimeDimensionItemValues(String value, OlapElement element,
         boolean timeRange) {
         List<String> result = null;
+
         if (value != null && !value.toString().toLowerCase().contains("all")) {
-            
-            String[] dataRange = getDateRangeCondition(element, value, timeRange);
-            TimeRangeDetail range = new TimeRangeDetail(dataRange[0], dataRange[1]);
-            
             List<String> tmpDays = Lists.newArrayList();
-            String[] detailDays = range.getDays();
-            TimeDimension tmp = (TimeDimension) element;
-            for (int i = 0; i < detailDays.length; i++) {
-                if (timeRange && tmp.getDataTimeType() == TimeType.TimeWeekly && i % 7 == 0) {
-                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
-                } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeMonth
-                        && detailDays[i].endsWith("01")) {
-                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
-                } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeQuarter) {
-                    Set<String> quarterStart = Sets.newHashSet("0101", "0401", "0701", "1001");
-                    String endStr = detailDays[i].substring(4);
-                    if (quarterStart.contains(endStr)) {
+            if (value.contains("_")) {
+                String dimName = MetaNameUtil.getDimNameFromUniqueName(value);
+                for (String valueTmp : MetaNameUtil.getNameFromMetaName(value).split("_")) {
+                    tmpDays.add("[" + dimName + "].[" + valueTmp + "]");
+                }
+                result = tmpDays;
+            } else {
+                String[] dataRange = getDateRangeCondition(element, value, timeRange);
+                TimeRangeDetail range = new TimeRangeDetail(dataRange[0], dataRange[1]);
+                String[] detailDays = range.getDays();
+                TimeDimension tmp = (TimeDimension) element;
+                for (int i = 0; i < detailDays.length; i++) {
+                    if (timeRange && tmp.getDataTimeType() == TimeType.TimeWeekly && i % 7 == 0) {
+                        tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                    } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeMonth
+                            && detailDays[i].endsWith("01")) {
+                        tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                    } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeQuarter) {
+                        Set<String> quarterStart = Sets.newHashSet("0101", "0401", "0701", "1001");
+                        String endStr = detailDays[i].substring(4);
+                        if (quarterStart.contains(endStr)) {
+                            tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                        }
+                    } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeDay) {
+                        tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
+                    } else if (!timeRange) {
                         tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
                     }
-                } else if (timeRange && tmp.getDataTimeType() == TimeType.TimeDay) {
-                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
-                } else if (!timeRange) {
-                    tmpDays.add("[" + element.getName() + "].[" + detailDays[i] + "]");
                 }
+                result = tmpDays;
             }
-            result = tmpDays;
+            
             logger.debug("[DEBUG] --- ---" + tmpDays);
         } else {
             result = Lists.newArrayList();

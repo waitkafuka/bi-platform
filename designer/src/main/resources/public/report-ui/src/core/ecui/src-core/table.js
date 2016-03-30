@@ -18,7 +18,6 @@ Table - 定义由行列构成的表格的基本操作。
     <tbody>
       <tr>
         <td>百度</td>
-        <td>www.baidu.com</td>
         <td>中国北京中关村</td>
         <td>1999</td>
       </tr>

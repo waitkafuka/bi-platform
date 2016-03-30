@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -1024,6 +1025,9 @@ public class QueryDataResource extends BaseResource {
         DataModel dm4Merage = result.getDataModel();
         // 值针对单维度组下转时候需要做truncation截取操作
         dm4Merage = DataModelUtils.truncationDataModel(dm4Merage, uniqueName, lineUniqueName);
+        if (CollectionUtils.isEmpty(dm4Merage.getRowHeadFields())) {
+            return dm4Merage;
+        }
         HeadField summayHeadField = dm4Merage.getRowHeadFields().get(0);
         if (uniqueName.equals(summayHeadField.getValue())) {
             List<HeadField> subHeads = summayHeadField.getChildren();

@@ -719,6 +719,7 @@ public class QueryContextBuilder {
                 // 获取根节点
                 MiniCubeMember member = metaDataService.lookUp(dataSourceInfo, cube, queryData.getUniqueName(), params);
                 MemberNodeTree memberNode = new MemberNodeTree(nodeTree);
+                
                 List<MemberNodeTree> childNodes = new ArrayList<MemberNodeTree>();
                 // 如果接到设置了下钻 或者 当前维度在行上第一个并且只有一个选中节点,
                 // FIXME 需要考虑展开的下层是一个Callback层级的情况，这里未测试
@@ -740,18 +741,74 @@ public class QueryContextBuilder {
                         });
                     }
                 }
-                // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
-                if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
-                    memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
-                    memberNode.setChildren(childNodes);
-                    nodeTree.getChildren().add(memberNode);
-                    // return memberNode;
+                // 处理表格时间（天）节点，并添加汇总节点，没有加汇总行的情况  TODO 此情况后续需要正对优化时间维度进行优化，
+                // 此逻辑为维度交叉时，对 天 添加汇总节点，周，月，季交叉的情况不走此逻辑。 by 罗文磊
+                if (MetaNameUtil.getDimNameFromUniqueName(queryData.getUniqueName()).startsWith("ownertable_TimeDay")
+                        && !MetaNameUtil.isAllMemberUniqueName(queryData.getUniqueName())
+                        && !"true".equals(params.get("isChartQuery"))
+                        && !isFirstInRow) {
+                    if (params.get("action") != null
+                            && params.get("action").equals("expand")) {
+                        if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
+                            memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
+                            memberNode.setTime(true);
+                            memberNode.setChildren(childNodes);
+                            nodeTree.getChildren().add(memberNode);
+                            // return memberNode;
+                        } else {
+                            nodeTree.getChildren().addAll(childNodes);
+                        }
+                    } else {
+                        MemberNodeTree memberNodeSummary = null;
+                        if (CollectionUtils.isEmpty(nodeTree.getChildren())) {
+                            String dimName = MetaNameUtil.getDimNameFromUniqueName(queryData.getUniqueName());
+                            memberNodeSummary = createTimeSummaryNode(nodeTree, dimName,
+                                    queryData.getUniqueName());
+                            nodeTree.getChildren().add(memberNodeSummary);
+                        } else {
+                            memberNodeSummary = nodeTree.getChildren().get(0);
+                        }
+                        if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
+                            MemberNodeTree memberNodeTmp = new MemberNodeTree(memberNodeSummary);
+                            memberNodeTmp.setTime(true);
+                            memberNodeTmp = buildMemberNodeByMember(dataSourceInfo, cube,
+                                    memberNodeTmp, member, params);
+                            memberNodeTmp.setChildren(childNodes);
+                            nodeTree.getChildren().get(0).setHasChildren(true);
+                            nodeTree.getChildren().get(0).setQuerySource(memberNodeTmp.getQuerySource());
+                            // nodeTree.getChildren().get(0).getChildren().add(memberNodeTmp);
+                            String[] uniqueNameNodes = MetaNameUtil
+                                    .parseUnique2NameArray(nodeTree.getChildren().get(0).getUniqueName());
+                            if (uniqueNameNodes[1].contains("All_")) {
+                                uniqueNameNodes[1] = memberNodeTmp.getName();
+                                nodeTree.getChildren().get(0).setName(memberNodeTmp.getName());
+                            } else {
+                                uniqueNameNodes[1] = uniqueNameNodes[1] + "_" +  memberNodeTmp.getName();
+                                nodeTree.getChildren().get(0).setName(uniqueNameNodes[1] + "_" +  memberNodeTmp.getName());
+                            }
+                            
+                            nodeTree.getChildren().get(0).setUniqueName(MetaNameUtil.makeUniqueNamesArray(uniqueNameNodes));
+                            nodeTree.getChildren().get(0).getLeafIds().add(memberNodeTmp.getName());
+                            // return memberNode;
+                        } else {
+                            nodeTree.getChildren().addAll(childNodes);
+                        }
+                    }
                 } else {
-                    nodeTree.getChildren().addAll(childNodes);
+                 // 如果当前孩子为空或者当前节点是要展现，那么直接把本身扔到要展现列表中
+                    if (queryData.isShow() || CollectionUtils.isEmpty(childNodes)) {
+                        memberNode = buildMemberNodeByMember(dataSourceInfo, cube, memberNode, member, params);
+                        memberNode.setChildren(childNodes);
+                        nodeTree.getChildren().add(memberNode);
+                        // return memberNode;
+                    } else {
+                        nodeTree.getChildren().addAll(childNodes);
+                    }
                 }
             }
 
         }
+
         // callback的情况
         if (hasCallbackLevel && CollectionUtils.isNotEmpty(callbackParams)) {
             Map<String, String> newParams = new HashMap<>(params);
@@ -793,6 +850,36 @@ public class QueryContextBuilder {
         return nodeTree;
     }
 
+    
+    /**
+     * createTimeSummaryNode
+     *
+     * @param parentNode
+     * @param dimName
+     * @param uniqueName
+     * @return
+     */
+    private MemberNodeTree createTimeSummaryNode(MemberNodeTree parentNode, String dimName,
+            String uniqueName) {
+        MemberNodeTree memberNodeSummary = new MemberNodeTree(parentNode);
+        if (dimName.contains("Day")) {
+            memberNodeSummary.setCaption("天汇总");
+        } else if (dimName.contains("Month")) {
+            memberNodeSummary.setCaption("月汇总");
+        } else if (dimName.contains("Weekly")) {
+            memberNodeSummary.setCaption("周汇总");
+        } else if (dimName.contains("Quarter")) {
+            memberNodeSummary.setCaption("季汇总");
+        }
+        memberNodeSummary.setHasChildren(true);
+        memberNodeSummary.setTime(true);
+        memberNodeSummary.setOrdinal("All_" + dimName + "s");
+        memberNodeSummary.setName("All_" + dimName + "s");
+        memberNodeSummary.setChildren(Lists.newArrayList());
+        memberNodeSummary.setUniqueName("[" + dimName + "].[" + memberNodeSummary.getName() + "]");
+        return memberNodeSummary;
+    }
+    
     /**
      * 根据维值创建查询树的节点
      * 

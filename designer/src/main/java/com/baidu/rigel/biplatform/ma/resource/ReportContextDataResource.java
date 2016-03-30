@@ -378,9 +378,10 @@ public class ReportContextDataResource extends BaseResource {
         
         ReportRuntimeModel runtimeModel = null;
         String activedsName = null;
+        ReportRuntimeModel planeTableRuntimeModel = null;
         // 先将动态数据源参数保存下来，以在后续初始化完毕之后再将数据源名称设置回context中
         try {
-            ReportRuntimeModel planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(reportId);
+            planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(reportId);
             if (planeTableRuntimeModel != null) {
                 activedsName = (String) planeTableRuntimeModel.getContext().getParams().get("activeds");
             }
@@ -463,6 +464,23 @@ public class ReportContextDataResource extends BaseResource {
             if (fromRuntimeModel == null) {
                 logger.info("[INFO]--- ---无法获取多维表运行态模型, id :", fromReportId);
                 throw new IllegalStateException("[INFO]--- ---无法获取多维表运行态模型, id :" + fromReportId);
+            }
+            
+            // copy from report参数
+            if (fromRuntimeModel != null && fromRuntimeModel.getContext() != null
+                    && fromRuntimeModel.getContext().getParams() != null) {
+                Map<String, Object> map = Maps.newHashMap();
+                map.putAll(fromRuntimeModel.getContext().getParams());
+                map.putAll(runtimeModel.getContext().getParams());
+                runtimeModel.getContext().getParams().putAll(map);
+            }
+            
+            // 处理p参数
+            for (Entry<String, ReportParam> entry : model.getParams().entrySet()) {
+                if (runtimeModel.getContext().getParams().get(entry.getKey()) != null) {
+                    String value = runtimeModel.getContext().getParams().get(entry.getKey()).toString();
+                    runtimeModel.getContext().getParams().put(entry.getValue().getElementId(), value);
+                }
             }
 
             // 多维表cube
@@ -609,19 +627,31 @@ public class ReportContextDataResource extends BaseResource {
                                     name = linkParam.getDimName();
                                 }
                                 id =  measures[0].getId();
+                                // 处理查询的uniquename
+                                String[] uniqueNames = MetaNameUtil.parseUnique2NameArray(linkParam.getUniqueName());
+                                uniqueNames[0] = name;
+                                linkParam.setUniqueName(MetaNameUtil.makeUniqueNamesArray(uniqueNames));
                             } else {
                                 name = dim[0].getName();
                                 id = dim[0].getId();
                                 type = dim[0].getType();
+                                // 判断维度组兼容老配置
+                                Dimension[] dimGroup = multiCube.getDimensions().values().stream()
+                                        .filter(v -> v.getName().equals(linkParam.getDimName()))
+                                        .toArray(Dimension[]::new);
+                                if (!ArrayUtils.isEmpty(dimGroup) 
+                                        && dimGroup[0].getType() != DimensionType.GROUP_DIMENSION) {
+                                    String[] uniqueNames = MetaNameUtil
+                                            .parseUnique2NameArray(linkParam.getUniqueName());
+                                    uniqueNames[0] = name;
+                                    linkParam.setUniqueName(MetaNameUtil.makeUniqueNamesArray(uniqueNames));
+                                }
                             }
                             
                             if (name == null) {
                                 throw new Exception("获取维度或指标数据出错");
                             }
-                            // 处理查询的uniquename
-                            String[] uniqueNames = MetaNameUtil.parseUnique2NameArray(linkParam.getUniqueName());
-                            uniqueNames[0] = name;
-                            linkParam.setUniqueName(MetaNameUtil.makeUniqueNamesArray(uniqueNames));
+                            
 
                             // 利用维度信息从上下文中获取是否有参数
                             Object filterValue = null;
@@ -672,6 +702,7 @@ public class ReportContextDataResource extends BaseResource {
             Map<String, Object> tmp = QueryUtils.resetContextParam(request, model);
             runtimeModel.getContext().getParams().putAll(tmp);
         }
+
         if (StringUtils.isEmpty(imageId) || reportId.equals(imageId)) {
             reportModelCacheManager.updateRunTimeModelToCache(reportId, runtimeModel);
         } else {
@@ -695,7 +726,13 @@ public class ReportContextDataResource extends BaseResource {
                     + "document.getElementsByTagName('head')[0].appendChild(seed);" + "</script>" + "</body>"
                     + "</html>";
         }
-        return builder.toString();
+        return "<!DOCTYPE html><html>" + "<head><meta charset=\"utf-8\"><title>报表平台-展示端</title>"
+        + "<meta name=\"description\" content=\"报表平台展示端\">"
+        + "<meta name=\"viewport\" content=\"width=device-width\">" + "</head>" + "<body>"
+        + "<script type=\"text/javascript\">" + "var seed = document.createElement('script');"
+        + "seed.src = '/silkroad/new-biplatform/asset/seed.js?action=display&t=' + (+new Date());"
+        + "document.getElementsByTagName('head')[0].appendChild(seed);" + "</script>" + "</body>"
+        + "</html>";
     }
 
     /**

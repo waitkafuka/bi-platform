@@ -648,22 +648,41 @@ public class ReportRuntimeModelManageResource extends BaseResource {
             reportModelCacheManager.updateRunTimeModelToCache(reportId, reportRuntimeModel);
 
             // 添加对动态数据源的处理逻辑
-            Object activedsObj = reportRuntimeModel.getContext().getParams().get("activeds");
-            if (activedsObj != null && StringUtils.hasLength(activedsObj.toString())) {
-                String activedsName = activedsObj.toString();
-                ReportRuntimeModel planeTableRuntimeModel = null;
-                try {
-                    planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(toTableId);
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
+//            Object activedsObj = reportRuntimeModel.getContext().getParams().get("activeds");
+//            if (activedsObj != null && StringUtils.hasLength(activedsObj.toString())) {
+//                String activedsName = activedsObj.toString();
+//                ReportRuntimeModel planeTableRuntimeModel = null;
+//                try {
+//                    planeTableRuntimeModel = reportModelCacheManager.getRuntimeModel(toTableId);
+//                } catch (Exception e) {
+//                    logger.error(e.getMessage(), e);
+//                }
+//                if (planeTableRuntimeModel == null) {
+//                    planeTableRuntimeModel = new ReportRuntimeModel(toTableId);
+//                    planeTableRuntimeModel.init(planeTableModel, true);
+//                }
+//                planeTableRuntimeModel.getContext().getParams().put("activeds", activedsName);
+            try {
+                ReportRuntimeModel planeTableRuntimeModel = reportModelCacheManager
+                        .getRuntimeModel(toTableId);
+                
                 if (planeTableRuntimeModel == null) {
                     planeTableRuntimeModel = new ReportRuntimeModel(toTableId);
                     planeTableRuntimeModel.init(planeTableModel, true);
                 }
-                planeTableRuntimeModel.getContext().getParams().put("activeds", activedsName);
-                reportModelCacheManager.updateRunTimeModelToCache(toTableId, planeTableRuntimeModel);
+                if (reportRuntimeModel != null && reportRuntimeModel.getContext() != null
+                        && reportRuntimeModel.getContext().getParams() != null) {
+                    Map<String, Object> map = Maps.newHashMap();
+                    map.putAll(reportRuntimeModel.getContext().getParams());
+                    map.putAll(planeTableRuntimeModel.getContext().getParams());
+                    planeTableRuntimeModel.getContext().getParams().putAll(map);
+                }
+                reportModelCacheManager
+                        .updateRunTimeModelToCache(toTableId, planeTableRuntimeModel);
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
+//            }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             mav = new ModelAndView("redirect:" + realmName + "/silkroad/error");
