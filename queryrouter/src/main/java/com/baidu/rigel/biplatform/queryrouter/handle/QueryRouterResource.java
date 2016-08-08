@@ -114,19 +114,19 @@ public class QueryRouterResource {
     @RequestMapping(value = "/query", method = { RequestMethod.POST })
     public ResponseResult query(HttpServletRequest request) {
         long begin = System.currentTimeMillis();
-        if (request.getAttribute(PRAMA_QUESTION) == null) {
+        String question = request.getParameterMap().get(PRAMA_QUESTION)[0].toString();
+        if (question == null) {
             return ResponseResultUtils.getErrorResult("question is null", 100);
         }
-        String questionStr = request.getAttribute(PRAMA_QUESTION).toString();
         // convert json to QuestionModel
-        ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(questionStr,
+        ConfigQuestionModel questionModel = AnswerCoreConstant.GSON.fromJson(question,
                 ConfigQuestionModel.class);
         questionModel.setQueryId(questionModel.getDataSourceInfo().getProductLine() + "-"
                 + questionModel.getQueryId());
         QueryRouterContext.setQueryInfo(questionModel.getQueryId());
         logger.info("queryId:{} query current handle size:{}, begin handle questionmodel json:{}",
                 questionModel.getQueryId(), QueryRouterContext.getQueryCurrentHandleSize(),
-                questionStr);
+                question);
         // get DataModel
         try {
             QueryService queryService = QueryServiceFactory.getQueryService(questionModel

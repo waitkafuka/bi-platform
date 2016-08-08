@@ -123,8 +123,8 @@ public class FileServer extends ChannelHandlerAdapter {
         
         FileInputStream fis = null;
         String classLocation = FileServer.class.getProtectionDomain()
-                .getCodeSource().getLocation().toString();
-        final File configFile = new File(classLocation + "/../conf/fileserver.conf");
+                .getCodeSource().getLocation().toString().replace("file:/", "");
+        final File configFile = new File(classLocation + "/fileserver.conf");
         Properties properties = new Properties();
         try {
             if (configFile.exists()) {

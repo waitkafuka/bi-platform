@@ -15,7 +15,6 @@ import com.baidu.rigel.biplatform.queryrouter.handle.model.QueryHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.PlaneTableUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.convert.SqlColumnUtils;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.meta.TableMetaService;
-import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.druid.sql.DruidSqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.plugins.palo.sql.PaloSqlExpression;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.service.JdbcHandler;
 import com.baidu.rigel.biplatform.queryrouter.queryplugin.sql.SqlExpression;
@@ -160,9 +159,6 @@ public class QueryHandlerBuilder {
                 break;
             case PALO:
                 sqlExpression = new PaloSqlExpression(sqlDataSourceInfo.getDataBase().getDriver());
-                break;
-            case DRUID:
-                sqlExpression = new DruidSqlExpression(sqlDataSourceInfo.getDataBase().getDriver());
                 break;
             default:
                 throw new QuestionModelTransformationException(sqlDataSourceInfo.getDataBase()

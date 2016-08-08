@@ -82,8 +82,7 @@ public class RandomValidateCodeController extends BaseResource {
             rs.setStatus(ResponseResult.SUCCESS);
             this.cacheManagerForResource.deleteFromCache(key);
         } else {
-            rs.setStatus(ResponseResult.FAILED);
-            rs.setStatusInfo("验证码错误");
+            rs.setStatusInfo("测试可以随便输入验证码");
         }
         return rs;
     }
