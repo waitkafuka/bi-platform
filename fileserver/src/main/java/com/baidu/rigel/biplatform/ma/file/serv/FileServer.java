@@ -47,6 +47,7 @@ import com.baidu.rigel.biplatform.ma.file.serv.service.FileLocation;
 import com.baidu.rigel.biplatform.ma.file.serv.service.LocalFileOperationService;
 import com.baidu.rigel.biplatform.ma.file.serv.service.impl.LocalFileOperationServiceImpl;
 import com.baidu.rigel.biplatform.ma.file.serv.util.LocalFileOperationUtils;
+import com.google.common.base.Preconditions;
 
 /**
  * 
@@ -150,6 +151,13 @@ public class FileServer extends ChannelHandlerAdapter {
         }
         
         String location = properties.getProperty(ROOT_DIR_KEY);
+        if (location.contains("$")) {
+        	String systemProp = location.substring(location.indexOf("{") + 1, location.indexOf("}"));
+        	Preconditions.checkArgument(System.getProperties().get(systemProp) != null, 
+        			String.format("没有找到%s的变量", String.format("${%s}", systemProp)));
+        	location = StringUtils.replace(location, String.format("${%s}", systemProp), 
+        			System.getProperties().get(systemProp).toString().split(";")[0]);
+        }
         if (StringUtils.isEmpty(location)) {
             LOGGER.error("the location can not be empty");
             System.exit(-1);

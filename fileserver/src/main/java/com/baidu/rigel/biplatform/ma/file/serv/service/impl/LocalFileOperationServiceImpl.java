@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.baidu.rigel.biplatform.ma.file.serv.service.FileLocation;
 import com.baidu.rigel.biplatform.ma.file.serv.service.LocalFileOperationService;
 import com.baidu.rigel.biplatform.ma.file.serv.util.LocalFileOperationUtils;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 /**
@@ -273,7 +274,6 @@ public class LocalFileOperationServiceImpl implements LocalFileOperationService 
             result.put(MSG, "请求路径为空");
             return result;
         }
-        
         File file = new File(dir);
         if (!file.exists()) {
             result.put(RESULT, FAIL);
