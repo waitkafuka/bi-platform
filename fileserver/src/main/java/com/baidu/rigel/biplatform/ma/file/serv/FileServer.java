@@ -123,20 +123,26 @@ public class FileServer extends ChannelHandlerAdapter {
 //        }
         
         FileInputStream fis = null;
-        String classLocation = FileServer.class.getProtectionDomain()
-                .getCodeSource().getLocation().toString().replace("file:/", "");
-        final File configFile = new File(classLocation + "/fileserver.conf");
         Properties properties = new Properties();
         try {
-            if (configFile.exists()) {
-                fis = new FileInputStream(configFile);
-            } else if (StringUtils.isNotEmpty(args[0])) {
-                fis = new FileInputStream(args[0]);
-            } else {
-                printUsage();
-                throw new RuntimeException("can't find correct file server configuration file!");
-            }
-            properties.load(fis);
+	        if (args.length <= 0) {
+	        	String classLocation = FileServer.class.getProtectionDomain()
+	                    .getCodeSource().getLocation().toString().replace("file:/", "");
+	            final File configFile = new File(classLocation + "/fileserver.conf");
+	            if (configFile.exists()) {
+	                fis = new FileInputStream(configFile);
+	                properties.load(fis);
+	            }
+	        } else {
+				if (StringUtils.isNotEmpty(args[0])) {
+					fis = new FileInputStream(new File(args[0]));
+					properties.load(fis);
+				} else {
+					printUsage();
+					throw new RuntimeException(
+							"can't find correct file server configuration file!");
+				}
+	        }
         } finally {
             if (fis != null) {
                 fis.close();
